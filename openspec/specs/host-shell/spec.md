@@ -2,28 +2,9 @@
 
 ## Purpose
 
-Defines the WPF host application: monitor selection and window placement, one rendering surface per widget, refresh scheduling, plugin discovery and hot-reload, and the application icon.
+Defines the WinUI 3 host application: monitor selection and window placement, one rendering surface per widget, refresh scheduling, plugin discovery and hot-reload, and the application icon.
 
 ## Requirements
-
-### Requirement: WPF Host Window
-The host application MUST provide a borderless WPF window that:
-
-- Covers the target monitor's full physical bounds (not the work area) exactly, positioned with `SetWindowPos`
-- Uses `WindowStyle.None`, `ResizeMode.NoResize` and manual startup location
-- Is process-wide PerMonitorV2 DPI aware (application manifest); monitors are enumerated in physical pixels
-- Re-applies the exact bounds after a `DpiChanged` event (WPF rescales windows that cross monitors of different DPI)
-- Sits in normal Z-order (does not use topmost) and does NOT use window transparency
-- Closes on Escape
-
-#### Scenario: Window covers full monitor
-- **WHEN** the host starts on the target monitor
-- **THEN** the window's physical bounds equal the monitor's full bounds
-- **THEN** a mismatch between the window and target bounds is logged as a warning
-
-#### Scenario: Window survives display changes
-- **WHEN** display settings change, or the machine resumes from sleep
-- **THEN** the host re-selects the target monitor and re-covers it, re-checking after 1.5s and again after 5s because monitors wake in arbitrary order
 
 ### Requirement: Monitor Selection
 The host MUST choose the target monitor from configuration:
@@ -37,17 +18,45 @@ The host MUST choose the target monitor from configuration:
 - **WHEN** `monitorName` is `"tallest"` and a 1100×3840 portrait panel is attached
 - **THEN** the window covers that panel
 
-### Requirement: SkiaSharp Element Integration
-The host MUST use `SkiaSharp.Views.WPF.SKElement` for widget rendering:
+### Requirement: Host Window
+The host application MUST provide a borderless window that:
 
-- One `SKElement` per widget, positioned on a WPF `Canvas` at the widget's card rectangle (see grid-layout)
-- There is NO page-level canvas
-- `SKElement` rasterizes in software into a `WriteableBitmap` at the monitor's physical resolution
-- The host draws the widget's card on the element before the widget renders (see widget-card)
-- Widgets MUST NOT draw outside their assigned element bounds
+- Covers the target monitor's full physical bounds (not the work area) with its content area exactly: no window border
+  or frame is visible inside the monitor's bounds
+- Cannot be resized or moved by the user
+- Is process-wide PerMonitorV2 DPI aware; monitors are enumerated in physical pixels
+- Re-applies the exact bounds when the monitor's scaling changes or the window moves to a monitor with different scaling
+- Sits in normal Z-order (does not use topmost) and does NOT use window transparency
+- Closes on Escape
+
+#### Scenario: Content area covers the full monitor
+- **WHEN** the host starts on a 1100×3840 target monitor
+- **THEN** the window's content area is 1100×3840 physical pixels at the monitor's origin
+- **THEN** a mismatch between the content area and the target bounds is logged as a warning
+
+#### Scenario: Window survives display changes
+- **WHEN** display settings change, or the machine resumes from sleep
+- **THEN** the host re-selects the target monitor and re-covers it, re-checking after 1.5s and again after 5s because
+  monitors wake in arbitrary order
+
+#### Scenario: Page returns after sleep
+- **WHEN** the machine resumes from sleep, or the graphics device is reset
+- **THEN** the window background and every widget are shown again without restarting the host
+
+### Requirement: Widget Surfaces
+The host MUST give every widget its own drawing surface:
+
+- One surface per widget, positioned at the widget's card rectangle (see grid-layout); there is NO page-level drawing
+  surface
+- The surface is rendered at the monitor's physical resolution
+- The host draws the widget's card on the surface before the widget renders (see widget-card)
+- Pixels outside the card's rounded shape are transparent, and a card fill with an alpha below 255 is blended with
+  whatever is behind the surface
+- Widgets MUST NOT draw outside their assigned surface
+- A surface is redrawn only when its own widget is repainted
 - A widget whose `Render` throws is drawn as a themed error card and the failure is logged; other widgets are unaffected
 
-#### Scenario: Widget renders to its own element
+#### Scenario: Widget renders to its own surface
 - **WHEN** a widget's `Render()` is called
 - **THEN** the `Canvas` in `WidgetRenderContext` is that widget's own surface, already showing its card, and
   `PixelSize` is the surface's pixel size
@@ -56,10 +65,30 @@ The host MUST use `SkiaSharp.Views.WPF.SKElement` for widget rendering:
 - **WHEN** a widget throws inside `Render()`
 - **THEN** an error card with the widget name and message is drawn in its place and the exception is logged
 
+#### Scenario: Translucent card
+- **WHEN** the active theme's card fill is partly transparent
+- **THEN** the window background is visible through the card and around its rounded corners
+
+#### Scenario: One widget repaints
+- **WHEN** one widget on a page of several is repainted
+- **THEN** the other widgets' `Render()` is not called
+
+### Requirement: GPU Composition
+The host window MUST be composited by the GPU from independent layers: the window background and one layer per widget
+surface. The host MUST NOT produce frames while no layer changes, and MUST NOT run a continuous render loop.
+
+#### Scenario: Still page
+- **WHEN** a page is shown and no widget is repainted
+- **THEN** no widget surface is redrawn and the host's GPU use is not measurably above zero
+
+#### Scenario: Layer changes
+- **WHEN** one widget is repainted
+- **THEN** only that widget's layer is updated and the page is composited again
+
 ### Requirement: Widget Refresh Scheduling
 The host MUST drive each widget from its own refresh policy, with no global render loop:
 
-- `RefreshOnTick` — a per-widget `DispatcherTimer` at the declared interval; each tick awaits `UpdateAsync` and then repaints
+- `RefreshOnTick` — a per-widget timer on the UI thread at the declared interval; each tick awaits `UpdateAsync` and then repaints
 - `RefreshAdaptive` — a timer at `MinMs` (load-based scaling up to `MaxMs` is specified by a later change)
 - `RefreshOnEvent` — the widget renders once on load (event-driven refresh is specified by a later change)
 - Overlapping updates for one widget are skipped, not queued
@@ -67,7 +96,7 @@ The host MUST drive each widget from its own refresh policy, with no global rend
 
 #### Scenario: Idle dashboard
 - **WHEN** only a 1-second Clock is placed
-- **THEN** the only recurring work is that widget's 1s timer (measured idle CPU ~0.03%)
+- **THEN** the only recurring work is that widget's 1s timer, and idle CPU stays negligible
 
 #### Scenario: Unchanged widget skips repaint
 - **WHEN** a 1-second Clock ticks again within the same displayed minute

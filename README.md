@@ -2,13 +2,13 @@
 
 UrDeck is a lightweight widget dashboard for a secondary or case display, built as a low-overhead replacement for HYTE Nexus. It was designed around the HYTE Y70 Touch panel (1100x3840, portrait) but adapts to any monitor: the layout is a 4-column grid of square cells computed from the monitor width.
 
-It is a .NET 10 WPF application that draws each widget with SkiaSharp. Widgets are plain C# plugin DLLs that can be added, replaced or removed while UrDeck is running.
+It is a .NET 10 WinUI 3 application (unpackaged, self-contained Windows App SDK) that draws each widget with SkiaSharp on its own GPU-composited layer. Widgets are plain C# plugin DLLs that can be added, replaced or removed while UrDeck is running.
 
 ## Status
 
-Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WPF host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Verified on the real 1100x3840 panel.
+Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Verified on the real 1100x3840 panel.
 
-Not done yet: an editor UI, other widgets, shared data providers and the `[RefreshOnEvent]` / `[RefreshAdaptive]` refresh strategies that build on them (such widgets currently render once, or refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. Memory use is about 66 MB private / 115 MB working set in Release with software composition (see `docs/perf/memory-investigation.md`); an empty WPF window alone is ~53 MB private, so the original 50 MB goal is not reachable with WPF and the baseline is now 60-70 MB.
+Not done yet: an editor UI, other widgets, shared data providers and the `[RefreshOnEvent]` / `[RefreshAdaptive]` refresh strategies that build on them (such widgets currently render once, or refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
 
 ## Requirements
 
@@ -89,13 +89,13 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 | `sdk/UrDeck.Sdk` | Widget SDK (`net10.0`, MIT): attributes, `Widget<TConfig>`, `IWidget`, `WidgetConfig`, render context, `Theme` and the `Readout` / `TextLine` components |
 | `sdk/UrDeck.Analyzer` | Roslyn analyzer (`netstandard2.0`, MIT) reporting URDECK001-005 |
 | `src/UrDeck.Engine` | Plugin loader, config store, grid layout, `PageRenderer` |
-| `src/UrDeck.Host` | WPF application (`net10.0-windows10.0.19041.0`): window and monitor placement, one `SKElement` per widget |
+| `src/UrDeck.Host` | WinUI 3 application (`net10.0-windows10.0.19041.0`): window and monitor placement, one `SKXamlCanvas` layer per widget |
 | `widgets/UrDeck.Widgets.Clock` | Built-in Clock plugin (`urdeck.widgets.clock`) |
 | `tests/UrDeck.Engine.Tests`, `tests/UrDeck.Analyzer.Tests` | xUnit tests |
 | `docs/` | `ROADMAP.md` (what to work on next), performance notes |
 | `openspec/` | Spec-driven documents: `specs/` holds the current capability specs (grid layout, host shell, widget SDK, Clock), `changes/` holds proposals in flight and the archive of finished changes |
 
-The Windows SDK suffix on the host and test target frameworks is required: `SkiaSharp.Views.WPF` only ships its .NET build for `net10.0-windows10.0.19041`.
+The Windows SDK suffix on the host and test target frameworks is required: the Windows App SDK and `SkiaSharp.Views.WinUI` target `net10.0-windows10.0.19041`.
 
 ## License
 
@@ -104,6 +104,7 @@ The Windows SDK suffix on the host and test target frameworks is required: `Skia
 | `src/UrDeck.Host`, `src/UrDeck.Engine`, `widgets/`, `tests/` | [GPL-3.0-or-later](LICENSE) with the [plugin exception](PLUGIN-EXCEPTION.md) |
 | `sdk/` (`UrDeck.Sdk`, `UrDeck.Analyzer`) | [MIT](sdk/LICENSE) |
 | Community widgets | The author's choice |
+| Windows App SDK (self-contained runtime shipped with the host) | Microsoft; see the licence files in the `Microsoft.WindowsAppSDK` NuGet package |
 | Inter variable font (`src/UrDeck.Engine/Themes/Builtin/`) | [SIL Open Font License 1.1](src/UrDeck.Engine/Themes/Builtin/Inter-OFL.txt); the licence text ships with the font |
 
 Widgets that talk to UrDeck only through the SDK API may use any license, including proprietary ones; that is what the plugin exception grants. The license boundary is an assembly boundary: widgets reference only `UrDeck.Sdk` (MIT), never the GPL engine or host. Code samples in the docs are MIT.
