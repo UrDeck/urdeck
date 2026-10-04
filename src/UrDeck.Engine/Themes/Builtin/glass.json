@@ -1,0 +1,15 @@
+{
+  "colors": {
+    "background": "#1b2760",
+    "cardFill": "#38ffffff",
+    "cardBorder": "#6effffff",
+    "text": "#ffffff",
+    "textMuted": "#c8ffffff",
+    "accent": "#8ab8ff",
+    "accentDim": "#668ab8ff"
+  },
+  "card": {
+    "radius": 0.1,
+    "borderWidth": 0.008
+  }
+}

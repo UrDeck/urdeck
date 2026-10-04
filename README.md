@@ -71,7 +71,7 @@ Config is `urdeck-config.json`, located next to the executable (`src/UrDeck.Host
 | `activePage` | Index of the page to show. |
 | `monitorName` | Target monitor: `"primary"`, `"tallest"` (tallest portrait monitor), `"widest"`, `"largest"` (most pixels), or a device name such as `"DISPLAY1"`. |
 | `monitor` | 1-based monitor index, used when `monitorName` matches nothing. Falls back to the primary monitor. |
-| `theme` | Name of the theme: `default-dark` (default), `default-light`, or a folder under `themes/` next to the executable. See [docs/themes.md](docs/themes.md). Unknown names fall back to the default with a warning; changing it applies on config reload without a restart. |
+| `theme` | Name of the theme: `default-dark` (default), `default-light`, `glass`, or a folder under `themes/` next to the executable. See [docs/themes.md](docs/themes.md). Unknown names fall back to the default with a warning; changing it applies on config reload without a restart. |
 | `dock` | Stored but not used yet. |
 
 Making a theme: create `themes/<name>/theme.json` next to `UrDeck.Host.exe` with only the values you want to change (colours, card radius/gap/padding, font, text sizes); everything else comes from `default-dark`. Bundle a font by putting the `.ttf` in the same folder and naming it in the file. Edit the theme, then save the config file to apply it. Full format: [docs/themes.md](docs/themes.md).

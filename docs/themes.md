@@ -1,7 +1,7 @@
 # Themes
 
 A theme is a folder holding one settings file and, optionally, font files. The theme decides how every card on a page
-looks; widgets only draw content. Two themes are built in (`default-dark`, `default-light`). Your own go in a `themes`
+looks; widgets only draw content. Three themes are built in (`default-dark`, `default-light` and `glass`, frosted translucent cards on a blue background). Your own go in a `themes`
 folder next to `UrDeck.Host.exe`:
 
 ```
