@@ -50,6 +50,20 @@ public sealed class ThemeTests : IDisposable
     }
 
     [Fact]
+    public void GlassTheme_IsBuiltInWithATranslucentCard()
+    {
+        var glass = Store().Load("glass");
+
+        Assert.Equal("glass", glass.Name);
+        Assert.DoesNotContain("not found", Log);
+        Assert.Contains("glass", ThemeStore.BuiltInNames);
+        Assert.True(SKColor.Parse(glass.Definition.Colors!.CardFill).Alpha < 255);
+        Assert.True(glass.Definition.Card!.BorderWidth > 0);
+        // Anything the theme leaves out comes from the default.
+        Assert.Equal(Store().Load("default-dark").Definition.Colors!.Good, glass.Definition.Colors.Good);
+    }
+
+    [Fact]
     public void PartialUserTheme_TakesTheRestFromTheDefault()
     {
         WriteTheme("mine", """{ "colors": { "accent": "#ff00ff" }, "card": { "radius": 0 } }""");

@@ -25,7 +25,7 @@ public sealed class ThemeStore(string themesDirectory)
 
     private static readonly Assembly Self = typeof(ThemeStore).Assembly;
 
-    public static IReadOnlyList<string> BuiltInNames { get; } = [DefaultName, "default-light"];
+    public static IReadOnlyList<string> BuiltInNames { get; } = [DefaultName, "default-light", "glass"];
 
     /// <summary>
     /// Returns the named theme. Never throws: an unknown or unusable theme gives the default theme, and a user theme's
