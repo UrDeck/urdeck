@@ -23,8 +23,8 @@
 - [x] 4.1 Borderless window through `AppWindow` and an `OverlappedPresenter`, not resizable or movable, normal Z-order, closes on Escape
 - [x] 4.2 Place the window in physical pixels and enlarge it by the measured non-client inset so the content area equals the target monitor's bounds; keep `MonitorPlacement`'s enumeration and selection
 - [x] 4.3 Log the placement as today, comparing the content area with the target and warning on a mismatch
-- [ ] 4.4 Carry over the retarget logic for display settings changes and resume (at once, then after 1.5 s and 5 s), and force a page rebuild after a resume or a device reset
-- [ ] 4.5 Rebuild the page when the scale changes, coalesced with size and theme changes as today
+- [x] 4.4 Carry over the retarget logic for display settings changes and resume (at once, then after 1.5 s and 5 s), and force a page rebuild after a resume or a device reset
+- [x] 4.5 Rebuild the page when the scale changes, coalesced with size and theme changes as today
 
 ## 5. Page and widget surfaces
 
@@ -32,7 +32,7 @@
 - [x] 5.2 Port `WidgetView` to an `SKXamlCanvas` whose paint handler calls `WidgetPainter.Paint`, rendered at the monitor's physical resolution, with the per-widget `DispatcherQueueTimer`, the overlap guard and the `NeedsRender` check
 - [x] 5.3 Port `MainWindow`'s page rebuild: theme resolution against the physical cell size, grid layout, widget creation, view disposal, the reaction to `ConfigChanged` and `PluginsChanged`
 - [x] 5.4 Confirm a translucent card fill and the rounded corners show the background layer (set a partly transparent `CardFill` in a test theme)
-- [ ] 5.5 Confirm the error card still appears when a widget throws in `Render`
+- [x] 5.5 Confirm the error card still appears when a widget throws in `Render`
 
 ## 6. Entry point
 
@@ -41,9 +41,9 @@
 
 ## 7. Verify on the panel
 
-- [ ] 7.1 Owner: the Clock page looks the same as on the WPF host, with no border inside the panel's edges
+- [x] 7.1 Owner: the Clock page looks the same as on the WPF host, with no border inside the panel's edges
 - [x] 7.2 `urdeck.log` shows the content area equal to the target bounds and no warnings
-- [ ] 7.3 Owner: sleep and resume, and unplugging and replugging a monitor, bring the page back on the panel
+- [x] 7.3 Owner: sleep and resume, and unplugging and replugging a monitor, bring the page back on the panel
 - [x] 7.4 Editing `urdeck-config.json` (a widget setting, the theme, `monitorName`) is applied without a restart
 - [x] 7.5 Measure the host with the method in `docs/perf/nexus-baseline.md` (one Clock, idle): CPU, GPU, private bytes, working set, video memory; confirm no widget is repainted between minute changes; write the result to `docs/perf/render-host-baseline.md`
 

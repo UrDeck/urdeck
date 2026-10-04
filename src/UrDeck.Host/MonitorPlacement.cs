@@ -63,14 +63,21 @@ internal static class MonitorPlacement
     /// <summary>
     /// Moves the window so that its content area covers <paramref name="bounds"/> exactly (physical pixels). The window
     /// keeps a thin non-client frame, so the content area is measured after each placement and the window is grown by
-    /// what is missing; this converges in a pass or two and never hard-codes the frame size.
+    /// what is missing; this converges in a pass or two and never hard-codes the frame size. With <paramref name="nudge"/> the
+    /// window is first resized by a pixel so that the content re-lays out.
     /// </summary>
-    public static void Cover(nint hwnd, Rectangle bounds)
+    public static void Cover(nint hwnd, Rectangle bounds, bool nudge = false)
     {
         if (hwnd == IntPtr.Zero)
             return;
 
         var window = bounds;
+        if (nudge)
+        {
+            // A scale change can leave XAML with the old content size even though the window is right; a real resize
+            // makes it lay out again.
+            SetWindowPos(hwnd, IntPtr.Zero, window.X, window.Y, window.Width + 1, window.Height + 1, SWP_NOZORDER | SWP_NOACTIVATE);
+        }
         for (int pass = 0; pass < 3; pass++)
         {
             SetWindowPos(hwnd, IntPtr.Zero, window.X, window.Y, window.Width, window.Height, SWP_NOZORDER | SWP_NOACTIVATE);

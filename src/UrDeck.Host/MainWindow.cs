@@ -37,6 +37,7 @@ public sealed class MainWindow : Window
     private readonly List<DispatcherQueueTimer> _pendingRetargets = new();
     private MonitorInfo _target;
     private bool _rebuildPending;
+    private bool _nudged;
     private LoadedTheme _loadedTheme;
     private Theme? _theme;
     private LayoutKey _lastLayout;
@@ -217,6 +218,22 @@ public sealed class MainWindow : Window
     {
         var screen = new System.Drawing.Size((int)_root.ActualWidth, (int)_root.ActualHeight);
         double scale = Scale;
+
+        // After a scale change (a monitor unplugged and plugged back in) XAML can keep the content size of the old
+        // scale while the window is right. Resize the window by a pixel once to make it lay out again, and build then.
+        var content = MonitorPlacement.GetContentBounds(_hwnd);
+        bool stale = !content.IsEmpty &&
+            (Math.Abs(_root.ActualWidth * scale - content.Width) > 2 || Math.Abs(_root.ActualHeight * scale - content.Height) > 2);
+        if (stale && !_nudged)
+        {
+            _nudged = true;
+            UrDeckLog.Info($"Layout {_root.ActualWidth:0.#}x{_root.ActualHeight:0.#} DIPs at scale {scale:0.##} does not match the content area {content.Width}x{content.Height}; resizing the window to refresh it");
+            MonitorPlacement.Cover(_hwnd, _target.Bounds, nudge: true);
+            ScheduleRebuild();
+            return;
+        }
+        _nudged = stale;
+
         var key = new LayoutKey(screen, scale, _loadedTheme);
         if (key == _lastLayout)
             return;

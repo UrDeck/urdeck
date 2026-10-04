@@ -42,9 +42,8 @@ everything else should be fine on Sonnet.
 - Item 14 was explored on 2026-10-03/04. Outcome: composition moves to the GPU and the host is rebuilt on WinUI 3. A
   spike on the panel passed the memory and layering checks (`docs/perf/render-host-spike.md`); a plain Win32 window
   with DirectComposition stays the fallback. See item 14 and `docs/handoff/2026-10-04-render-host-spike.md`.
-- `render-path` (the WinUI 3 host) is implemented on the branch `feat/render-path` (PR open); the owner's checks on
-  the panel (sleep and resume, hot-plug, look) are the remaining tasks before it is archived.
-- Next: finish `render-path`, then explore and propose `animation`; then item 3 (data providers). Each in a fresh
+- `render-path` (the WinUI 3 host) is implemented on the branch `feat/render-path` (PR open); all its tasks are verified, and it is waiting to be archived and merged.
+- Next: archive and merge `render-path`, then explore and propose `animation`; then item 3 (data providers). Each in a fresh
   session starting from its change or handoff. See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
@@ -361,7 +360,7 @@ Sonnet to implement.
 
 **Status:** explored on 2026-10-03/04; `render-path` is implemented on `feat/render-path` (`openspec/changes/render-path`):
 the WinUI 3 host, with plugin hot-reload verified and a measured baseline (`docs/perf/render-host-baseline.md`).
-**Next step:** the owner's checks on the panel (sleep and resume, hot-plug), then archive `render-path` and explore
+**Next step:** archive and merge `render-path` (all tasks verified on the panel), then explore
 `animation`.
 Background: [docs/handoff/2026-10-04-render-host-spike.md](handoff/2026-10-04-render-host-spike.md).
 
