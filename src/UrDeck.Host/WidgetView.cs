@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
-using System.Windows.Threading;
+using Microsoft.UI.Dispatching;
 using SkiaSharp;
-using SkiaSharp.Views.Desktop;
-using SkiaSharp.Views.WPF;
+using SkiaSharp.Views.Windows;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Rendering;
@@ -13,14 +12,15 @@ using UrDeck.Sdk;
 namespace UrDeck.Host;
 
 /// <summary>
-/// Hosts one widget instance in its own Skia surface, driven by the widget's declared refresh policy.
+/// Hosts one widget instance in its own Skia surface (composited by the GPU, drawn by Skia on the CPU), driven by the widget's declared refresh policy.
 /// Widgets without a timer-based policy (OnEvent) render once and then only on explicit invalidation.
 /// </summary>
-internal sealed class WidgetView : SKElement, IDisposable
+internal sealed class WidgetView : SKXamlCanvas, IDisposable
 {
-    private readonly IWidget _widget;
+    // Cleared on Dispose: WinUI can keep a removed canvas alive for a while, and it must not keep the plugin alive with it.
+    private IWidget? _widget;
     private readonly Theme _theme;
-    private readonly DispatcherTimer? _timer;
+    private readonly DispatcherQueueTimer? _timer;
     private readonly CancellationTokenSource _cts = new();
     private bool _updating;
     private bool _hasPainted;
@@ -33,7 +33,9 @@ internal sealed class WidgetView : SKElement, IDisposable
 
         if (descriptor.RefreshInterval is { } interval && interval > TimeSpan.Zero)
         {
-            _timer = new DispatcherTimer(DispatcherPriority.Background) { Interval = interval };
+            _timer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+            _timer.Interval = interval;
+            _timer.IsRepeating = true;
             _timer.Tick += (_, _) => _ = RefreshAsync();
         }
 
@@ -49,15 +51,18 @@ internal sealed class WidgetView : SKElement, IDisposable
     {
         if (_updating)
             return;
+        var widget = _widget;
+        if (widget == null)
+            return;
         _updating = true;
         try
         {
-            await _widget.UpdateAsync(_cts.Token);
+            await widget.UpdateAsync(_cts.Token);
         }
         catch (OperationCanceledException) { return; }
         catch (Exception ex)
         {
-            UrDeckLog.Error($"Widget '{_widget.Name}' update failed", ex);
+            UrDeckLog.Error($"Widget '{widget.Name}' update failed", ex);
         }
         finally
         {
@@ -65,29 +70,35 @@ internal sealed class WidgetView : SKElement, IDisposable
         }
 
         // The first refresh always paints; later ones only when the widget says something changed.
-        if (!_hasPainted || SafeNeedsRender())
-            InvalidateVisual();
+        if (_widget != null && (!_hasPainted || SafeNeedsRender()))
+            Invalidate();
     }
 
     private bool SafeNeedsRender()
     {
+        var widget = _widget;
+        if (widget == null)
+            return false;
         try
         {
-            return _widget.NeedsRender(DateTime.Now);
+            return widget.NeedsRender(DateTime.Now);
         }
         catch (Exception ex)
         {
-            UrDeckLog.Error($"Widget '{_widget.Name}' NeedsRender failed; repainting", ex);
+            UrDeckLog.Error($"Widget '{widget.Name}' NeedsRender failed; repainting", ex);
             return true;
         }
     }
 
     private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
     {
+        var widget = _widget;
+        if (widget == null)
+            return;
         var canvas = e.Surface.Canvas;
         canvas.Clear(SKColors.Transparent);
         WidgetPainter.Paint(
-            _widget,
+            widget,
             canvas,
             new System.Drawing.Size(e.Info.Width, e.Info.Height),
             _theme,
@@ -101,6 +112,8 @@ internal sealed class WidgetView : SKElement, IDisposable
         _timer?.Stop();
         _cts.Cancel();
         _cts.Dispose();
+        PaintSurface -= OnPaintSurface;
         (_widget as IDisposable)?.Dispose();
+        _widget = null;
     }
 }

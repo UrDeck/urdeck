@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Windows;
-using System.Windows.Interop;
 using UrDeck.Engine.Config;
 
 namespace UrDeck.Host;
 
 /// <summary>A display in physical pixels (the process is per-monitor DPI aware, see app.manifest).</summary>
-internal sealed record MonitorInfo(string DeviceName, Int32Rect Bounds, Int32Rect WorkArea, bool IsPrimary)
+internal sealed record MonitorInfo(string DeviceName, Rectangle Bounds, Rectangle WorkArea, bool IsPrimary)
 {
     public override string ToString() =>
         $"{DeviceName} {Bounds.Width}x{Bounds.Height} at {Bounds.X},{Bounds.Y}{(IsPrimary ? " (primary)" : "")}";
@@ -27,8 +26,8 @@ internal static class MonitorPlacement
             {
                 monitors.Add(new MonitorInfo(
                     info.szDevice,
-                    info.rcMonitor.ToInt32Rect(),
-                    info.rcWork.ToInt32Rect(),
+                    info.rcMonitor.ToRectangle(),
+                    info.rcWork.ToRectangle(),
                     (info.dwFlags & MONITORINFOF_PRIMARY) != 0));
             }
             return true;
@@ -61,19 +60,41 @@ internal static class MonitorPlacement
         return chosen ?? primary;
     }
 
-    /// <summary>Moves/resizes the window to exactly cover <paramref name="bounds"/> (physical pixels).</summary>
-    public static void Cover(Window window, Int32Rect bounds)
+    /// <summary>
+    /// Moves the window so that its content area covers <paramref name="bounds"/> exactly (physical pixels). The window
+    /// keeps a thin non-client frame, so the content area is measured after each placement and the window is grown by
+    /// what is missing; this converges in a pass or two and never hard-codes the frame size.
+    /// </summary>
+    public static void Cover(nint hwnd, Rectangle bounds)
     {
-        nint hwnd = new WindowInteropHelper(window).Handle;
         if (hwnd == IntPtr.Zero)
             return;
-        SetWindowPos(hwnd, IntPtr.Zero, bounds.X, bounds.Y, bounds.Width, bounds.Height, SWP_NOZORDER | SWP_NOACTIVATE);
+
+        var window = bounds;
+        for (int pass = 0; pass < 3; pass++)
+        {
+            SetWindowPos(hwnd, IntPtr.Zero, window.X, window.Y, window.Width, window.Height, SWP_NOZORDER | SWP_NOACTIVATE);
+            var client = GetContentBounds(hwnd);
+            if (client.IsEmpty || client == bounds)
+                return;
+            // Move each edge of the window by how far the matching edge of the content area is from the target.
+            int left = window.Left - (client.Left - bounds.Left);
+            int top = window.Top - (client.Top - bounds.Top);
+            int right = window.Right - (client.Right - bounds.Right);
+            int bottom = window.Bottom - (client.Bottom - bounds.Bottom);
+            window = Rectangle.FromLTRB(left, top, right, bottom);
+        }
     }
 
-    public static Int32Rect GetWindowBounds(Window window)
+    /// <summary>The window's content (client) area in screen coordinates, physical pixels.</summary>
+    public static Rectangle GetContentBounds(nint hwnd)
     {
-        nint hwnd = new WindowInteropHelper(window).Handle;
-        return GetWindowRect(hwnd, out var r) ? r.ToInt32Rect() : Int32Rect.Empty;
+        if (hwnd == IntPtr.Zero || !GetClientRect(hwnd, out var client))
+            return Rectangle.Empty;
+        var origin = new POINT { X = 0, Y = 0 };
+        if (!ClientToScreen(hwnd, ref origin))
+            return Rectangle.Empty;
+        return new Rectangle(origin.X, origin.Y, client.Right - client.Left, client.Bottom - client.Top);
     }
 
     private const int MONITORINFOF_PRIMARY = 1;
@@ -86,7 +107,7 @@ internal static class MonitorPlacement
     private struct RECT
     {
         public int Left, Top, Right, Bottom;
-        public Int32Rect ToInt32Rect() => new(Left, Top, Right - Left, Bottom - Top);
+        public Rectangle ToRectangle() => Rectangle.FromLTRB(Left, Top, Right, Bottom);
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -110,5 +131,14 @@ internal static class MonitorPlacement
     private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint flags);
 
     [DllImport("user32.dll")]
-    private static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
+    private static extern bool GetClientRect(IntPtr hWnd, out RECT rect);
+
+    [DllImport("user32.dll")]
+    private static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int X, Y;
+    }
 }

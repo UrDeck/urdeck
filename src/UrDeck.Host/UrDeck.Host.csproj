@@ -2,13 +2,27 @@
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>$(UrDeckWindowsTfm)</TargetFramework>
-        <UseWPF>true</UseWPF>
+        <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <PlatformTarget>x64</PlatformTarget>
+        <!-- Keep the output at bin/<config>/<tfm>/ so the documented paths and the snapshot command do not change. -->
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+        <!-- Unpackaged and self-contained: no installer and no machine-wide Windows App SDK runtime. -->
+        <UseWinUI>true</UseWinUI>
+        <WindowsPackageType>None</WindowsPackageType>
+        <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+        <SelfContained>true</SelfContained>
+        <EnableMsixTooling>true</EnableMsixTooling>
+        <!-- Program.cs has its own Main so that the snapshot command can exit before the XAML application starts. -->
+        <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <ApplicationIcon>Resources/urdeck.ico</ApplicationIcon>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="Microsoft.WindowsAppSDK" />
+        <PackageReference Include="Microsoft.Win32.SystemEvents" />
         <PackageReference Include="SkiaSharp" />
-        <PackageReference Include="SkiaSharp.Views.WPF" />
+        <PackageReference Include="SkiaSharp.Views.WinUI" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\UrDeck.Engine\UrDeck.Engine.csproj" />
@@ -22,6 +36,8 @@
         <None Update="urdeck-config.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <!-- The window icon is set at runtime through AppWindow, which needs the .ico as a file. -->
+        <Content Include="Resources/urdeck.ico" Link="urdeck.ico" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <!-- Drop built-in plugin assemblies into $(OutDir)plugins so the host discovers them like any third-party plugin. -->
