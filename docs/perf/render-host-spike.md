@@ -87,7 +87,21 @@ The framework floor is about 33 MB above WPF, which is small next to the web vie
   side, and a thin light edge is visible in captures. Workaround that worked: move/resize to bounds -3,-3,+6,+6
   (`--presenter comp`): client area 1100x3840 exactly. Clearing `WS_DLGFRAME` via `SetWindowLong` did not stick, and
   `FullScreen` presenter gave worse numbers (client 1084x3801) as I invoked it (move first, then set presenter).
-- Sleep/resume and hot-plug not tested.
+- Sleep/resume and hot-plug not tested in the spike; sleep/resume was tested later, see "Owner checks" below.
+
+## Owner checks (2026-10-04, gates of `render-path`)
+
+Run on the Y70 panel with the spike app (case `all`, presenter `comp`, `--url https://frigate.biglernet.com`):
+
+- **Sleep and resume:** the PC was put to sleep and woken. The video background, the cards, the web view and the
+  animated icon all came back and kept playing; the window kept its position and size (spike log: client area
+  1100x3840 at the same place before and after). Passed, no recovery code was needed in the spike.
+- **Frigate in the web view:** the page loaded (`nav completed ok=True`) and every camera feed played with good frame
+  rate. Passed.
+- **Touch scrolling in the web view:** confirmed good by the owner earlier in the exploration.
+- **Looping icon, 30 vs 60 frames per second:** the owner could not tell them apart; 30 is preferred for the
+  `animation` change (half the work for the same look).
+- Monitor hot-plug is checked on the real host, not the spike (`render-path` task 7.3).
 
 ## Screenshots
 

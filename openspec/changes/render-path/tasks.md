@@ -1,9 +1,9 @@
 ## 1. Gates on the panel (stop and report if one fails)
 
-- [ ] 1.1 Owner, with the spike app (`spike/RenderHostSpike` on the local branch `spike/render-host`, case `all`, presenter `comp`): put the PC to sleep and resume; the video, the cards and the web view are all shown again
-- [ ] 1.2 Owner, with the spike app: the Frigate page loads in the web view card (`--url`) and plays its camera feeds
-- [ ] 1.3 Owner, with the spike app: the looping icon looks smooth at 30 and at 60 frames per second; note which is preferred for the `animation` change
-- [ ] 1.4 Record the outcome of 1.1 to 1.3 in `docs/perf/render-host-spike.md`, with the owner's earlier confirmation that touch scrolling in the web view works
+- [x] 1.1 Owner, with the spike app (`spike/RenderHostSpike` on the local branch `spike/render-host`, case `all`, presenter `comp`): put the PC to sleep and resume; the video, the cards and the web view are all shown again
+- [x] 1.2 Owner, with the spike app: the Frigate page loads in the web view card (`--url`) and plays its camera feeds
+- [x] 1.3 Owner, with the spike app: the looping icon looks smooth at 30 and at 60 frames per second; note which is preferred for the `animation` change
+- [x] 1.4 Record the outcome of 1.1 to 1.3 in `docs/perf/render-host-spike.md`, with the owner's earlier confirmation that touch scrolling in the web view works
 
 ## 2. Project and build
 
