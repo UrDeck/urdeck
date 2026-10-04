@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Defines the WPF host application: monitor selection and window placement, one rendering surface per widget, refresh scheduling, plugin discovery and hot-reload, and the application icon.
+Defines the WinUI 3 host application: monitor selection and window placement, one rendering surface per widget, refresh scheduling, plugin discovery and hot-reload, and the application icon.
 
 ## Requirements
 

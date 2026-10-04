@@ -19,7 +19,7 @@ change under `openspec/changes/`. Work one item per session.
      It logs monitors, actual vs. target window bounds, placed widgets, reloads and warnings.
    - Screen capture on Windows: use Windows PowerShell 5.1 (`powershell.exe`, not `pwsh`), call
      `SetProcessDpiAwarenessContext(-4)` first, then `Graphics.CopyFromScreen` of the monitor bounds.
-     `PrintWindow` on the WPF window returns blank. Prefer one capture, or ask the user to look.
+     `PrintWindow` on the window returns blank. Prefer one capture, or ask the user to look.
 4. Never commit to `main`. Branch off it (`feat/...`, `fix/...`, `docs/...`, `chore/...`), push, and open a pull
    request; PRs are squash-merged once CI is green. The PR title is a conventional commit
    (`feat(scope): ...`, `fix`, `docs`, `test`, `perf`, `refactor`, `chore`) and the PR description becomes the body of
@@ -42,13 +42,13 @@ everything else should be fine on Sonnet.
 - Item 14 was explored on 2026-10-03/04. Outcome: composition moves to the GPU and the host is rebuilt on WinUI 3. A
   spike on the panel passed the memory and layering checks (`docs/perf/render-host-spike.md`); a plain Win32 window
   with DirectComposition stays the fallback. See item 14 and `docs/handoff/2026-10-04-render-host-spike.md`.
-- Proposed, not started: `render-path` (the WinUI 3 host), whose first tasks are the owner's remaining checks on the
-  panel.
-- Next: implement `render-path`, then explore and propose `animation`; then item 3 (data providers). Each in a fresh
+- `render-path` (the WinUI 3 host) is implemented on the branch `feat/render-path` (PR open); the owner's checks on
+  the panel (sleep and resume, hot-plug, look) are the remaining tasks before it is archived.
+- Next: finish `render-path`, then explore and propose `animation`; then item 3 (data providers). Each in a fresh
   session starting from its change or handoff. See "Suggested order" below.
-- Memory: today's WPF host is ~66 MB private / ~115 MB working set (Release, one Clock, software WPF composition), idle
-  CPU negligible (`docs/perf/memory-investigation.md`). That baseline is no longer the target: the bar is "no worse
-  than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
+- Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
+  (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
+  The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
 
 ### Suggested order
 
@@ -64,8 +64,8 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
 4. **Performance widget** (item 7), which brings the gauge component. Needs item 3.
 5. **Pages and touch** (item 8), then **shortcuts and dock** (items 7 and 10), which bring the image tile.
 
-Display targeting (item 6) is a future change. Its draft is written against the WPF window, so rework it after the new
-host has landed.
+Display targeting (item 6) is a future change. Its draft is written against the WPF window, so rework it now that the
+new host has landed.
 
 ---
 
@@ -223,8 +223,7 @@ Design direction, to be validated with `/opsx:explore` then `/opsx:propose` and 
   of one core and 3% GPU (`docs/perf/nexus-baseline.md`). The owner's real goal is an open source, trustable
   alternative, so cost may be spent on looks. The principle that stays: a page with nothing moving costs close to
   nothing, and the user pays only for what they switch on.
-- Budgets (written for the WPF host; revisit the numbers after the render host spike): host runtime baseline 60-70 MB
-  private; editor is secondary; per-widget budgets with tiers
+- Budgets: host runtime baseline about 100 MB private (WinUI 3, measured in `docs/perf/render-host-baseline.md`); editor is secondary; per-widget budgets with tiers
   (e.g. gold < 5 MB, silver < 10 MB, bronze above), expressed **per grid size** because the render surface
   (width x height x 4 bytes) dominates per-widget memory.
 - Measurement: a benchmark mode (e.g. `UrDeck.Host.exe --bench <widgetId> --size 4x2`) that runs the host with only
@@ -233,7 +232,7 @@ Design direction, to be validated with `/opsx:explore` then `/opsx:propose` and 
   Per-widget memory can't be isolated precisely inside a shared process; isolation runs are the fair measure.
 - Optional in-app diagnostics overlay showing per-widget render time and CPU.
 - Publish tiers in CONTRIBUTING.md; later show them in the widget picker.
-- The host decision moved to item 14: the WPF host is being replaced by a WinUI 3 host for GPU composition, with a
+- The host decision was item 14: the WPF host was replaced by a WinUI 3 host for GPU composition (`render-path`), with a
   plain Win32 window and DirectComposition as the fallback.
 
 ## 5. Theme and card (`openspec/changes/archive/2026-10-03-theme-and-card`)
@@ -360,8 +359,10 @@ panel, and the answer may change how all widgets are rendered, so this comes bef
 **Model:** Opus for the exploration and design (it fixes public SDK API and possibly the host's rendering architecture),
 Sonnet to implement.
 
-**Status:** explored on 2026-10-03/04; the spike was run and `render-path` is proposed (`openspec/changes/render-path`).
-**Next step:** `/opsx:apply` on `render-path` in a fresh Sonnet session, starting with the owner's checks on the panel.
+**Status:** explored on 2026-10-03/04; `render-path` is implemented on `feat/render-path` (`openspec/changes/render-path`):
+the WinUI 3 host, with plugin hot-reload verified and a measured baseline (`docs/perf/render-host-baseline.md`).
+**Next step:** the owner's checks on the panel (sleep and resume, hot-plug), then archive `render-path` and explore
+`animation`.
 Background: [docs/handoff/2026-10-04-render-host-spike.md](handoff/2026-10-04-render-host-spike.md).
 
 Decided in the exploration:
@@ -373,8 +374,8 @@ Decided in the exploration:
 - **The host framework is WinUI 3**, chosen by a spike (`docs/perf/render-host-spike.md`). It ships a layered web view,
   a media element and gestures, and serves the editor too. On the panel it passed the memory check (a full page with
   video, an animated icon and a web view: 419 MB private and 10.5% of one core, against 627 MB and 20% for Nexus) and
-  the layering check (translucent Skia cards and a web view over video). Sleep and resume are still to be tested and
-  are the first tasks of `render-path`. The fallback is a plain Win32 window with DirectComposition. All framework
+  the layering check (translucent Skia cards and a web view over video). Sleep and resume are tested by the owner
+  on the panel as the last gate of `render-path`. The fallback is a plain Win32 window with DirectComposition. All framework
   code stays inside the host.
 - **The bar is Nexus** (`docs/perf/nexus-baseline.md`), with "a page with nothing moving costs close to nothing" kept
   as the principle.

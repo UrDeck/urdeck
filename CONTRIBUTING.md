@@ -122,7 +122,7 @@ that throws in `Render` shows a red error tile instead of taking the dashboard d
 UrDeck's selling point is a low footprint, so cost is reviewed like correctness. The formal tiers and the benchmark mode
 are roadmap item 4; until then, the working targets are:
 
-- Host baseline: 60-70 MB private memory in Release (an empty WPF window alone is ~53 MB).
+- Host baseline: about 100 MB private memory in Release with one Clock (the WinUI 3 host, `docs/perf/render-host-baseline.md`), no CPU or GPU use while nothing changes. The bar is "no worse than HYTE Nexus" on the same panel (`docs/perf/nexus-baseline.md`).
 - A widget's dominant cost is its render surface (`width x height x 4` bytes); keep additional allocations small and
   avoid per-frame allocations in `Render`.
 - Refresh as rarely as the content allows (the Clock needs a repaint once a minute, not every second).
