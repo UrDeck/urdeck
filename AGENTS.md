@@ -1,6 +1,6 @@
 # Agent and contributor guide
 
-UrDeck is a lightweight widget dashboard for secondary/case displays (WPF host, SkiaSharp rendering, plugin widgets).
+UrDeck is a lightweight widget dashboard for secondary/case displays (WinUI 3 host, SkiaSharp rendering, plugin widgets).
 Read `README.md` for what it is, `docs/ROADMAP.md` for what to work on, and `CONTRIBUTING.md` for the full process.
 
 ## Workflow (non-negotiable)
@@ -33,7 +33,7 @@ CI (`.github/workflows/ci.yml`) runs all of the above on `windows-latest`; run t
 sdk/UrDeck.Sdk       MIT. The plugin contract: attributes, Widget<T>, WidgetConfig, render context, Theme, Components (Readout, TextLine)
 sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
 src/UrDeck.Engine     GPL. Plugin loader, config store, grid layout, PageRenderer, logging
-src/UrDeck.Host       GPL. WPF app: window/monitor placement, one SKElement per widget
+src/UrDeck.Host       GPL. WinUI 3 app: window/monitor placement, one SKXamlCanvas layer per widget
 widgets/              first-party widget plugins (UrDeck.Widgets.Clock, ...); copied to plugins/ by the host build
 tests/                xUnit projects
 docs/                 ROADMAP.md, perf/, design notes
@@ -47,17 +47,21 @@ needs the SPDX license header (`dotnet format` adds it): GPL-3.0-or-later everyw
 Widgets reference only `UrDeck.Sdk`, never `UrDeck.Engine` or `UrDeck.Host`; keep it that way, it is the license boundary.
 See the README license map before moving code between projects: it can change the license.
 
-## Windows / WPF gotchas
+## Windows / WinUI 3 gotchas
 
-- Host and test projects must target `net10.0-windows10.0.19041.0` (`$(UrDeckWindowsTfm)`): `SkiaSharp.Views.WPF` only
-  ships its .NET build for that Windows SDK version; plain `net10.0-windows` silently falls back to net48.
+- Host and test projects must target `net10.0-windows10.0.19041.0` (`$(UrDeckWindowsTfm)`): the Windows App SDK and
+  `SkiaSharp.Views.WinUI` target that Windows SDK version; plain `net10.0-windows` does not resolve them.
+- The host is an unpackaged, self-contained WinUI 3 app with its own `Main` (`Program.cs`): `--snapshot` runs with the
+  engine alone and exits before the XAML application starts. `App.xaml` must stay (building the application resources
+  in code crashes). Widget types are never XAML types.
 - Launching `UrDeck.Host.exe` (not `--snapshot`) blocks the shell. Start it detached and read `urdeck.log` next to the exe;
-  it logs monitors, target vs. actual window bounds, placed widgets, reloads and warnings.
+  it logs monitors, target vs. actual content area, placed widgets, reloads and warnings.
 - Screen capture: use Windows PowerShell 5.1 (`powershell.exe`, not `pwsh`), call `SetProcessDpiAwarenessContext(-4)`
-  first, then `Graphics.CopyFromScreen` on the monitor bounds. `PrintWindow` on the WPF window returns blank. Prefer one
+  first, then `Graphics.CopyFromScreen` on the monitor bounds. `PrintWindow` on the window returns blank. Prefer one
   capture, or ask the user to look.
 - In Git Bash, MSYS rewrites `/p:Foo` style switches as paths; use `-p:Foo`.
-- Plugins load from a shadow copy in a collectible `AssemblyLoadContext`. WPF pins assemblies in internal caches
-  (see `src/UrDeck.Host/WpfAssemblyCache.cs`); keep plugin types out of long-lived static caches.
+- Plugins load from a shadow copy in a collectible `AssemblyLoadContext`. A removed `SKXamlCanvas` can stay
+  alive after it leaves the tree, so `WidgetView.Dispose` drops its widget reference (without that, old plugin contexts
+  were not collected); keep plugin types out of long-lived static caches.
 - Do not add per-widget styling or resolution assumptions: styling belongs in the theme (`src/UrDeck.Engine/Themes`, `docs/themes.md`)
   and the user never sees resolution or scaling. Widgets draw no card and name no font; use the SDK components.

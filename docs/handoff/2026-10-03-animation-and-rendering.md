@@ -1,5 +1,9 @@
 # Handoff: explore animation and the rendering path (2026-10-03)
 
+> The exploration this note asked for has been done. Its outcome and the revised spike are in
+> [2026-10-04-render-host-spike.md](2026-10-04-render-host-spike.md), which replaces "Start here" and "Measure first"
+> below. The rest is kept as background.
+
 Context for a fresh session (Opus) that will run `/opsx:explore` and then `/opsx:propose` for roadmap item 14. Read
 `AGENTS.md`, `README.md` and `docs/ROADMAP.md` (items 4, 5, 7, 9 and 14) first; this note only adds what those do not
 say.

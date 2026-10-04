@@ -11,8 +11,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Target frameworks shared by the projects. The Windows SDK suffix matters: SkiaSharp.Views.WPF only ships a
-         .NET build for net10.0-windows10.0.19041; plain net10.0-windows silently falls back to its net48 build. -->
+    <!-- Target frameworks shared by the projects. The Windows SDK suffix matters: the Windows App SDK and
+         SkiaSharp.Views.WinUI target net10.0-windows10.0.19041; plain net10.0-windows does not resolve them. -->
     <UrDeckTfm>net10.0</UrDeckTfm>
     <UrDeckWindowsTfm>net10.0-windows10.0.19041.0</UrDeckWindowsTfm>
 

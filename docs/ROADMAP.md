@@ -19,7 +19,7 @@ change under `openspec/changes/`. Work one item per session.
      It logs monitors, actual vs. target window bounds, placed widgets, reloads and warnings.
    - Screen capture on Windows: use Windows PowerShell 5.1 (`powershell.exe`, not `pwsh`), call
      `SetProcessDpiAwarenessContext(-4)` first, then `Graphics.CopyFromScreen` of the monitor bounds.
-     `PrintWindow` on the WPF window returns blank. Prefer one capture, or ask the user to look.
+     `PrintWindow` on the window returns blank. Prefer one capture, or ask the user to look.
 4. Never commit to `main`. Branch off it (`feat/...`, `fix/...`, `docs/...`, `chore/...`), push, and open a pull
    request; PRs are squash-merged once CI is green. The PR title is a conventional commit
    (`feat(scope): ...`, `fix`, `docs`, `test`, `perf`, `refactor`, `chore`) and the PR description becomes the body of
@@ -39,24 +39,32 @@ everything else should be fine on Sonnet.
   line components, Clock migrated); see item 5.
 - Proposed, not started: `display-targeting` (older draft, to be reworked with `/opsx:explore` then `/opsx:propose`), and `data-providers`
   (item 3, not written yet).
-- Next: explore and propose item 14 (animation and rendering path), then item 3 (data providers), each in a fresh Opus
-  session starting from its handoff in `docs/handoff/`. See "Suggested order" below.
-- Memory: baseline decided. Keep the WPF host; ~66 MB private (60-70 MB) / ~115 MB working set (Release, one Clock,
-  software WPF composition). Idle CPU negligible. See `docs/perf/memory-investigation.md`.
+- Item 14 was explored on 2026-10-03/04. Outcome: composition moves to the GPU and the host is rebuilt on WinUI 3. A
+  spike on the panel passed the memory and layering checks (`docs/perf/render-host-spike.md`); a plain Win32 window
+  with DirectComposition stays the fallback. See item 14 and `docs/handoff/2026-10-04-render-host-spike.md`.
+- `render-path` (the WinUI 3 host) is implemented on the branch `feat/render-path` (PR open); all its tasks are verified and it is archived.
+- Next: merge `render-path`, then explore and propose `animation`; then item 3 (data providers). Each in a fresh
+  session starting from its change or handoff. See "Suggested order" below.
+- Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
+  (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
+  The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
 
 ### Suggested order
 
 Item numbers are identifiers, not a sequence. The order below gets the owner's current first page (clock, weather,
 performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked steps:
 
-1. **Item 14, animation and rendering path.** First because the software-versus-GPU answer could change how every widget
-   is rendered; cheapest to learn with one widget. Handoff: `docs/handoff/2026-10-03-animation-and-rendering.md`.
+1. **Item 14, rendering path and animation.** First because it replaces the host every widget is drawn in. The render
+   host spike is done; next is the `render-path` change (`openspec/changes/archive/2026-10-04-render-path`, the WinUI 3 host), then the
+   `animation` change (frame requests and an animation clock, with a split-flap Clock style as first consumer).
 2. **Item 3, data providers.** Handoff: `docs/handoff/2026-10-03-data-providers.md`.
-3. **Performance widget** (item 7), which brings the gauge component. Needs item 3.
-4. **Weather widget** (item 7), which brings glyphs and animated colour icons. Needs item 14.
+3. **Weather widget** (item 7), which brings glyphs and animated colour icons. Needs item 14. It fetches its own data,
+   so it does not need item 3.
+4. **Performance widget** (item 7), which brings the gauge component. Needs item 3.
 5. **Pages and touch** (item 8), then **shortcuts and dock** (items 7 and 10), which bring the image tile.
 
-Display targeting (item 6) is independent and can be done whenever monitor handling becomes a problem.
+Display targeting (item 6) is a future change. Its draft is written against the WPF window, so rework it now that the
+new host has landed.
 
 ---
 
@@ -210,7 +218,11 @@ Design direction, to be validated with `/opsx:explore` then `/opsx:propose` and 
 **Why:** give users and widget authors clear, comparable costs (the per-component strategy).
 **Model:** Opus for the measurement design, Sonnet to implement.
 
-- Budgets: host runtime baseline 60-70 MB private; editor is secondary; per-widget budgets with tiers
+- The bar (restated 2026-10-04): no worse than HYTE Nexus on the same panel, which measures about 627 MB private, 20%
+  of one core and 3% GPU (`docs/perf/nexus-baseline.md`). The owner's real goal is an open source, trustable
+  alternative, so cost may be spent on looks. The principle that stays: a page with nothing moving costs close to
+  nothing, and the user pays only for what they switch on.
+- Budgets: host runtime baseline about 100 MB private (WinUI 3, measured in `docs/perf/render-host-baseline.md`); editor is secondary; per-widget budgets with tiers
   (e.g. gold < 5 MB, silver < 10 MB, bronze above), expressed **per grid size** because the render surface
   (width x height x 4 bytes) dominates per-widget memory.
 - Measurement: a benchmark mode (e.g. `UrDeck.Host.exe --bench <widgetId> --size 4x2`) that runs the host with only
@@ -219,7 +231,8 @@ Design direction, to be validated with `/opsx:explore` then `/opsx:propose` and 
   Per-widget memory can't be isolated precisely inside a shared process; isolation runs are the fair measure.
 - Optional in-app diagnostics overlay showing per-widget render time and CPU.
 - Publish tiers in CONTRIBUTING.md; later show them in the widget picker.
-- Open decision: if the host baseline is unacceptable, evaluate a plain Win32 window + Skia host (est. 20-30 MB).
+- The host decision was item 14: the WPF host was replaced by a WinUI 3 host for GPU composition (`render-path`), with a
+  plain Win32 window and DirectComposition as the fallback.
 
 ## 5. Theme and card (`openspec/changes/archive/2026-10-03-theme-and-card`)
 
@@ -248,6 +261,9 @@ Pick the target monitor from a UI list with friendly names (EDID), persist a sta
 hot-plug, mixed-DPI setups and arbitrary monitor wake order. Needs real sleep/wake testing on the Y70.
 **Model:** Opus (hard to debug).
 
+The existing draft targets the WPF window. Rework it once the new host from item 14 has landed; placement and recovery
+after sleep are also one of the spike's pass/fail checks.
+
 ## 7. Default widget set
 
 Clock (done), weather, performance, shortcuts, media/now-playing. Each widget is its own change, must meet its
@@ -257,12 +273,17 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 
 | Widget | Sizes | Shows | Needs first | Brings |
 |---|---|---|---|---|
-| Clock | 4x2, 4x1, 2x1, 1x1 | time, date | done | readout, text line (done) |
+| Clock | 4x2, 4x1, 2x1, 1x1 | time, date; a split-flap style arrives with `animation` (item 14) | done | readout, text line (done) |
 | Performance | 2x2 (one stat), 4x2 (two gauges, three text stats), 4x4 (four gauges, three text stats) | CPU and GPU temperature and load, memory, GPU power and clock | item 3 | gauge ring (a ring around a readout) |
 | Single stat | 1x1 | one reading, for example one CPU core per card | item 3 | nothing new; may be the performance widget at its smallest size |
 | Weather | 4x2 | animated colour icon, temperature, condition, high and low, place, sunrise and sunset | item 14 | tinted glyph, colour or animated icon |
 | Shortcut | 1x1 | an app or URL icon that launches on tap | item 8 (touch) | image tile, shared with the dock (item 10) |
 | Media / now playing | open | track, artist, art, controls | items 3 and 8 | image tile reuse |
+| Web page | open | any web page, with touch (the owner shows Frigate camera feeds this way in Nexus) | item 14 (new host), item 8 | a hosted widget kind: the host places a web view layer instead of calling `Render` |
+| Camera (parked) | open | camera streams without a browser, for example from Frigate's go2rtc | item 9 for real video | reuses the video layer; a first version could draw snapshots on the canvas |
+
+The web page widget is a requirement, not an extra: it also covers Twitch chat and dashboards with no per-site work.
+It costs browser processes per instance, paid only by users who add one.
 
 Conventions settled in the theme exploration (2026-10-03), to follow in every widget:
 
@@ -280,13 +301,22 @@ via a keyless API such as Open-Meteo; Meteocons (MIT, full-colour, Lottie) is a 
 
 ## 8. Pages and touch
 
-Multiple pages with swipe navigation and a page indicator; tap/touch interaction routed to widgets (WPF touch and
-manipulation events; add an input API to the SDK). **Model:** Sonnet, Opus for the input API design.
+Multiple pages with swipe navigation and a page indicator; tap/touch interaction routed to widgets (through the input
+layer of the host chosen in item 14; add an input API to the SDK). **Model:** Sonnet, Opus for the input API design.
+
+Decided 2026-10-04: touch on the panel is for using the deck (swipe pages, tap, scroll inside a widget, interact with
+a web widget), never for editing it; see item 11. The host sees every touch first and arbitrates: a horizontal swipe
+changes page, a vertical pan scrolls the widget under the finger, and widgets declare what they consume. A widget that
+scrolls natively (a chat, a list) needs pan gestures with inertia from the host and a shared scroll component.
 
 ## 9. Backgrounds
 
 Static image, video, and generative visualizations per page (the `background` config field exists but is unused).
 Video is expensive: gate it behind the performance budget and measure. **Model:** Sonnet.
+
+Confirmed 2026-10-04 as a platform goal: a custom image, a video file, and a painted visualization (OpenGL or
+Direct3D), behind translucent cards. This is the main reason composition moves to the GPU (item 14), and the spike
+there measures a video background. The decoded-video layer built here is also what a camera widget would use.
 
 ## 10. Dock / quick launch
 
@@ -297,6 +327,12 @@ Launcher bar for apps and URLs (the `dock` config field exists but is unused). *
 Drag/drop placement on the grid, resize within supported sizes, property editing from each widget's config type,
 widget palette with performance tiers. Likely a separate window on the primary monitor editing the live page.
 **Model:** Opus for design, Sonnet for implementation.
+
+Decided 2026-10-04: the standalone editor does all editing (add, configure, move, resize, delete). Nothing is edited on
+the panel itself: Nexus splits editing between an app and the touch screen, which is inconsistent, and other screen
+types may have no touch. The editor therefore draws its own preview of the page (`PageRenderer` already renders a page
+to a bitmap) and can stay loosely coupled to the display by writing the config, which the host already reloads. Its UI
+framework follows the host decision in item 14: the same framework if WinUI 3 passes the spike, a separate one if not.
 
 ## 12. Packaging and distribution
 
@@ -313,7 +349,7 @@ Installer, start with Windows, tray icon (and using the `icon` config field for 
   protocols. `PageRenderer` already renders a page to a bitmap, which is the basis for "display backends" that push
   frames to non-monitor devices.
 
-## 14. Animation and the rendering path (new change, not written yet)
+## 14. Animation and the rendering path (changes `render-path` and `animation`, not written yet)
 
 **Why:** continuous motion is a design target (decided 2026-10-03): animated weather icons that loop like Nexus, music
 visualizers, chart and value transitions. Today a widget can only repaint on a fixed timer, and every repaint redraws
@@ -322,22 +358,33 @@ panel, and the answer may change how all widgets are rendered, so this comes bef
 **Model:** Opus for the exploration and design (it fixes public SDK API and possibly the host's rendering architecture),
 Sonnet to implement.
 
-**Next step:** a fresh Opus session running `/opsx:explore` from
-[docs/handoff/2026-10-03-animation-and-rendering.md](handoff/2026-10-03-animation-and-rendering.md), then `/opsx:propose`.
+**Status:** explored on 2026-10-03/04; `render-path` is implemented on `feat/render-path` (`openspec/changes/archive/2026-10-04-render-path`):
+the WinUI 3 host, with plugin hot-reload verified and a measured baseline (`docs/perf/render-host-baseline.md`).
+**Next step:** merge `render-path` (archived, all tasks verified on the panel), then explore
+`animation`.
+Background: [docs/handoff/2026-10-04-render-host-spike.md](handoff/2026-10-04-render-host-spike.md).
 
-Direction, to be validated:
+Decided in the exploration:
 
-- **Measure first.** A spike on the Y70: a looping animation on a 4x2 card at several frame rates, in software and with
-  hardware composition, with CPU and private bytes recorded in `docs/perf/`. The design rests on those numbers.
-- **A way for a widget to ask for frames**, and to stop asking, that fits with `NeedsRender` and the refresh attributes
-  and keeps a page with no animation at today's idle cost.
-- **Software or GPU.** Software WPF composition was chosen to save about 62 MB (`docs/perf/memory-investigation.md`).
-  `SKGLElement` (OpenGL) exists in `SkiaSharp.Views.WPF`. Whether to stay in software, switch, or mix is the main
-  architectural question, with the 60-70 MB budget and "idle CPU near zero" as the constraints.
-- **Limits the user and system can set:** a frame-rate cap, a motion level (off, subtle, full), pausing when the display
-  sleeps or the page is hidden, and backing off when the PC is busy (ties to item 3's `system.cpu`).
-- **Playing animation files:** Lottie through `SkiaSharp.Skottie` is the candidate, as a shared component that arrives
-  with the weather widget.
+- **Composition moves to the GPU.** Video and painted backgrounds behind translucent cards (item 9), page swipes
+  (item 8) and a web page widget (item 7) all need layers composited on the GPU. Software WPF composition, WPF's
+  hardware mode and `SKGLElement` are not candidates. Widgets keep drawing on an `SKCanvas`, so the SDK, engine, widgets
+  and `--snapshot` are expected to survive; `src/UrDeck.Host` is rebuilt.
+- **The host framework is WinUI 3**, chosen by a spike (`docs/perf/render-host-spike.md`). It ships a layered web view,
+  a media element and gestures, and serves the editor too. On the panel it passed the memory check (a full page with
+  video, an animated icon and a web view: 419 MB private and 10.5% of one core, against 627 MB and 20% for Nexus) and
+  the layering check (translucent Skia cards and a web view over video). Sleep and resume are tested by the owner
+  on the panel as the last gate of `render-path`. The fallback is a plain Win32 window with DirectComposition. All framework
+  code stays inside the host.
+- **The bar is Nexus** (`docs/perf/nexus-baseline.md`), with "a page with nothing moving costs close to nothing" kept
+  as the principle.
+- **Two changes, in this order:** `render-path` (the new host), then `animation`.
+- **The first animation consumer is the Clock** with a split-flap style. The weather widget is its own change after
+  `animation`; Lottie through `SkiaSharp.Skottie` (a build matching the repo's 4.153 exists) arrives with it.
 
-Out of scope here: the weather widget itself, video backgrounds (item 9, though they share the budget question), page
-transitions (item 8).
+Proposed for `animation`, not yet agreed: a widget asks for frames while it renders (and stops by not asking), one
+frame clock in the host that owns the rate and the limits (cap, motion level, display asleep, PC busy), a monotonic
+animation time that `--snapshot` pins, and data refresh on its own slow cadence. Details in the handoff.
+
+Out of scope here: the weather widget itself, the background feature (item 9; the spike only measures one), page
+navigation (item 8; the spike only tries a swipe), display targeting (item 6).

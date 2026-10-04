@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.Win32;
 using SkiaSharp;
 using UrDeck.Engine.Config;
@@ -14,25 +15,35 @@ using UrDeck.Engine.Layout;
 using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
+using WinRT.Interop;
 
 namespace UrDeck.Host;
 
+/// <summary>
+/// The borderless window covering the target monitor. Its content is an ordered stack of layers composited by the GPU:
+/// a background layer filled with the theme's background colour, and a canvas holding one surface per widget.
+/// Later changes add layers (an image or video background, hosted views such as a web view) to the same stack.
+/// </summary>
 public sealed class MainWindow : Window
 {
     private readonly ConfigStore _configStore;
     private readonly WidgetPluginLoader _plugins;
     private readonly ThemeStore _themes;
+    private readonly nint _hwnd;
+    private readonly Grid _root = new();
+    private readonly Grid _background = new();
     private readonly Canvas _surface = new();
     private readonly List<WidgetView> _views = new();
-    private readonly List<DispatcherTimer> _pendingRetargets = new();
+    private readonly List<DispatcherQueueTimer> _pendingRetargets = new();
     private MonitorInfo _target;
     private bool _rebuildPending;
+    private bool _nudged;
     private LoadedTheme _loadedTheme;
     private Theme? _theme;
     private LayoutKey _lastLayout;
 
     /// <summary>What a built page depends on: the window size, the display scaling and the active theme.</summary>
-    private readonly record struct LayoutKey(System.Drawing.Size Screen, double DpiScale, LoadedTheme? Theme);
+    private readonly record struct LayoutKey(System.Drawing.Size Screen, double Scale, LoadedTheme? Theme);
 
     internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, MonitorInfo target)
     {
@@ -41,26 +52,48 @@ public sealed class MainWindow : Window
         _themes = themes;
         _target = target;
         _loadedTheme = LoadTheme();
+        _hwnd = WindowNative.GetWindowHandle(this);
 
         Title = "UrDeck";
-        WindowStyle = WindowStyle.None;
-        ResizeMode = ResizeMode.NoResize;
-        WindowStartupLocation = WindowStartupLocation.Manual;
+        var presenter = OverlappedPresenter.Create();
+        presenter.SetBorderAndTitleBar(false, false);
+        presenter.IsResizable = false;
+        presenter.IsMaximizable = false;
+        presenter.IsMinimizable = false;
+        AppWindow.SetPresenter(presenter);
+        string icon = Path.Combine(AppContext.BaseDirectory, "urdeck.ico");
+        if (File.Exists(icon))
+            AppWindow.SetIcon(icon);
+
         ApplyBackground();
-        Content = _surface;
-
-        SourceInitialized += (_, _) => MonitorPlacement.Cover(this, _target.Bounds);
-        // Moving onto a monitor with a different DPI makes WPF resize the window by the DPI ratio;
-        // re-apply the exact physical bounds once that settles.
-        DpiChanged += (_, e) =>
+        _root.Children.Add(_background);
+        _root.Children.Add(_surface);
+        var escape = new KeyboardAccelerator { Key = Windows.System.VirtualKey.Escape };
+        escape.Invoked += (_, e) =>
         {
-            UrDeckLog.Info($"DPI changed {e.OldDpi.DpiScaleX:0.##} -> {e.NewDpi.DpiScaleX:0.##}");
-            Dispatcher.BeginInvoke(() => MonitorPlacement.Cover(this, _target.Bounds));
+            e.Handled = true;
+            Close();
         };
-        Loaded += (_, _) => LogPlacement();
-        SizeChanged += (_, _) => ScheduleRebuild();
+        _root.KeyboardAccelerators.Add(escape);
+        Content = _root;
 
-        _configStore.ConfigChanged += _ => Dispatcher.BeginInvoke(() =>
+        MonitorPlacement.Cover(_hwnd, _target.Bounds);
+        _root.Loaded += (_, _) =>
+        {
+            // The scale is only known once the content is in the tree; moving onto a monitor with another scale
+            // changes the DPI and the frame, so cover again and rebuild.
+            _root.XamlRoot.Changed += (_, _) =>
+            {
+                UrDeckLog.Info($"XAML root changed, scale {_root.XamlRoot.RasterizationScale:0.##}");
+                MonitorPlacement.Cover(_hwnd, _target.Bounds);
+                ScheduleRebuild();
+            };
+            LogPlacement();
+            ScheduleRebuild();
+        };
+        _root.SizeChanged += (_, _) => ScheduleRebuild();
+
+        _configStore.ConfigChanged += _ => DispatcherQueue.TryEnqueue(() =>
         {
             // Themes are re-read on every config reload, so editing a theme and saving the config applies it.
             _loadedTheme = LoadTheme();
@@ -68,12 +101,11 @@ public sealed class MainWindow : Window
             Retarget("config changed");
             ScheduleRebuild(force: true);
         });
-        _plugins.PluginsChanged += () => Dispatcher.BeginInvoke(() =>
+        _plugins.PluginsChanged += () => DispatcherQueue.TryEnqueue(() =>
         {
-            // Drop views holding old plugin instances now (not at the next idle rebuild) so the old
-            // plugin contexts can be collected, then clear WPF's static cache that also pins them.
+            // Drop views holding old plugin instances now (not at the next idle rebuild) so the old plugin contexts
+            // can be collected.
             DisposeViews();
-            WpfAssemblyCache.EvictCollectibleAssemblies();
             ScheduleRebuild(force: true);
         });
 
@@ -81,6 +113,7 @@ public sealed class MainWindow : Window
         // re-evaluate the target a few times after each change instead of trusting the first event.
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
         SystemEvents.PowerModeChanged += OnPowerModeChanged;
+        Closed += (_, _) => OnClosed();
     }
 
     private LoadedTheme LoadTheme()
@@ -93,33 +126,44 @@ public sealed class MainWindow : Window
     private void ApplyBackground()
     {
         var c = SKColor.Parse(_loadedTheme.Definition.Colors!.Background);
-        Background = new SolidColorBrush(Color.FromRgb(c.Red, c.Green, c.Blue));
+        var brush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, c.Red, c.Green, c.Blue));
+        _root.Background = brush;
+        _background.Background = brush;
     }
 
+    private double Scale => _root.XamlRoot?.RasterizationScale ?? 1;
+
     private void OnDisplaySettingsChanged(object? sender, EventArgs e) =>
-        Dispatcher.BeginInvoke(() => ScheduleRetargets("display settings changed"));
+        DispatcherQueue.TryEnqueue(() => ScheduleRetargets("display settings changed", rebuild: false));
 
     private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
     {
         if (e.Mode == PowerModes.Resume)
-            Dispatcher.BeginInvoke(() => ScheduleRetargets("resumed from sleep"));
+            DispatcherQueue.TryEnqueue(() => ScheduleRetargets("resumed from sleep", rebuild: true));
     }
 
-    private void ScheduleRetargets(string reason)
+    private void ScheduleRetargets(string reason, bool rebuild)
     {
         foreach (var t in _pendingRetargets)
             t.Stop();
         _pendingRetargets.Clear();
 
         Retarget(reason);
+        // After a resume the graphics device may have been reset: recreating every surface is the simple recovery.
+        if (rebuild)
+            ScheduleRebuild(force: true);
+
         foreach (var delay in new[] { TimeSpan.FromSeconds(1.5), TimeSpan.FromSeconds(5) })
         {
-            var timer = new DispatcherTimer { Interval = delay };
+            var timer = DispatcherQueue.CreateTimer();
+            timer.Interval = delay;
+            timer.IsRepeating = false;
             timer.Tick += (_, _) =>
             {
-                timer.Stop();
                 _pendingRetargets.Remove(timer);
                 Retarget($"{reason} (+{delay.TotalSeconds:0.#}s)");
+                if (rebuild)
+                    ScheduleRebuild(force: true);
             };
             _pendingRetargets.Add(timer);
             timer.Start();
@@ -134,29 +178,28 @@ public sealed class MainWindow : Window
             return;
 
         var target = MonitorPlacement.Select(_configStore.Config, monitors);
-        var actual = MonitorPlacement.GetWindowBounds(this);
-        if (target == _target && actual.Equals(target.Bounds))
+        var actual = MonitorPlacement.GetContentBounds(_hwnd);
+        if (target == _target && actual == target.Bounds)
             return;
 
-        UrDeckLog.Info($"Retarget ({reason}): {target}; window was at {actual.X},{actual.Y} {actual.Width}x{actual.Height}");
+        UrDeckLog.Info($"Retarget ({reason}): {target}; content area was at {actual.X},{actual.Y} {actual.Width}x{actual.Height}");
         _target = target;
-        MonitorPlacement.Cover(this, target.Bounds);
+        MonitorPlacement.Cover(_hwnd, target.Bounds);
         LogPlacement();
     }
 
     private void LogPlacement()
     {
-        var actual = MonitorPlacement.GetWindowBounds(this);
-        var dpi = VisualTreeHelper.GetDpi(this);
+        var actual = MonitorPlacement.GetContentBounds(_hwnd);
         var bounds = _target.Bounds;
-        UrDeckLog.Info($"Window at {actual.X},{actual.Y} {actual.Width}x{actual.Height} physical " +
+        UrDeckLog.Info($"Content area at {actual.X},{actual.Y} {actual.Width}x{actual.Height} physical " +
                       $"(target {bounds.X},{bounds.Y} {bounds.Width}x{bounds.Height}), " +
-                      $"{ActualWidth:0.#}x{ActualHeight:0.#} DIPs, scale {dpi.DpiScaleX:0.##}");
-        if (!actual.Equals(bounds))
-            UrDeckLog.Warn("Window bounds do not match the target monitor.");
+                      $"{_root.ActualWidth:0.#}x{_root.ActualHeight:0.#} DIPs, scale {Scale:0.##}");
+        if (actual != bounds)
+            UrDeckLog.Warn("Window content area does not match the target monitor.");
     }
 
-    /// <summary>Coalesces layout rebuilds (resize, DPI and placement changes arrive in bursts).</summary>
+    /// <summary>Coalesces layout rebuilds (resize, scale and placement changes arrive in bursts).</summary>
     private void ScheduleRebuild(bool force = false)
     {
         if (force)
@@ -164,7 +207,7 @@ public sealed class MainWindow : Window
         if (_rebuildPending)
             return;
         _rebuildPending = true;
-        Dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
+        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
         {
             _rebuildPending = false;
             RebuildLayout();
@@ -173,9 +216,25 @@ public sealed class MainWindow : Window
 
     private void RebuildLayout()
     {
-        var screen = new System.Drawing.Size((int)ActualWidth, (int)ActualHeight);
-        double dpiScale = VisualTreeHelper.GetDpi(this).DpiScaleX;
-        var key = new LayoutKey(screen, dpiScale, _loadedTheme);
+        var screen = new System.Drawing.Size((int)_root.ActualWidth, (int)_root.ActualHeight);
+        double scale = Scale;
+
+        // After a scale change (a monitor unplugged and plugged back in) XAML can keep the content size of the old
+        // scale while the window is right. Resize the window by a pixel once to make it lay out again, and build then.
+        var content = MonitorPlacement.GetContentBounds(_hwnd);
+        bool stale = !content.IsEmpty &&
+            (Math.Abs(_root.ActualWidth * scale - content.Width) > 2 || Math.Abs(_root.ActualHeight * scale - content.Height) > 2);
+        if (stale && !_nudged)
+        {
+            _nudged = true;
+            UrDeckLog.Info($"Layout {_root.ActualWidth:0.#}x{_root.ActualHeight:0.#} DIPs at scale {scale:0.##} does not match the content area {content.Width}x{content.Height}; resizing the window to refresh it");
+            MonitorPlacement.Cover(_hwnd, _target.Bounds, nudge: true);
+            ScheduleRebuild();
+            return;
+        }
+        _nudged = stale;
+
+        var key = new LayoutKey(screen, scale, _loadedTheme);
         if (key == _lastLayout)
             return;
         _lastLayout = key;
@@ -189,9 +248,9 @@ public sealed class MainWindow : Window
         if (page == null || screen.Width < 16 || screen.Height < 16)
             return;
 
-        // Layout is computed in DIPs; each SKElement then renders at the monitor's physical resolution, so the theme
+        // Layout is computed in DIPs; each surface then renders at the monitor's physical resolution, so the theme
         // is resolved against the physical size of one grid cell.
-        _theme = ThemeResolver.Resolve(_loadedTheme, (float)(screen.Width * dpiScale / 4));
+        _theme = ThemeResolver.Resolve(_loadedTheme, (float)(screen.Width * scale / 4));
         var layout = new GridLayoutManager(screen.Width, screen.Height, _loadedTheme.Definition.Card!.Gap!.Value)
             .RenderWidgetLayout(page.Widgets, screen);
 
@@ -240,14 +299,7 @@ public sealed class MainWindow : Window
         _surface.Children.Clear();
     }
 
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-        if (e.Key == Key.Escape)
-            Close();
-        base.OnKeyDown(e);
-    }
-
-    protected override void OnClosed(EventArgs e)
+    private void OnClosed()
     {
         // SystemEvents are static; unsubscribe or the window leaks.
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
@@ -256,6 +308,5 @@ public sealed class MainWindow : Window
             t.Stop();
         DisposeViews();
         _theme?.Dispose();
-        base.OnClosed(e);
     }
 }
