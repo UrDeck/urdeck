@@ -42,8 +42,8 @@ everything else should be fine on Sonnet.
 - Item 14 was explored on 2026-10-03/04. Outcome: composition moves to the GPU and the host is rebuilt on WinUI 3. A
   spike on the panel passed the memory and layering checks (`docs/perf/render-host-spike.md`); a plain Win32 window
   with DirectComposition stays the fallback. See item 14 and `docs/handoff/2026-10-04-render-host-spike.md`.
-- `render-path` (the WinUI 3 host) is implemented on the branch `feat/render-path` (PR open); all its tasks are verified, and it is waiting to be archived and merged.
-- Next: archive and merge `render-path`, then explore and propose `animation`; then item 3 (data providers). Each in a fresh
+- `render-path` (the WinUI 3 host) is implemented on the branch `feat/render-path` (PR open); all its tasks are verified and it is archived.
+- Next: merge `render-path`, then explore and propose `animation`; then item 3 (data providers). Each in a fresh
   session starting from its change or handoff. See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
@@ -55,7 +55,7 @@ Item numbers are identifiers, not a sequence. The order below gets the owner's c
 performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked steps:
 
 1. **Item 14, rendering path and animation.** First because it replaces the host every widget is drawn in. The render
-   host spike is done; next is the `render-path` change (`openspec/changes/render-path`, the WinUI 3 host), then the
+   host spike is done; next is the `render-path` change (`openspec/changes/archive/2026-10-04-render-path`, the WinUI 3 host), then the
    `animation` change (frame requests and an animation clock, with a split-flap Clock style as first consumer).
 2. **Item 3, data providers.** Handoff: `docs/handoff/2026-10-03-data-providers.md`.
 3. **Weather widget** (item 7), which brings glyphs and animated colour icons. Needs item 14. It fetches its own data,
@@ -358,9 +358,9 @@ panel, and the answer may change how all widgets are rendered, so this comes bef
 **Model:** Opus for the exploration and design (it fixes public SDK API and possibly the host's rendering architecture),
 Sonnet to implement.
 
-**Status:** explored on 2026-10-03/04; `render-path` is implemented on `feat/render-path` (`openspec/changes/render-path`):
+**Status:** explored on 2026-10-03/04; `render-path` is implemented on `feat/render-path` (`openspec/changes/archive/2026-10-04-render-path`):
 the WinUI 3 host, with plugin hot-reload verified and a measured baseline (`docs/perf/render-host-baseline.md`).
-**Next step:** archive and merge `render-path` (all tasks verified on the panel), then explore
+**Next step:** merge `render-path` (archived, all tasks verified on the panel), then explore
 `animation`.
 Background: [docs/handoff/2026-10-04-render-host-spike.md](handoff/2026-10-04-render-host-spike.md).
 

@@ -7,7 +7,7 @@ background. Read `AGENTS.md`, `README.md` and `docs/ROADMAP.md` (items 4, 7, 8, 
 
 > **Result (2026-10-04):** the WinUI 3 half of the spike was run the same day and passed the memory and layering
 > checks; the owner confirmed touch scrolling in the web view by hand. The host decision is WinUI 3, and the change is
-> proposed as `openspec/changes/render-path`. Results: `docs/perf/render-host-spike.md`. Sleep and resume, the Frigate
+> proposed as `openspec/changes/archive/2026-10-04-render-path`. Results: `docs/perf/render-host-spike.md`. Sleep and resume, the Frigate
 > page and smoothness are the first tasks of that change. The sections below are kept as the record of the plan.
 
 ## Start here
