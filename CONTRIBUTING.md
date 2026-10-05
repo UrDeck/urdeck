@@ -91,6 +91,13 @@ Rules enforced at compile time by the analyzer and again by the loader:
 - Exactly one of `[RefreshOnTick]`, `[RefreshAdaptive]` or `[RefreshOnEvent]`.
 - A public parameterless constructor.
 
+Animation: a widget that moves overrides `IsAnimating` and returns `true` while it is mid-animation. The host reads it
+after each paint; while it is `true` the host repaints the widget about 30 times a second (without calling
+`UpdateAsync` or `NeedsRender`) and stops after the paint that returns `false`. The widget does not choose the rate.
+Rules: draw from `context.Time`, never a frame count, so the motion is the same at any frame rate; draw the resting
+state on the first paint and on the first paint after `Configure`; make the paint after which `IsAnimating` first
+returns `false` the resting state; keep `IsAnimating` cheap and free of side effects. See the Clock's `flap` style.
+
 Project file for a first-party widget (modelled on `widgets/UrDeck.Widgets.Clock`; it inherits the shared settings from
 `Directory.Build.props`). A third-party widget in its own repo sets `TargetFramework` and the other properties itself.
 

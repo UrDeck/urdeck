@@ -33,6 +33,15 @@ public interface IWidget
     bool NeedsRender(DateTime now) => true;
 
     /// <summary>
+    /// Whether the widget is in the middle of an animation. The host reads it after each paint; while it returns
+    /// <c>true</c> the host repaints the widget at its own frame rate (without calling <see cref="UpdateAsync"/>), and
+    /// stops after the paint that returns <c>false</c>. Draw from <see cref="WidgetRenderContext.Time"/>, never a frame
+    /// count, and draw the resting state on the first paint and in the paint after which this first returns <c>false</c>.
+    /// Must be cheap and free of side effects.
+    /// </summary>
+    bool IsAnimating => false;
+
+    /// <summary>
     /// Draws the widget. Called on the UI thread; must be synchronous and fast. The canvas is only
     /// valid for the duration of the call.
     /// </summary>

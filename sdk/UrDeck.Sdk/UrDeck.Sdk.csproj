@@ -7,8 +7,9 @@
     <!-- Plugins are compiled against this assembly and loaded into the host's copy of it. .NET refuses to bind a
          reference to a lower assembly version, which would make the plugin load a second SDK copy and silently
          break type identity. Keep AssemblyVersion fixed until a deliberate breaking change; Version can move freely.
-         0.2.0.0: ThemeColors replaced by Theme, ContentRect added to the render context (theme-and-card). -->
-    <Version>0.2.0</Version>
+         0.2.0.0: ThemeColors replaced by Theme, ContentRect added to the render context (theme-and-card).
+         0.3.0 (assembly version unchanged, the addition is not breaking): IWidget.IsAnimating (animation). -->
+    <Version>0.3.0</Version>
     <AssemblyVersion>0.2.0.0</AssemblyVersion>
   </PropertyGroup>
 

@@ -67,7 +67,7 @@ Config is `urdeck-config.json`, located next to the executable (`src/UrDeck.Host
 | Field | Meaning |
 |---|---|
 | `pages[].widgets[]` | Widgets on a page. `typeId` is the widget's `Id`; `col` (0-3), `row`, `width` (1-4) and `height` are in grid units. Invalid values are clamped and a warning is logged. An unknown `typeId` leaves its cell empty. |
-| any other property on a widget | Widget-specific settings, e.g. the Clock's `format` (`"24h"` or `"12h"`), `showDate`, `textColor` (hex) and `fontSize` (multiplier). |
+| any other property on a widget | Widget-specific settings, e.g. the Clock's `format` (`"24h"` or `"12h"`), `showDate`, `textColor` (hex), `fontSize` (multiplier) and `style` (`"simple"`, the default, or `"flap"`, a split-flap display whose digits flip when the minute changes). |
 | `activePage` | Index of the page to show. |
 | `monitorName` | Target monitor: `"primary"`, `"tallest"` (tallest portrait monitor), `"widest"`, `"largest"` (most pixels), or a device name such as `"DISPLAY1"`. |
 | `monitor` | 1-based monitor index, used when `monitorName` matches nothing. Falls back to the primary monitor. |

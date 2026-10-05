@@ -20,14 +20,16 @@ internal sealed class WidgetView : SKXamlCanvas, IDisposable
     // Cleared on Dispose: WinUI can keep a removed canvas alive for a while, and it must not keep the plugin alive with it.
     private IWidget? _widget;
     private readonly Theme _theme;
+    private readonly FrameClock _frameClock;
     private readonly DispatcherQueueTimer? _timer;
     private readonly CancellationTokenSource _cts = new();
     private bool _updating;
     private bool _hasPainted;
 
-    public WidgetView(IWidget widget, WidgetDescriptor descriptor, Theme theme)
+    public WidgetView(IWidget widget, WidgetDescriptor descriptor, Theme theme, FrameClock frameClock)
     {
         _widget = widget;
+        _frameClock = frameClock;
         _theme = theme;
         PaintSurface += OnPaintSurface;
 
@@ -105,11 +107,31 @@ internal sealed class WidgetView : SKXamlCanvas, IDisposable
             DateTime.Now,
             _cts.Token);
         _hasPainted = true;
+
+        // Membership only changes here; the frame clock's next tick does the invalidating.
+        if (SafeIsAnimating(widget))
+            _frameClock.Add(this);
+        else
+            _frameClock.Remove(this);
+    }
+
+    private static bool SafeIsAnimating(IWidget widget)
+    {
+        try
+        {
+            return widget.IsAnimating;
+        }
+        catch (Exception ex)
+        {
+            UrDeckLog.Error($"Widget '{widget.Name}' IsAnimating failed; treating it as not animating", ex);
+            return false;
+        }
     }
 
     public void Dispose()
     {
         _timer?.Stop();
+        _frameClock.Remove(this);
         _cts.Cancel();
         _cts.Dispose();
         PaintSurface -= OnPaintSurface;

@@ -26,6 +26,14 @@ public class SdkContractTests
         Assert.True(widget.NeedsRender(DateTime.Now));
     }
 
+    [Fact]
+    public void IsAnimating_DefaultsToFalse()
+    {
+        IWidget widget = new PlainWidget();
+
+        Assert.False(widget.IsAnimating);
+    }
+
     private sealed class PlainWidget : Widget<WidgetConfig>
     {
         public override void Render(WidgetRenderContext context)
