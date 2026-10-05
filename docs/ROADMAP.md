@@ -42,9 +42,10 @@ everything else should be fine on Sonnet.
 - Item 14 was explored on 2026-10-03/04. Outcome: composition moves to the GPU and the host is rebuilt on WinUI 3. A
   spike on the panel passed the memory and layering checks (`docs/perf/render-host-spike.md`); a plain Win32 window
   with DirectComposition stays the fallback. See item 14 and `docs/handoff/2026-10-04-render-host-spike.md`.
-- `render-path` (the WinUI 3 host) is implemented on the branch `feat/render-path` (PR open); all its tasks are verified and it is archived.
-- Next: merge `render-path`, then explore and propose `animation`; then item 3 (data providers). Each in a fresh
-  session starting from its change or handoff. See "Suggested order" below.
+- `render-path` (the WinUI 3 host) is merged (#11) and so is the glass theme (#12).
+- `animation` is implemented on `feat/animation`, archived as `openspec/changes/archive/2026-10-04-animation` (`IWidget.IsAnimating`, one host frame clock at 30 fps that runs only
+  while a widget animates, the Clock's `flap` style); all its checks passed on the panel.
+- Next: item 3 (data providers), in a fresh session starting from its change or handoff. See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -273,7 +274,7 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 
 | Widget | Sizes | Shows | Needs first | Brings |
 |---|---|---|---|---|
-| Clock | 4x2, 4x1, 2x1, 1x1 | time, date; a split-flap style arrives with `animation` (item 14) | done | readout, text line (done) |
+| Clock | 4x2, 4x1, 2x1, 1x1 | time, date; `style: "flap"` is a split-flap display (`animation`, item 14) | done | readout, text line (done) |
 | Performance | 2x2 (one stat), 4x2 (two gauges, three text stats), 4x4 (four gauges, three text stats) | CPU and GPU temperature and load, memory, GPU power and clock | item 3 | gauge ring (a ring around a readout) |
 | Single stat | 1x1 | one reading, for example one CPU core per card | item 3 | nothing new; may be the performance widget at its smallest size |
 | Weather | 4x2 | animated colour icon, temperature, condition, high and low, place, sunrise and sunset | item 14 | tinted glyph, colour or animated icon |
@@ -349,7 +350,7 @@ Installer, start with Windows, tray icon (and using the `icon` config field for 
   protocols. `PageRenderer` already renders a page to a bitmap, which is the basis for "display backends" that push
   frames to non-monitor devices.
 
-## 14. Animation and the rendering path (changes `render-path` and `animation`, not written yet)
+## 14. Animation and the rendering path (changes `render-path` and `animation`, both done)
 
 **Why:** continuous motion is a design target (decided 2026-10-03): animated weather icons that loop like Nexus, music
 visualizers, chart and value transitions. Today a widget can only repaint on a fixed timer, and every repaint redraws
@@ -360,8 +361,7 @@ Sonnet to implement.
 
 **Status:** explored on 2026-10-03/04; `render-path` is implemented on `feat/render-path` (`openspec/changes/archive/2026-10-04-render-path`):
 the WinUI 3 host, with plugin hot-reload verified and a measured baseline (`docs/perf/render-host-baseline.md`).
-**Next step:** merge `render-path` (archived, all tasks verified on the panel), then explore
-`animation`.
+**Next step:** `animation` is done and archived (`openspec/changes/archive/2026-10-04-animation`); the weather change is next after item 3.
 Background: [docs/handoff/2026-10-04-render-host-spike.md](handoff/2026-10-04-render-host-spike.md).
 
 Decided in the exploration:
@@ -382,9 +382,10 @@ Decided in the exploration:
 - **The first animation consumer is the Clock** with a split-flap style. The weather widget is its own change after
   `animation`; Lottie through `SkiaSharp.Skottie` (a build matching the repo's 4.153 exists) arrives with it.
 
-Proposed for `animation`, not yet agreed: a widget asks for frames while it renders (and stops by not asking), one
-frame clock in the host that owns the rate and the limits (cap, motion level, display asleep, PC busy), a monotonic
-animation time that `--snapshot` pins, and data refresh on its own slow cadence. Details in the handoff.
+Built in `animation`: a widget reports `IsAnimating`; one host frame clock at 30 fps runs only while some widget does;
+frames never refresh data. Deliberately left out and revisited by the weather change, the first widget that loops: wake
+requests (a repaint at a wall-clock time), a monotonic or pinnable animation time, a transition helper, a user motion
+level, backing off when the PC is busy (needs `system.cpu` from item 3), smaller or GPU-backed surfaces. Details in the handoff.
 
 Out of scope here: the weather widget itself, the background feature (item 9; the spike only measures one), page
 navigation (item 8; the spike only tries a swipe), display targeting (item 6).

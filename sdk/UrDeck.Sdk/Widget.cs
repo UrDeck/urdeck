@@ -44,5 +44,8 @@ public abstract class Widget<TConfig> : IWidget<TConfig> where TConfig : WidgetC
     /// <inheritdoc cref="IWidget.NeedsRender"/>
     public virtual bool NeedsRender(DateTime now) => true;
 
+    /// <inheritdoc cref="IWidget.IsAnimating"/>
+    public virtual bool IsAnimating => false;
+
     public abstract void Render(WidgetRenderContext context);
 }

@@ -14,4 +14,6 @@ public class ClockConfig : WidgetConfig
     public string? TextColor { get; set; }
     /// <summary>Multiplier on the size-derived font size.</summary>
     public double FontSize { get; set; } = 1.0;
+    /// <summary>"simple" (default) or "flap", a split-flap display; anything else is "simple".</summary>
+    public string Style { get; set; } = "simple";
 }

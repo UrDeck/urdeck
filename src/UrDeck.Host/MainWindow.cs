@@ -34,6 +34,7 @@ public sealed class MainWindow : Window
     private readonly Grid _background = new();
     private readonly Canvas _surface = new();
     private readonly List<WidgetView> _views = new();
+    private readonly FrameClock _frameClock;
     private readonly List<DispatcherQueueTimer> _pendingRetargets = new();
     private MonitorInfo _target;
     private bool _rebuildPending;
@@ -51,6 +52,7 @@ public sealed class MainWindow : Window
         _plugins = plugins;
         _themes = themes;
         _target = target;
+        _frameClock = new FrameClock(DispatcherQueue);
         _loadedTheme = LoadTheme();
         _hwnd = WindowNative.GetWindowHandle(this);
 
@@ -272,7 +274,7 @@ public sealed class MainWindow : Window
             {
                 var widget = _plugins.CreateWidget(config)!;
                 var item = layout[i];
-                var view = new WidgetView(widget, descriptor, _theme)
+                var view = new WidgetView(widget, descriptor, _theme, _frameClock)
                 {
                     Width = item.Size.Width,
                     Height = item.Size.Height,
@@ -307,6 +309,7 @@ public sealed class MainWindow : Window
         foreach (var t in _pendingRetargets)
             t.Stop();
         DisposeViews();
+        _frameClock.Shutdown();
         _theme?.Dispose();
     }
 }

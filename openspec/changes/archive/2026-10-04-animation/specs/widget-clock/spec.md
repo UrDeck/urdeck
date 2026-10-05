@@ -1,10 +1,45 @@
-# Clock Widget Specification
+## ADDED Requirements
 
-## Purpose
+### Requirement: Split-Flap Style
+With `style: "flap"` the Clock MUST show the time as a split-flap display:
 
-Defines the built-in Clock widget: what it displays, how it is configured and how it looks.
+- Four digit tiles, two for the hour and two for the minute, with a colon between the pairs. In the 12-hour format
+  the first tile is blank for hours 1 to 9, and `AM`/`PM` is drawn as text beside the tiles, not on a tile
+- All tiles have the same size, so the layout does not change as digits change; the tiles are as large as fit the
+  content rectangle (scaled by `fontSize`), and the date line, when shown, is below them as in the `simple` style
+- When the displayed time changes, each tile whose character changed flips from the old character to the new one over
+  about half a second; tiles whose character did not change do not move
+- The Clock reports `IsAnimating` only while a flip is in progress, and its last frame is the resting state
+- The first paint, and the first paint after a configuration change, show the current time at rest with no flip
+- A flip's progress is computed from the render time; if the render time is before the flip's start or past its end
+  (a clock change, a resume from sleep), the tiles are drawn at rest
+- The flap style is available at every supported size
 
-## Requirements
+#### Scenario: Minute changes
+- **WHEN** the displayed time changes from `10:41` to `10:42` in the flap style
+- **THEN** only the last tile flips, the Clock reports `IsAnimating` until the flip ends, and then shows `10:42` at rest
+
+#### Scenario: Several digits change
+- **WHEN** the displayed time changes from `09:59` to `10:00`
+- **THEN** all four tiles flip
+
+#### Scenario: Flip finished
+- **WHEN** the Clock is painted with a time more than the flip duration after the change
+- **THEN** it draws the new time at rest and `IsAnimating` returns `false`
+
+#### Scenario: First paint
+- **WHEN** a flap-style Clock is painted for the first time (when placed, or in `--snapshot`)
+- **THEN** it shows the current time at rest and `IsAnimating` returns `false`
+
+#### Scenario: Idle between minutes
+- **WHEN** a flap-style Clock ticks again within the same displayed minute and no flip is in progress
+- **THEN** `NeedsRender` returns `false` and the widget is not repainted
+
+#### Scenario: Single-digit hour in 12-hour format
+- **WHEN** the format is `12h`, the style is `flap` and the time is 19:30
+- **THEN** the tiles show a blank, `7`, `3`, `0` and `PM` is drawn as text
+
+## MODIFIED Requirements
 
 ### Requirement: Clock Display
 The Clock widget (`typeId` `urdeck.widgets.clock`) MUST display the current time and date on its SkiaSharp surface:
@@ -83,42 +118,3 @@ The Clock widget MUST take its whole appearance from the theme and the shared co
 #### Scenario: Flap tiles follow the theme
 - **WHEN** the active theme changes while the Clock uses the `flap` style
 - **THEN** the tile colour, corner radius and digits follow the new theme, and the tiles are opaque on an opaque and on a translucent card
-
-### Requirement: Split-Flap Style
-With `style: "flap"` the Clock MUST show the time as a split-flap display:
-
-- Four digit tiles, two for the hour and two for the minute, with a colon between the pairs. In the 12-hour format
-  the first tile is blank for hours 1 to 9, and `AM`/`PM` is drawn as text beside the tiles, not on a tile
-- All tiles have the same size, so the layout does not change as digits change; the tiles are as large as fit the
-  content rectangle (scaled by `fontSize`), and the date line, when shown, is below them as in the `simple` style
-- When the displayed time changes, each tile whose character changed flips from the old character to the new one over
-  about half a second; tiles whose character did not change do not move
-- The Clock reports `IsAnimating` only while a flip is in progress, and its last frame is the resting state
-- The first paint, and the first paint after a configuration change, show the current time at rest with no flip
-- A flip's progress is computed from the render time; if the render time is before the flip's start or past its end
-  (a clock change, a resume from sleep), the tiles are drawn at rest
-- The flap style is available at every supported size
-
-#### Scenario: Minute changes
-- **WHEN** the displayed time changes from `10:41` to `10:42` in the flap style
-- **THEN** only the last tile flips, the Clock reports `IsAnimating` until the flip ends, and then shows `10:42` at rest
-
-#### Scenario: Several digits change
-- **WHEN** the displayed time changes from `09:59` to `10:00`
-- **THEN** all four tiles flip
-
-#### Scenario: Flip finished
-- **WHEN** the Clock is painted with a time more than the flip duration after the change
-- **THEN** it draws the new time at rest and `IsAnimating` returns `false`
-
-#### Scenario: First paint
-- **WHEN** a flap-style Clock is painted for the first time (when placed, or in `--snapshot`)
-- **THEN** it shows the current time at rest and `IsAnimating` returns `false`
-
-#### Scenario: Idle between minutes
-- **WHEN** a flap-style Clock ticks again within the same displayed minute and no flip is in progress
-- **THEN** `NeedsRender` returns `false` and the widget is not repainted
-
-#### Scenario: Single-digit hour in 12-hour format
-- **WHEN** the format is `12h`, the style is `flap` and the time is 19:30
-- **THEN** the tiles show a blank, `7`, `3`, `0` and `PM` is drawn as text

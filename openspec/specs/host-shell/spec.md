@@ -75,7 +75,8 @@ The host MUST give every widget its own drawing surface:
 
 ### Requirement: GPU Composition
 The host window MUST be composited by the GPU from independent layers: the window background and one layer per widget
-surface. The host MUST NOT produce frames while no layer changes, and MUST NOT run a continuous render loop.
+surface. The host MUST NOT produce frames while no layer changes, and MUST NOT run a render loop while no widget is
+animating (see "Animation Frames").
 
 #### Scenario: Still page
 - **WHEN** a page is shown and no widget is repainted
@@ -86,7 +87,8 @@ surface. The host MUST NOT produce frames while no layer changes, and MUST NOT r
 - **THEN** only that widget's layer is updated and the page is composited again
 
 ### Requirement: Widget Refresh Scheduling
-The host MUST drive each widget from its own refresh policy, with no global render loop:
+The host MUST drive each widget's data refresh from its own refresh policy. The only shared loop is the frame source
+for animating widgets (see "Animation Frames"), which is independent of the refresh policies:
 
 - `RefreshOnTick` — a per-widget timer on the UI thread at the declared interval; each tick awaits `UpdateAsync` and then repaints
 - `RefreshAdaptive` — a timer at `MinMs` (load-based scaling up to `MaxMs` is specified by a later change)
@@ -197,3 +199,32 @@ The host MUST apply the selected theme (see the `theme` capability) to everythin
 #### Scenario: Display scaling changes
 - **WHEN** the target monitor's scaling changes while the host runs
 - **THEN** the page is rebuilt and cards keep the same proportions relative to the grid cell
+
+### Requirement: Animation Frames
+The host MUST repaint animating widgets from one shared frame source:
+
+- After each paint of a widget the host reads `IWidget.IsAnimating`; a widget that returns `true` is animating until a
+  later paint after which it returns `false`
+- While at least one placed widget is animating, the frame source runs at 30 frames per second and repaints each
+  animating widget on every frame; widgets that are not animating are not repainted by it
+- When no placed widget is animating, the frame source MUST be stopped, not merely idle
+- A frame MUST NOT call `UpdateAsync` or `NeedsRender`
+- A widget that is removed (page rebuild, plugin reload, config change) stops being animated, and a widget whose
+  `IsAnimating` throws is treated as not animating and the failure is logged
+- `--snapshot` ignores `IsAnimating` and paints every widget once
+
+#### Scenario: Still page has no frame source
+- **WHEN** a page is shown and no widget is animating
+- **THEN** the frame source is not running and the only recurring work is the widgets' refresh timers
+
+#### Scenario: One widget animates
+- **WHEN** one widget on a page of several reports `IsAnimating`
+- **THEN** that widget is repainted about 30 times per second and the other widgets' `Render()` is not called
+
+#### Scenario: Animation ends
+- **WHEN** the last animating widget returns `false` from `IsAnimating` after a paint
+- **THEN** the frame source stops and CPU and GPU use return to the idle level
+
+#### Scenario: Animating widget is removed
+- **WHEN** the page is rebuilt while a widget is animating
+- **THEN** the old widget is no longer repainted and the frame source stops unless another widget is animating
