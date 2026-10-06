@@ -48,7 +48,8 @@ public class SystemProviderTests
         var catalog = new SystemProvider().Describe();
 
         var cores = catalog.Where(e => e.Path.StartsWith("cpu/core/", StringComparison.Ordinal)).ToList();
-        Assert.Equal(Environment.ProcessorCount, cores.Count);
+        // Windows reports every logical processor; the process may be limited to fewer of them (affinity, a container).
+        Assert.True(cores.Count >= Environment.ProcessorCount);
         Assert.Equal("cpu/core/1/load", cores[0].Path);
         Assert.Equal("Core 1", cores[0].Label);
         Assert.Equal("CPU core 1 load", cores[0].Name);
@@ -87,10 +88,12 @@ public class SystemProviderTests
     }
 
     [Fact]
-    public async Task TheTotalRisesWithTheMachinesCpuUse()
+    public async Task LoadRisesWithTheMachinesCpuUse()
     {
         var sink = new Sink();
-        var provider = Started(sink, "cpu/load");
+        // The busiest core is checked, not the total: the process may be limited to a few of the machine's processors.
+        string[] cores = new SystemProvider().Describe().Where(e => e.Path.StartsWith("cpu/core/", StringComparison.Ordinal)).Select(e => e.Path).ToArray();
+        var provider = Started(sink, ["cpu/load", .. cores]);
         Sample(provider);
 
         // Lowest priority: the machine reads as busy, but the other tests running in parallel are not starved by it.
@@ -111,7 +114,9 @@ public class SystemProviderTests
         foreach (var burner in burners)
             burner.Join();
 
-        Assert.True(sink.Values["cpu/load"] > 25, $"expected a busy machine, got {sink.Values["cpu/load"]:0.#}%");
+        double busiest = cores.Max(c => sink.Values[c]);
+        Assert.True(busiest > 50, $"expected a busy core, the busiest read {busiest:0.#}%");
+        Assert.InRange(sink.Values["cpu/load"], 0, 100);
     }
 
     [Fact]

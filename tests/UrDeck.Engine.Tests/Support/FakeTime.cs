@@ -14,6 +14,7 @@ internal sealed class FakeTime : TimeProvider
     private readonly object _gate = new();
     private readonly List<FakeTimer> _timers = [];
     private long _now;
+    private long _version;
 
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
 
@@ -31,6 +32,16 @@ internal sealed class FakeTime : TimeProvider
 
     public TimeSpan Elapsed => TimeSpan.FromTicks(GetTimestamp());
 
+    /// <summary>Counts timers created, changed, fired and disposed, so a test can tell when the code under test reacted.</summary>
+    private long Version
+    {
+        get
+        {
+            lock (_gate)
+                return _version;
+        }
+    }
+
     public int ActiveTimers
     {
         get
@@ -45,7 +56,11 @@ internal sealed class FakeTime : TimeProvider
         var timer = new FakeTimer(this, callback, state);
         timer.Change(dueTime, period);
         lock (_gate)
+        {
             _timers.Add(timer);
+            _version++;
+        }
+
         return timer;
     }
 
@@ -77,8 +92,9 @@ internal sealed class FakeTime : TimeProvider
     }
 
     /// <summary>
-    /// Advances in small steps, giving the code under test real time to react in between, until the condition holds.
-    /// Returns false when the virtual or the real limit is reached first.
+    /// Moves the clock from one timer to the next (never past a timer the code under test has not yet scheduled) until the
+    /// condition holds. After each jump it waits for the code under test to react and go quiet, so the result does not
+    /// depend on how fast the machine is. Returns false when the virtual or the real limit is reached first.
     /// </summary>
     public bool AdvanceUntil(Func<bool> condition, TimeSpan step, TimeSpan virtualLimit, int realLimitMs = 20000)
     {
@@ -88,22 +104,56 @@ internal sealed class FakeTime : TimeProvider
         {
             if (Elapsed >= limit || Environment.TickCount64 - started > realLimitMs)
                 return false;
-            Advance(step);
-            Settle();
+
+            long? due;
+            lock (_gate)
+                due = _timers.Where(t => t.Active).Select(t => (long?)t.Due).Min();
+            if (due == null)
+            {
+                // Nothing is scheduled yet: the code under test is still getting to its next wait.
+                WaitReal(() => condition() || ActiveTimers > 0, 50);
+                continue;
+            }
+
+            Advance(TimeSpan.FromTicks(Math.Max(0, due.Value - GetTimestamp())));
+            long fired = Version;
+            WaitReal(() => condition() || Version != fired, 250);
+            WaitQuiet();
         }
 
         return true;
     }
 
-    /// <summary>
-    /// Lets other threads react to the last advance. A sleep would take a whole timer tick (15 ms) on Windows, so spin and
-    /// yield for a fraction of a millisecond instead.
-    /// </summary>
-    private static void Settle()
+    private static void WaitReal(Func<bool> done, int timeoutMs)
     {
-        long until = Stopwatch.GetTimestamp() + Stopwatch.Frequency / 2000;
-        while (Stopwatch.GetTimestamp() < until)
+        long until = Stopwatch.GetTimestamp() + Stopwatch.Frequency / 1000 * timeoutMs;
+        while (!done() && Stopwatch.GetTimestamp() < until)
             Thread.Yield();
+    }
+
+    /// <summary>Waits until no timer event happened for a few milliseconds of real time.</summary>
+    private void WaitQuiet()
+    {
+        long seen = Version;
+        long quietSince = Stopwatch.GetTimestamp();
+        long until = quietSince + Stopwatch.Frequency / 2; // never wait longer than half a second
+        long window = Stopwatch.Frequency / 1000 * 5;
+        while (Stopwatch.GetTimestamp() < until)
+        {
+            long now = Stopwatch.GetTimestamp();
+            long version = Version;
+            if (version != seen)
+            {
+                seen = version;
+                quietSince = now;
+            }
+            else if (now - quietSince >= window)
+            {
+                return;
+            }
+
+            Thread.Yield();
+        }
     }
 
     private sealed class FakeTimer(FakeTime owner, TimerCallback callback, object? state) : ITimer
@@ -122,6 +172,7 @@ internal sealed class FakeTime : TimeProvider
             {
                 if (Disposed)
                     return false;
+                owner._version++;
                 _period = period;
                 Active = dueTime != Timeout.InfiniteTimeSpan;
                 Due = owner._now + (Active ? dueTime.Ticks : 0);
@@ -135,6 +186,7 @@ internal sealed class FakeTime : TimeProvider
             {
                 if (!Active || Disposed)
                     return;
+                owner._version++;
                 if (_period == Timeout.InfiniteTimeSpan || _period == TimeSpan.Zero)
                     Active = false;
                 else
@@ -148,6 +200,7 @@ internal sealed class FakeTime : TimeProvider
         {
             lock (owner._gate)
             {
+                owner._version++;
                 Disposed = true;
                 Active = false;
             }
