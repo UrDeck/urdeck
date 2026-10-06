@@ -48,8 +48,11 @@ everything else should be fine on Sonnet.
 - `render-path` (the WinUI 3 host) is merged (#11) and so is the glass theme (#12).
 - `animation` is merged (#13), archived as `openspec/changes/archive/2026-10-04-animation` (`IWidget.IsAnimating`, one host frame clock at 30 fps that runs only
   while a widget animates, the Clock's `flap` style); all its checks passed on the panel.
-- Next: review and merge `data-providers` (an Opus review is suggested), then the gauge ring and the larger stats
-  compositions. See "Suggested order" below.
+- `data-providers` is merged (#14). Proposed on 2026-10-05, not started: `stats-gauges` (the gauge component with the
+  styles ring, bar, vertical bar and plain, levels with warning and critical colours, the stats widget at 4x2 and 4x4)
+  and `gpu-readings` (GPU load, temperature, power and clock in the `system` provider without elevation, after a
+  spike). Both are in `openspec/changes/`; `gpu-readings` builds on `stats-gauges`.
+- Next: implement `stats-gauges`, then `gpu-readings`. See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -62,11 +65,14 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
 1. **Item 14, rendering path and animation.** First because it replaces the host every widget is drawn in. The render
    host spike is done; next is the `render-path` change (`openspec/changes/archive/2026-10-04-render-path`, the WinUI 3 host), then the
    `animation` change (frame requests and an animation clock, with a split-flap Clock style as first consumer).
-2. **Item 3, data providers**, as three changes:
-   1. `data-providers` (implemented, in review): providers as a plugin kind, readings, the `system` provider (CPU and memory load,
+2. **Item 3, data providers**, as four changes:
+   1. `data-providers` (done): providers as a plugin kind, readings, the `system` provider (CPU and memory load,
       no elevation) and the stats widget at 1x1 and 2x2. Gives the row of per-core cards.
-   2. The gauge ring and the stats widget's 4x2 and 4x4 compositions (the performance widget of item 7).
-   3. Sensors that need elevation (temperatures, power, clocks) through an opt-in helper.
+   2. `stats-gauges` (proposed): the gauge component and the stats widget's 4x2 and 4x4 compositions (the performance
+      widget of item 7).
+   3. `gpu-readings` (proposed): GPU load and temperature for any vendor through Windows, GPU power and clock through
+      the vendor library (NVIDIA first), all without elevation.
+   4. Sensors that need elevation (CPU temperature and what else needs a kernel driver) through an opt-in helper.
 3. **Weather** (item 7) as a provider plus a widget, which brings glyphs, animated colour icons and the first provider
    with settings. Needs item 14 and the first `data-providers` change.
 4. **Pages and touch** (item 8), then **shortcuts and dock** (items 7 and 10), which bring the image tile.
