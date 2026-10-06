@@ -7,6 +7,6 @@ public enum RefreshStrategy
 {
     None,
     OnTick,
-    OnEvent,
+    OnData,
     Adaptive
 }

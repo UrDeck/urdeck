@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Patrick Bigler
 
+using UrDeck.Sdk.Data;
+
 namespace UrDeck.Sdk;
 
 /// <summary>
@@ -18,6 +20,20 @@ public interface IWidget
 
     /// <summary>Applies a configuration; <paramref name="config"/> must be an instance of <see cref="ConfigType"/>.</summary>
     void Configure(WidgetConfig config);
+
+    /// <summary>
+    /// Receives the services the host offers the widget. Called once after the widget is created and before the first
+    /// <see cref="Configure"/>. The default does nothing. Do not keep the host beyond the widget's own lifetime.
+    /// </summary>
+    void Attach(IWidgetHost host) { }
+
+    /// <summary>
+    /// The ids of the readings the widget uses (<c>provider:path</c>), computed from its configuration. The host reads
+    /// it after each <see cref="Configure"/>, subscribes while the widget is shown and repaints the widget (through
+    /// <see cref="NeedsRender"/>, without <see cref="UpdateAsync"/>) when one of them changes. Must be cheap, free of
+    /// side effects and return the same ids until the configuration changes. Empty by default.
+    /// </summary>
+    IReadOnlyCollection<string> Subscriptions => [];
 
     /// <summary>
     /// Refreshes widget data (network, sensors, ...). Called off the render path on each refresh

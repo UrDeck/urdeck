@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Patrick Bigler
 
 using SkiaSharp;
+using UrDeck.Sdk.Data;
 
 namespace UrDeck.Sdk.Components;
 
@@ -35,15 +36,39 @@ public sealed class ReadoutOptions
 public static class Readout
 {
     private const float UnitGapRatio = 0.06f;
-    private const float LabelGapRatio = 0.7f;
+    private const float LabelGapRatio = 1.2f;
 
     /// <summary>Draws the readout and returns the rectangle it occupies.</summary>
     public static SKRect Draw(SKCanvas canvas, Theme theme, SKRect rect, string value, ReadoutOptions? options = null) =>
         Run(canvas, theme, rect, value, options);
 
-    /// <summary>The rectangle <see cref="Draw"/> would occupy, without drawing anything.</summary>
+    /// <summary>The rectangle <see cref="Draw(SKCanvas, Theme, SKRect, string, ReadoutOptions?)"/> would occupy, without drawing anything.</summary>
     public static SKRect Measure(Theme theme, SKRect rect, string value, ReadoutOptions? options = null) =>
         Run(null, theme, rect, value, options);
+
+    /// <summary>
+    /// Draws a formatted reading. The value, unit, unit placement and widest value come from <paramref name="reading"/>;
+    /// <paramref name="options"/> only supplies the label, alignment and scale. A value that is not current is drawn in
+    /// the theme's muted text colour. The text size is the same for a value, a stale value and a dash.
+    /// </summary>
+    public static SKRect Draw(SKCanvas canvas, Theme theme, SKRect rect, ReadingText reading, ReadoutOptions? options = null) =>
+        Run(canvas, theme, rect, reading.Value, ForReading(theme, reading, options));
+
+    /// <summary>The rectangle <see cref="Draw(SKCanvas, Theme, SKRect, ReadingText, ReadoutOptions?)"/> would occupy.</summary>
+    public static SKRect Measure(Theme theme, SKRect rect, ReadingText reading, ReadoutOptions? options = null) =>
+        Run(null, theme, rect, reading.Value, ForReading(theme, reading, options));
+
+    private static ReadoutOptions ForReading(Theme theme, ReadingText reading, ReadoutOptions? options) => new()
+    {
+        Unit = reading.Unit,
+        UnitPlacement = reading.UnitPlacement,
+        WidestValue = reading.WidestValue,
+        Label = options?.Label,
+        Horizontal = options?.Horizontal ?? HorizontalAlign.Center,
+        Vertical = options?.Vertical ?? VerticalAlign.Middle,
+        ValueColor = reading.IsCurrent ? options?.ValueColor : theme.TextMuted,
+        Scale = options?.Scale ?? 1f,
+    };
 
     private static SKRect Run(SKCanvas? canvas, Theme theme, SKRect rect, string value, ReadoutOptions? options)
     {

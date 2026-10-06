@@ -7,8 +7,12 @@
     <Project Path="src/UrDeck.Engine/UrDeck.Engine.csproj" />
     <Project Path="src/UrDeck.Host/UrDeck.Host.csproj" />
   </Folder>
+  <Folder Name="/providers/">
+    <Project Path="providers/UrDeck.Providers.System/UrDeck.Providers.System.csproj" />
+  </Folder>
   <Folder Name="/widgets/">
     <Project Path="widgets/UrDeck.Widgets.Clock/UrDeck.Widgets.Clock.csproj" />
+    <Project Path="widgets/UrDeck.Widgets.Stats/UrDeck.Widgets.Stats.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/UrDeck.Analyzer.Tests/UrDeck.Analyzer.Tests.csproj" />

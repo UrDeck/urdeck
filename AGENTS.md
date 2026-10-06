@@ -30,11 +30,14 @@ CI (`.github/workflows/ci.yml`) runs all of the above on `windows-latest`; run t
 ## Layout
 
 ```
-sdk/UrDeck.Sdk       MIT. The plugin contract: attributes, Widget<T>, WidgetConfig, render context, Theme, Components (Readout, TextLine)
+sdk/UrDeck.Sdk       MIT. The plugin contract: attributes, Widget<T>, WidgetConfig, render context, Theme, Components (Readout, TextLine),
+                     Data (IDataProvider, readings, ReadingFormatter)
 sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
-src/UrDeck.Engine     GPL. Plugin loader, config store, grid layout, PageRenderer, logging
+src/UrDeck.Engine     GPL. Plugin loader, config store, grid layout, PageRenderer, ReadingHub (runs the providers), logging
 src/UrDeck.Host       GPL. WinUI 3 app: window/monitor placement, one SKXamlCanvas layer per widget
-widgets/              first-party widget plugins (UrDeck.Widgets.Clock, ...); copied to plugins/ by the host build
+providers/            GPL. First-party data provider plugins (UrDeck.Providers.System); reference only UrDeck.Sdk
+widgets/              first-party widget plugins (UrDeck.Widgets.Clock, UrDeck.Widgets.Stats); with the providers, copied to
+                      plugins/ by the host build (the UrDeckPlugin list in UrDeck.Host.csproj)
 tests/                xUnit projects
 docs/                 ROADMAP.md, perf/, design notes
 openspec/             spec-driven change documents
@@ -44,7 +47,7 @@ Shared build settings live in `Directory.Build.props`; package versions only in 
 (no `Version=` on `PackageReference`). Style is in `.editorconfig`: file-scoped namespaces, `_camelCase` private
 instance fields, PascalCase static fields, `var` only when the type is apparent, LF line endings. Every `.cs` file
 needs the SPDX license header (`dotnet format` adds it): GPL-3.0-or-later everywhere except `sdk/` (MIT).
-Widgets reference only `UrDeck.Sdk`, never `UrDeck.Engine` or `UrDeck.Host`; keep it that way, it is the license boundary.
+Widgets and providers reference only `UrDeck.Sdk`, never `UrDeck.Engine` or `UrDeck.Host`; keep it that way, it is the license boundary.
 See the README license map before moving code between projects: it can change the license.
 
 ## Windows / WinUI 3 gotchas

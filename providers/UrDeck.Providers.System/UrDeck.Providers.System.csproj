@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(UrDeckTfm)</TargetFramework>
+    <!-- Not UrDeck.Providers.System: inside that namespace every System.* name would resolve to it. -->
+    <RootNamespace>UrDeck.Providers.Machine</RootNamespace>
+    <Description>First-party data provider for readings about the local machine (CPU and memory load).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- UrDeck.Sdk and SkiaSharp are provided by the host at runtime; don't copy them next to the plugin. -->
+    <ProjectReference Include="..\..\sdk\UrDeck.Sdk\UrDeck.Sdk.csproj" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
+
+</Project>

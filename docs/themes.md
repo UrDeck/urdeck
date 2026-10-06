@@ -28,11 +28,11 @@ value (for example a colour that does not parse) is replaced by the default's va
     "accent": "#4a9eff", "accentDim": "#664a9eff",
     "good": "#3ddc84", "warning": "#ffb020", "critical": "#ff5a4d"
   },
-  "card": { "radius": 0.08, "borderWidth": 0, "gap": 0.06, "padding": 0.08 },
+  "card": { "radius": 0.08, "borderWidth": 0, "gap": 0.06, "padding": 0.065 },
   "typography": {
     "font": "InterVariable.ttf",
     "weights": { "value": 600, "unit": 500, "label": 400, "body": 400, "title": 300 },
-    "labelSize": 0.05, "bodySize": 0.065, "titleSize": 0.085,
+    "labelSize": 0.091, "bodySize": 0.0845, "titleSize": 0.11,
     "unitRatio": 0.4
   },
   "stroke": { "thickness": 0.08, "cap": "round" }

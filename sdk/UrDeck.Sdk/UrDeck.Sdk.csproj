@@ -8,9 +8,12 @@
          reference to a lower assembly version, which would make the plugin load a second SDK copy and silently
          break type identity. Keep AssemblyVersion fixed until a deliberate breaking change; Version can move freely.
          0.2.0.0: ThemeColors replaced by Theme, ContentRect added to the render context (theme-and-card).
-         0.3.0 (assembly version unchanged, the addition is not breaking): IWidget.IsAnimating (animation). -->
-    <Version>0.3.0</Version>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+         0.3.0 (assembly version unchanged, the addition is not breaking): IWidget.IsAnimating (animation).
+         0.3.0.0 / package 0.4.0: RefreshOnEventAttribute removed and RefreshOnDataAttribute added, IWidget gained Attach and
+         Subscriptions, and the Data namespace arrived (data-providers). Removing a public type is breaking, so plugins
+         built against 0.2.0.0 must be rebuilt. -->
+    <Version>0.4.0</Version>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,6 +4,7 @@
 using Microsoft.UI.Dispatching;
 using SkiaSharp;
 using SkiaSharp.Views.Windows;
+using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Rendering;
@@ -13,7 +14,7 @@ namespace UrDeck.Host;
 
 /// <summary>
 /// Hosts one widget instance in its own Skia surface (composited by the GPU, drawn by Skia on the CPU), driven by the widget's declared refresh policy.
-/// Widgets without a timer-based policy (OnEvent) render once and then only on explicit invalidation.
+/// Widgets without a timer-based policy (OnData) render once and then only when one of their readings changes.
 /// </summary>
 internal sealed class WidgetView : SKXamlCanvas, IDisposable
 {
@@ -23,15 +24,22 @@ internal sealed class WidgetView : SKXamlCanvas, IDisposable
     private readonly FrameClock _frameClock;
     private readonly DispatcherQueueTimer? _timer;
     private readonly CancellationTokenSource _cts = new();
+    private readonly ReadingHub _readings;
+    private readonly string[] _subscriptions;
+    private bool _subscribed;
     private bool _updating;
     private bool _hasPainted;
 
-    public WidgetView(IWidget widget, WidgetDescriptor descriptor, Theme theme, FrameClock frameClock)
+    public WidgetView(IWidget widget, WidgetDescriptor descriptor, Theme theme, FrameClock frameClock, ReadingHub readings)
     {
         _widget = widget;
         _frameClock = frameClock;
         _theme = theme;
+        _readings = readings;
         PaintSurface += OnPaintSurface;
+
+        // The widget is already configured, so its readings are known. A widget that declares none costs nothing.
+        _subscriptions = ReadSubscriptions(widget);
 
         if (descriptor.RefreshInterval is { } interval && interval > TimeSpan.Zero)
         {
@@ -43,10 +51,54 @@ internal sealed class WidgetView : SKXamlCanvas, IDisposable
 
         Loaded += (_, _) =>
         {
+            Subscribe();
             _ = RefreshAsync();
             _timer?.Start();
         };
-        Unloaded += (_, _) => _timer?.Stop();
+        Unloaded += (_, _) =>
+        {
+            _timer?.Stop();
+            Unsubscribe();
+        };
+    }
+
+    /// <summary>The readings the widget declared, for the window id-to-view map.</summary>
+    public IReadOnlyList<string> Subscriptions => _subscriptions;
+
+    /// <summary>Called on the UI thread when a reading this widget declared changed: repaints if the widget says it must.</summary>
+    public void OnReadingsChanged()
+    {
+        if (_widget != null && (!_hasPainted || SafeNeedsRender()))
+            Invalidate();
+    }
+
+    private static string[] ReadSubscriptions(IWidget widget)
+    {
+        try
+        {
+            return widget.Subscriptions.Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+        }
+        catch (Exception ex)
+        {
+            UrDeckLog.Error($"Widget '{widget.Name}' Subscriptions failed; it gets no readings", ex);
+            return [];
+        }
+    }
+
+    private void Subscribe()
+    {
+        if (_subscribed || _subscriptions.Length == 0)
+            return;
+        _subscribed = true;
+        _readings.Subscribe(_subscriptions);
+    }
+
+    private void Unsubscribe()
+    {
+        if (!_subscribed)
+            return;
+        _subscribed = false;
+        _readings.Unsubscribe(_subscriptions);
     }
 
     private async Task RefreshAsync()
@@ -131,6 +183,7 @@ internal sealed class WidgetView : SKXamlCanvas, IDisposable
     public void Dispose()
     {
         _timer?.Stop();
+        Unsubscribe();
         _frameClock.Remove(this);
         _cts.Cancel();
         _cts.Dispose();

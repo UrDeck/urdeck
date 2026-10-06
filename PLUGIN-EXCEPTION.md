@@ -1,15 +1,17 @@
 # UrDeck plugin exception
 
 Additional permission under section 7 of the GNU General Public License, version 3 ("GPLv3"), granted by the
-copyright holders of UrDeck for the UrDeck host, engine and official widgets (together, the "Program").
+copyright holders of UrDeck for the UrDeck host, engine, official widgets and official data providers (together, the
+"Program").
 
 ## Definitions
 
 - **SDK Interface**: the public API a plugin uses to interact with the Program, meaning the public types, members and
   attributes of the `UrDeck.Sdk` and `UrDeck.Analyzer` assemblies (`Widget<TConfig>`, `IWidget`, the widget attributes,
-  `WidgetConfig`, the render context and the types they expose).
-- **Plugin**: a separate module (a .NET assembly) that the Program loads at run time through its plugin loader and that
-  interacts with the Program only through the SDK Interface.
+  `WidgetConfig`, the render context, and, for data providers, `IDataProvider`, `[DataProvider]`, `IReadingSink`, the
+  reading types (`Reading`, `ReadingValue`, `ReadingDescriptor`, `ReadingFormatter`) and the types they expose).
+- **Plugin**: a separate module (a .NET assembly, containing widgets, data providers or both) that the Program loads at
+  run time through its plugin loader and that interacts with the Program only through the SDK Interface.
 
 ## Permission
 
@@ -21,7 +23,7 @@ Interface, does not by itself make the Plugin subject to the GPLv3 or require yo
 
 - This permission does not apply to the Program itself or to any modified version of it, which remain under the
   GPLv3 and must be conveyed under it.
-- It does not apply to code copied from the Program (including the official widgets) into a Plugin. Such code stays
+- It does not apply to code copied from the Program (including the official widgets and data providers) into a Plugin. Such code stays
   under the GPLv3, unless it is code that is separately licensed under the MIT License, such as the `UrDeck.Sdk` and
   `UrDeck.Analyzer` assemblies.
 

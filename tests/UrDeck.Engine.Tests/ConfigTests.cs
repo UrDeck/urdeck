@@ -54,6 +54,36 @@ public class ConfigStoreTests : IDisposable
     }
 
     [Fact]
+    public void ProvidersSection_IsAbsentByDefault()
+    {
+        string path = Path.Combine(_dir, "urdeck-config.json");
+        using var store = new ConfigStore(path);
+
+        Assert.Null(store.Config.Providers);
+        Assert.DoesNotContain("providers", File.ReadAllText(path));
+    }
+
+    [Fact]
+    public void ProvidersSection_RoundTripsWithUnknownProperties()
+    {
+        string path = Path.Combine(_dir, "urdeck-config.json");
+        File.WriteAllText(path, "{\"providers\":{\"system\":{\"intervalMs\":500,\"future\":\"x\"},\"weather\":{\"token\":\"t\"}}}");
+        using var store = new ConfigStore(path);
+
+        Assert.Equal(500, store.Config.Providers!["system"].IntervalMs);
+        Assert.Null(store.Config.Providers["weather"].IntervalMs);
+
+        store.Save();
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        var providers = doc.RootElement.GetProperty("providers");
+        Assert.Equal(500, providers.GetProperty("system").GetProperty("intervalMs").GetInt32());
+        Assert.Equal("x", providers.GetProperty("system").GetProperty("future").GetString());
+        Assert.Equal("t", providers.GetProperty("weather").GetProperty("token").GetString());
+        Assert.False(providers.GetProperty("weather").TryGetProperty("intervalMs", out _));
+    }
+
+    [Fact]
     public void LoadedWidget_RoundTripsGridFields()
     {
         string path = Path.Combine(_dir, "urdeck-config.json");

@@ -32,6 +32,17 @@ public class DockItemConfig
     public string? Url { get; set; }
 }
 
+/// <summary>The user's settings for one data provider. Properties the engine does not know are kept for the provider.</summary>
+public class ProviderSettings
+{
+    /// <summary>Sampling interval in milliseconds; raised to the provider's minimum.</summary>
+    [JsonPropertyName("intervalMs")]
+    public int? IntervalMs { get; set; }
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement>? ExtensionData { get; set; }
+}
+
 public class UrDeckConfig
 {
     [JsonPropertyName("pages")]
@@ -61,6 +72,10 @@ public class UrDeckConfig
     /// </summary>
     [JsonPropertyName("monitorName")]
     public string? MonitorName { get; set; }
+
+    /// <summary>Per-provider settings keyed by provider id; absent from a default configuration.</summary>
+    [JsonPropertyName("providers")]
+    public Dictionary<string, ProviderSettings>? Providers { get; set; }
 
     [JsonIgnore]
     public PageConfig? CurrentPage =>

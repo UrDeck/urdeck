@@ -21,6 +21,9 @@ public class ClockWidget : Widget<ClockConfig>
     // The widest time the readout must fit, so its size does not change from minute to minute.
     private const string WidestTime = "88:88";
 
+    // The date is measured by cap height; this keeps room below it for descenders (the y in "Mon Oct 5, 2026").
+    private const float DescentAllowance = 0.25f;
+
     // The minute that was last painted. The widget ticks every second to catch the rollover promptly,
     // but only repaints when the displayed minute (which also covers the date) changes.
     private DateTime? _lastRenderedMinute;
@@ -73,7 +76,7 @@ public class ClockWidget : Widget<ClockConfig>
         float gap = 0f;
         if (Config.ShowDate)
         {
-            dateHeight = TextLine.Measure(theme, content, dateText, TextStep.Title).Height;
+            dateHeight = TextLine.Measure(theme, content, dateText, TextStep.Title).Height + theme.TitleSize * DescentAllowance;
             gap = theme.TitleSize;
         }
 
@@ -140,7 +143,7 @@ public class ClockWidget : Widget<ClockConfig>
         float gap = 0f;
         if (Config.ShowDate)
         {
-            dateHeight = TextLine.Measure(theme, content, dateText, TextStep.Title).Height;
+            dateHeight = TextLine.Measure(theme, content, dateText, TextStep.Title).Height + theme.TitleSize * DescentAllowance;
             gap = theme.TitleSize;
         }
 

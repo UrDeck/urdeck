@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using UrDeck.Engine.Config;
 using UrDeck.Sdk;
+using UrDeck.Sdk.Data;
 
 namespace UrDeck.Engine.Plugin;
 
@@ -18,8 +19,7 @@ public sealed record WidgetDescriptor(
     Type ConfigType,
     System.Drawing.Size[] SupportedSizes,
     RefreshStrategy Refresh,
-    TimeSpan? RefreshInterval,
-    string? RefreshEvent)
+    TimeSpan? RefreshInterval)
 {
     public static WidgetDescriptor? TryCreate(Type type, out string? rejectReason)
     {
@@ -41,8 +41,8 @@ public sealed record WidgetDescriptor(
 
         var tick = type.GetCustomAttribute<RefreshOnTickAttribute>();
         var adaptive = type.GetCustomAttribute<RefreshAdaptiveAttribute>();
-        var evt = type.GetCustomAttribute<RefreshOnEventAttribute>();
-        int strategies = new object?[] { tick, adaptive, evt }.Count(a => a != null);
+        var onData = type.GetCustomAttribute<RefreshOnDataAttribute>();
+        int strategies = new object?[] { tick, adaptive, onData }.Count(a => a != null);
         if (strategies != 1)
         { rejectReason = $"needs exactly one refresh strategy (found {strategies})"; return null; }
 
@@ -68,7 +68,7 @@ public sealed record WidgetDescriptor(
         }
         else
         {
-            refresh = RefreshStrategy.OnEvent;
+            refresh = RefreshStrategy.OnData;
         }
 
         return new WidgetDescriptor(
@@ -80,8 +80,7 @@ public sealed record WidgetDescriptor(
             configType,
             sizes,
             refresh,
-            interval,
-            evt?.EventName);
+            interval);
     }
 
     private static Type? FindConfigType(Type type) =>
@@ -103,6 +102,9 @@ public sealed record WidgetDescriptor(
 public class WidgetRegistry
 {
     private readonly ConcurrentDictionary<string, WidgetDescriptor> _widgets = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Handed to every widget created here, before it is configured. Null attaches nothing.</summary>
+    public IWidgetHost? Host { get; set; }
 
     public void Register(WidgetDescriptor descriptor) => _widgets[descriptor.Id] = descriptor;
 
@@ -128,6 +130,8 @@ public class WidgetRegistry
             return null;
 
         var widget = (IWidget)Activator.CreateInstance(descriptor.WidgetType)!;
+        if (Host != null)
+            widget.Attach(Host);
         widget.Configure(config.ToConcrete(descriptor.ConfigType));
         return widget;
     }

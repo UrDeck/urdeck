@@ -25,9 +25,14 @@
         <PackageReference Include="SkiaSharp.Views.WinUI" />
     </ItemGroup>
     <ItemGroup>
+        <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Clock\UrDeck.Widgets.Clock.csproj" />
+        <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Stats\UrDeck.Widgets.Stats.csproj" />
+        <UrDeckPlugin Include="..\..\providers\UrDeck.Providers.System\UrDeck.Providers.System.csproj" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\UrDeck.Engine\UrDeck.Engine.csproj" />
-        <!-- Build the built-in plugin with the host, but load it from plugins/ at runtime (not referenced). -->
-        <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Clock\UrDeck.Widgets.Clock.csproj">
+        <!-- Build the first-party plugins with the host, but load them from plugins/ at runtime (not referenced). -->
+        <ProjectReference Include="@(UrDeckPlugin)">
             <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
             <Private>false</Private>
         </ProjectReference>
@@ -40,9 +45,9 @@
         <Content Include="Resources/urdeck.ico" Link="urdeck.ico" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
-    <!-- Drop built-in plugin assemblies into $(OutDir)plugins so the host discovers them like any third-party plugin. -->
+    <!-- Drop first-party plugin assemblies into $(OutDir)plugins so the host discovers them like any third-party plugin. -->
     <Target Name="CopyBuiltInPlugins" AfterTargets="Build">
-        <MSBuild Projects="..\..\widgets\UrDeck.Widgets.Clock\UrDeck.Widgets.Clock.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+        <MSBuild Projects="@(UrDeckPlugin)" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
             <Output TaskParameter="TargetOutputs" ItemName="_UrDeckPluginAssembly" />
         </MSBuild>
         <Copy SourceFiles="@(_UrDeckPluginAssembly)" DestinationFolder="$(OutDir)plugins" SkipUnchangedFiles="true" />
