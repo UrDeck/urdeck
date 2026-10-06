@@ -21,6 +21,9 @@
     <ProjectReference Include="..\..\src\UrDeck.Engine\UrDeck.Engine.csproj" />
     <!-- The first-party Clock doubles as a sample widget for rendering tests. -->
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Clock\UrDeck.Widgets.Clock.csproj" />
+    <!-- The stats widget and the system provider are tested here too. -->
+    <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Stats\UrDeck.Widgets.Stats.csproj" />
+    <ProjectReference Include="..\..\providers\UrDeck.Providers.System\UrDeck.Providers.System.csproj" />
   </ItemGroup>
 
 </Project>

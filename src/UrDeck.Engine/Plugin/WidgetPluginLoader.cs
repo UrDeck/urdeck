@@ -2,14 +2,18 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using System.Reflection;
+using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Sdk;
+using UrDeck.Sdk.Data;
 
 namespace UrDeck.Engine.Plugin;
 
 public sealed class WidgetPluginLoader : IPluginService, IDisposable
 {
     private readonly WidgetRegistry _registry = new();
+    private readonly ProviderRegistry _providers = new();
+    private readonly ReadingHub _hub;
     private FileSystemWatcher? _watcher;
     private Timer? _debounce;
     private string? _pluginDirectory;
@@ -18,9 +22,25 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     private readonly List<string> _pendingDeletes = new();
     private static int StaleCleaned;
 
+    public WidgetPluginLoader(TimeProvider? time = null)
+    {
+        _hub = new ReadingHub(_providers, time);
+        _registry.Host = new WidgetHost(_hub);
+    }
+
     public event Action? PluginsChanged;
 
     public WidgetRegistry Registry => _registry;
+
+    public ProviderRegistry Providers => _providers;
+
+    /// <summary>The readings of every provider; widgets created here are attached to it.</summary>
+    public ReadingHub Readings => _hub;
+
+    private sealed class WidgetHost(IReadingSource readings) : IWidgetHost
+    {
+        public IReadingSource Readings { get; } = readings;
+    }
 
     public void ScanAndLoadPlugins(string pluginDirectory)
     {
@@ -38,6 +58,9 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     {
         lock (_gate)
         {
+            // Providers go first: they hold plugin types, and the page rebuild that follows resubscribes against the new ones.
+            _hub.ReleaseAll();
+            _providers.Clear();
             _registry.Clear();
             UnloadAll();
             LoadAll();
@@ -49,7 +72,8 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
         if (_pluginDirectory == null)
             return;
 
-        foreach (string dllPath in Directory.EnumerateFiles(_pluginDirectory, "*.dll"))
+        // In file name order, so that which of two plugins claims a provider id does not depend on the file system.
+        foreach (string dllPath in Directory.EnumerateFiles(_pluginDirectory, "*.dll").Order(StringComparer.OrdinalIgnoreCase))
         {
             string? shadowDir = null;
             PluginLoadContext? context = null;
@@ -204,7 +228,7 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
 
     private sealed record LoadedPlugin(PluginLoadContext Context, string ShadowDirectory);
 
-    /// <summary>Registers every valid widget type in <paramref name="assembly"/>. Public so tests and hosts can register built-ins directly.</summary>
+    /// <summary>Registers every valid widget and provider type in <paramref name="assembly"/>. Public so tests and hosts can register built-ins directly.</summary>
     public void LoadAssembly(Assembly assembly)
     {
         Type[] types;
@@ -225,29 +249,58 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
             if (type.IsAbstract || type.IsInterface)
                 continue;
 
-            if (!typeof(IWidget).IsAssignableFrom(type))
+            bool isWidget = typeof(IWidget).IsAssignableFrom(type);
+            bool isProvider = typeof(IDataProvider).IsAssignableFrom(type);
+            if (!isWidget && !isProvider)
             {
                 // Same interface name but a different assembly copy: the plugin carries or was built against another SDK.
-                foreignSdk |= type.GetInterfaces().Any(i => i.FullName == typeof(IWidget).FullName);
+                foreignSdk |= type.GetInterfaces().Any(i => i.FullName == typeof(IWidget).FullName || i.FullName == typeof(IDataProvider).FullName);
                 continue;
             }
 
-            var descriptor = WidgetDescriptor.TryCreate(type, out string? reason);
-            if (descriptor == null)
-            {
-                UrDeckLog.Warn($"Skipping widget {type.FullName}: {reason}");
-                continue;
-            }
-
-            _registry.Register(descriptor);
-            found++;
-            UrDeckLog.Info($"Registered widget '{descriptor.Id}' ({type.FullName}, {descriptor.Refresh} {descriptor.RefreshInterval})");
+            if (isWidget && RegisterWidget(type))
+                found++;
+            if (isProvider && RegisterProvider(type))
+                found++;
         }
 
         if (foreignSdk)
-            UrDeckLog.Warn($"{assembly.GetName().Name} has widgets built against a different UrDeck.Sdk than the host's; rebuild it against this version and don't ship UrDeck.Sdk.dll with it.");
+            UrDeckLog.Warn($"{assembly.GetName().Name} has widgets or providers built against a different UrDeck.Sdk than the host's; rebuild it against this version and don't ship UrDeck.Sdk.dll with it.");
         else if (found == 0)
-            UrDeckLog.Warn($"No widgets found in {assembly.GetName().Name} (not a plugin, or built against an incompatible UrDeck.Sdk?).");
+            UrDeckLog.Warn($"No widgets or providers found in {assembly.GetName().Name} (not a plugin, or built against an incompatible UrDeck.Sdk?).");
+    }
+
+    private bool RegisterWidget(Type type)
+    {
+        var descriptor = WidgetDescriptor.TryCreate(type, out string? reason);
+        if (descriptor == null)
+        {
+            UrDeckLog.Warn($"Skipping widget {type.FullName}: {reason}");
+            return false;
+        }
+
+        _registry.Register(descriptor);
+        UrDeckLog.Info($"Registered widget '{descriptor.Id}' ({type.FullName}, {descriptor.Refresh} {descriptor.RefreshInterval})");
+        return true;
+    }
+
+    private bool RegisterProvider(Type type)
+    {
+        var descriptor = ProviderDescriptor.TryCreate(type, out string? reason);
+        if (descriptor == null)
+        {
+            UrDeckLog.Warn($"Skipping provider {type.FullName}: {reason}");
+            return false;
+        }
+
+        if (!_providers.TryRegister(descriptor, out var existing))
+        {
+            UrDeckLog.Warn($"Provider '{descriptor.Id}' from {descriptor.AssemblyName} rejected: {existing!.AssemblyName} already provides it");
+            return false;
+        }
+
+        UrDeckLog.Info($"Registered provider '{descriptor.Id}' ({type.FullName}, default {descriptor.DefaultIntervalMs} ms, minimum {descriptor.MinIntervalMs} ms)");
+        return true;
     }
 
     private void WatchForChanges()
@@ -289,6 +342,8 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
         _debounce?.Dispose();
         lock (_gate)
         {
+            _hub.Dispose();
+            _providers.Clear();
             _registry.Clear();
             UnloadAll();
         }

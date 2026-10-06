@@ -26,7 +26,7 @@ public sealed class WidgetAnalyzer : DiagnosticAnalyzer
         IdWidgetSize, "Missing [WidgetSize]", "Widget class '{0}' must have at least one [WidgetSize] attribute", "Usage", DiagnosticSeverity.Error, true);
 
     private static readonly DiagnosticDescriptor RuleNoRefresh = new DiagnosticDescriptor(
-        IdNoRefresh, "Missing refresh strategy", "Widget class '{0}' must have a refresh strategy attribute ([RefreshOnTick], [RefreshAdaptive] or [RefreshOnEvent])", "Usage", DiagnosticSeverity.Error, true);
+        IdNoRefresh, "Missing refresh strategy", "Widget class '{0}' must have a refresh strategy attribute ([RefreshOnTick], [RefreshAdaptive] or [RefreshOnData])", "Usage", DiagnosticSeverity.Error, true);
 
     private static readonly DiagnosticDescriptor RuleMultipleRefresh = new DiagnosticDescriptor(
         IdMultipleRefresh, "Conflicting refresh strategies", "Widget class '{0}' must have only one refresh strategy attribute", "Usage", DiagnosticSeverity.Error, true);
@@ -51,10 +51,10 @@ public sealed class WidgetAnalyzer : DiagnosticAnalyzer
             var sizeAttr = start.Compilation.GetTypeByMetadataName(AttrNs + "WidgetSizeAttribute");
             var tick = start.Compilation.GetTypeByMetadataName(AttrNs + "RefreshOnTickAttribute");
             var adaptive = start.Compilation.GetTypeByMetadataName(AttrNs + "RefreshAdaptiveAttribute");
-            var onEvent = start.Compilation.GetTypeByMetadataName(AttrNs + "RefreshOnEventAttribute");
+            var onData = start.Compilation.GetTypeByMetadataName(AttrNs + "RefreshOnDataAttribute");
 
             start.RegisterSymbolAction(
-                ctx => AnalyzeType(ctx, widgetBase, widgetAttr, sizeAttr, tick, adaptive, onEvent),
+                ctx => AnalyzeType(ctx, widgetBase, widgetAttr, sizeAttr, tick, adaptive, onData),
                 SymbolKind.NamedType);
         });
     }
@@ -71,7 +71,7 @@ public sealed class WidgetAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeType(SymbolAnalysisContext context, INamedTypeSymbol widgetBase,
         INamedTypeSymbol? widgetAttr, INamedTypeSymbol? sizeAttr,
-        INamedTypeSymbol? tick, INamedTypeSymbol? adaptive, INamedTypeSymbol? onEvent)
+        INamedTypeSymbol? tick, INamedTypeSymbol? adaptive, INamedTypeSymbol? onData)
     {
         var type = (INamedTypeSymbol)context.Symbol;
         if (type.TypeKind != TypeKind.Class || type.IsAbstract)
@@ -92,7 +92,7 @@ public sealed class WidgetAnalyzer : DiagnosticAnalyzer
 
             if (Is(cls, widgetAttr))
                 hasWidget = true;
-            else if (Is(cls, tick) || Is(cls, adaptive) || Is(cls, onEvent))
+            else if (Is(cls, tick) || Is(cls, adaptive) || Is(cls, onData))
                 refreshCount++;
             else if (Is(cls, sizeAttr))
             {

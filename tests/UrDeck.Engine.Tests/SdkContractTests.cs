@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using UrDeck.Sdk;
+using UrDeck.Sdk.Data;
 using Xunit;
 
 namespace UrDeck.Engine.Tests;
@@ -14,7 +15,7 @@ public class SdkContractTests
         // Plugins bind to the host's UrDeck.Sdk by assembly version; a bump makes already-built plugins load a second
         // SDK copy and silently fail. Only change this together with a deliberate, announced breaking SDK change.
         var version = typeof(Widget<>).Assembly.GetName().Version;
-        Assert.Equal(new Version(0, 2, 0, 0), version);
+        Assert.Equal(new Version(0, 3, 0, 0), version);
     }
 
     [Fact]
@@ -34,8 +35,83 @@ public class SdkContractTests
         Assert.False(widget.IsAnimating);
     }
 
+    [Fact]
+    public void Subscriptions_DefaultToEmpty()
+    {
+        IWidget widget = new PlainWidget();
+
+        Assert.Empty(widget.Subscriptions);
+    }
+
+    [Fact]
+    public void Attach_DefaultsToANoOp()
+    {
+        // A widget that implements IWidget without overriding Attach (a default interface member) accepts a host.
+        IWidget widget = new BareWidget();
+
+        widget.Attach(new Host(new Source()));
+        Assert.Empty(widget.Subscriptions);
+    }
+
+    [Fact]
+    public void AnUnattachedWidget_ReadsEverythingAsUnavailable()
+    {
+        var widget = new PlainWidget();
+
+        var reading = widget.ReadingOf("system:cpu/load");
+
+        Assert.Equal(ReadingState.Unavailable, reading.State);
+        Assert.NotNull(reading.Reason);
+        Assert.Null(widget.DescriptionOf("system:cpu/load"));
+    }
+
+    [Fact]
+    public void AnAttachedWidget_ReadsThroughTheHost()
+    {
+        var widget = new PlainWidget();
+        widget.Attach(new Host(new Source()));
+
+        Assert.Equal(ReadingState.Ok, widget.ReadingOf("x:y").State);
+    }
+
+    private sealed class Source : IReadingSource
+    {
+        public Reading Read(string id) => Reading.Ok(1);
+
+        public ReadingDescriptor? Describe(string id) => null;
+
+        public bool RegionUsesFahrenheit => false;
+    }
+
+    private sealed class Host(IReadingSource readings) : IWidgetHost
+    {
+        public IReadingSource Readings { get; } = readings;
+    }
+
+    private sealed class BareWidget : IWidget
+    {
+        public string Name => "bare";
+        public string Description => "";
+        public string Category => "";
+        public System.Drawing.Size[] SupportedSizes => [];
+        public Type ConfigType => typeof(WidgetConfig);
+        public WidgetConfig Config { get; private set; } = new();
+
+        public void Configure(WidgetConfig config) => Config = config;
+
+        public Task UpdateAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public void Render(WidgetRenderContext context)
+        {
+        }
+    }
+
     private sealed class PlainWidget : Widget<WidgetConfig>
     {
+        public Reading ReadingOf(string id) => Readings.Read(id);
+
+        public ReadingDescriptor? DescriptionOf(string id) => Readings.Describe(id);
+
         public override void Render(WidgetRenderContext context)
         {
         }

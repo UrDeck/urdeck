@@ -88,7 +88,8 @@ Rules enforced at compile time by the analyzer and again by the loader:
 
 - `[Widget]` is required; `Id` is the stable `typeId` used in the config (it defaults to `Name`, so set it explicitly).
 - At least one `[WidgetSize(width, height)]` (width 1-4, height at least 1).
-- Exactly one of `[RefreshOnTick]`, `[RefreshAdaptive]` or `[RefreshOnEvent]`.
+- Exactly one of `[RefreshOnTick]`, `[RefreshAdaptive]` or `[RefreshOnData]` (no timer: the widget is painted when shown and
+  when a reading it declared changes).
 - A public parameterless constructor.
 
 Animation: a widget that moves overrides `IsAnimating` and returns `true` while it is mid-animation. The host reads it
@@ -97,6 +98,49 @@ after each paint; while it is `true` the host repaints the widget about 30 times
 Rules: draw from `context.Time`, never a frame count, so the motion is the same at any frame rate; draw the resting
 state on the first paint and on the first paint after `Configure`; make the paint after which `IsAnimating` first
 returns `false` the resting state; keep `IsAnimating` cheap and free of side effects. See the Clock's `flap` style.
+
+### Using readings
+
+A widget that shows data from a data provider (CPU load, a sensor, a Home Assistant state) declares the reading ids it
+needs and reads them when it paints. It never polls, subscribes or unsubscribes itself: the host subscribes while the
+widget is shown and asks `NeedsRender` when one of the declared readings changes.
+
+```csharp
+[Widget("Load", "Shows one reading", Id = "example.load")]
+[WidgetSize(1, 1)]
+[RefreshOnData]
+public class LoadWidget : Widget<LoadConfig>
+{
+    // From the config, cheap, free of side effects, the same ids until the config changes.
+    public override IReadOnlyCollection<string> Subscriptions => [Config.Reading];
+
+    public override bool NeedsRender(DateTime now) => /* compare what Render would draw with what it last drew */ true;
+
+    public override void Render(WidgetRenderContext context)
+    {
+        var reading = Readings.Read(Config.Reading);              // lock-free, no I/O, never throws
+        var entry = Readings.Describe(Config.Reading);           // the provider's catalog entry (label, kind, range), or null
+        var text = ReadingFormatter.Format(reading, entry, new ReadingFormatOptions(), Readings);
+        Readout.Draw(context.Canvas, context.Theme, context.ContentRect, text,
+            new ReadoutOptions { Label = entry?.Label });
+    }
+}
+```
+
+- A reading id is `<provider id>:<path>`, for example `system:cpu/core/2/load`; ids are compared without regard to case.
+- `Readings` (on `Widget<TConfig>`) is available after the host attached the widget; until then, and in a test that creates
+  the widget directly, every reading is unavailable, so a widget needs no special case for it. Tests can pass their own
+  `IReadingSource` through `Attach(new MyHost(source))`.
+- `ReadingFormatter` decides how a value is written (rounding, the `%` and `°` units, `On`/`Off`, a dash when there is no
+  value) and `Readout.Draw` with its result draws a value that is not current (pending with a last value, stale) in the
+  theme's muted colour. Use them, so every widget shows the four states (ok, pending, stale, unavailable) alike.
+- `[RefreshOnData]` only means "no timer". Reading changes trigger the `NeedsRender` check under any refresh attribute, so a
+  widget with `[RefreshOnTick]` may also use readings. `UpdateAsync` is not called for a reading change.
+- Compare what you would draw (the formatted text, the label, whether it is current), not the raw value: a load that moves
+  from 3.2 to 3.4 percent draws the same `3`, and the widget should not be repainted for it.
+- Do not keep the host or anything obtained from `Readings` beyond the widget's own lifetime.
+
+`widgets/UrDeck.Widgets.Stats` is a complete example.
 
 Project file for a first-party widget (modelled on `widgets/UrDeck.Widgets.Clock`; it inherits the shared settings from
 `Directory.Build.props`). A third-party widget in its own repo sets `TargetFramework` and the other properties itself.
@@ -117,12 +161,80 @@ Project file for a first-party widget (modelled on `widgets/UrDeck.Widgets.Clock
 </Project>
 ```
 
-For a first-party widget also add a `ProjectReference` (with `ReferenceOutputAssembly=false`) and a copy step in
-`src/UrDeck.Host/UrDeck.Host.csproj`, as the Clock has. Otherwise build the DLL and copy it into the host's `plugins/`
+For a first-party widget or provider also add its project to the `UrDeckPlugin` list in `src/UrDeck.Host/UrDeck.Host.csproj`
+(the host builds every listed project and copies its DLL to `plugins/`). Otherwise build the DLL and copy it into the host's `plugins/`
 folder (next to `UrDeck.Host.exe`). While UrDeck is running, adding, replacing or deleting a DLL there reloads the plugins
 and rebuilds the page after about half a second; the original file is never locked because plugins load from a shadow
 copy in their own collectible `AssemblyLoadContext`. Reference the widget by its `Id` in `urdeck-config.json`. A widget
 that throws in `Render` shows a red error tile instead of taking the dashboard down.
+
+## Writing a data provider
+
+A data provider supplies readings (numbers, texts or on/off states) that any widget can show. It is a class implementing
+`IDataProvider` with `[DataProvider]`, in a plugin assembly that references only `UrDeck.Sdk` (a plugin may hold providers,
+widgets or both; it loads from `plugins/` and hot-reloads like a widget). `providers/UrDeck.Providers.System` is the
+first-party example and uses the same contract.
+
+```csharp
+[DataProvider("example", "Example", DefaultIntervalMs = 2000, MinIntervalMs = 500)]
+public sealed class ExampleProvider : IDataProvider
+{
+    private IReadingSink? _sink;
+
+    public IReadOnlyList<ReadingDescriptor> Describe() =>
+    [
+        new ReadingDescriptor("room/temperature", ReadingKind.Temperature, "Room", "Room temperature") { Device = "Sensor 1" },
+    ];
+
+    public void Start(IReadingSink sink) => _sink = sink;
+
+    public void SetDemand(IReadOnlyCollection<string> paths) { /* remember what is wanted; skip work nobody needs */ }
+
+    public Task SampleAsync(CancellationToken cancellationToken)
+    {
+        _sink!.Publish("room/temperature", 21.5);   // temperatures are always degrees Celsius
+        return Task.CompletedTask;
+    }
+
+    public void Shutdown() => _sink = null;
+}
+```
+
+- **Ids.** The provider id is lowercase letters, digits, `.` and `-`, and is the collision domain: if two plugins declare
+  the same id the first by file name is kept and the other is rejected with a warning that names both. A reading is
+  addressed as `<provider id>:<path>`; the path is yours (`cpu/core/2/load`). Keep paths stable and portable (the same
+  path on every machine), because users write them into their config.
+- **Catalog.** `Describe()` lists every reading with its kind (`Number`, `Percent`, `Temperature`, `Text`, `OnOff`), a short
+  label, a full name, and optionally a device, a range, a unit text for plain numbers, a default display unit and
+  decimals. The range is what keeps a readout the same size while the value changes. It is called once, before `Start`, and
+  must not need `Start`. The catalog is fixed while the provider runs.
+- **Lifetime and demand.** The engine creates the provider when a reading of it is first subscribed to (or its catalog is
+  requested), calls `Start`, then `SetDemand` with the paths currently subscribed to, and again whenever that set changes.
+  Skip the work for readings nobody wants. It stops the provider five seconds after the last subscription ends (so a
+  page rebuild does not restart it) and calls `Shutdown`, after which a new instance is created if it is needed again.
+- **Sampling and threading.** The engine calls `SampleAsync` on a thread-pool thread, once at start, once more after 250 ms
+  (so a provider that needs two samples for a rate, like CPU load, has a value after a quarter of a second) and then per
+  interval, never two at once. `SetDemand` may run while a sample is running, so guard what the two share. Everything
+  published during one `SampleAsync` becomes visible together when the call returns. A pushed provider (a socket, an
+  event) publishes from its own callbacks at any time and may leave `SampleAsync` empty. `IReadingSink` is thread-safe.
+  Publish `sink.Unavailable(path, reason)` for a reading you cannot supply right now.
+- **Rate.** `DefaultIntervalMs` is used unless the user sets `providers.<id>.intervalMs`; a smaller value is raised to
+  `MinIntervalMs`. The provider never sees the setting.
+- **States.** Readings the engine shows are ok, pending (subscribed, nothing reported yet), stale (the last sample failed
+  or timed out, or the provider reported other readings in three samples in a row but not this one) or unavailable. You do
+  not model them; throwing from a member, or not answering, is how a failure is reported.
+- **Failures and the hang limit.** An exception from any member is caught and logged with the provider id. After a failure
+  the provider is sampled again with a delay that doubles from the interval up to a minute. A sample that has not finished
+  after five seconds or five intervals (whichever is longer) counts as failed and is cancelled through the token; if it
+  still does not return, the engine never starts a second sample, so a hung provider costs one thread-pool thread until
+  its plugin is reloaded. Honour the cancellation token. Killing a hung provider needs the out-of-process helper
+  (a later change).
+- **Cost.** Do the minimum per sample, reuse buffers, and do nothing while stopped. A page without data widgets costs no
+  provider code at all, and that is a budget (see below).
+- **Not yet.** Provider settings and secrets (a URL, a token), image values, a catalog that changes while running, and a
+  logger for plugins come with the first provider that needs them.
+
+Windows-only APIs need `[SupportedOSPlatform("windows")]` on the provider class when the project targets plain `net10.0`.
 
 ## Performance budgets
 

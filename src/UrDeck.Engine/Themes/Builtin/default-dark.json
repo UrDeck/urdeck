@@ -15,14 +15,14 @@
     "radius": 0.08,
     "borderWidth": 0,
     "gap": 0.06,
-    "padding": 0.08
+    "padding": 0.065
   },
   "typography": {
     "font": "InterVariable.ttf",
     "weights": { "value": 600, "unit": 500, "label": 400, "body": 400, "title": 300 },
-    "labelSize": 0.05,
-    "bodySize": 0.065,
-    "titleSize": 0.085,
+    "labelSize": 0.091,
+    "bodySize": 0.0845,
+    "titleSize": 0.11,
     "unitRatio": 0.4
   },
   "stroke": {

@@ -5,6 +5,7 @@ using SkiaSharp;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Components;
+using UrDeck.Sdk.Data;
 using Xunit;
 
 namespace UrDeck.Engine.Tests;
@@ -22,6 +23,84 @@ public sealed class ComponentTests : IDisposable
         using var scratch = into == null ? new SKBitmap(400, 200) : null;
         using var canvas = new SKCanvas(into ?? scratch!);
         return Readout.Draw(canvas, _theme, Slot, value, options);
+    }
+
+    private static readonly ReadingDescriptor Percent = new("p", ReadingKind.Percent, "P", "P") { Min = 0, Max = 100 };
+
+    private sealed class NoSource : IReadingSource
+    {
+        public Reading Read(string id) => Reading.Unavailable("test");
+
+        public ReadingDescriptor? Describe(string id) => null;
+
+        public bool RegionUsesFahrenheit => false;
+    }
+
+    private static ReadingText Text(Reading reading) => ReadingFormatter.Format(reading, Percent, null, new NoSource());
+
+    private SKBitmap DrawReading(ReadingText text, ReadoutOptions? options = null)
+    {
+        var bitmap = new SKBitmap(400, 200);
+        using var canvas = new SKCanvas(bitmap);
+        Readout.Draw(canvas, _theme, Slot, text, options);
+        return bitmap;
+    }
+
+    private static int CountPixels(SKBitmap bitmap, SKColor color)
+    {
+        int count = 0;
+        for (int y = 0; y < bitmap.Height; y++)
+            for (int x = 0; x < bitmap.Width; x++)
+                if (bitmap.GetPixel(x, y) == color)
+                    count++;
+        return count;
+    }
+
+    [Fact]
+    public void ReadoutOfAReading_KeepsItsSize_AcrossCurrentStaleAndDash()
+    {
+        using var scratch = new SKBitmap(400, 200);
+        using var canvas = new SKCanvas(scratch);
+
+        var current = Readout.Measure(_theme, Slot, Text(Reading.Ok(37)));
+        var stale = Readout.Measure(_theme, Slot, Text(Reading.Stale(37)));
+        var dash = Readout.Measure(_theme, Slot, Text(Reading.Unavailable("x")));
+
+        Assert.Equal(current.Height, stale.Height, 3);
+        Assert.Equal(current.Height, dash.Height, 3);
+    }
+
+    [Fact]
+    public void ReadoutOfAReading_DrawsACurrentValueInTheTextColour_AndAStaleOneInTheMutedColour()
+    {
+        using var current = DrawReading(Text(Reading.Ok(37)));
+        using var stale = DrawReading(Text(Reading.Stale(37)));
+
+        Assert.True(CountPixels(current, _theme.Text) > 0);
+        Assert.Equal(0, CountPixels(current, _theme.TextMuted));
+        Assert.True(CountPixels(stale, _theme.TextMuted) > 0);
+        Assert.Equal(0, CountPixels(stale, _theme.Text));
+    }
+
+    [Fact]
+    public void ReadoutOfAReading_TakesTheUnitFromTheReading()
+    {
+        var bare = Readout.Measure(_theme, Slot, new ReadingText("37", null, UnitPlacement.Raised, "100", true));
+        var withUnit = Readout.Measure(_theme, Slot, Text(Reading.Ok(37)));
+
+        // A unit takes width from the value, so the value gets smaller to fit it.
+        Assert.True(withUnit.Height < bare.Height);
+    }
+
+    [Fact]
+    public void ReadoutOfAReading_StillTakesTheLabelFromTheOptions()
+    {
+        using var plain = DrawReading(Text(Reading.Ok(37)));
+        using var labelled = DrawReading(Text(Reading.Ok(37)), new ReadoutOptions { Label = "Core 1" });
+
+        // The label is drawn in the muted colour, so a current reading without one has none of it.
+        Assert.Equal(0, CountPixels(plain, _theme.TextMuted));
+        Assert.True(CountPixels(labelled, _theme.TextMuted) > 0);
     }
 
     [Fact]

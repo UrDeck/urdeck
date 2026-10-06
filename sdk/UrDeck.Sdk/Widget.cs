@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Patrick Bigler
 
 using System.Reflection;
+using UrDeck.Sdk.Data;
 
 namespace UrDeck.Sdk;
 
@@ -38,6 +39,17 @@ public abstract class Widget<TConfig> : IWidget<TConfig> where TConfig : WidgetC
 
     /// <summary>Called after <see cref="Config"/> changes.</summary>
     protected virtual void OnConfigured() { }
+
+    private IWidgetHost? _host;
+
+    /// <summary>The readings the widget may read; every reading is unavailable until the widget is attached.</summary>
+    protected IReadingSource Readings => _host?.Readings ?? NullReadingSource.Instance;
+
+    /// <inheritdoc cref="IWidget.Attach"/>
+    public virtual void Attach(IWidgetHost host) => _host = host;
+
+    /// <inheritdoc cref="IWidget.Subscriptions"/>
+    public virtual IReadOnlyCollection<string> Subscriptions => [];
 
     public virtual Task UpdateAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 

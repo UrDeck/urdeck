@@ -29,7 +29,7 @@ change under `openspec/changes/`. Work one item per session.
 Suggested model per item is noted as **Model**. Items marked Opus involve architecture decisions or hard debugging;
 everything else should be fine on Sonnet.
 
-## Current state (2026-10-03)
+## Current state (2026-10-05)
 
 - `urdeck-framework` (Phase 1 foundation) is complete and archived: SDK, analyzer, plugin loader with hot-reload
   (collectible AssemblyLoadContext), grid layout, WPF host with per-monitor DPI placement, Clock widget, tests, placeholder
@@ -37,15 +37,19 @@ everything else should be fine on Sonnet.
 - Repo structure, licensing, the rename and the SDK/Engine split are done (item 1). The repo is `UrDeck/urdeck`.
 - `theme-and-card` (item 5) is implemented (themes as data, host-drawn card, gap in the layout, readout and text
   line components, Clock migrated); see item 5.
-- Proposed, not started: `display-targeting` (older draft, to be reworked with `/opsx:explore` then `/opsx:propose`), and `data-providers`
-  (item 3, not written yet).
+- Proposed, not started: `display-targeting` (older draft, to be reworked with `/opsx:explore` then `/opsx:propose`).
+- `data-providers` (item 3, first of its three changes, `openspec/changes/archive/2026-10-05-data-providers`) is implemented and archived
+  (2026-10-05, all tasks and the panel checks done): providers as a plugin kind, the reading hub, the `system` provider
+  (CPU load per core and in total, memory load) and the stats widget at 1x1 and 2x2. Measurements are in
+  `docs/perf/data-providers.md`.
 - Item 14 was explored on 2026-10-03/04. Outcome: composition moves to the GPU and the host is rebuilt on WinUI 3. A
   spike on the panel passed the memory and layering checks (`docs/perf/render-host-spike.md`); a plain Win32 window
   with DirectComposition stays the fallback. See item 14 and `docs/handoff/2026-10-04-render-host-spike.md`.
 - `render-path` (the WinUI 3 host) is merged (#11) and so is the glass theme (#12).
-- `animation` is implemented on `feat/animation`, archived as `openspec/changes/archive/2026-10-04-animation` (`IWidget.IsAnimating`, one host frame clock at 30 fps that runs only
+- `animation` is merged (#13), archived as `openspec/changes/archive/2026-10-04-animation` (`IWidget.IsAnimating`, one host frame clock at 30 fps that runs only
   while a widget animates, the Clock's `flap` style); all its checks passed on the panel.
-- Next: item 3 (data providers), in a fresh session starting from its change or handoff. See "Suggested order" below.
+- Next: review and merge `data-providers` (an Opus review is suggested), then the gauge ring and the larger stats
+  compositions. See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -58,11 +62,14 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
 1. **Item 14, rendering path and animation.** First because it replaces the host every widget is drawn in. The render
    host spike is done; next is the `render-path` change (`openspec/changes/archive/2026-10-04-render-path`, the WinUI 3 host), then the
    `animation` change (frame requests and an animation clock, with a split-flap Clock style as first consumer).
-2. **Item 3, data providers.** Handoff: `docs/handoff/2026-10-03-data-providers.md`.
-3. **Weather widget** (item 7), which brings glyphs and animated colour icons. Needs item 14. It fetches its own data,
-   so it does not need item 3.
-4. **Performance widget** (item 7), which brings the gauge component. Needs item 3.
-5. **Pages and touch** (item 8), then **shortcuts and dock** (items 7 and 10), which bring the image tile.
+2. **Item 3, data providers**, as three changes:
+   1. `data-providers` (implemented, in review): providers as a plugin kind, readings, the `system` provider (CPU and memory load,
+      no elevation) and the stats widget at 1x1 and 2x2. Gives the row of per-core cards.
+   2. The gauge ring and the stats widget's 4x2 and 4x4 compositions (the performance widget of item 7).
+   3. Sensors that need elevation (temperatures, power, clocks) through an opt-in helper.
+3. **Weather** (item 7) as a provider plus a widget, which brings glyphs, animated colour icons and the first provider
+   with settings. Needs item 14 and the first `data-providers` change.
+4. **Pages and touch** (item 8), then **shortcuts and dock** (items 7 and 10), which bring the image tile.
 
 Display targeting (item 6) is a future change. Its draft is written against the WPF window, so rework it now that the
 new host has landed.
@@ -166,8 +173,9 @@ in [docs/design/sdk-engine-split-full-tasks.md](design/sdk-engine-split-full-tas
 - [ ] **Build guard:** fail the build if anything under `sdk/` references `src/`.
 - [ ] **Services and logging for widgets:** widgets log nothing today. When the first one needs to (weather), use
   `Microsoft.Extensions.Logging.Abstractions`: the SDK exposes `ILogger` (for example a protected `Logger` on `Widget<T>`) and the
-  engine supplies an `ILoggerFactory` that writes to `urdeck.log`. No custom logging interface. A general host-services hook
-  (the design suggests `IWidget.Attach(IWidgetHost)`) can come with it.
+  engine supplies an `ILoggerFactory` that writes to `urdeck.log`. No custom logging interface. The host-services hook
+  (`IWidget.Attach(IWidgetHost)`) is done in its minimal form with `data-providers` (it carries the readings); the
+  logger joins it with the first plugin that needs one.
 - [ ] **SDK tests:** the SDK is only covered indirectly through the engine tests; add `UrDeck.Sdk` tests and a floor (the design
   suggests 80%).
 - [ ] **Plugin exception wording:** optionally name theme/data packages, non-widget plugin kinds and the SkiaSharp types the SDK
@@ -190,29 +198,45 @@ shared data: several widgets that all want CPU/GPU/memory (or weather, now-playi
 Done in `urdeck-framework`: skipping redundant redraws via `IWidget.NeedsRender(DateTime now)` (the Clock repaints once a
 minute) and the placeholder icon.
 
-**Next step:** a fresh Opus session running `/opsx:explore` from
-[docs/handoff/2026-10-03-data-providers.md](handoff/2026-10-03-data-providers.md), which adds the first consumer (the
-performance widget) and the open questions to the direction below.
+**Status:** the first change is implemented (2026-10-05) as `openspec/changes/archive/2026-10-05-data-providers`; its `design.md` holds the
+decisions and the rejected alternatives. The handoff that started the exploration is
+[docs/handoff/2026-10-03-data-providers.md](handoff/2026-10-03-data-providers.md). What it measured on the panel is in
+[docs/perf/data-providers.md](perf/data-providers.md). `[RefreshOnEvent]` is gone (`[RefreshOnData]` replaces it) and
+`IWidget` gained `Attach` and `Subscriptions`, so the SDK assembly version is 0.3.0.0.
+**Next step:** an Opus review of the change, then the second change of the three (gauge ring and larger compositions).
 
-Design direction, to be validated with `/opsx:explore` then `/opsx:propose` and an Opus review:
+What the exploration settled (it replaced the earlier "named topics with typed values, one provider per topic"):
 
-- A latest-value store plus a change signal, not a pipeline framework: named **topics** (`system.cpu`,
-  `media.nowplaying`), each with a typed latest value.
-- **Providers** are a plugin kind in the SDK, so community authors are not locked into official data; official providers use
-  the same public API. One provider per topic, owned by the engine. Polled providers implement `Sample()` and the engine
-  schedules them at the fastest rate any subscriber needs; pushed providers publish when something happens (media, power).
-- **Demand-driven:** a provider starts when its first widget subscribes and stops with the last. Subscriptions are dropped on
-  plugin reload.
-- **Consuming:** a widget declares the topics it uses (replacing the bare `[RefreshOnEvent("name")]`) and reads the latest
-  value at draw time (a cached read, no I/O); the engine redraws it when a topic changes.
-- **Adaptive refresh** (`[RefreshAdaptive]`, today it runs at `minMs`) becomes a consumer of the `system.cpu` topic: back off
-  when the machine is busy (a case display often runs next to a game) and on battery.
-- Hard problems to settle in the design: sharing payload types across plugin load contexts (standard payload types in the SDK
-  plus a generic schema'd value for community topics; shared contract assemblies later), engine-owned scheduling and fault
-  containment so a bad provider cannot spin or hang, topic naming and collisions, naming providers in
-  `PLUGIN-EXCEPTION.md`, and which "Parked" SDK items (loader hardening, versioning, API tracking) must land first.
-  Optional later: providers that subscribe to other topics (derived data).
-- Keep the first implementation minimal. First-party providers (system CPU/memory) serve the default widget set (item 7).
+- **Providers are a plugin kind** from the first change, loaded like widgets and referencing only the SDK. A provider
+  is created on its first subscription and stopped after its last, so 200 installed providers cost nothing if 3 are
+  used.
+- **Self-describing readings, not typed topics.** A reading has an id (`system:cpu/core/2/load`), a value (number,
+  text or on/off; image later) and a catalog entry (kind, label, name, device, optional range and default display
+  unit). Any widget can show any reading, and an editor can list them. Rich data such as now-playing is a group of
+  readings; typed topics are postponed and may never be needed.
+- **A provider owns a namespace and a catalog.** The first-party `system` provider has portable ids
+  (`system:cpu/load`) that work on any PC, and will later hide where a value comes from, including the elevated
+  helper.
+- **The widget declares, the host subscribes.** A widget names its reading ids from its config; the host subscribes
+  while the widget is shown. Only providers with a visible consumer run (this is what makes per-page demand work
+  once item 8 lands).
+- **Engine-owned sampling** off the UI thread, one loop per provider, at a rate the provider declares and the user
+  can override under `providers` in the config. Values arrive in batches and are read at paint time without I/O.
+- **Uniform states and formatting:** ok, pending, stale (last value dimmed) and unavailable (a dash), with reasons in
+  the log. One SDK formatter; the display unit comes from the widget's setting, then the reading's default, then the
+  region, because hardware temperatures are read in Celsius even where weather is read in Fahrenheit.
+- **Elevation is opt-in:** a one-time deliberate action enables the helper, and demand decides whether it runs.
+  Without it those readings are in the catalog and report unavailable.
+
+The three changes are listed under "Suggested order". Left for later, each with the change or consumer that needs it:
+
+- Provider-defined settings and secrets (weather location, a Home Assistant URL and token): with the weather change.
+- A logger for plugins: with the first provider that talks to a network.
+- Backing off when the PC is busy or on battery, which also gives `[RefreshAdaptive]` its meaning: the engine owns
+  every provider's timer, so it is one place to change. Shared with the animation frame rate (item 14).
+- A per-card sampling rate, history buffers for charts, a catalog that changes while running, image values.
+- FPS: it comes from tracing the foreground game, not from hardware, and needs its own provider and rights.
+- An editor that lists the catalog with live values (item 11) is a subscriber that is not a shown widget.
 
 ## 4. Performance budgets and measurement
 
@@ -275,13 +299,49 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 | Widget | Sizes | Shows | Needs first | Brings |
 |---|---|---|---|---|
 | Clock | 4x2, 4x1, 2x1, 1x1 | time, date; `style: "flap"` is a split-flap display (`animation`, item 14) | done | readout, text line (done) |
-| Performance | 2x2 (one stat), 4x2 (two gauges, three text stats), 4x4 (four gauges, three text stats) | CPU and GPU temperature and load, memory, GPU power and clock | item 3 | gauge ring (a ring around a readout) |
-| Single stat | 1x1 | one reading, for example one CPU core per card | item 3 | nothing new; may be the performance widget at its smallest size |
-| Weather | 4x2 | animated colour icon, temperature, condition, high and low, place, sunrise and sunset | item 14 | tinted glyph, colour or animated icon |
+| Stats (single stat and performance are one widget, `urdeck.widgets.stats`) | 1x1 and 2x2 (one reading; done in `data-providers`), then 4x2 (two gauges, three text stats) and 4x4 (four gauges, three text stats) | any reading from any provider, one per slot: CPU and GPU temperature and load, memory, GPU power and clock, one CPU core per card | item 3 | slot configuration (a reading plus a presentation); gauge ring (a ring around a readout) with the larger sizes |
+| Weather | 4x2 | animated colour icon, temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | tinted glyph, colour or animated icon, provider settings |
 | Shortcut | 1x1 | an app or URL icon that launches on tap | item 8 (touch) | image tile, shared with the dock (item 10) |
 | Media / now playing | open | track, artist, art, controls | items 3 and 8 | image tile reuse |
 | Web page | open | any web page, with touch (the owner shows Frigate camera feeds this way in Nexus) | item 14 (new host), item 8 | a hosted widget kind: the host places a web view layer instead of calling `Render` |
 | Camera (parked) | open | camera streams without a browser, for example from Frigate's go2rtc | item 9 for real video | reuses the video layer; a first version could draw snapshots on the canvas |
+
+**Stats widget, larger compositions (the second `data-providers` change; not specified yet).** The owner's reference is
+the HYTE Nexus 4x4 performance widget, which is one widget with several configurable parts:
+
+- Row 1: CPU temperature (with gauge) and CPU utilization % (with gauge).
+- Row 2: GPU temperature (with gauge) and GPU utilization % (with gauge).
+- Row 3: memory % used, GPU wattage and GPU clock speed (MHz or GHz), as text stats.
+
+What is settled and what is open, so the next session starts from context:
+
+- The first change (`data-providers`) deliberately stops at 1x1 and 2x2. It specifies the slot list (`reading`, `label`,
+  `unit`, `decimals`, unknown properties preserved) and that only the first slot is drawn; extra slots stay in the file.
+  It does not specify gauges, per-slot presentation or layout.
+- This is the same widget (`urdeck.widgets.stats`) growing, not a new one: 4x2 is two gauges and three text stats, 4x4 is
+  four gauges and three text stats. Configs written for 1x1 must stay valid.
+- To be specified in the next change: a per-slot presentation (the roadmap's working names are `gauge` and `text`, with
+  `text` as the meaning of a missing property); which slot goes where at each size (probably by slot order, with the
+  composition chosen from the widget's grid size, as the conventions below say); what a gauge shows (ring and readout,
+  its range from the catalog entry's `Min` and `Max`, colour from the theme, for example `Good`, `Warning` and
+  `Critical` thresholds); how a temperature slot picks its unit (the reading's default, then the region, see the
+  formatter); and what a slot without a value looks like inside a gauge (the dash and the dimmed colour already exist).
+- The gauge ring is a new shared SDK component (a ring around a `Readout`), brought by this change, so it is available to
+  any widget and themed like the others (stroke thickness and cap are already theme values).
+- Readings the reference needs but nothing offers yet: CPU temperature, GPU temperature, GPU utilization, GPU power and
+  GPU clock. Temperatures, power and clocks usually need elevation, so they come with the third change (the opt-in
+  helper behind the `system` provider, ids such as `system:cpu/temperature`, unavailable until the helper is enabled).
+  Until then a 4x4 can be built and tested with the readings that exist (CPU load, per-core load, memory load); a slot
+  whose reading is unavailable shows the dash.
+- GPU readings that need no elevation may be possible through other sources (for example vendor libraries); decide that
+  when the third change is explored.
+- CPU load is time-based, not Task Manager's number. `system:cpu/load` is the share of time cores are busy, so it reads
+  lower than Task Manager (which shows `% Processor Utility`, weighted by frequency) when the CPU boosts: 53% against
+  84% with half the cores busy on the owner's machine. Kept on purpose (2026-10-05); how to switch and what to measure
+  first are in design decision 10 of `openspec/changes/archive/2026-10-05-data-providers/design.md` and `docs/perf/data-providers.md`.
+  Revisit this if gauges make the difference more noticeable.
+- Text sizes are theme values; a gauge's inner readout must use them like every other readout, so the theme alone decides
+  how large the small text is (it was enlarged twice after the first look at the panel, see `docs/themes.md`).
 
 The web page widget is a requirement, not an extra: it also covers Twitch chat and dashboards with no per-site work.
 It costs browser processes per instance, paid only by users who add one.
@@ -297,7 +357,8 @@ Conventions settled in the theme exploration (2026-10-03), to follow in every wi
   draw into whatever rectangle the widget gives them.
 - Each widget owns its configuration type. A per-widget editor UI is part of item 11, not of the widget changes.
 
-Notes: sensor data likely via LibreHardwareMonitor (some sensors need admin; run it as a provider, see item 3); weather
+Notes: sensors that need elevation likely via LibreHardwareMonitor in an opt-in helper behind the `system` provider
+(see item 3; its licence, driver and security-tool status are still to be verified); weather
 via a keyless API such as Open-Meteo; Meteocons (MIT, full-colour, Lottie) is a candidate for animated weather art.
 
 ## 8. Pages and touch

@@ -34,6 +34,10 @@ public sealed class MainWindow : Window
     private readonly Grid _background = new();
     private readonly Canvas _surface = new();
     private readonly List<WidgetView> _views = new();
+    private readonly Dictionary<string, List<WidgetView>> _viewsByReading = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _changedGate = new();
+    private HashSet<string> _changedReadings = new(StringComparer.OrdinalIgnoreCase);
+    private bool _changedQueued;
     private readonly FrameClock _frameClock;
     private readonly List<DispatcherQueueTimer> _pendingRetargets = new();
     private MonitorInfo _target;
@@ -55,6 +59,8 @@ public sealed class MainWindow : Window
         _frameClock = new FrameClock(DispatcherQueue);
         _loadedTheme = LoadTheme();
         _hwnd = WindowNative.GetWindowHandle(this);
+        _plugins.Readings.ApplySettings(_configStore.Config.Providers);
+        _plugins.Readings.ReadingsChanged += OnReadingsChanged;
 
         Title = "UrDeck";
         var presenter = OverlappedPresenter.Create();
@@ -99,6 +105,7 @@ public sealed class MainWindow : Window
         {
             // Themes are re-read on every config reload, so editing a theme and saving the config applies it.
             _loadedTheme = LoadTheme();
+            _plugins.Readings.ApplySettings(_configStore.Config.Providers);
             ApplyBackground();
             Retarget("config changed");
             ScheduleRebuild(force: true);
@@ -274,7 +281,7 @@ public sealed class MainWindow : Window
             {
                 var widget = _plugins.CreateWidget(config)!;
                 var item = layout[i];
-                var view = new WidgetView(widget, descriptor, _theme, _frameClock)
+                var view = new WidgetView(widget, descriptor, _theme, _frameClock, _plugins.Readings)
                 {
                     Width = item.Size.Width,
                     Height = item.Size.Height,
@@ -283,6 +290,13 @@ public sealed class MainWindow : Window
                 Canvas.SetTop(view, item.Position.Y);
                 _surface.Children.Add(view);
                 _views.Add(view);
+                foreach (string reading in view.Subscriptions)
+                {
+                    if (!_viewsByReading.TryGetValue(reading, out var users))
+                        _viewsByReading[reading] = users = [];
+                    users.Add(view);
+                }
+
                 UrDeckLog.Info($"Placed '{config.WidgetTypeId}' at grid ({config.Col},{config.Row}) {config.Width}x{config.Height} " +
                               $"-> {item.Position.X},{item.Position.Y} {item.Size.Width}x{item.Size.Height} DIPs");
             }
@@ -298,7 +312,46 @@ public sealed class MainWindow : Window
         foreach (var view in _views)
             view.Dispose();
         _views.Clear();
+        _viewsByReading.Clear();
         _surface.Children.Clear();
+    }
+
+    /// <summary>Runs on a sampling thread: collects the ids and asks the UI thread, once, to look at them.</summary>
+    private void OnReadingsChanged(IReadOnlyCollection<string> ids)
+    {
+        lock (_changedGate)
+        {
+            _changedReadings.UnionWith(ids);
+            if (_changedQueued)
+                return;
+            _changedQueued = true;
+        }
+
+        DispatcherQueue.TryEnqueue(RepaintChangedReadings);
+    }
+
+    private void RepaintChangedReadings()
+    {
+        HashSet<string> ids;
+        lock (_changedGate)
+        {
+            ids = _changedReadings;
+            _changedReadings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            _changedQueued = false;
+        }
+
+        // Only the views that declared a changed reading are asked, each once.
+        var asked = new HashSet<WidgetView>();
+        foreach (string id in ids)
+        {
+            if (!_viewsByReading.TryGetValue(id, out var users))
+                continue;
+            foreach (var view in users)
+            {
+                if (asked.Add(view))
+                    view.OnReadingsChanged();
+            }
+        }
     }
 
     private void OnClosed()
@@ -306,6 +359,7 @@ public sealed class MainWindow : Window
         // SystemEvents are static; unsubscribe or the window leaks.
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         SystemEvents.PowerModeChanged -= OnPowerModeChanged;
+        _plugins.Readings.ReadingsChanged -= OnReadingsChanged;
         foreach (var t in _pendingRetargets)
             t.Stop();
         DisposeViews();

@@ -69,12 +69,16 @@ public class Cfg : WidgetConfig { }
         Assert.Equal(new[] { "URDECK002" }, Run(Widget + Tick));
 
     [Fact]
+    public void RefreshOnData_CountsAsTheRefreshStrategy() =>
+        Assert.Empty(Run(Widget + Size + "[RefreshOnData]"));
+
+    [Fact]
     public void MissingRefresh_UrDeck003() =>
         Assert.Equal(new[] { "URDECK003" }, Run(Widget + Size));
 
     [Fact]
     public void MultipleRefresh_UrDeck004() =>
-        Assert.Equal(new[] { "URDECK004" }, Run(Widget + Size + Tick + "[RefreshOnEvent(\"e\")]"));
+        Assert.Equal(new[] { "URDECK004" }, Run(Widget + Size + Tick + "[RefreshOnData]"));
 
     [Theory]
     [InlineData("[WidgetSize(5, 1)]")]

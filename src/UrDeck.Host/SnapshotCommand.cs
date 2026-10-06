@@ -49,6 +49,15 @@ internal static class SnapshotCommand
                     widgets.Add((config, widget));
             }
 
+            // Subscribe the way the live window does, and let the providers report once so the card shows values.
+            var readings = host.Plugins.Readings;
+            readings.ApplySettings(host.Config.Config.Providers);
+            string[] ids = widgets.SelectMany(w => w.Item2.Subscriptions).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+            readings.Subscribe(ids);
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
+            while (readings.AnyPending(ids) && DateTime.UtcNow < deadline)
+                Thread.Sleep(25);
+
             using var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now);
             using var file = File.Create(output);
             bitmap.Encode(file, SKEncodedImageFormat.Png, 100);
