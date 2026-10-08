@@ -598,5 +598,8 @@ public sealed partial class ReadingHub
 
         public void Unavailable(string path, string reason) =>
             hub.PublishFromProvider(runtime, generation, path, new Publication(null, reason));
+
+        public void Log(string message) =>
+            UrDeckLog.Info($"Provider '{runtime.Descriptor.Id}': {message}");
     }
 }

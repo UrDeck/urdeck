@@ -92,13 +92,14 @@ Slots beyond the positions of the size stay in the file; a position without a sl
 { "typeId": "urdeck.widgets.stats", "col": 0, "row": 2, "slots": [ { "reading": "system:cpu/core/2/load" } ] }
 ```
 
-A 4x4 with the readings that exist today:
+A 4x4 performance card: four gauges (CPU load, GPU temperature and load, memory load) above three text stats (the
+GPU's power, its clock and the CPU's first core):
 
 ```json
 { "typeId": "urdeck.widgets.stats", "col": 0, "row": 0, "width": 4, "height": 4, "slots": [
-  { "reading": "system:cpu/load" }, { "reading": "system:memory/load", "label": "RAM" },
-  { "reading": "system:cpu/core/1/load" }, { "reading": "system:cpu/core/2/load", "style": "bar" },
-  { "reading": "system:cpu/core/3/load" }, { "reading": "system:cpu/core/4/load" }, { "reading": "system:cpu/core/5/load" } ] }
+  { "reading": "system:cpu/load" }, { "reading": "system:gpu/temperature" },
+  { "reading": "system:gpu/load" }, { "reading": "system:memory/load", "label": "RAM" },
+  { "reading": "system:gpu/power" }, { "reading": "system:gpu/clock" }, { "reading": "system:cpu/core/1/load" } ] }
 ```
 
 | Slot field | Meaning |
@@ -109,7 +110,7 @@ A 4x4 with the readings that exist today:
 | `decimals` | Number of decimals to show (default 0). |
 | `style` | `plain`, `gauge` (the theme's default gauge style), `ring`, `bar` or `verticalBar`. Absent: plain at 1x1 and 2x2, the theme's gauge style in a gauge position of a 4x2 or 4x4. Text positions are always plain. A reading that has no range to measure against (a text, a plain number) is drawn plain whatever the style. |
 | `min`, `max` | The gauge's range, replacing the one the provider declares (a percentage defaults to 0 to 100). |
-| `warning`, `critical` | From these values on the gauge is drawn in the theme's warning or critical colour. Replace the provider's own levels; the `system` readings have none. In the reading's canonical unit (degrees Celsius for a temperature). |
+| `warning`, `critical` | From these values on the gauge is drawn in the theme's warning or critical colour. Replace the provider's own levels; of the `system` readings only the GPU temperature has any (80 and 90 degrees). In the reading's canonical unit (degrees Celsius for a temperature). |
 
 The fill eases to a new value over about 300 ms; the number and the colour change at once.
 
@@ -117,6 +118,21 @@ The `system` provider offers `system:cpu/load` (all logical processors), `system
 counted from 1) and `system:memory/load`, all as percentages, with no administrator rights. CPU load is the share of time the processors are busy, so with a CPU that boosts it reads lower under load than Task Manager, which weighs by clock speed (`docs/perf/data-providers.md`). A reading that does not exist
 shows a dash and the id; a reading whose provider stopped answering keeps its last value in the dimmed text colour. Only
 providers that a shown widget uses are started, and one that nothing uses stops five seconds later.
+
+The GPU readings are `system:gpu/load`, `system:gpu/temperature`, `system:gpu/power` (watts) and `system:gpu/clock`
+(MHz) for the main GPU, the one with the most dedicated video memory, and `system:gpu/<n>/...` for each adapter,
+counted from 1 in that order. They need no administrator rights and cost nothing unless a GPU slot is shown.
+
+| Reading | Source | Verified |
+|---|---|---|
+| load, temperature | Windows itself (graphics kernel statistics and adapter performance data), any vendor | NVIDIA (RTX 4090) |
+| power, clock | the vendor's library: `nvml.dll`, which the NVIDIA driver installs | NVIDIA (RTX 4090) |
+
+On AMD and Intel the load and temperature should work (the code does not depend on the vendor) but nobody has run them
+yet, and power and clock show a dash until their vendor libraries are added. `urdeck.log` names each GPU and the source
+of each of its readings when it is first sampled, which makes a report from another GPU useful. GPU load is the busiest
+engine of the adapter, as in Task Manager; a load sample costs about 6 ms of one core every provider interval while a
+GPU load slot is shown (`docs/perf/gpu-readings.md`). Laptops whose NVIDIA GPU is powered down are untested.
 
 Making a theme: create `themes/<name>/theme.json` next to `UrDeck.Host.exe` with only the values you want to change (colours, card radius/gap/padding, font, text sizes); everything else comes from `default-dark`. Bundle a font by putting the `.ttf` in the same folder and naming it in the file. Edit the theme, then save the config file to apply it. Full format: [docs/themes.md](docs/themes.md).
 

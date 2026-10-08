@@ -37,4 +37,9 @@ public interface IReadingSink
 
     /// <summary>Reports that the reading cannot be supplied.</summary>
     void Unavailable(string path, string reason);
+
+    /// <summary>Writes one line to the host's log, for the facts that make a report useful (which device, which source).</summary>
+    void Log(string message)
+    {
+    }
 }

@@ -29,11 +29,17 @@ public class SdkContractTests
     }
 
     [Fact]
-    public void TheSystemProvidersReadings_DeclareNoLevels()
+    public void TheSystemProvidersReadings_DeclareNoLevels_ExceptGpuTemperature()
     {
         var provider = new UrDeck.Providers.Machine.SystemProvider();
 
-        Assert.All(provider.Describe(), d => Assert.True(d.Warning == null && d.Critical == null));
+        var catalog = provider.Describe();
+        Assert.All(
+            catalog.Where(d => d.Kind != ReadingKind.Temperature),
+            d => Assert.True(d.Warning == null && d.Critical == null));
+        Assert.All(
+            catalog.Where(d => d.Kind == ReadingKind.Temperature),
+            d => Assert.True(d.Warning == 80 && d.Critical == 90));
     }
 
     [Fact]

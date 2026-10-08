@@ -52,9 +52,11 @@ everything else should be fine on Sonnet.
   `openspec/changes/archive/2026-10-08-stats-gauges`): the gauge component with the styles ring, bar, vertical bar and
   plain, levels with warning and critical colours, the stats widget at 4x2 and 4x4, an eased fill. Panel checks passed;
   measurements are in `docs/perf/stats-gauges.md`.
-  Proposed, not started: `gpu-readings` (GPU load, temperature, power and clock in the `system` provider without
-  elevation, after a spike). Both are in `openspec/changes/`; `gpu-readings` builds on `stats-gauges`.
-- Next: `gpu-readings`. See "Suggested order" below.
+- `gpu-readings` is implemented and archived (2026-10-08, `openspec/changes/archive/2026-10-08-gpu-readings`): GPU load and temperature for any vendor
+  through Windows, power and clock through `nvml.dll` on NVIDIA behind a vendor seam, without elevation. Spike and
+  measurements in `docs/perf/gpu-readings.md`. Verified on NVIDIA only. Adds `IReadingSink.Log` to the SDK.
+- Proposed, not started: `display-targeting`.
+- Next: sensors that need elevation (item 3, fourth change). See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -72,7 +74,7 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
       no elevation) and the stats widget at 1x1 and 2x2. Gives the row of per-core cards.
    2. `stats-gauges` (done): the gauge component and the stats widget's 4x2 and 4x4 compositions (the performance
       widget of item 7).
-   3. `gpu-readings` (proposed): GPU load and temperature for any vendor through Windows, GPU power and clock through
+   3. `gpu-readings` (done): GPU load and temperature for any vendor through Windows, GPU power and clock through
       the vendor library (NVIDIA first), all without elevation.
    4. Sensors that need elevation (CPU temperature and what else needs a kernel driver) through an opt-in helper.
 3. **Weather** (item 7) as a provider plus a widget, which brings glyphs, animated colour icons and the first provider
@@ -211,7 +213,7 @@ decisions and the rejected alternatives. The handoff that started the exploratio
 [docs/handoff/2026-10-03-data-providers.md](handoff/2026-10-03-data-providers.md). What it measured on the panel is in
 [docs/perf/data-providers.md](perf/data-providers.md). `[RefreshOnEvent]` is gone (`[RefreshOnData]` replaces it) and
 `IWidget` gained `Attach` and `Subscriptions`, so the SDK assembly version is 0.3.0.0.
-**Next step:** the second change, `stats-gauges` (gauge component and larger compositions), is done and archived; the third is `gpu-readings`.
+**Next step:** the second change, `stats-gauges` (gauge component and larger compositions), and `gpu-readings` are done; the fourth is the elevated helper.
 
 What the exploration settled (it replaced the earlier "named topics with typed values, one provider per topic"):
 
@@ -336,13 +338,10 @@ What is settled and what is open, so the next session starts from context:
   formatter); and what a slot without a value looks like inside a gauge (the dash and the dimmed colour already exist).
 - The gauge ring is a new shared SDK component (a ring around a `Readout`), brought by this change, so it is available to
   any widget and themed like the others (stroke thickness and cap are already theme values).
-- Readings the reference needs but nothing offers yet: CPU temperature, GPU temperature, GPU utilization, GPU power and
-  GPU clock. Temperatures, power and clocks usually need elevation, so they come with the third change (the opt-in
-  helper behind the `system` provider, ids such as `system:cpu/temperature`, unavailable until the helper is enabled).
-  Until then a 4x4 can be built and tested with the readings that exist (CPU load, per-core load, memory load); a slot
-  whose reading is unavailable shows the dash.
-- GPU readings that need no elevation may be possible through other sources (for example vendor libraries); decide that
-  when the third change is explored.
+- Readings the reference needs: CPU temperature (still nothing offers it), and the GPU's temperature, load, power and
+  clock, which `gpu-readings` now supplies without elevation (`system:gpu/...`, README). CPU temperature and what else
+  needs a kernel driver come with the fourth change (the opt-in helper behind the `system` provider, ids such as
+  `system:cpu/temperature`, unavailable until the helper is enabled). A slot whose reading is unavailable shows the dash.
 - CPU load is time-based, not Task Manager's number. `system:cpu/load` is the share of time cores are busy, so it reads
   lower than Task Manager (which shows `% Processor Utility`, weighted by frequency) when the CPU boosts: 53% against
   84% with half the cores busy on the owner's machine. Kept on purpose (2026-10-05); how to switch and what to measure
