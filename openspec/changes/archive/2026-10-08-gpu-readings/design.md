@@ -110,11 +110,17 @@ Two ways to read it, to be decided by the spike on cost:
 
 Like CPU load, the first sample only sets the baseline and publishes nothing.
 
+The spike chose the graphics kernel statistics (`docs/perf/gpu-readings.md`). They need no rights, but a sample is one
+kernel call per node (14 on the owner's card, about 6 ms of CPU), which misses the "well under a millisecond" bar of
+decision 8. The performance counters are cheaper per sample but cost 840 ms on the first call and 40 MB, so the kernel
+statistics stay; the cost is only paid while a GPU load reading is shown, at the provider's interval.
+
 ### 5. Temperature
 
 Windows keeps performance data per adapter (`D3DKMTQueryAdapterInfo` with the adapter performance data type, WDDM 2.4
 and later), which includes the temperature in tenths of a degree Celsius. A driver that does not report it leaves
-zero. The provider publishes a value above zero and reports the reading unavailable with a reason otherwise, once per
+zero. On the owner's NVIDIA card Windows reports it (47.6 °C against `nvidia-smi` 48 °C), so no vendor fallback is
+needed. The provider publishes a value above zero and reports the reading unavailable with a reason otherwise, once per
 transition as the hub already logs.
 
 ### 6. Power and clock through a vendor seam

@@ -245,10 +245,24 @@ public sealed class ExampleProvider : IDataProvider
   (a later change).
 - **Cost.** Do the minimum per sample, reuse buffers, and do nothing while stopped. A page without data widgets costs no
   provider code at all, and that is a budget (see below).
-- **Not yet.** Provider settings and secrets (a URL, a token), image values, a catalog that changes while running, and a
-  logger for plugins come with the first provider that needs them.
+- **Logging.** `sink.Log(message)` writes one line to `urdeck.log` under the provider's id. Use it for facts that make
+  a bug report useful (which device, which source), once, not per sample.
+- **Not yet.** Provider settings and secrets (a URL, a token), image values and a catalog that changes while running
+  come with the first provider that needs them.
 
 Windows-only APIs need `[SupportedOSPlatform("windows")]` on the provider class when the project targets plain `net10.0`.
+
+### Adding a GPU vendor (AMD, Intel)
+
+The `system` provider reads GPU load and temperature from Windows for every vendor. Power and clock come from the
+vendor's own library through `IGpuVendorReader` (`providers/UrDeck.Providers.System/IGpuVendorReader.cs`); only NVIDIA
+(`NvmlReader`, `nvml.dll`) exists. To add a vendor, implement the interface (load the library from the system directory
+only, find the device from the `GpuAdapter`'s PCI location or name, return watts and MHz, release everything in `Close`)
+and return it from `WindowsGpuPlatform.CreateVendorReader` for that PCI vendor id (`0x1002` AMD, `0x8086` Intel). The ids
+(`system:gpu/power`, `system:gpu/clock`) and the pages do not change. The provider opens the reader only when power or
+clock is shown, does not retry a failed open, and logs the source; test it with a fake `IGpuVendorReader`
+(`tests/UrDeck.Engine.Tests/GpuReadingsTests.cs`). Say in the PR which hardware you ran it on: the README lists what is
+verified per vendor.
 
 ## Performance budgets
 

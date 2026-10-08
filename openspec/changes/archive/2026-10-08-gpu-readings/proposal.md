@@ -42,8 +42,8 @@ None.
 
 - `providers/UrDeck.Providers.System`: `SystemProvider` (catalog, demand, sampling), `NativeMethods` (Windows graphics
   kernel calls, NVML), likely split into one file per reading group.
-- Depends on `stats-gauges` for `ReadingDescriptor.Warning` and `Critical`. No SDK change of its own, no engine or
-  host change, no new package dependency: Windows APIs and `nvml.dll` are called directly.
+- Depends on `stats-gauges` for `ReadingDescriptor.Warning` and `Critical`. One small SDK addition: `IReadingSink.Log` (a default interface method, so no provider breaks;
+  the engine's sink writes it to `urdeck.log`), which the per-adapter source log needs. No host change, no new package dependency: Windows APIs and `nvml.dll` are called directly.
 - Tests: `SystemProviderTests` (catalog, demand, behaviour without a GPU or without NVML through a seam).
 - Docs: `docs/perf/gpu-readings.md` (the spike and the cost), `README.md` (the readings and a full 4x4 example),
   `docs/ROADMAP.md`.

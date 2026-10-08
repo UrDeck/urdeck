@@ -4,7 +4,9 @@
     <TargetFramework>$(UrDeckTfm)</TargetFramework>
     <!-- Not UrDeck.Providers.System: inside that namespace every System.* name would resolve to it. -->
     <RootNamespace>UrDeck.Providers.Machine</RootNamespace>
-    <Description>First-party data provider for readings about the local machine (CPU and memory load).</Description>
+    <Description>First-party data provider for readings about the local machine (CPU, memory and GPU).</Description>
+    <!-- The graphics kernel and NVML are called through pointers into stack buffers. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
