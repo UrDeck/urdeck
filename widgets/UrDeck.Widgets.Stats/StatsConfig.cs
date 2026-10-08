@@ -23,6 +23,23 @@ public class StatsSlot
 
     public int? Decimals { get; set; }
 
+    /// <summary>
+    /// <c>plain</c>, <c>gauge</c> (the theme's default gauge style), <c>ring</c>, <c>bar</c> or <c>verticalBar</c>. Null or
+    /// a name this version does not know counts as not present.
+    /// </summary>
+    public string? Style { get; set; }
+
+    /// <summary>The gauge's range, replacing the one in the reading's description (canonical unit).</summary>
+    public double? Min { get; set; }
+
+    public double? Max { get; set; }
+
+    /// <summary>From this value on the gauge is drawn in the theme's warning colour (canonical unit).</summary>
+    public double? Warning { get; set; }
+
+    /// <summary>From this value on the gauge is drawn in the theme's critical colour (canonical unit).</summary>
+    public double? Critical { get; set; }
+
     /// <summary>Properties this version does not know; kept across load and save.</summary>
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; set; }
@@ -30,6 +47,6 @@ public class StatsSlot
 
 public class StatsConfig : WidgetConfig
 {
-    /// <summary>The readings on the card. At 1x1 and 2x2 only the first is shown; the others stay in the file.</summary>
+    /// <summary>The readings on the card, in the order of the positions of its size; slots beyond them stay in the file.</summary>
     public List<StatsSlot> Slots { get; set; } = [];
 }

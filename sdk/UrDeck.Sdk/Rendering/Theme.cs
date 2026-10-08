@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Patrick Bigler
 
 using SkiaSharp;
+using UrDeck.Sdk.Components;
 
 namespace UrDeck.Sdk;
 
@@ -42,6 +43,9 @@ public sealed class Theme : IDisposable
     /// <summary>Line thickness as a fraction of the drawn element's size.</summary>
     public float StrokeRatio { get; init; } = 0.08f;
     public SKStrokeCap StrokeCap { get; init; } = SKStrokeCap.Round;
+
+    /// <summary>The shape a widget draws for a gauge it was asked to draw "as the theme says"; never <see cref="GaugeStyle.Plain"/>.</summary>
+    public GaugeStyle GaugeStyle { get; init; } = GaugeStyle.Ring;
 
     /// <summary>One typeface per role; the theme owns them. Missing roles use the system default.</summary>
     public IReadOnlyDictionary<TextRole, SKTypeface> Typefaces

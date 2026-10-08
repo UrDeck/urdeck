@@ -35,7 +35,8 @@ value (for example a colour that does not parse) is replaced by the default's va
     "labelSize": 0.091, "bodySize": 0.0845, "titleSize": 0.11,
     "unitRatio": 0.4
   },
-  "stroke": { "thickness": 0.08, "cap": "round" }
+  "stroke": { "thickness": 0.08, "cap": "round" },
+  "gauge": { "style": "ring" }
 }
 ```
 
@@ -49,6 +50,15 @@ value (for example a colour that does not parse) is replaced by the default's va
 - **`typography.unitRatio`** is the size of a readout's unit as a fraction of its value's size.
 - **`stroke`** is for components that draw lines: thickness as a fraction of the drawn element and `round` or `square`
   ends.
+- **`gauge.style`** is the shape a gauge takes when a widget asks for "the theme's" gauge: `ring`, `bar` or `verticalBar`.
+  `plain` is not allowed here (a gauge that draws no shape is no gauge); it and any unknown name fall back to `ring`
+  with a logged warning. A widget's own explicit style wins over it.
+
+A gauge draws its fill in `colors.accent`, or in `colors.warning` or `colors.critical` once its reading has reached
+that level, and its track in the same colour at the alpha of `colors.accentDim`. A reading that is not current (stale,
+pending, unavailable) uses `colors.textMuted` for both. The number keeps `colors.text`, except where it lies over the
+fill of a vertical bar: there it is `colors.text` or `colors.background`, whichever contrasts more with the fill.
+Thickness and line ends come from `stroke`.
 
 ## Bundled font
 

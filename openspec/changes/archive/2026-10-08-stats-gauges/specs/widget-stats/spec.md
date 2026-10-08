@@ -1,10 +1,5 @@
-# Widget Stats Specification
+## MODIFIED Requirements
 
-## Purpose
-
-Defines the first-party stats widget, which shows readings from any provider. It is the single-stat card now and
-grows into the performance widget by adding sizes and presentations.
-## Requirements
 ### Requirement: Stats Widget Identity
 UrDeck MUST ship a widget with the type id `urdeck.widgets.stats` that supports the sizes 1x1, 2x2, 4x2 and 4x4. It
 shows one reading at 1x1 and 2x2, up to five at 4x2 and up to seven at 4x4 (see "Stats Compositions"). It MUST
@@ -133,6 +128,8 @@ level.
 - **WHEN** a 1x1 stats widget has three slots and the reading of the third changes
 - **THEN** the widget is not repainted
 
+## ADDED Requirements
+
 ### Requirement: Stats Compositions
 The widget MUST choose its composition from its grid size and fill the positions with its slots in order.
 
@@ -196,4 +193,3 @@ once.
 #### Scenario: Plain card
 - **WHEN** a stats widget shows only plain positions and a value changes
 - **THEN** it is repainted once and does not report that it is animating
-

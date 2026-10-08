@@ -48,8 +48,13 @@ everything else should be fine on Sonnet.
 - `render-path` (the WinUI 3 host) is merged (#11) and so is the glass theme (#12).
 - `animation` is merged (#13), archived as `openspec/changes/archive/2026-10-04-animation` (`IWidget.IsAnimating`, one host frame clock at 30 fps that runs only
   while a widget animates, the Clock's `flap` style); all its checks passed on the panel.
-- Next: review and merge `data-providers` (an Opus review is suggested), then the gauge ring and the larger stats
-  compositions. See "Suggested order" below.
+- `data-providers` is merged (#14). `stats-gauges` is implemented and archived (2026-10-08,
+  `openspec/changes/archive/2026-10-08-stats-gauges`): the gauge component with the styles ring, bar, vertical bar and
+  plain, levels with warning and critical colours, the stats widget at 4x2 and 4x4, an eased fill. Panel checks passed;
+  measurements are in `docs/perf/stats-gauges.md`.
+  Proposed, not started: `gpu-readings` (GPU load, temperature, power and clock in the `system` provider without
+  elevation, after a spike). Both are in `openspec/changes/`; `gpu-readings` builds on `stats-gauges`.
+- Next: `gpu-readings`. See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -62,11 +67,14 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
 1. **Item 14, rendering path and animation.** First because it replaces the host every widget is drawn in. The render
    host spike is done; next is the `render-path` change (`openspec/changes/archive/2026-10-04-render-path`, the WinUI 3 host), then the
    `animation` change (frame requests and an animation clock, with a split-flap Clock style as first consumer).
-2. **Item 3, data providers**, as three changes:
-   1. `data-providers` (implemented, in review): providers as a plugin kind, readings, the `system` provider (CPU and memory load,
+2. **Item 3, data providers**, as four changes:
+   1. `data-providers` (done): providers as a plugin kind, readings, the `system` provider (CPU and memory load,
       no elevation) and the stats widget at 1x1 and 2x2. Gives the row of per-core cards.
-   2. The gauge ring and the stats widget's 4x2 and 4x4 compositions (the performance widget of item 7).
-   3. Sensors that need elevation (temperatures, power, clocks) through an opt-in helper.
+   2. `stats-gauges` (done): the gauge component and the stats widget's 4x2 and 4x4 compositions (the performance
+      widget of item 7).
+   3. `gpu-readings` (proposed): GPU load and temperature for any vendor through Windows, GPU power and clock through
+      the vendor library (NVIDIA first), all without elevation.
+   4. Sensors that need elevation (CPU temperature and what else needs a kernel driver) through an opt-in helper.
 3. **Weather** (item 7) as a provider plus a widget, which brings glyphs, animated colour icons and the first provider
    with settings. Needs item 14 and the first `data-providers` change.
 4. **Pages and touch** (item 8), then **shortcuts and dock** (items 7 and 10), which bring the image tile.
@@ -203,7 +211,7 @@ decisions and the rejected alternatives. The handoff that started the exploratio
 [docs/handoff/2026-10-03-data-providers.md](handoff/2026-10-03-data-providers.md). What it measured on the panel is in
 [docs/perf/data-providers.md](perf/data-providers.md). `[RefreshOnEvent]` is gone (`[RefreshOnData]` replaces it) and
 `IWidget` gained `Attach` and `Subscriptions`, so the SDK assembly version is 0.3.0.0.
-**Next step:** an Opus review of the change, then the second change of the three (gauge ring and larger compositions).
+**Next step:** the second change, `stats-gauges` (gauge component and larger compositions), is done and archived; the third is `gpu-readings`.
 
 What the exploration settled (it replaced the earlier "named topics with typed values, one provider per topic"):
 
@@ -299,14 +307,14 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 | Widget | Sizes | Shows | Needs first | Brings |
 |---|---|---|---|---|
 | Clock | 4x2, 4x1, 2x1, 1x1 | time, date; `style: "flap"` is a split-flap display (`animation`, item 14) | done | readout, text line (done) |
-| Stats (single stat and performance are one widget, `urdeck.widgets.stats`) | 1x1 and 2x2 (one reading; done in `data-providers`), then 4x2 (two gauges, three text stats) and 4x4 (four gauges, three text stats) | any reading from any provider, one per slot: CPU and GPU temperature and load, memory, GPU power and clock, one CPU core per card | item 3 | slot configuration (a reading plus a presentation); gauge ring (a ring around a readout) with the larger sizes |
+| Stats (single stat and performance are one widget, `urdeck.widgets.stats`) | 1x1 and 2x2 (one reading; done in `data-providers`), 4x2 (two gauges, three text stats) and 4x4 (four gauges, three text stats) (done in `stats-gauges`) | any reading from any provider, one per slot: CPU and GPU temperature and load, memory, GPU power and clock, one CPU core per card | item 3 | slot configuration (a reading plus a presentation); gauge component (ring, bar, vertical bar) with the larger sizes (done) |
 | Weather | 4x2 | animated colour icon, temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | tinted glyph, colour or animated icon, provider settings |
 | Shortcut | 1x1 | an app or URL icon that launches on tap | item 8 (touch) | image tile, shared with the dock (item 10) |
 | Media / now playing | open | track, artist, art, controls | items 3 and 8 | image tile reuse |
 | Web page | open | any web page, with touch (the owner shows Frigate camera feeds this way in Nexus) | item 14 (new host), item 8 | a hosted widget kind: the host places a web view layer instead of calling `Render` |
 | Camera (parked) | open | camera streams without a browser, for example from Frigate's go2rtc | item 9 for real video | reuses the video layer; a first version could draw snapshots on the canvas |
 
-**Stats widget, larger compositions (the second `data-providers` change; not specified yet).** The owner's reference is
+**Stats widget, larger compositions (the second `data-providers` change, now implemented as `stats-gauges`; the notes below are the original exploration).** The owner's reference is
 the HYTE Nexus 4x4 performance widget, which is one widget with several configurable parts:
 
 - Row 1: CPU temperature (with gauge) and CPU utilization % (with gauge).

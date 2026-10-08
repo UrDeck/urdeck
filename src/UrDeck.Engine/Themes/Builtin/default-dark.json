@@ -28,5 +28,8 @@
   "stroke": {
     "thickness": 0.08,
     "cap": "round"
+  },
+  "gauge": {
+    "style": "ring"
   }
 }

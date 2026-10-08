@@ -25,6 +25,9 @@ public sealed class ReadoutOptions
     /// <summary>Overrides the theme's text colour for the value only.</summary>
     public SKColor? ValueColor { get; init; }
 
+    /// <summary>Overrides the theme's muted text colour for the label.</summary>
+    public SKColor? LabelColor { get; init; }
+
     /// <summary>Fraction of the fitted size to draw at, from 0.1 to 1.0.</summary>
     public float Scale { get; init; } = 1f;
 }
@@ -64,6 +67,7 @@ public static class Readout
         UnitPlacement = reading.UnitPlacement,
         WidestValue = reading.WidestValue,
         Label = options?.Label,
+        LabelColor = options?.LabelColor,
         Horizontal = options?.Horizontal ?? HorizontalAlign.Center,
         Vertical = options?.Vertical ?? VerticalAlign.Middle,
         ValueColor = reading.IsCurrent ? options?.ValueColor : theme.TextMuted,
@@ -85,19 +89,11 @@ public static class Readout
         using var labelFont = TextMetrics.CreateFont(theme.GetTypeface(TextRole.Label), theme.LabelSize);
 
         float digit = TextMetrics.DigitAdvance(valueFont);
-        float sampleWidth = Advance(valueFont, options.WidestValue ?? value, digit);
         float unitWidth = hasUnit ? unitFont.MeasureText(options.Unit!) : 0f;
         float valueCap = TextMetrics.CapHeight(valueFont);
+        float labelBlock = hasLabel ? TextMetrics.CapHeight(labelFont) + theme.LabelSize * LabelGapRatio : 0f;
 
-        // Everything below is measured at the reference size and scales linearly with the value's size.
-        float widthPerSize = (sampleWidth + (hasUnit ? unitWidth * ratio + UnitGapRatio * TextMetrics.ReferenceSize : 0f))
-                             / TextMetrics.ReferenceSize;
-        float labelCap = hasLabel ? TextMetrics.CapHeight(labelFont) : 0f;
-        float labelBlock = hasLabel ? labelCap + theme.LabelSize * LabelGapRatio : 0f;
-        float capPerSize = valueCap / TextMetrics.ReferenceSize;
-
-        float size = Math.Min(rect.Width / widthPerSize, Math.Max(1f, rect.Height - labelBlock) / capPerSize);
-        size = Math.Max(1f, size * Math.Clamp(options.Scale, 0.1f, 1f));
+        float size = Math.Max(1f, Fit(theme, rect, value, options, valueFont, unitFont, labelFont) * Math.Clamp(options.Scale, 0.1f, 1f));
         float k = size / TextMetrics.ReferenceSize;
 
         float actualValueWidth = Advance(valueFont, value, digit) * k;
@@ -142,11 +138,39 @@ public static class Readout
                 labelWidth = rect.Width;
             }
             float labelX = Align(options.Horizontal, rect.Left, rect.Right, labelWidth);
-            using var labelPaint = new SKPaint { Color = theme.TextMuted, IsAntialias = true };
+            using var labelPaint = new SKPaint { Color = options.LabelColor ?? theme.TextMuted, IsAntialias = true };
             canvas.DrawText(options.Label!, labelX, baseline + labelBlock, SKTextAlign.Left, labelFont, labelPaint);
         }
 
         return block;
+    }
+
+    /// <summary>The value size in pixels that fits <paramref name="rect"/>, before <see cref="ReadoutOptions.Scale"/>.</summary>
+    internal static float FitSize(Theme theme, SKRect rect, string value, ReadoutOptions? options = null)
+    {
+        options ??= new ReadoutOptions();
+        if (string.IsNullOrEmpty(value) || rect.Width <= 0 || rect.Height <= 0)
+            return 0f;
+        using var valueFont = TextMetrics.CreateFont(theme.GetTypeface(TextRole.Value), TextMetrics.ReferenceSize);
+        using var unitFont = TextMetrics.CreateFont(theme.GetTypeface(TextRole.Unit), TextMetrics.ReferenceSize);
+        using var labelFont = TextMetrics.CreateFont(theme.GetTypeface(TextRole.Label), theme.LabelSize);
+        return Math.Max(1f, Fit(theme, rect, value, options, valueFont, unitFont, labelFont));
+    }
+
+    private static float Fit(Theme theme, SKRect rect, string value, ReadoutOptions options, SKFont valueFont, SKFont unitFont, SKFont labelFont)
+    {
+        bool hasUnit = !string.IsNullOrEmpty(options.Unit);
+        bool hasLabel = !string.IsNullOrEmpty(options.Label);
+        float digit = TextMetrics.DigitAdvance(valueFont);
+        float sampleWidth = Advance(valueFont, options.WidestValue ?? value, digit);
+        float unitWidth = hasUnit ? unitFont.MeasureText(options.Unit!) : 0f;
+
+        // Everything is measured at the reference size and scales linearly with the value's size.
+        float widthPerSize = (sampleWidth + (hasUnit ? unitWidth * theme.UnitRatio + UnitGapRatio * TextMetrics.ReferenceSize : 0f))
+                             / TextMetrics.ReferenceSize;
+        float labelBlock = hasLabel ? TextMetrics.CapHeight(labelFont) + theme.LabelSize * LabelGapRatio : 0f;
+        float capPerSize = TextMetrics.CapHeight(valueFont) / TextMetrics.ReferenceSize;
+        return Math.Min(rect.Width / widthPerSize, Math.Max(1f, rect.Height - labelBlock) / capPerSize);
     }
 
     private static float Align(HorizontalAlign align, float left, float right, float width) => align switch

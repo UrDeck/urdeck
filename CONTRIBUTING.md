@@ -99,6 +99,18 @@ Rules: draw from `context.Time`, never a frame count, so the motion is the same 
 state on the first paint and on the first paint after `Configure`; make the paint after which `IsAnimating` first
 returns `false` the resting state; keep `IsAnimating` cheap and free of side effects. See the Clock's `flap` style.
 
+### Drawing a gauge
+
+`Gauge.Draw(canvas, theme, rect, style, reading, options)` draws a formatted reading (see below) with a shape, `Ring`,
+`Bar`, `VerticalBar` or `Plain` (the readout alone), and places the readout itself. `GaugeScale.Resolve(reading,
+descriptor, options)` turns a reading into the `Fraction` (0 to 1, or null) and `Level` (normal, warning, critical) to
+pass in `GaugeOptions`; use it so that your widget scales like every other: the range is yours, else the catalog's, else
+0 to 100 for a percentage, and the value is rounded to the shown decimals first. With no fraction, draw `Plain`.
+`theme.GaugeStyle` is the style the theme prefers. The gauge keeps no state: the fraction you pass is the one drawn, so
+an ease is yours (see Animation: draw from `context.Time`, move from the fraction last drawn, keep `IsAnimating` true only
+while moving, and draw the first paint at rest). To draw several gauges at one text size, call `Gauge.Measure` for each
+and pass `smallest / own` as `GaugeOptions.ReadoutScale`. The stats widget is the reference use.
+
 ### Using readings
 
 A widget that shows data from a data provider (CPU load, a sensor, a Home Assistant state) declares the reading ids it
@@ -206,7 +218,9 @@ public sealed class ExampleProvider : IDataProvider
   path on every machine), because users write them into their config.
 - **Catalog.** `Describe()` lists every reading with its kind (`Number`, `Percent`, `Temperature`, `Text`, `OnOff`), a short
   label, a full name, and optionally a device, a range, a unit text for plain numbers, a default display unit and
-  decimals. The range is what keeps a readout the same size while the value changes. It is called once, before `Start`, and
+  decimals. The range is what keeps a readout the same size while the value changes. `Warning` and `Critical` say from
+  which value (canonical unit) the reading deserves attention; declare them only where a high value is a fault (a
+  temperature), never for a load, and a gauge colours itself by them. It is called once, before `Start`, and
   must not need `Start`. The catalog is fixed while the provider runs.
 - **Lifetime and demand.** The engine creates the provider when a reading of it is first subscribed to (or its catalog is
   requested), calls `Start`, then `SetDemand` with the paths currently subscribed to, and again whenever that set changes.

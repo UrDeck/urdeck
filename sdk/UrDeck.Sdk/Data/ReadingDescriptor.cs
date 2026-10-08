@@ -19,6 +19,15 @@ public sealed record ReadingDescriptor(string Path, ReadingKind Kind, string Lab
     /// <summary>The largest value the reading takes (canonical unit).</summary>
     public double? Max { get; init; }
 
+    /// <summary>
+    /// From this value on (canonical unit) the reading deserves attention. Null when a high value is not a fault, which
+    /// is the case for every reading that has no levels of its own.
+    /// </summary>
+    public double? Warning { get; init; }
+
+    /// <summary>From this value on (canonical unit) the reading is a fault. Null when it has none.</summary>
+    public double? Critical { get; init; }
+
     /// <summary>The unit text of a plain <see cref="ReadingKind.Number"/>.</summary>
     public string? Unit { get; init; }
 

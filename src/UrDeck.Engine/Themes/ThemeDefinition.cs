@@ -3,6 +3,7 @@
 
 using System.Text.RegularExpressions;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Sdk.Components;
 
 namespace UrDeck.Engine.Themes;
 
@@ -16,6 +17,7 @@ public sealed partial class ThemeDefinition
     public ThemeCardDefinition? Card { get; set; }
     public ThemeTypographyDefinition? Typography { get; set; }
     public ThemeStrokeDefinition? Stroke { get; set; }
+    public ThemeGaugeDefinition? Gauge { get; set; }
 
     /// <summary>This definition's values, with anything it leaves out taken from <paramref name="baseline"/>.</summary>
     public ThemeDefinition MergeOver(ThemeDefinition baseline) => new()
@@ -24,6 +26,7 @@ public sealed partial class ThemeDefinition
         Card = (Card ?? new ThemeCardDefinition()).MergeOver(baseline.Card),
         Typography = (Typography ?? new ThemeTypographyDefinition()).MergeOver(baseline.Typography),
         Stroke = (Stroke ?? new ThemeStrokeDefinition()).MergeOver(baseline.Stroke),
+        Gauge = (Gauge ?? new ThemeGaugeDefinition()).MergeOver(baseline.Gauge),
     };
 
     /// <summary>Clears every invalid value (so a merge replaces it with the default's) and logs a warning for each.</summary>
@@ -76,6 +79,11 @@ public sealed partial class ThemeDefinition
                 UrDeckLog.Warn($"Theme '{themeName}': stroke.cap '{cap}' must be 'round' or 'square'; using the default.");
                 s.Cap = null;
             }
+        }
+        if (Gauge is { Style: { } style } && !ThemeGaugeDefinition.IsStyle(style))
+        {
+            UrDeckLog.Warn($"Theme '{themeName}': gauge.style '{style}' must be 'ring', 'bar' or 'verticalBar'; using the default.");
+            Gauge.Style = null;
         }
     }
 
@@ -199,5 +207,26 @@ public sealed class ThemeStrokeDefinition
     {
         Thickness = Thickness ?? b?.Thickness,
         Cap = Cap ?? b?.Cap,
+    };
+}
+
+public sealed class ThemeGaugeDefinition
+{
+    /// <summary>"ring", "bar" or "verticalBar".</summary>
+    public string? Style { get; set; }
+
+    internal static bool IsStyle(string style) => Parse(style) != null;
+
+    internal static GaugeStyle? Parse(string? style) => style?.Trim().ToLowerInvariant() switch
+    {
+        "ring" => GaugeStyle.Ring,
+        "bar" => GaugeStyle.Bar,
+        "verticalbar" => GaugeStyle.VerticalBar,
+        _ => null,
+    };
+
+    internal ThemeGaugeDefinition MergeOver(ThemeGaugeDefinition? b) => new()
+    {
+        Style = Style ?? b?.Style,
     };
 }
