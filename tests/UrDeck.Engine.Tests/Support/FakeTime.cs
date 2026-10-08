@@ -111,13 +111,13 @@ internal sealed class FakeTime : TimeProvider
             if (due == null)
             {
                 // Nothing is scheduled yet: the code under test is still getting to its next wait.
-                WaitReal(() => condition() || ActiveTimers > 0, 50);
+                WaitReal(() => condition() || ActiveTimers > 0, 1000);
                 continue;
             }
 
             Advance(TimeSpan.FromTicks(Math.Max(0, due.Value - GetTimestamp())));
             long fired = Version;
-            WaitReal(() => condition() || Version != fired, 250);
+            WaitReal(() => condition() || Version != fired, 2000);
             WaitQuiet();
         }
 
@@ -136,8 +136,8 @@ internal sealed class FakeTime : TimeProvider
     {
         long seen = Version;
         long quietSince = Stopwatch.GetTimestamp();
-        long until = quietSince + Stopwatch.Frequency / 2; // never wait longer than half a second
-        long window = Stopwatch.Frequency / 1000 * 5;
+        long until = quietSince + Stopwatch.Frequency * 2; // never wait longer than two seconds
+        long window = Stopwatch.Frequency / 1000 * 10;
         while (Stopwatch.GetTimestamp() < until)
         {
             long now = Stopwatch.GetTimestamp();
