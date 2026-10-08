@@ -15,6 +15,7 @@ internal sealed class FakeTime : TimeProvider
     private readonly List<FakeTimer> _timers = [];
     private long _now;
     private long _version;
+    private long _created;
 
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
 
@@ -42,6 +43,16 @@ internal sealed class FakeTime : TimeProvider
         }
     }
 
+    /// <summary>How many timers were ever created. A test compares two readings to know a timer was registered in between.</summary>
+    public long TimersCreated
+    {
+        get
+        {
+            lock (_gate)
+                return _created;
+        }
+    }
+
     public int ActiveTimers
     {
         get
@@ -58,6 +69,7 @@ internal sealed class FakeTime : TimeProvider
         lock (_gate)
         {
             _timers.Add(timer);
+            _created++;
             _version++;
         }
 
@@ -94,9 +106,10 @@ internal sealed class FakeTime : TimeProvider
     /// <summary>
     /// Moves the clock from one timer to the next (never past a timer the code under test has not yet scheduled) until the
     /// condition holds. After each jump it waits for the code under test to react and go quiet, so the result does not
-    /// depend on how fast the machine is. Returns false when the virtual or the real limit is reached first.
+    /// depend on how fast the machine is. <paramref name="settled"/> says the code under test has finished reacting to the
+    /// last thing that happened (see <see cref="FakeProvider.IsSettled"/>). Returns false when the virtual or the real limit is reached first.
     /// </summary>
-    public bool AdvanceUntil(Func<bool> condition, TimeSpan step, TimeSpan virtualLimit, int realLimitMs = 20000)
+    public bool AdvanceUntil(Func<bool> condition, TimeSpan step, TimeSpan virtualLimit, int realLimitMs = 20000, Func<bool>? settled = null)
     {
         long started = Environment.TickCount64;
         var limit = Elapsed + virtualLimit;
@@ -104,6 +117,12 @@ internal sealed class FakeTime : TimeProvider
         {
             if (Elapsed >= limit || Environment.TickCount64 - started > realLimitMs)
                 return false;
+
+            // Never jump while the code under test is between finishing a sample and scheduling its next wait: the only timer
+            // that exists then is the sample's own timeout, and jumping to it would fire it. The wait is a ceiling, for
+            // tests whose sample is meant to hang.
+            if (settled != null)
+                WaitReal(() => condition() || settled(), 1000);
 
             long? due;
             lock (_gate)

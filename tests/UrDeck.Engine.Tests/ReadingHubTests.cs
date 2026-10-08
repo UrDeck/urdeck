@@ -42,7 +42,7 @@ public sealed class ReadingHubTests : IDisposable
     }
 
     private bool Pump(Func<bool> condition, int virtualSeconds = 30) =>
-        _time.AdvanceUntil(condition, Step, TimeSpan.FromSeconds(virtualSeconds));
+        _time.AdvanceUntil(condition, Step, TimeSpan.FromSeconds(virtualSeconds), settled: () => Provider.IsSettled);
 
     /// <summary>Waits for the first sample before moving the clock, so every gap is measured from a known start.</summary>
     private bool PumpSamples(int count, int virtualSeconds = 30) =>
@@ -319,7 +319,7 @@ public sealed class ReadingHubTests : IDisposable
         _registry.TryRegister(other.Descriptor("other"), out _);
 
         Hub.Subscribe(["fake:a", "other:a"]);
-        _time.AdvanceUntil(() => other.Samples >= 12, Step, TimeSpan.FromSeconds(30));
+        _time.AdvanceUntil(() => other.Samples >= 12, Step, TimeSpan.FromSeconds(30), settled: () => other.IsSettled);
 
         Assert.True(other.Samples >= 12);
         Assert.Equal(1, Provider.MaxConcurrentSamples);
@@ -499,7 +499,7 @@ public sealed class ReadingHubTests : IDisposable
         Provider.OnSample = (_, _, _) => throw new InvalidOperationException("boom");
         Hub.Subscribe(["fake:a"]);
         Assert.True(Wait(() => Provider.Samples >= 1));
-        Assert.True(_time.AdvanceUntil(() => Provider.Samples >= 4, TimeSpan.FromMilliseconds(250), TimeSpan.FromMinutes(10)));
+        Assert.True(_time.AdvanceUntil(() => Provider.Samples >= 4, TimeSpan.FromMilliseconds(250), TimeSpan.FromMinutes(10), settled: () => Provider.IsSettled));
 
         var times = SampleTimes();
         Assert.InRange(Ms(times[1] - times[0]), 40000, 40750);
@@ -561,7 +561,7 @@ public sealed class ReadingHubTests : IDisposable
         _registry.TryRegister(other.Descriptor("other"), out _);
         Hub.Subscribe(["fake:a", "other:a"]);
 
-        Assert.True(_time.AdvanceUntil(() => other.Samples >= 20, Step, TimeSpan.FromSeconds(60)));
+        Assert.True(_time.AdvanceUntil(() => other.Samples >= 20, Step, TimeSpan.FromSeconds(60), settled: () => other.IsSettled));
         Assert.Equal(1, Provider.Samples);
         Assert.Equal(ReadingState.Ok, Hub.Read("other:a").State);
     }
