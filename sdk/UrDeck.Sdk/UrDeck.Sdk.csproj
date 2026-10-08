@@ -11,8 +11,10 @@
          0.3.0 (assembly version unchanged, the addition is not breaking): IWidget.IsAnimating (animation).
          0.3.0.0 / package 0.4.0: RefreshOnEventAttribute removed and RefreshOnDataAttribute added, IWidget gained Attach and
          Subscriptions, and the Data namespace arrived (data-providers). Removing a public type is breaking, so plugins
-         built against 0.2.0.0 must be rebuilt. -->
-    <Version>0.4.0</Version>
+         built against 0.2.0.0 must be rebuilt.
+         Package 0.5.0 (stats-gauges): Gauge, GaugeScale, ReadingDescriptor.Warning/Critical and Theme.GaugeStyle. All
+         additive, so the assembly version stays. -->
+    <Version>0.5.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

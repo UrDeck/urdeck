@@ -77,11 +77,28 @@ Config is `urdeck-config.json`, located next to the executable (`src/UrDeck.Host
 
 ### Stats widget
 
-`urdeck.widgets.stats` (1x1 and 2x2) shows one reading from any data provider: a large value with its unit and a label. Its
-settings are a list of `slots`; the first slot is shown and further slots stay in the file for the larger compositions to come.
+`urdeck.widgets.stats` shows readings from any data provider: a large value with its unit and a label, optionally inside a
+gauge. Its settings are a list of `slots`, which fill the positions of the card's size in order:
+
+| Size | Positions |
+|---|---|
+| 1x1, 2x2 | one reading (slot 1) |
+| 4x2 | two gauges side by side (slots 1 and 2) above three text stats (slots 3 to 5) |
+| 4x4 | four gauges in two rows (slots 1 to 4) above three text stats (slots 5 to 7) |
+
+Slots beyond the positions of the size stay in the file; a position without a slot stays empty.
 
 ```json
 { "typeId": "urdeck.widgets.stats", "col": 0, "row": 2, "slots": [ { "reading": "system:cpu/core/2/load" } ] }
+```
+
+A 4x4 with the readings that exist today:
+
+```json
+{ "typeId": "urdeck.widgets.stats", "col": 0, "row": 0, "width": 4, "height": 4, "slots": [
+  { "reading": "system:cpu/load" }, { "reading": "system:memory/load", "label": "RAM" },
+  { "reading": "system:cpu/core/1/load" }, { "reading": "system:cpu/core/2/load", "style": "bar" },
+  { "reading": "system:cpu/core/3/load" }, { "reading": "system:cpu/core/4/load" }, { "reading": "system:cpu/core/5/load" } ] }
 ```
 
 | Slot field | Meaning |
@@ -90,6 +107,11 @@ settings are a list of `slots`; the first slot is shown and further slots stay i
 | `label` | Absent: the label the provider declares (for example `Core 2`). A text: shown instead. `""`: no label. |
 | `unit` | `celsius` or `fahrenheit` for readings that have several units (otherwise the reading's default, then the region's). |
 | `decimals` | Number of decimals to show (default 0). |
+| `style` | `plain`, `gauge` (the theme's default gauge style), `ring`, `bar` or `verticalBar`. Absent: plain at 1x1 and 2x2, the theme's gauge style in a gauge position of a 4x2 or 4x4. Text positions are always plain. A reading that has no range to measure against (a text, a plain number) is drawn plain whatever the style. |
+| `min`, `max` | The gauge's range, replacing the one the provider declares (a percentage defaults to 0 to 100). |
+| `warning`, `critical` | From these values on the gauge is drawn in the theme's warning or critical colour. Replace the provider's own levels; the `system` readings have none. In the reading's canonical unit (degrees Celsius for a temperature). |
+
+The fill eases to a new value over about 300 ms; the number and the colour change at once.
 
 The `system` provider offers `system:cpu/load` (all logical processors), `system:cpu/core/<n>/load` (logical processor `n`,
 counted from 1) and `system:memory/load`, all as percentages, with no administrator rights. CPU load is the share of time the processors are busy, so with a CPU that boosts it reads lower under load than Task Manager, which weighs by clock speed (`docs/perf/data-providers.md`). A reading that does not exist

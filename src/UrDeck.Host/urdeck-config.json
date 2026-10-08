@@ -12,6 +12,22 @@
           "format": "24h",
           "showDate": true,
           "fontSize": 1.0
+        },
+        {
+          "typeId": "urdeck.widgets.stats",
+          "col": 0,
+          "row": 2,
+          "width": 4,
+          "height": 4,
+          "slots": [
+            { "reading": "system:cpu/load" },
+            { "reading": "system:memory/load", "label": "RAM" },
+            { "reading": "system:cpu/core/1/load", "style": "bar" },
+            { "reading": "system:cpu/core/2/load", "style": "verticalBar" },
+            { "reading": "system:cpu/core/3/load" },
+            { "reading": "system:cpu/core/4/load" },
+            { "reading": "system:cpu/core/5/load" }
+          ]
         }
       ]
     }

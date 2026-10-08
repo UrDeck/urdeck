@@ -4,6 +4,7 @@
 using SkiaSharp;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Sdk;
+using UrDeck.Sdk.Components;
 
 namespace UrDeck.Engine.Themes;
 
@@ -48,6 +49,7 @@ public static class ThemeResolver
             StrokeCap = string.Equals(stroke.Cap, "square", StringComparison.OrdinalIgnoreCase)
                 ? SKStrokeCap.Square
                 : SKStrokeCap.Round,
+            GaugeStyle = ThemeGaugeDefinition.Parse(d.Gauge?.Style) ?? GaugeStyle.Ring,
             Typefaces = LoadTypefaces(loaded),
         };
     }

@@ -79,6 +79,42 @@ public sealed class ThemeTests : IDisposable
     }
 
     [Fact]
+    public void GaugeStyle_IsRingInTheBuiltInThemes_AndAUserThemeCanChangeIt()
+    {
+        foreach (string name in ThemeStore.BuiltInNames)
+        {
+            using var builtIn = ThemeResolver.Resolve(Store().Load(name), 275);
+            Assert.Equal(UrDeck.Sdk.Components.GaugeStyle.Ring, builtIn.GaugeStyle);
+        }
+
+        WriteTheme("bars", """{ "gauge": { "style": "bar" } }""");
+        using var bars = ThemeResolver.Resolve(Store().Load("bars"), 275);
+
+        Assert.Equal(UrDeck.Sdk.Components.GaugeStyle.Bar, bars.GaugeStyle);
+    }
+
+    [Fact]
+    public void APartialUserTheme_InheritsTheGaugeStyle()
+    {
+        WriteTheme("mine", """{ "colors": { "accent": "#ff00ff" } }""");
+        using var theme = ThemeResolver.Resolve(Store().Load("mine"), 275);
+
+        Assert.Equal(UrDeck.Sdk.Components.GaugeStyle.Ring, theme.GaugeStyle);
+    }
+
+    [Theory]
+    [InlineData("plain")]
+    [InlineData("disc")]
+    public void APlainOrUnknownGaugeStyle_FallsBackToRingWithAWarning(string style)
+    {
+        WriteTheme("odd", "{ \"gauge\": { \"style\": \"" + style + "\" } }");
+        using var theme = ThemeResolver.Resolve(Store().Load("odd"), 275);
+
+        Assert.Equal(UrDeck.Sdk.Components.GaugeStyle.Ring, theme.GaugeStyle);
+        Assert.Contains("gauge.style", Log);
+    }
+
+    [Fact]
     public void UnknownTheme_FallsBackToDefaultWithWarning()
     {
         var loaded = Store().Load("no-such-theme");

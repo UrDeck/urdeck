@@ -19,6 +19,24 @@ public class SdkContractTests
     }
 
     [Fact]
+    public void ADescriptorBuiltWithoutLevels_HasNone()
+    {
+        // Providers built before warning and critical existed construct descriptors without them.
+        var descriptor = new ReadingDescriptor("cpu/load", ReadingKind.Percent, "CPU", "CPU load");
+
+        Assert.Null(descriptor.Warning);
+        Assert.Null(descriptor.Critical);
+    }
+
+    [Fact]
+    public void TheSystemProvidersReadings_DeclareNoLevels()
+    {
+        var provider = new UrDeck.Providers.Machine.SystemProvider();
+
+        Assert.All(provider.Describe(), d => Assert.True(d.Warning == null && d.Critical == null));
+    }
+
+    [Fact]
     public void NeedsRender_DefaultsToTrue()
     {
         // A widget that does not override it is repainted on every refresh.
