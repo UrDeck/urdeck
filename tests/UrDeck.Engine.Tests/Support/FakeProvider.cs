@@ -37,6 +37,16 @@ internal sealed class FakeProvider(TimeProvider time) : IDataProvider
 
     public int MaxConcurrentSamples { get; private set; }
 
+    private long _timersWhenLastSampleEnded = -1;
+
+    /// <summary>
+    /// True when no sample is running and the hub has scheduled a wait since the last one ended (or no sample ran yet).
+    /// Moving the fake clock before that would fire the sample's own timeout timer, the only one that exists in between.
+    /// </summary>
+    public bool IsSettled =>
+        Volatile.Read(ref SamplesRunning) == 0
+        && (_timersWhenLastSampleEnded < 0 || (time as FakeTime)?.TimersCreated > _timersWhenLastSampleEnded);
+
     public IReadOnlyList<string> Calls
     {
         get
@@ -97,6 +107,7 @@ internal sealed class FakeProvider(TimeProvider time) : IDataProvider
         }
         finally
         {
+            Volatile.Write(ref _timersWhenLastSampleEnded, (time as FakeTime)?.TimersCreated ?? -1);
             Interlocked.Decrement(ref SamplesRunning);
         }
     }
