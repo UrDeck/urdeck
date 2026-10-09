@@ -62,7 +62,7 @@ everything else should be fine on Sonnet.
   of places typed into the widgets), the 4x2 weather widget with Meteocons animated icons (`SkiaSharp.Skottie`), the
   time reading, patterned catalog entries, attribution carried with the data and drawn by the weather and stats widgets,
   and `IWidgetHost.Log`. Spike and measurements in `docs/perf/weather.md`.
-- `pages-and-pager` is implemented (2026-10-09; archived once merged): the window never takes focus
+- `pages-and-pager` is implemented (2026-10-09, archived as `openspec/changes/archive/2026-10-09-pages-and-pager`): the window never takes focus
   (`WS_EX_NOACTIVATE`; Escape no longer closes it, `URDECK_ACTIVATABLE=1` restores it), swipe between pages with a
   bounce at the ends, the page indicator (`pager.indicator`: `always`, `fade`, `off`, `auto`) with tap-to-switch,
   `--snapshot --page N`, and the indicator in the theme. Only the current page is alive. Measurements in

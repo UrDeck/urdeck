@@ -75,4 +75,4 @@
 - [x] 9.2 `README.md`: pages and swipe, the `pager.indicator` setting with its four values, `--snapshot --page`, Escape no longer closing the window, and `URDECK_ACTIVATABLE`
 - [x] 9.3 `docs/BACKLOG.md`: item 8 status and "Current state", with the web view swipe gap and the keyboard-focus gap noted; `docs/ROADMAP.md`: milestone 1's pages line
 - [x] 9.4 `docs/perf/pages-and-pager.md`: the focus result, the spike result and the measurements from 8.6
-- [ ] 9.5 Archive the change when every task is ticked and verified
+- [x] 9.5 Archive the change when every task is ticked and verified
