@@ -37,7 +37,7 @@
 - [x] 5.2 The pager: one page host at rest, a second built beside it when the swipe direction is decided, moved with the finger, settled with the mechanism from task 2.5, the page that left disposed after settling (views disposed, readings unsubscribed, frame-clock entries removed)
 - [x] 5.3 Translate window pointer events into recogniser samples at the pager's root with pointer capture; views handle none; mouse, touch and pen share the path; ignore a second contact
 - [x] 5.4 Past-the-end swipes use the rubber band and build nothing; no wrap
-- [ ] 5.5 A configuration, theme, plugin or placement change during a swipe finishes it at once, then rebuilds; the navigator's reload operation keeps the page
+- [x] 5.5 A configuration, theme, plugin or placement change during a swipe finishes it at once, then rebuilds; the navigator's reload operation keeps the page
 - [x] 5.6 Generalise `FrameClock` from `WidgetView` to a small interface (frame interval, invalidate) so the indicator can use it
 - [x] 5.7 `IndicatorView`: draws `PageIndicator` in the indicator rectangle; repaints only on a change of position or opacity; tap on a slot goes to that page with the slide; for `fade` it appears on a page change or swipe start, fades after about two seconds, and is not hit-testable while invisible
 - [x] 5.8 Rebuild when the resolved mode, the page count or the theme's band height change; layout uses `ChromeLayout` for the grid height
@@ -64,8 +64,8 @@
 - [ ] 8.1 `dotnet build urdeck.slnx -c Release` with 0 warnings, `dotnet test urdeck.slnx -c Release`, the engine coverage floor, `dotnet format urdeck.slnx --severity warn`, and `openspec validate --all --strict`
 - [x] 8.2 Snapshots at 1100x3840 of pages 0, 1 and 2 of a three-page configuration in `always`, `fade` and `auto`: the band, the pill, widgets not under it
 - [ ] 8.3 Plugin hot-reload still works with the page host: rebuild a widget while running, `urdeck.log` shows the reload and `Unloaded plugin context(s) collected`, no "not collected" warning
-- [ ] 8.4 On the panel: swipe feel by touch, bounce at both ends, tap on each dot, a swipe that returns, a fast flick, a swipe during a config save, and the page kept across a config save
-- [ ] 8.5 On the panel: values on the incoming page (dimmed last value, not dashes, for a reading seen before), the Clock showing the current time after a long absence, no flashing empty cards
+- [x] 8.4 On the panel: swipe feel by touch, bounce at both ends, tap on each dot, a swipe that returns, a fast flick, a swipe during a config save, and the page kept across a config save
+- [x] 8.5 On the panel: values on the incoming page (dimmed last value, not dashes, for a reading seen before), the Clock showing the current time after a long absence, no flashing empty cards
 - [ ] 8.6 On the panel: idle CPU and GPU with nothing moving are not above the single-page baseline of `docs/perf/render-host-baseline.md`; the frame clock stops after a swipe and after the fade; private bytes at rest and mid-swipe are recorded in `docs/perf/pages-and-pager.md`
 - [ ] 8.7 Owner looks at the indicator under the dark, light and glass themes: band height, dot and pill size, spacing, colours, the fade, the translucent backdrop
 
