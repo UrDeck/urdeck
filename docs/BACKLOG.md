@@ -518,8 +518,12 @@ framework follows the host decision in item 14: the same framework if WinUI 3 pa
 
 ## 12. Packaging and distribution
 
-Installer, start with Windows, tray icon (and using the `icon` config field for it, moved from `urdeck-framework`), auto-update, logo and branding, winget manifest and GitHub release automation, and a third-party notices file
+Installer, start with Windows, auto-update, logo and branding, winget manifest and GitHub release automation, and a third-party notices file
 (SkiaSharp is MIT and must be attributed in binary releases). **Model:** Sonnet.
+
+Tray icon with Quit: done (`tray-icon`). The menu is a list of entries, so the editor's "Open editor" entry (and a
+single-instance guard, which would also be the place to bring the first copy's editor forward) are added later. Still
+open here: using the `icon` config field for the tray icon (moved from `urdeck-framework`).
 
 ## 13. SDK distribution and other displays
 

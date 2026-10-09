@@ -12,6 +12,7 @@ public partial class App : Application
 {
     private HostContext? _host;
     private MainWindow? _window;
+    private TrayIcon? _tray;
     private DispatcherQueueTimer? _memTimer;
 
     public App()
@@ -41,9 +42,17 @@ public partial class App : Application
         _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Target);
         _window.Closed += (_, _) =>
         {
+            _tray?.Dispose();
+            _tray = null;
             _host.Dispose();
             _host = null;
         };
         _window.Activate();
+
+        // The tray icon is the way to close the app: the window never takes focus and has no taskbar button.
+        var window = _window;
+        _tray = new TrayIcon(
+            [new TrayMenuEntry("Quit", window.Close)],
+            Path.Combine(AppContext.BaseDirectory, "urdeck.ico"));
     }
 }
