@@ -3,6 +3,7 @@
 
 using System.Numerics;
 using Microsoft.UI.Composition;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
@@ -36,6 +37,10 @@ internal sealed class PagerController
 {
     private static readonly TimeSpan SettleTime = TimeSpan.FromMilliseconds(250);
 
+    // A page's surfaces are native memory the garbage collector cannot see, so a released page can sit around for a
+    // long time. One collection shortly after the pages have settled (and nothing is moving) frees them.
+    private static readonly TimeSpan ReclaimDelay = TimeSpan.FromSeconds(1.5);
+
     private readonly Grid _input;
     private readonly Canvas _pages;
     private readonly Canvas _overlay;
@@ -49,6 +54,7 @@ internal sealed class PagerController
     private PageHost? _neighbor;
     private int _neighborIndex = -1;
     private IndicatorView? _indicator;
+    private readonly DispatcherQueueTimer _reclaim;
     private bool _animating;
     private int _epoch;
 
@@ -60,6 +66,10 @@ internal sealed class PagerController
         _clock = clock;
         _navigator = navigator;
         _compositor = ElementCompositionPreview.GetElementVisual(pages).Compositor;
+        _reclaim = pages.DispatcherQueue.CreateTimer();
+        _reclaim.Interval = ReclaimDelay;
+        _reclaim.IsRepeating = false;
+        _reclaim.Tick += (_, _) => GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: false);
 
         input.PointerPressed += OnPressed;
         input.PointerMoved += OnMoved;
@@ -315,6 +325,8 @@ internal sealed class PagerController
         if (_current != null)
             SetOffset(_current, 0);
         _animating = false;
+        _reclaim.Stop();
+        _reclaim.Start();
     }
 
     private void Animate(PageHost page, double target)

@@ -63,10 +63,10 @@
 
 - [ ] 8.1 `dotnet build urdeck.slnx -c Release` with 0 warnings, `dotnet test urdeck.slnx -c Release`, the engine coverage floor, `dotnet format urdeck.slnx --severity warn`, and `openspec validate --all --strict`
 - [x] 8.2 Snapshots at 1100x3840 of pages 0, 1 and 2 of a three-page configuration in `always`, `fade` and `auto`: the band, the pill, widgets not under it
-- [ ] 8.3 Plugin hot-reload still works with the page host: rebuild a widget while running, `urdeck.log` shows the reload and `Unloaded plugin context(s) collected`, no "not collected" warning
+- [x] 8.3 Plugin hot-reload still works with the page host: rebuild a widget while running, `urdeck.log` shows the reload and `Unloaded plugin context(s) collected`, no "not collected" warning
 - [x] 8.4 On the panel: swipe feel by touch, bounce at both ends, tap on each dot, a swipe that returns, a fast flick, a swipe during a config save, and the page kept across a config save
 - [x] 8.5 On the panel: values on the incoming page (dimmed last value, not dashes, for a reading seen before), the Clock showing the current time after a long absence, no flashing empty cards
-- [ ] 8.6 On the panel: idle CPU and GPU with nothing moving are not above the single-page baseline of `docs/perf/render-host-baseline.md`; the frame clock stops after a swipe and after the fade; private bytes at rest and mid-swipe are recorded in `docs/perf/pages-and-pager.md`
+- [x] 8.6 On the panel: idle CPU and GPU with nothing moving are not above the single-page baseline of `docs/perf/render-host-baseline.md`; the frame clock stops after a swipe and after the fade; private bytes at rest and mid-swipe are recorded in `docs/perf/pages-and-pager.md`
 - [ ] 8.7 Owner looks at the indicator under the dark, light and glass themes: band height, dot and pill size, spacing, colours, the fade, the translucent backdrop
 
 ## 9. Documentation
