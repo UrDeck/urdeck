@@ -61,7 +61,7 @@
 
 ## 8. Verify
 
-- [ ] 8.1 `dotnet build urdeck.slnx -c Release` with 0 warnings, `dotnet test urdeck.slnx -c Release`, the engine coverage floor, `dotnet format urdeck.slnx --severity warn`, and `openspec validate --all --strict`
+- [x] 8.1 `dotnet build urdeck.slnx -c Release` with 0 warnings, `dotnet test urdeck.slnx -c Release`, the engine coverage floor, `dotnet format urdeck.slnx --severity warn`, and `openspec validate --all --strict`
 - [x] 8.2 Snapshots at 1100x3840 of pages 0, 1 and 2 of a three-page configuration in `always`, `fade` and `auto`: the band, the pill, widgets not under it
 - [x] 8.3 Plugin hot-reload still works with the page host: rebuild a widget while running, `urdeck.log` shows the reload and `Unloaded plugin context(s) collected`, no "not collected" warning
 - [x] 8.4 On the panel: swipe feel by touch, bounce at both ends, tap on each dot, a swipe that returns, a fast flick, a swipe during a config save, and the page kept across a config save
@@ -71,8 +71,8 @@
 
 ## 9. Documentation
 
-- [ ] 9.1 `docs/themes.md`: the `indicator` group and which colours it uses
-- [ ] 9.2 `README.md`: pages and swipe, the `pager.indicator` setting with its four values, `--snapshot --page`, Escape no longer closing the window, and `URDECK_ACTIVATABLE`
-- [ ] 9.3 `docs/BACKLOG.md`: item 8 status and "Current state", with the web view swipe gap and the keyboard-focus gap noted; `docs/ROADMAP.md`: milestone 1's pages line
+- [x] 9.1 `docs/themes.md`: the `indicator` group and which colours it uses
+- [x] 9.2 `README.md`: pages and swipe, the `pager.indicator` setting with its four values, `--snapshot --page`, Escape no longer closing the window, and `URDECK_ACTIVATABLE`
+- [x] 9.3 `docs/BACKLOG.md`: item 8 status and "Current state", with the web view swipe gap and the keyboard-focus gap noted; `docs/ROADMAP.md`: milestone 1's pages line
 - [x] 9.4 `docs/perf/pages-and-pager.md`: the focus result, the spike result and the measurements from 8.6
 - [ ] 9.5 Archive the change when every task is ticked and verified

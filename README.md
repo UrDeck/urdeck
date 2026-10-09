@@ -32,6 +32,32 @@ consequence it receives no keyboard input and Escape does not close it. Until th
 (Task Manager or `Stop-Process`). For development, set `URDECK_ACTIVATABLE=1` before starting the host: the window can then take focus and Escape
 closes it.
 
+### Pages
+
+A configuration can hold several pages (`pages` in `urdeck-config.json`). Swipe left or right on the deck (mouse, touch
+or pen) to change page; the page follows your finger, and swiping past the first or last page bounces back, it never
+wraps. Only the page you are on is alive: the neighbour is built when a swipe starts and released once the slide has
+settled, so more pages cost nothing while you look at one. `activePage` is the page shown at startup; swiping does not
+change the file, and saving the config keeps you on the page you are on (matched by name, else by position).
+
+An indicator shows where you are: one dot per page, the current page as a pill that follows your finger. Tap a dot to go
+to that page. The `pager.indicator` setting chooses how it shows:
+
+```json
+{ "pager": { "indicator": "auto" } }
+```
+
+- `always`: a band at the bottom is reserved for it and it is always visible; widgets never go under it.
+- `fade`: it floats over the page, on a translucent pill, appears when a swipe starts or the page changes and fades out
+  a couple of seconds later. While it is faded out, taps go through it.
+- `off`: no indicator, no band.
+- `auto` (the default): hidden with one page; with several pages it behaves as `always` if at least four whole grid rows
+  remain after the band, otherwise as `fade`. The 1100x3840 panel keeps all 13 rows, because the band fits in the
+  space left over under them.
+
+A widget that no longer fits in the rows that remain is not placed, and an error is written to `urdeck.log`. The look of
+the indicator is part of the theme (`indicator`, see `docs/themes.md`).
+
 ### Snapshots
 
 `--snapshot` renders the active page off-screen with the same layout and widget code as the live window, writes a PNG and exits (no window is shown):
@@ -40,7 +66,9 @@ closes it.
 dotnet run --project src/UrDeck.Host -c Release -- --snapshot out.png --size 1100x3840
 ```
 
-`--size WxH` defaults to the target monitor's resolution. `*.snapshot.png` files are git-ignored.
+`--size WxH` defaults to the target monitor's resolution. `--page N` renders the page at index N (0-based, default
+`activePage`) with the band and the indicator showing that page; an index outside the page list fails with a logged reason
+and exit code 1. `*.snapshot.png` files are git-ignored.
 
 ## Configuration
 
