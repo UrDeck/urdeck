@@ -53,6 +53,10 @@ internal sealed class IndicatorView : SKXamlCanvas, IFrameClient
             Invalidate();
         };
         PaintSurface += OnPaintSurface;
+
+        // Ask for the first paint ourselves: after a rebuild nothing else does until the pill moves.
+        Loaded += (_, _) => Invalidate();
+        SizeChanged += (_, _) => Invalidate();
     }
 
     public TimeSpan FrameInterval => TimeSpan.Zero;

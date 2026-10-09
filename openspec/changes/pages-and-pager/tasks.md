@@ -67,12 +67,12 @@
 - [x] 8.4 On the panel: swipe feel by touch, bounce at both ends, tap on each dot, a swipe that returns, a fast flick, a swipe during a config save, and the page kept across a config save
 - [x] 8.5 On the panel: values on the incoming page (dimmed last value, not dashes, for a reading seen before), the Clock showing the current time after a long absence, no flashing empty cards
 - [x] 8.6 On the panel: idle CPU and GPU with nothing moving are not above the single-page baseline of `docs/perf/render-host-baseline.md`; the frame clock stops after a swipe and after the fade; private bytes at rest and mid-swipe are recorded in `docs/perf/pages-and-pager.md`
-- [ ] 8.7 Owner looks at the indicator under the dark, light and glass themes: band height, dot and pill size, spacing, colours, the fade, the translucent backdrop
+- [x] 8.7 Owner looks at the indicator under the dark, light and glass themes: band height, dot and pill size, spacing, colours, the fade, the translucent backdrop
 
 ## 9. Documentation
 
 - [ ] 9.1 `docs/themes.md`: the `indicator` group and which colours it uses
 - [ ] 9.2 `README.md`: pages and swipe, the `pager.indicator` setting with its four values, `--snapshot --page`, Escape no longer closing the window, and `URDECK_ACTIVATABLE`
 - [ ] 9.3 `docs/BACKLOG.md`: item 8 status and "Current state", with the web view swipe gap and the keyboard-focus gap noted; `docs/ROADMAP.md`: milestone 1's pages line
-- [ ] 9.4 `docs/perf/pages-and-pager.md`: the focus result, the spike result and the measurements from 8.6
+- [x] 9.4 `docs/perf/pages-and-pager.md`: the focus result, the spike result and the measurements from 8.6
 - [ ] 9.5 Archive the change when every task is ticked and verified
