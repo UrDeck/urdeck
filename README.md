@@ -25,6 +25,13 @@ dotnet test urdeck.slnx -c Release       # grid, config, plugin loader and analy
 
 The window covers the target monitor completely. Press Esc to close it. Diagnostics go to `urdeck.log` next to the executable.
 
+### Closing the window
+
+The window never takes focus, so touching or clicking the deck does not interrupt a game or another application. As a
+consequence it receives no keyboard input and Escape does not close it. Close it from its taskbar button (right-click,
+Close). For development, set `URDECK_ACTIVATABLE=1` before starting the host: the window can then take focus and Escape
+closes it.
+
 ### Snapshots
 
 `--snapshot` renders the active page off-screen with the same layout and widget code as the live window, writes a PNG and exits (no window is shown):

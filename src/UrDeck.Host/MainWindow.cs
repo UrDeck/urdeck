@@ -30,6 +30,7 @@ public sealed class MainWindow : Window
     private readonly WidgetPluginLoader _plugins;
     private readonly ThemeStore _themes;
     private readonly nint _hwnd;
+    private readonly WindowFocus? _focus;
     private readonly Grid _root = new();
     private readonly Grid _background = new();
     private readonly Canvas _surface = new();
@@ -76,15 +77,19 @@ public sealed class MainWindow : Window
         ApplyBackground();
         _root.Children.Add(_background);
         _root.Children.Add(_surface);
-        var escape = new KeyboardAccelerator { Key = Windows.System.VirtualKey.Escape };
-        escape.Invoked += (_, e) =>
+        if (!WindowFocus.IsEnabled)
         {
-            e.Handled = true;
-            Close();
-        };
-        _root.KeyboardAccelerators.Add(escape);
+            var escape = new KeyboardAccelerator { Key = Windows.System.VirtualKey.Escape };
+            escape.Invoked += (_, e) =>
+            {
+                e.Handled = true;
+                Close();
+            };
+            _root.KeyboardAccelerators.Add(escape);
+        }
         Content = _root;
 
+        _focus = WindowFocus.Apply(_hwnd);
         MonitorPlacement.Cover(_hwnd, _target.Bounds);
         _root.Loaded += (_, _) =>
         {
