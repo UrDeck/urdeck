@@ -693,3 +693,28 @@ public class PagerConfigTests : IDisposable
         Assert.Equal(IndicatorMode.Fade, again.Config.Pager.GetIndicatorMode());
     }
 }
+
+public class PageSelectionTests
+{
+    [Theory]
+    [InlineData(3, 1, null, 1)]
+    [InlineData(3, 9, null, 2)]
+    [InlineData(3, 1, 0, 0)]
+    [InlineData(3, 1, 2, 2)]
+    public void ChoosesAPage(int count, int active, int? requested, int expected)
+    {
+        Assert.True(PageSelection.TryChoose(count, active, requested, out int index, out string? error));
+        Assert.Equal(expected, index);
+        Assert.Null(error);
+    }
+
+    [Theory]
+    [InlineData(3, 5)]
+    [InlineData(3, -1)]
+    [InlineData(3, 3)]
+    public void APageOutsideTheList_Fails_WithAReason(int count, int requested)
+    {
+        Assert.False(PageSelection.TryChoose(count, 0, requested, out _, out string? error));
+        Assert.Contains($"Page {requested}", error);
+    }
+}

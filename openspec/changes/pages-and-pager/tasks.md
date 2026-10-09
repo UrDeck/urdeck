@@ -44,8 +44,8 @@
 
 ## 6. Snapshot
 
-- [ ] 6.1 `--snapshot --page N` builds page N's widgets, uses the same chrome layout and indicator as the window, and fails with a logged reason and exit code 1 for an index outside the list; the default page is `activePage`
-- [ ] 6.2 Update the `SnapshotCommand` usage comment and the `host-shell` entry-point text if the built wording differs
+- [x] 6.1 `--snapshot --page N` builds page N's widgets, uses the same chrome layout and indicator as the window, and fails with a logged reason and exit code 1 for an index outside the list; the default page is `activePage`
+- [x] 6.2 Update the `SnapshotCommand` usage comment and the `host-shell` entry-point text if the built wording differs
 
 ## 7. Tests
 
@@ -57,12 +57,12 @@
 - [x] 7.6 `PageIndicator`: pixel probes for the pill at positions 0, 0.5 and 1, one page draws nothing in `auto`, opacity zero draws nothing, slot mapping for tap points including beside the dot
 - [x] 7.7 Theme tests: the `indicator` group loads, a partial user theme and an older theme inherit it without a warning, an invalid value falls back with a warning
 - [x] 7.8 Config tests: `pager.indicator` round trip, absent means `auto`, an unknown value means `auto`, an older file without `pager` loads
-- [ ] 7.9 Snapshot test with the engine alone: page 1 of 3 shows the pill in the middle; an out-of-range page fails
+- [x] 7.9 Snapshot test with the engine alone: page 1 of 3 shows the pill in the middle; an out-of-range page fails
 
 ## 8. Verify
 
 - [ ] 8.1 `dotnet build urdeck.slnx -c Release` with 0 warnings, `dotnet test urdeck.slnx -c Release`, the engine coverage floor, `dotnet format urdeck.slnx --severity warn`, and `openspec validate --all --strict`
-- [ ] 8.2 Snapshots at 1100x3840 of pages 0, 1 and 2 of a three-page configuration in `always`, `fade` and `auto`: the band, the pill, widgets not under it
+- [x] 8.2 Snapshots at 1100x3840 of pages 0, 1 and 2 of a three-page configuration in `always`, `fade` and `auto`: the band, the pill, widgets not under it
 - [ ] 8.3 Plugin hot-reload still works with the page host: rebuild a widget while running, `urdeck.log` shows the reload and `Unloaded plugin context(s) collected`, no "not collected" warning
 - [ ] 8.4 On the panel: swipe feel by touch, bounce at both ends, tap on each dot, a swipe that returns, a fast flick, a swipe during a config save, and the page kept across a config save
 - [ ] 8.5 On the panel: values on the incoming page (dimmed last value, not dashes, for a reading seen before), the Clock showing the current time after a long absence, no flashing empty cards

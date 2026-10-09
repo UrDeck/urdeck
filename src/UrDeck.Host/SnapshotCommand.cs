@@ -4,13 +4,15 @@
 using System.Globalization;
 using SkiaSharp;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Layout;
 using UrDeck.Engine.Rendering;
 using UrDeck.Sdk;
 
 namespace UrDeck.Host;
 
 /// <summary>
-/// <c>--snapshot out.png [--size WxH] [--theme name]</c>: renders the active page off-screen with the same layout and
+/// <c>--snapshot out.png [--size WxH] [--theme name] [--page N]</c>: renders a page (default: the one at
+/// <c>activePage</c>) off-screen with the same layout and
 /// widget code as the live window, writes a PNG and exits. Defaults to the target monitor's resolution. It uses the
 /// engine alone and runs before the XAML application starts.
 /// </summary>
@@ -38,15 +40,27 @@ internal static class SnapshotCommand
             string themeName = themeIndex >= 0 && themeIndex + 1 < args.Length ? args[themeIndex + 1] : host.Config.Config.Theme;
             var theme = host.Themes.Load(themeName);
 
-            var page = host.Config.Config.CurrentPage;
-            var widgets = new List<(WidgetConfig, IWidget)>();
-            foreach (var config in page?.Widgets ?? new List<WidgetConfig>())
+            int? requested = null;
+            int pageArg = Array.IndexOf(args, "--page");
+            if (pageArg >= 0 && pageArg + 1 < args.Length)
+                requested = int.Parse(args[pageArg + 1], CultureInfo.InvariantCulture);
+
+            var config = host.Config.Config;
+            if (!PageSelection.TryChoose(config.Pages.Count, config.ActivePage, requested, out int pageIndex, out string? pageError))
             {
-                var widget = host.Plugins.CreateWidget(config);
+                UrDeckLog.Error($"Snapshot failed: {pageError}");
+                return 1;
+            }
+
+            var page = config.Pages.Count == 0 ? null : config.Pages[pageIndex];
+            var widgets = new List<(WidgetConfig, IWidget)>();
+            foreach (var widgetConfig in page?.Widgets ?? new List<WidgetConfig>())
+            {
+                var widget = host.Plugins.CreateWidget(widgetConfig);
                 if (widget == null)
-                    UrDeckLog.Warn($"Snapshot: '{config.WidgetTypeId}' not registered");
+                    UrDeckLog.Warn($"Snapshot: '{widgetConfig.WidgetTypeId}' not registered");
                 else
-                    widgets.Add((config, widget));
+                    widgets.Add((widgetConfig, widget));
             }
 
             // Subscribe the way the live window does, and let the providers report once so the card shows values.
@@ -58,7 +72,8 @@ internal static class SnapshotCommand
             while (readings.AnyPending(ids) && DateTime.UtcNow < deadline)
                 Thread.Sleep(25);
 
-            using var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now);
+            using var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now,
+                new PageRenderer.Chrome(config.Pager.GetIndicatorMode(), pageIndex, config.Pages.Count));
             using var file = File.Create(output);
             bitmap.Encode(file, SKEncodedImageFormat.Png, 100);
             UrDeckLog.Info($"Snapshot {width}x{height} with {widgets.Count} widget(s) written to {Path.GetFullPath(output)}");
