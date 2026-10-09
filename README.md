@@ -28,8 +28,8 @@ The window covers the target monitor completely. Press Esc to close it. Diagnost
 ### Closing the window
 
 The window never takes focus, so touching or clicking the deck does not interrupt a game or another application. As a
-consequence it receives no keyboard input and Escape does not close it. Close it from its taskbar button (right-click,
-Close). For development, set `URDECK_ACTIVATABLE=1` before starting the host: the window can then take focus and Escape
+consequence it receives no keyboard input and Escape does not close it. Until the tray icon arrives, end the process
+(Task Manager or `Stop-Process`). For development, set `URDECK_ACTIVATABLE=1` before starting the host: the window can then take focus and Escape
 closes it.
 
 ### Snapshots

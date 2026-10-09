@@ -4,7 +4,7 @@
 - [x] 1.2 `URDECK_ACTIVATABLE=1` skips the style and the subclass and keeps Escape closing the window; log which mode started
 - [ ] 1.3 On the panel with another window focused: tap, drag and long-press the deck; the other window keeps focus and stays in front. Repeat with a fullscreen application. Record the result in `docs/perf/pages-and-pager.md`
 - [ ] 1.4 If the XAML child window still activates the top-level window, extend the subclass to cover it; only if that fails use the last resort of design decision 1 and say so in the note
-- [ ] 1.5 Right-click the taskbar button then Close closes the host; the taskbar button is still there
+- [x] 1.5 Dropped: the owner has no taskbar button and does not need one; the tray icon (milestone 2) will close the app
 - [x] 1.6 `host-shell` spec text is correct for what was built; `README.md` and `AGENTS.md` say that Escape no longer closes the window and how to close it (taskbar) and how to restore it for development
 
 ## 2. Spike: the slide (throwaway, result recorded in `docs/perf/pages-and-pager.md`)

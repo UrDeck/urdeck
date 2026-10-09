@@ -57,7 +57,7 @@ See the README license map before moving code between projects: it can change th
 - The host is an unpackaged, self-contained WinUI 3 app with its own `Main` (`Program.cs`): `--snapshot` runs with the
   engine alone and exits before the XAML application starts. `App.xaml` must stay (building the application resources
   in code crashes). Widget types are never XAML types.
-- The window has `WS_EX_NOACTIVATE`: it never takes focus, so Escape does not close it. Close it from the taskbar, or
+- The window has `WS_EX_NOACTIVATE`: it never takes focus, so Escape does not close it. End the process, or
   start it with `URDECK_ACTIVATABLE=1` (the window can take focus and Escape closes it) when developing.
 - Launching `UrDeck.Host.exe` (not `--snapshot`) blocks the shell. Start it detached and read `urdeck.log` next to the exe;
   it logs monitors, target vs. actual content area, placed widgets, reloads and warnings.

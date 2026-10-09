@@ -36,7 +36,7 @@ See `proposal.md` for the motivation and scope. What the code does today, and wh
 ### 1. The window never takes focus
 
 Set `WS_EX_NOACTIVATE` on the window's extended style and subclass the window procedure to answer `WM_MOUSEACTIVATE`
-with `MA_NOACTIVATE`. Do not set `WS_EX_TOOLWINDOW`: the owner closes the app from the taskbar button, which must stay.
+with `MA_NOACTIVATE`. `WS_EX_TOOLWINDOW` is not set. The owner no longer sees a taskbar button for the window (it vanished in an earlier change, cause not found) and does not need one: the tray icon (milestone 2) is the intended way to close it.
 Escape stops working because a window that is never active gets no keyboard input; the owner accepts this until the tray
 icon (milestone 2). `URDECK_ACTIVATABLE=1` skips the style and the subclass so a developer keeps Escape.
 
