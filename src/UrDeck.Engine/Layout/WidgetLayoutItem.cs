@@ -16,4 +16,6 @@ public class WidgetLayoutItem
     public System.Drawing.Point CellPosition { get; set; }
     public Size CellSize { get; set; }
     public Size GridSize { get; set; }
+    /// <summary>False when the widget's cells do not lie inside the grid area; it is then not drawn.</summary>
+    public bool Placed { get; set; } = true;
 }

@@ -18,6 +18,7 @@ public sealed partial class ThemeDefinition
     public ThemeTypographyDefinition? Typography { get; set; }
     public ThemeStrokeDefinition? Stroke { get; set; }
     public ThemeGaugeDefinition? Gauge { get; set; }
+    public ThemeIndicatorDefinition? Indicator { get; set; }
 
     /// <summary>This definition's values, with anything it leaves out taken from <paramref name="baseline"/>.</summary>
     public ThemeDefinition MergeOver(ThemeDefinition baseline) => new()
@@ -27,6 +28,7 @@ public sealed partial class ThemeDefinition
         Typography = (Typography ?? new ThemeTypographyDefinition()).MergeOver(baseline.Typography),
         Stroke = (Stroke ?? new ThemeStrokeDefinition()).MergeOver(baseline.Stroke),
         Gauge = (Gauge ?? new ThemeGaugeDefinition()).MergeOver(baseline.Gauge),
+        Indicator = (Indicator ?? new ThemeIndicatorDefinition()).MergeOver(baseline.Indicator),
     };
 
     /// <summary>Clears every invalid value (so a merge replaces it with the default's) and logs a warning for each.</summary>
@@ -79,6 +81,16 @@ public sealed partial class ThemeDefinition
                 UrDeckLog.Warn($"Theme '{themeName}': stroke.cap '{cap}' must be 'round' or 'square'; using the default.");
                 s.Cap = null;
             }
+        }
+        if (Indicator is { } ind)
+        {
+            ind.BandHeight = check.Number("indicator.bandHeight", ind.BandHeight, 0.02, 1);
+            ind.DotSize = check.Number("indicator.dotSize", ind.DotSize, 0.005, 0.5);
+            ind.PillLength = check.Number("indicator.pillLength", ind.PillLength, 0.005, 1);
+            ind.Spacing = check.Number("indicator.spacing", ind.Spacing, 0, 1);
+            ind.Active = check.Color("indicator.active", ind.Active);
+            ind.Inactive = check.Color("indicator.inactive", ind.Inactive);
+            ind.Backdrop = check.Color("indicator.backdrop", ind.Backdrop);
         }
         if (Gauge is { Style: { } style } && !ThemeGaugeDefinition.IsStyle(style))
         {
@@ -228,5 +240,31 @@ public sealed class ThemeGaugeDefinition
     internal ThemeGaugeDefinition MergeOver(ThemeGaugeDefinition? b) => new()
     {
         Style = Style ?? b?.Style,
+    };
+}
+
+/// <summary>The page indicator's look: sizes as fractions of the grid cell, and colours.</summary>
+public sealed class ThemeIndicatorDefinition
+{
+    /// <summary>Height of the band reserved at the bottom of the screen.</summary>
+    public double? BandHeight { get; set; }
+    public double? DotSize { get; set; }
+    public double? PillLength { get; set; }
+    /// <summary>Space between neighbouring marks.</summary>
+    public double? Spacing { get; set; }
+    public string? Active { get; set; }
+    public string? Inactive { get; set; }
+    /// <summary>The translucent pill behind a floating indicator.</summary>
+    public string? Backdrop { get; set; }
+
+    internal ThemeIndicatorDefinition MergeOver(ThemeIndicatorDefinition? b) => new()
+    {
+        BandHeight = BandHeight ?? b?.BandHeight,
+        DotSize = DotSize ?? b?.DotSize,
+        PillLength = PillLength ?? b?.PillLength,
+        Spacing = Spacing ?? b?.Spacing,
+        Active = Active ?? b?.Active,
+        Inactive = Inactive ?? b?.Inactive,
+        Backdrop = Backdrop ?? b?.Backdrop,
     };
 }

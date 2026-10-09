@@ -8,8 +8,8 @@ tapping the panel activates UrDeck and takes focus away from whatever the user i
 ## What Changes
 
 - **Focus fix (first, can ship alone):** the window no longer activates when it is touched or clicked
-  (`WS_EX_NOACTIVATE`, and the activation message answered with "do not activate"). The taskbar button stays, so the
-  app can still be closed from it. **BREAKING (accepted):** the window never has keyboard focus, so Escape no longer
+  (`WS_EX_NOACTIVATE`, and the activation message answered with "do not activate"). The taskbar button is not
+  required; a tray icon (milestone 2) will be the way to close the app. **BREAKING (accepted):** the window never has keyboard focus, so Escape no longer
   closes it; a tray icon (milestone 2) will replace that.
 - **Runtime page state:** `activePage` becomes the page shown at startup. The page being shown is held by the host and
   swiping never writes the config. A config reload keeps the user on the page they are on.

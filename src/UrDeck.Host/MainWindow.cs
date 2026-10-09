@@ -13,6 +13,7 @@ using UrDeck.Engine.Config;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Layout;
 using UrDeck.Engine.Plugin;
+using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 using WinRT.Interop;
@@ -30,11 +31,13 @@ public sealed class MainWindow : Window
     private readonly WidgetPluginLoader _plugins;
     private readonly ThemeStore _themes;
     private readonly nint _hwnd;
+    private readonly WindowFocus? _focus;
     private readonly Grid _root = new();
     private readonly Grid _background = new();
     private readonly Canvas _surface = new();
-    private readonly List<WidgetView> _views = new();
-    private readonly Dictionary<string, List<WidgetView>> _viewsByReading = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Canvas _overlay = new();
+    private readonly PageNavigator _navigator;
+    private readonly PagerController _pager;
     private readonly object _changedGate = new();
     private HashSet<string> _changedReadings = new(StringComparer.OrdinalIgnoreCase);
     private bool _changedQueued;
@@ -48,7 +51,8 @@ public sealed class MainWindow : Window
     private LayoutKey _lastLayout;
 
     /// <summary>What a built page depends on: the window size, the display scaling and the active theme.</summary>
-    private readonly record struct LayoutKey(System.Drawing.Size Screen, double Scale, LoadedTheme? Theme);
+    private readonly record struct LayoutKey(
+        System.Drawing.Size Screen, double Scale, LoadedTheme? Theme, IndicatorMode Mode, int PageCount);
 
     internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, MonitorInfo target)
     {
@@ -57,6 +61,8 @@ public sealed class MainWindow : Window
         _themes = themes;
         _target = target;
         _frameClock = new FrameClock(DispatcherQueue);
+        _navigator = new PageNavigator(PageNames(), _configStore.Config.ActivePage);
+        _pager = new PagerController(_root, _surface, _overlay, _frameClock, _navigator);
         _loadedTheme = LoadTheme();
         _hwnd = WindowNative.GetWindowHandle(this);
         _plugins.Readings.ApplySettings(_configStore.Config.Providers);
@@ -76,15 +82,20 @@ public sealed class MainWindow : Window
         ApplyBackground();
         _root.Children.Add(_background);
         _root.Children.Add(_surface);
-        var escape = new KeyboardAccelerator { Key = Windows.System.VirtualKey.Escape };
-        escape.Invoked += (_, e) =>
+        _root.Children.Add(_overlay);
+        if (!WindowFocus.IsEnabled)
         {
-            e.Handled = true;
-            Close();
-        };
-        _root.KeyboardAccelerators.Add(escape);
+            var escape = new KeyboardAccelerator { Key = Windows.System.VirtualKey.Escape };
+            escape.Invoked += (_, e) =>
+            {
+                e.Handled = true;
+                Close();
+            };
+            _root.KeyboardAccelerators.Add(escape);
+        }
         Content = _root;
 
+        _focus = WindowFocus.Apply(_hwnd);
         MonitorPlacement.Cover(_hwnd, _target.Bounds);
         _root.Loaded += (_, _) =>
         {
@@ -105,6 +116,7 @@ public sealed class MainWindow : Window
         {
             // Themes are re-read on every config reload, so editing a theme and saving the config applies it.
             _loadedTheme = LoadTheme();
+            _navigator.Reload(PageNames());
             _plugins.Readings.ApplySettings(_configStore.Config.Providers);
             ApplyBackground();
             Retarget("config changed");
@@ -114,7 +126,7 @@ public sealed class MainWindow : Window
         {
             // Drop views holding old plugin instances now (not at the next idle rebuild) so the old plugin contexts
             // can be collected.
-            DisposeViews();
+            _pager.Release();
             ScheduleRebuild(force: true);
         });
 
@@ -124,6 +136,8 @@ public sealed class MainWindow : Window
         SystemEvents.PowerModeChanged += OnPowerModeChanged;
         Closed += (_, _) => OnClosed();
     }
+
+    private List<string> PageNames() => _configStore.Config.Pages.Select(p => p.Name).ToList();
 
     private LoadedTheme LoadTheme()
     {
@@ -243,77 +257,42 @@ public sealed class MainWindow : Window
         }
         _nudged = stale;
 
-        var key = new LayoutKey(screen, scale, _loadedTheme);
+        var config = _configStore.Config;
+        var mode = config.Pager.GetIndicatorMode();
+        var key = new LayoutKey(screen, scale, _loadedTheme, mode, config.Pages.Count);
         if (key == _lastLayout)
             return;
         _lastLayout = key;
 
         // Views first, so nothing still paints with the old theme's typefaces when they are released.
-        DisposeViews();
+        _pager.Release();
         _theme?.Dispose();
         _theme = null;
 
-        var page = _configStore.Config.CurrentPage;
-        if (page == null || screen.Width < 16 || screen.Height < 16)
+        if (config.Pages.Count == 0 || screen.Width < 16 || screen.Height < 16)
             return;
 
         // Layout is computed in DIPs; each surface then renders at the monitor's physical resolution, so the theme
         // is resolved against the physical size of one grid cell.
-        _theme = ThemeResolver.Resolve(_loadedTheme, (float)(screen.Width * scale / 4));
-        var layout = new GridLayoutManager(screen.Width, screen.Height, _loadedTheme.Definition.Card!.Gap!.Value)
-            .RenderWidgetLayout(page.Widgets, screen);
+        float cellPx = (float)(screen.Width * scale / 4);
+        _theme = ThemeResolver.Resolve(_loadedTheme, cellPx);
+        var chrome = ChromeLayout.Compute(screen, mode, config.Pages.Count, _loadedTheme.Definition.Indicator!.BandHeight!.Value);
+        var theme = _theme;
+        double gap = _loadedTheme.Definition.Card!.Gap!.Value;
+        UrDeckLog.Info($"Pages: {config.Pages.Count}, showing '{_navigator.Name}'; indicator {chrome.Mode}, {chrome.Rows} grid rows");
 
-        for (int i = 0; i < page.Widgets.Count; i++)
-        {
-            var config = page.Widgets[i];
-            if (!config.IsVisible)
-                continue;
-
-            var descriptor = _plugins.GetDescriptor(config.WidgetTypeId);
-            if (descriptor == null)
+        _pager.Rebuild(new PagerSetup(
+            screen,
+            scale,
+            chrome,
+            IndicatorStyle.Resolve(_loadedTheme, cellPx),
+            index =>
             {
-                UrDeckLog.Warn($"Widget type '{config.WidgetTypeId}' is not registered; leaving its cell empty. " +
-                              $"Registered: [{string.Join(", ", _plugins.GetRegisteredWidgetTypes())}]");
-                continue;
-            }
-
-            try
-            {
-                var widget = _plugins.CreateWidget(config)!;
-                var item = layout[i];
-                var view = new WidgetView(widget, descriptor, _theme, _frameClock, _plugins.Readings)
-                {
-                    Width = item.Size.Width,
-                    Height = item.Size.Height,
-                };
-                Canvas.SetLeft(view, item.Position.X);
-                Canvas.SetTop(view, item.Position.Y);
-                _surface.Children.Add(view);
-                _views.Add(view);
-                foreach (string reading in view.Subscriptions)
-                {
-                    if (!_viewsByReading.TryGetValue(reading, out var users))
-                        _viewsByReading[reading] = users = [];
-                    users.Add(view);
-                }
-
-                UrDeckLog.Info($"Placed '{config.WidgetTypeId}' at grid ({config.Col},{config.Row}) {config.Width}x{config.Height} " +
-                              $"-> {item.Position.X},{item.Position.Y} {item.Size.Width}x{item.Size.Height} DIPs");
-            }
-            catch (Exception ex)
-            {
-                UrDeckLog.Error($"Failed to create widget '{config.WidgetTypeId}'", ex);
-            }
-        }
-    }
-
-    private void DisposeViews()
-    {
-        foreach (var view in _views)
-            view.Dispose();
-        _views.Clear();
-        _viewsByReading.Clear();
-        _surface.Children.Clear();
+                var page = config.Pages[index];
+                var layout = new GridLayoutManager(screen.Width, screen.Height, gap, chrome.Grid.Height)
+                    .RenderWidgetLayout(page.Widgets, screen);
+                return new PageHost(page, layout, _plugins, theme, _frameClock);
+            }));
     }
 
     /// <summary>Runs on a sampling thread: collects the ids and asks the UI thread, once, to look at them.</summary>
@@ -342,14 +321,15 @@ public sealed class MainWindow : Window
 
         // Only the views that declared a changed reading are asked, each once.
         var asked = new HashSet<WidgetView>();
-        foreach (string id in ids)
+        foreach (var page in _pager.LivePages)
         {
-            if (!_viewsByReading.TryGetValue(id, out var users))
-                continue;
-            foreach (var view in users)
+            foreach (string id in ids)
             {
-                if (asked.Add(view))
-                    view.OnReadingsChanged();
+                foreach (var view in page.ViewsFor(id))
+                {
+                    if (asked.Add(view))
+                        view.OnReadingsChanged();
+                }
             }
         }
     }
@@ -362,7 +342,7 @@ public sealed class MainWindow : Window
         _plugins.Readings.ReadingsChanged -= OnReadingsChanged;
         foreach (var t in _pendingRetargets)
             t.Stop();
-        DisposeViews();
+        _pager.Shutdown();
         _frameClock.Shutdown();
         _theme?.Dispose();
     }

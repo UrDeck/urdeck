@@ -12,7 +12,8 @@ The host application MUST provide a borderless window that:
 - Never takes focus: touching, clicking or dragging on it MUST NOT make it the foreground window or move keyboard
   focus away from the window that has it, so using the deck does not interrupt a game or any other application. As a
   consequence the window receives no keyboard input and does not close on Escape
-- Keeps its button in the taskbar, whose menu can close it
+- Is not required to have a taskbar button; until the tray icon (milestone 2) it is closed by ending the process, or by
+  Escape in the development override
 - Starts activatable, so that it can be given focus for development, when the environment variable
   `URDECK_ACTIVATABLE` is set to `1`; in that case Escape closes the window
 
@@ -38,10 +39,6 @@ The host application MUST provide a borderless window that:
 #### Scenario: Escape does nothing
 - **WHEN** the host window is shown and the user presses Escape on the keyboard
 - **THEN** the host keeps running
-
-#### Scenario: Closing from the taskbar
-- **WHEN** the user right-clicks the host's taskbar button and chooses Close
-- **THEN** the host closes
 
 #### Scenario: Development override
 - **WHEN** the host is started with `URDECK_ACTIVATABLE=1`

@@ -62,6 +62,12 @@ everything else should be fine on Sonnet.
   of places typed into the widgets), the 4x2 weather widget with Meteocons animated icons (`SkiaSharp.Skottie`), the
   time reading, patterned catalog entries, attribution carried with the data and drawn by the weather and stats widgets,
   and `IWidgetHost.Log`. Spike and measurements in `docs/perf/weather.md`.
+- `pages-and-pager` is implemented (2026-10-09, archived as `openspec/changes/archive/2026-10-09-pages-and-pager`): the window never takes focus
+  (`WS_EX_NOACTIVATE`; Escape no longer closes it, `URDECK_ACTIVATABLE=1` restores it), swipe between pages with a
+  bounce at the ends, the page indicator (`pager.indicator`: `always`, `fade`, `off`, `auto`) with tap-to-switch,
+  `--snapshot --page N`, and the indicator in the theme. Only the current page is alive. Measurements in
+  `docs/perf/pages-and-pager.md`. Gaps carried forward: widgets receive no touch yet (no SDK input API), a hosted web view
+  would take the swipe from the page, and the window never has keyboard focus, which a web view with text entry needs.
 - Next: the 4x4 weather widget (forecast days, humidity and wind), then sensors that need elevation (item 3, fourth
   change). See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
@@ -472,6 +478,10 @@ Notes: sensors that need elevation likely via LibreHardwareMonitor in an opt-in 
 via a keyless API such as Open-Meteo; Meteocons (MIT, full-colour, Lottie) is a candidate for animated weather art.
 
 ## 8. Pages and touch
+
+**Status (2026-10-09):** pages, swipe, the indicator and the no-focus window are done (`pages-and-pager`). Still open:
+routing taps and scrolls to widgets through an SDK input API, swiping over a web view, per-page backgrounds (item 9) and
+keyboard focus for a web view.
 
 Multiple pages with swipe navigation and a page indicator; tap/touch interaction routed to widgets (through the input
 layer of the host chosen in item 14; add an input API to the SDK). **Model:** Sonnet, Opus for the input API design.

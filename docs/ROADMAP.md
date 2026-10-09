@@ -35,7 +35,7 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
 
 **1. Daily driver.** Everything on the owner's current Nexus page, and nothing that forces a restart of the app.
 - The 4x4 weather widget (item 7).
-- Pages, swipe, tap and the page indicator (item 8).
+- Pages, swipe and the page indicator (item 8; done, tap on widgets is still open).
 - The shortcut widget and the dock, which bring the image tile (items 7 and 10).
 - Recovery after sleep, hot-plug and monitor wake order (the robustness half of item 6; the picker UI waits for
   milestone 3).

@@ -36,7 +36,11 @@ value (for example a colour that does not parse) is replaced by the default's va
     "unitRatio": 0.4
   },
   "stroke": { "thickness": 0.08, "cap": "round" },
-  "gauge": { "style": "ring" }
+  "gauge": { "style": "ring" },
+  "indicator": {
+    "bandHeight": 0.25, "dotSize": 0.05, "pillLength": 0.14, "spacing": 0.05,
+    "active": "#ffffff", "inactive": "#59ffffff", "backdrop": "#8c0f0f1a"
+  }
 }
 ```
 
@@ -53,6 +57,13 @@ value (for example a colour that does not parse) is replaced by the default's va
 - **`gauge.style`** is the shape a gauge takes when a widget asks for "the theme's" gauge: `ring`, `bar` or `verticalBar`.
   `plain` is not allowed here (a gauge that draws no shape is no gauge); it and any unknown name fall back to `ring`
   with a logged warning. A widget's own explicit style wins over it.
+
+- **`indicator`** is the page indicator (see the README, "Pages"). `bandHeight`, `dotSize`, `pillLength` and `spacing`
+  are fractions of one grid cell: `bandHeight` is the height of the band reserved at the bottom of the screen when the
+  indicator is always shown, `dotSize` is the diameter of a dot (and the height of the pill), `pillLength` is the length
+  of the current page's pill and `spacing` is the gap between neighbouring marks. `active` is the pill's colour,
+  `inactive` the other dots', and `backdrop` the translucent pill behind a floating indicator (`fade` mode). A theme
+  written before the indicator existed takes all of these from `default-dark`, with no warning.
 
 A gauge draws its fill in `colors.accent`, or in `colors.warning` or `colors.critical` once its reading has reached
 that level, and its track in the same colour at the alpha of `colors.accentDim`. A reading that is not current (stale,

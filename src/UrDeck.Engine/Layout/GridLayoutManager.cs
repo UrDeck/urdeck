@@ -16,11 +16,17 @@ public class GridLayoutManager
     /// <summary>The theme's gap between cards, as a fraction of the column width. Each card is inset by half of it.</summary>
     public double GapFraction { get; }
 
-    public GridLayoutManager(double screenWidth, double screenHeight, double gapFraction = 0)
+    private readonly double? _gridHeight;
+
+    /// <summary>The height widgets may occupy: the screen without a reserved bottom band.</summary>
+    public double GridHeight => _gridHeight ?? ScreenHeight;
+
+    public GridLayoutManager(double screenWidth, double screenHeight, double gapFraction = 0, double? gridHeight = null)
     {
         ScreenWidth = screenWidth;
         ScreenHeight = screenHeight;
         GapFraction = gapFraction;
+        _gridHeight = gridHeight;
     }
 
     public System.Drawing.Point ConvertToPixels(int col, int row, int width, int height)
@@ -82,6 +88,12 @@ public class GridLayoutManager
             int right = RoundPx((clampedCol + clampedWidth) * ColumnWidth - half);
             int bottom = RoundPx((clampedRow + clampedHeight) * RowHeight - half);
 
+            bool fits = cellPos.Y + cellSize.Height <= GridHeight + 0.5;
+            if (!fits)
+            {
+                UrDeck.Engine.Diagnostics.UrDeckLog.Error($"Widget {widget.WidgetTypeId} at ({clampedCol},{clampedRow})[{clampedWidth}x{clampedHeight}] does not fit in the grid area ({(int)(GridHeight / RowHeight)} whole rows); it is not placed");
+            }
+
             var item = new WidgetLayoutItem
             {
                 WidgetTypeId = widget.WidgetTypeId,
@@ -89,7 +101,8 @@ public class GridLayoutManager
                 Size = GapFraction > 0 ? new Size(Math.Max(1, right - left), Math.Max(1, bottom - top)) : cellSize,
                 CellPosition = cellPos,
                 CellSize = cellSize,
-                GridSize = new Size(clampedWidth, clampedHeight)
+                GridSize = new Size(clampedWidth, clampedHeight),
+                Placed = fits,
             };
             result.Add(item);
         }

@@ -3,9 +3,7 @@
 ## Purpose
 
 Defines the WinUI 3 host application: monitor selection and window placement, one rendering surface per widget, refresh scheduling, plugin discovery and hot-reload, and the application icon.
-
 ## Requirements
-
 ### Requirement: Monitor Selection
 The host MUST choose the target monitor from configuration:
 
@@ -27,7 +25,13 @@ The host application MUST provide a borderless window that:
 - Is process-wide PerMonitorV2 DPI aware; monitors are enumerated in physical pixels
 - Re-applies the exact bounds when the monitor's scaling changes or the window moves to a monitor with different scaling
 - Sits in normal Z-order (does not use topmost) and does NOT use window transparency
-- Closes on Escape
+- Never takes focus: touching, clicking or dragging on it MUST NOT make it the foreground window or move keyboard
+  focus away from the window that has it, so using the deck does not interrupt a game or any other application. As a
+  consequence the window receives no keyboard input and does not close on Escape
+- Is not required to have a taskbar button; until the tray icon (milestone 2) it is closed by ending the process, or by
+  Escape in the development override
+- Starts activatable, so that it can be given focus for development, when the environment variable
+  `URDECK_ACTIVATABLE` is set to `1`; in that case Escape closes the window
 
 #### Scenario: Content area covers the full monitor
 - **WHEN** the host starts on a 1100×3840 target monitor
@@ -42,6 +46,19 @@ The host application MUST provide a borderless window that:
 #### Scenario: Page returns after sleep
 - **WHEN** the machine resumes from sleep, or the graphics device is reset
 - **THEN** the window background and every widget are shown again without restarting the host
+
+#### Scenario: Tap leaves focus alone
+- **WHEN** another application's window has keyboard focus and the user taps the panel
+- **THEN** the other window keeps focus and stays in front of the host window
+- **THEN** a fullscreen application is not minimised
+
+#### Scenario: Escape does nothing
+- **WHEN** the host window is shown and the user presses Escape on the keyboard
+- **THEN** the host keeps running
+
+#### Scenario: Development override
+- **WHEN** the host is started with `URDECK_ACTIVATABLE=1`
+- **THEN** the window can take focus and Escape closes it
 
 ### Requirement: Widget Surfaces
 The host MUST give every widget its own drawing surface:
@@ -150,6 +167,9 @@ The host MUST manage configuration via `urdeck-config.json`:
 - Hot-reloads configuration on file change (1s debounce), retrying when the file is briefly locked and ignoring its own saves
 - On a parse error keeps running with the last good configuration and logs a warning
 - Preserves widget-specific settings (extra JSON properties on a widget object) across load/save
+- `activePage` is the index of the page shown on startup. It is not updated while the host runs, and a reload does not
+  move the user to it (see page-navigation)
+- `pager.indicator` is the page indicator's mode: `always`, `fade`, `off` or `auto`; absent means `auto`
 
 #### Scenario: Config file does not exist
 - **WHEN** the host starts with no `urdeck-config.json`
@@ -159,9 +179,17 @@ The host MUST manage configuration via `urdeck-config.json`:
 - **WHEN** the user changes a widget setting (e.g. `format` to `"12h"`) or `monitorName` and saves
 - **THEN** the host reloads, re-targets the monitor if needed, and rebuilds the page
 
+#### Scenario: Config edited on another page
+- **WHEN** the user is on the second page and saves an edit to a widget setting
+- **THEN** the host reloads and rebuilds the page, and the second page is still shown
+
 #### Scenario: Invalid config edit
 - **WHEN** the file is saved with invalid JSON
 - **THEN** the host logs a warning and keeps the previous configuration
+
+#### Scenario: Indicator mode set
+- **WHEN** the file has `"pager": { "indicator": "always" }`
+- **THEN** the indicator is always visible in a reserved band
 
 ### Requirement: Application Entry Point
 The host MUST provide the application entry point with:
@@ -170,9 +198,11 @@ The host MUST provide the application entry point with:
   per-widget timers
 - Unhandled UI exceptions logged via `UrDeckLog`
 - Diagnostics written to `urdeck.log` next to the executable (no console output)
-- `--snapshot out.png [--size WxH] [--theme name]`: renders the active page off-screen via `PageRenderer` with the same
-  layout, card and widget code, writes a PNG (default size = target monitor resolution, default theme = the configured
-  theme) and exits with 0 on success, 1 on failure
+- `--snapshot out.png [--size WxH] [--theme name] [--page N]`: renders a page off-screen via `PageRenderer` with the
+  same layout, card and widget code, including the reserved band and the page indicator as the configuration says,
+  writes a PNG (default size = target monitor resolution, default theme = the configured theme, default page = the
+  page at `activePage`) and exits with 0 on success, 1 on failure. `--page` is the 0-based index of the page, and an
+  index outside the page list is a failure with a logged reason. The indicator shows page N as the current page
 
 #### Scenario: Application starts clean
 - **WHEN** the user launches the urdeck host
@@ -186,6 +216,14 @@ The host MUST provide the application entry point with:
 #### Scenario: Snapshot with a named theme
 - **WHEN** the host is run with `--snapshot out.png --theme default-light`
 - **THEN** the PNG shows the page under the light theme without the configuration being changed
+
+#### Scenario: Snapshot of another page
+- **WHEN** the host is run with `--snapshot out.png --page 1` and the configuration has three pages
+- **THEN** the PNG shows the second page and an indicator with the middle mark as the pill
+
+#### Scenario: Snapshot page out of range
+- **WHEN** the host is run with `--snapshot out.png --page 5` and the configuration has three pages
+- **THEN** no PNG is written, the reason is logged and the exit code is 1
 
 ### Requirement: Theme Application
 The host MUST apply the selected theme (see the `theme` capability) to everything it draws:
@@ -286,3 +324,4 @@ provider before it exits.
 #### Scenario: Snapshot of a page without data widgets
 - **WHEN** `--snapshot` is run for a page with only a Clock
 - **THEN** no provider is started and the snapshot is not delayed
+

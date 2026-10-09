@@ -10,5 +10,10 @@
     "good": "#1a9e55",
     "warning": "#c77700",
     "critical": "#d92d20"
+  },
+  "indicator": {
+    "active": "#14141f",
+    "inactive": "#5914141f",
+    "backdrop": "#b3ffffff"
   }
 }

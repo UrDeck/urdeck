@@ -16,7 +16,7 @@ namespace UrDeck.Host;
 /// Hosts one widget instance in its own Skia surface (composited by the GPU, drawn by Skia on the CPU), driven by the widget's declared refresh policy.
 /// Widgets without a timer-based policy (OnData) render once and then only when one of their readings changes.
 /// </summary>
-internal sealed class WidgetView : SKXamlCanvas, IDisposable
+internal sealed class WidgetView : SKXamlCanvas, IFrameClient, IDisposable
 {
     // Cleared on Dispose: WinUI can keep a removed canvas alive for a while, and it must not keep the plugin alive with it.
     private IWidget? _widget;

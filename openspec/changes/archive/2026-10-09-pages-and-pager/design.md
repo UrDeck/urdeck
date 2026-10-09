@@ -36,7 +36,7 @@ See `proposal.md` for the motivation and scope. What the code does today, and wh
 ### 1. The window never takes focus
 
 Set `WS_EX_NOACTIVATE` on the window's extended style and subclass the window procedure to answer `WM_MOUSEACTIVATE`
-with `MA_NOACTIVATE`. Do not set `WS_EX_TOOLWINDOW`: the owner closes the app from the taskbar button, which must stay.
+with `MA_NOACTIVATE`. `WS_EX_TOOLWINDOW` is not set. The owner no longer sees a taskbar button for the window (it vanished in an earlier change, cause not found) and does not need one: the tray icon (milestone 2) is the intended way to close it.
 Escape stops working because a window that is never active gets no keyboard input; the owner accepts this until the tray
 icon (milestone 2). `URDECK_ACTIVATABLE=1` skips the style and the subclass so a developer keeps Escape.
 
@@ -118,6 +118,11 @@ the offset (the distance moved is a diminishing fraction of the drag). `Interact
 while the UI thread paints a Lottie icon, but the redirect must be decided at pointer-down, before the direction is
 known, which may fight decision 3. The spike builds the baseline and measures frame pacing with an animating widget; if it
 is smooth, `InteractionTracker` is not used. The recogniser's output does not change either way.
+
+Outcome: the baseline was smooth by touch on the panel, with the Lottie icon animating, so `InteractionTracker` is not used. The
+starting values of decision 3 (slop 0.04 of a cell, commit at half a page or 0.6 pages per second, 250 ms settle with an
+ease-out curve) were kept. Values on the incoming page showed their last value rather than dashes, so the neighbour is still built when the
+direction is decided, not at pointer-down.
 
 ### 6. The indicator is drawn by the engine
 
