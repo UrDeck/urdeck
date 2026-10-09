@@ -49,7 +49,7 @@ measurement so far is from one panel and one NVIDIA GPU, and that is the largest
 - Config, themes, plugins and the log in a per-user folder instead of next to the executable (item 15).
 - A config format version and a first migration (item 15).
 - A first run that produces a sensible page on any monitor, including a landscape one (item 15).
-- A tray icon with quit, reload and "open the log" (item 12).
+- A tray icon with Quit (item 12; shipped in `tray-icon`), later the entry that opens the config editor.
 - Code signing, so the download is not blocked by SmartScreen (item 15).
 - A hardware report template and a compatibility table: AMD and Intel GPUs, other panels (item 15).
 - Screenshots and a short clip in the README, issue templates, Discussions.

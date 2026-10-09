@@ -38,7 +38,7 @@ internal sealed class WindowFocus
         SetWindowLongPtr(hwnd, GwlExStyle, style | WsExNoActivate);
         if (!SetWindowSubclass(hwnd, focus._proc, 1, 0))
             UrDeckLog.Warn("Could not subclass the window to refuse activation by mouse");
-        UrDeckLog.Info("Window never takes focus (WS_EX_NOACTIVATE); end the process to close it");
+        UrDeckLog.Info("Window never takes focus (WS_EX_NOACTIVATE); close it from the tray icon");
         return focus;
     }
 
