@@ -1,7 +1,7 @@
 # Agent and contributor guide
 
 UrDeck is a lightweight widget dashboard for secondary/case displays (WinUI 3 host, SkiaSharp rendering, plugin widgets).
-Read `README.md` for what it is, `docs/ROADMAP.md` for what to work on, and `CONTRIBUTING.md` for the full process.
+Read `README.md` for what it is, `docs/ROADMAP.md` for the milestones, `docs/BACKLOG.md` for what to work on, and `CONTRIBUTING.md` for the full process.
 
 ## Workflow (non-negotiable)
 
@@ -9,7 +9,7 @@ Read `README.md` for what it is, `docs/ROADMAP.md` for what to work on, and `CON
   request. `main` is protected: PRs need green CI and are **squash-merged** only.
 - The PR title is a conventional commit (`feat(scope): ...`; types `feat fix docs test perf refactor chore ci build
   revert`). It becomes the squash commit title and the PR description becomes the commit body, so write both well.
-- One roadmap item / OpenSpec change per PR where possible. Behavior changes go through `openspec/changes/`.
+- One backlog item / OpenSpec change per PR where possible. Behavior changes go through `openspec/changes/`.
 - Tick `tasks.md` items only when verified; archive the change when all tasks are done.
 
 ## Commands
@@ -39,7 +39,7 @@ providers/            GPL. First-party data provider plugins (UrDeck.Providers.S
 widgets/              first-party widget plugins (UrDeck.Widgets.Clock, UrDeck.Widgets.Stats); with the providers, copied to
                       plugins/ by the host build (the UrDeckPlugin list in UrDeck.Host.csproj)
 tests/                xUnit projects
-docs/                 ROADMAP.md, perf/, design notes
+docs/                 ROADMAP.md (milestones), BACKLOG.md (work items and status), perf/, design notes
 openspec/             spec-driven change documents
 ```
 
