@@ -14,19 +14,26 @@ namespace UrDeck.Engine.Rendering;
 /// </summary>
 public static class PageRenderer
 {
+    /// <summary>The page indicator to draw: the configured mode, which page is shown and how many there are.</summary>
+    public sealed record Chrome(IndicatorMode Mode, int PageIndex, int PageCount);
+
     public static void Render(
         SKCanvas canvas,
         int widthPx,
         int heightPx,
         IReadOnlyList<(WidgetConfig Config, IWidget Widget)> widgets,
         LoadedTheme loaded,
-        DateTime time)
+        DateTime time,
+        Chrome? chrome = null)
     {
         // Pixels are physical here, so the theme resolves against this canvas's own cell size.
         using var theme = ThemeResolver.Resolve(loaded, widthPx / 4f);
         canvas.Clear(theme.Background);
 
-        var layout = new GridLayoutManager(widthPx, heightPx, loaded.Definition.Card!.Gap!.Value)
+        var screen = new System.Drawing.Size(widthPx, heightPx);
+        var indicator = loaded.Definition.Indicator!;
+        var frame = ChromeLayout.Compute(screen, chrome?.Mode ?? IndicatorMode.Off, chrome?.PageCount ?? 1, indicator.BandHeight!.Value);
+        var layout = new GridLayoutManager(widthPx, heightPx, loaded.Definition.Card!.Gap!.Value, frame.Grid.Height)
             .RenderWidgetLayout(widgets.Select(w => w.Config).ToList(), new System.Drawing.Size(widthPx, heightPx));
 
         for (int i = 0; i < widgets.Count; i++)
@@ -36,10 +43,19 @@ public static class PageRenderer
                 continue;
 
             var item = layout[i];
+            if (!item.Placed)
+                continue;
             int save = canvas.Save();
             canvas.Translate(item.Position.X, item.Position.Y);
             WidgetPainter.Paint(widget, canvas, item.Size, theme, time, CancellationToken.None);
             canvas.RestoreToCount(save);
+        }
+
+        if (chrome != null && frame.Mode != IndicatorMode.Off)
+        {
+            // A snapshot has no fade: the indicator is always at full opacity.
+            PageIndicator.Paint(canvas, frame.Indicator, chrome.PageCount, chrome.PageIndex, 1f,
+                frame.Mode == IndicatorMode.Fade, IndicatorStyle.Resolve(loaded, widthPx / 4f));
         }
     }
 
@@ -48,11 +64,12 @@ public static class PageRenderer
         int heightPx,
         IReadOnlyList<(WidgetConfig Config, IWidget Widget)> widgets,
         LoadedTheme loaded,
-        DateTime time)
+        DateTime time,
+        Chrome? chrome = null)
     {
         var bitmap = new SKBitmap(widthPx, heightPx);
         using var canvas = new SKCanvas(bitmap);
-        Render(canvas, widthPx, heightPx, widgets, loaded, time);
+        Render(canvas, widthPx, heightPx, widgets, loaded, time, chrome);
         return bitmap;
     }
 }

@@ -17,19 +17,19 @@
 
 ## 3. Engine: page state, chrome layout and grid
 
-- [ ] 3.1 `PageNavigator`: created from the page list and `activePage` (clamped), current index and name, a reload operation that keeps the page by name (first of repeated names), else the same index clamped, and a settle operation
-- [ ] 3.2 `PagerConfig` with `Indicator` (`always`, `fade`, `off`, `auto`) in `UrDeckConfig` as `pager.indicator`; absent is `auto`; an unknown value is `auto` with a warning
-- [ ] 3.3 Theme: add the `indicator` group (`bandHeight`, `dotSize`, `pillLength`, `spacing`, `active`, `inactive`, `backdrop`) to `ThemeDefinition` with merge, sanitising and resolving, and the starting values in `default-dark`, `default-light` and `glass`
-- [ ] 3.4 `ChromeLayout`: from the screen size, the resolved mode, the page count and the theme's band height, return the indicator rectangle, the grid rectangle and the number of whole rows; resolve the mode (`off`; `auto` with one page; `always`; `fade`; `auto` with several pages reserves the band when at least four whole rows remain, else floats)
-- [ ] 3.5 `GridLayoutManager` takes the grid height; a widget whose cell rectangle ends below it is returned with `Placed = false` and an error is logged; the result stays index-aligned with the widgets; no change when no band is reserved
+- [x] 3.1 `PageNavigator`: created from the page list and `activePage` (clamped), current index and name, a reload operation that keeps the page by name (first of repeated names), else the same index clamped, and a settle operation
+- [x] 3.2 `PagerConfig` with `Indicator` (`always`, `fade`, `off`, `auto`) in `UrDeckConfig` as `pager.indicator`; absent is `auto`; an unknown value is `auto` with a warning
+- [x] 3.3 Theme: add the `indicator` group (`bandHeight`, `dotSize`, `pillLength`, `spacing`, `active`, `inactive`, `backdrop`) to `ThemeDefinition` with merge, sanitising and resolving, and the starting values in `default-dark`, `default-light` and `glass`
+- [x] 3.4 `ChromeLayout`: from the screen size, the resolved mode, the page count and the theme's band height, return the indicator rectangle, the grid rectangle and the number of whole rows; resolve the mode (`off`; `auto` with one page; `always`; `fade`; `auto` with several pages reserves the band when at least four whole rows remain, else floats)
+- [x] 3.5 `GridLayoutManager` takes the grid height; a widget whose cell rectangle ends below it is returned with `Placed = false` and an error is logged; the result stays index-aligned with the widgets; no change when no band is reserved
 - [ ] 3.6 `PageRenderer` and the window skip unplaced items
 
 ## 4. Engine: gestures and the indicator
 
-- [ ] 4.1 `GestureRecognizer`: pointer samples in, events out (swipe started with direction, moved, ended with velocity; tap; cancelled), first pointer owns the gesture, thresholds as fractions of the column width and page width as chosen in task 2.5, no timers and no clock reads
-- [ ] 4.2 Rubber-band function for the offset past the first and last page, and the commit decision (distance or velocity) as pure functions beside the recogniser
-- [ ] 4.3 `PageIndicator` painter: dots, the current page as a pill from a fractional position, opacity, the translucent backdrop for the floating mode, themed colours and sizes; a function that maps a point to a page slot with each slot at least a third of a cell wide
-- [ ] 4.4 `PageRenderer` draws the band and the indicator for a page index and count; the indicator is at full opacity in a snapshot
+- [x] 4.1 `GestureRecognizer`: pointer samples in, events out (swipe started with direction, moved, ended with velocity; tap; cancelled), first pointer owns the gesture, thresholds as fractions of the column width and page width as chosen in task 2.5, no timers and no clock reads
+- [x] 4.2 Rubber-band function for the offset past the first and last page, and the commit decision (distance or velocity) as pure functions beside the recogniser
+- [x] 4.3 `PageIndicator` painter: dots, the current page as a pill from a fractional position, opacity, the translucent backdrop for the floating mode, themed colours and sizes; a function that maps a point to a page slot with each slot at least a third of a cell wide
+- [x] 4.4 `PageRenderer` draws the band and the indicator for a page index and count; the indicator is at full opacity in a snapshot
 
 ## 5. Host: pager
 
@@ -49,14 +49,14 @@
 
 ## 7. Tests
 
-- [ ] 7.1 `PageNavigator`: start page and clamping, reload by name, repeated names, removed page, a single page
-- [ ] 7.2 `ChromeLayout`: the 1100x3840 numbers (13 rows with and without the band), the 1000x1000 example, each mode, `auto` with one page, with a reserved band that leaves four rows, and with one that would leave three
-- [ ] 7.3 `GridLayoutManager`: a widget that ends below the grid is not placed and logs an error; one that fits exactly is; rows 0 to 7 on the tall panel are unchanged; the item list stays index-aligned
-- [ ] 7.4 `GestureRecognizer` with scripted samples: tap, short drag, horizontal swipe in both directions, vertical drag, a diagonal drag decided at the first move past the slop, fast flick versus slow drag, a second pointer ignored, cancel, pointer lost
-- [ ] 7.5 Rubber band and commit decisions: monotonic, bounded, zero at zero, half-width and velocity commits
-- [ ] 7.6 `PageIndicator`: pixel probes for the pill at positions 0, 0.5 and 1, one page draws nothing in `auto`, opacity zero draws nothing, slot mapping for tap points including beside the dot
-- [ ] 7.7 Theme tests: the `indicator` group loads, a partial user theme and an older theme inherit it without a warning, an invalid value falls back with a warning
-- [ ] 7.8 Config tests: `pager.indicator` round trip, absent means `auto`, an unknown value means `auto`, an older file without `pager` loads
+- [x] 7.1 `PageNavigator`: start page and clamping, reload by name, repeated names, removed page, a single page
+- [x] 7.2 `ChromeLayout`: the 1100x3840 numbers (13 rows with and without the band), the 1000x1000 example, each mode, `auto` with one page, with a reserved band that leaves four rows, and with one that would leave three
+- [x] 7.3 `GridLayoutManager`: a widget that ends below the grid is not placed and logs an error; one that fits exactly is; rows 0 to 7 on the tall panel are unchanged; the item list stays index-aligned
+- [x] 7.4 `GestureRecognizer` with scripted samples: tap, short drag, horizontal swipe in both directions, vertical drag, a diagonal drag decided at the first move past the slop, fast flick versus slow drag, a second pointer ignored, cancel, pointer lost
+- [x] 7.5 Rubber band and commit decisions: monotonic, bounded, zero at zero, half-width and velocity commits
+- [x] 7.6 `PageIndicator`: pixel probes for the pill at positions 0, 0.5 and 1, one page draws nothing in `auto`, opacity zero draws nothing, slot mapping for tap points including beside the dot
+- [x] 7.7 Theme tests: the `indicator` group loads, a partial user theme and an older theme inherit it without a warning, an invalid value falls back with a warning
+- [x] 7.8 Config tests: `pager.indicator` round trip, absent means `auto`, an unknown value means `auto`, an older file without `pager` loads
 - [ ] 7.9 Snapshot test with the engine alone: page 1 of 3 shows the pill in the middle; an out-of-range page fails
 
 ## 8. Verify

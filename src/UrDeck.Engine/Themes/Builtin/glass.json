@@ -8,6 +8,11 @@
     "accent": "#8ab8ff",
     "accentDim": "#668ab8ff"
   },
+  "indicator": {
+    "active": "#ffffff",
+    "inactive": "#66ffffff",
+    "backdrop": "#661b2760"
+  },
   "card": {
     "radius": 0.1,
     "borderWidth": 0.008

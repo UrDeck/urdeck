@@ -31,5 +31,14 @@
   },
   "gauge": {
     "style": "ring"
+  },
+  "indicator": {
+    "bandHeight": 0.25,
+    "dotSize": 0.05,
+    "pillLength": 0.14,
+    "spacing": 0.05,
+    "active": "#ffffff",
+    "inactive": "#59ffffff",
+    "backdrop": "#8c0f0f1a"
   }
 }

@@ -4,6 +4,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Layout;
 using UrDeck.Sdk;
 
 namespace UrDeck.Engine.Config;
@@ -32,6 +33,34 @@ public class DockItemConfig
     public string? Url { get; set; }
 }
 
+/// <summary>Settings for paging between pages. An object so that later pager settings have a home.</summary>
+public class PagerConfig
+{
+    /// <summary><c>always</c>, <c>fade</c>, <c>off</c> or <c>auto</c>; absent means <c>auto</c>.</summary>
+    [JsonPropertyName("indicator")]
+    public string? Indicator { get; set; }
+
+    /// <summary>The indicator mode; an unknown value is <c>auto</c>, with a warning when <paramref name="warn"/> is set.</summary>
+    public IndicatorMode GetIndicatorMode(bool warn = false)
+    {
+        switch (Indicator?.Trim().ToLowerInvariant())
+        {
+            case null or "" or "auto":
+                return IndicatorMode.Auto;
+            case "always":
+                return IndicatorMode.Always;
+            case "fade":
+                return IndicatorMode.Fade;
+            case "off":
+                return IndicatorMode.Off;
+            default:
+                if (warn)
+                    UrDeckLog.Warn($"pager.indicator '{Indicator}' must be 'always', 'fade', 'off' or 'auto'; using 'auto'.");
+                return IndicatorMode.Auto;
+        }
+    }
+}
+
 /// <summary>The user's settings for one data provider. Properties the engine does not know are kept for the provider.</summary>
 public class ProviderSettings
 {
@@ -53,6 +82,9 @@ public class UrDeckConfig
 
     [JsonPropertyName("activePage")]
     public int ActivePage { get; set; } = 0;
+
+    [JsonPropertyName("pager")]
+    public PagerConfig Pager { get; set; } = new PagerConfig();
 
     [JsonPropertyName("dock")]
     public List<DockItemConfig> Dock { get; set; } = new List<DockItemConfig>();
@@ -112,6 +144,8 @@ public sealed class ConfigStore : IDisposable
 
         string json = ReadShared(_configPath);
         Config = JsonSerializer.Deserialize<UrDeckConfig>(json, UrDeckJson.Options) ?? new UrDeckConfig();
+        Config.Pager ??= new PagerConfig();
+        Config.Pager.GetIndicatorMode(warn: true);
         if (Config.Pages.Count == 0)
             Config.Pages.Add(new PageConfig());
     }
