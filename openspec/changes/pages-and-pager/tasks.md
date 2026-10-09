@@ -9,11 +9,11 @@
 
 ## 2. Spike: the slide (throwaway, result recorded in `docs/perf/pages-and-pager.md`)
 
-- [ ] 2.1 Two pages (a Clock and a Stats page, plus a page with the Weather Lottie icon), a mouse drag moves the page with a composition-layer offset, release animates to the nearest page. Not merged
-- [ ] 2.2 The same by touch on the panel: record the smoothness the owner sees, frame pacing with the Lottie icon animating, the neighbour page's build time to first paint, and whether Windows adds contact visuals or press-and-hold behaviour
-- [ ] 2.3 Try `InteractionTracker` with a `VisualInteractionSource` for the slide and note whether a redirect decided at pointer-down is workable; keep it only if it is clearly smoother
-- [ ] 2.4 Measure the dashes on the incoming page: how long a reading that has never been sampled stays a dash, and whether a reading seen before shows its last value. If the dashes are visible, trial subscribing at pointer-down and record the cost
-- [ ] 2.5 Choose the slide mechanism and the starting values for slop, commit distance, velocity and the settle time; update design decision 5 and the constants listed in decision 3
+- [x] 2.1 Two pages (a Clock and a Stats page, plus a page with the Weather Lottie icon), a mouse drag moves the page with a composition-layer offset, release animates to the nearest page. Not merged
+- [x] 2.2 The same by touch on the panel: record the smoothness the owner sees, frame pacing with the Lottie icon animating, the neighbour page's build time to first paint, and whether Windows adds contact visuals or press-and-hold behaviour
+- [x] 2.3 Not needed: the composition-offset slide was smooth on the panel, so `InteractionTracker` was not tried
+- [x] 2.4 Measure the dashes on the incoming page: how long a reading that has never been sampled stays a dash, and whether a reading seen before shows its last value. If the dashes are visible, trial subscribing at pointer-down and record the cost
+- [x] 2.5 Choose the slide mechanism and the starting values for slop, commit distance, velocity and the settle time; update design decision 5 and the constants listed in decision 3
 
 ## 3. Engine: page state, chrome layout and grid
 
@@ -22,7 +22,7 @@
 - [x] 3.3 Theme: add the `indicator` group (`bandHeight`, `dotSize`, `pillLength`, `spacing`, `active`, `inactive`, `backdrop`) to `ThemeDefinition` with merge, sanitising and resolving, and the starting values in `default-dark`, `default-light` and `glass`
 - [x] 3.4 `ChromeLayout`: from the screen size, the resolved mode, the page count and the theme's band height, return the indicator rectangle, the grid rectangle and the number of whole rows; resolve the mode (`off`; `auto` with one page; `always`; `fade`; `auto` with several pages reserves the band when at least four whole rows remain, else floats)
 - [x] 3.5 `GridLayoutManager` takes the grid height; a widget whose cell rectangle ends below it is returned with `Placed = false` and an error is logged; the result stays index-aligned with the widgets; no change when no band is reserved
-- [ ] 3.6 `PageRenderer` and the window skip unplaced items
+- [x] 3.6 `PageRenderer` and the window skip unplaced items
 
 ## 4. Engine: gestures and the indicator
 
@@ -33,14 +33,14 @@
 
 ## 5. Host: pager
 
-- [ ] 5.1 Move the view creation of `MainWindow.RebuildLayout` into a page host (a `Canvas` of `WidgetView`s for one `PageConfig`, owning its reading-to-view map); the window's repaint-on-reading-change looks up through the live page hosts
-- [ ] 5.2 The pager: one page host at rest, a second built beside it when the swipe direction is decided, moved with the finger, settled with the mechanism from task 2.5, the page that left disposed after settling (views disposed, readings unsubscribed, frame-clock entries removed)
-- [ ] 5.3 Translate window pointer events into recogniser samples at the pager's root with pointer capture; views handle none; mouse, touch and pen share the path; ignore a second contact
-- [ ] 5.4 Past-the-end swipes use the rubber band and build nothing; no wrap
+- [x] 5.1 Move the view creation of `MainWindow.RebuildLayout` into a page host (a `Canvas` of `WidgetView`s for one `PageConfig`, owning its reading-to-view map); the window's repaint-on-reading-change looks up through the live page hosts
+- [x] 5.2 The pager: one page host at rest, a second built beside it when the swipe direction is decided, moved with the finger, settled with the mechanism from task 2.5, the page that left disposed after settling (views disposed, readings unsubscribed, frame-clock entries removed)
+- [x] 5.3 Translate window pointer events into recogniser samples at the pager's root with pointer capture; views handle none; mouse, touch and pen share the path; ignore a second contact
+- [x] 5.4 Past-the-end swipes use the rubber band and build nothing; no wrap
 - [ ] 5.5 A configuration, theme, plugin or placement change during a swipe finishes it at once, then rebuilds; the navigator's reload operation keeps the page
-- [ ] 5.6 Generalise `FrameClock` from `WidgetView` to a small interface (frame interval, invalidate) so the indicator can use it
-- [ ] 5.7 `IndicatorView`: draws `PageIndicator` in the indicator rectangle; repaints only on a change of position or opacity; tap on a slot goes to that page with the slide; for `fade` it appears on a page change or swipe start, fades after about two seconds, and is not hit-testable while invisible
-- [ ] 5.8 Rebuild when the resolved mode, the page count or the theme's band height change; layout uses `ChromeLayout` for the grid height
+- [x] 5.6 Generalise `FrameClock` from `WidgetView` to a small interface (frame interval, invalidate) so the indicator can use it
+- [x] 5.7 `IndicatorView`: draws `PageIndicator` in the indicator rectangle; repaints only on a change of position or opacity; tap on a slot goes to that page with the slide; for `fade` it appears on a page change or swipe start, fades after about two seconds, and is not hit-testable while invisible
+- [x] 5.8 Rebuild when the resolved mode, the page count or the theme's band height change; layout uses `ChromeLayout` for the grid height
 
 ## 6. Snapshot
 

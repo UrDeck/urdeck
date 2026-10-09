@@ -6,8 +6,17 @@ using UrDeck.Engine.Diagnostics;
 
 namespace UrDeck.Host;
 
+/// <summary>Something the <see cref="FrameClock"/> repaints while it animates.</summary>
+internal interface IFrameClient
+{
+    /// <summary>The time between frames it asks for; zero is the clock's own rate.</summary>
+    TimeSpan FrameInterval { get; }
+
+    void Invalidate();
+}
+
 /// <summary>
-/// The one shared frame source. It repaints the views whose widgets report <c>IsAnimating</c> about 30 times a second,
+/// The one shared frame source. It repaints the views (widgets, the page indicator) that report they are animating about 30 times a second,
 /// and exists only while there is at least one: the timer starts with the first view and stops when the last one leaves.
 /// A frame only invalidates; it never refreshes widget data.
 /// </summary>
@@ -17,8 +26,8 @@ internal sealed class FrameClock
 
     private const double TickSlackMs = 10;
 
-    private readonly HashSet<WidgetView> _views = new();
-    private readonly Dictionary<WidgetView, long> _last = new();
+    private readonly HashSet<IFrameClient> _views = new();
+    private readonly Dictionary<IFrameClient, long> _last = new();
     private readonly DispatcherQueueTimer _timer;
 
     public FrameClock(DispatcherQueue queue)
@@ -31,7 +40,7 @@ internal sealed class FrameClock
 
     public bool IsRunning => _timer.IsRunning;
 
-    public void Add(WidgetView view)
+    public void Add(IFrameClient view)
     {
         if (!_views.Add(view) || _timer.IsRunning)
             return;
@@ -39,7 +48,7 @@ internal sealed class FrameClock
         UrDeckLog.Info("Frame clock started");
     }
 
-    public void Remove(WidgetView view)
+    public void Remove(IFrameClient view)
     {
         _last.Remove(view);
         if (_views.Remove(view) && _views.Count == 0)

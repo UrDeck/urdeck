@@ -171,6 +171,9 @@ public sealed class GestureRecognizer
         return t1 <= t0 ? 0 : (x1 - x0) * 1000.0 / (t1 - t0);
     }
 
+    /// <summary>Forgets a gesture in progress without raising anything (the surface is being rebuilt).</summary>
+    public void Abort() => Reset();
+
     private void Reset()
     {
         _state = State.Idle;

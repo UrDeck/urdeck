@@ -119,6 +119,11 @@ while the UI thread paints a Lottie icon, but the redirect must be decided at po
 known, which may fight decision 3. The spike builds the baseline and measures frame pacing with an animating widget; if it
 is smooth, `InteractionTracker` is not used. The recogniser's output does not change either way.
 
+Outcome: the baseline was smooth by touch on the panel, with the Lottie icon animating, so `InteractionTracker` is not used. The
+starting values of decision 3 (slop 0.04 of a cell, commit at half a page or 0.6 pages per second, 250 ms settle with an
+ease-out curve) were kept. Values on the incoming page showed their last value rather than dashes, so the neighbour is still built when the
+direction is decided, not at pointer-down.
+
 ### 6. The indicator is drawn by the engine
 
 A `PageIndicator` painter in the engine draws, into a rectangle: one dot per page, the current page as a pill, from a
