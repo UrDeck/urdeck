@@ -54,7 +54,7 @@ internal static class SnapshotCommand
             readings.ApplySettings(host.Config.Config.Providers);
             string[] ids = widgets.SelectMany(w => w.Item2.Subscriptions).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
             readings.Subscribe(ids);
-            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(2);
+            var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(8);
             while (readings.AnyPending(ids) && DateTime.UtcNow < deadline)
                 Thread.Sleep(25);
 

@@ -200,8 +200,9 @@ DefaultIntervalMs = 900000, MinIntervalMs = 300000)]`.
 - **Forecast.** `https://api.open-meteo.com/v1/forecast` with `current=temperature_2m,apparent_temperature,is_day,
   weather_code`, `daily=temperature_2m_max,temperature_2m_min,sunrise,sunset`, `timezone=auto`,
   `forecast_days=1`, `timeformat=unixtime`. The response's `utc_offset_seconds` gives the offset of every instant.
-  Whether one request can carry several comma-separated coordinates with `timezone=auto` is checked in the spike; if
-  it does the provider batches all places into one request, if not it sends one per place, which the spec allows.
+  One request carries several comma-separated coordinates with `timezone=auto` (checked in the spike): the answer is an
+  array with one object per place in request order, each with its own `utc_offset_seconds`; a single place answers an
+  object, not an array. The provider batches all places into one request and the parser accepts both shapes.
 - **New places do not wait.** `SetDemand` compares the wanted keys with the ones it has data for and starts a fetch
   for the new ones on the thread pool, serialised with `SampleAsync` by a semaphore so two fetches never overlap. It
   publishes outside a sample (a pushed publication), so a widget whose location was just edited shows values in
@@ -249,14 +250,15 @@ owner's standing preference), using `Readout` for the temperature and the two ti
 - **Subscriptions** are the eight ids of the location in the table above (not `apparent`, which no composition shows).
   With no location it subscribes to nothing and the card shows dashes and the neutral icon.
 - **Icon choice.** `(condition class, is-day)` maps to an animation named in a table in the widget. Meteocons names are
-  confirmed against the real file list in the spike; the expected mapping is `clear` to `clear-day`/`clear-night`,
-  `partly-cloudy` to `partly-cloudy-day`/`-night`, `cloudy` to `overcast` (or `cloudy`), `fog`, `drizzle`, `rain`,
-  `sleet`, `snow` and `thunder` to the matching file, and `unknown` or a missing value to `not-available`.
+  confirmed against the real file list in the spike: `clear` to `clear-day`/`clear-night`, `partly-cloudy` to
+  `partly-cloudy-day`/`-night`, `cloudy` to `overcast`, `fog`, `drizzle`, `rain`, `sleet` and `snow` to the file of the
+  same name, `thunder` to `thunderstorms-day`/`-night`, and `unknown` or a missing value to `not-available` (thirteen
+  files, 168 401 bytes; see `docs/perf/weather.md`).
 - **Assets.** The chosen JSON files are `EmbeddedResource`s of the widget assembly, read with
   `GetManifestResourceStream` when an icon is first needed; the Meteocons licence text is embedded beside them. Only
   the animation on screen is parsed and kept; the previous one is disposed when the icon changes and on reconfigure.
 - **Motion.** The widget records the render time of its first paint. The first paint, a new icon and `motion: "off"`
-  draw the poster frame, a fixed fraction of the animation's duration chosen by eye in the spike. After the first
+  draw the poster frame, a fixed fraction of the animation's duration: `0.0`, chosen by eye in the spike. After the first
   paint, `t = (poster + elapsed) mod duration`, so the loop continues from the poster; a negative elapsed (a clock
   change) draws the poster. `IsAnimating` is true while `motion` is `full` and an animation is loaded. This is all
   inside the widget, using `context.Time`; there is no pinned animation time.
@@ -285,6 +287,25 @@ Recorded responses (one place, several places, no match, polar night, error stat
 `tests/UrDeck.Engine.Tests/Fixtures/weather/` and are fed through `IWeatherHttp`. The hub tests use the existing
 `FakeProvider` and `FakeTime` for pattern resolution. The widget is rendered to a bitmap with a fake reading source,
 as the stats tests do.
+
+## Found while building
+
+- **The device of a weather reading is the location as typed**, not the resolved name: a catalog pattern is filled in by the
+  engine, which only knows the path. The resolved name is the `place` reading, which the card shows.
+- **`IWidgetHost.Log(string)`** (a default interface member, with a protected `Log` on `Widget<T>`) was added so that a widget
+  can log "icon missing" once, as the widget spec asks. It is additive and writes one line to `urdeck.log`.
+- **`ReadingHub` takes `regionUses24HourClock`** next to `regionUsesFahrenheit`, and `IReadingSource.RegionUses24HourClock`
+  is a default member that reads the current culture.
+- **The temperature descriptions declare a range of -60 to 60 degrees Celsius**, which gives a readout a stable width and a
+  gauge a scale without the widget naming a size.
+- **`--snapshot` waits up to 8 seconds, not 2, for pending readings**, because a weather card needs a lookup and a forecast
+  request; a page without pending readings does not wait.
+- **Motion is `periodic` by default** (one loop every `periodSeconds`, default 60, then the poster frame), with `full` and `off`
+  as the other modes, because a full-card repaint at 30 fps was too costly (see `docs/perf/weather.md`). The SDK gained two
+  default members: `IWidget.AnimationFrameInterval` (the weather icon asks for 15 fps; the frame clock throttles per widget)
+  and `IWidget.NextAnimationAt` (the host paints the widget then, with a one-shot timer, so no widget timer is needed).
+- **The icon loop is timed from the first paint of each icon** (a new icon starts at the poster frame), and a clock that
+  jumps back restarts the loop at the poster frame.
 
 ## Risks / Trade-offs
 
@@ -315,4 +336,4 @@ as the stats tests do.
 - **Does the card also name GeoNames?** The default is no: the place name is the only GeoNames data shown, and CC BY
   accepts credit "in any reasonable manner", which the notices and README are. If the owner wants it on the card,
   only the provider's attribution strings change.
-- **The poster frame fraction** and which Meteocons style files are used are settled by looking at them in the spike.
+- ~~The poster frame fraction and which Meteocons style files are used~~: settled in the spike (`fill` style, fraction `0.0`).

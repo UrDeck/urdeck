@@ -27,7 +27,8 @@ The widget's settings MUST be:
 - `label`: not present (the card shows the place's resolved name), a text (shown as given), or an empty text (no place
   is shown and no space is reserved for it)
 - `unit`: optional display unit for temperatures (`celsius`, `fahrenheit`); not present means the region's unit
-- `motion`: `full` (the default) or `off`; any other value is treated as `full`
+- `motion`: `periodic` (the default), `full` or `off`; any other value is treated as `periodic`
+- `periodSeconds`: optional seconds between loops in the periodic mode
 
 Unknown properties MUST be preserved across load and save. The widget MUST subscribe to the readings of exactly one
 location, so two weather widgets with different locations show two places and two with the same location share one
@@ -137,23 +138,30 @@ assembly, MUST be drawn with the SDK's Lottie component, and MUST be loaded only
 - **THEN** no icon is drawn, one line is logged, and the other content is unaffected
 
 ### Requirement: Weather Motion
-With `motion` set to `full` the icon MUST loop continuously, and the widget MUST report `IsAnimating` while an icon
-is shown, so the host repaints it at its frame rate. With `motion` set to `off` the widget MUST draw the icon's poster
-frame, a fixed frame of the animation, and MUST NOT report `IsAnimating`.
+The icon MUST move according to the `motion` setting. With `periodic` (the default, and the meaning of any value the widget
+does not know) it plays its loop once at the start and then once every period (the `periodSeconds` setting, 60 seconds by
+default, never less than a loop and a second), and between loops it shows the poster frame, a fixed frame of the animation,
+and the widget MUST NOT report `IsAnimating`; it reports when the next loop starts so that the host paints it then. With
+`full` the icon loops continuously and the widget reports `IsAnimating` while an icon is shown. With `off` the widget draws the
+poster frame and never animates. While it animates the widget MUST ask for a frame interval of about 1/15 second.
 
-- The loop is timed from the widget's first paint and computed from the render time; a render time before the loop's
-  start (a clock change) is drawn as the poster frame
+- The loop is timed from the icon's first paint and computed from the render time; a render time before that start (a clock
+  change) is drawn as the poster frame and the timing restarts there
 - The first paint, the paint of a new icon, and `--snapshot` MUST draw the poster frame, so a snapshot is repeatable
 - Frames do not refresh data, and a page with no weather widget MUST pay nothing for any of this
 
-#### Scenario: Looping
+#### Scenario: Periodic loop
+- **WHEN** `motion` is absent and the icon is shown
+- **THEN** the widget animates for one loop, then reports it is not animating and the time of the next loop, and the icon is
+  the poster frame until then
+
+#### Scenario: Full motion
 - **WHEN** `motion` is `full` and the icon is shown
-- **THEN** the widget reports `IsAnimating` and the icon advances with the render time and repeats at the end of the
-  animation
+- **THEN** the widget reports `IsAnimating` and the icon advances with the render time and repeats at the end of the animation
 
 #### Scenario: Motion off
 - **WHEN** `motion` is `off`
-- **THEN** `IsAnimating` returns `false` and the icon is the poster frame in every paint
+- **THEN** `IsAnimating` returns `false`, no next start is reported and the icon is the poster frame in every paint
 
 #### Scenario: First paint
 - **WHEN** the widget is painted for the first time or in `--snapshot`
@@ -165,7 +173,7 @@ frame, a fixed frame of the animation, and MUST NOT report `IsAnimating`.
 
 #### Scenario: Unknown motion value
 - **WHEN** `motion` is `"slow"`
-- **THEN** the widget behaves as `full`, and `slow` is still in the file after a save
+- **THEN** the widget behaves as `periodic`, and `slow` is still in the file after a save
 
 ### Requirement: Weather Credit Line
 The card MUST always draw the credit of the data it shows, taken from the attribution in the descriptions of the

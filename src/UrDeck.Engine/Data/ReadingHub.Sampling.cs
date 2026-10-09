@@ -176,40 +176,61 @@ public sealed partial class ReadingHub
         }
     }
 
-    private Dictionary<string, ReadingDescriptor>? CacheCatalog(ProviderRuntime rt, IDataProvider instance, out string? error)
+    private bool CacheCatalog(ProviderRuntime rt, IDataProvider instance, out string? error)
     {
         error = null;
         lock (_gate)
         {
             if (rt.Catalog != null)
-                return rt.Catalog;
+                return true;
         }
 
         var catalog = new Dictionary<string, ReadingDescriptor>(StringComparer.OrdinalIgnoreCase);
+        var patterns = new List<CatalogPattern>();
         try
         {
             foreach (var entry in instance.Describe())
             {
-                if (entry != null && !string.IsNullOrEmpty(entry.Path) && !catalog.TryAdd(entry.Path, entry))
+                if (entry == null || string.IsNullOrEmpty(entry.Path))
+                    continue;
+                if (!TryParsePattern(entry.Path, out string[]? segments, out bool isPattern))
+                {
+                    UrDeckLog.Warn($"Provider '{rt.Descriptor.Id}' lists the malformed pattern '{entry.Path}' (a parameter is a whole segment written {{name}}); skipped");
+                    continue;
+                }
+
+                if (isPattern)
+                {
+                    if (patterns.Any(p => string.Equals(p.Descriptor.Path, entry.Path, StringComparison.OrdinalIgnoreCase)))
+                        UrDeckLog.Warn($"Provider '{rt.Descriptor.Id}' lists '{entry.Path}' twice; keeping the first");
+                    else
+                        patterns.Add(new CatalogPattern(entry, segments!, segments!.Count(s => !IsParameter(s))));
+                }
+                else if (!catalog.TryAdd(entry.Path, entry))
+                {
                     UrDeckLog.Warn($"Provider '{rt.Descriptor.Id}' lists '{entry.Path}' twice; keeping the first");
+                }
             }
         }
         catch (Exception ex)
         {
             error = $"could not describe its readings: {ex.GetBaseException().Message}";
             UrDeckLog.Error($"Provider '{rt.Descriptor.Id}' {error}", ex);
-            return null;
+            return false;
         }
 
         var changed = new List<string>();
         lock (_gate)
         {
             if (rt.Catalog != null)
-                return rt.Catalog;
+                return true;
             if (_disposed || !_runtimes.TryGetValue(rt.Descriptor.Id, out var current) || !ReferenceEquals(current, rt))
-                return catalog;
+                return true;
 
             rt.Catalog = catalog;
+            rt.Patterns.Clear();
+            rt.Patterns.AddRange(patterns);
+            rt.Instances.Clear();
             foreach (var entry in catalog.Values)
                 _descriptors[$"{rt.Descriptor.Id}:{entry.Path}"] = entry;
 
@@ -224,7 +245,7 @@ public sealed partial class ReadingHub
         }
 
         Raise(changed);
-        return catalog;
+        return true;
     }
 
     private void PumpDemand(ProviderRuntime rt)
@@ -242,8 +263,9 @@ public sealed partial class ReadingHub
                     rt.DemandDirty = false;
                     instance = rt.Instance;
                     paths = rt.Wanted
-                        .Select(p => rt.Catalog != null && rt.Catalog.TryGetValue(p, out var d) ? d.Path : null)
+                        .Select(p => Resolve(rt, p)?.Path)
                         .OfType<string>()
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
                         .ToArray();
                 }
 
@@ -314,7 +336,7 @@ public sealed partial class ReadingHub
             return false;
         }
 
-        if (CacheCatalog(rt, instance, out error) == null)
+        if (!CacheCatalog(rt, instance, out error))
             return false;
 
         try
@@ -512,7 +534,8 @@ public sealed partial class ReadingHub
                 string canonical = path;
                 if (rt.Catalog != null)
                 {
-                    if (!rt.Catalog.TryGetValue(path, out var entry))
+                    var entry = Resolve(rt, path);
+                    if (entry == null)
                         continue;
                     canonical = entry.Path;
                 }
@@ -562,7 +585,9 @@ public sealed partial class ReadingHub
         var reported = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var (path, publication) in items)
         {
-            if (rt.Catalog == null || !rt.Catalog.TryGetValue(path, out var entry))
+            // A path made from a pattern is resolved only when a widget asked for it, so a provider cannot grow the cache.
+            var entry = rt.Catalog == null ? null : rt.Catalog.TryGetValue(path, out var exact) ? exact : rt.Wanted.Contains(path) ? Resolve(rt, path) : null;
+            if (entry == null)
             {
                 if (_loggedBad.Add($"{providerId}:{path}"))
                     UrDeckLog.Warn($"Provider '{providerId}' published '{path}', which is not in its catalog; ignored");
@@ -580,7 +605,8 @@ public sealed partial class ReadingHub
             return;
         foreach (string path in rt.Wanted)
         {
-            if (!rt.Catalog.TryGetValue(path, out var entry) || reported.Contains(entry.Path))
+            var entry = Resolve(rt, path);
+            if (entry == null || reported.Contains(entry.Path))
                 continue;
             int misses = rt.Misses.GetValueOrDefault(entry.Path) + 1;
             rt.Misses[entry.Path] = misses;

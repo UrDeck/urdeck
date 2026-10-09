@@ -16,6 +16,8 @@ public enum ReadingKind
     Text,
     /// <summary>An on/off state.</summary>
     OnOff,
+    /// <summary>An instant with the UTC offset it is read in; shown as the time of day.</summary>
+    Time,
 }
 
 /// <summary>Where a reading stands. See the data-providers spec, "Reading States".</summary>

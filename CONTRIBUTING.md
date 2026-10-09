@@ -151,6 +151,13 @@ public class LoadWidget : Widget<LoadConfig>
 - Compare what you would draw (the formatted text, the label, whether it is current), not the raw value: a load that moves
   from 3.2 to 3.4 percent draws the same `3`, and the widget should not be repainted for it.
 - Do not keep the host or anything obtained from `Readings` beyond the widget's own lifetime.
+- A reading whose description carries an `Attribution` must be credited wherever its data is shown: collect the distinct
+  attributions of the readings you draw, `Attribution.Measure` the strip for the content width, take it off the bottom of the
+  content rectangle before laying out the rest, and `Attribution.Draw` it (see `widgets/UrDeck.Widgets.Stats`).
+- `LottieAnimation` plays a Lottie file the widget embeds (`TryCreate` from a stream, `Draw(canvas, rect, seconds)`, `Dispose`
+  when the widget is reconfigured or disposed); it is the one component a widget owns. Compute the time from
+  `context.Time`, never from a clock of your own, and report `IsAnimating` while it should be repainted at the frame rate
+  (`widgets/UrDeck.Widgets.Weather`). `Log(message)` writes one line to `urdeck.log`.
 
 `widgets/UrDeck.Widgets.Stats` is a complete example.
 
@@ -247,6 +254,22 @@ public sealed class ExampleProvider : IDataProvider
   provider code at all, and that is a budget (see below).
 - **Logging.** `sink.Log(message)` writes one line to `urdeck.log` under the provider's id. Use it for facts that make
   a bug report useful (which device, which source), once, not per sample.
+- **Parameter segments.** A catalog path may have whole segments written `{name}` (`{location}/current/temperature`): such an
+  entry is a pattern that stands for every path with any one segment there, so a provider can serve places (or devices) the
+  user types without listing them. The engine matches a subscribed path against exact paths first, then patterns (the one
+  with the most literal segments wins), and fills `{name}` into the entry's path, label, name and device. `SetDemand` gets
+  the concrete paths. The weather provider (`providers/UrDeck.Providers.Weather`) is the example.
+- **Times.** `ReadingValue.FromTime(DateTimeOffset)` with a `ReadingKind.Time` entry is an instant plus the UTC offset it is
+  read in; the formatter shows it as the time of day in that offset with the region's 12 or 24 hour clock.
+- **Attribution.** A source that requires a credit (a CC BY service) declares it on its descriptions:
+  `Attribution = new ReadingAttribution("Weather data by Open-Meteo.com", "Open-Meteo.com", "https://open-meteo.com/")`.
+  A widget that shows such a reading draws the credit with the `Attribution` component (`Measure` the strip, take it off
+  the content rectangle, `Draw` it), so the credit follows the data into every widget. Put the licence text of what you
+  ship in `THIRD-PARTY-NOTICES.md`.
+- **Network.** Make no request while nothing is subscribed, use https only, bound every request by a timeout, create the
+  `HttpClient` in `Start` and dispose it in `Shutdown` (nothing static, so the plugin can be unloaded), and log the first
+  failure and the first success after it, not every attempt. Throw from `SampleAsync` on a failure: the engine marks the
+  readings stale and retries with its own backoff.
 - **Not yet.** Provider settings and secrets (a URL, a token), image values and a catalog that changes while running
   come with the first provider that needs them.
 

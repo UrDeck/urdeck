@@ -56,8 +56,12 @@ everything else should be fine on Sonnet.
   through Windows, power and clock through `nvml.dll` on NVIDIA behind a vendor seam, without elevation. Spike and
   measurements in `docs/perf/gpu-readings.md`. Verified on NVIDIA only. Adds `IReadingSink.Log` to the SDK.
 - Proposed, not started: `display-targeting`.
-- Next: the weather widget at 4x2 (explored 2026-10-08, decisions and open points under item 7), then sensors that need
-  elevation (item 3, fourth change). See "Suggested order" below.
+- `weather` is implemented (2026-10-08, `openspec/changes/archive/2026-10-08-weather`): the `weather` provider (Open-Meteo, keyless, any number
+  of places typed into the widgets), the 4x2 weather widget with Meteocons animated icons (`SkiaSharp.Skottie`), the
+  time reading, patterned catalog entries, attribution carried with the data and drawn by the weather and stats widgets,
+  and `IWidgetHost.Log`. Spike and measurements in `docs/perf/weather.md`.
+- Next: the 4x4 weather widget (forecast days, humidity and wind), then sensors that need elevation (item 3, fourth
+  change). See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -80,7 +84,8 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
    4. Sensors that need elevation (CPU temperature and what else needs a kernel driver) through an opt-in helper.
 3. **Weather** (item 7) as a provider plus a widget, which brings animated colour icons (Lottie), the first network
    provider, per-widget locations and a time reading. Needs item 14 and the first `data-providers` change. The first
-   change is the 4x2 widget only; 4x4 follows. It goes before the elevated-sensors change.
+   change (the 4x2 widget) is done; the 4x4 widget follows as the next weather change. It goes before the
+   elevated-sensors change.
 4. **Pages and touch** (item 8), then **shortcuts and dock** (items 7 and 10), which bring the image tile.
 
 Display targeting (item 6) is a future change. Its draft is written against the WPF window, so rework it now that the
@@ -183,7 +188,9 @@ in [docs/design/sdk-engine-split-full-tasks.md](design/sdk-engine-split-full-tas
   and make Dependabot ignore SkiaSharp majors; they are SDK-breaking changes. (Dependabot already moved 3.x to 4.x.)
 - [ ] **Packaging:** bundle the analyzer in the `UrDeck.Sdk` NuGet package; a `dotnet new` widget template.
 - [ ] **Build guard:** fail the build if anything under `sdk/` references `src/`.
-- [ ] **Services and logging for widgets:** widgets log nothing today. When the first one needs to (weather), use
+- [ ] **Services and logging for widgets:** `IWidgetHost.Log(string)` and a protected `Log` on `Widget<T>` exist since `weather`
+  (one line to `urdeck.log`, enough for a missing resource). The fuller design, for when a widget needs levels and
+  categories: use
   `Microsoft.Extensions.Logging.Abstractions`: the SDK exposes `ILogger` (for example a protected `Logger` on `Widget<T>`) and the
   engine supplies an `ILoggerFactory` that writes to `urdeck.log`. No custom logging interface. The host-services hook
   (`IWidget.Attach(IWidgetHost)`) is done in its minimal form with `data-providers` (it carries the readings); the
@@ -315,7 +322,7 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 |---|---|---|---|---|
 | Clock | 4x2, 4x1, 2x1, 1x1 | time, date; `style: "flap"` is a split-flap display (`animation`, item 14) | done | readout, text line (done) |
 | Stats (single stat and performance are one widget, `urdeck.widgets.stats`) | 1x1 and 2x2 (one reading; done in `data-providers`), 4x2 (two gauges, three text stats) and 4x4 (four gauges, three text stats) (done in `stats-gauges`) | any reading from any provider, one per slot: CPU and GPU temperature and load, memory, GPU power and clock, one CPU core per card | item 3 | slot configuration (a reading plus a presentation); gauge component (ring, bar, vertical bar) with the larger sizes (done) |
-| Weather | 4x2 (first change) | animated colour icon (day and night variants), temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | Lottie icons, per-widget locations, the time reading, patterned catalogs; see "Weather widget" below |
+| Weather | 4x2 (done in `weather`) | animated colour icon (day and night variants), temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | Lottie icons, per-widget locations, the time reading, patterned catalogs; see "Weather widget" below |
 | Weather, 4x4 (roadmap) | 4x4 | everything of the 4x2 plus forecast days, humidity and wind (exact content open) | the 4x2 weather change | forecast readings (`daily/N/...`), a date label |
 | Shortcut | 1x1 | an app or URL icon that launches on tap | item 8 (touch) | image tile, shared with the dock (item 10) |
 | Media / now playing | open | track, artist, art, controls | items 3 and 8 | image tile reuse |
@@ -521,7 +528,7 @@ Sonnet to implement.
 
 **Status:** explored on 2026-10-03/04; `render-path` is implemented on `feat/render-path` (`openspec/changes/archive/2026-10-04-render-path`):
 the WinUI 3 host, with plugin hot-reload verified and a measured baseline (`docs/perf/render-host-baseline.md`).
-**Next step:** `animation` is done and archived (`openspec/changes/archive/2026-10-04-animation`); the weather change is next after item 3.
+**Next step:** `animation` is done and archived (`openspec/changes/archive/2026-10-04-animation`); the weather change (4x2) is done; the 4x4 weather widget is next.
 Background: [docs/handoff/2026-10-04-render-host-spike.md](handoff/2026-10-04-render-host-spike.md).
 
 Decided in the exploration:

@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Skottie (Lottie) is versioned in lockstep with SkiaSharp itself: keep them equal. -->
     <PackageVersion Include="SkiaSharp" Version="4.153.1" />
+    <PackageVersion Include="SkiaSharp.Skottie" Version="4.153.1" />
     <PackageVersion Include="SkiaSharp.Views.WinUI" Version="4.153.1" />
     <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="10.0.0" />

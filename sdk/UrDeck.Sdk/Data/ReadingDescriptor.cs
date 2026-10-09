@@ -36,4 +36,13 @@ public sealed record ReadingDescriptor(string Path, ReadingKind Kind, string Lab
 
     /// <summary>The number of decimals to show when the widget does not choose any.</summary>
     public int? Decimals { get; init; }
+
+    /// <summary>The credit the reading's source requires wherever its data is shown; null when it requires none.</summary>
+    public ReadingAttribution? Attribution { get; init; }
 }
+
+/// <summary>A source's credit: the text to draw, an optional shorter text for a narrow place and an optional link.</summary>
+/// <param name="Text">The credit, for example <c>Weather data by Open-Meteo.com</c>.</param>
+/// <param name="ShortText">Drawn instead of <paramref name="Text"/> when that does not fit.</param>
+/// <param name="Url">The source's page. A component draws text only; the link is for a tap or an about screen.</param>
+public sealed record ReadingAttribution(string Text, string? ShortText = null, string? Url = null);

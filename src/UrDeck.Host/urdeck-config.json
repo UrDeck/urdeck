@@ -28,6 +28,14 @@
             { "reading": "system:cpu/core/4/load" },
             { "reading": "system:cpu/core/5/load" }
           ]
+        },
+        {
+          "typeId": "urdeck.widgets.weather",
+          "col": 0,
+          "row": 6,
+          "width": 4,
+          "height": 2,
+          "location": "Tokyo"
         }
       ]
     }

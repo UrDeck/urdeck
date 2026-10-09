@@ -32,7 +32,7 @@ public class StatsWidget : Widget<StatsConfig>
     private readonly record struct Position(PositionKind Kind, int Cell, StatsSlot? Slot);
 
     /// <summary>What a paint puts on a position at rest; two equal values draw the same pixels.</summary>
-    private readonly record struct Shown(ReadingText Text, string? Label, float? Fraction, GaugeLevel Level);
+    private readonly record struct Shown(ReadingText Text, string? Label, float? Fraction, GaugeLevel Level, string? Credit);
 
     /// <summary>The fill of one position moving from one fraction to another.</summary>
     private struct Ease
@@ -96,7 +96,17 @@ public class StatsWidget : Widget<StatsConfig>
         _drawn = shown;
         _animating = _eases.Any(e => e.To != null && e.Drawn != e.To);
 
-        var rects = Layout(context, positions);
+        // A credit the data asks for is drawn once for the whole card, in a strip taken off the bottom of the content.
+        var content = context.ContentRect;
+        var credits = Credits(positions);
+        float strip = Attribution.Measure(theme, credits, content.Width);
+        if (strip > 0)
+        {
+            Attribution.Draw(context.Canvas, theme, SKRect.Create(content.Left, content.Bottom - strip, content.Width, strip), credits, HorizontalAlign.Center);
+            content = new SKRect(content.Left, content.Top, content.Right, content.Bottom - strip - theme.Gap);
+        }
+
+        var rects = Layout(context, content, positions);
         float[] scales = ReadoutScales(theme, positions, rects, shown, styles);
         for (int i = 0; i < positions.Length; i++)
         {
@@ -164,6 +174,7 @@ public class StatsWidget : Widget<StatsConfig>
 
         var options = new ReadingFormatOptions { Decimals = slot?.Decimals, DisplayUnit = ParseUnit(slot?.Unit) };
         var text = ReadingFormatter.Format(reading, descriptor, options, Readings);
+        string? credit = descriptor?.Attribution?.Text;
 
         // No label set: the catalog's. A reading that does not exist has none, so name the id to make the mistake findable.
         string? label = slot?.Label
@@ -171,7 +182,7 @@ public class StatsWidget : Widget<StatsConfig>
             ?? (reading.State == ReadingState.Unavailable ? id : null);
 
         if (Request(position) == StyleRequest.Plain)
-            return new Shown(text, label, null, GaugeLevel.Normal);
+            return new Shown(text, label, null, GaugeLevel.Normal, credit);
 
         var scale = GaugeScale.Resolve(reading, descriptor, new GaugeScaleOptions
         {
@@ -181,7 +192,7 @@ public class StatsWidget : Widget<StatsConfig>
             Critical = slot?.Critical,
             Decimals = slot?.Decimals,
         });
-        return new Shown(text, label, scale.Fraction, scale.Level);
+        return new Shown(text, label, scale.Fraction, scale.Level, credit);
     }
 
     /// <summary>The style a position ends up with. A text position is always plain.</summary>
@@ -216,9 +227,22 @@ public class StatsWidget : Widget<StatsConfig>
         return style != GaugeStyle.Plain && hasValue && shown.Fraction == null ? GaugeStyle.Plain : style;
     }
 
-    private static SKRect[] Layout(WidgetRenderContext context, Position[] positions)
+    /// <summary>The attributions of the readings the card shows, taken from their descriptions.</summary>
+    private List<ReadingAttribution> Credits(Position[] positions)
     {
-        var content = context.ContentRect;
+        var credits = new List<ReadingAttribution>();
+        foreach (var position in positions)
+        {
+            var credit = Readings.Describe(ReadingId(position.Slot))?.Attribution;
+            if (credit != null)
+                credits.Add(credit);
+        }
+
+        return credits;
+    }
+
+    private static SKRect[] Layout(WidgetRenderContext context, SKRect content, Position[] positions)
+    {
         var rects = new SKRect[positions.Length];
         if (positions.Length == 0 || positions[0].Kind == PositionKind.Single)
         {

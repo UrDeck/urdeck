@@ -45,6 +45,9 @@ public abstract class Widget<TConfig> : IWidget<TConfig> where TConfig : WidgetC
     /// <summary>The readings the widget may read; every reading is unavailable until the widget is attached.</summary>
     protected IReadingSource Readings => _host?.Readings ?? NullReadingSource.Instance;
 
+    /// <summary>Writes one line to the host's log; does nothing before the widget is attached.</summary>
+    protected void Log(string message) => _host?.Log(message);
+
     /// <inheritdoc cref="IWidget.Attach"/>
     public virtual void Attach(IWidgetHost host) => _host = host;
 
@@ -58,6 +61,12 @@ public abstract class Widget<TConfig> : IWidget<TConfig> where TConfig : WidgetC
 
     /// <inheritdoc cref="IWidget.IsAnimating"/>
     public virtual bool IsAnimating => false;
+
+    /// <inheritdoc cref="IWidget.AnimationFrameInterval"/>
+    public virtual TimeSpan AnimationFrameInterval => TimeSpan.Zero;
+
+    /// <inheritdoc cref="IWidget.NextAnimationAt"/>
+    public virtual DateTime? NextAnimationAt => null;
 
     public abstract void Render(WidgetRenderContext context);
 }

@@ -58,6 +58,19 @@ public interface IWidget
     bool IsAnimating => false;
 
     /// <summary>
+    /// The time between frames the host should use while <see cref="IsAnimating"/> is true. Zero (the default) is the host's
+    /// own rate. A slow animation looks the same at a lower rate and costs proportionally less.
+    /// </summary>
+    TimeSpan AnimationFrameInterval => TimeSpan.Zero;
+
+    /// <summary>
+    /// When the widget is not animating but will want to start again (an animation that plays now and then), the time of
+    /// the next start; the host paints the widget then, without a refresh. Null (the default) means never. Read after each
+    /// paint; must be cheap and free of side effects.
+    /// </summary>
+    DateTime? NextAnimationAt => null;
+
+    /// <summary>
     /// Draws the widget. Called on the UI thread; must be synchronous and fast. The canvas is only
     /// valid for the duration of the call.
     /// </summary>

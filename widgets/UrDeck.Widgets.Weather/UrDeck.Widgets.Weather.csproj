@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(UrDeckTfm)</TargetFramework>
+    <Description>First-party widget that shows the weather of a place, with an animated icon.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- UrDeck.Sdk and SkiaSharp are provided by the host at runtime; don't copy them next to the plugin. -->
+    <ProjectReference Include="..\..\sdk\UrDeck.Sdk\UrDeck.Sdk.csproj" Private="false" />
+    <ProjectReference Include="..\..\sdk\UrDeck.Analyzer\UrDeck.Analyzer.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The icons (Meteocons, MIT) and their licence travel inside the assembly: the host copies only the plugin's DLL. -->
+    <EmbeddedResource Include="Icons\*.json" LogicalName="Icons.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Icons\Meteocons-LICENSE.txt" LogicalName="Icons.Meteocons-LICENSE.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
+
+</Project>
