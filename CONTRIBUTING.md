@@ -10,7 +10,7 @@ Agents and humans follow the same rules; the short version for agents is in [AGE
 
 ## Workflow
 
-1. Pick an item from [docs/ROADMAP.md](docs/ROADMAP.md) (or open an issue first). Larger changes get an OpenSpec change
+1. Pick an item from [docs/BACKLOG.md](docs/BACKLOG.md) (or open an issue first; [docs/ROADMAP.md](docs/ROADMAP.md) has the milestones). Larger changes get an OpenSpec change
    under `openspec/changes/` (proposal, design, specs, tasks) that passes `openspec validate --all --strict`.
 2. Branch off `main`: `feat/short-name`, `fix/...`, `docs/...`, `chore/...`. Never commit to `main` directly.
 3. Build, test and format locally (commands in [AGENTS.md](AGENTS.md)). Warnings are errors.
@@ -290,7 +290,7 @@ verified per vendor.
 ## Performance budgets
 
 UrDeck's selling point is a low footprint, so cost is reviewed like correctness. The formal tiers and the benchmark mode
-are roadmap item 4; until then, the working targets are:
+are backlog item 4; until then, the working targets are:
 
 - Host baseline: about 100 MB private memory in Release with one Clock (the WinUI 3 host, `docs/perf/render-host-baseline.md`), no CPU or GPU use while nothing changes. The bar is "no worse than HYTE Nexus" on the same panel (`docs/perf/nexus-baseline.md`).
 - A widget's dominant cost is its render surface (`width x height x 4` bytes); keep additional allocations small and
@@ -308,4 +308,4 @@ State the measured impact under "Performance impact" in the PR description.
 - [ ] No per-widget styling or resolution/scaling assumptions leaked in
 - [ ] Performance impact measured or explicitly "none"
 - [ ] Rendering checked with `--snapshot`, and on the real panel for host/layout/DPI changes
-- [ ] Docs updated (README, ROADMAP status, AGENTS.md if commands or conventions changed)
+- [ ] Docs updated (README, BACKLOG status, ROADMAP milestones, AGENTS.md if commands or conventions changed)

@@ -2,7 +2,7 @@
 
 > **Status: reference only.** This is the full design from an Opus review of the SDK/Engine split. The owner chose a much
 > smaller first step (the split itself, a frozen SDK `AssemblyVersion`, a loader warning); the rest is parked in
-> [docs/ROADMAP.md](../ROADMAP.md) under "Parked". Names such as `UrDeck.Core` below describe the code before the split.
+> [docs/BACKLOG.md](../BACKLOG.md) under "Parked". Names such as `UrDeck.Core` below describe the code before the split.
 
 ## Context
 

@@ -2,7 +2,7 @@
 
 > **Status: reference only.** This is the full design from an Opus review of the SDK/Engine split. The owner chose a much
 > smaller first step (the split itself, a frozen SDK `AssemblyVersion`, a loader warning); the rest is parked in
-> [docs/ROADMAP.md](../ROADMAP.md) under "Parked". Names such as `UrDeck.Core` below describe the code before the split. PR 1 below was done in a reduced form; PRs 2 and 3 are the parked work.
+> [docs/BACKLOG.md](../BACKLOG.md) under "Parked". Names such as `UrDeck.Core` below describe the code before the split. PR 1 below was done in a reduced form; PRs 2 and 3 are the parked work.
 
 Three PRs, each green on its own. Labels: **[mechanical]** is fine for a cheaper model (Sonnet) given `design.md`; **[judgment]** needs design sense or debugging (Opus, or Sonnet with review). Use `git mv` for every move so history follows the files. In Git Bash use `-p:Foo`, not `/p:Foo`.
 
