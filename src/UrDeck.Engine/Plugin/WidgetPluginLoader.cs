@@ -40,6 +40,8 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     private sealed class WidgetHost(IReadingSource readings) : IWidgetHost
     {
         public IReadingSource Readings { get; } = readings;
+
+        public void Log(string message) => UrDeckLog.Info(message);
     }
 
     public void ScanAndLoadPlugins(string pluginDirectory)

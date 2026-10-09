@@ -22,8 +22,14 @@ internal sealed class ProviderRuntime(ProviderDescriptor descriptor)
     /// <summary>Whether <see cref="IDataProvider.Start"/> ran on <see cref="Instance"/>.</summary>
     public bool Started { get; set; }
 
-    /// <summary>The catalog by path; kept across stops, dropped on release.</summary>
+    /// <summary>The catalog's exact entries by path; kept across stops, dropped on release.</summary>
     public Dictionary<string, ReadingDescriptor>? Catalog { get; set; }
+
+    /// <summary>The catalog's entries with parameter segments, in the order the provider listed them.</summary>
+    public List<CatalogPattern> Patterns { get; } = [];
+
+    /// <summary>The descriptions already made from a pattern, by the path that asked for them.</summary>
+    public Dictionary<string, ReadingDescriptor> Instances { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Paths with at least one subscriber (including paths the catalog turns out not to contain).</summary>
     public HashSet<string> Wanted { get; } = new(StringComparer.OrdinalIgnoreCase);

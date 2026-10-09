@@ -23,6 +23,7 @@ internal sealed class WidgetView : SKXamlCanvas, IDisposable
     private readonly Theme _theme;
     private readonly FrameClock _frameClock;
     private readonly DispatcherQueueTimer? _timer;
+    private DispatcherQueueTimer? _wake;
     private readonly CancellationTokenSource _cts = new();
     private readonly ReadingHub _readings;
     private readonly string[] _subscriptions;
@@ -162,9 +163,64 @@ internal sealed class WidgetView : SKXamlCanvas, IDisposable
 
         // Membership only changes here; the frame clock's next tick does the invalidating.
         if (SafeIsAnimating(widget))
+        {
             _frameClock.Add(this);
+            _wake?.Stop();
+        }
         else
+        {
             _frameClock.Remove(this);
+            ScheduleWake(widget);
+        }
+    }
+
+    /// <summary>The time between frames the widget asks for while it animates; zero is the clock's own rate.</summary>
+    public TimeSpan FrameInterval
+    {
+        get
+        {
+            try
+            {
+                return _widget?.AnimationFrameInterval ?? TimeSpan.Zero;
+            }
+            catch (Exception ex)
+            {
+                UrDeckLog.Error("AnimationFrameInterval failed; using the clock's rate", ex);
+                return TimeSpan.Zero;
+            }
+        }
+    }
+
+    /// <summary>A widget that animates now and then says when; one timer, restarted after every paint, paints it then.</summary>
+    private void ScheduleWake(IWidget widget)
+    {
+        DateTime? next;
+        try
+        {
+            next = widget.NextAnimationAt;
+        }
+        catch (Exception ex)
+        {
+            UrDeckLog.Error($"Widget '{widget.Name}' NextAnimationAt failed; no wake is scheduled", ex);
+            next = null;
+        }
+
+        if (next is not { } at)
+        {
+            _wake?.Stop();
+            return;
+        }
+
+        if (_wake == null)
+        {
+            _wake = DispatcherQueue.GetForCurrentThread().CreateTimer();
+            _wake.IsRepeating = false;
+            _wake.Tick += (_, _) => Invalidate();
+        }
+
+        _wake.Stop();
+        _wake.Interval = TimeSpan.FromMilliseconds(Math.Max(50, (at - DateTime.Now).TotalMilliseconds));
+        _wake.Start();
     }
 
     private static bool SafeIsAnimating(IWidget widget)
@@ -183,6 +239,7 @@ internal sealed class WidgetView : SKXamlCanvas, IDisposable
     public void Dispose()
     {
         _timer?.Stop();
+        _wake?.Stop();
         Unsubscribe();
         _frameClock.Remove(this);
         _cts.Cancel();

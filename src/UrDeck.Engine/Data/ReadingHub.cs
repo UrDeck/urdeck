@@ -29,11 +29,13 @@ public sealed partial class ReadingHub : IReadingSource, IDisposable
     private Dictionary<string, int> _intervals = new(StringComparer.OrdinalIgnoreCase);
     private bool _disposed;
 
-    public ReadingHub(ProviderRegistry providers, TimeProvider? time = null, bool? regionUsesFahrenheit = null)
+    public ReadingHub(ProviderRegistry providers, TimeProvider? time = null, bool? regionUsesFahrenheit = null, bool? regionUses24HourClock = null)
     {
         _providers = providers;
         _time = time ?? TimeProvider.System;
         RegionUsesFahrenheit = regionUsesFahrenheit ?? !RegionIsMetric();
+        RegionUses24HourClock = regionUses24HourClock
+            ?? !CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Contains("tt", StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -43,6 +45,8 @@ public sealed partial class ReadingHub : IReadingSource, IDisposable
     public event Action<IReadOnlyCollection<string>>? ReadingsChanged;
 
     public bool RegionUsesFahrenheit { get; }
+
+    public bool RegionUses24HourClock { get; }
 
     private static bool RegionIsMetric()
     {
@@ -88,11 +92,22 @@ public sealed partial class ReadingHub : IReadingSource, IDisposable
                 return null;
             rt = GetOrCreateRuntime(descriptor);
             if (rt.Catalog != null)
-                return rt.Catalog.Values.ToList();
+                return Listed(rt);
         }
 
         var instance = EnsureInstance(rt, out _);
-        return instance == null ? null : CacheCatalog(rt, instance, out _)?.Values.ToList();
+        if (instance == null || !CacheCatalog(rt, instance, out _))
+            return null;
+        lock (_gate)
+            return rt.Catalog == null ? null : Listed(rt);
+    }
+
+    /// <summary>The exact entries and then the patterns as the provider wrote them; under the gate.</summary>
+    private static List<ReadingDescriptor> Listed(ProviderRuntime rt)
+    {
+        var list = rt.Catalog!.Values.ToList();
+        list.AddRange(rt.Patterns.Select(p => p.Descriptor));
+        return list;
     }
 
     /// <summary>Counts one more subscriber for each id; the first subscriber of an id makes its reading pending.</summary>
@@ -283,7 +298,7 @@ public sealed partial class ReadingHub : IReadingSource, IDisposable
     /// <summary>Marks a subscribed path that the provider's catalog does not contain as unavailable.</summary>
     private void CheckPath(ProviderRuntime rt, string id, string path, List<string> changed)
     {
-        if (rt.Catalog!.ContainsKey(path))
+        if (Resolve(rt, path) != null)
             return;
         SetBad(id, $"provider '{rt.Descriptor.Id}' has no reading '{path}'", changed);
     }

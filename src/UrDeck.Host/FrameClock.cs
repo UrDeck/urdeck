@@ -15,7 +15,10 @@ internal sealed class FrameClock
 {
     private static readonly TimeSpan FrameInterval = TimeSpan.FromSeconds(1.0 / 30);
 
+    private const double TickSlackMs = 10;
+
     private readonly HashSet<WidgetView> _views = new();
+    private readonly Dictionary<WidgetView, long> _last = new();
     private readonly DispatcherQueueTimer _timer;
 
     public FrameClock(DispatcherQueue queue)
@@ -38,6 +41,7 @@ internal sealed class FrameClock
 
     public void Remove(WidgetView view)
     {
+        _last.Remove(view);
         if (_views.Remove(view) && _views.Count == 0)
             Stop();
     }
@@ -46,6 +50,7 @@ internal sealed class FrameClock
     public void Shutdown()
     {
         _views.Clear();
+        _last.Clear();
         Stop();
     }
 
@@ -59,8 +64,16 @@ internal sealed class FrameClock
 
     private void OnTick()
     {
-        // A paint can change membership, so walk a copy.
+        // A paint can change membership, so walk a copy. A widget that asks for a slower rate is invalidated on every
+        // n-th tick; the tick itself is cheap.
+        long now = Environment.TickCount64;
         foreach (var view in _views.ToArray())
+        {
+            double interval = view.FrameInterval.TotalMilliseconds;
+            if (interval > 0 && _last.TryGetValue(view, out long last) && now - last < interval - TickSlackMs)
+                continue;
+            _last[view] = now;
             view.Invalidate();
+        }
     }
 }

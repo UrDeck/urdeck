@@ -56,7 +56,12 @@ everything else should be fine on Sonnet.
   through Windows, power and clock through `nvml.dll` on NVIDIA behind a vendor seam, without elevation. Spike and
   measurements in `docs/perf/gpu-readings.md`. Verified on NVIDIA only. Adds `IReadingSink.Log` to the SDK.
 - Proposed, not started: `display-targeting`.
-- Next: sensors that need elevation (item 3, fourth change). See "Suggested order" below.
+- `weather` is implemented (2026-10-08, `openspec/changes/archive/2026-10-08-weather`): the `weather` provider (Open-Meteo, keyless, any number
+  of places typed into the widgets), the 4x2 weather widget with Meteocons animated icons (`SkiaSharp.Skottie`), the
+  time reading, patterned catalog entries, attribution carried with the data and drawn by the weather and stats widgets,
+  and `IWidgetHost.Log`. Spike and measurements in `docs/perf/weather.md`.
+- Next: the 4x4 weather widget (forecast days, humidity and wind), then sensors that need elevation (item 3, fourth
+  change). See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -77,8 +82,10 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
    3. `gpu-readings` (done): GPU load and temperature for any vendor through Windows, GPU power and clock through
       the vendor library (NVIDIA first), all without elevation.
    4. Sensors that need elevation (CPU temperature and what else needs a kernel driver) through an opt-in helper.
-3. **Weather** (item 7) as a provider plus a widget, which brings glyphs, animated colour icons and the first provider
-   with settings. Needs item 14 and the first `data-providers` change.
+3. **Weather** (item 7) as a provider plus a widget, which brings animated colour icons (Lottie), the first network
+   provider, per-widget locations and a time reading. Needs item 14 and the first `data-providers` change. The first
+   change (the 4x2 widget) is done; the 4x4 widget follows as the next weather change. It goes before the
+   elevated-sensors change.
 4. **Pages and touch** (item 8), then **shortcuts and dock** (items 7 and 10), which bring the image tile.
 
 Display targeting (item 6) is a future change. Its draft is written against the WPF window, so rework it now that the
@@ -181,7 +188,9 @@ in [docs/design/sdk-engine-split-full-tasks.md](design/sdk-engine-split-full-tas
   and make Dependabot ignore SkiaSharp majors; they are SDK-breaking changes. (Dependabot already moved 3.x to 4.x.)
 - [ ] **Packaging:** bundle the analyzer in the `UrDeck.Sdk` NuGet package; a `dotnet new` widget template.
 - [ ] **Build guard:** fail the build if anything under `sdk/` references `src/`.
-- [ ] **Services and logging for widgets:** widgets log nothing today. When the first one needs to (weather), use
+- [ ] **Services and logging for widgets:** `IWidgetHost.Log(string)` and a protected `Log` on `Widget<T>` exist since `weather`
+  (one line to `urdeck.log`, enough for a missing resource). The fuller design, for when a widget needs levels and
+  categories: use
   `Microsoft.Extensions.Logging.Abstractions`: the SDK exposes `ILogger` (for example a protected `Logger` on `Widget<T>`) and the
   engine supplies an `ILoggerFactory` that writes to `urdeck.log`. No custom logging interface. The host-services hook
   (`IWidget.Attach(IWidgetHost)`) is done in its minimal form with `data-providers` (it carries the readings); the
@@ -213,7 +222,7 @@ decisions and the rejected alternatives. The handoff that started the exploratio
 [docs/handoff/2026-10-03-data-providers.md](handoff/2026-10-03-data-providers.md). What it measured on the panel is in
 [docs/perf/data-providers.md](perf/data-providers.md). `[RefreshOnEvent]` is gone (`[RefreshOnData]` replaces it) and
 `IWidget` gained `Attach` and `Subscriptions`, so the SDK assembly version is 0.3.0.0.
-**Next step:** the second change, `stats-gauges` (gauge component and larger compositions), and `gpu-readings` are done; the fourth is the elevated helper.
+**Next step:** the second change, `stats-gauges` (gauge component and larger compositions), and `gpu-readings` are done; the fourth is the elevated helper, which waits behind the weather widget (item 7).
 
 What the exploration settled (it replaced the earlier "named topics with typed values, one provider per topic"):
 
@@ -240,8 +249,11 @@ What the exploration settled (it replaced the earlier "named topics with typed v
 
 The three changes are listed under "Suggested order". Left for later, each with the change or consumer that needs it:
 
-- Provider-defined settings and secrets (weather location, a Home Assistant URL and token): with the weather change.
-- A logger for plugins: with the first provider that talks to a network.
+- Provider-defined settings and secrets (a Home Assistant URL and token): with the first provider that needs them. The
+  weather location no longer needs provider settings: it is per widget and travels in the reading id (item 7), so
+  `providers.weather` carries only `intervalMs`. Secrets (Credential Manager or DPAPI) stay parked.
+- A logger for plugins: `IReadingSink.Log` already serves providers, which are the only plugins that talk to a network,
+  so `ILogger` stays parked until a widget needs to log.
 - Backing off when the PC is busy or on battery, which also gives `[RefreshAdaptive]` its meaning: the engine owns
   every provider's timer, so it is one place to change. Shared with the animation frame rate (item 14).
 - A per-card sampling rate, history buffers for charts, a catalog that changes while running, image values.
@@ -310,7 +322,8 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 |---|---|---|---|---|
 | Clock | 4x2, 4x1, 2x1, 1x1 | time, date; `style: "flap"` is a split-flap display (`animation`, item 14) | done | readout, text line (done) |
 | Stats (single stat and performance are one widget, `urdeck.widgets.stats`) | 1x1 and 2x2 (one reading; done in `data-providers`), 4x2 (two gauges, three text stats) and 4x4 (four gauges, three text stats) (done in `stats-gauges`) | any reading from any provider, one per slot: CPU and GPU temperature and load, memory, GPU power and clock, one CPU core per card | item 3 | slot configuration (a reading plus a presentation); gauge component (ring, bar, vertical bar) with the larger sizes (done) |
-| Weather | 4x2 | animated colour icon, temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | tinted glyph, colour or animated icon, provider settings |
+| Weather | 4x2 (done in `weather`) | animated colour icon (day and night variants), temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | Lottie icons, per-widget locations, the time reading, patterned catalogs; see "Weather widget" below |
+| Weather, 4x4 (roadmap) | 4x4 | everything of the 4x2 plus forecast days, humidity and wind (exact content open) | the 4x2 weather change | forecast readings (`daily/N/...`), a date label |
 | Shortcut | 1x1 | an app or URL icon that launches on tap | item 8 (touch) | image tile, shared with the dock (item 10) |
 | Media / now playing | open | track, artist, art, controls | items 3 and 8 | image tile reuse |
 | Web page | open | any web page, with touch (the owner shows Frigate camera feeds this way in Nexus) | item 14 (new host), item 8 | a hosted widget kind: the host places a web view layer instead of calling `Render` |
@@ -349,6 +362,92 @@ What is settled and what is open, so the next session starts from context:
   Revisit this if gauges make the difference more noticeable.
 - Text sizes are theme values; a gauge's inner readout must use them like every other readout, so the theme alone decides
   how large the small text is (it was enlarged twice after the first look at the panel, see `docs/themes.md`).
+
+**Weather widget (explored 2026-10-08; the first change is 4x2 only, 4x4 is its own change).** Settled with the owner,
+or checked against the code and the spike (`H:\projects\urdeck-render-spike`, `render-host-spike.md`):
+
+- Scope of the first change: the `weather` provider and the 4x2 widget (icon, temperature, condition, high and low,
+  place, sunrise and sunset). 4x4 (forecast days, humidity, wind) is the next weather change.
+- **Locations are per widget, several at once.** The widget config holds a free-text `location` (city, zip, "City, ST",
+  "City, State", optionally with a country code) and may hold explicit `latitude` and `longitude`. The widget puts the
+  location into its reading ids as the first path segment (`weather:Portland, Oregon/current/temperature`); the
+  engine's `ReadingId` already allows this. The provider reads the distinct locations from `SetDemand`, geocodes them
+  and fetches all of them in one forecast request. It publishes `{location}/place` (the resolved name) so the widget
+  can show it by default and the user can see which place was picked. The widget normalises the location (trim, case)
+  so two widgets for one place share a fetch.
+- **Geocoding: Open-Meteo's search (keyless), probed on 2026-10-08.** Works: `90210`, `Portland, OR`, `Portland, Oregon`,
+  `Springfield, IL`, `Paris, TX`, `Portland, Oregon, US`, `London, GB`, `London, England`, a bare `Zurich` (the biggest
+  match wins). Does not work: `Portland OR` (no comma), `London, UK` (use `GB`), `Zürich, CH`, `Beverly Hills, CA 90210`,
+  or a wrong state. A bare zip can match several countries (`10001`, `97201`), so the first result is shown with its
+  resolved name and the other candidates are logged; adding `, US` narrows it. A no-match result is `unavailable`
+  with the query in the reason.
+- **Catalog (proposed, public API): patterned descriptors.** A descriptor path may contain `{location}`
+  (`{location}/current/temperature`); the engine resolves a subscribed path through one lookup that falls back to the
+  patterns and caches the concrete descriptor. Today `rt.Catalog` is an exact dictionary read at about six sites in
+  `ReadingHub` and `ReadingHub.Sampling`, which is why `CheckPath` would mark every location unavailable. The
+  alternative (a catalog that grows while running) stays parked.
+- **Provider settings are not needed.** `providers.weather` carries `intervalMs` only (default 15 minutes, minimum
+  5; Open-Meteo's current conditions update every 15 minutes, and its free tier allows 600 calls a minute, 5,000 an
+  hour and 10,000 a day, which these intervals stay far below; the minimum must stay enforced).
+  `IReadingSink.Log` is the provider's logger. Secrets stay parked.
+- **Reading vocabulary is provider-neutral**: `current/condition` is text from a small portable set (`clear`,
+  `partly-cloudy`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `thunder`, ...) mapped from WMO codes in one place;
+  also `current/is-day`, `current/temperature`, `current/apparent`, `today/high`, `today/low`, `today/sunrise`,
+  `today/sunset`. A later provider fits behind the same ids. Condition labels are English for now.
+- **Time as a reading (settled to add; representation proposed).** A new value type holding a `DateTimeOffset`
+  (epoch seconds plus the UTC offset) and `ReadingKind.Time`, which `ReadingFormatter` shows as the time of day in the
+  value's own offset (a Tokyo sunrise reads in Tokyo time) with the region's 12 or 24 hour setting. An instant, not a
+  `TimeSpan`: after sunset the widget needs tomorrow's sunrise, which a time of day cannot say. Dates and date-times
+  are further formatting kinds over the same value; durations (uptime, time left) are a number with a unit and wait
+  for a use.
+- **Icons are Lottie (settled).** Spike result: `SkiaSharp.Skottie` 4.153.1 works headless (`Animation.TryCreate`,
+  `SeekFrameTime`, `Render(canvas, rect)`) and measured 3.4% of one core and 3.1% GPU 3D at 30 fps, 7.5% at 60 fps,
+  with the whole 1050x520 card repainted each frame; Nexus is about 20% of a core. The 30 fps frame clock from
+  `animation` stays. Meteocons fill is MIT and needs an attribution entry.
+- **Where Lottie lives (settled 2026-10-08): the SDK, as a component.** A small `IDisposable` wrapper in
+  `UrDeck.Sdk.Components` over `SkiaSharp.Skottie` (create from a stream, seek to a time, draw into a rectangle), so any
+  author can use it and the SDK's public surface shows no Skottie types. The SDK takes `SkiaSharp.Skottie` (with
+  `SceneGraph` and `Resources`, pure managed packages) as a package reference the way it takes `SkiaSharp`, so the
+  assemblies resolve from the host's copy; the first task confirms they reach the host output. A plugin-private Skottie
+  was rejected because the host build copies only each plugin's own DLL to `plugins/` and the loader would log the
+  stray DLLs as "no widgets"; a host service on `IWidgetHost` was rejected because its only gain was a shared parse
+  cache. Cost: every SDK consumer gains three dependencies, and Skottie's version moves with SkiaSharp's (already true
+  of SkiaSharp itself, see the parked SDK versioning policy in item 1).
+- **Assets (settled 2026-10-08): the icons are embedded resources in the weather DLL**, read with
+  `GetManifestResourceStream`. The shadow copy carries only the DLL, `.pdb` and `.deps.json`, so loose files next to a
+  plugin would not follow it. The one Meteocons file measured is 5 KB, so about thirty icons are small; load them
+  lazily, one at a time. The asset policy for third-party widgets that ship large media is a separate, parked question.
+- **Motion:** the Lottie loop needs a poster frame for `--snapshot` and for the first paint (`IsAnimating` rules in
+  `animation`), and a motion level (at least "off" = freeze on the poster frame) because it is the first animation
+  that never stops. Time stays `context.Time`; a pinned animation time is only needed if snapshots must differ from
+  the poster frame. Not done by the weather change: wake requests, a transition helper, backing off when busy.
+- **Still to check in the proposal or the first tasks:** Skottie parsing a Meteocons file with every layer type we use
+  (only `partly-cloudy-day` was tried), the real size of the icon set, and the exact wording of the Open-Meteo and
+  Meteocons terms (read on 2026-10-08 through a summarising fetch, so copy the text from the pages themselves).
+- **Licences and attribution (read 2026-10-08; compliance is a requirement, not a nicety).** Each item becomes a task
+  of the change, and none ships before the code that uses it:
+  - **Open-Meteo data is CC BY 4.0.** Credit, a link to the licence, and an indication of changes are required, and
+    Open-Meteo asks for a link "next to any location Open-Meteo data are displayed", for example "Weather data by
+    Open-Meteo.com" linking to `https://open-meteo.com/`, with no exception for apps. So the 4x2 card always draws that
+    credit line, and no widget setting hides it (the "empty hides the label" convention does not apply). Because the
+    credit travels with the data, a stats slot pointed at a `weather:` reading needs it too: the proposal decides how
+    (a leaning: `ReadingDescriptor` gains an attribution text and link that any widget showing the reading draws, so
+    the stats widget can honour it). Our conversions (units, the portable condition classes) go into the notices as
+    "data converted".
+  - **The free tier is for non-commercial use**: private or non-profit apps with no subscriptions or advertising.
+    UrDeck is free and open source, so it qualifies; each user's PC is its own caller. The widget and provider docs say
+    that commercial use needs an Open-Meteo API key. Supporting an optional `apiKey` setting would bring provider
+    settings and secrets back and is parked.
+  - **Geocoding data is GeoNames (CC BY).** Credit it in the notices file; whether the card also needs a GeoNames line
+    is a judgment call for the proposal (the conservative reading is yes, in the same credit line).
+  - **Meteocons is MIT, Copyright (c) 2020-2024 Bas Milius**, for every style and format including the Lottie files. The
+    notice must be included with copies, and the icons are embedded in a DLL we distribute, so the licence text goes in
+    the third-party notices (item 12), in the README licence table, and next to the icon sources as
+    `Meteocons-LICENSE.txt`, the pattern the Inter font already follows. Keep each file's metadata intact.
+  - **The Open-Meteo server code (AGPL v3) does not apply**: we call the API and ship none of its code.
+  - SkiaSharp and Skottie are MIT and need the same notice entry (item 12 already plans it for SkiaSharp).
+- Parked: named location aliases, a disk cache for geocoding results, localised condition text, the Windows location
+  API (IP geolocation is rejected: it leaks the location to a third party).
 
 The web page widget is a requirement, not an extra: it also covers Twitch chat and dashboards with no per-site work.
 It costs browser processes per instance, paid only by users who add one.
@@ -429,7 +528,7 @@ Sonnet to implement.
 
 **Status:** explored on 2026-10-03/04; `render-path` is implemented on `feat/render-path` (`openspec/changes/archive/2026-10-04-render-path`):
 the WinUI 3 host, with plugin hot-reload verified and a measured baseline (`docs/perf/render-host-baseline.md`).
-**Next step:** `animation` is done and archived (`openspec/changes/archive/2026-10-04-animation`); the weather change is next after item 3.
+**Next step:** `animation` is done and archived (`openspec/changes/archive/2026-10-04-animation`); the weather change (4x2) is done; the 4x4 weather widget is next.
 Background: [docs/handoff/2026-10-04-render-host-spike.md](handoff/2026-10-04-render-host-spike.md).
 
 Decided in the exploration:
@@ -454,6 +553,7 @@ Built in `animation`: a widget reports `IsAnimating`; one host frame clock at 30
 frames never refresh data. Deliberately left out and revisited by the weather change, the first widget that loops: wake
 requests (a repaint at a wall-clock time), a monotonic or pinnable animation time, a transition helper, a user motion
 level, backing off when the PC is busy (needs `system.cpu` from item 3), smaller or GPU-backed surfaces. Details in the handoff.
+The 2026-10-08 weather exploration took the poster frame and the motion level; see "Weather widget" under item 7.
 
 Out of scope here: the weather widget itself, the background feature (item 9; the spike only measures one), page
 navigation (item 8; the spike only tries a swipe), display targeting (item 6).

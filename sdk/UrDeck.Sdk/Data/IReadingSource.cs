@@ -16,12 +16,23 @@ public interface IReadingSource
 
     /// <summary>Whether the user's Windows region shows temperatures in Fahrenheit.</summary>
     bool RegionUsesFahrenheit { get; }
+
+    /// <summary>
+    /// Whether the user's Windows region shows the time on a 24 hour clock. The default reads the current culture, so a
+    /// source written before times existed keeps compiling.
+    /// </summary>
+    bool RegionUses24HourClock => !System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Contains("tt", StringComparison.Ordinal);
 }
 
 /// <summary>The services the host offers a widget, handed over by <see cref="IWidget.Attach"/>.</summary>
 public interface IWidgetHost
 {
     IReadingSource Readings { get; }
+
+    /// <summary>Writes one line to the host's log, for a fact worth reporting (a missing resource). The default drops it.</summary>
+    void Log(string message)
+    {
+    }
 }
 
 /// <summary>The reading source of a widget that was never attached: everything is unavailable.</summary>

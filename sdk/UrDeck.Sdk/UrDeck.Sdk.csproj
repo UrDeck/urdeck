@@ -13,13 +13,17 @@
          Subscriptions, and the Data namespace arrived (data-providers). Removing a public type is breaking, so plugins
          built against 0.2.0.0 must be rebuilt.
          Package 0.5.0 (stats-gauges): Gauge, GaugeScale, ReadingDescriptor.Warning/Critical and Theme.GaugeStyle. All
-         additive, so the assembly version stays. -->
-    <Version>0.5.0</Version>
+         additive, so the assembly version stays.
+         Package 0.6.0 (weather): ReadingValue time, ReadingKind.Time, ReadingFormatOptions.Use24HourClock,
+         IReadingSource.RegionUses24HourClock and IWidgetHost.Log, IWidget.AnimationFrameInterval and IWidget.NextAnimationAt (default members), ReadingAttribution, the Attribution and LottieAnimation
+         components, and the SkiaSharp.Skottie package reference. All additive, so the assembly version stays. -->
+    <Version>0.6.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.Skottie" />
   </ItemGroup>
 
 </Project>

@@ -9,10 +9,12 @@
   </Folder>
   <Folder Name="/providers/">
     <Project Path="providers/UrDeck.Providers.System/UrDeck.Providers.System.csproj" />
+    <Project Path="providers/UrDeck.Providers.Weather/UrDeck.Providers.Weather.csproj" />
   </Folder>
   <Folder Name="/widgets/">
     <Project Path="widgets/UrDeck.Widgets.Clock/UrDeck.Widgets.Clock.csproj" />
     <Project Path="widgets/UrDeck.Widgets.Stats/UrDeck.Widgets.Stats.csproj" />
+    <Project Path="widgets/UrDeck.Widgets.Weather/UrDeck.Widgets.Weather.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/UrDeck.Analyzer.Tests/UrDeck.Analyzer.Tests.csproj" />

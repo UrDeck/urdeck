@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(UrDeckTfm)</TargetFramework>
+    <Description>First-party data provider for weather readings from Open-Meteo, for any number of places.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- UrDeck.Sdk and SkiaSharp are provided by the host at runtime; don't copy them next to the plugin. -->
+    <ProjectReference Include="..\..\sdk\UrDeck.Sdk\UrDeck.Sdk.csproj" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
+
+</Project>

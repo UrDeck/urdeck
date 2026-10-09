@@ -23,7 +23,14 @@
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Clock\UrDeck.Widgets.Clock.csproj" />
     <!-- The stats widget and the system provider are tested here too. -->
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Stats\UrDeck.Widgets.Stats.csproj" />
+    <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Weather\UrDeck.Widgets.Weather.csproj" />
     <ProjectReference Include="..\..\providers\UrDeck.Providers.System\UrDeck.Providers.System.csproj" />
+    <ProjectReference Include="..\..\providers\UrDeck.Providers.Weather\UrDeck.Providers.Weather.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Recorded answers of the weather services, fed to the provider in place of the network. -->
+    <Content Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

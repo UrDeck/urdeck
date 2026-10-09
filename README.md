@@ -6,9 +6,9 @@ It is a .NET 10 WinUI 3 application (unpackaged, self-contained Windows App SDK)
 
 ## Status
 
-Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading. Verified on the real 1100x3840 panel.
+Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places) and a 4x2 Weather widget with animated icons are in too. Verified on the real 1100x3840 panel.
 
-Not done yet: an editor UI, the other widgets (weather, the performance widget with gauges, shortcuts), sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
+Not done yet: an editor UI, the other widgets (the 4x4 weather widget, shortcuts), sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
 
 ## Requirements
 
@@ -138,6 +138,52 @@ Making a theme: create `themes/<name>/theme.json` next to `UrDeck.Host.exe` with
 
 Grid math: `ColumnWidth = screenWidth / 4` and `RowHeight = ColumnWidth`, so on a 1100 px wide panel each cell is 275x275 and a 4x2 widget is 1100x550.
 
+### Weather widget
+
+`urdeck.widgets.weather` is a 4x2 card with an animated colour icon (day and night variants), the temperature, the
+condition in words, today's high and low, the place, and sunrise and sunset in the place's own local time. It takes its
+data from the `weather` provider and needs no provider setting: the place is typed into the widget.
+
+```json
+{ "typeId": "urdeck.widgets.weather", "col": 0, "row": 0, "width": 4, "height": 2, "location": "Portland, OR" }
+```
+
+| Setting | Meaning |
+|---|---|
+| `location` | The place, as text: a city (`Zurich`), `City, ST` (`Portland, OR`), `City, State` (`Portland, Oregon`), a postal code (`90210`), optionally with a country code after a comma (`Paris, FR`). It is looked up with Open-Meteo's geocoding, once per run, and the first match is used; `urdeck.log` lists the other matches, so an ambiguous name (`Springfield`) can be fixed by adding a state or by giving coordinates. No default: with none the card shows dashes. |
+| `latitude`, `longitude` | Decimal degrees. When both are set they replace `location` and no search is made. |
+| `label` | Absent: the place's resolved name (`Portland, Oregon`). A text: shown instead. `""`: no place is shown. |
+| `unit` | `celsius` or `fahrenheit`. Absent: the region's. |
+| `motion` | `periodic` (the default) plays the icon's loop once a minute and rests on its first frame in between; `full` loops it all the time; `off` shows only the first frame. Any other value counts as `periodic`. The icon animates at 15 frames a second. |
+| `periodSeconds` | Seconds between loops in the `periodic` mode (default 60; never less than a loop and a second). |
+
+Any number of weather cards can show different places on one page; two cards with the same place share one request. The
+widget never costs anything on a page without it: the provider starts with the first weather reading and stops five
+seconds after the last, and a new or edited place is fetched at once, not at the next interval. The data is fetched every
+15 minutes (`"providers": { "weather": { "intervalMs": 600000 } }`; the minimum is 5 minutes). When the network is down the
+values stay on the card in the dimmed colour and come back by themselves.
+
+The provider's readings, for any place (`weather:<place>/<reading>`, `@lat,lon` for coordinates, `%2F` for a `/` and `%25`
+for a `%` in a place name), can also be shown by a stats slot:
+
+| Reading | Meaning |
+|---|---|
+| `place` | The resolved name of the place (text) |
+| `current/temperature`, `current/apparent` | Air temperature now, and what it feels like (degrees Celsius; the region or the slot's `unit` decides the display unit) |
+| `current/condition` | `clear`, `partly-cloudy`, `cloudy`, `fog`, `drizzle`, `rain`, `sleet`, `snow`, `thunder` or `unknown` |
+| `current/is-day` | Whether the sun is up at the place |
+| `today/high`, `today/low` | Today's extremes at the place |
+| `today/sunrise`, `today/sunset` | A time in the place's own zone, shown in the region's 12 or 24 hour clock; unavailable where the sun does not rise or set |
+
+```json
+{ "typeId": "urdeck.widgets.stats", "col": 0, "row": 2, "slots": [ { "reading": "weather:Tokyo/current/temperature", "label": "Tokyo" } ] }
+```
+
+Weather data is by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), and every card that shows it draws the credit
+"Weather data by Open-Meteo.com"; the stats widget draws it too, and no setting hides it. Open-Meteo's free service is for
+**non-commercial use only**; commercial users need an Open-Meteo subscription, which UrDeck does not support yet. The icons
+are [Meteocons](https://github.com/basmilius/weather-icons) (MIT). Notices: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
 ## Writing a widget
 
 A widget is a class deriving from `Widget<TConfig>` with a few attributes; the Roslyn analyzer checks the rules at compile time and plugins hot-reload while UrDeck runs. See [CONTRIBUTING.md](CONTRIBUTING.md#writing-a-widget) for a full example, the project file and the rules, and `widgets/UrDeck.Widgets.Clock` for a real one. A widget that shows data from a provider is `widgets/UrDeck.Widgets.Stats`; a data provider is a class implementing `IDataProvider` in a plugin of its own, see [Writing a data provider](CONTRIBUTING.md#writing-a-data-provider) and `providers/UrDeck.Providers.System`.
@@ -150,8 +196,8 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 | `sdk/UrDeck.Analyzer` | Roslyn analyzer (`netstandard2.0`, MIT) reporting URDECK001-005 |
 | `src/UrDeck.Engine` | Plugin loader, config store, grid layout, `PageRenderer`, the reading hub that runs the data providers |
 | `src/UrDeck.Host` | WinUI 3 application (`net10.0-windows10.0.19041.0`): window and monitor placement, one `SKXamlCanvas` layer per widget |
-| `providers/UrDeck.Providers.System` | First-party data provider `system` (CPU and memory load) |
-| `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats` | Built-in plugins: Clock (`urdeck.widgets.clock`) and Stats (`urdeck.widgets.stats`) |
+| `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather` | First-party data providers: `system` (CPU, memory and GPU readings) and `weather` (Open-Meteo, any number of places) |
+| `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`) and Weather (`urdeck.widgets.weather`) |
 | `tests/UrDeck.Engine.Tests`, `tests/UrDeck.Analyzer.Tests` | xUnit tests |
 | `docs/` | `ROADMAP.md` (what to work on next), performance notes |
 | `openspec/` | Spec-driven documents: `specs/` holds the current capability specs (grid layout, host shell, widget SDK, Clock), `changes/` holds proposals in flight and the archive of finished changes |
@@ -167,6 +213,12 @@ The Windows SDK suffix on the host and test target frameworks is required: the W
 | Community widgets and data providers | The author's choice |
 | Windows App SDK (self-contained runtime shipped with the host) | Microsoft; see the licence files in the `Microsoft.WindowsAppSDK` NuGet package |
 | Inter variable font (`src/UrDeck.Engine/Themes/Builtin/`) | [SIL Open Font License 1.1](src/UrDeck.Engine/Themes/Builtin/Inter-OFL.txt); the licence text ships with the font |
+| Meteocons weather icons (embedded in `widgets/UrDeck.Widgets.Weather`) | [MIT](THIRD-PARTY-NOTICES.md#meteocons-weather-icons), Copyright (c) 2020-present Bas Milius; the licence text ships with the icons |
+
+**Data services.** The weather provider uses [Open-Meteo](https://open-meteo.com/) (CC BY 4.0; the card credits it) and its
+geocoding, whose place database is from [GeoNames](https://www.geonames.org/) (CC BY 4.0). Open-Meteo's free service is for
+non-commercial use only; commercial use needs an Open-Meteo subscription. All third-party notices are in
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 Widgets and data providers that talk to UrDeck only through the SDK API may use any license, including proprietary ones; that is what the plugin exception grants. The license boundary is an assembly boundary: widgets and providers reference only `UrDeck.Sdk` (MIT), never the GPL engine or host. Code samples in the docs are MIT.
 

@@ -14,6 +14,9 @@ public sealed class ReadingFormatOptions
 
     /// <summary>The unit to show a temperature in; defaults to the descriptor's, then the user's region.</summary>
     public DisplayUnit? DisplayUnit { get; init; }
+
+    /// <summary>Whether to show a time on a 24 hour clock; defaults to the user's region.</summary>
+    public bool? Use24HourClock { get; init; }
 }
 
 /// <summary>A reading as a widget draws it.</summary>
@@ -44,6 +47,7 @@ public static class ReadingFormatter
         {
             ReadingValueType.Text => ReadingKind.Text,
             ReadingValueType.OnOff => ReadingKind.OnOff,
+            ReadingValueType.Time => ReadingKind.Time,
             _ => ReadingKind.Number,
         };
         (string? unitText, UnitPlacement placement) = kind switch
@@ -55,9 +59,28 @@ public static class ReadingFormatter
         };
 
         bool hasValue = reading.State != ReadingState.Unavailable && reading.Value.HasValue;
+        if (kind == ReadingKind.Time)
+            return FormatTime(reading, hasValue, options.Use24HourClock ?? source.RegionUses24HourClock);
+
         string text = hasValue ? Text(reading.Value!.Value, kind, decimals, unit) : Dash;
         string widest = Widest(hasValue ? reading.Value : null, text, descriptor, kind, decimals, unit);
         return new ReadingText(text, unitText, placement, widest, reading.State == ReadingState.Ok);
+    }
+
+    private static ReadingText FormatTime(Reading reading, bool hasValue, bool use24Hour)
+    {
+        string widest = use24Hour ? "00:00" : "12:00";
+        bool current = reading.State == ReadingState.Ok;
+        if (!hasValue || reading.Value!.Value.Type != ReadingValueType.Time)
+            return new ReadingText(Dash, null, UnitPlacement.Baseline, widest, current);
+
+        var time = reading.Value.Value.Time;
+        if (use24Hour)
+            return new ReadingText(time.ToString("HH:mm", CultureInfo.InvariantCulture), null, UnitPlacement.Baseline, widest, current);
+
+        int hour = time.Hour % 12 == 0 ? 12 : time.Hour % 12;
+        string text = hour.ToString(CultureInfo.InvariantCulture) + ":" + time.Minute.ToString("00", CultureInfo.InvariantCulture);
+        return new ReadingText(text, time.Hour < 12 ? "AM" : "PM", UnitPlacement.Baseline, widest, current);
     }
 
     private static DisplayUnit ResolveDisplayUnit(ReadingFormatOptions options, ReadingDescriptor? descriptor, IReadingSource source) =>
@@ -69,6 +92,7 @@ public static class ReadingFormatter
     {
         ReadingValueType.Text => value.Text,
         ReadingValueType.OnOff => value.IsOn ? "On" : "Off",
+        ReadingValueType.Time => value.ToString(),
         _ => Number(value.Number, kind, decimals, unit),
     };
 
