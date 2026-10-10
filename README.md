@@ -6,9 +6,9 @@ It is a .NET 10 WinUI 3 application (unpackaged, self-contained Windows App SDK)
 
 ## Status
 
-Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places) and a 4x2 Weather widget with animated icons are in too. Verified on the real 1100x3840 panel.
+Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places) and a 4x2 Weather widget with animated icons are in too. Verified on the real 1100x3840 panel. Taps reach widgets, and a Shortcut widget shows the icon of an application, a folder or a web address and opens it on tap (its checks on the panel are still open).
 
-Not done yet: an editor UI, the other widgets (the 4x4 weather widget, shortcuts), sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
+Not done yet: an editor UI, the other widgets (the 4x4 weather widget, the dock), sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
 
 ## Requirements
 
@@ -219,6 +219,56 @@ Weather data is by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), and ev
 **non-commercial use only**; commercial users need an Open-Meteo subscription, which UrDeck does not support yet. The icons
 are [Meteocons](https://github.com/basmilius/weather-icons) (MIT). Notices: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
+### Shortcut widget
+
+`urdeck.widgets.shortcut` is a 1x1 card that shows the icon of an application, a file, a folder or a web address and
+opens it when you tap it, the way a desktop shortcut does. While your finger is down the card shrinks and dims
+slightly (the amounts are the theme's `press` values, see `docs/themes.md`); a swipe that starts on a shortcut still
+changes the page and opens nothing, and so does a long hold.
+
+```json
+{ "typeId": "urdeck.widgets.shortcut", "col": 0, "row": 8, "target": "C:\\Program Files (x86)\\Steam\\steam.exe" },
+{ "typeId": "urdeck.widgets.shortcut", "col": 1, "row": 8, "target": "shell:AppsFolder\\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App" },
+{ "typeId": "urdeck.widgets.shortcut", "col": 2, "row": 8, "target": "%USERPROFILE%\\Documents" },
+{ "typeId": "urdeck.widgets.shortcut", "col": 3, "row": 8, "target": "https://example.com", "icon": "C:\\Icons\\example.png" }
+```
+
+| Setting | Meaning |
+|---|---|
+| `target` | What to open. A rooted path to an executable, a `.lnk`, a document or a folder (`%NAME%` environment variables are expanded); a bare name Windows resolves itself (`notepad`); a `shell:` item; a web address (`http` or `https`); or any other address Windows has an application for (`steam://open/main`, `ms-settings:display`). A relative path is refused. With no target the card shows an empty placeholder and does not react. |
+| `arguments` | Arguments for a file target. Ignored, with a warning in the log, for an address. They are never written to the log. |
+| `icon` | Where the icon comes from instead of `target`: a local image file (PNG, JPEG, WebP, BMP, GIF or ICO), or anything else that could be a target. |
+| `label` | A text under the icon. Absent or `""`: no label, and the icon takes the whole card. |
+
+A packaged (Store) application has no path; its target is `shell:AppsFolder\` followed by its id, which
+`Get-StartApps` lists in PowerShell:
+
+```powershell
+Get-StartApps | Where-Object Name -like '*Terminal*'   # AppID: Microsoft.WindowsTerminal_8wekyb3d8bbwe!App
+```
+
+**Launching.** The target is handed to the Windows shell with its default action: never through a command interpreter
+and never elevated. Whether a running application is brought forward or a second window opens is the application's
+decision, as it is for a desktop shortcut, and Windows and the application decide which monitor the window opens on. A
+double tap opens one window. A target Windows refuses (a missing file, no application for the address) opens nothing
+and `urdeck.log` says why. Launch targets come from your own configuration file and are trusted like a shortcut on
+your desktop: do not paste in a page from somebody else without reading its targets.
+
+**Icons.** A local image file is shown as it is. For any other file, a folder or a `shell:` item the card shows the
+icon Windows shows for it (an executable's or a `.lnk`'s application icon, a package's icon). For a web address it
+shows the site's own icon, and the default browser's icon when the site offers none. Until the icon is there, and when
+there is none, the card shows a placeholder with the first letter of the label or of the target's name.
+
+**Network.** A site's icon is the one thing UrDeck itself fetches from the network (the weather data is fetched by the
+weather provider). It happens only for a shortcut whose icon source is an `http(s)` address, at most once per address
+in 30 days: a request for the address, one for the web manifest the page links, and at most four for icon candidates
+(the manifest's icons, the page's `apple-touch-icon` and `icon` links, `/favicon.ico`), which may live on another host
+such as a CDN, followed there over `https` only. The requests carry no cookies and no credentials, name UrDeck in the
+`User-Agent`, give up after ten seconds and never ignore a certificate error. A site behind a sign-in page yields no
+icon, and an address that yielded none is not asked again until the next start. To make no request at all, set `icon`
+to a local file. Fetched icons are kept as PNG files in `cache/icons` next to the executable; deleting the folder is
+always safe, the icons are fetched again.
+
 ## Writing a widget
 
 A widget is a class deriving from `Widget<TConfig>` with a few attributes; the Roslyn analyzer checks the rules at compile time and plugins hot-reload while UrDeck runs. See [CONTRIBUTING.md](CONTRIBUTING.md#writing-a-widget) for a full example, the project file and the rules, and `widgets/UrDeck.Widgets.Clock` for a real one. A widget that shows data from a provider is `widgets/UrDeck.Widgets.Stats`; a data provider is a class implementing `IDataProvider` in a plugin of its own, see [Writing a data provider](CONTRIBUTING.md#writing-a-data-provider) and `providers/UrDeck.Providers.System`.
@@ -227,12 +277,12 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 
 | Path | Purpose |
 |---|---|
-| `sdk/UrDeck.Sdk` | Plugin SDK (`net10.0`, MIT): attributes, `Widget<TConfig>`, `IWidget`, `WidgetConfig`, render context, `Theme`, the `Readout` / `TextLine` components, and the data provider contract and reading formatter (`UrDeck.Sdk.Data`) |
+| `sdk/UrDeck.Sdk` | Plugin SDK (`net10.0`, MIT): attributes, `Widget<TConfig>`, `IWidget`, `WidgetConfig`, render context, `Theme`, the `Readout` / `TextLine` / `Gauge` / `ImageTile` components, tap input (`UrDeck.Sdk.Input`), launch targets and the launch and icon services (`UrDeck.Sdk.Launch`, `UrDeck.Sdk.Icons`), and the data provider contract and reading formatter (`UrDeck.Sdk.Data`) |
 | `sdk/UrDeck.Analyzer` | Roslyn analyzer (`netstandard2.0`, MIT) reporting URDECK001-005 |
-| `src/UrDeck.Engine` | Plugin loader, config store, grid layout, `PageRenderer`, the reading hub that runs the data providers |
+| `src/UrDeck.Engine` | Plugin loader, config store, grid layout, gesture recognition and hit testing, `PageRenderer`, the reading hub that runs the data providers, the launcher and the icon service |
 | `src/UrDeck.Host` | WinUI 3 application (`net10.0-windows10.0.19041.0`): window and monitor placement, one `SKXamlCanvas` layer per widget |
 | `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather` | First-party data providers: `system` (CPU, memory and GPU readings) and `weather` (Open-Meteo, any number of places) |
-| `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`) and Weather (`urdeck.widgets.weather`) |
+| `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather`, `widgets/UrDeck.Widgets.Shortcut` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`), Weather (`urdeck.widgets.weather`) and Shortcut (`urdeck.widgets.shortcut`) |
 | `tests/UrDeck.Engine.Tests`, `tests/UrDeck.Analyzer.Tests` | xUnit tests |
 | `docs/` | `ROADMAP.md` (the milestones), `BACKLOG.md` (what to work on next), performance notes |
 | `openspec/` | Spec-driven documents: `specs/` holds the current capability specs (grid layout, host shell, widget SDK, Clock), `changes/` holds proposals in flight and the archive of finished changes |

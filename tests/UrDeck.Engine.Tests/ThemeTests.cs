@@ -236,6 +236,70 @@ public sealed class ThemeTests : IDisposable
     }
 
     [Fact]
+    public void EveryBuiltInTheme_HasPressValues()
+    {
+        foreach (string name in ThemeStore.BuiltInNames)
+        {
+            var press = PressStyle.Resolve(Store().Load(name));
+
+            Assert.InRange(press.Scale, 0.5f, 1f);
+            Assert.InRange(press.Opacity, 0.1f, 1f);
+            Assert.True(press.IsVisible);
+        }
+    }
+
+    [Fact]
+    public void AnOlderThemeWithoutPressValues_TakesTheDefaults_WithoutAWarning()
+    {
+        WriteTheme("old", """{ "colors": { "accent": "#ff00ff" } }""");
+
+        var press = PressStyle.Resolve(Store().Load("old"));
+
+        Assert.Equal(PressStyle.Resolve(Store().Load("default-dark")), press);
+        Assert.DoesNotContain("press", Log);
+    }
+
+    [Fact]
+    public void AUserTheme_CanOverrideOneOfTheTwoPressValues()
+    {
+        WriteTheme("firm", """{ "press": { "scale": 0.9 } }""");
+
+        var press = PressStyle.Resolve(Store().Load("firm"));
+        var defaults = PressStyle.Resolve(Store().Load("default-dark"));
+
+        Assert.Equal(0.9f, press.Scale);
+        Assert.Equal(defaults.Opacity, press.Opacity);
+        Assert.DoesNotContain("press", Log);
+    }
+
+    [Theory]
+    [InlineData("scale", "2")]
+    [InlineData("scale", "0.4")]
+    [InlineData("opacity", "0")]
+    [InlineData("opacity", "1.5")]
+    public void APressValueOutOfRange_FallsBackToTheDefault_WithAWarning(string name, string value)
+    {
+        WriteTheme("wild", "{ \"press\": { \"" + name + "\": " + value + " } }");
+
+        var press = PressStyle.Resolve(Store().Load("wild"));
+
+        Assert.Equal(PressStyle.Resolve(Store().Load("default-dark")), press);
+        Assert.Contains("press." + name, Log);
+    }
+
+    [Fact]
+    public void PressValuesOfOne_SwitchTheFeedbackOff()
+    {
+        WriteTheme("still", """{ "press": { "scale": 1, "opacity": 1 } }""");
+
+        var press = PressStyle.Resolve(Store().Load("still"));
+
+        Assert.Equal(new PressStyle(1f, 1f), press);
+        Assert.False(press.IsVisible);
+        Assert.DoesNotContain("press", Log);
+    }
+
+    [Fact]
     public void Colours_CarryTransparency()
     {
         WriteTheme("glass", """{ "colors": { "cardFill": "#cc102030" } }""");

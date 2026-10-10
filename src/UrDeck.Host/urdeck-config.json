@@ -36,6 +36,12 @@
           "width": 4,
           "height": 2,
           "location": "Tokyo"
+        },
+        {
+          "typeId": "urdeck.widgets.shortcut",
+          "col": 0,
+          "row": 8,
+          "target": "%USERPROFILE%"
         }
       ]
     }

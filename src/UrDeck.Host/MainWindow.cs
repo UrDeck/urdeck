@@ -278,6 +278,7 @@ public sealed class MainWindow : Window
         _theme = ThemeResolver.Resolve(_loadedTheme, cellPx);
         var chrome = ChromeLayout.Compute(screen, mode, config.Pages.Count, _loadedTheme.Definition.Indicator!.BandHeight!.Value);
         var theme = _theme;
+        var press = PressStyle.Resolve(_loadedTheme);
         double gap = _loadedTheme.Definition.Card!.Gap!.Value;
         UrDeckLog.Info($"Pages: {config.Pages.Count}, showing '{_navigator.Name}'; indicator {chrome.Mode}, {chrome.Rows} grid rows");
 
@@ -291,7 +292,7 @@ public sealed class MainWindow : Window
                 var page = config.Pages[index];
                 var layout = new GridLayoutManager(screen.Width, screen.Height, gap, chrome.Grid.Height)
                     .RenderWidgetLayout(page.Widgets, screen);
-                return new PageHost(page, layout, _plugins, theme, _frameClock);
+                return new PageHost(page, layout, _plugins, theme, press, _frameClock);
             }));
     }
 

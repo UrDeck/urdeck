@@ -4,6 +4,8 @@
 using System.Reflection;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Icons;
+using UrDeck.Engine.Launch;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Data;
 
@@ -14,6 +16,8 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     private readonly WidgetRegistry _registry = new();
     private readonly ProviderRegistry _providers = new();
     private readonly ReadingHub _hub;
+    private readonly IconService _icons;
+    private readonly Launcher _launcher;
     private FileSystemWatcher? _watcher;
     private Timer? _debounce;
     private string? _pluginDirectory;
@@ -22,10 +26,14 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     private readonly List<string> _pendingDeletes = new();
     private static int StaleCleaned;
 
-    public WidgetPluginLoader(TimeProvider? time = null)
+    /// <param name="time">The clock of the readings, the launcher's repeat guard and the icon cache's age.</param>
+    /// <param name="iconCacheFolder">Where fetched site icons are kept; by default <c>cache/icons</c> next to the executable.</param>
+    public WidgetPluginLoader(TimeProvider? time = null, string? iconCacheFolder = null)
     {
         _hub = new ReadingHub(_providers, time);
-        _registry.Host = new WidgetHost(_hub);
+        _icons = new IconService(iconCacheFolder ?? Path.Combine(AppContext.BaseDirectory, "cache", "icons"), time);
+        _launcher = new Launcher(time);
+        _registry.CreateServices = () => new WidgetServices(_hub, _launcher, _icons);
     }
 
     public event Action? PluginsChanged;
@@ -37,12 +45,11 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     /// <summary>The readings of every provider; widgets created here are attached to it.</summary>
     public ReadingHub Readings => _hub;
 
-    private sealed class WidgetHost(IReadingSource readings) : IWidgetHost
-    {
-        public IReadingSource Readings { get; } = readings;
+    /// <summary>The icons widgets ask for; every widget created here reaches it through its own services.</summary>
+    public IconService Icons => _icons;
 
-        public void Log(string message) => UrDeckLog.Info(message);
-    }
+    /// <summary>The launch service every widget created here shares.</summary>
+    public Launcher Launcher => _launcher;
 
     public void ScanAndLoadPlugins(string pluginDirectory)
     {
@@ -338,6 +345,8 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
 
     public IWidget? CreateWidget(WidgetConfig config) => _registry.CreateWidget(config);
 
+    public IWidget? CreateWidget(WidgetConfig config, out WidgetServices? services) => _registry.CreateWidget(config, out services);
+
     public void Dispose()
     {
         _watcher?.Dispose();
@@ -345,6 +354,7 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
         lock (_gate)
         {
             _hub.Dispose();
+            _icons.Dispose();
             _providers.Clear();
             _registry.Clear();
             UnloadAll();

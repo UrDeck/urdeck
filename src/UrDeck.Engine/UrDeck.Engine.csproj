@@ -12,6 +12,10 @@
     <ProjectReference Include="..\..\sdk\UrDeck.Sdk\UrDeck.Sdk.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
+
   <!-- Built-in themes and their font. Inter is SIL OFL 1.1; its licence text travels with the font (Inter-OFL.txt). -->
   <ItemGroup>
     <EmbeddedResource Include="Themes\Builtin\*.json;Themes\Builtin\*.ttf;Themes\Builtin\*.txt" LogicalName="UrDeck.Themes.%(Filename)%(Extension)" />

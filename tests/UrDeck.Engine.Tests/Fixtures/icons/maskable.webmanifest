@@ -1,0 +1,7 @@
+{
+  "name": "Example",
+  "icons": [
+    { "src": "/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/mono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "monochrome maskable" }
+  ]
+}

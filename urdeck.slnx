@@ -13,6 +13,7 @@
   </Folder>
   <Folder Name="/widgets/">
     <Project Path="widgets/UrDeck.Widgets.Clock/UrDeck.Widgets.Clock.csproj" />
+    <Project Path="widgets/UrDeck.Widgets.Shortcut/UrDeck.Widgets.Shortcut.csproj" />
     <Project Path="widgets/UrDeck.Widgets.Stats/UrDeck.Widgets.Stats.csproj" />
     <Project Path="widgets/UrDeck.Widgets.Weather/UrDeck.Widgets.Weather.csproj" />
   </Folder>

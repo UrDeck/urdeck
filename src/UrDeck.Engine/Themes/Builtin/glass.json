@@ -16,5 +16,9 @@
   "card": {
     "radius": 0.1,
     "borderWidth": 0.008
+  },
+  "press": {
+    "scale": 0.96,
+    "opacity": 0.85
   }
 }

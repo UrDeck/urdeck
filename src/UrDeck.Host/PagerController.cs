@@ -7,6 +7,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
+using SkiaSharp;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Input;
 using UrDeck.Engine.Layout;
@@ -54,6 +55,7 @@ internal sealed class PagerController
     private PageHost? _neighbor;
     private int _neighborIndex = -1;
     private IndicatorView? _indicator;
+    private WidgetView? _pressed;
     private readonly DispatcherQueueTimer _reclaim;
     private bool _animating;
     private int _epoch;
@@ -126,6 +128,8 @@ internal sealed class PagerController
     {
         _epoch++;
         _animating = false;
+        // The recognizer says nothing when it is aborted, and the views are about to go: just forget the press.
+        _pressed = null;
         _gestures?.Abort();
         _gestures = null;
         _neighbor?.Dispose();
@@ -194,10 +198,51 @@ internal sealed class PagerController
             case GestureKind.Cancelled:
                 EndDrag(g.Dx, 0, allowCommit: false);
                 break;
+            case GestureKind.Pressed:
+                Press(g.X, g.Y);
+                break;
+            case GestureKind.PressCancelled:
+                ReleasePress();
+                break;
             case GestureKind.Tap:
+                ReleasePress();
                 Tap(g.X, g.Y);
                 break;
         }
+    }
+
+    // Press and tap go to the widget under the pointer on the page at rest. The press is shown from pointer-down, before
+    // anybody knows whether it becomes a tap; a swipe, a vertical drag or a long hold takes it back.
+
+    private void Press(double x, double y)
+    {
+        ReleasePress();
+        if (_setup == null || _current == null || IndicatorPageAt(x, y) >= 0)
+            return;
+        if (_current.FindView(x, y, out var local) is not { } view || !view.CanTap(ToCardPixels(local)))
+            return;
+        view.Press();
+        _pressed = view;
+    }
+
+    private void ReleasePress()
+    {
+        _pressed?.ReleasePress();
+        _pressed = null;
+    }
+
+    private SKPoint ToCardPixels(System.Drawing.PointF local) =>
+        new((float)(local.X * _setup!.Scale), (float)(local.Y * _setup.Scale));
+
+    /// <summary>The page whose mark of a visible indicator the point is on, or -1.</summary>
+    private int IndicatorPageAt(double x, double y)
+    {
+        if (_setup == null || _indicator == null || !_indicator.IsVisible)
+            return -1;
+
+        var rect = _setup.Chrome.Indicator;
+        var local = new System.Drawing.PointF((float)((x - rect.X) * _setup.Scale), (float)((y - rect.Y) * _setup.Scale));
+        return _indicator.HitTest(local, (float)(_setup.Screen.Width * _setup.Scale / 4));
     }
 
     // The page follows the finger. A swipe to the left (dx < 0) brings the next page in from the right.
@@ -234,14 +279,20 @@ internal sealed class PagerController
 
     private void Tap(double x, double y)
     {
-        if (_setup == null || _indicator == null || !_indicator.IsVisible)
+        if (_setup == null)
             return;
 
-        var rect = _setup.Chrome.Indicator;
-        var local = new System.Drawing.PointF((float)((x - rect.X) * _setup.Scale), (float)((y - rect.Y) * _setup.Scale));
-        int page = _indicator.HitTest(local, (float)(_setup.Screen.Width * _setup.Scale / 4));
-        if (page >= 0 && page != _navigator.Index)
-            GoTo(page);
+        // A visible indicator takes a tap on one of its marks before any widget does.
+        int page = IndicatorPageAt(x, y);
+        if (page >= 0)
+        {
+            if (page != _navigator.Index)
+                GoTo(page);
+            return;
+        }
+
+        if (_current?.FindView(x, y, out var local) is { } view)
+            view.Tap(ToCardPixels(local));
     }
 
     /// <summary>Slides to <paramref name="page"/> (a tap on a dot).</summary>

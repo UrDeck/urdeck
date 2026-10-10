@@ -40,5 +40,9 @@
     "active": "#ffffff",
     "inactive": "#59ffffff",
     "backdrop": "#8c0f0f1a"
+  },
+  "press": {
+    "scale": 0.96,
+    "opacity": 0.85
   }
 }

@@ -264,17 +264,55 @@ public class GestureRecognizerTests
         Send(1, PointerPhase.Move, 102, 201, 30);
         Send(1, PointerPhase.Up, 102, 201, 90);
 
-        var tap = Assert.Single(_events);
-        Assert.Equal(GestureKind.Tap, tap.Kind);
-        Assert.Equal(102, tap.X);
-        Assert.Equal(201, tap.Y);
+        Assert.Equal([GestureKind.Pressed, GestureKind.Tap], Kinds);
+        Assert.Equal((100, 200), (_events[0].X, _events[0].Y));
+        Assert.Equal((102, 201), (_events[1].X, _events[1].Y));
     }
 
     [Fact]
-    public void LongPress_IsNotATap()
+    public void ThePress_IsRaisedWhenThePointerGoesDown_NotWhenTheTapIsRecognised()
     {
         Send(1, PointerPhase.Down, 100, 200, 0);
-        Send(1, PointerPhase.Up, 100, 200, 800);
+
+        var press = Assert.Single(_events);
+        Assert.Equal(GestureKind.Pressed, press.Kind);
+        Assert.Equal((100, 200), (press.X, press.Y));
+    }
+
+    [Fact]
+    public void LongPress_IsNotATap_AndThePressEndsOnRelease()
+    {
+        Send(1, PointerPhase.Down, 100, 200, 0);
+        Send(1, PointerPhase.Move, 101, 200, 1500);
+        Assert.Equal([GestureKind.Pressed], Kinds);
+
+        Send(1, PointerPhase.Up, 100, 200, 2000);
+
+        Assert.Equal([GestureKind.Pressed, GestureKind.PressCancelled], Kinds);
+    }
+
+    [Fact]
+    public void ASecondPointer_ChangesNothing_WhileThePressIsPending()
+    {
+        Send(1, PointerPhase.Down, 100, 200, 0);
+        Send(2, PointerPhase.Down, 600, 600, 10);
+        Send(2, PointerPhase.Move, 900, 600, 20);
+        Send(2, PointerPhase.Up, 900, 600, 30);
+        Assert.Equal([GestureKind.Pressed], Kinds);
+
+        Send(1, PointerPhase.Up, 100, 200, 90);
+
+        Assert.Equal([GestureKind.Pressed, GestureKind.Tap], Kinds);
+    }
+
+    [Fact]
+    public void Abort_RaisesNothing_AndForgetsThePress()
+    {
+        Send(1, PointerPhase.Down, 100, 200, 0);
+        _events.Clear();
+
+        _g.Abort();
+        Send(1, PointerPhase.Up, 100, 200, 50);
 
         Assert.Empty(_events);
     }
@@ -286,16 +324,17 @@ public class GestureRecognizerTests
     {
         Send(1, PointerPhase.Down, 500, 500, 0);
         Send(1, PointerPhase.Move, 500 + sign * 5, 500, 10);
-        Assert.Empty(_events);
+        Assert.Equal([GestureKind.Pressed], Kinds);
 
         Send(1, PointerPhase.Move, 500 + sign * 20, 502, 20);
         Send(1, PointerPhase.Move, 500 + sign * 60, 502, 40);
         Send(1, PointerPhase.Up, 500 + sign * 60, 502, 50);
 
+        // The press ends just before the swipe starts, and a swipe never ends in a tap.
         Assert.Equal(
-            [GestureKind.SwipeStarted, GestureKind.SwipeMoved, GestureKind.SwipeMoved, GestureKind.SwipeEnded],
+            [GestureKind.Pressed, GestureKind.PressCancelled, GestureKind.SwipeStarted, GestureKind.SwipeMoved, GestureKind.SwipeMoved, GestureKind.SwipeEnded],
             Kinds);
-        Assert.Equal(sign * 20, _events[0].Dx);
+        Assert.Equal(sign * 20, _events[2].Dx);
         Assert.Equal(sign * 60, _events[^1].Dx);
         Assert.Equal(sign, Math.Sign(_events[^1].Velocity));
     }
@@ -308,7 +347,7 @@ public class GestureRecognizerTests
         Send(1, PointerPhase.Move, 560, 600, 40);
         Send(1, PointerPhase.Up, 560, 600, 50);
 
-        Assert.Empty(_events);
+        Assert.Equal([GestureKind.Pressed, GestureKind.PressCancelled], Kinds);
         Assert.False(_g.IsSwiping);
     }
 
@@ -319,7 +358,7 @@ public class GestureRecognizerTests
         Send(1, PointerPhase.Move, 515, 510, 20); // 15 right, 10 down: horizontal
         Send(1, PointerPhase.Move, 520, 700, 40); // a later vertical turn does not undo it
 
-        Assert.Equal(GestureKind.SwipeStarted, _events[0].Kind);
+        Assert.Equal(GestureKind.SwipeStarted, _events[2].Kind);
         Assert.True(_g.IsSwiping);
     }
 
@@ -375,16 +414,16 @@ public class GestureRecognizerTests
         _events.Clear();
         Send(3, PointerPhase.Down, 10, 10, 100);
         Send(3, PointerPhase.Up, 10, 10, 120);
-        Assert.Equal(GestureKind.Tap, Assert.Single(_events).Kind);
+        Assert.Equal([GestureKind.Pressed, GestureKind.Tap], Kinds);
     }
 
     [Fact]
-    public void Cancel_BeforeTheDirectionIsDecided_RaisesNothing()
+    public void Cancel_BeforeTheDirectionIsDecided_EndsThePress_AndNothingElse()
     {
         Send(1, PointerPhase.Down, 500, 500, 0);
         Send(1, PointerPhase.Cancel, 500, 500, 10);
 
-        Assert.Empty(_events);
+        Assert.Equal([GestureKind.Pressed, GestureKind.PressCancelled], Kinds);
     }
 
     [Fact]

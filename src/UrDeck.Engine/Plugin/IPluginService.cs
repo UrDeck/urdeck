@@ -15,4 +15,5 @@ public interface IPluginService
     IReadOnlyList<string> GetRegisteredWidgetTypes();
     WidgetDescriptor? GetDescriptor(string typeId);
     IWidget? CreateWidget(WidgetConfig config);
+    IWidget? CreateWidget(WidgetConfig config, out WidgetServices? services);
 }

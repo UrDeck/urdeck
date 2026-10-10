@@ -15,5 +15,9 @@
     "active": "#14141f",
     "inactive": "#5914141f",
     "backdrop": "#b3ffffff"
+  },
+  "press": {
+    "scale": 0.96,
+    "opacity": 0.85
   }
 }

@@ -72,8 +72,22 @@ internal static class SnapshotCommand
             while (readings.AnyPending(ids) && DateTime.UtcNow < deadline)
                 Thread.Sleep(25);
 
-            using var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now,
-                new PageRenderer.Chrome(config.Pager.GetIndicatorMode(), pageIndex, config.Pages.Count));
+            var chrome = new PageRenderer.Chrome(config.Pager.GetIndicatorMode(), pageIndex, config.Pages.Count);
+            var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome);
+
+            // Icons are asked for while painting. If that paint asked for any, wait for them (a few seconds at most) and
+            // paint again, so the image shows icons and not placeholders. A page without them is painted once.
+            var icons = host.Plugins.Icons;
+            if (icons.AnyPending)
+            {
+                var iconDeadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+                while (icons.AnyPending && DateTime.UtcNow < iconDeadline)
+                    Thread.Sleep(25);
+                bitmap.Dispose();
+                bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome);
+            }
+
+            using var image = bitmap;
             using var file = File.Create(output);
             bitmap.Encode(file, SKEncodedImageFormat.Png, 100);
             UrDeckLog.Info($"Snapshot {width}x{height} with {widgets.Count} widget(s) written to {Path.GetFullPath(output)}");

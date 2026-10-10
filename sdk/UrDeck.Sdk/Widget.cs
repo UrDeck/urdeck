@@ -3,6 +3,8 @@
 
 using System.Reflection;
 using UrDeck.Sdk.Data;
+using UrDeck.Sdk.Icons;
+using UrDeck.Sdk.Launch;
 
 namespace UrDeck.Sdk;
 
@@ -47,6 +49,12 @@ public abstract class Widget<TConfig> : IWidget<TConfig> where TConfig : WidgetC
 
     /// <summary>Writes one line to the host's log; does nothing before the widget is attached.</summary>
     protected void Log(string message) => _host?.Log(message);
+
+    /// <summary>The host's launch service; it starts nothing until the widget is attached.</summary>
+    protected ILauncher Launcher => _host?.Launcher ?? NullLauncher.Instance;
+
+    /// <summary>The host's icon service; there are no icons until the widget is attached.</summary>
+    protected IIconSource Icons => _host?.Icons ?? NullIconSource.Instance;
 
     /// <inheritdoc cref="IWidget.Attach"/>
     public virtual void Attach(IWidgetHost host) => _host = host;

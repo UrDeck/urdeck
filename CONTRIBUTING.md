@@ -82,7 +82,7 @@ public class HelloWidget : Widget<HelloConfig>
 
 Widgets draw no card or background and name no font or fixed size: the theme owns the look of every widget on the page
 (see [docs/themes.md](docs/themes.md)). Use `Readout` for a big value with a unit and label, `TextLine` for a line of
-text at the theme's label, body or title size, and `context.Theme` for colours.
+text at the theme's label, body or title size, `ImageTile` for an icon or a picture, and `context.Theme` for colours.
 
 Rules enforced at compile time by the analyzer and again by the loader:
 
@@ -110,6 +110,66 @@ pass in `GaugeOptions`; use it so that your widget scales like every other: the 
 an ease is yours (see Animation: draw from `context.Time`, move from the fraction last drawn, keep `IsAnimating` true only
 while moving, and draw the first paint at rest). To draw several gauges at one text size, call `Gauge.Measure` for each
 and pass `smallest / own` as `GaugeOptions.ReadoutScale`. The stats widget is the reference use.
+
+### Taking taps, launching and icons
+
+A widget that reacts to a tap implements `UrDeck.Sdk.Input.ITapTarget` beside deriving from `Widget<TConfig>`.
+Implementing it is the declaration: the host calls nothing for input on a widget that does not, so a widget that only
+shows something costs nothing extra.
+
+```csharp
+[Widget("Open", "Opens one thing", Id = "example.open")]
+[WidgetSize(1, 1)]
+[RefreshOnData]
+public class OpenWidget : Widget<OpenConfig>, ITapTarget
+{
+    private LaunchTarget _target;
+
+    protected override void OnConfigured() => _target = LaunchTarget.Parse(Config.Target);
+
+    public override bool NeedsRender(DateTime now) => false;   // nothing it shows changes by itself
+
+    public override void Render(WidgetRenderContext context)
+    {
+        var icon = Icons.GetIcon(Config.Target ?? "", (int)context.ContentRect.Width);   // never blocks; null until it is ready
+        ImageTile.Draw(context.Canvas, context.Theme, context.ContentRect, icon.Image, label: null, placeholder: _target.DisplayName);
+    }
+
+    public bool CanTap(SKPoint point) => _target.IsValid;
+
+    public void OnTap(SKPoint point) => Launcher.Launch(_target.Text);
+}
+```
+
+- **Points** are in the widget's own pixels, the space of `context.PixelSize`, with `(0, 0)` at the top-left corner of
+  the card.
+- **`CanTap`** says whether a tap at a point would do something. The host asks when the pointer goes down, to decide
+  whether to show the press, and again before it delivers the tap; keep it cheap and free of side effects. The default
+  accepts every point.
+- **`OnTap`** runs on the UI thread when the tap is recognised: a short press and release that did not move. A swipe, a
+  vertical drag and a long hold never tap. Return quickly. Afterwards the host asks `NeedsRender` and repaints the
+  widget when it returns `true`.
+- **No pressed state in the widget.** While the pointer is down the host scales and dims the whole card with the
+  theme's `press` values, on the compositor. Do not draw a pressed look, keep no "is pressed" flag, and do not expect a
+  repaint for a press or a release.
+- **`Launcher.Launch(target, arguments)`** asks the host to open something the way a desktop shortcut does and returns
+  whether it was started; it never throws and it logs a failure itself. Call it from `OnTap`, not later: Windows lets
+  the launched application come to the front only while the tap is being handled. `LaunchTarget.Parse(text)` is the
+  same classification the host uses (kind, normalised text, a short display name) and needs no host, so a widget can
+  tell a valid target from an invalid one without starting anything.
+- **`Icons.GetIcon(source, pixelSize)`** returns the icon of a local image file, of what a path or a `shell:` item
+  shows in Windows, or of a web address's site. It answers at once: the image, or none with `IsLoading` set while it is
+  being loaded on a worker. The host repaints the widget once when the icon is ready or given up on, so ask on every
+  paint and draw what you get. The image belongs to the host: do not dispose it and do not keep it for a later paint.
+- **`ImageTile.Draw(canvas, theme, rect, image, label, placeholder)`** fits and centres an image (never enlarged beyond
+  twice its pixel size), draws an optional label below it, and draws a placeholder square with the first letter of
+  `placeholder` when the image is null. It doubles as the loading state.
+- Before the widget is attached, and in a test that creates it directly, `Launcher` starts nothing and `Icons` has no
+  icons, so no special case is needed. A test passes its own through `Attach(new MyHost(...))` with `IWidgetHost.Launcher`
+  and `IWidgetHost.Icons`.
+- Other kinds of input (scrolling, a long press) will be further interfaces beside `ITapTarget`.
+
+`widgets/UrDeck.Widgets.Shortcut` is the reference use.
 
 ### Using readings
 

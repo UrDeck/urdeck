@@ -30,13 +30,15 @@ CI (`.github/workflows/ci.yml`) runs all of the above on `windows-latest`; run t
 ## Layout
 
 ```
-sdk/UrDeck.Sdk       MIT. The plugin contract: attributes, Widget<T>, WidgetConfig, render context, Theme, Components (Readout, TextLine),
-                     Data (IDataProvider, readings, ReadingFormatter)
+sdk/UrDeck.Sdk       MIT. The plugin contract: attributes, Widget<T>, WidgetConfig, render context, Theme, Components (Readout, TextLine,
+                     Gauge, ImageTile), Data (IDataProvider, readings, ReadingFormatter), Input (ITapTarget), Launch (LaunchTarget,
+                     ILauncher), Icons (IIconSource)
 sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
-src/UrDeck.Engine     GPL. Plugin loader, config store, grid layout, PageRenderer, ReadingHub (runs the providers), logging
+src/UrDeck.Engine     GPL. Plugin loader, config store, grid layout, gestures and hit testing, PageRenderer, ReadingHub (runs the
+                      providers), per-widget WidgetServices, Launcher, IconService (shell, file and site icons), logging
 src/UrDeck.Host       GPL. WinUI 3 app: window/monitor placement, one SKXamlCanvas layer per widget
 providers/            GPL. First-party data provider plugins (UrDeck.Providers.System); reference only UrDeck.Sdk
-widgets/              first-party widget plugins (UrDeck.Widgets.Clock, UrDeck.Widgets.Stats); with the providers, copied to
+widgets/              first-party widget plugins (UrDeck.Widgets.Clock, .Stats, .Weather, .Shortcut); with the providers, copied to
                       plugins/ by the host build (the UrDeckPlugin list in UrDeck.Host.csproj)
 tests/                xUnit projects
 docs/                 ROADMAP.md (milestones), BACKLOG.md (work items and status), perf/, design notes
@@ -68,5 +70,7 @@ See the README license map before moving code between projects: it can change th
 - Plugins load from a shadow copy in a collectible `AssemblyLoadContext`. A removed `SKXamlCanvas` can stay
   alive after it leaves the tree, so `WidgetView.Dispose` drops its widget reference (without that, old plugin contexts
   were not collected); keep plugin types out of long-lived static caches.
+- The host build copies `src/UrDeck.Host/urdeck-config.json` over the one next to the exe whenever the source file is
+  newer. After editing the tracked sample, a build replaces a working config in `bin/`: back it up first.
 - Do not add per-widget styling or resolution assumptions: styling belongs in the theme (`src/UrDeck.Engine/Themes`, `docs/themes.md`)
   and the user never sees resolution or scaling. Widgets draw no card and name no font; use the SDK components.

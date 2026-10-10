@@ -40,7 +40,8 @@ value (for example a colour that does not parse) is replaced by the default's va
   "indicator": {
     "bandHeight": 0.25, "dotSize": 0.05, "pillLength": 0.14, "spacing": 0.05,
     "active": "#ffffff", "inactive": "#59ffffff", "backdrop": "#8c0f0f1a"
-  }
+  },
+  "press": { "scale": 0.96, "opacity": 0.85 }
 }
 ```
 
@@ -64,6 +65,13 @@ value (for example a colour that does not parse) is replaced by the default's va
   of the current page's pill and `spacing` is the gap between neighbouring marks. `active` is the pill's colour,
   `inactive` the other dots', and `backdrop` the translucent pill behind a floating indicator (`fade` mode). A theme
   written before the indicator existed takes all of these from `default-dark`, with no warning.
+- **`press`** is how a card looks while a finger is down on a widget that accepts taps (a shortcut): `scale` is the
+  card's size and `opacity` its opacity, each as a ratio where `1` means unchanged. The whole card, border included, is
+  scaled around its centre and dimmed by the compositor; the widget is not repainted and draws no pressed state of its
+  own. `scale` must be between `0.5` and `1` and `opacity` between `0.1` and `1`; a value outside that is replaced by
+  the default's with a logged warning. Set both to `1` to switch the feedback off. The built-in themes use `0.96` and
+  `0.85`, settled by eye on the Y70 panel. A theme written before these existed
+  takes them from `default-dark`, with no warning. How fast the card moves is not a theme value.
 
 A gauge draws its fill in `colors.accent`, or in `colors.warning` or `colors.critical` once its reading has reached
 that level, and its track in the same colour at the alpha of `colors.accentDim`. A reading that is not current (stale,
