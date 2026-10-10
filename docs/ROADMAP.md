@@ -38,7 +38,7 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
 - The 4x4 weather widget (item 7).
 - Pages, swipe and the page indicator, and taps on widgets (item 8; done).
 - The shortcut widget, which brought tap input, launching, icons and the image tile (item 7; implemented in
-  `shortcut-and-tap`, its checks on the panel are still open).
+  `shortcut-and-tap`; done).
 - The dock, a row of shortcut slots at the bottom of every page (item 10; next).
 - Recovery after sleep, hot-plug and monitor wake order (the robustness half of item 6; the picker UI waits for
   milestone 3).

@@ -8,9 +8,9 @@ dock, once that change's `design.md` holds the decisions. Read `AGENTS.md`, `REA
 
 ## Start here
 
-1. Finish `shortcut-and-tap` if it is not archived yet: its tasks 9.1 to 9.5 are checks on the panel with the owner
-   (press feedback and the press values, launching the four targets by touch, icons, the cost). The dock builds on all
-   of them, so a problem found there (a launch that stays behind, a press that looks wrong) is fixed first.
+1. `shortcut-and-tap` is done and archived (`openspec/changes/archive/2026-10-09-shortcut-and-tap`), its panel
+   checks included: the press values are approved, every launch came to the front on the main monitor, and the cost
+   is in `docs/perf/shortcut-and-tap.md`.
 2. Branch off `main` after `shortcut-and-tap` has merged (`feat/dock`). One PR, title like
    `feat(dock): a row of shortcut slots on every page`.
 3. `/model opus`, then: "Read `docs/handoff/2026-10-09-shortcut-and-dock.md` and explore this with me."
@@ -19,7 +19,7 @@ dock, once that change's `design.md` holds the decisions. Read `AGENTS.md`, `REA
 
 ## What `shortcut-and-tap` settled (do not design these again)
 
-All of it is in `openspec/changes/shortcut-and-tap/design.md`, with the alternatives that were weighed.
+All of it is in `openspec/changes/archive/2026-10-09-shortcut-and-tap/design.md`, with the alternatives that were weighed.
 
 - **Tap input.** `UrDeck.Sdk.Input.ITapTarget` (`CanTap(point)`, `OnTap(point)`), optional and beside `IWidget`.
   Implementing it is the capability declaration. The gesture recognizer raises `Pressed` and `PressCancelled`; the
@@ -73,8 +73,8 @@ own. This is why nothing in `shortcut-and-tap` assumes that a tappable thing is 
 - **Snapshot.** `--snapshot` should draw the dock (`PageRenderer` has the chrome for the indicator; the dock is drawn
   the same way).
 - **Cost.** The dock's icons are alive on every page for as long as the app runs. Measure against the same page
-  without a dock; the idle cost must stay about zero (`docs/perf/shortcut-and-tap.md` has the shortcut figures once
-  task 9.4 is done).
+  without a dock; the idle cost must stay about zero (`docs/perf/shortcut-and-tap.md` has the shortcut figures, and
+  one open question about memory at the three-minute plateau).
 
 ## Verification expectations
 

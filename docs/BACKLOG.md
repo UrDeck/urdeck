@@ -68,14 +68,14 @@ everything else should be fine on Sonnet.
   `--snapshot --page N`, and the indicator in the theme. Only the current page is alive. Measurements in
   `docs/perf/pages-and-pager.md`. Gaps carried forward: widgets receive no touch yet (no SDK input API), a hosted web view
   would take the swipe from the page, and the window never has keyboard focus, which a web view with text entry needs.
-- `shortcut-and-tap` is implemented (2026-10-09, `openspec/changes/shortcut-and-tap`; its checks on the panel, tasks
-  9.1 to 9.5, are still open, so it is not archived): taps reach widgets through the optional `ITapTarget` interface,
+- `shortcut-and-tap` is implemented and archived (2026-10-09, `openspec/changes/archive/2026-10-09-shortcut-and-tap`;
+  all tasks and the panel checks done): taps reach widgets through the optional `ITapTarget` interface,
   the host shows the press on the compositor with the theme's `press` values, a launch service and an icon service
   (shell icons, local image files, site icons with a disk cache) sit on the per-widget host services, the SDK has the
   image tile, and the 1x1 shortcut widget (`urdeck.widgets.shortcut`) uses all of it. Spikes and measurements in
   `docs/perf/shortcut-and-tap.md`. The engine now makes network requests of its own (site icons; see the README's
   shortcut section). Gaps carried forward: scroll and long press routing, input for a hosted web view, the dock.
-- Next: the panel checks of `shortcut-and-tap`, then the dock (item 10; `docs/handoff/2026-10-09-shortcut-and-dock.md`),
+- Next: the dock (item 10; `docs/handoff/2026-10-09-shortcut-and-dock.md`),
   the 4x4 weather widget (forecast days, humidity and wind), then sensors that need elevation (item 3, fourth change).
   See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
