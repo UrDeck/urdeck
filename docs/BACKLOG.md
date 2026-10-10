@@ -31,7 +31,7 @@ did not change.
 Suggested model per item is noted as **Model**. Items marked Opus involve architecture decisions or hard debugging;
 everything else should be fine on Sonnet.
 
-## Current state (2026-10-05)
+## Current state (2026-10-09)
 
 - `urdeck-framework` (Phase 1 foundation) is complete and archived: SDK, analyzer, plugin loader with hot-reload
   (collectible AssemblyLoadContext), grid layout, WPF host with per-monitor DPI placement, Clock widget, tests, placeholder
@@ -68,6 +68,19 @@ everything else should be fine on Sonnet.
   `--snapshot --page N`, and the indicator in the theme. Only the current page is alive. Measurements in
   `docs/perf/pages-and-pager.md`. Gaps carried forward: widgets receive no touch yet (no SDK input API), a hosted web view
   would take the swipe from the page, and the window never has keyboard focus, which a web view with text entry needs.
+- `shortcut-and-tap` is implemented and archived (2026-10-09, `openspec/changes/archive/2026-10-09-shortcut-and-tap`;
+  all tasks and the panel checks done): taps reach widgets through the optional `ITapTarget` interface,
+  the host shows the press on the compositor with the theme's `press` values, a launch service and an icon service
+  (shell icons, local image files, site icons with a disk cache) sit on the per-widget host services, the SDK has the
+  image tile, and the 1x1 shortcut widget (`urdeck.widgets.shortcut`) uses all of it. Spikes and measurements in
+  `docs/perf/shortcut-and-tap.md`. The engine now makes network requests of its own (site icons; see the README's
+  shortcut section). Gaps carried forward: scroll and long press routing, input for a hosted web view, the dock.
+- `dock` is implemented (2026-10-09, archived as `openspec/changes/archive/2026-10-09-dock`; the checks on the panel passed): up to four
+  widgets in a band at the very bottom of the screen, the same on every page, with the page indicator directly above
+  it. A slot is a grid cell at a smaller size (the theme's `dock.height`, 0.71 of a cell), so any widget with a 1x1
+  size sits in it as a miniature and the dock has no drawing, press or launch code of its own. The `dock`
+  configuration field is now a list of widget objects. On the 1100x3840 panel the dock costs no row. Measurements in
+  `docs/perf/dock.md`.
 - Next: the 4x4 weather widget (forecast days, humidity and wind), then sensors that need elevation (item 3, fourth
   change). See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
@@ -94,7 +107,8 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
    provider, per-widget locations and a time reading. Needs item 14 and the first `data-providers` change. The first
    change (the 4x2 widget) is done; the 4x4 widget follows as the next weather change. It goes before the
    elevated-sensors change.
-4. **Pages and touch** (item 8), then **shortcuts and dock** (items 7 and 10), which bring the image tile.
+4. **Pages and touch** (item 8; pages done in `pages-and-pager`, taps in `shortcut-and-tap`), then **shortcuts**
+   (item 7; done in `shortcut-and-tap`, which brought the image tile) and the **dock** (item 10; done in `dock`).
 
 Display targeting (item 6) is a future change. Its draft is written against the WPF window, so rework it now that the
 new host has landed.
@@ -334,7 +348,7 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 | Stats (single stat and performance are one widget, `urdeck.widgets.stats`) | 1x1 and 2x2 (one reading; done in `data-providers`), 4x2 (two gauges, three text stats) and 4x4 (four gauges, three text stats) (done in `stats-gauges`) | any reading from any provider, one per slot: CPU and GPU temperature and load, memory, GPU power and clock, one CPU core per card | item 3 | slot configuration (a reading plus a presentation); gauge component (ring, bar, vertical bar) with the larger sizes (done) |
 | Weather | 4x2 (done in `weather`) | animated colour icon (day and night variants), temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | Lottie icons, per-widget locations, the time reading, patterned catalogs; see "Weather widget" below |
 | Weather, 4x4 (roadmap) | 4x4 | everything of the 4x2 plus forecast days, humidity and wind (exact content open) | the 4x2 weather change | forecast readings (`daily/N/...`), a date label |
-| Shortcut | 1x1 | an app or URL icon that launches on tap | item 8 (touch) | image tile, shared with the dock (item 10) |
+| Shortcut | 1x1 (done in `shortcut-and-tap`) | the icon of an application, a file, a folder or a web address; opens it on tap; settings `target`, `arguments`, `icon`, `label` | item 8 (touch) | tap input (`ITapTarget`), the launch and icon services, the image tile; all shared with the dock (item 10) |
 | Media / now playing | open | track, artist, art, controls | items 3 and 8 | image tile reuse |
 | Web page | open | any web page, with touch (the owner shows Frigate camera feeds this way in Nexus) | item 14 (new host), item 8 | a hosted widget kind: the host places a web view layer instead of calling `Render` |
 | Camera (parked) | open | camera streams without a browser, for example from Frigate's go2rtc | item 9 for real video | reuses the video layer; a first version could draw snapshots on the canvas |
@@ -479,9 +493,13 @@ via a keyless API such as Open-Meteo; Meteocons (MIT, full-colour, Lottie) is a 
 
 ## 8. Pages and touch
 
-**Status (2026-10-09):** pages, swipe, the indicator and the no-focus window are done (`pages-and-pager`). Still open:
-routing taps and scrolls to widgets through an SDK input API, swiping over a web view, per-page backgrounds (item 9) and
-keyboard focus for a web view.
+**Status (2026-10-09):** pages, swipe, the indicator and the no-focus window are done (`pages-and-pager`). Taps are
+done (`shortcut-and-tap`): a widget opts in with `UrDeck.Sdk.Input.ITapTarget`, the host finds the widget under the
+pointer, shows the press from pointer-down with the theme's `press` values and delivers the tap on release; a swipe, a
+vertical drag and a long hold never tap. Taps and presses also reach the widgets of the dock (`dock`), which is asked
+before the page. Still open: routing scrolls and a long press to widgets (further interfaces
+beside `ITapTarget`; the recognizer already ends a vertical drag and a long hold without an event of their own),
+swiping over a web view, per-page backgrounds (item 9) and keyboard focus for a web view.
 
 Multiple pages with swipe navigation and a page indicator; tap/touch interaction routed to widgets (through the input
 layer of the host chosen in item 14; add an input API to the SDK). **Model:** Sonnet, Opus for the input API design.
@@ -503,6 +521,23 @@ there measures a video background. The decoded-video layer built here is also wh
 ## 10. Dock / quick launch
 
 Launcher bar for apps and URLs (the `dock` config field exists but is unused). **Model:** Sonnet.
+
+**Status (2026-10-09):** implemented and archived in `dock` (`openspec/changes/archive/2026-10-09-dock`; its `design.md` holds the decisions and the
+rejected alternatives). The owner checked it on the panel (`docs/perf/dock.md`). What was settled:
+
+- The dock is a second reserved band at the very bottom of the screen, below the page indicator's. It is reserved
+  whenever `dock` has an entry, and the indicator is the element that gives way (`auto` becomes `fade`).
+- Four equal, square slots, shown as one centred group. The slot's side is the band's height, the theme's
+  `dock.height` (0.71 of a cell: 195 pixels on the panel, which keeps all 13 rows).
+- An entry of `dock` is a widget object without a position, normally a shortcut. Any widget type with a 1x1 size can
+  sit in a slot: the theme is resolved a second time for the slot's size, so the card is a miniature drawn by the same
+  code, and the SDK did not change.
+- The dock's views live beside the indicator, outside the pages: they are built once per layout, do not move during a
+  swipe and keep their readings and icons across page changes.
+- Input: the indicator first, then the dock, then the page. A point in the dock's band that hits no card goes nowhere.
+
+Left out on purpose: more than four slots, a scrolling dock, a backdrop bar behind the slots, per-page docks, drag and
+drop (item 11).
 
 ## 11. WYSIWYG editor
 
@@ -602,10 +637,16 @@ Collected while the milestones were drawn up. Each names the milestone that need
   back-off parked in items 3 and 14.
 - **Network statement and declared capabilities** (milestone 6). A short document listing every request the app and
   the first-party providers make. For plugins, a declared capability (network, elevation) that the editor shows before
-  a widget is added; the marketplace manifest in item 13 already plans the same field.
+  a widget is added; the marketplace manifest in item 13 already plans the same field. To list, as of
+  `shortcut-and-tap`: the engine itself fetches site icons (only for a widget whose icon source is an `http(s)`
+  address; the address, its web manifest and at most four icon candidates, which may be on another host over `https`;
+  at most once per address in 30 days; no cookies or credentials), beside the weather provider's requests.
 - **More `system` readings.** Network throughput, disk use and activity, fan speeds, battery. Each is a few catalog
   entries once its source is known; do them when a user asks.
 - **More providers and widgets.** Home Assistant (also the first user of provider settings and secrets), calendar or
   agenda, an audio visualizer (named as a design target in item 14), a timer.
 - **Shared pages.** A page and its theme exported as one file that somebody else can import, as the step before a
-  marketplace.
+  marketplace. An imported page must not bring launch targets in silently: a shortcut's `target` and `arguments` are
+  trusted like a `.lnk` on the desktop because the user wrote them, so an import has to show them and ask for consent
+  (or strip them) before they can be tapped. The same goes for an `icon` or `target` that is a web address, which
+  makes the app send a request.

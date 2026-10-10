@@ -48,11 +48,12 @@ public sealed class MainWindow : Window
     private bool _nudged;
     private LoadedTheme _loadedTheme;
     private Theme? _theme;
+    private Theme? _dockTheme;
     private LayoutKey _lastLayout;
 
-    /// <summary>What a built page depends on: the window size, the display scaling and the active theme.</summary>
+    /// <summary>What a built page depends on: the window size, the display scaling, the active theme and the dock's size.</summary>
     private readonly record struct LayoutKey(
-        System.Drawing.Size Screen, double Scale, LoadedTheme? Theme, IndicatorMode Mode, int PageCount);
+        System.Drawing.Size Screen, double Scale, LoadedTheme? Theme, IndicatorMode Mode, int PageCount, int DockCount);
 
     internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, MonitorInfo target)
     {
@@ -259,15 +260,14 @@ public sealed class MainWindow : Window
 
         var config = _configStore.Config;
         var mode = config.Pager.GetIndicatorMode();
-        var key = new LayoutKey(screen, scale, _loadedTheme, mode, config.Pages.Count);
+        var key = new LayoutKey(screen, scale, _loadedTheme, mode, config.Pages.Count, config.Dock.Count);
         if (key == _lastLayout)
             return;
         _lastLayout = key;
 
         // Views first, so nothing still paints with the old theme's typefaces when they are released.
         _pager.Release();
-        _theme?.Dispose();
-        _theme = null;
+        DisposeThemes();
 
         if (config.Pages.Count == 0 || screen.Width < 16 || screen.Height < 16)
             return;
@@ -276,10 +276,27 @@ public sealed class MainWindow : Window
         // is resolved against the physical size of one grid cell.
         float cellPx = (float)(screen.Width * scale / 4);
         _theme = ThemeResolver.Resolve(_loadedTheme, cellPx);
-        var chrome = ChromeLayout.Compute(screen, mode, config.Pages.Count, _loadedTheme.Definition.Indicator!.BandHeight!.Value);
+        // Whether there is a dock is the configuration's decision alone, so the layout does not depend on the plugins.
+        var chrome = ChromeLayout.Compute(screen, mode, config.Pages.Count, _loadedTheme.Definition.Indicator!.BandHeight!.Value,
+            config.Dock.Count > 0 ? _loadedTheme.Definition.Dock!.Height!.Value : 0);
         var theme = _theme;
+        var press = PressStyle.Resolve(_loadedTheme);
         double gap = _loadedTheme.Definition.Card!.Gap!.Value;
         UrDeckLog.Info($"Pages: {config.Pages.Count}, showing '{_navigator.Name}'; indicator {chrome.Mode}, {chrome.Rows} grid rows");
+
+        // A dock slot is a small grid cell: a second theme resolved for the slot's size makes its card a miniature.
+        Func<PageHost?> buildDock = () => null;
+        int slot = DockLayout.SlotSide(chrome.Dock);
+        if (slot > 0)
+        {
+            var dockTheme = _dockTheme = ThemeResolver.Resolve(_loadedTheme, (float)(slot * scale));
+            buildDock = () =>
+            {
+                var entries = DockLayout.Select(config.Dock, _plugins.GetDescriptor);
+                var page = new PageConfig { Name = "Dock", Widgets = entries.Select(e => e.Config).ToList() };
+                return new PageHost(page, DockLayout.Compute(chrome.Dock, entries, gap), _plugins, dockTheme, press, _frameClock);
+            };
+        }
 
         _pager.Rebuild(new PagerSetup(
             screen,
@@ -291,8 +308,17 @@ public sealed class MainWindow : Window
                 var page = config.Pages[index];
                 var layout = new GridLayoutManager(screen.Width, screen.Height, gap, chrome.Grid.Height)
                     .RenderWidgetLayout(page.Widgets, screen);
-                return new PageHost(page, layout, _plugins, theme, _frameClock);
-            }));
+                return new PageHost(page, layout, _plugins, theme, press, _frameClock);
+            },
+            buildDock));
+    }
+
+    private void DisposeThemes()
+    {
+        _theme?.Dispose();
+        _theme = null;
+        _dockTheme?.Dispose();
+        _dockTheme = null;
     }
 
     /// <summary>Runs on a sampling thread: collects the ids and asks the UI thread, once, to look at them.</summary>
@@ -344,6 +370,6 @@ public sealed class MainWindow : Window
             t.Stop();
         _pager.Shutdown();
         _frameClock.Shutdown();
-        _theme?.Dispose();
+        DisposeThemes();
     }
 }

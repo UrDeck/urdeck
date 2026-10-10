@@ -5,7 +5,6 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using UrDeck.Engine.Config;
 using UrDeck.Sdk;
-using UrDeck.Sdk.Data;
 
 namespace UrDeck.Engine.Plugin;
 
@@ -103,8 +102,11 @@ public class WidgetRegistry
 {
     private readonly ConcurrentDictionary<string, WidgetDescriptor> _widgets = new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>Handed to every widget created here, before it is configured. Null attaches nothing.</summary>
-    public IWidgetHost? Host { get; set; }
+    /// <summary>
+    /// Makes the host services of one widget; each widget created here is attached to its own before it is configured.
+    /// Null attaches nothing.
+    /// </summary>
+    internal Func<WidgetServices>? CreateServices { get; set; }
 
     public void Register(WidgetDescriptor descriptor) => _widgets[descriptor.Id] = descriptor;
 
@@ -123,15 +125,23 @@ public class WidgetRegistry
     /// Creates a new widget instance configured from <paramref name="config"/>. Each placed widget
     /// gets its own instance. Returns null when the type isn't registered.
     /// </summary>
-    public IWidget? CreateWidget(WidgetConfig config)
+    public IWidget? CreateWidget(WidgetConfig config) => CreateWidget(config, out _);
+
+    /// <summary>
+    /// Creates a widget as <see cref="CreateWidget(WidgetConfig)"/> does and hands out its host services, for a caller
+    /// that shows the widget: it listens for repaint requests and disposes the services with the view.
+    /// </summary>
+    public IWidget? CreateWidget(WidgetConfig config, out WidgetServices? services)
     {
+        services = null;
         var descriptor = GetDescriptor(config.WidgetTypeId);
         if (descriptor == null)
             return null;
 
         var widget = (IWidget)Activator.CreateInstance(descriptor.WidgetType)!;
-        if (Host != null)
-            widget.Attach(Host);
+        services = CreateServices?.Invoke();
+        if (services != null)
+            widget.Attach(services);
         widget.Configure(config.ToConcrete(descriptor.ConfigType));
         return widget;
     }

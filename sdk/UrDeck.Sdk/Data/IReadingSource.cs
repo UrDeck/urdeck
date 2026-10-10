@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Patrick Bigler
 
+using UrDeck.Sdk.Icons;
+using UrDeck.Sdk.Launch;
+
 namespace UrDeck.Sdk.Data;
 
 /// <summary>
@@ -33,6 +36,12 @@ public interface IWidgetHost
     void Log(string message)
     {
     }
+
+    /// <summary>Opens files, applications and addresses. The default starts nothing.</summary>
+    ILauncher Launcher => NullLauncher.Instance;
+
+    /// <summary>The icons of applications, files and web addresses. The default has none.</summary>
+    IIconSource Icons => NullIconSource.Instance;
 }
 
 /// <summary>The reading source of a widget that was never attached: everything is unavailable.</summary>

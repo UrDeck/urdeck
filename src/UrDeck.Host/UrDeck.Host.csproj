@@ -26,6 +26,7 @@
     </ItemGroup>
     <ItemGroup>
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Clock\UrDeck.Widgets.Clock.csproj" />
+        <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Shortcut\UrDeck.Widgets.Shortcut.csproj" />
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Stats\UrDeck.Widgets.Stats.csproj" />
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Weather\UrDeck.Widgets.Weather.csproj" />
         <UrDeckPlugin Include="..\..\providers\UrDeck.Providers.System\UrDeck.Providers.System.csproj" />

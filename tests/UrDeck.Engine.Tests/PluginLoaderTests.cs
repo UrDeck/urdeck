@@ -333,6 +333,92 @@ public class ForeignProvider : UrDeck.Sdk.Data.IDataProvider
         return new WeakReference(AssemblyLoadContext.GetLoadContext(widget.GetType().Assembly));
     }
 
+    private const string IconWidgetSource = @"
+using SkiaSharp;
+using UrDeck.Sdk;
+using UrDeck.Sdk.Input;
+public class IconCfg : WidgetConfig { }
+[Widget(""I"", ""d"", Id = ""test.icon"")]
+[WidgetSize(1, 1)]
+[RefreshOnData]
+public class IconWidget : Widget<IconCfg>, ITapTarget
+{
+    public bool Drew;
+    public override void Render(WidgetRenderContext context)
+    {
+        string path = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Windows), ""explorer.exe"");
+        Drew = Icons.GetIcon(path, 64).Image != null;
+    }
+    public void OnTap(SKPoint point) { }
+}";
+
+    [Fact]
+    public void AWidgetThatAskedForAnIcon_AndWasDisposed_LeavesItsContextCollectible()
+    {
+        string path = WriteSource("Icon.dll", IconWidgetSource);
+        _loader.ScanAndLoadPlugins(_dir);
+        var contextRef = ShowIconWidgetAndDisposeIt();
+        Assert.Equal(0, _loader.Icons.Count);
+
+        File.Delete(path);
+        _loader.ReloadPlugins();
+
+        for (int i = 0; i < 50 && contextRef.IsAlive; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Thread.Sleep(100);
+        }
+
+        Assert.False(contextRef.IsAlive, "A widget that asked for an icon keeps its plugin context alive after it was disposed.");
+    }
+
+    // Does what a view does: listens for the repaint with a handler that holds the widget, paints, and disposes the services.
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private WeakReference ShowIconWidgetAndDisposeIt()
+    {
+        var config = new WidgetConfig { WidgetTypeId = "test.icon", Width = 1, Height = 1 };
+        var widget = _loader.CreateWidget(config, out var services)!;
+        Assert.NotNull(services);
+        Assert.IsAssignableFrom<UrDeck.Sdk.Input.ITapTarget>(widget);
+
+        int repaints = 0;
+        services!.RepaintRequested += () =>
+        {
+            GC.KeepAlive(widget);
+            Interlocked.Increment(ref repaints);
+        };
+
+        var theme = new UrDeck.Engine.Themes.ThemeStore("").Load(UrDeck.Engine.Themes.ThemeStore.DefaultName);
+        UrDeck.Engine.Rendering.PageRenderer.RenderToBitmap(100, 100, new[] { (config, widget) }, theme, DateTime.Now).Dispose();
+        Assert.True(Support.TestImages.WaitFor(() => Volatile.Read(ref repaints) == 1), "the widget was not asked to repaint when its icon was ready");
+        UrDeck.Engine.Rendering.PageRenderer.RenderToBitmap(100, 100, new[] { (config, widget) }, theme, DateTime.Now).Dispose();
+
+        Assert.True((bool)widget.GetType().GetField("Drew")!.GetValue(widget)!, "the second paint did not receive the icon");
+        Assert.Equal(1, _loader.Icons.Count);
+        services.Dispose();
+        return new WeakReference(AssemblyLoadContext.GetLoadContext(widget.GetType().Assembly));
+    }
+
+    [Fact]
+    public void EveryWidget_GetsItsOwnServices_AndAnUnknownTypeGetsNone()
+    {
+        WritePlugin("test.widget");
+        _loader.ScanAndLoadPlugins(_dir);
+        var config = new WidgetConfig { WidgetTypeId = "test.widget" };
+
+        Assert.NotNull(_loader.CreateWidget(config, out var first));
+        Assert.NotNull(_loader.CreateWidget(config, out var second));
+        Assert.Null(_loader.CreateWidget(new WidgetConfig { WidgetTypeId = "no.such.widget" }, out var none));
+
+        Assert.NotNull(first);
+        Assert.NotSame(first, second);
+        Assert.Null(none);
+        Assert.Same(_loader.Readings, first!.Readings);
+        Assert.Same(_loader.Launcher, first.Launcher);
+        Assert.Same(first.Launcher, second!.Launcher);
+    }
+
     [Fact]
     public void GarbageDll_IsSkipped_OthersStillLoad()
     {

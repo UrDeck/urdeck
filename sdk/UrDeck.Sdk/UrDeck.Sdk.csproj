@@ -16,8 +16,11 @@
          additive, so the assembly version stays.
          Package 0.6.0 (weather): ReadingValue time, ReadingKind.Time, ReadingFormatOptions.Use24HourClock,
          IReadingSource.RegionUses24HourClock and IWidgetHost.Log, IWidget.AnimationFrameInterval and IWidget.NextAnimationAt (default members), ReadingAttribution, the Attribution and LottieAnimation
-         components, and the SkiaSharp.Skottie package reference. All additive, so the assembly version stays. -->
-    <Version>0.6.0</Version>
+         components, and the SkiaSharp.Skottie package reference. All additive, so the assembly version stays.
+         Package 0.7.0 (shortcut-and-tap): Input.ITapTarget, Launch.LaunchTarget and ILauncher, Icons.IIconSource and
+         IconResult, IWidgetHost.Launcher and IWidgetHost.Icons (default members), Widget.Launcher and Widget.Icons, and
+         the ImageTile component. All additive, so the assembly version stays. -->
+    <Version>0.7.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

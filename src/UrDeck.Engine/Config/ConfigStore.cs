@@ -21,18 +21,6 @@ public class PageConfig
     public JsonElement? Background { get; set; }
 }
 
-public class DockItemConfig
-{
-    [JsonPropertyName("type")]
-    public string Type { get; set; } = "";
-
-    [JsonPropertyName("command")]
-    public string? Command { get; set; }
-
-    [JsonPropertyName("url")]
-    public string? Url { get; set; }
-}
-
 /// <summary>Settings for paging between pages. An object so that later pager settings have a home.</summary>
 public class PagerConfig
 {
@@ -86,8 +74,12 @@ public class UrDeckConfig
     [JsonPropertyName("pager")]
     public PagerConfig Pager { get; set; } = new PagerConfig();
 
+    /// <summary>
+    /// The widgets of the dock, in slot order: widget objects like a page's, whose <c>col</c> and <c>row</c> are ignored.
+    /// Empty means no dock.
+    /// </summary>
     [JsonPropertyName("dock")]
-    public List<DockItemConfig> Dock { get; set; } = new List<DockItemConfig>();
+    public List<WidgetConfig> Dock { get; set; } = new List<WidgetConfig>();
 
     [JsonPropertyName("theme")]
     public string Theme { get; set; } = "default-dark";
@@ -145,6 +137,7 @@ public sealed class ConfigStore : IDisposable
         string json = ReadShared(_configPath);
         Config = JsonSerializer.Deserialize<UrDeckConfig>(json, UrDeckJson.Options) ?? new UrDeckConfig();
         Config.Pager ??= new PagerConfig();
+        Config.Dock ??= new List<WidgetConfig>();
         Config.Pager.GetIndicatorMode(warn: true);
         if (Config.Pages.Count == 0)
             Config.Pages.Add(new PageConfig());

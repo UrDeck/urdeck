@@ -1,0 +1,14 @@
+{
+  "name": "Example",
+  "short_name": "Example",
+  "start_url": "/?homescreen=1",
+  "display": "standalone",
+  "icons": [
+    { "src": "/static/icons/mark.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-384.png", "sizes": "384x384", "type": "image/png" },
+    { "src": "maskable-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "maskable" },
+    { "src": "mono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "monochrome" }
+  ]
+}

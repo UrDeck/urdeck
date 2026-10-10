@@ -174,6 +174,8 @@ The host MUST manage configuration via `urdeck-config.json`:
 - `activePage` is the index of the page shown on startup. It is not updated while the host runs, and a reload does not
   move the user to it (see page-navigation)
 - `pager.indicator` is the page indicator's mode: `always`, `fade`, `off` or `auto`; absent means `auto`
+- `dock` is a list of widget objects shown in the dock (see dock, "Dock Configuration"); absent or empty means no
+  dock. Widget-specific settings on its entries are preserved across load/save like those of a page's widgets
 
 #### Scenario: Config file does not exist
 - **WHEN** the host starts with no `urdeck-config.json`
@@ -194,6 +196,15 @@ The host MUST manage configuration via `urdeck-config.json`:
 #### Scenario: Indicator mode set
 - **WHEN** the file has `"pager": { "indicator": "always" }`
 - **THEN** the indicator is always visible in a reserved band
+
+#### Scenario: Dock entries
+- **WHEN** the file has a `dock` list with two shortcut objects
+- **THEN** the dock shows the two shortcuts, and after a save both objects are in the file with their settings
+
+#### Scenario: Dock entry in the older shape
+- **WHEN** the file has a `dock` entry without a `typeId` (the unused `type`, `command`, `url` shape)
+- **THEN** the file loads, the entry's slot is empty, a warning is logged, and the entry's properties are still in the
+  file after a save
 
 ### Requirement: Application Entry Point
 The host MUST provide the application entry point with:

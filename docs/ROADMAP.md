@@ -5,12 +5,13 @@ UrDeck is a lightweight, extensible widget dashboard for secondary and case disp
 read the source of, low resource use, great visuals, a modular widget SDK, a WYSIWYG editor, and touch.
 
 This page is the plan in outcomes. The work items behind it, with their design notes and status, are in
-[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-10-08.
+[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-10-09.
 
 ## Where it is today
 
 The foundation is in place and runs on the real panel: a WinUI 3 host that composites each widget on the GPU, a plugin
-SDK with hot reload, themes, animation, data providers, and the Clock, Stats and Weather widgets. There is no
+SDK with hot reload, themes, animation, data providers, pages you swipe between, a dock, and the Clock, Stats,
+Weather and Shortcut widgets. There is no
 installer and no editor yet: you build from source and edit a JSON file. See the [README](../README.md).
 
 ## Milestones
@@ -35,8 +36,10 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
 
 **1. Daily driver.** Everything on the owner's current Nexus page, and nothing that forces a restart of the app.
 - The 4x4 weather widget (item 7).
-- Pages, swipe and the page indicator (item 8; done, tap on widgets is still open).
-- The shortcut widget and the dock, which bring the image tile (items 7 and 10).
+- Pages, swipe and the page indicator, and taps on widgets (item 8; done).
+- The shortcut widget, which brought tap input, launching, icons and the image tile (item 7; implemented in
+  `shortcut-and-tap`; done).
+- The dock, a row of up to four widget slots at the bottom of every page (item 10; implemented in `dock`).
 - Recovery after sleep, hot-plug and monitor wake order (the robustness half of item 6; the picker UI waits for
   milestone 3).
 - CPU temperature through the opt-in elevated helper (item 3, fourth change). May slip to milestone 2 if the driver

@@ -103,6 +103,7 @@ public class GridLayoutManager
                 CellSize = cellSize,
                 GridSize = new Size(clampedWidth, clampedHeight),
                 Placed = fits,
+                Visible = widget.IsVisible,
             };
             result.Add(item);
         }

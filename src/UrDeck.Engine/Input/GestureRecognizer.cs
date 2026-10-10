@@ -30,18 +30,27 @@ public enum GestureKind
 
     /// <summary>The swipe was interrupted (the pointer was cancelled or lost) and should return.</summary>
     Cancelled,
+
+    /// <summary>The pointer went down; <see cref="GestureEvent.X"/> and <see cref="GestureEvent.Y"/> say where.</summary>
+    Pressed,
+
+    /// <summary>
+    /// The press ended without a tap: the gesture became a swipe (raised just before <see cref="SwipeStarted"/>) or a
+    /// vertical drag, the pointer was cancelled, or it was released after too long for a tap.
+    /// </summary>
+    PressCancelled,
 }
 
 /// <param name="Kind">What happened.</param>
 /// <param name="Dx">Horizontal distance from the press, in pixels (swipe events).</param>
 /// <param name="Velocity">Horizontal velocity at release, in pixels per second (<see cref="GestureKind.SwipeEnded"/>).</param>
-/// <param name="X">Position of the pointer (tap).</param>
-/// <param name="Y">Position of the pointer (tap).</param>
+/// <param name="X">Position of the pointer (press and tap).</param>
+/// <param name="Y">Position of the pointer (press and tap).</param>
 public readonly record struct GestureEvent(GestureKind Kind, double Dx = 0, double Velocity = 0, double X = 0, double Y = 0);
 
 /// <summary>
-/// Turns pointer samples into swipes and taps. It has no timers and reads no clock: durations come from the samples'
-/// timestamps. The first pointer to go down owns the gesture; other pointers are ignored until it ends. Thresholds are
+/// Turns pointer samples into presses, swipes and taps. It has no timers and reads no clock: durations come from the
+/// samples' timestamps, so a long hold stays pressed until the pointer lifts. The first pointer to go down owns the gesture; other pointers are ignored until it ends. Thresholds are
 /// fractions of the column width, so nothing depends on the resolution.
 /// </summary>
 public sealed class GestureRecognizer
@@ -92,6 +101,7 @@ public sealed class GestureRecognizer
                 _startT = s.TimestampMs;
                 _recent.Clear();
                 _recent.Add((s.TimestampMs, s.X));
+                Raise(new GestureEvent(GestureKind.Pressed, X: s.X, Y: s.Y));
             }
             return;
         }
@@ -110,6 +120,8 @@ public sealed class GestureRecognizer
             case PointerPhase.Cancel:
                 if (_state == State.Swiping)
                     Raise(new GestureEvent(GestureKind.Cancelled, s.X - _startX));
+                else if (_state == State.Pending)
+                    Raise(new GestureEvent(GestureKind.PressCancelled));
                 Reset();
                 break;
         }
@@ -121,6 +133,7 @@ public sealed class GestureRecognizer
         double dy = s.Y - _startY;
         if (_state == State.Pending && Math.Sqrt(dx * dx + dy * dy) >= _slop)
         {
+            Raise(new GestureEvent(GestureKind.PressCancelled));
             if (Math.Abs(dx) >= Math.Abs(dy))
             {
                 _state = State.Swiping;
@@ -150,6 +163,9 @@ public sealed class GestureRecognizer
                 break;
             case State.Pending when s.TimestampMs - _startT <= TapMaxMs:
                 Raise(new GestureEvent(GestureKind.Tap, X: s.X, Y: s.Y));
+                break;
+            case State.Pending:
+                Raise(new GestureEvent(GestureKind.PressCancelled));
                 break;
         }
         Reset();

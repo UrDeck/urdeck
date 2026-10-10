@@ -236,6 +236,125 @@ public sealed class ThemeTests : IDisposable
     }
 
     [Fact]
+    public void EveryBuiltInTheme_HasPressValues()
+    {
+        foreach (string name in ThemeStore.BuiltInNames)
+        {
+            var press = PressStyle.Resolve(Store().Load(name));
+
+            Assert.InRange(press.Scale, 0.5f, 1f);
+            Assert.InRange(press.Opacity, 0.1f, 1f);
+            Assert.True(press.IsVisible);
+        }
+    }
+
+    [Fact]
+    public void AnOlderThemeWithoutPressValues_TakesTheDefaults_WithoutAWarning()
+    {
+        WriteTheme("old", """{ "colors": { "accent": "#ff00ff" } }""");
+
+        var press = PressStyle.Resolve(Store().Load("old"));
+
+        Assert.Equal(PressStyle.Resolve(Store().Load("default-dark")), press);
+        Assert.DoesNotContain("press", Log);
+    }
+
+    [Fact]
+    public void AUserTheme_CanOverrideOneOfTheTwoPressValues()
+    {
+        WriteTheme("firm", """{ "press": { "scale": 0.9 } }""");
+
+        var press = PressStyle.Resolve(Store().Load("firm"));
+        var defaults = PressStyle.Resolve(Store().Load("default-dark"));
+
+        Assert.Equal(0.9f, press.Scale);
+        Assert.Equal(defaults.Opacity, press.Opacity);
+        Assert.DoesNotContain("press", Log);
+    }
+
+    [Theory]
+    [InlineData("scale", "2")]
+    [InlineData("scale", "0.4")]
+    [InlineData("opacity", "0")]
+    [InlineData("opacity", "1.5")]
+    public void APressValueOutOfRange_FallsBackToTheDefault_WithAWarning(string name, string value)
+    {
+        WriteTheme("wild", "{ \"press\": { \"" + name + "\": " + value + " } }");
+
+        var press = PressStyle.Resolve(Store().Load("wild"));
+
+        Assert.Equal(PressStyle.Resolve(Store().Load("default-dark")), press);
+        Assert.Contains("press." + name, Log);
+    }
+
+    [Fact]
+    public void PressValuesOfOne_SwitchTheFeedbackOff()
+    {
+        WriteTheme("still", """{ "press": { "scale": 1, "opacity": 1 } }""");
+
+        var press = PressStyle.Resolve(Store().Load("still"));
+
+        Assert.Equal(new PressStyle(1f, 1f), press);
+        Assert.False(press.IsVisible);
+        Assert.DoesNotContain("press", Log);
+    }
+
+    [Fact]
+    public void EveryBuiltInTheme_HasADockHeight_ThatKeepsThePanelsThirteenRows()
+    {
+        foreach (string name in ThemeStore.BuiltInNames)
+        {
+            var definition = Store().Load(name).Definition;
+
+            Assert.Equal(0.71, definition.Dock!.Height);
+            var chrome = UrDeck.Engine.Layout.ChromeLayout.Compute(
+                new System.Drawing.Size(1100, 3840), UrDeck.Engine.Layout.IndicatorMode.Always, 2,
+                definition.Indicator!.BandHeight!.Value, definition.Dock.Height!.Value);
+            Assert.Equal(13, chrome.Rows);
+        }
+    }
+
+    [Fact]
+    public void AnOlderThemeWithoutADockHeight_TakesTheDefault_WithoutAWarning()
+    {
+        WriteTheme("old", """{ "colors": { "accent": "#ff00ff" } }""");
+
+        var loaded = Store().Load("old");
+
+        Assert.Equal(Store().Load("default-dark").Definition.Dock!.Height, loaded.Definition.Dock!.Height);
+        Assert.DoesNotContain("dock", Log);
+    }
+
+    [Fact]
+    public void AUserTheme_CanResizeTheDock()
+    {
+        WriteTheme("low", """{ "dock": { "height": 0.5 } }""");
+
+        var loaded = Store().Load("low");
+
+        Assert.Equal(0.5, loaded.Definition.Dock!.Height);
+        Assert.DoesNotContain("dock", Log);
+        // Half a cell of the 1100 pixel wide panel.
+        var chrome = UrDeck.Engine.Layout.ChromeLayout.Compute(
+            new System.Drawing.Size(1100, 3840), UrDeck.Engine.Layout.IndicatorMode.Off, 1, 0.25, loaded.Definition.Dock.Height!.Value);
+        Assert.Equal(138, chrome.Dock.Height);
+    }
+
+    [Theory]
+    [InlineData("3")]
+    [InlineData("0.1")]
+    [InlineData("-1")]
+    public void ADockHeightOutOfRange_FallsBackToTheDefault_WithAWarning(string value)
+    {
+        WriteTheme("wild", "{ \"dock\": { \"height\": " + value + " } }");
+
+        var loaded = Store().Load("wild");
+
+        Assert.Equal(Store().Load("default-dark").Definition.Dock!.Height, loaded.Definition.Dock!.Height);
+        Assert.Contains("dock.height", Log);
+    }
+
+    [Fact]
     public void Colours_CarryTransparency()
     {
         WriteTheme("glass", """{ "colors": { "cardFill": "#cc102030" } }""");

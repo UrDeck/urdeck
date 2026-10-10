@@ -63,20 +63,40 @@ internal static class SnapshotCommand
                     widgets.Add((widgetConfig, widget));
             }
 
+            // The dock's slots, decided as the live window decides them; an empty slot has no widget.
+            var dock = new List<(WidgetConfig, IWidget?)>();
+            foreach (var entry in DockLayout.Select(config.Dock, host.Plugins.GetDescriptor))
+                dock.Add((entry.Config, entry.Shown ? host.Plugins.CreateWidget(entry.Config) : null));
+
             // Subscribe the way the live window does, and let the providers report once so the card shows values.
             var readings = host.Plugins.Readings;
             readings.ApplySettings(host.Config.Config.Providers);
-            string[] ids = widgets.SelectMany(w => w.Item2.Subscriptions).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+            string[] ids = widgets.Select(w => w.Item2).Concat(dock.Select(d => d.Item2).OfType<IWidget>())
+                .SelectMany(w => w.Subscriptions).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
             readings.Subscribe(ids);
             var deadline = DateTime.UtcNow + TimeSpan.FromSeconds(8);
             while (readings.AnyPending(ids) && DateTime.UtcNow < deadline)
                 Thread.Sleep(25);
 
-            using var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now,
-                new PageRenderer.Chrome(config.Pager.GetIndicatorMode(), pageIndex, config.Pages.Count));
+            var chrome = new PageRenderer.Chrome(config.Pager.GetIndicatorMode(), pageIndex, config.Pages.Count);
+            var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome, dock);
+
+            // Icons are asked for while painting. If that paint asked for any, wait for them (a few seconds at most) and
+            // paint again, so the image shows icons and not placeholders. A page without them is painted once.
+            var icons = host.Plugins.Icons;
+            if (icons.AnyPending)
+            {
+                var iconDeadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+                while (icons.AnyPending && DateTime.UtcNow < iconDeadline)
+                    Thread.Sleep(25);
+                bitmap.Dispose();
+                bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome, dock);
+            }
+
+            using var image = bitmap;
             using var file = File.Create(output);
             bitmap.Encode(file, SKEncodedImageFormat.Png, 100);
-            UrDeckLog.Info($"Snapshot {width}x{height} with {widgets.Count} widget(s) written to {Path.GetFullPath(output)}");
+            UrDeckLog.Info($"Snapshot {width}x{height} with {widgets.Count} widget(s) and {dock.Count(d => d.Item2 != null)} in the dock written to {Path.GetFullPath(output)}");
             return 0;
         }
         catch (Exception ex)

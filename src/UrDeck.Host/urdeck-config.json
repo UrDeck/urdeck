@@ -41,7 +41,12 @@
     }
   ],
   "activePage": 0,
-  "dock": [],
+  "dock": [
+    {
+      "typeId": "urdeck.widgets.shortcut",
+      "target": "%USERPROFILE%"
+    }
+  ],
   "theme": "default-dark",
   "monitorName": "tallest"
 }

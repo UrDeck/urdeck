@@ -7,6 +7,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Input;
+using SkiaSharp;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Input;
 using UrDeck.Engine.Layout;
@@ -17,19 +18,22 @@ namespace UrDeck.Host;
 /// <summary>What the pager needs to build its pages for the current window size, theme and configuration.</summary>
 /// <param name="Screen">The window size in DIPs.</param>
 /// <param name="Scale">DIPs to physical pixels.</param>
-/// <param name="Chrome">Where the indicator goes (in DIPs) and the resolved mode.</param>
+/// <param name="Chrome">Where the indicator and the dock go (in DIPs) and the resolved mode.</param>
 /// <param name="Style">The indicator's theme values, in physical pixels.</param>
 /// <param name="BuildPage">Builds the widgets of the page at an index.</param>
+/// <param name="BuildDock">Builds the dock's widgets; null when there is no dock.</param>
 internal sealed record PagerSetup(
     System.Drawing.Size Screen,
     double Scale,
     ChromeLayoutResult Chrome,
     IndicatorStyle Style,
-    Func<int, PageHost> BuildPage);
+    Func<int, PageHost> BuildPage,
+    Func<PageHost?> BuildDock);
 
 /// <summary>
 /// Shows the current page and slides to a neighbour. At rest one page is alive; while a swipe is in progress the
-/// neighbour in its direction is built too, and the page that left is disposed when the slide settles. All decisions
+/// neighbour in its direction is built too, and the page that left is disposed when the slide settles. The dock is not
+/// a page: it is built once per setup, sits in the overlay and stays where it is while pages slide. All decisions
 /// (swipe or tap, commit, rubber band) are the engine's; this class translates pointer events into samples, moves the
 /// pages' composition offsets and runs the settle animation.
 /// </summary>
@@ -53,7 +57,9 @@ internal sealed class PagerController
     private PageHost? _current;
     private PageHost? _neighbor;
     private int _neighborIndex = -1;
+    private PageHost? _dock;
     private IndicatorView? _indicator;
+    private WidgetView? _pressed;
     private readonly DispatcherQueueTimer _reclaim;
     private bool _animating;
     private int _epoch;
@@ -80,7 +86,7 @@ internal sealed class PagerController
 
     private double Width => _setup?.Screen.Width ?? 0;
 
-    /// <summary>The widgets of every live page, for the window's reading-changed lookup.</summary>
+    /// <summary>The widgets of every live page and of the dock, for the window's reading-changed lookup.</summary>
     public IEnumerable<PageHost> LivePages
     {
         get
@@ -89,11 +95,13 @@ internal sealed class PagerController
                 yield return _current;
             if (_neighbor != null)
                 yield return _neighbor;
+            if (_dock != null)
+                yield return _dock;
         }
     }
 
     /// <summary>
-    /// Builds the current page for a new setup. A swipe in progress ends at once: both pages are released and the
+    /// Builds the current page and the dock for a new setup. A swipe in progress ends at once: both pages are released and the
     /// navigator keeps the page the user was on.
     /// </summary>
     public void Rebuild(PagerSetup setup)
@@ -106,6 +114,14 @@ internal sealed class PagerController
         _current = setup.BuildPage(_navigator.Index);
         SetOffset(_current, 0);
         _pages.Children.Add(_current);
+
+        // The dock goes into the overlay first, so the indicator is above it. Page changes never touch it.
+        _dock = setup.BuildDock();
+        if (_dock != null)
+        {
+            _overlay.Children.Add(_dock);
+            UrDeckLog.Info($"Dock: {_dock.ViewCount} slot(s) shown");
+        }
 
         var chrome = setup.Chrome;
         if (chrome.Mode != IndicatorMode.Off && _navigator.Count > 0)
@@ -121,11 +137,13 @@ internal sealed class PagerController
         }
     }
 
-    /// <summary>Releases every page and the indicator (a rebuild or the window closing).</summary>
+    /// <summary>Releases every page, the dock and the indicator (a rebuild or the window closing).</summary>
     public void Release()
     {
         _epoch++;
         _animating = false;
+        // The recognizer says nothing when it is aborted, and the views are about to go: just forget the press.
+        _pressed = null;
         _gestures?.Abort();
         _gestures = null;
         _neighbor?.Dispose();
@@ -134,6 +152,8 @@ internal sealed class PagerController
         _current?.Dispose();
         _current = null;
         _pages.Children.Clear();
+        _dock?.Dispose();
+        _dock = null;
         _indicator?.Stop();
         _indicator = null;
         _overlay.Children.Clear();
@@ -194,10 +214,65 @@ internal sealed class PagerController
             case GestureKind.Cancelled:
                 EndDrag(g.Dx, 0, allowCommit: false);
                 break;
+            case GestureKind.Pressed:
+                Press(g.X, g.Y);
+                break;
+            case GestureKind.PressCancelled:
+                ReleasePress();
+                break;
             case GestureKind.Tap:
+                ReleasePress();
                 Tap(g.X, g.Y);
                 break;
         }
+    }
+
+    // Press and tap go to the widget under the pointer: the indicator is asked first, then the dock, then the page at
+    // rest. The press is shown from pointer-down, before anybody knows whether it becomes a tap; a swipe, a vertical
+    // drag or a long hold takes it back.
+
+    private void Press(double x, double y)
+    {
+        ReleasePress();
+        if (_setup == null || _current == null || IndicatorPageAt(x, y) >= 0)
+            return;
+        if (FindView(x, y, out var local) is not { } view || !view.CanTap(ToCardPixels(local)))
+            return;
+        view.Press();
+        _pressed = view;
+    }
+
+    /// <summary>
+    /// The view under the point. A point in the dock's band is looked up in the dock and never in the page: nothing of
+    /// the page is there, so a point beside the dock's cards belongs to nobody.
+    /// </summary>
+    private WidgetView? FindView(double x, double y, out System.Drawing.PointF local)
+    {
+        local = default;
+        var dock = _setup!.Chrome.Dock;
+        if (dock.Height > 0 && y >= dock.Top && y < dock.Bottom)
+            return _dock?.FindView(x, y, out local);
+        return _current?.FindView(x, y, out local);
+    }
+
+    private void ReleasePress()
+    {
+        _pressed?.ReleasePress();
+        _pressed = null;
+    }
+
+    private SKPoint ToCardPixels(System.Drawing.PointF local) =>
+        new((float)(local.X * _setup!.Scale), (float)(local.Y * _setup.Scale));
+
+    /// <summary>The page whose mark of a visible indicator the point is on, or -1.</summary>
+    private int IndicatorPageAt(double x, double y)
+    {
+        if (_setup == null || _indicator == null || !_indicator.IsVisible)
+            return -1;
+
+        var rect = _setup.Chrome.Indicator;
+        var local = new System.Drawing.PointF((float)((x - rect.X) * _setup.Scale), (float)((y - rect.Y) * _setup.Scale));
+        return _indicator.HitTest(local, (float)(_setup.Screen.Width * _setup.Scale / 4));
     }
 
     // The page follows the finger. A swipe to the left (dx < 0) brings the next page in from the right.
@@ -234,14 +309,20 @@ internal sealed class PagerController
 
     private void Tap(double x, double y)
     {
-        if (_setup == null || _indicator == null || !_indicator.IsVisible)
+        if (_setup == null)
             return;
 
-        var rect = _setup.Chrome.Indicator;
-        var local = new System.Drawing.PointF((float)((x - rect.X) * _setup.Scale), (float)((y - rect.Y) * _setup.Scale));
-        int page = _indicator.HitTest(local, (float)(_setup.Screen.Width * _setup.Scale / 4));
-        if (page >= 0 && page != _navigator.Index)
-            GoTo(page);
+        // A visible indicator takes a tap on one of its marks before any widget does.
+        int page = IndicatorPageAt(x, y);
+        if (page >= 0)
+        {
+            if (page != _navigator.Index)
+                GoTo(page);
+            return;
+        }
+
+        if (FindView(x, y, out var local) is { } view)
+            view.Tap(ToCardPixels(local));
     }
 
     /// <summary>Slides to <paramref name="page"/> (a tap on a dot).</summary>
