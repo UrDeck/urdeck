@@ -41,7 +41,8 @@ value (for example a colour that does not parse) is replaced by the default's va
     "bandHeight": 0.25, "dotSize": 0.05, "pillLength": 0.14, "spacing": 0.05,
     "active": "#ffffff", "inactive": "#59ffffff", "backdrop": "#8c0f0f1a"
   },
-  "press": { "scale": 0.96, "opacity": 0.85 }
+  "press": { "scale": 0.96, "opacity": 0.85 },
+  "dock": { "height": 0.71 }
 }
 ```
 
@@ -72,6 +73,14 @@ value (for example a colour that does not parse) is replaced by the default's va
   the default's with a logged warning. Set both to `1` to switch the feedback off. The built-in themes use `0.96` and
   `0.85`, settled by eye on the Y70 panel. A theme written before these existed
   takes them from `default-dark`, with no warning. How fast the card moves is not a theme value.
+- **`dock`** is the dock (see the README, "Dock"). `height` is the height of the band reserved for it at the bottom
+  of the screen, as a fraction of one grid cell, and also the side of a dock slot: the theme's sizes (`card.*`,
+  `typography.*Size`) are applied to a slot as they are to a grid cell, so a docked card is a miniature whose corners,
+  padding and text shrink with this value. It must be between `0.2` and `1`; a value outside that is replaced by the
+  default's with a logged warning. The built-in themes use `0.71`: on the 1100x3840 panel that is 195 pixels, which
+  together with the indicator's band of 69 fits in the 265 pixels left under the thirteenth row, so the dock costs no
+  row there; the owner approved the size by eye on that panel. A larger value takes a row there. A theme written before the dock existed takes the value from
+  `default-dark`, with no warning.
 
 A gauge draws its fill in `colors.accent`, or in `colors.warning` or `colors.critical` once its reading has reached
 that level, and its track in the same colour at the alpha of `colors.accentDim`. A reading that is not current (stale,

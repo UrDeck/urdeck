@@ -84,6 +84,84 @@ public class ConfigStoreTests : IDisposable
     }
 
     [Fact]
+    public void Dock_IsAnEmptyList_WhenAbsentOrNull()
+    {
+        string path = Path.Combine(_dir, "urdeck-config.json");
+        File.WriteAllText(path, "{\"pages\":[{\"name\":\"Main\",\"widgets\":[]}]}");
+        using (var absent = new ConfigStore(path))
+            Assert.Empty(absent.Config.Dock);
+
+        File.WriteAllText(path, "{\"dock\":null}");
+        using var empty = new ConfigStore(path);
+        Assert.Empty(empty.Config.Dock);
+    }
+
+    [Fact]
+    public void Dock_TwoShortcuts_RoundTripWithTheirSettings_AndAnUnknownProperty()
+    {
+        string path = Path.Combine(_dir, "urdeck-config.json");
+        File.WriteAllText(path, """
+            { "dock": [
+                { "typeId": "urdeck.widgets.shortcut", "target": "notepad.exe", "label": "Notes", "future": { "x": 1 } },
+                { "typeId": "urdeck.widgets.shortcut", "target": "https://example.org" }
+            ] }
+            """);
+        using (var store = new ConfigStore(path))
+        {
+            Assert.Equal(2, store.Config.Dock.Count);
+            Assert.All(store.Config.Dock, e => Assert.Equal("urdeck.widgets.shortcut", e.WidgetTypeId));
+            Assert.Equal("notepad.exe", store.Config.Dock[0].ExtensionData!["target"].GetString());
+            store.Save();
+        }
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        var dock = doc.RootElement.GetProperty("dock");
+        Assert.Equal(2, dock.GetArrayLength());
+        Assert.Equal("urdeck.widgets.shortcut", dock[0].GetProperty("typeId").GetString());
+        Assert.Equal("notepad.exe", dock[0].GetProperty("target").GetString());
+        Assert.Equal("Notes", dock[0].GetProperty("label").GetString());
+        Assert.Equal(1, dock[0].GetProperty("future").GetProperty("x").GetInt32());
+        Assert.Equal("https://example.org", dock[1].GetProperty("target").GetString());
+    }
+
+    [Fact]
+    public void Dock_AnEntryInTheOlderShape_Loads_AndKeepsItsPropertiesThroughASave()
+    {
+        string path = Path.Combine(_dir, "urdeck-config.json");
+        File.WriteAllText(path, "{\"dock\":[{\"type\":\"app\",\"command\":\"notepad.exe\",\"url\":\"https://example.org\"}]}");
+        using (var store = new ConfigStore(path))
+        {
+            var entry = store.Config.Dock.Single();
+            Assert.Equal("", entry.WidgetTypeId);
+            store.Save();
+        }
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        var saved = doc.RootElement.GetProperty("dock")[0];
+        Assert.Equal("app", saved.GetProperty("type").GetString());
+        Assert.Equal("notepad.exe", saved.GetProperty("command").GetString());
+        Assert.Equal("https://example.org", saved.GetProperty("url").GetString());
+    }
+
+    [Fact]
+    public void Dock_AFifthEntry_StaysInTheFileThroughASave()
+    {
+        string path = Path.Combine(_dir, "urdeck-config.json");
+        string entries = string.Join(",", Enumerable.Range(1, 5).Select(i => $"{{\"typeId\":\"urdeck.widgets.shortcut\",\"target\":\"app{i}.exe\"}}"));
+        File.WriteAllText(path, "{\"dock\":[" + entries + "]}");
+        using (var store = new ConfigStore(path))
+        {
+            UrDeck.Engine.Layout.DockLayout.Select(store.Config.Dock, _ => null);
+            store.Save();
+        }
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        var dock = doc.RootElement.GetProperty("dock");
+        Assert.Equal(5, dock.GetArrayLength());
+        Assert.Equal("app5.exe", dock[4].GetProperty("target").GetString());
+    }
+
+    [Fact]
     public void LoadedWidget_RoundTripsGridFields()
     {
         string path = Path.Combine(_dir, "urdeck-config.json");

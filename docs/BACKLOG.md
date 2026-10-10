@@ -75,9 +75,14 @@ everything else should be fine on Sonnet.
   image tile, and the 1x1 shortcut widget (`urdeck.widgets.shortcut`) uses all of it. Spikes and measurements in
   `docs/perf/shortcut-and-tap.md`. The engine now makes network requests of its own (site icons; see the README's
   shortcut section). Gaps carried forward: scroll and long press routing, input for a hosted web view, the dock.
-- Next: the dock (item 10; `docs/handoff/2026-10-09-shortcut-and-dock.md`),
-  the 4x4 weather widget (forecast days, humidity and wind), then sensors that need elevation (item 3, fourth change).
-  See "Suggested order" below.
+- `dock` is implemented (2026-10-09, `openspec/changes/dock`; the checks on the panel passed): up to four
+  widgets in a band at the very bottom of the screen, the same on every page, with the page indicator directly above
+  it. A slot is a grid cell at a smaller size (the theme's `dock.height`, 0.71 of a cell), so any widget with a 1x1
+  size sits in it as a miniature and the dock has no drawing, press or launch code of its own. The `dock`
+  configuration field is now a list of widget objects. On the 1100x3840 panel the dock costs no row. Measurements in
+  `docs/perf/dock.md`.
+- Next: the 4x4 weather widget (forecast days, humidity and wind), then sensors that need elevation (item 3, fourth
+  change). See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -103,7 +108,7 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
    change (the 4x2 widget) is done; the 4x4 widget follows as the next weather change. It goes before the
    elevated-sensors change.
 4. **Pages and touch** (item 8; pages done in `pages-and-pager`, taps in `shortcut-and-tap`), then **shortcuts**
-   (item 7; done in `shortcut-and-tap`, which brought the image tile) and the **dock** (item 10; next).
+   (item 7; done in `shortcut-and-tap`, which brought the image tile) and the **dock** (item 10; done in `dock`).
 
 Display targeting (item 6) is a future change. Its draft is written against the WPF window, so rework it now that the
 new host has landed.
@@ -491,7 +496,8 @@ via a keyless API such as Open-Meteo; Meteocons (MIT, full-colour, Lottie) is a 
 **Status (2026-10-09):** pages, swipe, the indicator and the no-focus window are done (`pages-and-pager`). Taps are
 done (`shortcut-and-tap`): a widget opts in with `UrDeck.Sdk.Input.ITapTarget`, the host finds the widget under the
 pointer, shows the press from pointer-down with the theme's `press` values and delivers the tap on release; a swipe, a
-vertical drag and a long hold never tap. Still open: routing scrolls and a long press to widgets (further interfaces
+vertical drag and a long hold never tap. Taps and presses also reach the widgets of the dock (`dock`), which is asked
+before the page. Still open: routing scrolls and a long press to widgets (further interfaces
 beside `ITapTarget`; the recognizer already ends a vertical drag and a long hold without an event of their own),
 swiping over a web view, per-page backgrounds (item 9) and keyboard focus for a web view.
 
@@ -516,13 +522,22 @@ there measures a video background. The decoded-video layer built here is also wh
 
 Launcher bar for apps and URLs (the `dock` config field exists but is unused). **Model:** Sonnet.
 
-**Status (2026-10-09):** next, as its own change after `shortcut-and-tap`, which built everything a dock item needs
-(tap, press feedback, launching, icons, the image tile, the shortcut widget). Direction from that exploration: the dock
-is a fixed row of 1x1 widget slots in the bottom band, present on every page, so it needs no item type, drawing, press
-or launch code of its own; an entry of `dock` is a widget object, normally a shortcut. Still to decide: the slot size
-(a full grid cell, or a smaller one that fits the band the indicator uses), how the band shares the bottom of the
-screen with the page indicator, how many slots there are and what happens with more, and whether the dock's views
-live outside the pages so they are not rebuilt on a swipe. Handoff: `docs/handoff/2026-10-09-shortcut-and-dock.md`.
+**Status (2026-10-09):** implemented in `dock` (`openspec/changes/dock`; its `design.md` holds the decisions and the
+rejected alternatives). The owner checked it on the panel (`docs/perf/dock.md`). What was settled:
+
+- The dock is a second reserved band at the very bottom of the screen, below the page indicator's. It is reserved
+  whenever `dock` has an entry, and the indicator is the element that gives way (`auto` becomes `fade`).
+- Four equal, square slots, shown as one centred group. The slot's side is the band's height, the theme's
+  `dock.height` (0.71 of a cell: 195 pixels on the panel, which keeps all 13 rows).
+- An entry of `dock` is a widget object without a position, normally a shortcut. Any widget type with a 1x1 size can
+  sit in a slot: the theme is resolved a second time for the slot's size, so the card is a miniature drawn by the same
+  code, and the SDK did not change.
+- The dock's views live beside the indicator, outside the pages: they are built once per layout, do not move during a
+  swipe and keep their readings and icons across page changes.
+- Input: the indicator first, then the dock, then the page. A point in the dock's band that hits no card goes nowhere.
+
+Left out on purpose: more than four slots, a scrolling dock, a backdrop bar behind the slots, per-page docks, drag and
+drop (item 11).
 
 ## 11. WYSIWYG editor
 

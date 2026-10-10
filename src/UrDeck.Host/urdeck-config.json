@@ -36,18 +36,17 @@
           "width": 4,
           "height": 2,
           "location": "Tokyo"
-        },
-        {
-          "typeId": "urdeck.widgets.shortcut",
-          "col": 0,
-          "row": 8,
-          "target": "%USERPROFILE%"
         }
       ]
     }
   ],
   "activePage": 0,
-  "dock": [],
+  "dock": [
+    {
+      "typeId": "urdeck.widgets.shortcut",
+      "target": "%USERPROFILE%"
+    }
+  ],
   "theme": "default-dark",
   "monitorName": "tallest"
 }

@@ -300,6 +300,61 @@ public sealed class ThemeTests : IDisposable
     }
 
     [Fact]
+    public void EveryBuiltInTheme_HasADockHeight_ThatKeepsThePanelsThirteenRows()
+    {
+        foreach (string name in ThemeStore.BuiltInNames)
+        {
+            var definition = Store().Load(name).Definition;
+
+            Assert.Equal(0.71, definition.Dock!.Height);
+            var chrome = UrDeck.Engine.Layout.ChromeLayout.Compute(
+                new System.Drawing.Size(1100, 3840), UrDeck.Engine.Layout.IndicatorMode.Always, 2,
+                definition.Indicator!.BandHeight!.Value, definition.Dock.Height!.Value);
+            Assert.Equal(13, chrome.Rows);
+        }
+    }
+
+    [Fact]
+    public void AnOlderThemeWithoutADockHeight_TakesTheDefault_WithoutAWarning()
+    {
+        WriteTheme("old", """{ "colors": { "accent": "#ff00ff" } }""");
+
+        var loaded = Store().Load("old");
+
+        Assert.Equal(Store().Load("default-dark").Definition.Dock!.Height, loaded.Definition.Dock!.Height);
+        Assert.DoesNotContain("dock", Log);
+    }
+
+    [Fact]
+    public void AUserTheme_CanResizeTheDock()
+    {
+        WriteTheme("low", """{ "dock": { "height": 0.5 } }""");
+
+        var loaded = Store().Load("low");
+
+        Assert.Equal(0.5, loaded.Definition.Dock!.Height);
+        Assert.DoesNotContain("dock", Log);
+        // Half a cell of the 1100 pixel wide panel.
+        var chrome = UrDeck.Engine.Layout.ChromeLayout.Compute(
+            new System.Drawing.Size(1100, 3840), UrDeck.Engine.Layout.IndicatorMode.Off, 1, 0.25, loaded.Definition.Dock.Height!.Value);
+        Assert.Equal(138, chrome.Dock.Height);
+    }
+
+    [Theory]
+    [InlineData("3")]
+    [InlineData("0.1")]
+    [InlineData("-1")]
+    public void ADockHeightOutOfRange_FallsBackToTheDefault_WithAWarning(string value)
+    {
+        WriteTheme("wild", "{ \"dock\": { \"height\": " + value + " } }");
+
+        var loaded = Store().Load("wild");
+
+        Assert.Equal(Store().Load("default-dark").Definition.Dock!.Height, loaded.Definition.Dock!.Height);
+        Assert.Contains("dock.height", Log);
+    }
+
+    [Fact]
     public void Colours_CarryTransparency()
     {
         WriteTheme("glass", """{ "colors": { "cardFill": "#cc102030" } }""");

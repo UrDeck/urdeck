@@ -34,7 +34,7 @@ sdk/UrDeck.Sdk       MIT. The plugin contract: attributes, Widget<T>, WidgetConf
                      Gauge, ImageTile), Data (IDataProvider, readings, ReadingFormatter), Input (ITapTarget), Launch (LaunchTarget,
                      ILauncher), Icons (IIconSource)
 sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
-src/UrDeck.Engine     GPL. Plugin loader, config store, grid layout, gestures and hit testing, PageRenderer, ReadingHub (runs the
+src/UrDeck.Engine     GPL. Plugin loader, config store, grid and dock layout, gestures and hit testing, PageRenderer, ReadingHub (runs the
                       providers), per-widget WidgetServices, Launcher, IconService (shell, file and site icons), logging
 src/UrDeck.Host       GPL. WinUI 3 app: window/monitor placement, one SKXamlCanvas layer per widget
 providers/            GPL. First-party data provider plugins (UrDeck.Providers.System); reference only UrDeck.Sdk

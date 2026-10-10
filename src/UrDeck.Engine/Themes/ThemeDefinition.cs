@@ -20,6 +20,7 @@ public sealed partial class ThemeDefinition
     public ThemeGaugeDefinition? Gauge { get; set; }
     public ThemeIndicatorDefinition? Indicator { get; set; }
     public ThemePressDefinition? Press { get; set; }
+    public ThemeDockDefinition? Dock { get; set; }
 
     /// <summary>This definition's values, with anything it leaves out taken from <paramref name="baseline"/>.</summary>
     public ThemeDefinition MergeOver(ThemeDefinition baseline) => new()
@@ -31,6 +32,7 @@ public sealed partial class ThemeDefinition
         Gauge = (Gauge ?? new ThemeGaugeDefinition()).MergeOver(baseline.Gauge),
         Indicator = (Indicator ?? new ThemeIndicatorDefinition()).MergeOver(baseline.Indicator),
         Press = (Press ?? new ThemePressDefinition()).MergeOver(baseline.Press),
+        Dock = (Dock ?? new ThemeDockDefinition()).MergeOver(baseline.Dock),
     };
 
     /// <summary>Clears every invalid value (so a merge replaces it with the default's) and logs a warning for each.</summary>
@@ -99,6 +101,8 @@ public sealed partial class ThemeDefinition
             press.Scale = check.Number("press.scale", press.Scale, 0.5, 1);
             press.Opacity = check.Number("press.opacity", press.Opacity, 0.1, 1);
         }
+        if (Dock is { } dock)
+            dock.Height = check.Number("dock.height", dock.Height, 0.2, 1);
         if (Gauge is { Style: { } style } && !ThemeGaugeDefinition.IsStyle(style))
         {
             UrDeckLog.Warn($"Theme '{themeName}': gauge.style '{style}' must be 'ring', 'bar' or 'verticalBar'; using the default.");
@@ -288,5 +292,17 @@ public sealed class ThemePressDefinition
     {
         Scale = Scale ?? b?.Scale,
         Opacity = Opacity ?? b?.Opacity,
+    };
+}
+
+/// <summary>The dock's size, as a fraction of the grid cell.</summary>
+public sealed class ThemeDockDefinition
+{
+    /// <summary>Height of the band reserved for the dock, which is also the side of a dock slot; 0.2 to 1.</summary>
+    public double? Height { get; set; }
+
+    internal ThemeDockDefinition MergeOver(ThemeDockDefinition? b) => new()
+    {
+        Height = Height ?? b?.Height,
     };
 }

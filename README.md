@@ -6,9 +6,9 @@ It is a .NET 10 WinUI 3 application (unpackaged, self-contained Windows App SDK)
 
 ## Status
 
-Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places) and a 4x2 Weather widget with animated icons are in too. Verified on the real 1100x3840 panel. Taps reach widgets, and a Shortcut widget shows the icon of an application, a folder or a web address and opens it on tap.
+Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places) and a 4x2 Weather widget with animated icons are in too. Verified on the real 1100x3840 panel. Taps reach widgets, and a Shortcut widget shows the icon of an application, a folder or a web address and opens it on tap. A dock at the bottom of the screen keeps up to four widgets, normally shortcuts, in the same place on every page.
 
-Not done yet: an editor UI, the other widgets (the 4x4 weather widget, the dock), sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
+Not done yet: an editor UI, the other widgets (the 4x4 weather widget), sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
 
 ## Requirements
 
@@ -56,11 +56,47 @@ to that page. The `pager.indicator` setting chooses how it shows:
   space left over under them.
 
 A widget that no longer fits in the rows that remain is not placed, and an error is written to `urdeck.log`. The look of
-the indicator is part of the theme (`indicator`, see `docs/themes.md`).
+the indicator is part of the theme (`indicator`, see `docs/themes.md`). With a dock (below) the indicator sits directly
+above it: its band in the `always` mode, and the floating pill of the `fade` mode.
+
+### Dock
+
+The dock is a row of up to four widgets at the very bottom of the screen that is the same on every page, for the
+things you reach for most. It does not move while a page slides, and its widgets stay alive when the page changes. It
+is the `dock` list of `urdeck-config.json`. An entry is a widget object like the ones on a page, without a position:
+its place is its index in the list, the first at the left.
+
+```json
+{
+  "dock": [
+    { "typeId": "urdeck.widgets.shortcut", "target": "C:\\Program Files (x86)\\Steam\\steam.exe" },
+    { "typeId": "urdeck.widgets.shortcut", "target": "shell:AppsFolder\\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App" },
+    { "typeId": "urdeck.widgets.shortcut", "target": "%USERPROFILE%\\Documents" },
+    { "typeId": "urdeck.widgets.shortcut", "target": "https://example.com" }
+  ]
+}
+```
+
+- **Four slots.** The entries are shown as one group, centred, as wide as the number of entries. Entries after the
+  fourth are ignored with a warning in `urdeck.log`; they stay in the file.
+- **Any widget that supports the size 1x1 can sit in a slot**: a shortcut, and also a clock or a single stat. A slot
+  is a grid cell at a smaller size (0.71 of a cell with the built-in themes; `dock.height` in the theme, see
+  `docs/themes.md`), and the theme is applied at that size, so the card is a miniature of the widget's 1x1 card with
+  its corners, padding and text in proportion. `col`, `row`, `width` and `height` on an entry are ignored. A widget
+  type that has no 1x1 size, or a `typeId` that is not installed, leaves its slot empty with a warning in the log; an
+  entry with `"isVisible": false` leaves it empty too.
+- **Taps work as on a page**: a shortcut in the dock shows the press and opens its target. A swipe that starts on the
+  dock changes the page; the dock stays.
+- **Space.** From the bottom of the screen upwards the order is: dock, page indicator, widget grid. The dock is
+  reserved whenever `dock` has an entry. On the 1100x3840 panel the dock and the indicator's band fit in the space left
+  over under the thirteenth row, so no row is lost. On a display without that spare space the dock takes a row: a
+  widget in a row that is gone is not placed and an error is written to the log, and an `auto` indicator floats above
+  the dock (`fade`) when fewer than four rows would remain beside its band.
+- With `dock` empty or absent there is no dock and nothing is reserved for it.
 
 ### Snapshots
 
-`--snapshot` renders the active page off-screen with the same layout and widget code as the live window, writes a PNG and exits (no window is shown):
+`--snapshot` renders the active page and the dock off-screen with the same layout and widget code as the live window, writes a PNG and exits (no window is shown):
 
 ```powershell
 dotnet run --project src/UrDeck.Host -c Release -- --snapshot out.png --size 1100x3840
@@ -108,7 +144,7 @@ Config is `urdeck-config.json`, located next to the executable (`src/UrDeck.Host
 | `monitor` | 1-based monitor index, used when `monitorName` matches nothing. Falls back to the primary monitor. |
 | `theme` | Name of the theme: `default-dark` (default), `default-light`, `glass`, or a folder under `themes/` next to the executable. See [docs/themes.md](docs/themes.md). Unknown names fall back to the default with a warning; changing it applies on config reload without a restart. |
 | `providers` | Optional settings per data provider, keyed by provider id: `"providers": { "system": { "intervalMs": 500 } }` samples the `system` provider every 500 ms instead of its default 2000 ms. A value below the provider's minimum (250 ms for `system`) is raised to it and logged. Applies on config reload without a restart. Absent by default; other properties are kept in the file. |
-| `dock` | Stored but not used yet. |
+| `dock` | The widgets of the dock, up to four, in slot order: widget objects like those of a page, without `col` and `row`. Absent or empty: no dock. See [Dock](#dock). Applies on config reload without a restart, and widget-specific settings are kept in the file. |
 
 ### Stats widget
 
@@ -279,7 +315,7 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 |---|---|
 | `sdk/UrDeck.Sdk` | Plugin SDK (`net10.0`, MIT): attributes, `Widget<TConfig>`, `IWidget`, `WidgetConfig`, render context, `Theme`, the `Readout` / `TextLine` / `Gauge` / `ImageTile` components, tap input (`UrDeck.Sdk.Input`), launch targets and the launch and icon services (`UrDeck.Sdk.Launch`, `UrDeck.Sdk.Icons`), and the data provider contract and reading formatter (`UrDeck.Sdk.Data`) |
 | `sdk/UrDeck.Analyzer` | Roslyn analyzer (`netstandard2.0`, MIT) reporting URDECK001-005 |
-| `src/UrDeck.Engine` | Plugin loader, config store, grid layout, gesture recognition and hit testing, `PageRenderer`, the reading hub that runs the data providers, the launcher and the icon service |
+| `src/UrDeck.Engine` | Plugin loader, config store, grid and dock layout, gesture recognition and hit testing, `PageRenderer`, the reading hub that runs the data providers, the launcher and the icon service |
 | `src/UrDeck.Host` | WinUI 3 application (`net10.0-windows10.0.19041.0`): window and monitor placement, one `SKXamlCanvas` layer per widget |
 | `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather` | First-party data providers: `system` (CPU, memory and GPU readings) and `weather` (Open-Meteo, any number of places) |
 | `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather`, `widgets/UrDeck.Widgets.Shortcut` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`), Weather (`urdeck.widgets.weather`) and Shortcut (`urdeck.widgets.shortcut`) |

@@ -12,7 +12,7 @@ using UrDeck.Sdk;
 namespace UrDeck.Host;
 
 /// <summary>
-/// The widgets of one page: a canvas of <see cref="WidgetView"/>s, owning its reading-to-view map. Disposing it releases
+/// The widgets of one page, or of the dock: a canvas of <see cref="WidgetView"/>s, owning its reading-to-view map. Disposing it releases
 /// every view (readings unsubscribed, frame-clock entries removed), so a page that is not shown costs nothing.
 /// </summary>
 internal sealed class PageHost : Canvas, IDisposable
@@ -78,6 +78,9 @@ internal sealed class PageHost : Canvas, IDisposable
             }
         }
     }
+
+    /// <summary>How many widgets are shown.</summary>
+    public int ViewCount => _views.Count;
 
     /// <summary>The views that declared <paramref name="reading"/>.</summary>
     public IReadOnlyList<WidgetView> ViewsFor(string reading) =>

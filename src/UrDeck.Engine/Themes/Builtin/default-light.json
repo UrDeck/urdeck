@@ -19,5 +19,8 @@
   "press": {
     "scale": 0.96,
     "opacity": 0.85
+  },
+  "dock": {
+    "height": 0.71
   }
 }
