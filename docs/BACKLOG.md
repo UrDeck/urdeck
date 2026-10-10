@@ -75,7 +75,7 @@ everything else should be fine on Sonnet.
   image tile, and the 1x1 shortcut widget (`urdeck.widgets.shortcut`) uses all of it. Spikes and measurements in
   `docs/perf/shortcut-and-tap.md`. The engine now makes network requests of its own (site icons; see the README's
   shortcut section). Gaps carried forward: scroll and long press routing, input for a hosted web view, the dock.
-- `dock` is implemented (2026-10-09, `openspec/changes/dock`; the checks on the panel passed): up to four
+- `dock` is implemented (2026-10-09, archived as `openspec/changes/archive/2026-10-09-dock`; the checks on the panel passed): up to four
   widgets in a band at the very bottom of the screen, the same on every page, with the page indicator directly above
   it. A slot is a grid cell at a smaller size (the theme's `dock.height`, 0.71 of a cell), so any widget with a 1x1
   size sits in it as a miniature and the dock has no drawing, press or launch code of its own. The `dock`
@@ -522,7 +522,7 @@ there measures a video background. The decoded-video layer built here is also wh
 
 Launcher bar for apps and URLs (the `dock` config field exists but is unused). **Model:** Sonnet.
 
-**Status (2026-10-09):** implemented in `dock` (`openspec/changes/dock`; its `design.md` holds the decisions and the
+**Status (2026-10-09):** implemented and archived in `dock` (`openspec/changes/archive/2026-10-09-dock`; its `design.md` holds the decisions and the
 rejected alternatives). The owner checked it on the panel (`docs/perf/dock.md`). What was settled:
 
 - The dock is a second reserved band at the very bottom of the screen, below the page indicator's. It is reserved
