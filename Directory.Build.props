@@ -26,9 +26,15 @@
     <!-- Required for IDE0005 (unused usings) to run during build; missing-XML-doc warnings stay off. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- NuGet vulnerability audit of direct and transitive packages. With TreatWarningsAsErrors a known-vulnerable
+         package (NU1901-NU1904) fails the build. -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
   </PropertyGroup>
 
-  <!-- Test projects: xunit v2 on the Windows TFM (they reference WPF-adjacent assemblies) and never packed. -->
+  <!-- Test projects: xunit v3 on the Windows TFM (they reference WPF-adjacent assemblies) and never packed. -->
   <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
     <TargetFramework>$(UrDeckWindowsTfm)</TargetFramework>
     <IsPackable>false</IsPackable>

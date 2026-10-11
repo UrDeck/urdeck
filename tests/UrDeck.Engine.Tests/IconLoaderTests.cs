@@ -138,7 +138,7 @@ public class StaWorkerTests
             done.Set();
         });
 
-        Assert.True(done.Wait(5000));
+        Assert.True(done.Wait(5000, TestContext.Current.CancellationToken));
         Assert.Equal(ApartmentState.STA, apartment);
         Assert.Equal(first, second);
         Assert.True(TestImages.WaitFor(() => !worker.IsRunning), "the worker thread did not end after it went idle");
@@ -154,7 +154,7 @@ public class StaWorkerTests
 
         Assert.True(worker.Post(done.Set));
 
-        Assert.True(done.Wait(5000));
+        Assert.True(done.Wait(5000, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -163,7 +163,7 @@ public class StaWorkerTests
         var worker = new StaWorker(TimeSpan.FromSeconds(30));
         using var done = new ManualResetEventSlim();
         worker.Post(done.Set);
-        Assert.True(done.Wait(5000));
+        Assert.True(done.Wait(5000, TestContext.Current.CancellationToken));
 
         worker.Dispose();
 

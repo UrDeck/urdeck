@@ -44,6 +44,9 @@ force pushes or deletion, squash merges only.
 - Shared MSBuild settings are in `Directory.Build.props`; package versions are only in `Directory.Packages.props`.
 - Tests: xUnit in `tests/`. `UrDeck.Engine` has a line-coverage floor (currently 65%, enforced in CI; raise it when
   coverage improves, never lower it to make a PR pass).
+- Dependencies are scanned for known vulnerabilities three ways: NuGet audit fails the build (`NuGetAudit` in
+  `Directory.Build.props`), and `.github/workflows/security.yml` runs dependency review (vulnerabilities and licenses on
+  PRs), OSV-Scanner and CodeQL. `dotnet test` runs on Microsoft.Testing.Platform (xUnit v3), selected in `global.json`.
 - New files get the license header automatically via `dotnet format`.
 - Comments explain why, not what. Match the surrounding code.
 
