@@ -6,9 +6,9 @@ It is a .NET 10 WinUI 3 application (unpackaged, self-contained Windows App SDK)
 
 ## Status
 
-Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places) and a 4x2 Weather widget with animated icons are in too. Verified on the real 1100x3840 panel. Taps reach widgets, and a Shortcut widget shows the icon of an application, a folder or a web address and opens it on tap. A dock at the bottom of the screen keeps up to four widgets, normally shortcuts, in the same place on every page.
+Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places, seven forecast days) and a Weather widget with animated icons, at 4x2 and at 4x4 with the forecast, are in too. Verified on the real 1100x3840 panel. Taps reach widgets, and a Shortcut widget shows the icon of an application, a folder or a web address and opens it on tap. A dock at the bottom of the screen keeps up to four widgets, normally shortcuts, in the same place on every page.
 
-Not done yet: an editor UI, the other widgets (the 4x4 weather widget), sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
+Not done yet: an editor UI, the other widgets, sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
 
 ## Requirements
 
@@ -212,11 +212,15 @@ Grid math: `ColumnWidth = screenWidth / 4` and `RowHeight = ColumnWidth`, so on 
 ### Weather widget
 
 `urdeck.widgets.weather` is a 4x2 card with an animated colour icon (day and night variants), the temperature, the
-condition in words, today's high and low, the place, and sunrise and sunset in the place's own local time. It takes its
-data from the `weather` provider and needs no provider setting: the place is typed into the widget.
+condition in words, today's high and low, the place, and sunrise and sunset in the place's own local time. At 4x4 the
+same card sits on top of a forecast: a line of what it feels like, the humidity and the wind (`14 mph NW`), the snow
+expected over the days shown, and one column per day with the weekday, an icon, high and low, the chance of
+precipitation, and the rain and snow expected (an amount appears only on a day that has one). It takes its data from the
+`weather` provider and needs no provider setting: the place is typed into the widget.
 
 ```json
 { "typeId": "urdeck.widgets.weather", "col": 0, "row": 0, "width": 4, "height": 2, "location": "Portland, OR" }
+{ "typeId": "urdeck.widgets.weather", "col": 0, "row": 2, "width": 4, "height": 4, "location": "Portland, OR", "unit": "fahrenheit", "days": 5 }
 ```
 
 | Setting | Meaning |
@@ -224,9 +228,11 @@ data from the `weather` provider and needs no provider setting: the place is typ
 | `location` | The place, as text: a city (`Zurich`), `City, ST` (`Portland, OR`), `City, State` (`Portland, Oregon`), a postal code (`90210`), optionally with a country code after a comma (`Paris, FR`). It is looked up with Open-Meteo's geocoding, once per run, and the first match is used; `urdeck.log` lists the other matches, so an ambiguous name (`Springfield`) can be fixed by adding a state or by giving coordinates. No default: with none the card shows dashes. |
 | `latitude`, `longitude` | Decimal degrees. When both are set they replace `location` and no search is made. |
 | `label` | Absent: the place's resolved name (`Portland, Oregon`). A text: shown instead. `""`: no place is shown. |
-| `unit` | `celsius` or `fahrenheit`. Absent: the region's. |
+| `unit` | `celsius` or `fahrenheit`. Absent: the region's. It chooses the system of the whole card: Celsius is kilometres per hour, millimetres and centimetres, Fahrenheit is miles per hour and inches. |
 | `motion` | `periodic` (the default) plays the icon's loop once a minute and rests on its first frame in between; `full` loops it all the time; `off` shows only the first frame. Any other value counts as `periodic`. The icon animates at 15 frames a second. |
 | `periodSeconds` | Seconds between loops in the `periodic` mode (default 60; never less than a loop and a second). |
+| `days` | 4x4 only: how many forecast days to show, 1 to 7 (default 5; a number outside the range is the nearest end, and a value that is not a number counts as absent). The snow total covers the days shown. At 4x2 it has no effect and stays in the file. |
+| `animateForecast` | 4x4 only: `true` lets the forecast icons move as `motion` says, in step with the main icon; absent or `false` shows them as still pictures. Each moving icon costs about 2.7 MB of memory and repaints with the main icon, so it is off by default; `motion: off` always wins. |
 
 Any number of weather cards can show different places on one page; two cards with the same place share one request. The
 widget never costs anything on a page without it: the provider starts with the first weather reading and stops five
@@ -243,12 +249,22 @@ for a `%` in a place name), can also be shown by a stats slot:
 | `current/temperature`, `current/apparent` | Air temperature now, and what it feels like (degrees Celsius; the region or the slot's `unit` decides the display unit) |
 | `current/condition` | `clear`, `partly-cloudy`, `cloudy`, `fog`, `drizzle`, `rain`, `sleet`, `snow`, `thunder` or `unknown` |
 | `current/is-day` | Whether the sun is up at the place |
-| `today/high`, `today/low` | Today's extremes at the place |
-| `today/sunrise`, `today/sunset` | A time in the place's own zone, shown in the region's 12 or 24 hour clock; unavailable where the sun does not rise or set |
+| `current/humidity` | Relative humidity, in percent |
+| `current/wind-speed`, `current/wind-direction` | Wind speed (kilometres per hour; shown as mph or km/h) and the bearing it blows from, in degrees (0 to 360) |
+| `daily/N/date` | The start of day `N` at the place (`0` is today, up to `6`), shown as a weekday by default |
+| `daily/N/condition`, `daily/N/high`, `daily/N/low` | That day's condition class and extremes |
+| `daily/N/sunrise`, `daily/N/sunset` | A time in the place's own zone, shown in the region's 12 or 24 hour clock; unavailable where the sun does not rise or set |
+| `daily/N/precip-chance` | The chance of precipitation that day, in percent |
+| `daily/N/rain`, `daily/N/snow` | The rain (millimetres) and fresh snow (centimetres) expected that day; shown in inches for imperial units, and a positive amount under 0.1 inch as `<0.1"`; a day with none is `0` |
 
 ```json
 { "typeId": "urdeck.widgets.stats", "col": 0, "row": 2, "slots": [ { "reading": "weather:Tokyo/current/temperature", "label": "Tokyo" } ] }
 ```
+
+**Breaking:** `today/high`, `today/low`, `today/sunrise` and `today/sunset` are now `daily/0/high`, `daily/0/low`,
+`daily/0/sunrise` and `daily/0/sunset`; a stats slot that names the old ids must be rewritten. Rain and snow are model
+forecasts, not measurements: they are as uncertain as the weather, and the snow total adds up what the model says for each
+shown day. A day whose snow is missing makes the total a dash rather than a partial sum.
 
 Weather data is by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), and every card that shows it draws the credit
 "Weather data by Open-Meteo.com"; the stats widget draws it too, and no setting hides it. Open-Meteo's free service is for

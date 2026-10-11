@@ -283,9 +283,12 @@ public sealed class ExampleProvider : IDataProvider
   the same id the first by file name is kept and the other is rejected with a warning that names both. A reading is
   addressed as `<provider id>:<path>`; the path is yours (`cpu/core/2/load`). Keep paths stable and portable (the same
   path on every machine), because users write them into their config.
-- **Catalog.** `Describe()` lists every reading with its kind (`Number`, `Percent`, `Temperature`, `Text`, `OnOff`), a short
+- **Catalog.** `Describe()` lists every reading with its kind (`Number`, `Percent`, `Temperature`, `Text`, `OnOff`, `Time`, `Date`, `Speed`, `Depth`), a short
   label, a full name, and optionally a device, a range, a unit text for plain numbers, a default display unit and
-  decimals. The range is what keeps a readout the same size while the value changes. `Warning` and `Critical` say from
+  decimals. A `Depth` reading (rainfall, snowfall) declares the unit its value is reported in (`DepthUnit`, millimetres
+  when absent), and the formatter converts it for display; a `Speed` is reported in kilometres per hour. A widget's
+  `unit` setting (`celsius` or `fahrenheit`, passed as `ReadingFormatOptions.DisplayUnit`) names the metric or imperial
+  system for temperatures, speeds and depths together. A `Date` is a time value shown as a day. The range is what keeps a readout the same size while the value changes. `Warning` and `Critical` say from
   which value (canonical unit) the reading deserves attention; declare them only where a high value is a fault (a
   temperature), never for a load, and a gauge colours itself by them. It is called once, before `Start`, and
   must not need `Start`. The catalog is fixed while the provider runs.

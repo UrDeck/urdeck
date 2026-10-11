@@ -69,10 +69,10 @@ public sealed class WeatherWidgetTests : IDisposable
         ("current/temperature", ReadingKind.Temperature, "Now", "Temperature"),
         ("current/condition", ReadingKind.Text, "Condition", "Weather condition"),
         ("current/is-day", ReadingKind.OnOff, "Daytime", "Is daytime"),
-        ("today/high", ReadingKind.Temperature, "High", "Today's high"),
-        ("today/low", ReadingKind.Temperature, "Low", "Today's low"),
-        ("today/sunrise", ReadingKind.Time, "Sunrise", "Sunrise"),
-        ("today/sunset", ReadingKind.Time, "Sunset", "Sunset"),
+        ("daily/0/high", ReadingKind.Temperature, "High", "Today's high"),
+        ("daily/0/low", ReadingKind.Temperature, "Low", "Today's low"),
+        ("daily/0/sunrise", ReadingKind.Time, "Sunrise", "Sunrise"),
+        ("daily/0/sunset", ReadingKind.Time, "Sunset", "Sunset"),
     ];
 
     /// <summary>Describes the readings of a place (as the weather provider's catalog does) and gives them values.</summary>
@@ -92,10 +92,10 @@ public sealed class WeatherWidgetTests : IDisposable
         Set(location, "current/temperature", Reading.Ok(temperature));
         Set(location, "current/condition", Reading.Ok(condition));
         Set(location, "current/is-day", Reading.Ok(day));
-        Set(location, "today/high", Reading.Ok(temperature + 3));
-        Set(location, "today/low", Reading.Ok(temperature - 5));
-        Set(location, "today/sunrise", Reading.Ok(new DateTimeOffset(2026, 10, 8, 6, 42, 0, TimeSpan.FromHours(-7))));
-        Set(location, "today/sunset", Reading.Ok(new DateTimeOffset(2026, 10, 8, 19, 3, 0, TimeSpan.FromHours(-7))));
+        Set(location, "daily/0/high", Reading.Ok(temperature + 3));
+        Set(location, "daily/0/low", Reading.Ok(temperature - 5));
+        Set(location, "daily/0/sunrise", Reading.Ok(new DateTimeOffset(2026, 10, 8, 6, 42, 0, TimeSpan.FromHours(-7))));
+        Set(location, "daily/0/sunset", Reading.Ok(new DateTimeOffset(2026, 10, 8, 19, 3, 0, TimeSpan.FromHours(-7))));
     }
 
     private void Set(string location, string path, Reading reading) => _source.Readings[Id(location, path)] = reading;
@@ -151,12 +151,12 @@ public sealed class WeatherWidgetTests : IDisposable
     // Identity and configuration
 
     [Fact]
-    public void ItIsTheWeatherWidget_At4x2Only_RefreshedByDataOnly()
+    public void ItIsTheWeatherWidget_At4x2And4x4_RefreshedByDataOnly()
     {
         var descriptor = WidgetDescriptor.TryCreate(typeof(WeatherWidget), out _)!;
 
         Assert.Equal("urdeck.widgets.weather", descriptor.Id);
-        Assert.Equal([new System.Drawing.Size(4, 2)], descriptor.SupportedSizes);
+        Assert.Equal([new System.Drawing.Size(4, 2), new System.Drawing.Size(4, 4)], descriptor.SupportedSizes);
         Assert.Equal(RefreshStrategy.OnData, descriptor.Refresh);
         Assert.Null(descriptor.RefreshInterval);
     }
@@ -169,8 +169,8 @@ public sealed class WeatherWidgetTests : IDisposable
         Assert.Equal(
             [
                 "weather:Portland, OR/place", "weather:Portland, OR/current/temperature", "weather:Portland, OR/current/condition",
-                "weather:Portland, OR/current/is-day", "weather:Portland, OR/today/high", "weather:Portland, OR/today/low",
-                "weather:Portland, OR/today/sunrise", "weather:Portland, OR/today/sunset",
+                "weather:Portland, OR/current/is-day", "weather:Portland, OR/daily/0/high", "weather:Portland, OR/daily/0/low",
+                "weather:Portland, OR/daily/0/sunrise", "weather:Portland, OR/daily/0/sunset",
             ],
             widget.Subscriptions);
     }
@@ -294,8 +294,8 @@ public sealed class WeatherWidgetTests : IDisposable
         Fill("Portland, OR", temperature: 22.7778);
         using SKBitmap converted = Paint(Widget(configure: c => c.Unit = "fahrenheit"));
         Fill("Portland, OR", temperature: 73);
-        Set("Portland, OR", "today/high", Reading.Ok(78));
-        Set("Portland, OR", "today/low", Reading.Ok(64));
+        Set("Portland, OR", "daily/0/high", Reading.Ok(78));
+        Set("Portland, OR", "daily/0/low", Reading.Ok(64));
         using SKBitmap plain = Paint(Widget(configure: c => c.Unit = "celsius"));
 
         Assert.True(Same(converted, plain));

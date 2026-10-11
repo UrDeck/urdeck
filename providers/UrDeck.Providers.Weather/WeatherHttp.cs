@@ -74,15 +74,15 @@ internal sealed class GeocodingClient(IWeatherHttp http)
     }
 }
 
-/// <summary>Asks Open-Meteo for the current conditions and today's values of several places in one request.</summary>
+/// <summary>Asks Open-Meteo for the current conditions and the seven days from today of several places in one request.</summary>
 internal sealed class ForecastClient(IWeatherHttp http)
 {
     private const string Endpoint = "https://api.open-meteo.com/v1/forecast";
 
     private const string Query =
-        "current=temperature_2m,apparent_temperature,is_day,weather_code"
-        + "&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset"
-        + "&timezone=auto&forecast_days=1&timeformat=unixtime";
+        "current=temperature_2m,apparent_temperature,is_day,weather_code,relative_humidity_2m,wind_speed_10m,wind_direction_10m"
+        + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,rain_sum,showers_sum,snowfall_sum"
+        + "&timezone=auto&forecast_days=7&timeformat=unixtime";
 
     /// <summary>One answer per place, in the order given.</summary>
     public async Task<PlaceWeather[]> FetchAsync(IReadOnlyList<Place> places, CancellationToken cancellationToken)

@@ -107,3 +107,27 @@ real Open-Meteo answers (Zurich, Tokyo, Portland).
   timer, and the frame clock stops in between). Same method, three cards: `full` now costs 4.3% of a core and 5.2% GPU
   (was 7.4% and 10.6%), and `periodic` at rest costs 0% CPU and 0% GPU, about 0.4% CPU averaged over a minute with the loop.
 - These are short samples, not a benchmark.
+
+## Cost of the 4x4 card (`weather-4x4-forecast`)
+
+Measured on 2026-10-11 on the owner's PC, same method as above but a 60 s window (ten GPU samples, 6 s apart) after 15 s
+of warm-up, one weather card alone on the page (Portland, OR, 5 days, imperial), default dark theme, Release build.
+Single runs, not a benchmark.
+
+| Card | `motion` | `animateForecast` | Private bytes | Working set | CPU, % of one core | GPU |
+|---|---|---|---|---|---|---|
+| 4x2 | full | n/a | 112 MB | 160 MB | 2.84% | 1.6% |
+| 4x2 | periodic | n/a | 105 MB | 153 MB | 0.36% | 0.2% |
+| 4x4 | periodic | off | 113 MB | 160 MB | 0.39% | 0.3% |
+| 4x4 | full | off | 129 MB | 177 MB | 3.18% | 3.1% |
+| 4x4 | periodic | on | 113 MB | 159 MB | 0.31% | 0.3% |
+| 4x4 | full | on | 129 MB | 177 MB | 1.95% | 3.1% |
+
+- With the default `periodic` motion the 4x4 card costs about what the 4x2 does (0.4% of a core, 0.3% GPU), so the forecast
+  panel is not cached.
+- With `motion: full` the 4x4 costs about the same CPU as the 4x2 (3.2% against 2.8%) and twice the GPU (3.1% against 1.6%),
+  since the whole, larger card repaints at 15 frames a second.
+- The `animateForecast: on` rows show no extra memory over the still ones, although about 2.7 MB per loaded animation was
+  expected. The owner confirmed on the panel that the forecast icons do move with the setting on, so the figures stand as
+  measured: the still posters and the loaded animations cost about the same here, and the difference is within the noise of
+  a single run.

@@ -18,6 +18,31 @@ public enum ReadingKind
     OnOff,
     /// <summary>An instant with the UTC offset it is read in; shown as the time of day.</summary>
     Time,
+    /// <summary>An instant with the UTC offset it is read in; shown as the day (a weekday, or the month and day).</summary>
+    Date,
+    /// <summary>A speed in kilometres per hour; the formatter converts for display.</summary>
+    Speed,
+    /// <summary>
+    /// An amount of precipitation. The descriptor declares the canonical unit (<see cref="ReadingDescriptor.DepthUnit"/>);
+    /// the formatter converts for display.
+    /// </summary>
+    Depth,
+}
+
+/// <summary>The unit a <see cref="ReadingKind.Depth"/> reading is reported in.</summary>
+public enum DepthUnit
+{
+    Millimetre,
+    Centimetre,
+}
+
+/// <summary>How a <see cref="ReadingKind.Date"/> is shown.</summary>
+public enum DateStyle
+{
+    /// <summary>The abbreviated weekday, for example <c>Wed</c>.</summary>
+    Weekday,
+    /// <summary>The abbreviated month and the day, ordered as the region orders them, for example <c>Oct 14</c>.</summary>
+    MonthDay,
 }
 
 /// <summary>Where a reading stands. See the data-providers spec, "Reading States".</summary>

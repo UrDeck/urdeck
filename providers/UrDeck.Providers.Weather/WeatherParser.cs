@@ -12,8 +12,29 @@ namespace UrDeck.Providers.Weather;
 internal sealed record Place(string Name, double Latitude, double Longitude);
 
 /// <summary>
-/// What the forecast service says about one place today; a value the answer did not hold is null. <c>UtcOffset</c> is in
-/// whole minutes, <c>Sunrise</c> and <c>Sunset</c> are Unix seconds (null when the sun does not rise or set that day).
+/// What the forecast service says about one forecast day; a value the answer did not hold is null. <c>Date</c>,
+/// <c>Sunrise</c> and <c>Sunset</c> are Unix seconds (<c>Date</c> is the start of the day at the place; a sunrise or
+/// sunset is null when the sun does not rise or set that day). Rain is in millimetres and snow in centimetres, as sent.
+/// </summary>
+internal sealed record DayWeather(
+    long? Date,
+    int? WeatherCode,
+    double? High,
+    double? Low,
+    long? Sunrise,
+    long? Sunset,
+    double? PrecipChance,
+    double? RainSum,
+    double? ShowersSum,
+    double? Snow)
+{
+    /// <summary>The liquid that falls as rain or showers; null when the source supplied neither.</summary>
+    public double? Rain => RainSum is null && ShowersSum is null ? null : (RainSum ?? 0) + (ShowersSum ?? 0);
+}
+
+/// <summary>
+/// What the forecast service says about one place: the conditions now and up to <see cref="WeatherParser.MaxDays"/> days
+/// from today; a value the answer did not hold is null. <c>UtcOffset</c> is in whole minutes.
 /// </summary>
 internal sealed record PlaceWeather(
     TimeSpan UtcOffset,
@@ -21,14 +42,17 @@ internal sealed record PlaceWeather(
     double? Apparent,
     bool? IsDay,
     int? WeatherCode,
-    double? High,
-    double? Low,
-    long? Sunrise,
-    long? Sunset);
+    double? Humidity,
+    double? WindSpeed,
+    double? WindDirection,
+    IReadOnlyList<DayWeather> Days);
 
 /// <summary>Reads the services' JSON answers. Anything that is not what the service documents throws.</summary>
 internal static class WeatherParser
 {
+    /// <summary>The days of the forecast the provider offers (today and six more).</summary>
+    public const int MaxDays = 7;
+
     /// <summary>The places of a geocoding answer, best match first; none when nothing matched (the answer has no <c>results</c>).</summary>
     public static IReadOnlyList<Place> ParseGeocoding(string json)
     {
@@ -89,7 +113,7 @@ internal static class WeatherParser
         double offsetSeconds = Number(item, "utc_offset_seconds") ?? 0;
         var offset = TimeSpan.FromMinutes(Math.Round(offsetSeconds / 60));
 
-        double? temperature = null, apparent = null;
+        double? temperature = null, apparent = null, humidity = null, windSpeed = null, windDirection = null;
         bool? isDay = null;
         int? code = null;
         if (item.TryGetProperty("current", out JsonElement current) && current.ValueKind == JsonValueKind.Object)
@@ -98,20 +122,54 @@ internal static class WeatherParser
             apparent = Number(current, "apparent_temperature");
             isDay = Number(current, "is_day") is { } day ? day != 0 : null;
             code = Number(current, "weather_code") is { } weather ? (int)weather : null;
+            humidity = Number(current, "relative_humidity_2m");
+            windSpeed = Number(current, "wind_speed_10m");
+            windDirection = Number(current, "wind_direction_10m");
         }
 
-        double? high = null, low = null;
-        long? sunrise = null, sunset = null;
+        DayWeather[] days = [];
         if (item.TryGetProperty("daily", out JsonElement daily) && daily.ValueKind == JsonValueKind.Object)
+            days = ParseDays(daily);
+
+        return new PlaceWeather(offset, temperature, apparent, isDay, code, humidity, windSpeed, windDirection, days);
+    }
+
+    // The days run as long as the longest array says, up to seven; a day or a field the answer lacks is null.
+    private static DayWeather[] ParseDays(JsonElement daily)
+    {
+        string[] names =
+        [
+            "time", "weather_code", "temperature_2m_max", "temperature_2m_min", "sunrise", "sunset",
+            "precipitation_probability_max", "rain_sum", "showers_sum", "snowfall_sum",
+        ];
+        int count = 0;
+        foreach (string name in names)
         {
-            high = First(daily, "temperature_2m_max");
-            low = First(daily, "temperature_2m_min");
-            sunrise = First(daily, "sunrise") is { } rise ? (long)rise : null;
-            sunset = First(daily, "sunset") is { } set ? (long)set : null;
+            if (daily.TryGetProperty(name, out JsonElement array) && array.ValueKind == JsonValueKind.Array)
+                count = Math.Max(count, array.GetArrayLength());
         }
 
-        return new PlaceWeather(offset, temperature, apparent, isDay, code, high, low, sunrise, sunset);
+        count = Math.Min(count, MaxDays);
+        var days = new DayWeather[count];
+        for (int i = 0; i < count; i++)
+        {
+            days[i] = new DayWeather(
+                Whole(At(daily, "time", i)),
+                At(daily, "weather_code", i) is { } weather ? (int)weather : null,
+                At(daily, "temperature_2m_max", i),
+                At(daily, "temperature_2m_min", i),
+                Whole(At(daily, "sunrise", i)),
+                Whole(At(daily, "sunset", i)),
+                At(daily, "precipitation_probability_max", i),
+                At(daily, "rain_sum", i),
+                At(daily, "showers_sum", i),
+                At(daily, "snowfall_sum", i));
+        }
+
+        return days;
     }
+
+    private static long? Whole(double? number) => number is { } value ? (long)value : null;
 
     private static void ThrowIfError(JsonElement element)
     {
@@ -125,12 +183,12 @@ internal static class WeatherParser
     private static double? Number(JsonElement element, string name) =>
         element.TryGetProperty(name, out JsonElement value) && value.ValueKind == JsonValueKind.Number ? value.GetDouble() : null;
 
-    /// <summary>The first entry of an array property (today's value); null when it is missing, empty or null.</summary>
-    private static double? First(JsonElement element, string name)
+    /// <summary>The entry at an index of an array property; null when the array or the entry is missing or null.</summary>
+    private static double? At(JsonElement element, string name, int index)
     {
-        if (!element.TryGetProperty(name, out JsonElement array) || array.ValueKind != JsonValueKind.Array || array.GetArrayLength() == 0)
+        if (!element.TryGetProperty(name, out JsonElement array) || array.ValueKind != JsonValueKind.Array || array.GetArrayLength() <= index)
             return null;
-        JsonElement first = array[0];
-        return first.ValueKind == JsonValueKind.Number ? first.GetDouble() : null;
+        JsonElement entry = array[index];
+        return entry.ValueKind == JsonValueKind.Number ? entry.GetDouble() : null;
     }
 }

@@ -44,7 +44,7 @@ public sealed class StatsAttributionTests : IDisposable
         _source.Catalog["system:cpu/load"] = new ReadingDescriptor("cpu/load", ReadingKind.Percent, "CPU", "CPU load") { Min = 0, Max = 100 };
         _source.Readings["system:cpu/load"] = Reading.Ok(37);
         AddWeather(Zurich, "Now", 14, Credit);
-        AddWeather("weather:Zurich/today/high", "High", 17, Credit);
+        AddWeather("weather:Zurich/daily/0/high", "High", 17, Credit);
         AddWeather("weather:Tokyo/current/temperature", "Tokyo", 21, new ReadingAttribution("Data by Somebody Else"));
     }
 
@@ -138,7 +138,7 @@ public sealed class StatsAttributionTests : IDisposable
     [Fact]
     public void TwoWeatherReadings_ShowTheCreditOnce()
     {
-        StatsWidget widget = Widget(4, 2, Zurich, "weather:Zurich/today/high");
+        StatsWidget widget = Widget(4, 2, Zurich, "weather:Zurich/daily/0/high");
         using SKBitmap bitmap = Paint(widget);
 
         float one = Strip(1100, Credit);
