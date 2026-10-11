@@ -108,9 +108,9 @@ public class SystemProviderTests
             .ToArray();
         foreach (var burner in burners)
             burner.Start();
-        await Task.Delay(400);
+        await Task.Delay(400, TestContext.Current.CancellationToken);
         Sample(provider);
-        await Task.Delay(300);
+        await Task.Delay(300, TestContext.Current.CancellationToken);
         foreach (var burner in burners)
             burner.Join();
 

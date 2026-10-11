@@ -478,7 +478,7 @@ public sealed class SiteIconCacheTests : IDisposable
 
         var cache = Start();
         using var first = cache.Load(Address, 256);
-        await cache.Refreshing.WaitAsync(TimeSpan.FromSeconds(5));
+        await cache.Refreshing.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
         using var second = cache.Load(Address, 256);
 
         // The first answer is the old icon: nobody waits for the network. The refreshed one is there afterwards.
@@ -497,9 +497,9 @@ public sealed class SiteIconCacheTests : IDisposable
 
         var cache = Start();
         using var first = cache.Load(Address, 256);
-        await cache.Refreshing.WaitAsync(TimeSpan.FromSeconds(5));
+        await cache.Refreshing.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
         using var second = cache.Load(Address, 256);
-        await cache.Refreshing.WaitAsync(TimeSpan.FromSeconds(5));
+        await cache.Refreshing.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         Assert.Equal(128, first!.Width);
         Assert.Equal(128, second!.Width);
