@@ -29,7 +29,7 @@ public sealed class SdkWeatherTests : IDisposable
         public bool RegionUses24HourClock => use24Hour;
     }
 
-    private static readonly ReadingDescriptor Sunrise = new("today/sunrise", ReadingKind.Time, "Sunrise", "Sunrise");
+    private static readonly ReadingDescriptor Sunrise = new("daily/0/sunrise", ReadingKind.Time, "Sunrise", "Sunrise");
 
     private static ReadingText Format(Reading reading, bool use24Hour, ReadingDescriptor? descriptor = null, ReadingFormatOptions? options = null) =>
         ReadingFormatter.Format(reading, descriptor ?? Sunrise, options, new Source(use24Hour));

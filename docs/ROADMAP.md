@@ -5,13 +5,13 @@ UrDeck is a lightweight, extensible widget dashboard for secondary and case disp
 read the source of, low resource use, great visuals, a modular widget SDK, a WYSIWYG editor, and touch.
 
 This page is the plan in outcomes. The work items behind it, with their design notes and status, are in
-[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-10-09.
+[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-10-11.
 
 ## Where it is today
 
 The foundation is in place and runs on the real panel: a WinUI 3 host that composites each widget on the GPU, a plugin
 SDK with hot reload, themes, animation, data providers, pages you swipe between, a dock, and the Clock, Stats,
-Weather and Shortcut widgets. There is no
+Weather (4x2 and 4x4) and Shortcut widgets. There is no
 installer and no editor yet: you build from source and edit a JSON file. See the [README](../README.md).
 
 ## Milestones
@@ -35,7 +35,7 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
 `weather` providers (item 3), Clock, Stats and Weather 4x2 (item 7).
 
 **1. Daily driver.** Everything on the owner's current Nexus page, and nothing that forces a restart of the app.
-- The 4x4 weather widget (item 7).
+- The 4x4 weather widget (item 7; implemented in `weather-4x4-forecast`; the panel look is the owner's to confirm).
 - Pages, swipe and the page indicator, and taps on widgets (item 8; done).
 - The shortcut widget, which brought tap input, launching, icons and the image tile (item 7; implemented in
   `shortcut-and-tap`; done).

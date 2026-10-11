@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using System.Globalization;
 using UrDeck.Sdk.Data;
 
 namespace UrDeck.Providers.Weather;
@@ -377,26 +378,78 @@ public sealed class WeatherProvider : IDataProvider, IDisposable
             return null;
         }
 
-        ReadingValue? value = reading.ToLowerInvariant() switch
+        string path = reading.ToLowerInvariant();
+        if (path.StartsWith("daily/", StringComparison.Ordinal))
+            return DailyValue(path, weather, out reason);
+
+        ReadingValue? value = path switch
         {
             WeatherCatalog.Temperature => Number(weather.Temperature),
             WeatherCatalog.Apparent => Number(weather.Apparent),
-            WeatherCatalog.Condition => weather.WeatherCode is { } code ? ReadingValue.FromText(ConditionMap.Classify(code)) : NoValue,
+            WeatherCatalog.Condition => Condition(weather.WeatherCode),
             WeatherCatalog.IsDay => weather.IsDay is { } day ? ReadingValue.FromOnOff(day) : NoValue,
-            WeatherCatalog.High => Number(weather.High),
-            WeatherCatalog.Low => Number(weather.Low),
-            WeatherCatalog.Sunrise => Instant(weather.Sunrise, weather),
-            WeatherCatalog.Sunset => Instant(weather.Sunset, weather),
+            WeatherCatalog.Humidity => Number(weather.Humidity),
+            WeatherCatalog.WindSpeed => Number(weather.WindSpeed),
+            WeatherCatalog.WindDirection => Number(weather.WindDirection),
+            _ => NoValue,
+        };
+        if (value == null)
+            reason = "the source gave no value";
+        return value;
+    }
+
+    // daily/N/field, N from 0 to 6.
+    private static ReadingValue? DailyValue(string path, PlaceWeather weather, out string? reason)
+    {
+        reason = "the source gave no value";
+        string[] parts = path.Split('/');
+        if (parts.Length != 3 || !int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out int index))
+            return NoValue;
+        if (index >= weather.Days.Count)
+        {
+            reason = "the source gave no forecast for this day";
+            return NoValue;
+        }
+
+        DayWeather day = weather.Days[index];
+        ReadingValue? value = parts[2] switch
+        {
+            WeatherCatalog.Date => DayStart(day.Date, weather),
+            WeatherCatalog.DayCondition => Condition(day.WeatherCode),
+            WeatherCatalog.High => Number(day.High),
+            WeatherCatalog.Low => Number(day.Low),
+            WeatherCatalog.Sunrise => Instant(day.Sunrise, weather),
+            WeatherCatalog.Sunset => Instant(day.Sunset, weather),
+            WeatherCatalog.PrecipChance => Number(day.PrecipChance),
+            WeatherCatalog.Rain => Number(day.Rain),
+            WeatherCatalog.Snow => Number(day.Snow),
             _ => NoValue,
         };
         if (value == null)
         {
-            reason = reading.StartsWith("today/sun", StringComparison.OrdinalIgnoreCase)
-                ? "the sun does not rise or set at this place today"
-                : "the source gave no value";
+            reason = parts[2] switch
+            {
+                WeatherCatalog.Sunrise or WeatherCatalog.Sunset => "the sun does not rise or set at this place on this day",
+                WeatherCatalog.Snow => "the source gave no snowfall for this day",
+                WeatherCatalog.Rain => "the source gave no rain amount for this day",
+                _ => "the source gave no value",
+            };
         }
 
         return value;
+    }
+
+    private static ReadingValue? Condition(int? code) => code is { } c ? ReadingValue.FromText(ConditionMap.Classify(c)) : NoValue;
+
+    // The start of the calendar day at the place. The service gives the day start as an instant, which read at today's
+    // offset could land an hour into the day before when a clock change lies in between; the date is taken from the
+    // middle of the morning and rebuilt at midnight.
+    private static ReadingValue? DayStart(long? unixSeconds, PlaceWeather weather)
+    {
+        if (unixSeconds is not { } seconds)
+            return NoValue;
+        DateTime local = DateTimeOffset.FromUnixTimeSeconds(seconds).ToOffset(weather.UtcOffset).DateTime.AddHours(6).Date;
+        return ReadingValue.FromTime(new DateTimeOffset(local, weather.UtcOffset));
     }
 
     // A bare null would convert through the string operator of ReadingValue and become an empty text.

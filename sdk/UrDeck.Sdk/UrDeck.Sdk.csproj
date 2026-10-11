@@ -19,8 +19,11 @@
          components, and the SkiaSharp.Skottie package reference. All additive, so the assembly version stays.
          Package 0.7.0 (shortcut-and-tap): Input.ITapTarget, Launch.LaunchTarget and ILauncher, Icons.IIconSource and
          IconResult, IWidgetHost.Launcher and IWidgetHost.Icons (default members), Widget.Launcher and Widget.Icons, and
-         the ImageTile component. All additive, so the assembly version stays. -->
-    <Version>0.7.0</Version>
+         the ImageTile component. All additive, so the assembly version stays.
+         Package 0.8.0 (weather-4x4-forecast): ReadingKind.Date, Speed and Depth, DepthUnit and ReadingDescriptor.DepthUnit,
+         DateStyle and ReadingFormatOptions.DateStyle, IReadingSource.RegionCulture (default member) and
+         ReadingFormatter.CompassPoint. All additive, so the assembly version stays. -->
+    <Version>0.8.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

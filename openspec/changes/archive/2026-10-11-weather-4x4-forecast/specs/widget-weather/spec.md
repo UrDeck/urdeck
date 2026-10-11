@@ -5,7 +5,7 @@ UrDeck MUST ship a widget with the type id `urdeck.widgets.weather` that support
 reference only the widget SDK, MUST NOT reference the weather provider's assembly, and MUST be refreshed by reading
 changes and by animation frames only (no timer).
 
-#### Scenario: Sizes offered
+#### Scenario: Size offered
 - **WHEN** the registry lists the sizes of `urdeck.widgets.weather`
 - **THEN** the sizes are 4x2 and 4x4
 

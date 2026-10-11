@@ -172,10 +172,17 @@ public sealed class WeatherProviderTests : IDisposable
         Assert.Equal(23.3, portland.Apparent);
         Assert.True(portland.IsDay);
         Assert.Equal(3, portland.WeatherCode);
-        Assert.Equal(23.8, portland.High);
-        Assert.Equal(12.2, portland.Low);
-        Assert.Equal(1791469092, portland.Sunrise);
-        Assert.Equal(1791509850, portland.Sunset);
+        Assert.Equal(87, portland.Humidity);
+        Assert.Equal(4.0, portland.WindSpeed);
+        Assert.Equal(334, portland.WindDirection);
+        Assert.Equal(7, portland.Days.Count);
+        Assert.Equal(1791442800, portland.Days[0].Date);
+        Assert.Equal(23.8, portland.Days[0].High);
+        Assert.Equal(12.2, portland.Days[0].Low);
+        Assert.Equal(1791469092, portland.Days[0].Sunrise);
+        Assert.Equal(1791509850, portland.Days[0].Sunset);
+        Assert.Equal(0.0, portland.Days[0].Snow);
+        Assert.Equal(1791442800 + (6 * 86400), portland.Days[6].Date);
     }
 
     [Fact]
@@ -202,9 +209,9 @@ public sealed class WeatherProviderTests : IDisposable
     {
         PlaceWeather polar = Assert.Single(WeatherParser.ParseForecast(Fixture("forecast-polar"), 1));
 
-        Assert.Null(polar.Sunrise);
-        Assert.Null(polar.Sunset);
-        Assert.Equal(5.4, polar.High);
+        Assert.Null(polar.Days[0].Sunrise);
+        Assert.Null(polar.Days[0].Sunset);
+        Assert.Equal(5.4, polar.Days[0].High);
     }
 
     [Fact]
@@ -216,8 +223,9 @@ public sealed class WeatherProviderTests : IDisposable
         Assert.Null(bare.Temperature);
         Assert.Null(bare.IsDay);
         Assert.Null(bare.WeatherCode);
-        Assert.Null(bare.High);
-        Assert.Null(bare.Sunrise);
+        Assert.Null(bare.Humidity);
+        Assert.Null(bare.WindSpeed);
+        Assert.Empty(bare.Days);
     }
 
     [Fact]
@@ -433,16 +441,20 @@ public sealed class WeatherProviderTests : IDisposable
     // The catalog
 
     [Fact]
-    public void TheCatalog_HasTheNineReadings_AsPatterns_WithTheCreditOnEach()
+    public void TheCatalog_HasTheCurrentAndSevenForecastDays_AsPatterns_WithTheCreditOnEach()
     {
         IReadOnlyList<ReadingDescriptor> catalog = new WeatherProvider().Describe();
 
-        Assert.Equal(
-            [
-                "{location}/place", "{location}/current/temperature", "{location}/current/apparent", "{location}/current/condition",
-                "{location}/current/is-day", "{location}/today/high", "{location}/today/low", "{location}/today/sunrise", "{location}/today/sunset",
-            ],
-            catalog.Select(d => d.Path));
+        string[] current =
+        [
+            "place", "current/temperature", "current/apparent", "current/condition", "current/is-day",
+            "current/humidity", "current/wind-speed", "current/wind-direction",
+        ];
+        string[] fields = ["date", "condition", "high", "low", "sunrise", "sunset", "precip-chance", "rain", "snow"];
+        string[] expected = [.. current, .. Enumerable.Range(0, 7).SelectMany(day => fields.Select(field => $"daily/{day}/{field}"))];
+        Assert.Equal(expected.Select(path => "{location}/" + path), catalog.Select(d => d.Path));
+        Assert.Equal(71, catalog.Count);
+        Assert.DoesNotContain(catalog, d => d.Path.Contains("today", StringComparison.Ordinal));
         Assert.All(catalog, d =>
         {
             Assert.Equal("{location}", d.Device);
@@ -451,13 +463,24 @@ public sealed class WeatherProviderTests : IDisposable
             Assert.Equal("https://open-meteo.com/", d.Attribution.Url);
         });
         Assert.All(catalog.Where(d => d.Kind == ReadingKind.Temperature), d => Assert.Null(d.DisplayUnit));
-        Assert.Equal(
-            [ReadingKind.Text, ReadingKind.Temperature, ReadingKind.Temperature, ReadingKind.Text, ReadingKind.OnOff, ReadingKind.Temperature, ReadingKind.Temperature, ReadingKind.Time, ReadingKind.Time],
-            catalog.Select(d => d.Kind));
-        Assert.Equal(["Place", "Now", "Feels like", "Condition", "Daytime", "High", "Low", "Sunrise", "Sunset"], catalog.Select(d => d.Label));
-        Assert.Equal(
-            ["Place", "Temperature", "Feels like temperature", "Weather condition", "Is daytime", "Today's high", "Today's low", "Sunrise", "Sunset"],
-            catalog.Select(d => d.Name));
+    }
+
+    [Fact]
+    public void TheCatalog_GivesTheNewReadingsTheirKindsUnitsAndNames()
+    {
+        var catalog = new WeatherProvider().Describe().ToDictionary(d => d.Path["{location}/".Length..]);
+
+        Assert.Equal((ReadingKind.Percent, "Humidity", "Relative humidity"), (catalog["current/humidity"].Kind, catalog["current/humidity"].Label, catalog["current/humidity"].Name));
+        Assert.Equal((ReadingKind.Speed, "Wind", "Wind speed"), (catalog["current/wind-speed"].Kind, catalog["current/wind-speed"].Label, catalog["current/wind-speed"].Name));
+        ReadingDescriptor direction = catalog["current/wind-direction"];
+        Assert.Equal((ReadingKind.Number, "Direction", "Wind direction", "°", 0.0, 360.0), (direction.Kind, direction.Label, direction.Name, direction.Unit, direction.Min, direction.Max));
+        Assert.Equal((ReadingKind.Date, "Day", "Forecast day 3 date"), (catalog["daily/3/date"].Kind, catalog["daily/3/date"].Label, catalog["daily/3/date"].Name));
+        Assert.Equal("Forecast day 6 chance of precipitation", catalog["daily/6/precip-chance"].Name);
+        Assert.Equal(ReadingKind.Percent, catalog["daily/6/precip-chance"].Kind);
+        Assert.Equal((ReadingKind.Depth, DepthUnit.Millimetre, "Rain"), (catalog["daily/2/rain"].Kind, catalog["daily/2/rain"].DepthUnit, catalog["daily/2/rain"].Label));
+        Assert.Equal((ReadingKind.Depth, DepthUnit.Centimetre, "Snow"), (catalog["daily/2/snow"].Kind, catalog["daily/2/snow"].DepthUnit, catalog["daily/2/snow"].Label));
+        Assert.Equal("Forecast day 0 high", catalog["daily/0/high"].Name);
+        Assert.Equal(ReadingKind.Time, catalog["daily/5/sunrise"].Kind);
     }
 
     [Fact]
@@ -494,22 +517,144 @@ public sealed class WeatherProviderTests : IDisposable
         Assert.Equal(23.3, _sink.Value("Portland, OR/current/apparent").Number);
         Assert.Equal("cloudy", _sink.Value("Portland, OR/current/condition").Text);
         Assert.True(_sink.Value("Portland, OR/current/is-day").IsOn);
-        Assert.Equal(23.8, _sink.Value("Portland, OR/today/high").Number);
-        Assert.Equal(12.2, _sink.Value("Portland, OR/today/low").Number);
+        Assert.Equal(23.8, _sink.Value("Portland, OR/daily/0/high").Number);
+        Assert.Equal(12.2, _sink.Value("Portland, OR/daily/0/low").Number);
     }
 
     [Fact]
     public void SunriseAndSunset_AreInstantsInThePlacesOwnOffset()
     {
-        WeatherProvider provider = Started("Portland, OR/today/sunrise", "Portland, OR/today/sunset", "Tokyo/today/sunrise");
+        WeatherProvider provider = Started("Portland, OR/daily/0/sunrise", "Portland, OR/daily/0/sunset", "Tokyo/daily/0/sunrise");
         Sample(provider);
 
-        DateTimeOffset sunrise = _sink.Value("Portland, OR/today/sunrise").Time;
+        DateTimeOffset sunrise = _sink.Value("Portland, OR/daily/0/sunrise").Time;
         Assert.Equal(TimeSpan.FromHours(-7), sunrise.Offset);
         Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1791469092), sunrise);
-        Assert.Equal(TimeSpan.FromHours(-7), _sink.Value("Portland, OR/today/sunset").Time.Offset);
-        Assert.Equal(TimeSpan.FromHours(9), _sink.Value("Tokyo/today/sunrise").Time.Offset);
-        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1791492136), _sink.Value("Tokyo/today/sunrise").Time);
+        Assert.Equal(TimeSpan.FromHours(-7), _sink.Value("Portland, OR/daily/0/sunset").Time.Offset);
+        Assert.Equal(TimeSpan.FromHours(9), _sink.Value("Tokyo/daily/0/sunrise").Time.Offset);
+        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1791492136), _sink.Value("Tokyo/daily/0/sunrise").Time);
+    }
+
+    [Fact]
+    public void EveryDayOfTheForecast_IsPublished_WithItsOwnValues()
+    {
+        WeatherProvider provider = Started(AllReadings("Portland, OR"));
+        Sample(provider);
+
+        for (int day = 0; day < 7; day++)
+        {
+            foreach (string field in new[] { "date", "condition", "high", "low", "precip-chance", "rain", "snow" })
+                Assert.True(_sink.Has($"Portland, OR/daily/{day}/{field}"), $"day {day} {field}");
+        }
+
+        Assert.Equal(23.8, _sink.Value("Portland, OR/daily/0/high").Number);
+        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1791442800 + (3 * 86400)), _sink.Value("Portland, OR/daily/3/date").Time);
+        Assert.Equal("cloudy", _sink.Value("Portland, OR/daily/0/condition").Text);
+        Assert.Equal(0, _sink.Value("Portland, OR/daily/0/rain").Number);
+        Assert.Equal(0, _sink.Value("Portland, OR/daily/0/snow").Number);
+    }
+
+    [Fact]
+    public void TheDate_IsTheStartOfTheDayAtThePlace_SoItsWeekdayIsThePlacesWeekday()
+    {
+        WeatherProvider provider = Started("Portland, OR/daily/0/date", "Portland, OR/daily/1/date", "Tokyo/daily/0/date", "Tokyo/daily/1/date");
+        Sample(provider);
+
+        DateTimeOffset portland = _sink.Value("Portland, OR/daily/0/date").Time;
+        Assert.Equal(TimeSpan.FromHours(-7), portland.Offset);
+        Assert.Equal(new DateTime(2026, 10, 8), portland.DateTime);
+        Assert.Equal(DayOfWeek.Friday, _sink.Value("Portland, OR/daily/1/date").Time.DayOfWeek);
+        DateTimeOffset tokyo = _sink.Value("Tokyo/daily/0/date").Time;
+        Assert.Equal(TimeSpan.FromHours(9), tokyo.Offset);
+        Assert.Equal(TimeSpan.Zero, tokyo.TimeOfDay);
+        Assert.Equal(tokyo.AddDays(1), _sink.Value("Tokyo/daily/1/date").Time);
+    }
+
+    [Fact]
+    public void RainAndSnowOnOneDay_AreSeparateReadings_RainBeingTheSumOfRainAndShowers()
+    {
+        _http.Override = url => url.Host.StartsWith("api.", StringComparison.Ordinal) ? Fixture("forecast-mixed") : new FakeHttp().GetStringAsync(url, default).Result;
+        WeatherProvider provider = Started("Portland, OR/daily/2/rain", "Portland, OR/daily/2/snow", "Portland, OR/daily/2/precip-chance", "Portland, OR/daily/2/condition", "Portland, OR/daily/4/snow");
+        Sample(provider);
+
+        Assert.Equal(7.0, _sink.Value("Portland, OR/daily/2/rain").Number);
+        Assert.Equal(7.5, _sink.Value("Portland, OR/daily/2/snow").Number);
+        Assert.Equal(90, _sink.Value("Portland, OR/daily/2/precip-chance").Number);
+        Assert.Equal("snow", _sink.Value("Portland, OR/daily/2/condition").Text);
+        Assert.Equal(0.1, _sink.Value("Portland, OR/daily/4/snow").Number);
+    }
+
+    [Fact]
+    public void ANullSnowfall_IsUnavailableWithAReason_NotZero_AndRainWithOnlyOneSumIsThatSum()
+    {
+        _http.Override = url => url.Host.StartsWith("api.", StringComparison.Ordinal) ? Fixture("forecast-mixed") : new FakeHttp().GetStringAsync(url, default).Result;
+        WeatherProvider provider = Started("Portland, OR/daily/3/snow", "Portland, OR/daily/3/rain");
+        Sample(provider);
+
+        Assert.True(_sink.IsUnavailable("Portland, OR/daily/3/snow"));
+        Assert.Contains("snow", _sink.Reason("Portland, OR/daily/3/snow"));
+        Assert.Equal(0.4, _sink.Value("Portland, OR/daily/3/rain").Number);
+    }
+
+    [Fact]
+    public void ADayTheAnswerLacks_IsUnavailable_AndADayBeyondTheCatalogIsNotPublished()
+    {
+        const string oneDay = """{"utc_offset_seconds":0,"daily":{"time":[1791442800],"temperature_2m_max":[3.0]}}""";
+        _http.Override = url => url.Host.StartsWith("api.", StringComparison.Ordinal) ? oneDay : new FakeHttp().GetStringAsync(url, default).Result;
+        WeatherProvider provider = Started("Zurich/daily/0/high", "Zurich/daily/1/high", "Zurich/daily/7/high", "Zurich/daily/0/snow");
+        Sample(provider);
+
+        Assert.Equal(3.0, _sink.Value("Zurich/daily/0/high").Number);
+        Assert.True(_sink.IsUnavailable("Zurich/daily/1/high"));
+        Assert.True(_sink.IsUnavailable("Zurich/daily/0/snow"));
+        Assert.False(_sink.Has("Zurich/daily/7/high"));
+        Assert.False(_sink.IsUnavailable("Zurich/daily/7/high"));
+    }
+
+    [Fact]
+    public void Humidity_AndWind_ArePublished()
+    {
+        WeatherProvider provider = Started("Portland, OR/current/humidity", "Portland, OR/current/wind-speed", "Portland, OR/current/wind-direction");
+        Sample(provider);
+
+        Assert.Equal(87, _sink.Value("Portland, OR/current/humidity").Number);
+        Assert.Equal(4.0, _sink.Value("Portland, OR/current/wind-speed").Number);
+        Assert.Equal(334, _sink.Value("Portland, OR/current/wind-direction").Number);
+    }
+
+    [Fact]
+    public void AWidgetAt4x2_AndOneAt4x4_ShareOneRequest()
+    {
+        string[] small = ["Portland, OR/current/temperature", "Portland, OR/daily/0/high", "Portland, OR/daily/0/sunrise"];
+        WeatherProvider provider = Started([.. small, .. AllReadings("Portland, OR")]);
+        Sample(provider);
+
+        Assert.Equal(1, _http.Forecasts);
+        Assert.True(_sink.Has("Portland, OR/daily/6/snow"));
+    }
+
+    [Fact]
+    public void AFull4x4Set_IsOneForecastRequestPerPlacePerSample()
+    {
+        WeatherProvider one = Started(AllReadings("Zurich"));
+        Sample(one);
+        Assert.Equal(1, _http.Forecasts);
+        _time.Advance(TimeSpan.FromMinutes(1));
+        Sample(one);
+        Assert.Equal(2, _http.Forecasts);
+    }
+
+    [Fact]
+    public void AFull4x4SetForTwoPlaces_IsOneForecastRequestPerSample()
+    {
+        WeatherProvider provider = Started([.. AllReadings("Zurich"), .. AllReadings("Tokyo")]);
+        Sample(provider);
+
+        Assert.Equal(1, _http.Forecasts);
+        Assert.Equal(2, _http.Geocoding);
+        Assert.Equal(11.3, _sink.Value("Zurich/current/temperature").Number);
+        Assert.Equal(19.2, _sink.Value("Tokyo/current/temperature").Number);
+        Assert.Equal(TimeSpan.FromHours(9), _sink.Value("Tokyo/daily/6/date").Time.Offset);
     }
 
     [Fact]
@@ -553,10 +698,10 @@ public sealed class WeatherProviderTests : IDisposable
 
         Assert.True(Wait(() => _http.Forecasts == 1));
         string query = Uri.UnescapeDataString(_http.Requests.Single(r => r.Host.StartsWith("api.", StringComparison.Ordinal)).Query);
-        Assert.Contains("current=temperature_2m,apparent_temperature,is_day,weather_code", query);
-        Assert.Contains("daily=temperature_2m_max,temperature_2m_min,sunrise,sunset", query);
+        Assert.Contains("current=temperature_2m,apparent_temperature,is_day,weather_code,relative_humidity_2m,wind_speed_10m,wind_direction_10m", query);
+        Assert.Contains("daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,rain_sum,showers_sum,snowfall_sum", query);
         Assert.Contains("timezone=auto", query);
-        Assert.Contains("forecast_days=1", query);
+        Assert.Contains("forecast_days=7", query);
         Assert.Contains("timeformat=unixtime", query);
     }
 
@@ -595,17 +740,19 @@ public sealed class WeatherProviderTests : IDisposable
 
         Assert.True(_sink.Has("Zurich/current/temperature"));
         Assert.False(_sink.Has("Zurich/place"));
-        Assert.False(_sink.Has("Zurich/today/high"));
+        Assert.False(_sink.Has("Zurich/daily/0/high"));
     }
 
     [Fact]
     public void AReadingTheProviderDoesNotHave_IsNotPublished()
     {
-        WeatherProvider provider = Started("Zurich/current/humidity", "Zurich/current/temperature");
+        WeatherProvider provider = Started("Zurich/current/visibility", "Zurich/daily/7/high", "Zurich/today/high", "Zurich/current/temperature");
         Sample(provider);
 
-        Assert.False(_sink.Has("Zurich/current/humidity"));
-        Assert.False(_sink.IsUnavailable("Zurich/current/humidity"));
+        Assert.False(_sink.Has("Zurich/current/visibility"));
+        Assert.False(_sink.IsUnavailable("Zurich/current/visibility"));
+        Assert.False(_sink.Has("Zurich/daily/7/high"));
+        Assert.False(_sink.Has("Zurich/today/high"));
         Assert.True(_sink.Has("Zurich/current/temperature"));
     }
 
@@ -613,13 +760,13 @@ public sealed class WeatherProviderTests : IDisposable
     public void ANoSunrise_IsUnavailableWithAReason_AndTheRestStillPublishes()
     {
         _http.Override = url => url.Host.StartsWith("api.", StringComparison.Ordinal) ? Fixture("forecast-polar") : new FakeHttp().GetStringAsync(url, default).Result;
-        WeatherProvider provider = Started("Oslo/today/sunrise", "Oslo/today/sunset", "Oslo/today/high");
+        WeatherProvider provider = Started("Oslo/daily/0/sunrise", "Oslo/daily/0/sunset", "Oslo/daily/0/high");
         Sample(provider);
 
-        Assert.True(_sink.IsUnavailable("Oslo/today/sunrise"));
-        Assert.Contains("sun", _sink.Reason("Oslo/today/sunrise"));
-        Assert.True(_sink.IsUnavailable("Oslo/today/sunset"));
-        Assert.Equal(5.4, _sink.Value("Oslo/today/high").Number);
+        Assert.True(_sink.IsUnavailable("Oslo/daily/0/sunrise"));
+        Assert.Contains("sun", _sink.Reason("Oslo/daily/0/sunrise"));
+        Assert.True(_sink.IsUnavailable("Oslo/daily/0/sunset"));
+        Assert.Equal(5.4, _sink.Value("Oslo/daily/0/high").Number);
     }
 
     [Fact]
@@ -729,10 +876,10 @@ public sealed class WeatherProviderTests : IDisposable
         Sample(provider);
         int forecasts = _http.Forecasts;
 
-        provider.SetDemand(["Zurich/current/temperature", "Zurich/today/high", "Zurich/place"]);
+        provider.SetDemand(["Zurich/current/temperature", "Zurich/daily/0/high", "Zurich/place"]);
 
-        Assert.True(Wait(() => _sink.Has("Zurich/today/high") && _sink.Has("Zurich/place")));
-        Assert.Equal(14.6, _sink.Value("Zurich/today/high").Number);
+        Assert.True(Wait(() => _sink.Has("Zurich/daily/0/high") && _sink.Has("Zurich/place")));
+        Assert.Equal(14.6, _sink.Value("Zurich/daily/0/high").Number);
         Assert.Equal(forecasts, _http.Forecasts);
     }
 

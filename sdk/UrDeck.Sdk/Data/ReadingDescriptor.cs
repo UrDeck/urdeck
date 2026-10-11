@@ -34,6 +34,9 @@ public sealed record ReadingDescriptor(string Path, ReadingKind Kind, string Lab
     /// <summary>The unit to show a kind in when the widget does not choose one.</summary>
     public DisplayUnit? DisplayUnit { get; init; }
 
+    /// <summary>The unit a <see cref="ReadingKind.Depth"/> value is reported in; null reads as millimetres.</summary>
+    public DepthUnit? DepthUnit { get; init; }
+
     /// <summary>The number of decimals to show when the widget does not choose any.</summary>
     public int? Decimals { get; init; }
 

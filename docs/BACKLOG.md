@@ -81,8 +81,12 @@ everything else should be fine on Sonnet.
   size sits in it as a miniature and the dock has no drawing, press or launch code of its own. The `dock`
   configuration field is now a list of widget objects. On the 1100x3840 panel the dock costs no row. Measurements in
   `docs/perf/dock.md`.
-- Next: the 4x4 weather widget (forecast days, humidity and wind), then sensors that need elevation (item 3, fourth
-  change). See "Suggested order" below.
+- `weather-4x4-forecast` is implemented (2026-10-11, `openspec/changes/archive/2026-10-11-weather-4x4-forecast`): the weather widget at 4x4
+  (feels like, humidity and wind, the snow total of the days shown, and 1 to 7 forecast columns with rain and snow;
+  settings `days` and `animateForecast`), seven forecast days from the provider (`daily/0` to `daily/6`, replacing
+  `today/*`), and the SDK reading kinds `Date`, `Speed` and `Depth` with `DateStyle`, a per-description canonical depth
+  unit and `ReadingFormatter.CompassPoint` (package 0.8.0). Panel look and the cost measurement are for the owner.
+- Next: sensors that need elevation (item 3, fourth change). See "Suggested order" below.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -105,7 +109,7 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
    4. Sensors that need elevation (CPU temperature and what else needs a kernel driver) through an opt-in helper.
 3. **Weather** (item 7) as a provider plus a widget, which brings animated colour icons (Lottie), the first network
    provider, per-widget locations and a time reading. Needs item 14 and the first `data-providers` change. The first
-   change (the 4x2 widget) is done; the 4x4 widget follows as the next weather change. It goes before the
+   change (the 4x2 widget) and the second (the 4x4 widget, `weather-4x4-forecast`) are done. It goes before the
    elevated-sensors change.
 4. **Pages and touch** (item 8; pages done in `pages-and-pager`, taps in `shortcut-and-tap`), then **shortcuts**
    (item 7; done in `shortcut-and-tap`, which brought the image tile) and the **dock** (item 10; done in `dock`).
@@ -347,7 +351,7 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 | Clock | 4x2, 4x1, 2x1, 1x1 | time, date; `style: "flap"` is a split-flap display (`animation`, item 14) | done | readout, text line (done) |
 | Stats (single stat and performance are one widget, `urdeck.widgets.stats`) | 1x1 and 2x2 (one reading; done in `data-providers`), 4x2 (two gauges, three text stats) and 4x4 (four gauges, three text stats) (done in `stats-gauges`) | any reading from any provider, one per slot: CPU and GPU temperature and load, memory, GPU power and clock, one CPU core per card | item 3 | slot configuration (a reading plus a presentation); gauge component (ring, bar, vertical bar) with the larger sizes (done) |
 | Weather | 4x2 (done in `weather`) | animated colour icon (day and night variants), temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | Lottie icons, per-widget locations, the time reading, patterned catalogs; see "Weather widget" below |
-| Weather, 4x4 (roadmap) | 4x4 | everything of the 4x2 plus forecast days, humidity and wind (exact content open) | the 4x2 weather change | forecast readings (`daily/N/...`), a date label |
+| Weather, 4x4 (done in `weather-4x4-forecast`) | 4x4 | everything of the 4x2 plus feels like, humidity and wind, the snow total, and 1 to 7 forecast columns (weekday, icon, high and low, chance, rain, snow) | the 4x2 weather change | forecast readings (`daily/N/...`), the date, speed and depth reading kinds |
 | Shortcut | 1x1 (done in `shortcut-and-tap`) | the icon of an application, a file, a folder or a web address; opens it on tap; settings `target`, `arguments`, `icon`, `label` | item 8 (touch) | tap input (`ITapTarget`), the launch and icon services, the image tile; all shared with the dock (item 10) |
 | Media / now playing | open | track, artist, art, controls | items 3 and 8 | image tile reuse |
 | Web page | open | any web page, with touch (the owner shows Frigate camera feeds this way in Nexus) | item 14 (new host), item 8 | a hosted widget kind: the host places a web view layer instead of calling `Render` |
@@ -416,8 +420,8 @@ or checked against the code and the spike (`H:\projects\urdeck-render-spike`, `r
   `IReadingSink.Log` is the provider's logger. Secrets stay parked.
 - **Reading vocabulary is provider-neutral**: `current/condition` is text from a small portable set (`clear`,
   `partly-cloudy`, `cloudy`, `fog`, `drizzle`, `rain`, `snow`, `thunder`, ...) mapped from WMO codes in one place;
-  also `current/is-day`, `current/temperature`, `current/apparent`, `today/high`, `today/low`, `today/sunrise`,
-  `today/sunset`. A later provider fits behind the same ids. Condition labels are English for now.
+  also `current/is-day`, `current/temperature`, `current/apparent`, `daily/0/high`, `daily/0/low`, `daily/0/sunrise`,
+  `daily/0/sunset` (called `today/*` until `weather-4x4-forecast`). A later provider fits behind the same ids. Condition labels are English for now.
 - **Time as a reading (settled to add; representation proposed).** A new value type holding a `DateTimeOffset`
   (epoch seconds plus the UTC offset) and `ReadingKind.Time`, which `ReadingFormatter` shows as the time of day in the
   value's own offset (a Tokyo sunrise reads in Tokyo time) with the region's 12 or 24 hour setting. An instant, not a

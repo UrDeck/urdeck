@@ -25,6 +25,12 @@ public interface IReadingSource
     /// source written before times existed keeps compiling.
     /// </summary>
     bool RegionUses24HourClock => !System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Contains("tt", StringComparison.Ordinal);
+
+    /// <summary>
+    /// The language and calendar of the user's Windows region, used to name weekdays and months. The default is the
+    /// current culture, so a source written before dates existed keeps compiling.
+    /// </summary>
+    System.Globalization.CultureInfo RegionCulture => System.Globalization.CultureInfo.CurrentCulture;
 }
 
 /// <summary>The services the host offers a widget, handed over by <see cref="IWidget.Attach"/>.</summary>
