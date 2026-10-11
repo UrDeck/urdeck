@@ -5,16 +5,26 @@
 Defines the WinUI 3 host application: monitor selection and window placement, one rendering surface per widget, refresh scheduling, plugin discovery and hot-reload, and the application icon.
 ## Requirements
 ### Requirement: Monitor Selection
-The host MUST choose the target monitor from configuration:
+The host MUST show the deck on the remembered display (see display-targeting, "Remembered Display"). The selectors in
+the configuration make the choice when no display is remembered, or when they were edited since it was remembered:
 
 - `monitorName` may be `primary`, `tallest` (tallest portrait monitor), `widest`, `largest` (by pixel area), or a device name suffix such as `DISPLAY1`
 - If `monitorName` is unset or matches nothing, the 1-based `monitor` index is used
 - If that also fails, the primary monitor is used
-- A config change re-runs selection and moves the window without restarting
+- The selectors are not evaluated again on a display change: once a display is remembered, a display that would now
+  match the selector better does not take the deck
+- The primary monitor is the fallback only for this choice. A remembered display that is not connected is absent
+  (see display-targeting, "Absent Display"); the deck does not move to the primary monitor
+- A config change that edits the selectors re-runs selection and moves the window without restarting
 
 #### Scenario: Tallest monitor selected
-- **WHEN** `monitorName` is `"tallest"` and a 1100×3840 portrait panel is attached
-- **THEN** the window covers that panel
+- **WHEN** `monitorName` is `"tallest"`, no display is remembered and a 1100×3840 portrait panel is attached
+- **THEN** the window covers that panel and the panel is remembered
+
+#### Scenario: Selector no longer matches the remembered display
+- **WHEN** the panel was remembered from `"tallest"` and is disconnected, leaving a 1080×1920 portrait monitor as the
+  tallest
+- **THEN** the deck is hidden and the 1080×1920 monitor is not covered
 
 ### Requirement: Host Window
 The host application MUST provide a borderless window that:
@@ -27,11 +37,13 @@ The host application MUST provide a borderless window that:
 - Sits in normal Z-order (does not use topmost) and does NOT use window transparency
 - Never takes focus: touching, clicking or dragging on it MUST NOT make it the foreground window or move keyboard
   focus away from the window that has it, so using the deck does not interrupt a game or any other application. As a
-  consequence the window receives no keyboard input and does not close on Escape
+  consequence the window receives no keyboard input and does not close on Escape. Showing the window again after its
+  display returned MUST NOT take focus either
 - Is not required to have a taskbar button; it is closed from the tray icon (see tray-icon), or by Escape in the
   development override
 - Starts activatable, so that it can be given focus for development, when the environment variable
   `URDECK_ACTIVATABLE` is set to `1`; in that case Escape closes the window
+- Is hidden while its display is absent (see display-targeting, "Absent Display")
 
 #### Scenario: Content area covers the full monitor
 - **WHEN** the host starts on a 1100×3840 target monitor
@@ -40,8 +52,8 @@ The host application MUST provide a borderless window that:
 
 #### Scenario: Window survives display changes
 - **WHEN** display settings change, or the machine resumes from sleep
-- **THEN** the host re-selects the target monitor and re-covers it, re-checking after 1.5s and again after 5s because
-  monitors wake in arbitrary order
+- **THEN** the host finds the remembered display again and converges to a verified placement on it (see
+  display-targeting, "Verified Placement After Display Changes"), because monitors wake in arbitrary order
 
 #### Scenario: Page returns after sleep
 - **WHEN** the machine resumes from sleep, or the graphics device is reset
@@ -63,6 +75,10 @@ The host application MUST provide a borderless window that:
 #### Scenario: Development override
 - **WHEN** the host is started with `URDECK_ACTIVATABLE=1`
 - **THEN** the window can take focus and Escape closes it
+
+#### Scenario: Display returns while another application has focus
+- **WHEN** the deck's display is connected again while another application's window has keyboard focus
+- **THEN** the deck is shown and the other window keeps focus
 
 ### Requirement: Widget Surfaces
 The host MUST give every widget its own drawing surface:
@@ -167,7 +183,7 @@ The host MUST discover plugins in the `plugins/` subdirectory of its executable:
 The host MUST manage configuration via `urdeck-config.json`:
 
 - Located next to the executable; created with defaults if it does not exist
-- Saves configuration on exit
+- Saves configuration on exit, and when it remembers a display or updates the remembered one (see below)
 - Hot-reloads configuration on file change (1s debounce), retrying when the file is briefly locked and ignoring its own saves
 - On a parse error keeps running with the last good configuration and logs a warning
 - Preserves widget-specific settings (extra JSON properties on a widget object) across load/save
@@ -176,6 +192,10 @@ The host MUST manage configuration via `urdeck-config.json`:
 - `pager.indicator` is the page indicator's mode: `always`, `fade`, `off` or `auto`; absent means `auto`
 - `dock` is a list of widget objects shown in the dock (see dock, "Dock Configuration"); absent or empty means no
   dock. Widget-specific settings on its entries are preserved across load/save like those of a page's widgets
+- `display` is the remembered display (see display-targeting): an object with `name` (for the reader, never used for
+  matching), `model`, `path` and `selector` (the selector it was chosen with; absent when it was not chosen by a
+  selector). The host writes it; it is absent from a default configuration until a display has been chosen. A user
+  removes it to make the host choose again. Properties of it the host does not know are preserved across load and save
 
 #### Scenario: Config file does not exist
 - **WHEN** the host starts with no `urdeck-config.json`
@@ -206,18 +226,31 @@ The host MUST manage configuration via `urdeck-config.json`:
 - **THEN** the file loads, the entry's slot is empty, a warning is logged, and the entry's properties are still in the
   file after a save
 
+#### Scenario: Display remembered while running
+- **WHEN** the host chooses a display for a configuration without `display`
+- **THEN** the file gains the `display` object while the host runs, every other property of the file is unchanged, and
+  the host does not reload the configuration because of its own save
+
+#### Scenario: Older configuration
+- **WHEN** a configuration written before this change, with `monitorName` and no `display`, is loaded
+- **THEN** it loads without a warning and the deck is on the display the selector chooses
+
 ### Requirement: Application Entry Point
 The host MUST provide the application entry point with:
 
 - Startup sequence: monitor enumeration, config load, theme selection, plugin scan, target selection, window/layout,
-  per-widget timers
+  per-widget timers. When the target is absent (see display-targeting, "Absent Display") the sequence stops after
+  target selection, with the tray icon present, and continues when the display is connected
 - Unhandled UI exceptions logged via `UrDeckLog`
-- Diagnostics written to `urdeck.log` next to the executable (no console output)
+- Diagnostics written to `urdeck.log` next to the executable (no console output). Each connected monitor is logged with
+  its name, model, device name, bounds and scaling
 - `--snapshot out.png [--size WxH] [--theme name] [--page N]`: renders a page off-screen via `PageRenderer` with the
   same layout, card and widget code, including the reserved band and the page indicator as the configuration says,
   writes a PNG (default size = target monitor resolution, default theme = the configured theme, default page = the
   page at `activePage`) and exits with 0 on success, 1 on failure. `--page` is the 0-based index of the page, and an
-  index outside the page list is a failure with a logged reason. The indicator shows page N as the current page
+  index outside the page list is a failure with a logged reason. The indicator shows page N as the current page.
+  `--snapshot` never writes the configuration: it does not remember a display. When the target monitor is absent and
+  `--size` is not given, the size is the primary monitor's resolution and the log says so
 
 #### Scenario: Application starts clean
 - **WHEN** the user launches the urdeck host
@@ -239,6 +272,14 @@ The host MUST provide the application entry point with:
 #### Scenario: Snapshot page out of range
 - **WHEN** the host is run with `--snapshot out.png --page 5` and the configuration has three pages
 - **THEN** no PNG is written, the reason is logged and the exit code is 1
+
+#### Scenario: Snapshot without the target monitor
+- **WHEN** the host is run with `--snapshot out.png` and the remembered display is not connected
+- **THEN** a PNG at the primary monitor's resolution is written, and the configuration file is not modified
+
+#### Scenario: Started before the display is ready
+- **WHEN** the host starts at sign-in before the remembered display is connected
+- **THEN** no window is shown, and the deck appears with its widgets when the display is connected
 
 ### Requirement: Theme Application
 The host MUST apply the selected theme (see the `theme` capability) to everything it draws:

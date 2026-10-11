@@ -11,6 +11,7 @@ using Microsoft.Win32;
 using SkiaSharp;
 using UrDeck.Engine.Config;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Display;
 using UrDeck.Engine.Layout;
 using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Rendering;
@@ -21,7 +22,8 @@ using WinRT.Interop;
 namespace UrDeck.Host;
 
 /// <summary>
-/// The borderless window covering the target monitor. Its content is an ordered stack of layers composited by the GPU:
+/// The borderless window covering the deck's display. Where it is, and whether it is shown at all, is decided by a
+/// <see cref="PlacementController"/>: this class tells it what happened and does what it asks. Its content is an ordered stack of layers composited by the GPU:
 /// a background layer filled with the theme's background colour, and a canvas holding one surface per widget.
 /// Later changes add layers (an image or video background, hosted views such as a web view) to the same stack.
 /// </summary>
@@ -42,10 +44,11 @@ public sealed class MainWindow : Window
     private HashSet<string> _changedReadings = new(StringComparer.OrdinalIgnoreCase);
     private bool _changedQueued;
     private readonly FrameClock _frameClock;
-    private readonly List<DispatcherQueueTimer> _pendingRetargets = new();
-    private MonitorInfo _target;
+    private readonly Action _saveDisplay;
+    private readonly PlacementController _placement;
+    private readonly DispatcherQueueTimer _placementTimer;
+    private bool _pageHeld = true;
     private bool _rebuildPending;
-    private bool _nudged;
     private LoadedTheme _loadedTheme;
     private Theme? _theme;
     private Theme? _dockTheme;
@@ -55,12 +58,16 @@ public sealed class MainWindow : Window
     private readonly record struct LayoutKey(
         System.Drawing.Size Screen, double Scale, LoadedTheme? Theme, IndicatorMode Mode, int PageCount, int DockCount);
 
-    internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, MonitorInfo target)
+    /// <summary>The placement state changed (UI thread); the name is the remembered display's, if there is one.</summary>
+    internal event Action<PlacementState, string?>? PlacementChanged;
+
+    /// <summary><paramref name="saveDisplay"/> writes the configuration after the remembered display was set or updated.</summary>
+    internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, Action saveDisplay)
     {
         _configStore = configStore;
         _plugins = plugins;
         _themes = themes;
-        _target = target;
+        _saveDisplay = saveDisplay;
         _frameClock = new FrameClock(DispatcherQueue);
         _navigator = new PageNavigator(PageNames(), _configStore.Config.ActivePage);
         _pager = new PagerController(_root, _surface, _overlay, _frameClock, _navigator);
@@ -97,21 +104,18 @@ public sealed class MainWindow : Window
         Content = _root;
 
         _focus = WindowFocus.Apply(_hwnd);
-        MonitorPlacement.Cover(_hwnd, _target.Bounds);
-        _root.Loaded += (_, _) =>
-        {
-            // The scale is only known once the content is in the tree; moving onto a monitor with another scale
-            // changes the DPI and the frame, so cover again and rebuild.
-            _root.XamlRoot.Changed += (_, _) =>
-            {
-                UrDeckLog.Info($"XAML root changed, scale {_root.XamlRoot.RasterizationScale:0.##}");
-                MonitorPlacement.Cover(_hwnd, _target.Bounds);
-                ScheduleRebuild();
-            };
-            LogPlacement();
-            ScheduleRebuild();
-        };
-        _root.SizeChanged += (_, _) => ScheduleRebuild();
+
+        // One timer drives placement: the controller says after each call when it wants the next one.
+        var seam = new PlacementSeam(this);
+        _placement = new PlacementController(seam, seam, () => _configStore.Config);
+        _placementTimer = DispatcherQueue.CreateTimer();
+        _placementTimer.IsRepeating = false;
+        _placementTimer.Tick += (_, _) => Arm(_placement.Tick(Now));
+
+        // The scale is only known once the content is in the tree; moving onto a monitor with another scale changes
+        // the DPI and the frame. Placement decides what to do about either.
+        _root.Loaded += (_, _) => _root.XamlRoot.Changed += (_, _) => Signal(PlacementSignal.WindowChanged);
+        _root.SizeChanged += (_, _) => Signal(PlacementSignal.WindowChanged);
 
         _configStore.ConfigChanged += _ => DispatcherQueue.TryEnqueue(() =>
         {
@@ -120,7 +124,7 @@ public sealed class MainWindow : Window
             _navigator.Reload(PageNames());
             _plugins.Readings.ApplySettings(_configStore.Config.Providers);
             ApplyBackground();
-            Retarget("config changed");
+            Signal(PlacementSignal.ConfigReloaded);
             ScheduleRebuild(force: true);
         });
         _plugins.PluginsChanged += () => DispatcherQueue.TryEnqueue(() =>
@@ -131,10 +135,16 @@ public sealed class MainWindow : Window
             ScheduleRebuild(force: true);
         });
 
-        // Monitors can come back from sleep/hot-plug in any order and settle their DPI late, so
-        // re-evaluate the target a few times after each change instead of trusting the first event.
-        SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
-        SystemEvents.PowerModeChanged += OnPowerModeChanged;
+        // Monitors can come back from sleep/hot-plug in any order and settle their DPI late; placement waits for
+        // them and checks its result instead of trusting the first event.
+        // Subscribed from the thread pool on purpose: SystemEvents hands events to the synchronization context of the
+        // thread that subscribed, and the UI thread's one (set in Program.Main) never delivered them.
+        Task.Run(() =>
+        {
+            SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
+            SystemEvents.PowerModeChanged += OnPowerModeChanged;
+            UrDeckLog.Info("Listening for display and power changes");
+        });
         Closed += (_, _) => OnClosed();
     }
 
@@ -157,70 +167,101 @@ public sealed class MainWindow : Window
 
     private double Scale => _root.XamlRoot?.RasterizationScale ?? 1;
 
-    private void OnDisplaySettingsChanged(object? sender, EventArgs e) =>
-        DispatcherQueue.TryEnqueue(() => ScheduleRetargets("display settings changed", rebuild: false));
+    // These run on the SystemEvents thread, which swallows what a handler throws: say what arrived and what failed.
+    private void OnDisplaySettingsChanged(object? sender, EventArgs e)
+    {
+        UrDeckLog.Info("Windows: display settings changed");
+        Post(PlacementSignal.DisplaysChanged);
+    }
 
     private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
     {
+        UrDeckLog.Info($"Windows: power mode {e.Mode}");
         if (e.Mode == PowerModes.Resume)
-            DispatcherQueue.TryEnqueue(() => ScheduleRetargets("resumed from sleep", rebuild: true));
+            Post(PlacementSignal.Resumed);
     }
 
-    private void ScheduleRetargets(string reason, bool rebuild)
+    private void Post(PlacementSignal signal)
     {
-        foreach (var t in _pendingRetargets)
-            t.Stop();
-        _pendingRetargets.Clear();
-
-        Retarget(reason);
-        // After a resume the graphics device may have been reset: recreating every surface is the simple recovery.
-        if (rebuild)
-            ScheduleRebuild(force: true);
-
-        foreach (var delay in new[] { TimeSpan.FromSeconds(1.5), TimeSpan.FromSeconds(5) })
+        try
         {
-            var timer = DispatcherQueue.CreateTimer();
-            timer.Interval = delay;
-            timer.IsRepeating = false;
-            timer.Tick += (_, _) =>
-            {
-                _pendingRetargets.Remove(timer);
-                Retarget($"{reason} (+{delay.TotalSeconds:0.#}s)");
-                if (rebuild)
-                    ScheduleRebuild(force: true);
-            };
-            _pendingRetargets.Add(timer);
-            timer.Start();
+            if (!DispatcherQueue.TryEnqueue(() => Signal(signal)))
+                UrDeckLog.Warn($"Could not queue the {signal} signal: the UI thread is not accepting work");
+        }
+        catch (Exception ex)
+        {
+            UrDeckLog.Error($"Could not queue the {signal} signal", ex);
         }
     }
 
-    /// <summary>Re-selects the target monitor from config and moves the window if it isn't covering it exactly.</summary>
-    private void Retarget(string reason)
+    /// <summary>Starts placement: the window is shown if its display is connected, and when it is.</summary>
+    internal void Start() => Signal(PlacementSignal.Startup);
+
+    private static TimeSpan Now => TimeSpan.FromMilliseconds(Environment.TickCount64);
+
+    private void Signal(PlacementSignal signal) => Arm(_placement.Signal(signal, Now));
+
+    private void Arm(TimeSpan? delay)
     {
-        var monitors = MonitorPlacement.GetMonitors();
-        if (monitors.Count == 0)
+        _placementTimer.Stop();
+        if (delay is not { } wait)
             return;
-
-        var target = MonitorPlacement.Select(_configStore.Config, monitors);
-        var actual = MonitorPlacement.GetContentBounds(_hwnd);
-        if (target == _target && actual == target.Bounds)
-            return;
-
-        UrDeckLog.Info($"Retarget ({reason}): {target}; content area was at {actual.X},{actual.Y} {actual.Width}x{actual.Height}");
-        _target = target;
-        MonitorPlacement.Cover(_hwnd, target.Bounds);
-        LogPlacement();
+        _placementTimer.Interval = wait > TimeSpan.FromMilliseconds(1) ? wait : TimeSpan.FromMilliseconds(1);
+        _placementTimer.Start();
     }
 
-    private void LogPlacement()
+    private void ShowDeck()
     {
-        var actual = MonitorPlacement.GetContentBounds(_hwnd);
-        var bounds = _target.Bounds;
-        UrDeckLog.Info($"Content area at {actual.X},{actual.Y} {actual.Width}x{actual.Height} physical " +
-                      $"(target {bounds.X},{bounds.Y} {bounds.Width}x{bounds.Height}), " +
-                      $"{_root.ActualWidth:0.#}x{_root.ActualHeight:0.#} DIPs, scale {Scale:0.##}");
-        if (actual != bounds)
-            UrDeckLog.Warn("Window content area does not match the target monitor.");
+        // Never with activation: the display may return while a game has the keyboard. The development window is
+        // activated, or it would get no Escape.
+        if (WindowFocus.IsEnabled)
+            AppWindow.Show(false);
+        else
+            Activate();
+    }
+
+    private void HideDeck()
+    {
+        _pageHeld = true;
+        AppWindow.Hide();
+    }
+
+    /// <summary>Drops the page of a hidden deck: its widgets stop and their providers follow after the linger period.</summary>
+    private void ReleasePage()
+    {
+        _pager.Release();
+        DisposeThemes();
+        _lastLayout = default;
+    }
+
+    /// <summary>What the placement controller sees of this window, and what it asks of it.</summary>
+    private sealed class PlacementSeam(MainWindow window) : IDisplayEnvironment, IPlacementOwner
+    {
+        public IReadOnlyList<DisplayInfo> GetDisplays() => MonitorPlacement.GetDisplays();
+
+        public System.Drawing.Rectangle ContentBounds => MonitorPlacement.GetContentBounds(window._hwnd);
+
+        public double WindowScaling => MonitorPlacement.GetWindowScaling(window._hwnd);
+
+        public System.Drawing.SizeF LayoutSize => new((float)window._root.ActualWidth, (float)window._root.ActualHeight);
+
+        public void Cover(System.Drawing.Rectangle bounds, bool nudge) => MonitorPlacement.Cover(window._hwnd, bounds, nudge);
+
+        public void Show() => window.ShowDeck();
+
+        public void Hide() => window.HideDeck();
+
+        public void RebuildPage(bool force)
+        {
+            window._pageHeld = false;
+            window.ScheduleRebuild(force);
+        }
+
+        public void ReleasePage() => window.ReleasePage();
+
+        public void SaveRememberedDisplay(RememberedDisplay display) => window._saveDisplay();
+
+        public void StateChanged(PlacementState state, string? displayName) => window.PlacementChanged?.Invoke(state, displayName);
     }
 
     /// <summary>Coalesces layout rebuilds (resize, scale and placement changes arrive in bursts).</summary>
@@ -240,23 +281,12 @@ public sealed class MainWindow : Window
 
     private void RebuildLayout()
     {
+        // A hidden deck has no page, and a deck that was just shown gets one when placement has settled and asks for it.
+        if (_pageHeld)
+            return;
+
         var screen = new System.Drawing.Size((int)_root.ActualWidth, (int)_root.ActualHeight);
         double scale = Scale;
-
-        // After a scale change (a monitor unplugged and plugged back in) XAML can keep the content size of the old
-        // scale while the window is right. Resize the window by a pixel once to make it lay out again, and build then.
-        var content = MonitorPlacement.GetContentBounds(_hwnd);
-        bool stale = !content.IsEmpty &&
-            (Math.Abs(_root.ActualWidth * scale - content.Width) > 2 || Math.Abs(_root.ActualHeight * scale - content.Height) > 2);
-        if (stale && !_nudged)
-        {
-            _nudged = true;
-            UrDeckLog.Info($"Layout {_root.ActualWidth:0.#}x{_root.ActualHeight:0.#} DIPs at scale {scale:0.##} does not match the content area {content.Width}x{content.Height}; resizing the window to refresh it");
-            MonitorPlacement.Cover(_hwnd, _target.Bounds, nudge: true);
-            ScheduleRebuild();
-            return;
-        }
-        _nudged = stale;
 
         var config = _configStore.Config;
         var mode = config.Pager.GetIndicatorMode();
@@ -366,8 +396,7 @@ public sealed class MainWindow : Window
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         SystemEvents.PowerModeChanged -= OnPowerModeChanged;
         _plugins.Readings.ReadingsChanged -= OnReadingsChanged;
-        foreach (var t in _pendingRetargets)
-            t.Stop();
+        _placementTimer.Stop();
         _pager.Shutdown();
         _frameClock.Shutdown();
         DisposeThemes();

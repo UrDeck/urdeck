@@ -40,8 +40,8 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
 - The shortcut widget, which brought tap input, launching, icons and the image tile (item 7; implemented in
   `shortcut-and-tap`; done).
 - The dock, a row of up to four widget slots at the bottom of every page (item 10; implemented in `dock`).
-- Recovery after sleep, hot-plug and monitor wake order (the robustness half of item 6; the picker UI waits for
-  milestone 3).
+- Recovery after sleep, hot-plug and monitor wake order (the robustness half of item 6; implemented in
+  `display-recovery`, checked on the panel for sleep, unplug and scaling; the picker UI waits for milestone 3).
 - CPU temperature through the opt-in elevated helper (item 3, fourth change). May slip to milestone 2 if the driver
   question takes long; the card shows a dash until then.
 - Start with Windows, in its simplest form (item 12).

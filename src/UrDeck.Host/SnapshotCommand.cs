@@ -13,8 +13,9 @@ namespace UrDeck.Host;
 /// <summary>
 /// <c>--snapshot out.png [--size WxH] [--theme name] [--page N]</c>: renders a page (default: the one at
 /// <c>activePage</c>) off-screen with the same layout and
-/// widget code as the live window, writes a PNG and exits. Defaults to the target monitor's resolution. It uses the
-/// engine alone and runs before the XAML application starts.
+/// widget code as the live window, writes a PNG and exits. Defaults to the target monitor's resolution, to the primary
+/// monitor's when the target is not connected. It uses the engine alone, runs before the XAML application starts and
+/// never writes the configuration.
 /// </summary>
 internal static class SnapshotCommand
 {
@@ -23,10 +24,9 @@ internal static class SnapshotCommand
         int index = Array.IndexOf(args, "--snapshot");
         try
         {
-            using var host = new HostContext();
+            using var host = new HostContext(saveConfiguration: false);
             string output = index + 1 < args.Length ? args[index + 1] : "urdeck.snapshot.png";
-            int width = host.Target.Bounds.Width;
-            int height = host.Target.Bounds.Height;
+            int width, height;
 
             int sizeIndex = Array.IndexOf(args, "--size");
             if (sizeIndex >= 0 && sizeIndex + 1 < args.Length)
@@ -34,6 +34,21 @@ internal static class SnapshotCommand
                 string[] parts = args[sizeIndex + 1].Split('x', 'X');
                 width = int.Parse(parts[0], CultureInfo.InvariantCulture);
                 height = int.Parse(parts[1], CultureInfo.InvariantCulture);
+            }
+            else if (host.Target is { } target)
+            {
+                (width, height) = (target.Bounds.Width, target.Bounds.Height);
+                UrDeckLog.Info($"Snapshot size from the target monitor: {target}");
+            }
+            else if (host.Displays.FirstOrDefault(d => d.IsPrimary) is { } primary)
+            {
+                (width, height) = (primary.Bounds.Width, primary.Bounds.Height);
+                UrDeckLog.Info($"Snapshot: the target monitor is not connected; using the size of the primary monitor, {primary}");
+            }
+            else
+            {
+                (width, height) = (1100, 3840);
+                UrDeckLog.Info("Snapshot: no monitor found; using 1100x3840");
             }
 
             int themeIndex = Array.IndexOf(args, "--theme");

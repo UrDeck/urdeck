@@ -140,11 +140,25 @@ Config is `urdeck-config.json`, located next to the executable (`src/UrDeck.Host
 | `pages[].widgets[]` | Widgets on a page. `typeId` is the widget's `Id`; `col` (0-3), `row`, `width` (1-4) and `height` are in grid units. Invalid values are clamped and a warning is logged. An unknown `typeId` leaves its cell empty. |
 | any other property on a widget | Widget-specific settings, e.g. the Clock's `format` (`"24h"` or `"12h"`), `showDate`, `textColor` (hex), `fontSize` (multiplier) and `style` (`"simple"`, the default, or `"flap"`, a split-flap display whose digits flip when the minute changes). |
 | `activePage` | Index of the page to show. |
-| `monitorName` | Target monitor: `"primary"`, `"tallest"` (tallest portrait monitor), `"widest"`, `"largest"` (most pixels), or a device name such as `"DISPLAY1"`. |
-| `monitor` | 1-based monitor index, used when `monitorName` matches nothing. Falls back to the primary monitor. |
+| `monitorName` | Which monitor to choose when none is remembered yet: `"primary"`, `"tallest"` (tallest portrait monitor), `"widest"`, `"largest"` (most pixels), or a device name such as `"DISPLAY1"`. It is used once: the chosen monitor is then remembered as `display` and followed from there on. Changing it chooses again. |
+| `monitor` | 1-based monitor index, used when `monitorName` matches nothing. Falls back to the primary monitor. Like `monitorName`, it makes the choice once. |
+| `display` | The monitor the deck belongs to. UrDeck writes it the first time `monitorName` / `monitor` have chosen one: `name` (for you; never used to find the monitor), `model` and `path` (how the monitor is found again after a restart, sleep, or a move to another output), and `selector` (what it was chosen with). You do not edit it; **remove it to make UrDeck choose again**, for example when the first start picked the wrong monitor because yours was switched off. See [The deck's monitor](#the-decks-monitor). |
 | `theme` | Name of the theme: `default-dark` (default), `default-light`, `glass`, or a folder under `themes/` next to the executable. See [docs/themes.md](docs/themes.md). Unknown names fall back to the default with a warning; changing it applies on config reload without a restart. |
 | `providers` | Optional settings per data provider, keyed by provider id: `"providers": { "system": { "intervalMs": 500 } }` samples the `system` provider every 500 ms instead of its default 2000 ms. A value below the provider's minimum (250 ms for `system`) is raised to it and logged. Applies on config reload without a restart. Absent by default; other properties are kept in the file. |
 | `dock` | The widgets of the dock, up to four, in slot order: widget objects like those of a page, without `col` and `row`. Absent or empty: no dock. See [Dock](#dock). Applies on config reload without a restart, and widget-specific settings are kept in the file. |
+
+### The deck's monitor
+
+UrDeck stays on one physical monitor. Once it is remembered (`display` above), a monitor that would now match
+`monitorName` better, such as a taller one you plug in later, does not take the deck, and neither does the order in
+which Windows numbers the monitors.
+
+After sleep, a monitor being plugged in or out, or a change of resolution or scaling, UrDeck waits a moment for the
+monitors to settle, puts the window back on its monitor and checks that it fits; `urdeck.log` has a line for each step.
+
+While its monitor is not connected the deck is hidden: it does not move to another screen, its widgets and their data
+providers stop, and the tray icon's tooltip reads "UrDeck: waiting for" and the monitor's name. It comes back by
+itself when the monitor does. The same holds at startup: with the monitor off there is no window, only the tray icon.
 
 ### Stats widget
 

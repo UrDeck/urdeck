@@ -39,7 +39,6 @@ everything else should be fine on Sonnet.
 - Repo structure, licensing, the rename and the SDK/Engine split are done (item 1). The repo is `UrDeck/urdeck`.
 - `theme-and-card` (item 5) is implemented (themes as data, host-drawn card, gap in the layout, readout and text
   line components, Clock migrated); see item 5.
-- Proposed, not started: `display-targeting` (older draft, to be reworked with `/opsx:explore` then `/opsx:propose`).
 - `data-providers` (item 3, first of its three changes, `openspec/changes/archive/2026-10-05-data-providers`) is implemented and archived
   (2026-10-05, all tasks and the panel checks done): providers as a plugin kind, the reading hub, the `system` provider
   (CPU load per core and in total, memory load) and the stats widget at 1x1 and 2x2. Measurements are in
@@ -57,7 +56,6 @@ everything else should be fine on Sonnet.
 - `gpu-readings` is implemented and archived (2026-10-08, `openspec/changes/archive/2026-10-08-gpu-readings`): GPU load and temperature for any vendor
   through Windows, power and clock through `nvml.dll` on NVIDIA behind a vendor seam, without elevation. Spike and
   measurements in `docs/perf/gpu-readings.md`. Verified on NVIDIA only. Adds `IReadingSink.Log` to the SDK.
-- Proposed, not started: `display-targeting`.
 - `weather` is implemented (2026-10-08, `openspec/changes/archive/2026-10-08-weather`): the `weather` provider (Open-Meteo, keyless, any number
   of places typed into the widgets), the 4x2 weather widget with Meteocons animated icons (`SkiaSharp.Skottie`), the
   time reading, patterned catalog entries, attribution carried with the data and drawn by the weather and stats widgets,
@@ -86,7 +84,13 @@ everything else should be fine on Sonnet.
   settings `days` and `animateForecast`), seven forecast days from the provider (`daily/0` to `daily/6`, replacing
   `today/*`), and the SDK reading kinds `Date`, `Speed` and `Depth` with `DateStyle`, a per-description canonical depth
   unit and `ReadingFormatter.CompassPoint` (package 0.8.0). Panel look and the cost measurement are for the owner.
-- Next: sensors that need elevation (item 3, fourth change). See "Suggested order" below.
+- `display-recovery` is implemented (2026-10-11, `openspec/changes/display-recovery`): the half of item 6 that needs no
+  user interface. Checked on the panel: five sleeps, unplug and replug, start without the display, scaling changes, a
+  display that is only switched off (Windows does not report it). Not checked on hardware: a move to another output (no
+  spare output; the unit tests cover it). Idle GPU is 0.2 to 0.7% with the full widget set. It replaces the `display-targeting` draft; see item 6 and
+  `docs/perf/display-recovery.md`.
+- Next: `display-recovery`, then start with Windows (item 12), which together let the two-week run of milestone 1
+  begin. Sensors that need elevation (item 3, fourth change) follow and may slip to milestone 2.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -114,8 +118,8 @@ performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked st
 4. **Pages and touch** (item 8; pages done in `pages-and-pager`, taps in `shortcut-and-tap`), then **shortcuts**
    (item 7; done in `shortcut-and-tap`, which brought the image tile) and the **dock** (item 10; done in `dock`).
 
-Display targeting (item 6) is a future change. Its draft is written against the WPF window, so rework it now that the
-new host has landed.
+Display targeting (item 6) is split into `display-recovery` (implemented) and `settings-window`
+(the picker).
 
 ---
 
@@ -329,15 +333,29 @@ Follow-ups (see `design.md` of the theme-and-card change for the constraints the
   shortcuts and the dock). Charts stay parked until a widget needs one. See item 7 for which widget brings which.
 - Later theme knobs once measured: shadows, gradients, blur, a motion level, backgrounds, icon packs.
 
-## 6. Display targeting (`openspec/changes/display-targeting`)
+## 6. Display targeting (`openspec/changes/display-recovery`, then `settings-window`)
 
 Pick the target monitor from a UI list with friendly names (EDID), persist a stable monitor identity (not
 `DISPLAYn`), never expose resolution/scaling to the user, and re-render at the correct scale after sleep/resume,
 hot-plug, mixed-DPI setups and arbitrary monitor wake order. Needs real sleep/wake testing on the Y70.
 **Model:** Opus (hard to debug).
 
-The existing draft targets the WPF window. Rework it once the new host from item 14 has landed; placement and recovery
-after sleep are also one of the spike's pass/fail checks.
+**Status (2026-10-11):** split in two. The older `display-targeting` draft (written against the WPF window) is
+deleted and replaced.
+
+- `display-recovery` (implemented, milestone 1): the half without a user interface. The host remembers the physical
+  display (`display` in the configuration: name, model, device path), the selectors `monitorName` / `monitor` choose
+  once instead of on every display event, placement after a display change is verified and retried instead of
+  re-checked after fixed delays, and the deck hides while its display is absent. Its `design.md` has the measurements
+  of the owner's three displays and the decisions.
+- `settings-window` (not proposed, milestone 3 or earlier): a small window opened from the tray icon, with the
+  monitor picker as its first page. Carried over from the old draft: list every connected display with its friendly
+  name (a generic name plus resolution and position when the display reports none), resolution, orientation, primary
+  flag and relative position; an Identify action that briefly shows a marker on every physical display; selecting an
+  entry moves the deck at once and writes `display` without a `selector`; the window is released after closing and
+  must not raise idle memory or CPU. It may add a "fall back to the primary monitor while absent" option. The picker
+  needs none of the editor's open decisions (settings metadata, grid shape), so it can be the editor's first slice and
+  settle the window shell, the tray entry and the single-instance guard (item 12).
 
 ## 7. Default widget set
 

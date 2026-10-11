@@ -4,6 +4,7 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Display;
 
 namespace UrDeck.Host;
 
@@ -38,8 +39,8 @@ public partial class App : Application
             _memTimer.Start();
         }
 
-        _host = new HostContext();
-        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Target);
+        _host = new HostContext(saveConfiguration: true);
+        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.SaveConfiguration);
         _window.Closed += (_, _) =>
         {
             _tray?.Dispose();
@@ -47,12 +48,15 @@ public partial class App : Application
             _host.Dispose();
             _host = null;
         };
-        _window.Activate();
-
         // The tray icon is the way to close the app: the window never takes focus and has no taskbar button.
         var window = _window;
         _tray = new TrayIcon(
             [new TrayMenuEntry("Quit", window.Close)],
             Path.Combine(AppContext.BaseDirectory, "urdeck.ico"));
+
+        // The window is not shown here: placement shows it once its display is connected, and hides it while it is not.
+        window.PlacementChanged += (state, display) => _tray?.SetTooltip(
+            state == PlacementState.Absent ? $"UrDeck: waiting for {display ?? "a display"}" : "UrDeck");
+        window.Start();
     }
 }
