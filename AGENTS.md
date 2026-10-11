@@ -34,7 +34,7 @@ sdk/UrDeck.Sdk       MIT. The plugin contract: attributes, Widget<T>, WidgetConf
                      Gauge, ImageTile), Data (IDataProvider, readings, ReadingFormatter), Input (ITapTarget), Launch (LaunchTarget,
                      ILauncher), Icons (IIconSource)
 sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
-src/UrDeck.Engine     GPL. Plugin loader, config store, grid and dock layout, gestures and hit testing, PageRenderer, ReadingHub (runs the
+src/UrDeck.Engine     GPL. Plugin loader, config store, grid and dock layout, display identity and placement, gestures and hit testing, PageRenderer, ReadingHub (runs the
                       providers), per-widget WidgetServices, Launcher, IconService (shell, file and site icons), logging
 src/UrDeck.Host       GPL. WinUI 3 app: window/monitor placement, one SKXamlCanvas layer per widget
 providers/            GPL. First-party data provider plugins (UrDeck.Providers.System); reference only UrDeck.Sdk
@@ -63,6 +63,18 @@ See the README license map before moving code between projects: it can change th
   start it with `URDECK_ACTIVATABLE=1` (the window can take focus and Escape closes it) when developing.
 - Launching `UrDeck.Host.exe` (not `--snapshot`) blocks the shell. Start it detached and read `urdeck.log` next to the exe;
   it logs monitors, target vs. actual content area, placed widgets, reloads and warnings.
+- Where the window is, and whether it is shown, is decided by `PlacementController` (`src/UrDeck.Engine/Display`, tested
+  with scripted display sequences); `MainWindow` only reports signals and arms one timer. The log has `Display chosen
+  with ...` / `Display matched by device path` (which monitor and why), `Placement: A -> B` for each state change,
+  `Placement attempt N on <name>: <what differed>` for each retry, `Placement verified on ...` (with `rebuilding the page`
+  or `page kept`), and `Deck hidden: waiting for ...` / `Deck shown on ...`. No placement lines while nothing changes.
+- `SystemEvents` (power resume, display changes) must be subscribed from a thread-pool thread, as `MainWindow` does:
+  subscribed from the UI thread (which has the `DispatcherQueueSynchronizationContext` from `Program.Main`) it delivered
+  nothing, not even Suspend. The log says `Windows: power mode Resume` / `display settings changed` when one arrives;
+  if a sleep leaves no such line, the subscription is broken, not the placement.
+- The host remembers its display in `urdeck-config.json` (`display`) and writes the file when it does. With that
+  display not connected there is no window at all, only the tray icon: delete `display` from the config next to the exe
+  to make it choose again. `--snapshot` never writes the config.
 - Screen capture: use Windows PowerShell 5.1 (`powershell.exe`, not `pwsh`), call `SetProcessDpiAwarenessContext(-4)`
   first, then `Graphics.CopyFromScreen` on the monitor bounds. `PrintWindow` on the window returns blank. Prefer one
   capture, or ask the user to look.

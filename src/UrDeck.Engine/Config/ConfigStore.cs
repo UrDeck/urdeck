@@ -4,6 +4,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Display;
 using UrDeck.Engine.Layout;
 using UrDeck.Sdk;
 
@@ -96,6 +97,13 @@ public class UrDeckConfig
     /// </summary>
     [JsonPropertyName("monitorName")]
     public string? MonitorName { get; set; }
+
+    /// <summary>
+    /// The display the deck belongs to. Written by the host once the selectors above have chosen one; absent from a
+    /// default configuration.
+    /// </summary>
+    [JsonPropertyName("display")]
+    public RememberedDisplay? Display { get; set; }
 
     /// <summary>Per-provider settings keyed by provider id; absent from a default configuration.</summary>
     [JsonPropertyName("providers")]

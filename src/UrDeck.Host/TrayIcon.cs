@@ -18,13 +18,13 @@ internal sealed record TrayMenuEntry(string Label, Action Run);
 internal sealed class TrayIcon : IDisposable
 {
     private const string ClassName = "UrDeckTrayWindow";
-    private const string Tooltip = "UrDeck";
     private const uint IconId = 1;
     private const uint CallbackMessage = 0x8001; // WM_APP + 1
     private const uint WmNull = 0x0000;
     private const uint WmContextMenu = 0x007B;
     private const uint WmDestroy = 0x0002;
     private const uint NimAdd = 0;
+    private const uint NimModify = 1;
     private const uint NimDelete = 2;
     private const uint NimSetVersion = 4;
     private const uint NifMessage = 0x1;
@@ -53,6 +53,7 @@ internal sealed class TrayIcon : IDisposable
     private nint _icon;
     private bool _ownsIcon;
     private bool _added;
+    private string _tooltip = "UrDeck";
 
     public TrayIcon(IReadOnlyList<TrayMenuEntry> entries, string iconPath)
     {
@@ -107,6 +108,22 @@ internal sealed class TrayIcon : IDisposable
         _icon = 0;
     }
 
+    /// <summary>Changes the text shown when the pointer rests on the icon. It is kept when the icon is added again.</summary>
+    public void SetTooltip(string tooltip)
+    {
+        if (tooltip == _tooltip)
+            return;
+        _tooltip = tooltip;
+        if (!_added)
+            return;
+
+        var data = NewData();
+        data.Flags = NifTip | NifShowTip;
+        data.Tip = _tooltip;
+        if (!Shell_NotifyIcon(NimModify, ref data))
+            UrDeckLog.Warn("Tray icon: could not change the tooltip");
+    }
+
     private void LoadIcon()
     {
         int width = GetSystemMetrics(SmCxSmIcon);
@@ -129,7 +146,7 @@ internal sealed class TrayIcon : IDisposable
         data.Flags = NifMessage | NifIcon | NifTip | NifShowTip;
         data.CallbackMessage = CallbackMessage;
         data.Icon = _icon;
-        data.Tip = Tooltip;
+        data.Tip = _tooltip;
         _added = Shell_NotifyIcon(NimAdd, ref data);
         if (!_added)
         {
