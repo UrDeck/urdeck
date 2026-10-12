@@ -25,6 +25,27 @@ dotnet test urdeck.slnx -c Release       # grid, config, plugin loader and analy
 
 The window covers the target monitor completely. Press Esc to close it. Diagnostics go to `urdeck.log` next to the executable.
 
+### Installing a copy and starting with Windows
+
+`dotnet build` output is for development: a build either fails on locked files or replaces the working configuration with
+the sample. To run UrDeck daily, install a copy:
+
+```powershell
+pwsh scripts/Install-Local.ps1            # publishes to %LOCALAPPDATA%\Programs\UrDeck (or -Destination <folder>)
+```
+
+The script closes a running copy (`UrDeck.Host.exe --quit`), replaces the application's files and starts it again; add
+`-Start` to start a copy that was not running. It never replaces `urdeck-config.json` (the sample is copied only when
+there is none), the log, `cache/`, `themes/` or plugins it did not build. Copy your working `urdeck-config.json` into the
+installed folder once.
+
+Right-click the tray icon and choose **Start with Windows** to start that copy at sign-in. The check mark shows what
+Windows will do, including after you switch it off in Task Manager or Settings. Only one copy runs per folder: a second
+start from the same folder logs a line and exits, while a build beside the installed copy still starts.
+`UrDeck.Host.exe --quit` asks the copy in the same folder to close and waits up to 10 seconds.
+
+`urdeck.log` lines start with the date (`[2026-10-11 07:15:02.250]`); at 5 MB the file becomes `urdeck.log.1`.
+
 ### Closing the window
 
 The window never takes focus, so touching or clicking the deck does not interrupt a game or another application. As a

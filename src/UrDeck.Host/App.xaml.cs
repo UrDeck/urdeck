@@ -5,6 +5,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
+using UrDeck.Engine.Startup;
 
 namespace UrDeck.Host;
 
@@ -15,6 +16,7 @@ public partial class App : Application
     private MainWindow? _window;
     private TrayIcon? _tray;
     private DispatcherQueueTimer? _memTimer;
+    private readonly RunKeyAutostart _autostart = new();
 
     public App()
     {
@@ -51,12 +53,35 @@ public partial class App : Application
         // The tray icon is the way to close the app: the window never takes focus and has no taskbar button.
         var window = _window;
         _tray = new TrayIcon(
-            [new TrayMenuEntry("Quit", window.Close)],
+            [
+                new TrayMenuEntry("Start with Windows", ToggleAutostart, () => _autostart.State == AutostartState.On),
+                new TrayMenuEntry("Quit", window.Close),
+            ],
             Path.Combine(AppContext.BaseDirectory, "urdeck.ico"));
+
+        // --quit sets an event; closing the window on the UI thread is what the tray's Quit does.
+        var dispatcher = DispatcherQueue.GetForCurrentThread();
+        Program.Instance?.ListenForQuit(() =>
+        {
+            UrDeckLog.Info("--quit received; closing");
+            dispatcher.TryEnqueue(window.Close);
+        });
 
         // The window is not shown here: placement shows it once its display is connected, and hides it while it is not.
         window.PlacementChanged += (state, display) => _tray?.SetTooltip(
             state == PlacementState.Absent ? $"UrDeck: waiting for {display ?? "a display"}" : "UrDeck");
         window.Start();
+    }
+
+    private void ToggleAutostart()
+    {
+        var before = _autostart.State;
+        string? replaced = before == AutostartState.AnotherCopy ? _autostart.RegisteredExecutable : null;
+        if (before == AutostartState.On)
+            _autostart.SwitchOff();
+        else
+            _autostart.SwitchOn();
+
+        UrDeckLog.Info($"Start with Windows: {before} -> {_autostart.State}" + (replaced is null ? "" : $" (replaced {replaced})"));
     }
 }

@@ -49,10 +49,17 @@
     </ItemGroup>
 
     <!-- Drop first-party plugin assemblies into $(OutDir)plugins so the host discovers them like any third-party plugin. -->
-    <Target Name="CopyBuiltInPlugins" AfterTargets="Build">
+    <Target Name="CollectBuiltInPlugins">
         <MSBuild Projects="@(UrDeckPlugin)" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
             <Output TaskParameter="TargetOutputs" ItemName="_UrDeckPluginAssembly" />
         </MSBuild>
+    </Target>
+    <Target Name="CopyBuiltInPlugins" AfterTargets="Build" DependsOnTargets="CollectBuiltInPlugins">
         <Copy SourceFiles="@(_UrDeckPluginAssembly)" DestinationFolder="$(OutDir)plugins" SkipUnchangedFiles="true" />
+    </Target>
+
+    <!-- The published folder is what a zip or an installer wraps, so it needs the same plugins/ as the build output. -->
+    <Target Name="PublishBuiltInPlugins" AfterTargets="Publish" DependsOnTargets="CollectBuiltInPlugins">
+        <Copy SourceFiles="@(_UrDeckPluginAssembly)" DestinationFolder="$(PublishDir)plugins" SkipUnchangedFiles="true" />
     </Target>
 </Project>
