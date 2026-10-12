@@ -17,11 +17,11 @@ Tasks marked **(owner)** need the owner: prepare what they need, then stop and a
 
 ## 3. Check it
 
-- [ ] 3.1 On the pull request itself: `changes` reports `code` true, `build`, `test-linux` and `ci-ok` pass
-- [ ] 3.2 A scratch pull request that changes only `docs/BACKLOG.md`: `build`, `test-linux` and `openspec` are skipped, `ci-ok` and `pr-title` pass. Close it without merging
-- [ ] 3.3 A scratch pull request that changes only a file under `openspec/`: only `openspec` runs. Close it
-- [ ] 3.4 A scratch pull request that changes `docs/schemas/v1/shader-manifest.json`: `build` runs. Close it
-- [ ] 3.5 A scratch pull request with a deliberately failing test: `ci-ok` fails. Close it
+- [x] 3.1 On the pull request itself: `changes` reports `code` true, `build`, `test-linux` and `ci-ok` pass
+- [x] 3.2 A scratch pull request that changes only `docs/BACKLOG.md`: `build`, `test-linux` and `openspec` are skipped, `ci-ok` and `pr-title` pass. Close it without merging
+- [x] 3.3 A scratch pull request that changes only a file under `openspec/`: only `openspec` runs. Close it
+- [x] 3.4 A scratch pull request that changes `docs/schemas/v1/shader-manifest.json`: `build` runs. Close it
+- [x] 3.5 A scratch pull request with a deliberately failing test: `ci-ok` fails. Close it
 
 ## 4. Documents and the ruleset
 
