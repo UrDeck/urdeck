@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// A soft gradient along `angle` whose bands drift, drawn with the palette (iColor0..iColor3).
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float angle;   // default: 30
+
+half4 main(float2 fragCoord) {
+    float2 uv = (fragCoord - 0.5 * iResolution) / max(iResolution.x, iResolution.y);
+    float a = radians(angle);
+    float d = dot(uv, float2(cos(a), sin(a)));
+    float v = 0.5 + 0.5 * sin(d * 3.0 + iTime * 0.20);
+    float w = 0.5 + 0.5 * sin(d * 1.7 - iTime * 0.13 + 1.3);
+    float3 col = mix(iColor0.rgb, iColor1.rgb, v);
+    col = mix(col, iColor2.rgb, w * 0.6);
+    col = mix(col, iColor3.rgb, v * w * 0.5);
+    return half4(half3(col), 1.0);
+}

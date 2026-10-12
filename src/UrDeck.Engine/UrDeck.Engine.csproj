@@ -21,4 +21,9 @@
     <EmbeddedResource Include="Themes\Builtin\*.json;Themes\Builtin\*.ttf;Themes\Builtin\*.txt" LogicalName="UrDeck.Themes.%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <!-- Built-in background shaders (SkSL). They are the examples for a user's own backgrounds/<name>.sksl. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Backgrounds\Builtin\*.sksl" LogicalName="UrDeck.Backgrounds.%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

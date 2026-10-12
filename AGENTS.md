@@ -35,7 +35,8 @@ sdk/UrDeck.Sdk       MIT. The plugin contract: attributes, Widget<T>, WidgetConf
                      ILauncher), Icons (IIconSource)
 sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
 src/UrDeck.Engine     GPL. Plugin loader, config store, grid and dock layout, display identity and placement, gestures and hit testing, PageRenderer, ReadingHub (runs the
-                      providers), per-widget WidgetServices, Launcher, IconService (shell, file and site icons), logging
+                      providers), per-widget WidgetServices, Launcher, IconService (shell, file and site icons), Backgrounds (settings, shader store,
+                      palette, image cover-fit, DeckBackground), logging
 src/UrDeck.Host       GPL. WinUI 3 app: window/monitor placement, one SKXamlCanvas layer per widget
 providers/            GPL. First-party data provider plugins (UrDeck.Providers.System); reference only UrDeck.Sdk
 widgets/              first-party widget plugins (UrDeck.Widgets.Clock, .Stats, .Weather, .Shortcut); with the providers, copied to
@@ -97,5 +98,21 @@ See the README license map before moving code between projects: it can change th
   event keyed on the folder, `UrDeck.Engine/Startup/InstanceNames`), then the XAML application. `--quit` sets the event
   and waits for the mutex. "Start with Windows" is the `UrDeck` value under `HKCU\...\Run` (`RunKeyAutostart`); Windows
   owns the setting, the config has no field for it.
+- The background (`docs/backgrounds.md`, `src/UrDeck.Engine/Backgrounds`, host `BackgroundLayer`): a moving shader is an
+  `SKSwapChainPanel` (`EnableRenderLoop = false`), a still one or a picture an `SKXamlCanvas`, both under the cards in the
+  `_background` grid with `IsHitTestVisible = false`. The render scale is the element's size times `scale` with its
+  composition visual scaled back (`ElementCompositionPreview.GetElementVisual(el).Scale`): never a `RenderTransform` or
+  `Viewbox`, they feed the panel's composition scale and it renders at full size again. Frames are paced from
+  `CompositionTarget.Rendering` (30 per second, subscribed only while running), not `FrameClock`: a 1/30 s dispatcher timer
+  delivered about 22 frames per second in the spike. Look for `Background: shader '...' (built-in), surface WxH, scale S,
+  moving|still` (check the surface size at other display scalings), `Background frames started (reason)` and `Background
+  frames stopped (reason): N frames in S s` (N/S about 30), `Windows: display off` / `display on`, and `Background: none`
+  in `urdeck.log`. The layer keys on `DeckBackground.RequestKey`, so an unrelated config save does not restart the motion,
+  and a background that failed is not tried again until its key changes. User shaders are `backgrounds/<name>.sksl` next to
+  the exe and `scripts/Install-Local.ps1` never touches that folder. The deck window must keep **square corners**
+  (`WindowCorners.Square`, `DWMWA_WINDOW_CORNER_PREFERENCE` = do not round): with Windows 11's rounded corners the desktop
+  compositor blends translucent content over a swap chain three times along the window's diagonal, a bright dotted line
+  through every translucent card (`glass` theme, moving background). The log says `Window corners are square`.
+  `FrameClock` delivers about 21 frames per second, not 30 (`docs/perf/backgrounds.md`).
 - Do not add per-widget styling or resolution assumptions: styling belongs in the theme (`src/UrDeck.Engine/Themes`, `docs/themes.md`)
   and the user never sees resolution or scaling. Widgets draw no card and name no font; use the SDK components.

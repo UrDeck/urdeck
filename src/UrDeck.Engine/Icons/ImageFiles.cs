@@ -17,15 +17,19 @@ internal static class ImageFiles
     public static bool IsImage(string path) =>
         Extensions.Any(extension => path.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>The picture in the file, or null when it is missing, unreadable or not an image.</summary>
-    public static SKBitmap? Load(string path)
+    /// <summary>
+    /// The picture in the file, or null when it is missing, unreadable or not an image. A photo's stored orientation is
+    /// applied when <paramref name="applyOrientation"/> is set, and <paramref name="maxPixels"/> raises the size limit
+    /// (a wallpaper is far larger than an icon).
+    /// </summary>
+    public static SKBitmap? Load(string path, long maxPixels = MaxPixels, bool applyOrientation = false)
     {
         try
         {
             if (!File.Exists(path))
                 return null;
             using var codec = SKCodec.Create(path);
-            return codec == null ? null : Decode(codec);
+            return codec == null ? null : Decode(codec, maxPixels, applyOrientation);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
         {
@@ -43,19 +47,54 @@ internal static class ImageFiles
         return codec == null ? null : Decode(codec);
     }
 
-    private static SKBitmap? Decode(SKCodec codec)
+    private static SKBitmap? Decode(SKCodec codec, long maxPixels = MaxPixels, bool applyOrientation = false)
     {
         var size = codec.Info;
-        if (size.Width <= 0 || size.Height <= 0 || (long)size.Width * size.Height > MaxPixels)
+        if (size.Width <= 0 || size.Height <= 0 || (long)size.Width * size.Height > maxPixels)
             return null;
 
         var info = new SKImageInfo(size.Width, size.Height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
         var bitmap = new SKBitmap(info);
-        if (codec.GetPixels(info, bitmap.GetPixels()) == SKCodecResult.Success)
+        if (codec.GetPixels(info, bitmap.GetPixels()) != SKCodecResult.Success)
+        {
+            bitmap.Dispose();
+            return null;
+        }
+
+        return applyOrientation ? Oriented(bitmap, codec.EncodedOrigin) : bitmap;
+    }
+
+    /// <summary><paramref name="bitmap"/> upright for its stored <paramref name="origin"/>; the original is disposed when a copy is made.</summary>
+    private static SKBitmap Oriented(SKBitmap bitmap, SKEncodedOrigin origin)
+    {
+        int w = bitmap.Width;
+        int h = bitmap.Height;
+
+        // Maps a pixel of the stored picture to its place in the upright one.
+        (SKMatrix Matrix, bool Swap)? transform = origin switch
+        {
+            SKEncodedOrigin.TopRight => (new SKMatrix(-1, 0, w, 0, 1, 0, 0, 0, 1), false),
+            SKEncodedOrigin.BottomRight => (new SKMatrix(-1, 0, w, 0, -1, h, 0, 0, 1), false),
+            SKEncodedOrigin.BottomLeft => (new SKMatrix(1, 0, 0, 0, -1, h, 0, 0, 1), false),
+            SKEncodedOrigin.LeftTop => (new SKMatrix(0, 1, 0, 1, 0, 0, 0, 0, 1), true),
+            SKEncodedOrigin.RightTop => (new SKMatrix(0, -1, h, 1, 0, 0, 0, 0, 1), true),
+            SKEncodedOrigin.RightBottom => (new SKMatrix(0, -1, h, -1, 0, w, 0, 0, 1), true),
+            SKEncodedOrigin.LeftBottom => (new SKMatrix(0, 1, 0, -1, 0, w, 0, 0, 1), true),
+            _ => null,
+        };
+        if (transform is not { } t)
             return bitmap;
 
+        var upright = new SKBitmap(new SKImageInfo(t.Swap ? h : w, t.Swap ? w : h, SKImageInfo.PlatformColorType, SKAlphaType.Premul));
+        using (var canvas = new SKCanvas(upright))
+        {
+            canvas.SetMatrix(t.Matrix);
+            using var image = SKImage.FromBitmap(bitmap);
+            canvas.DrawImage(image, 0, 0, new SKSamplingOptions(SKFilterMode.Nearest));
+        }
+
         bitmap.Dispose();
-        return null;
+        return upright;
     }
 }
 

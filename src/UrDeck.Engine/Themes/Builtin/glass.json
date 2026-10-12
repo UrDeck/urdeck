@@ -6,7 +6,8 @@
     "text": "#ffffff",
     "textMuted": "#c8ffffff",
     "accent": "#8ab8ff",
-    "accentDim": "#668ab8ff"
+    "accentDim": "#668ab8ff",
+    "backgroundPalette": ["#131c4f", "#1b2760", "#3a3f9c", "#6b3fa0"]
   },
   "indicator": {
     "active": "#ffffff",

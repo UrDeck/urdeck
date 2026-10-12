@@ -44,7 +44,7 @@ public partial class App : Application
         }
 
         _host = new HostContext(saveConfiguration: true);
-        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.SaveConfiguration);
+        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Shaders, _host.AppDirectory, _host.SaveConfiguration);
         _window.Closed += (_, _) =>
         {
             // Quitting closes Settings too: it holds the host, which is disposed next.

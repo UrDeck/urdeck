@@ -51,6 +51,7 @@ public sealed partial class ThemeDefinition
             c.Good = check.Color("colors.good", c.Good);
             c.Warning = check.Color("colors.warning", c.Warning);
             c.Critical = check.Color("colors.critical", c.Critical);
+            c.BackgroundPalette = check.Palette("colors.backgroundPalette", c.BackgroundPalette);
         }
         if (Card is { } card)
         {
@@ -123,6 +124,19 @@ public sealed partial class ThemeDefinition
             return null;
         }
 
+        /// <summary>One to four valid colours, or null (with a warning) so the palette is derived from the theme's own colours.</summary>
+        public List<string>? Palette(string path, List<string>? value)
+        {
+            if (value == null)
+                return null;
+            if (value.Count is >= 1 and <= 4 && value.All(c => c != null && ColorPattern().IsMatch(c)))
+                return value;
+            Warn($"Theme '{themeName}': {path} must be one to four colours (#RRGGBB or #AARRGGBB); the palette is derived from the theme's colours.");
+            return null;
+        }
+
+        private static void Warn(string message) => UrDeckLog.Warn(message);
+
         public double? Number(string path, double? value, double min, double max)
         {
             if (value == null)
@@ -148,6 +162,9 @@ public sealed class ThemeColorsDefinition
     public string? Warning { get; set; }
     public string? Critical { get; set; }
 
+    /// <summary>One to four colours for the backgrounds' shaders; absent means derived from this theme's own colours.</summary>
+    public List<string>? BackgroundPalette { get; set; }
+
     internal ThemeColorsDefinition MergeOver(ThemeColorsDefinition? b) => new()
     {
         Background = Background ?? b?.Background,
@@ -160,6 +177,10 @@ public sealed class ThemeColorsDefinition
         Good = Good ?? b?.Good,
         Warning = Warning ?? b?.Warning,
         Critical = Critical ?? b?.Critical,
+
+        // Not taken from the baseline, unlike every other member: a light theme written before backgrounds existed would
+        // otherwise get the dark theme's palette. A theme without one has its own colours' palette derived.
+        BackgroundPalette = BackgroundPalette,
     };
 }
 

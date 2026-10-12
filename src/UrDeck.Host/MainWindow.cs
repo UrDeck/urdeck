@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Win32;
 using SkiaSharp;
+using UrDeck.Engine.Backgrounds;
 using UrDeck.Engine.Config;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
@@ -24,16 +25,23 @@ namespace UrDeck.Host;
 /// <summary>
 /// The borderless window covering the deck's display. Where it is, and whether it is shown at all, is decided by a
 /// <see cref="PlacementController"/>: this class tells it what happened and does what it asks. Its content is an ordered stack of layers composited by the GPU:
-/// a background layer filled with the theme's background colour, and a canvas holding one surface per widget.
-/// Later changes add layers (an image or video background, hosted views such as a web view) to the same stack.
+/// a background layer (the theme's background colour, and over it the configured shader or picture, see
+/// <see cref="BackgroundLayer"/>), and a canvas holding one surface per widget. Later changes add layers (hosted views
+/// such as a web view) to the same stack.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "The background layer and the power watcher are disposed when the window closes (OnClosed).")]
 public sealed class MainWindow : Window, ISettingsHost
 {
     private readonly ConfigStore _configStore;
     private readonly WidgetPluginLoader _plugins;
     private readonly ThemeStore _themes;
+    private readonly ShaderStore _shaders;
+    private readonly string _appDirectory;
     private readonly nint _hwnd;
     private readonly WindowFocus? _focus;
+    private readonly DisplayPowerWatcher? _power;
+    private readonly BackgroundLayer _backgroundLayer;
+    private BackgroundSettings _backgroundSettings;
     private readonly Grid _root = new();
     private readonly Grid _background = new();
     private readonly Canvas _surface = new();
@@ -71,11 +79,15 @@ public sealed class MainWindow : Window, ISettingsHost
     private event Action? SettingsChanged;
 
     /// <summary><paramref name="saveDisplay"/> writes the configuration after the remembered display was set or updated.</summary>
-    internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, Action saveDisplay)
+    internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, ShaderStore shaders, string appDirectory, Action saveDisplay)
     {
         _configStore = configStore;
         _plugins = plugins;
         _themes = themes;
+        _shaders = shaders;
+        _appDirectory = appDirectory;
+        _backgroundLayer = new BackgroundLayer(_background);
+        _backgroundSettings = BackgroundSettings.Parse(_configStore.Config.Background);
         _saveDisplay = saveDisplay;
         _frameClock = new FrameClock(DispatcherQueue);
         _navigator = new PageNavigator(PageNames(), _configStore.Config.ActivePage);
@@ -113,6 +125,10 @@ public sealed class MainWindow : Window, ISettingsHost
         Content = _root;
 
         _focus = WindowFocus.Apply(_hwnd);
+        WindowCorners.Square(_hwnd);
+        _power = DisplayPowerWatcher.Start(_hwnd);
+        if (_power != null)
+            _power.DisplayStateChanged += _backgroundLayer.SetDisplayOn;
 
         // One timer drives placement: the controller says after each call when it wants the next one.
         var seam = new PlacementSeam(this);
@@ -130,6 +146,7 @@ public sealed class MainWindow : Window, ISettingsHost
         {
             // Themes are re-read on every config reload, so editing a theme and saving the config applies it.
             _loadedTheme = LoadTheme();
+            _backgroundSettings = BackgroundSettings.Parse(_configStore.Config.Background);
             _navigator.Reload(PageNames());
             _plugins.Readings.ApplySettings(_configStore.Config.Providers);
             ApplyBackground();
@@ -261,11 +278,13 @@ public sealed class MainWindow : Window, ISettingsHost
             AppWindow.Show(false);
         else
             Activate();
+        _backgroundLayer.SetVisible(true);
     }
 
     private void HideDeck()
     {
         _pageHeld = true;
+        _backgroundLayer.SetVisible(false);
         AppWindow.Hide();
     }
 
@@ -273,6 +292,7 @@ public sealed class MainWindow : Window, ISettingsHost
     private void ReleasePage()
     {
         _pager.Release();
+        _backgroundLayer.Release();
         DisposeThemes();
         _lastLayout = default;
     }
@@ -335,6 +355,11 @@ public sealed class MainWindow : Window, ISettingsHost
         var screen = new System.Drawing.Size((int)_root.ActualWidth, (int)_root.ActualHeight);
         double scale = Scale;
 
+        // Before the layout comparison: an unrelated reload keeps the running background, but a changed one must apply
+        // even when the page itself is as it was.
+        if (screen.Width >= 16 && screen.Height >= 16)
+            ApplyBackgroundLayer(screen, scale);
+
         var config = _configStore.Config;
         var mode = config.Pager.GetIndicatorMode();
         var key = new LayoutKey(screen, scale, _loadedTheme, mode, config.Pages.Count, config.Dock.Count);
@@ -388,6 +413,19 @@ public sealed class MainWindow : Window, ISettingsHost
                 return new PageHost(page, layout, _plugins, theme, press, _frameClock);
             },
             buildDock));
+    }
+
+    private void ApplyBackgroundLayer(System.Drawing.Size screen, double scale)
+    {
+        var settings = _backgroundSettings;
+        var theme = _loadedTheme;
+        string? key = DeckBackground.RequestKey(settings, theme, _shaders, _appDirectory);
+        _backgroundLayer.Apply(
+            key,
+            () => DeckBackground.Create(settings, theme, _shaders, _appDirectory),
+            screen,
+            scale,
+            SKColor.Parse(theme.Definition.Colors!.Background));
     }
 
     private void DisposeThemes()
@@ -446,6 +484,8 @@ public sealed class MainWindow : Window, ISettingsHost
         _placementTimer.Stop();
         _pager.Shutdown();
         _frameClock.Shutdown();
+        _power?.Dispose();
+        _backgroundLayer.Dispose();
         DisposeThemes();
     }
 }

@@ -8,7 +8,7 @@ Publishes UrDeck and installs it for the current user, keeping the user's own fi
 .DESCRIPTION
 Publishes the host to a temporary folder, closes a running copy from the destination (UrDeck.Host.exe --quit), mirrors
 the application's files into the destination and starts the copy again if it was running (or when -Start is given).
-Never replaced or removed: urdeck-config.json once it exists, urdeck.log and urdeck.log.1, cache/, themes/, and files in
+Never replaced or removed: urdeck-config.json once it exists, urdeck.log and urdeck.log.1, cache/, themes/, backgrounds/, and files in
 plugins/ that the publish did not produce. A destination without urdeck-config.json gets the sample one. It does not
 register the app to start with Windows: that is the "Start with Windows" entry in the tray menu.
 
@@ -56,7 +56,7 @@ try {
 
     New-Item -ItemType Directory -Force -Path $Destination | Out-Null
     $userFiles = @('urdeck-config.json', 'urdeck.log', 'urdeck.log.1')
-    $userDirs = @('plugins', 'themes', 'cache')
+    $userDirs = @('plugins', 'themes', 'backgrounds', 'cache')
 
     Write-Host "Copying to $Destination"
     # The application's files are mirrored; what the user owns is excluded on both sides, so it is neither overwritten nor purged.
