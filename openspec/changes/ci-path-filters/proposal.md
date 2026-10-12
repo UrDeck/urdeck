@@ -36,3 +36,4 @@ None.
 - `CONTRIBUTING.md` (the line naming the required checks), `AGENTS.md` (the line saying CI runs everything).
 - One new third-party action in CI (the path filter), pinned to a commit.
 - `.github/workflows/security.yml` is not touched.
+
