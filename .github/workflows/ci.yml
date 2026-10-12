@@ -57,6 +57,13 @@ jobs:
             $cli shader render "$builtin/$name" -o "$out/$name.png" --fail-on-warnings
             test -s "$out/$name.png"
           done
+          # init on a loose copy of a built-in shader, a sample recorded in the manifest, then a check (warnings only: exit 0).
+          work="$RUNNER_TEMP/init"
+          mkdir -p "$work"
+          cp "$builtin/plasma/plasma.sksl" "$work/mine.sksl"
+          $cli shader init "$work/mine.sksl"
+          $cli shader render "$work/mine" -o "$work/mine/sample.png" --update-manifest
+          $cli shader validate "$work/mine"
 
       - name: Pack (urdeck-cli)
         run: dotnet pack tools/UrDeck.Cli -c Release --no-build
@@ -104,6 +111,13 @@ jobs:
             $cli shader render "$builtin/$name" -o "$out/$name.png" --fail-on-warnings
             test -s "$out/$name.png"
           done
+          # init on a loose copy of a built-in shader, a sample recorded in the manifest, then a check (warnings only: exit 0).
+          work="$RUNNER_TEMP/init"
+          mkdir -p "$work"
+          cp "$builtin/plasma/plasma.sksl" "$work/mine.sksl"
+          $cli shader init "$work/mine.sksl"
+          $cli shader render "$work/mine" -o "$work/mine/sample.png" --update-manifest
+          $cli shader validate "$work/mine"
 
   # Required status check: the PR title becomes the squash commit title, so it must be a conventional commit.
   pr-title:

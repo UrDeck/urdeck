@@ -15,8 +15,11 @@ public enum ParameterKind
 public sealed record ManifestParameter(
     string Name, string? Label, string? Description, ParameterKind? Kind, double? Min, double? Max, double? Step, string? Unit, bool Hidden);
 
-/// <summary>A sample file of a background. A <c>video</c> type is accepted and never played.</summary>
-public sealed record ManifestSample(string Type, string? File, int? Order, string? Caption);
+/// <summary>
+/// A sample file of a background. A <c>video</c> type is accepted and never played. <see cref="Settings"/> is how the sample
+/// was made, as written (a clone that outlives the document); the host never uses it.
+/// </summary>
+public sealed record ManifestSample(string Type, string? File, int? Order, string? Caption, JsonElement? Settings = null);
 
 /// <summary>The version 1 manifest as far as it could be read; every field but <see cref="Version"/> may be missing.</summary>
 public sealed record BackgroundManifest(
@@ -236,10 +239,16 @@ public static class BackgroundManifestReader
                 found.Add(WrongType($"{where}.order", "an integer", orderElement));
         }
 
-        if (element.TryGetProperty("settings", out var settings) && settings.ValueKind != JsonValueKind.Object)
-            found.Add(WrongType($"{where}.settings", "an object", settings));
+        JsonElement? kept = null;
+        if (element.TryGetProperty("settings", out var settings))
+        {
+            if (settings.ValueKind == JsonValueKind.Object)
+                kept = settings.Clone();
+            else
+                found.Add(WrongType($"{where}.settings", "an object", settings));
+        }
 
-        return new ManifestSample(type, Text(element, "file", $"{where}.file", found), order, Text(element, "caption", $"{where}.caption", found));
+        return new ManifestSample(type, Text(element, "file", $"{where}.file", found), order, Text(element, "caption", $"{where}.caption", found), kept);
     }
 
     private static void CheckKeys(JsonElement element, string[] known, string where, List<ShaderDiagnostic> found)

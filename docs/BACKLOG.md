@@ -586,9 +586,10 @@ Three changes, in this order; the detail of (b) and (c) is in `docs/handoff/2026
   dotnet tool (DotMake.CommandLine), `tools/UrDeck.Cli`, with the commands that only read a background: `shader validate`
   (`--all`, `--format text|markdown|json|sarif`, `--fail-on-warnings`, exit codes 0/1/2) and `shader render` (CPU, to a PNG);
   `SHADER012` and `SHADER070`; it replaces the `BuiltInSampleTool` test; CI runs it on Windows and Linux and packs it. No schema is
-  embedded: the lint is the one judge. **(b2)** the commands that write a manifest: `shader init` and `render --update-manifest`
-  (refusing a rewrite that would lose comments or trailing commas), then publishing to NuGet.org and standalone binaries. A
-  community store would run the tool in CI. **Model:** Sonnet.
+  embedded: the lint is the one judge. **(b2)** (implemented 2026-10-12, in review; `openspec/changes/urdeck-cli-init`): the commands
+  that write a manifest, `shader init` and `render --update-manifest` (refusing a rewrite that would lose comments, trailing
+  commas or a duplicate key), and `settings` on a sample. **Still open:** publishing to NuGet.org and standalone binaries. A
+  community store would run the tool in CI. **Model:** Sonnet. (c) is next.
 - **(c) generated documentation** (after (b)): `shader docs` and a CI drift check, like `dotnet format --verify-no-changes`.
   **Model:** Sonnet.
 - The settings UI that builds a form from manifests belongs to the editor (item 11).

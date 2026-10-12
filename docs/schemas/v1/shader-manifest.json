@@ -44,7 +44,18 @@
           "file": { "type": "string", "description": "A file inside the folder." },
           "order": { "type": "integer" },
           "caption": { "type": "string" },
-          "settings": { "type": "object" }
+          "settings": {
+            "type": "object",
+            "description": "How the sample was made. A record for people and tools; the deck never uses it.",
+            "additionalProperties": true,
+            "properties": {
+              "size": { "type": "string", "description": "WIDTHxHEIGHT in pixels." },
+              "time": { "type": "number", "description": "The shader's time in seconds." },
+              "theme": { "type": "string", "description": "The name of a theme." },
+              "colors": { "type": "array", "items": { "type": "string" }, "description": "Colours, as the configuration's colors." },
+              "parameters": { "type": "object", "description": "Parameter values, as the configuration sets them." }
+            }
+          }
         }
       }
     }

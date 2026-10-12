@@ -29,7 +29,12 @@
     {
       "type": "image",
       "file": "sample.png",
-      "caption": "Julia in the default theme"
+      "caption": "Julia in the default theme",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "default-dark"
+      }
     }
   ]
 }

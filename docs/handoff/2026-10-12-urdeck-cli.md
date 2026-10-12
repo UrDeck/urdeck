@@ -20,6 +20,21 @@ Nothing here is built. It is what the exploration decided, so the proposals do n
 > - **Exit code `2`** for "the tool could not do its job", so a parse error does not collide with "findings" (`1`).
 > - **`SHADER012`**: a folder whose name is not a valid background name, reported by the lint.
 > - The rest of this file (init, `--update-manifest`, the manifest writer, change (c)) is still to do.
+>
+> **Update 2026-10-12 (change (b2), `openspec/changes/urdeck-cli-init`).** `shader init` and `render --update-manifest` are
+> built; what is left is change (c) and publishing. What it decided:
+>
+> - **Refuse instead of losing comments.** The manifest is rewritten from a `JsonNode` tree (`ManifestWriter` in the tool, not the
+>   engine). A comment, a trailing comma or a duplicate key makes `--update-manifest` fail with exit code 2 before anything is
+>   rendered, and print the `samples` entry to paste. Only the author's indentation and blank lines are not kept.
+> - **The colour guess.** `init` writes `"kind": "color"` for a three- or four-component parameter with `layout(color)`, a default
+>   written as `#...` (`ShaderUniform.DefaultIsColor`, new) or `color`, `colour` or `tint` in its name. A wrong guess is one line
+>   to delete; it never causes a diagnostic.
+> - **`settings` means how a sample was made**: `size`, `time`, `theme`, and `colors` and `parameters` when given. The reader keeps
+>   it (`ManifestSample.Settings`); the host never uses it. Change (c) can print it; nothing renders from it yet.
+> - **`init` accepts a file or a folder.** A file is moved (not copied) into a folder of its name; a folder that holds the shader and no
+>   manifest is worked on in place. It never overwrites, and `--output` is the directory the folder is made in.
+> - The theme recorded for the default is `default-dark`, the built-in theme's real name.
 
 ## Where this comes from
 

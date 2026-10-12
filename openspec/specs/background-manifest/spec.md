@@ -95,6 +95,17 @@ The meaning of the parameter keys:
 - A key the format does not define, a `kind` or sample `type` that is not defined, and a value of the wrong JSON type
   each log one lint warning and are otherwise ignored
 
+The meaning of a sample's `settings`:
+
+- It says how the sample was made, so the same picture can be made again: `size` (text, `<width>x<height>` in
+  pixels), `time` (a number, the shader's time in seconds), `theme` (the name of a theme), `colors` (an array of
+  colours, as the configuration's `colors`) and `parameters` (an object of parameter values, as the configuration
+  sets them). Every key is optional
+- It is a record for a person and for tools. The host MUST NOT use it to decide what is shown
+- A reader of the manifest gets `settings` as it is written
+- Its content is not checked: a key it does not define, or a value of another type, is not a diagnostic. Only a
+  `settings` that is not an object is one
+
 #### Scenario: Annotation
 - **WHEN** the manifest gives `parameters.intensity` a `label`, a `description`, `min` 0 and `max` 3
 - **THEN** those are what a reader of the manifest gets for `intensity`, and the parameter's type and default are
@@ -119,6 +130,15 @@ The meaning of the parameter keys:
 #### Scenario: Reserved sample type
 - **WHEN** a sample has `"type": "video"`
 - **THEN** it is accepted, and the host never plays it
+
+#### Scenario: Sample settings are kept
+- **WHEN** a sample has `"settings": { "size": "270x480", "time": 10, "theme": "default" }`
+- **THEN** a reader of the manifest gets those three values for that sample, and the deck shows the background as the
+  configuration says, not as the sample's settings do
+
+#### Scenario: Sample settings are not checked
+- **WHEN** a sample's `settings` has a key `"note": "evening"`
+- **THEN** there is no diagnostic for it
 
 ### Requirement: Host Keys Are Not Parameters
 The names of the background's own configuration keys (`type`, `name`, `path`, `speed`, `scale`, `colors`) and of the host

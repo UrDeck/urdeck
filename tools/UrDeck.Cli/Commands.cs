@@ -33,6 +33,19 @@ public class RootCommand
             public int Run() => ValidateRunner.Run(new ValidateOptions(Folder, All, Format, FailOnWarnings), CliApp.Out, CliApp.Error);
         }
 
+        [CliCommand(Description = "Makes a background folder with a manifest from a shader: a stub with one entry for each parameter the shader declares. Never overwrites a manifest."
+            + ExitCodes.HelpText)]
+        public class InitCommand
+        {
+            [CliArgument(Description = "A .sksl file (a folder of its name is made next to it and the file is moved in) or a folder that holds <name>.sksl and no manifest.")]
+            public string Path { get; set; } = "";
+
+            [CliOption(Description = "Make the folder in this existing directory instead of next to the shader file.", Name = "output", Alias = "o", Required = false)]
+            public string? Output { get; set; }
+
+            public int Run() => InitRunner.Run(new InitOptions(Path, Output), CliApp.Out, CliApp.Error);
+        }
+
         [CliCommand(Description = "Draws one frame of a background folder on the CPU and writes it as a PNG." + ExitCodes.HelpText)]
         public class RenderCommand
         {
@@ -60,8 +73,11 @@ public class RootCommand
             [CliOption(Description = "A warning fails the run as an error does.", Name = "fail-on-warnings")]
             public bool FailOnWarnings { get; set; }
 
+            [CliOption(Description = "Record the picture in the folder's manifest.json: add it to samples, or update its entry, with how it was made in settings. The output must be inside the folder. Refused, with the entry to paste, when a rewrite would lose a comment, a trailing comma or a duplicate key.", Name = "update-manifest")]
+            public bool UpdateManifest { get; set; }
+
             public int Run() => RenderRunner.Run(
-                new RenderOptions(Folder, Output, Size, Time, Theme, Colors, Param, FailOnWarnings), CliApp.Out, CliApp.Error);
+                new RenderOptions(Folder, Output, Size, Time, Theme, Colors, Param, FailOnWarnings, UpdateManifest), CliApp.Out, CliApp.Error);
         }
     }
 }

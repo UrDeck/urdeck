@@ -7,8 +7,10 @@ namespace UrDeck.Cli;
 
 internal sealed record ValidateOptions(string? Folder, string? All, string Format, bool FailOnWarnings);
 
+internal sealed record InitOptions(string Path, string? Output);
+
 internal sealed record RenderOptions(
-    string Folder, string Output, string Size, float Time, string? Theme, string? Colors, IReadOnlyList<string> Param, bool FailOnWarnings);
+    string Folder, string Output, string Size, float Time, string? Theme, string? Colors, IReadOnlyList<string> Param, bool FailOnWarnings, bool UpdateManifest = false);
 
 /// <summary>One background and what the lint found in it. <see cref="FullPath"/> is the folder on disk, <see cref="Folder"/> how it is printed.</summary>
 internal sealed record BackgroundReport(string Name, string FullPath, IReadOnlyList<ShaderDiagnostic> Diagnostics)

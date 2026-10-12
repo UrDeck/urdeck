@@ -9,9 +9,9 @@ namespace UrDeck.Engine.Backgrounds;
 
 /// <summary>
 /// A uniform of a shader: its name, how many floats it has (1 to 4), its declared default, if any, and whether the
-/// declaration says <c>layout(color)</c>.
+/// declaration says <c>layout(color)</c>. <see cref="DefaultIsColor"/> is true when the default was written as a colour (<c>#...</c>) and read as one.
 /// </summary>
-public sealed record ShaderUniform(string Name, int Components, float[]? Default, bool IsColor = false);
+public sealed record ShaderUniform(string Name, int Components, float[]? Default, bool IsColor = false, bool DefaultIsColor = false);
 
 /// <summary>
 /// What a shader's text declares. SkiaSharp names a compiled effect's uniforms but not their types, so the declarations
@@ -83,7 +83,7 @@ public sealed partial class ShaderDeclarations
             }
 
             bool isColor = match.Groups["layout"].Success && ColorWord().IsMatch(match.Groups["layout"].Value);
-            uniforms.Add(new ShaderUniform(name, components.Value, value, isColor));
+            uniforms.Add(new ShaderUniform(name, components.Value, value, isColor, value != null && comment!.StartsWith('#')));
         }
 
         return new ShaderDeclarations(uniforms, unsupported, child, diagnostics);

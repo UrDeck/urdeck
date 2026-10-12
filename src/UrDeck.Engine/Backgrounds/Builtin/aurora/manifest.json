@@ -23,7 +23,12 @@
     {
       "type": "image",
       "file": "sample.png",
-      "caption": "Aurora in the default theme"
+      "caption": "Aurora in the default theme",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "default-dark"
+      }
     }
   ]
 }
