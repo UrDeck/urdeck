@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using UrDeck.Engine.Startup;
+using UrDeck.Engine.Tests.Support;
 using Xunit;
 
 namespace UrDeck.Engine.Tests;
@@ -73,7 +74,7 @@ public sealed class InstanceNamesTests
     public void CaseDoesNotMatter() =>
         Assert.Equal(InstanceNames.Key(@"C:\Apps\UrDeck"), InstanceNames.Key(@"c:\apps\urdeck"));
 
-    [Fact]
+    [WindowsFact]
     public void TrailingSeparatorDoesNotMatter() =>
         Assert.Equal(InstanceNames.Key(@"C:\Apps\UrDeck"), InstanceNames.Key(@"C:\Apps\UrDeck\"));
 

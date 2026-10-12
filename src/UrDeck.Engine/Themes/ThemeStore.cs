@@ -76,7 +76,7 @@ public sealed class ThemeStore(string themesDirectory)
         ThemeFont? font = null;
         if (user.Typography?.Font is { } spec)
         {
-            if (IsFontFile(spec) && !IsInside(folder, Path.GetFullPath(Path.Combine(folder, spec))))
+            if (IsFontFile(spec) && !IsInside(folder, ResolveIn(folder, spec)))
             {
                 UrDeckLog.Warn($"Theme '{name}': font '{spec}' leaves the theme folder and is ignored.");
                 user.Typography.Font = null;
@@ -113,9 +113,13 @@ public sealed class ThemeStore(string themesDirectory)
 
     private static FileStream? OpenThemeFile(string folder, string fileName)
     {
-        string path = Path.GetFullPath(Path.Combine(folder, fileName));
+        string path = ResolveIn(folder, fileName);
         return IsInside(folder, path) && File.Exists(path) ? File.OpenRead(path) : null;
     }
+
+    // A backslash is a separator in a theme file on every platform, so ..\x cannot slip past the check where it is not one.
+    private static string ResolveIn(string folder, string relative) =>
+        Path.GetFullPath(Path.Combine(folder, relative.Replace('\\', Path.DirectorySeparatorChar)));
 
     private static bool IsInside(string folder, string path) =>
         path.StartsWith(folder.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);

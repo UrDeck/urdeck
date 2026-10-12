@@ -308,7 +308,7 @@ public sealed class GaugeTests : IDisposable
         Background = background,
         TextMuted = text,
         StrokeRatio = _theme.StrokeRatio,
-        Typefaces = new Dictionary<TextRole, SKTypeface>(),
+        Typefaces = _theme.Typefaces,
     };
 
     [Fact]

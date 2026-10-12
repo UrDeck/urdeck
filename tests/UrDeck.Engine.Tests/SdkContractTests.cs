@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using System.Runtime.Versioning;
+using UrDeck.Engine.Tests.Support;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Data;
 using Xunit;
@@ -28,7 +30,8 @@ public class SdkContractTests
         Assert.Null(descriptor.Critical);
     }
 
-    [Fact]
+    [WindowsFact]
+    [SupportedOSPlatform("windows")]
     public void TheSystemProvidersReadings_DeclareNoLevels_ExceptGpuTemperature()
     {
         var provider = new UrDeck.Providers.Machine.SystemProvider();

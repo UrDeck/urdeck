@@ -54,6 +54,23 @@ jobs:
           path: artifacts/coverage/
           if-no-files-found: ignore
 
+  # The tests on Linux, in preparation for a cross-platform command line tool. urdeck.slnx holds the host, which needs
+  # Windows, so the test projects are built directly. Tests of Windows-only code are skipped there.
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Test (engine)
+        run: dotnet test tests/UrDeck.Engine.Tests -c Release
+
+      - name: Test (analyzer)
+        run: dotnet test tests/UrDeck.Analyzer.Tests -c Release
+
   # Required status check: the PR title becomes the squash commit title, so it must be a conventional commit.
   pr-title:
     if: github.event_name == 'pull_request'

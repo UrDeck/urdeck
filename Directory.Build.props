@@ -34,11 +34,11 @@
     <NuGetAuditLevel>low</NuGetAuditLevel>
   </PropertyGroup>
 
-  <!-- Test projects: xunit v3 on the Windows TFM (they reference WPF-adjacent assemblies) and never packed. -->
+  <!-- Test projects: xunit v3 on the plain TFM, so they run on Windows and Linux (the host is the only project that
+       needs Windows; a test of Windows-only code says so, see tests/UrDeck.Engine.Tests/Support/WindowsOnlyAttributes.cs). Never packed. -->
   <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
-    <TargetFramework>$(UrDeckWindowsTfm)</TargetFramework>
+    <TargetFramework>$(UrDeckTfm)</TargetFramework>
     <IsPackable>false</IsPackable>
-    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
 </Project>

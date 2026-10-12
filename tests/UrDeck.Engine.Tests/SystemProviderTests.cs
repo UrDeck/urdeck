@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using System.Runtime.Versioning;
+using UrDeck.Engine.Tests.Support;
 using UrDeck.Providers.Machine;
 using UrDeck.Sdk.Data;
 using Xunit;
 
 namespace UrDeck.Engine.Tests;
 
+[SupportedOSPlatform("windows")]
 public class SystemProviderTests
 {
     private sealed class Sink : IReadingSink
@@ -30,7 +33,7 @@ public class SystemProviderTests
 
     private static void Sample(SystemProvider provider) => provider.SampleAsync(CancellationToken.None).GetAwaiter().GetResult();
 
-    [Fact]
+    [WindowsFact]
     public void IsDeclaredAsTheSystemProvider()
     {
         var descriptor = UrDeck.Engine.Data.ProviderDescriptor.TryCreate(typeof(SystemProvider), out string? reason);
@@ -42,7 +45,7 @@ public class SystemProviderTests
         Assert.Equal(250, descriptor.MinIntervalMs);
     }
 
-    [Fact]
+    [WindowsFact]
     public void TheCatalog_ListsOneEntryPerLogicalProcessor_WithLabelsAndTheCpuName()
     {
         var catalog = new SystemProvider().Describe();
@@ -70,7 +73,7 @@ public class SystemProviderTests
         Assert.Equal(ReadingKind.Percent, memory.Kind);
     }
 
-    [Fact]
+    [WindowsFact]
     public void ALoadNeedsTwoSamples_AndIsAPercentageThen()
     {
         var sink = new Sink();
@@ -87,7 +90,7 @@ public class SystemProviderTests
         Assert.InRange(sink.Values["cpu/core/1/load"], 0, 100);
     }
 
-    [Fact]
+    [WindowsFact]
     public async Task LoadRisesWithTheMachinesCpuUse()
     {
         var sink = new Sink();
@@ -119,7 +122,7 @@ public class SystemProviderTests
         Assert.InRange(sink.Values["cpu/load"], 0, 100);
     }
 
-    [Fact]
+    [WindowsFact]
     public void ACoreThatDoesNotExist_IsReportedUnavailable()
     {
         var sink = new Sink();
@@ -131,7 +134,7 @@ public class SystemProviderTests
         Assert.Contains("cpu/core/0/load", sink.Unavailables.Keys);
     }
 
-    [Fact]
+    [WindowsFact]
     public void OnlyMemoryWanted_DoesNotQueryProcessorTimes()
     {
         var sink = new Sink();
@@ -145,7 +148,7 @@ public class SystemProviderTests
         Assert.Equal(["memory/load"], sink.Values.Keys);
     }
 
-    [Fact]
+    [WindowsFact]
     public void OnlyCpuWanted_DoesNotQueryMemory()
     {
         var sink = new Sink();
@@ -159,7 +162,7 @@ public class SystemProviderTests
         Assert.False(sink.Values.ContainsKey("cpu/load"), "only the wanted readings are published");
     }
 
-    [Fact]
+    [WindowsFact]
     public void NothingWanted_DoesNothing()
     {
         var sink = new Sink();
@@ -172,7 +175,7 @@ public class SystemProviderTests
         Assert.Empty(sink.Values);
     }
 
-    [Fact]
+    [WindowsFact]
     public void WhenCpuIsWantedAgainAfterAPause_TheFirstSampleIsABaselineAgain()
     {
         var sink = new Sink();
@@ -191,7 +194,7 @@ public class SystemProviderTests
         Assert.False(sink.Values.ContainsKey("cpu/load"));
     }
 
-    [Fact]
+    [WindowsFact]
     public void AfterStop_SamplingDoesNothing()
     {
         var sink = new Sink();

@@ -77,7 +77,7 @@ public class ShellIconLoaderTests
         return count;
     }
 
-    [Fact]
+    [WindowsFact]
     public void AnExecutableInTheWindowsFolder_YieldsAnIconWithTransparentPixels()
     {
         using var loader = new ShellIconLoader();
@@ -91,7 +91,7 @@ public class ShellIconLoaderTests
         Assert.True(CountPixels(icon, c => c.Alpha == 255) > 0, "the icon has no opaque pixels");
     }
 
-    [Fact]
+    [WindowsFact]
     public void AFolder_HasAnIcon_AndAPathThatDoesNotExistHasNone()
     {
         using var loader = new ShellIconLoader();
@@ -103,7 +103,7 @@ public class ShellIconLoaderTests
         Assert.Null(missing);
     }
 
-    [Fact]
+    [WindowsFact]
     public void TheWorkerThread_StartsWithTheFirstIcon_AndNotBefore()
     {
         using var loader = new ShellIconLoader();
@@ -117,7 +117,7 @@ public class ShellIconLoaderTests
 
 public class StaWorkerTests
 {
-    [Fact]
+    [WindowsFact]
     public void TheThread_IsCreatedByTheFirstWork_RunsInASingleThreadedApartment_AndEndsWhenIdle()
     {
         using var worker = new StaWorker(TimeSpan.FromMilliseconds(50));

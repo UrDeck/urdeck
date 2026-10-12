@@ -61,6 +61,8 @@ public sealed class BackgroundPackageTests : IDisposable
     [InlineData("../a.png")]
     [InlineData("..\\a.png")]
     [InlineData("sub/../../a.png")]
+    [InlineData("sub\\..\\..\\a.png")]
+    [InlineData("sub/..\\..\\a.png")]
     [InlineData("/a.png")]
     [InlineData("\\a.png")]
     [InlineData("C:\\a.png")]
