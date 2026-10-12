@@ -4,6 +4,55 @@
 **Then:** the OpenSpec apply of `backgrounds` resumes (`/opsx:apply backgrounds`) with your findings.
 **Date:** 2026-10-11. State: `feat/backgrounds`, everything committed; the change is 50 of 53 tasks done.
 
+## Resolved 2026-10-12: resume the apply
+
+**The seam is fixed on `feat/backgrounds`; `/opsx:apply backgrounds` can resume.** The rest of this document is the
+original brief, kept for the record. Its claim that the line is "the diagonal of the surface's quad" turned out wrong.
+
+### The fix
+
+The deck window now has square corners: `WindowCorners.Square(hwnd)` (`src/UrDeck.Host/WindowCorners.cs`, called in
+`MainWindow` right after `WindowFocus.Apply`) sets `DWMWA_WINDOW_CORNER_PREFERENCE` to `DWMWCP_DONOTROUND`. Nothing else
+changed: the surface is still the `SKSwapChainPanel`, the layering and the render scale are as designed, so **no design
+decision changes and the cost numbers of the spike still hold** (nothing was re-measured, nothing needed to be).
+The log says `Window corners are square`, or `Window corners left to Windows (0x...)` where the call fails (expected on
+Windows 10, which was not tested).
+
+### Root cause (what was observed)
+
+- The line is the diagonal of the **window**, not of the panel: a half-height panel and a panel twice the window's size
+  both left it on the window's diagonal, and a resized window moved it to the new window diagonal.
+- A seam pixel is the card blended **three times** over the background instead of once: with the glass fill (22% white)
+  the neighbour (73,82,126) blended twice more gives (144,150,177); measured (143,149,176).
+- A `SwapChainPanel` is external content: Windows draws the swap chain below the XAML output, which has a hole cut in it.
+  Over-blending the XAML output is invisible where it is opaque or fully transparent, and shows only where it is
+  translucent over the swap chain. Hence: only with a moving background, only under translucent cards.
+- The trigger is the rounded-corner clip Windows 11 applies to a top-level window. Of six window-level switches tried one
+  at a time, only square corners removed the seam; no brushes on `_root` and `_background`, `Opacity` 0.999 on the pages
+  layer, `DWMNCRP_DISABLED`, a popup style and `WS_EX_LAYERED` each left about 566.
+- Not established: why the corner clip makes the desktop compositor blend three times along the diagonal (inside DWM).
+  Only the Y70 on the RTX 4090 was tested; no other display, GPU or scaling.
+
+### Measured (glass, julia, `seam.py`)
+
+| Setup | Seam pixels |
+|---|---|
+| Before, `scale` 0.5 | 566 |
+| After, `scale` 0.5 | 3 |
+| After, `scale` 1 | 3 |
+
+A contrast-raised before and after crop was looked at: the line is gone. Where the 3 remaining detector hits are was not
+looked at. Build 0 warnings, `dotnet test urdeck.slnx -c Release` passes, `dotnet format --verify-no-changes` is clean.
+
+### Left for the apply session
+
+- Add the gotcha to `AGENTS.md` (the background bullet): the deck window must keep square corners while a swap chain sits
+  under translucent content; rounded corners bring the diagonal line back. Mention it in `docs/backgrounds.md` if the
+  design notes list known pitfalls.
+- No task in `openspec/changes/backgrounds/tasks.md` was ticked and the change was not archived. Still open: 9.4, 9.5,
+  10.6, as below.
+- `docs/handoff/backgrounds-seam/` (capture script and detector) can go once the change is archived.
+
 ## The defect
 
 With a **moving** background (an `SKSwapChainPanel`) and **translucent cards** over it, a one-pixel dotted line runs along

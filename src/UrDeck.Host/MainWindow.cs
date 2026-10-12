@@ -125,6 +125,7 @@ public sealed class MainWindow : Window, ISettingsHost
         Content = _root;
 
         _focus = WindowFocus.Apply(_hwnd);
+        WindowCorners.Square(_hwnd);
         _power = DisplayPowerWatcher.Start(_hwnd);
         if (_power != null)
             _power.DisplayStateChanged += _backgroundLayer.SetDisplayOn;
