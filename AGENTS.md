@@ -30,7 +30,9 @@ runs it on the four built-ins and on an `init` of a copy of one. `render --updat
 Render without a screen (from `src/UrDeck.Host/bin/Release/net10.0-windows10.0.19041.0/`):
 `UrDeck.Host.exe --snapshot out.snapshot.png --size 1100x3840`.
 
-CI (`.github/workflows/ci.yml`) runs all of the above on `windows-latest`; run them locally before pushing.
+CI (`.github/workflows/ci.yml`) runs the build, format and tests on `windows-latest` and the Linux tests when a change touches
+anything outside docs, root Markdown, `openspec/`, `site/` and most of `.github/`; OpenSpec validation runs when `openspec/` changed.
+The required checks are `ci-ok` and `pr-title` (`workflow_dispatch` runs everything). Run the commands locally before pushing.
 
 ## Layout
 

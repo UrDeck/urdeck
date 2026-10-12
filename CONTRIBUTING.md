@@ -21,8 +21,18 @@ Agents and humans follow the same rules; the short version for agents is in [AGE
    title and the PR description as the commit body, so keep the description tidy (delete the template comments).
 6. The head branch is deleted on merge. Keep branches short-lived and update them from `main` when they fall behind.
 
-`main` is protected by a ruleset: pull request required, required checks `build` and `pr-title`, linear history, no
+`main` is protected by a ruleset: pull request required, required checks `ci-ok` and `pr-title`, linear history, no
 force pushes or deletion, squash merges only.
+
+CI runs only the jobs a change can affect (`ci-ok` passes when every job that ran passed; a skipped job counts as passed):
+
+| Changed | Runs |
+| --- | --- |
+| Anything except the paths below (code, projects, build props, tests, a new folder) | `build` (Windows), `test-linux` |
+| Only root `*.md`, `docs/` (not `docs/schemas/`), `site/`, `.github/` (not `ci.yml`), `LICENSE`, `PLUGIN-EXCEPTION.md`, `THIRD-PARTY-NOTICES.md` | nothing but `ci-ok` and `pr-title` |
+| `openspec/` | `openspec` (validation) |
+
+`workflow_dispatch` (Actions tab, Run workflow) runs every job.
 
 ## Licensing
 

@@ -15,8 +15,47 @@ permissions:
   contents: read
 
 jobs:
-  # Required status check: build, format, tests, coverage floor and OpenSpec validation.
+  # Decides which jobs below run. A skipped job counts as passed, so ci-ok (the required check) is what catches a failure
+  # here. `code` is a deny-list: everything not named is built, so a new folder is checked by default.
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.code_candidate == 'true' || steps.filter.outputs.code_schema == 'true' || steps.filter.outputs.code_workflow == 'true' }}
+      openspec: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.openspec == 'true' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # v3.0.4. `every`: a file counts for a filter only when it matches all of its patterns (the `!` ones exclude).
+      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad
+        id: filter
+        if: github.event_name != 'workflow_dispatch'
+        with:
+          predicate-quantifier: every
+          filters: |
+            code_candidate:
+              - '**'
+              - '!*.md'
+              - '!docs/**'
+              - '!openspec/**'
+              - '!site/**'
+              - '!.github/**'
+              - '!LICENSE'
+              - '!PLUGIN-EXCEPTION.md'
+              - '!THIRD-PARTY-NOTICES.md'
+            code_schema:
+              - 'docs/schemas/**'
+            code_workflow:
+              - '.github/workflows/ci.yml'
+            openspec:
+              - 'openspec/**'
+
+  # Build, format, tests and coverage floor (gated through ci-ok).
   build:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
@@ -24,10 +63,6 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
 
       - name: Restore
         run: dotnet restore urdeck.slnx
@@ -68,9 +103,6 @@ jobs:
       - name: Pack (urdeck-cli)
         run: dotnet pack tools/UrDeck.Cli -c Release --no-build
 
-      - name: Validate OpenSpec
-        run: npx --yes @fission-ai/openspec@1.7.0 validate --all --strict
-
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -81,6 +113,8 @@ jobs:
   # The tests on Linux, and urdeck-cli (which runs there as well). urdeck.slnx holds the host, which needs Windows, so the
   # test projects are built directly. Tests of Windows-only code are skipped there.
   test-linux:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -118,6 +152,36 @@ jobs:
           $cli shader init "$work/mine.sksl"
           $cli shader render "$work/mine" -o "$work/mine/sample.png" --update-manifest
           $cli shader validate "$work/mine"
+
+  openspec:
+    needs: changes
+    if: needs.changes.outputs.openspec == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Validate OpenSpec
+        run: npx --yes @fission-ai/openspec@1.7.0 validate --all --strict
+
+  # Required status check, the one gate for the jobs above. Skipped counts as passed; failed or cancelled (a failed
+  # `changes` included) fails it. Every job except pr-title belongs in `needs`: add a new job here in the pull request that adds it.
+  ci-ok:
+    needs: [changes, build, test-linux, openspec]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "needed job results: $RESULTS"
+          case " $RESULTS " in
+            *" failure "*|*" cancelled "*) exit 1 ;;
+          esac
 
   # Required status check: the PR title becomes the squash commit title, so it must be a conventional commit.
   pr-title:
