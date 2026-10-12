@@ -182,7 +182,7 @@ Tasks:
 
 ### Git workflow and GitHub maintenance
 
-**Status:** applied on 2026-09-29 (ruleset "main protection", squash-only merge settings, PR template, Dependabot, `pr-title` check). Open: `CODEOWNERS` once there is a second maintainer.
+**Status:** applied on 2026-09-29 (ruleset "main protection", squash-only merge settings, PR template, Dependabot, `pr-title` check). Open: `CODEOWNERS` once there is a second maintainer. CI path filters (`ci-path-filters`): jobs run by what a change touched, `ci-ok` replaces `build` as the required check.
 
 All work happens on a short-lived branch and lands on `main` through a pull request. Nobody (including admins and
 agents) pushes to `main` directly. Configure on GitHub (repo settings + a ruleset on `main`), and document in
