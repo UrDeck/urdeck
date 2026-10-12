@@ -15,6 +15,8 @@ public partial class App : Application
     private HostContext? _host;
     private MainWindow? _window;
     private TrayIcon? _tray;
+    private SettingsWindow? _settings;
+    private SettingsSoak? _soak;
     private DispatcherQueueTimer? _memTimer;
     private readonly RunKeyAutostart _autostart = new();
 
@@ -45,6 +47,8 @@ public partial class App : Application
         _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.SaveConfiguration);
         _window.Closed += (_, _) =>
         {
+            // Quitting closes Settings too: it holds the host, which is disposed next.
+            _settings?.Close();
             _tray?.Dispose();
             _tray = null;
             _host.Dispose();
@@ -52,15 +56,19 @@ public partial class App : Application
         };
         // The tray icon is the way to close the app: the window never takes focus and has no taskbar button.
         var window = _window;
+        var dispatcher = DispatcherQueue.GetForCurrentThread();
+        // Opening a window is queued, not done inside the tray's window procedure or the menu's message loop.
+        void OpenSettingsLater() => dispatcher.TryEnqueue(OpenSettings);
         _tray = new TrayIcon(
             [
+                new TrayMenuEntry("Settings", OpenSettingsLater),
                 new TrayMenuEntry("Start with Windows", ToggleAutostart, () => _autostart.State == AutostartState.On),
                 new TrayMenuEntry("Quit", window.Close),
             ],
             Path.Combine(AppContext.BaseDirectory, "urdeck.ico"));
+        _tray.Selected += OpenSettingsLater;
 
         // --quit sets an event; closing the window on the UI thread is what the tray's Quit does.
-        var dispatcher = DispatcherQueue.GetForCurrentThread();
         Program.Instance?.ListenForQuit(() =>
         {
             UrDeckLog.Info("--quit received; closing");
@@ -71,6 +79,36 @@ public partial class App : Application
         window.PlacementChanged += (state, display) => _tray?.SetTooltip(
             state == PlacementState.Absent ? $"UrDeck: waiting for {display ?? "a display"}" : "UrDeck");
         window.Start();
+
+        // Opt-in measurement: URDECK_SETTINGS_SOAK=1 opens and closes the settings window 20 times and logs memory;
+        // =hold opens it once, five seconds after start, and leaves it open.
+        string? soak = Environment.GetEnvironmentVariable("URDECK_SETTINGS_SOAK");
+        if (soak is "1" or "hold")
+        {
+            _soak = new SettingsSoak(dispatcher, OpenSettings, () => _settings?.Close(), cycles: soak == "1" ? 20 : 0);
+            _soak.Start();
+        }
+    }
+
+    /// <summary>Opens the settings window, or brings the open one forward: there is at most one.</summary>
+    private void OpenSettings()
+    {
+        if (_window is null)
+            return;
+        if (_settings is not null)
+        {
+            _settings.BringForward();
+            return;
+        }
+
+        var settings = new SettingsWindow(_window, Path.Combine(AppContext.BaseDirectory, "urdeck.ico"));
+        settings.Closed += (_, _) =>
+        {
+            if (ReferenceEquals(_settings, settings))
+                _settings = null;
+        };
+        _settings = settings;
+        settings.Open();
     }
 
     private void ToggleAutostart()

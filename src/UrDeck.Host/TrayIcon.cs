@@ -15,8 +15,8 @@ internal sealed record TrayMenuEntry(string Label, Action Run, Func<bool>? IsChe
 /// <summary>
 /// The notification-area icon. It owns a hidden message-only window (the deck window never activates, and a popup
 /// menu needs an owner that can be put in the foreground), shows a native popup menu built from an ordered list of
-/// entries on right-click, and adds the icon again when Explorer restarts. It knows nothing about the application:
-/// what each entry does is the entry's own action. Create and dispose it on the UI thread.
+/// entries on right-click, reports a left click, and adds the icon again when Explorer restarts. It knows nothing about
+/// the application: what each entry does is the entry's own action. Create and dispose it on the UI thread.
 /// </summary>
 internal sealed class TrayIcon : IDisposable
 {
@@ -25,6 +25,8 @@ internal sealed class TrayIcon : IDisposable
     private const uint CallbackMessage = 0x8001; // WM_APP + 1
     private const uint WmNull = 0x0000;
     private const uint WmContextMenu = 0x007B;
+    private const uint NinSelect = 0x0400; // WM_USER: the icon was selected with the left button or Enter
+    private const uint NinKeySelect = 0x0401;
     private const uint WmDestroy = 0x0002;
     private const uint NimAdd = 0;
     private const uint NimModify = 1;
@@ -58,6 +60,9 @@ internal sealed class TrayIcon : IDisposable
     private bool _ownsIcon;
     private bool _added;
     private string _tooltip = "UrDeck";
+
+    /// <summary>The icon was clicked with the left button, or chosen from the keyboard. Raised on the thread that created it.</summary>
+    public event Action? Selected;
 
     public TrayIcon(IReadOnlyList<TrayMenuEntry> entries, string iconPath)
     {
@@ -184,8 +189,15 @@ internal sealed class TrayIcon : IDisposable
         if (message == CallbackMessage)
         {
             // Version 4: the event is in the low word of lParam, the anchor point in wParam.
-            if (((uint)lParam & 0xFFFF) == WmContextMenu)
+            uint notification = (uint)lParam & 0xFFFF;
+            if (notification == WmContextMenu)
                 ShowMenu((short)((ulong)wParam & 0xFFFF), (short)(((ulong)wParam >> 16) & 0xFFFF));
+            else if (notification is NinSelect or NinKeySelect)
+            {
+                // The click is what lets this process take the foreground; the window that opens next needs it, as the menu does.
+                SetForegroundWindow(_hwnd);
+                Selected?.Invoke();
+            }
             return 0;
         }
 

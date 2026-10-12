@@ -59,8 +59,14 @@ See the README license map before moving code between projects: it can change th
 - The host is an unpackaged, self-contained WinUI 3 app with its own `Main` (`Program.cs`): `--snapshot` runs with the
   engine alone and exits before the XAML application starts. `App.xaml` must stay (building the application resources
   in code crashes). Widget types are never XAML types.
-- The window has `WS_EX_NOACTIVATE`: it never takes focus, so Escape does not close it. Close it from the tray icon (right-click, Quit; Windows 11 may hide it in the overflow flyout), or
-  start it with `URDECK_ACTIVATABLE=1` (the window can take focus and Escape closes it) when developing.
+- The deck window has `WS_EX_NOACTIVATE`: it never takes focus, so Escape does not close it. Close it from the tray icon (right-click, Quit; Windows 11 may hide it in the overflow flyout), or
+  start it with `URDECK_ACTIVATABLE=1` (the deck window can take focus and Escape closes it) when developing.
+- The deck is not the only window: a left click on the tray icon (or its Settings entry) opens the settings window
+  (`SettingsWindow`, one page, the monitor picker), an ordinary activatable window with a taskbar button while it is
+  open. It talks to the host only through `ISettingsHost`, and `App` keeps one reference that it drops on close (a new
+  window per opening, so nothing lingers). Quit closes it first. `URDECK_SETTINGS_SOAK=1` opens and closes it 20 times at
+  startup and logs memory (`Soak ...` lines; the numbers are in `docs/perf/settings-window.md`). To try the window without a
+  deck on a screen, copy the build output elsewhere and give its config a `display` that is not connected.
 - Launching `UrDeck.Host.exe` (not `--snapshot`) blocks the shell. Start it detached and read `urdeck.log` next to the exe;
   it logs monitors, target vs. actual content area, placed widgets, reloads and warnings.
 - Where the window is, and whether it is shown, is decided by `PlacementController` (`src/UrDeck.Engine/Display`, tested

@@ -27,7 +27,7 @@ namespace UrDeck.Host;
 /// a background layer filled with the theme's background colour, and a canvas holding one surface per widget.
 /// Later changes add layers (an image or video background, hosted views such as a web view) to the same stack.
 /// </summary>
-public sealed class MainWindow : Window
+public sealed class MainWindow : Window, ISettingsHost
 {
     private readonly ConfigStore _configStore;
     private readonly WidgetPluginLoader _plugins;
@@ -60,6 +60,15 @@ public sealed class MainWindow : Window
 
     /// <summary>The placement state changed (UI thread); the name is the remembered display's, if there is one.</summary>
     internal event Action<PlacementState, string?>? PlacementChanged;
+
+    /// <inheritdoc />
+    event Action? ISettingsHost.Changed
+    {
+        add => SettingsChanged += value;
+        remove => SettingsChanged -= value;
+    }
+
+    private event Action? SettingsChanged;
 
     /// <summary><paramref name="saveDisplay"/> writes the configuration after the remembered display was set or updated.</summary>
     internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, Action saveDisplay)
@@ -199,7 +208,41 @@ public sealed class MainWindow : Window
 
     private static TimeSpan Now => TimeSpan.FromMilliseconds(Environment.TickCount64);
 
-    private void Signal(PlacementSignal signal) => Arm(_placement.Signal(signal, Now));
+    private void Signal(PlacementSignal signal)
+    {
+        Arm(_placement.Signal(signal, Now));
+        // The window's own size and scaling echo every placement; the picker has nothing to learn from them.
+        if (signal != PlacementSignal.WindowChanged)
+            SettingsChanged?.Invoke();
+    }
+
+    DisplayList ISettingsHost.GetDisplayList() => DisplayRows.Build(_configStore.Config, MonitorPlacement.GetDisplays());
+
+    void ISettingsHost.ChooseDisplay(DisplayInfo display)
+    {
+        if (!DisplayChoice.Choose(_configStore.Config, display))
+        {
+            UrDeckLog.Info($"Settings: {display.Name} is already the chosen display");
+            return;
+        }
+
+        UrDeckLog.Info($"Settings: display {display.Name} chosen; it is remembered without a selector");
+        _saveDisplay();
+        Signal(PlacementSignal.ConfigReloaded);
+    }
+
+    void ISettingsHost.ChooseAutomatically()
+    {
+        if (!DisplayChoice.ChooseAutomatically(_configStore.Config))
+        {
+            UrDeckLog.Info("Settings: the display is already chosen by the selectors");
+            return;
+        }
+
+        UrDeckLog.Info("Settings: the remembered display was cleared; the selectors choose again");
+        _saveDisplay();
+        Signal(PlacementSignal.ConfigReloaded);
+    }
 
     private void Arm(TimeSpan? delay)
     {
@@ -261,7 +304,11 @@ public sealed class MainWindow : Window
 
         public void SaveRememberedDisplay(RememberedDisplay display) => window._saveDisplay();
 
-        public void StateChanged(PlacementState state, string? displayName) => window.PlacementChanged?.Invoke(state, displayName);
+        public void StateChanged(PlacementState state, string? displayName)
+        {
+            window.PlacementChanged?.Invoke(state, displayName);
+            window.SettingsChanged?.Invoke();
+        }
     }
 
     /// <summary>Coalesces layout rebuilds (resize, scale and placement changes arrive in bursts).</summary>

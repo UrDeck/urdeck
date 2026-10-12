@@ -38,7 +38,9 @@ The host application MUST provide a borderless window that:
 - Never takes focus: touching, clicking or dragging on it MUST NOT make it the foreground window or move keyboard
   focus away from the window that has it, so using the deck does not interrupt a game or any other application. As a
   consequence the window receives no keyboard input and does not close on Escape. Showing the window again after its
-  display returned MUST NOT take focus either
+  display returned MUST NOT take focus either. This is a rule of the deck window alone: the settings window (see
+  settings-window) is a separate window that the user opens on purpose and that takes focus, and opening, using or
+  closing it never activates the deck window
 - Is not required to have a taskbar button; it is closed from the tray icon (see tray-icon), or by Escape in the
   development override
 - Starts activatable, so that it can be given focus for development, when the environment variable
@@ -79,6 +81,10 @@ The host application MUST provide a borderless window that:
 #### Scenario: Display returns while another application has focus
 - **WHEN** the deck's display is connected again while another application's window has keyboard focus
 - **THEN** the deck is shown and the other window keeps focus
+
+#### Scenario: Settings window does not change the deck's focus rule
+- **WHEN** the settings window is open and the user taps the panel
+- **THEN** the settings window keeps focus and the deck window does not take it
 
 ### Requirement: Widget Surfaces
 The host MUST give every widget its own drawing surface:
