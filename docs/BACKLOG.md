@@ -93,6 +93,10 @@ everything else should be fine on Sonnet.
   Windows" (Run key behind `IAutostart`), a complete `dotnet publish` folder, `scripts/Install-Local.ps1`, one host per
   folder with `--quit`, and a dated, capped log. The cold-boot checks (section 6 of its tasks) are the owner's; see
   `docs/perf/start-with-windows.md`.
+- `FrameClock` delivers about 21 paints per second, not the 30 it is documented to (measured 2026-10-12, `docs/perf/backgrounds.md`):
+  a `DispatcherQueueTimer` at 1/30 s fires late, as the spike's dispatcher timer did. A widget that asks for 15 fps (the
+  weather icon) gets 11. Pace it from `CompositionTarget.Rendering` as the background does, or document 21. Not done in
+  `backgrounds`.
 - `backgrounds` is implemented (2026-10-11, `openspec/changes/backgrounds`; the owner's checks on the panel are open, see
   item 9): the `background` setting with shader and image kinds, four built-in shaders, user shaders in `backgrounds/`,
   the theme's `colors.backgroundPalette`, a GPU surface at 30 frames per second that runs only while it can be seen, and
@@ -559,9 +563,10 @@ shaders (`plasma`, `aurora`, `gradient`, `julia`) that draw with the theme's pal
 user's own `backgrounds/<name>.sksl` with parameters read from its uniforms, a wallpaper image that covers the panel, 30
 frames per second on one GPU surface at a configurable `scale` (default 0.5), no frames while the deck is hidden or the
 display is off, and the background in `--snapshot`. Checked by build, tests, snapshots and the real host: 30.0 frames per
-second, no restart on an unrelated config save, plugin hot-reload leaves it running. **Open:** the owner's checks on the
-panel (the look of each built-in, sleep/wake and display-off recovery, the cost table in `docs/perf/backgrounds.md`, what
-`FrameClock` really delivers); per-page backgrounds (`pages[].background` stays unused), a video file, a guard for a heavy
+second, no restart on an unrelated config save, plugin hot-reload leaves it running; the owner checked the look, swipes,
+sleep/wake and display-off recovery on the panel. A dotted diagonal line under translucent cards was fixed by giving the
+deck window square corners (`WindowCorners`). **Open:** the cost table in `docs/perf/backgrounds.md` (owner); `FrameClock`
+runs at about 21 fps, not 30 (see Current state); per-page backgrounds (`pages[].background` stays unused), a video file, a guard for a heavy
 user shader, backgrounds that react to readings, blur behind translucent cards.
 
 Confirmed 2026-10-04 as a platform goal: a custom image, a video file, and a painted visualization (OpenGL or

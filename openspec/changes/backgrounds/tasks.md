@@ -76,7 +76,7 @@ reference for group 6. Tasks marked **(owner)** need the owner at the panel: pre
 - [x] 9.2 **(owner)** With a moving background: sleep and wake the PC; let Windows switch the display off and wake it (the log has `Windows: display off` then a stop line, then `display on` and a start line); unplug and replug the panel or power-cycle it; if a second scaling is available, set the panel to 150% once and check the apply line's surface size. If the surface is blank or frozen after any of these, implement the rebuild of design decision 8 ("After resume") and repeat
 - [x] 9.3 **(owner)** Settle the three built-in palettes and each built-in's default parameters by eye; record the final values in `docs/themes.md` and `docs/backgrounds.md`
 - [ ] 9.4 **(owner)** Measure with the method of `docs/perf/nexus-baseline.md` on the owner's usual page: no background, an image, `plasma` and `julia` at the default scale, `julia` at scale 1; and once with a game running beside the deck. Write the table to `docs/perf/backgrounds.md` and compare with the budget of design decision 14. A case over budget is reported to the owner, not tuned silently
-- [ ] 9.5 Measure what `FrameClock` really delivers: with one animating widget for 60 s, count its paints (a temporary log line is enough, removed afterwards). Record the rate in `docs/perf/backgrounds.md` and, if it is not about 30, add a backlog entry; do not change `FrameClock` in this change
+- [x] 9.5 Measure what `FrameClock` really delivers: with one animating widget for 60 s, count its paints (a temporary log line is enough, removed afterwards). Record the rate in `docs/perf/backgrounds.md` and, if it is not about 30, add a backlog entry; do not change `FrameClock` in this change
 
 ## 10. Documentation
 

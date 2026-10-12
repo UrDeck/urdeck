@@ -109,6 +109,10 @@ See the README license map before moving code between projects: it can change th
   frames stopped (reason): N frames in S s` (N/S about 30), `Windows: display off` / `display on`, and `Background: none`
   in `urdeck.log`. The layer keys on `DeckBackground.RequestKey`, so an unrelated config save does not restart the motion,
   and a background that failed is not tried again until its key changes. User shaders are `backgrounds/<name>.sksl` next to
-  the exe and `scripts/Install-Local.ps1` never touches that folder.
+  the exe and `scripts/Install-Local.ps1` never touches that folder. The deck window must keep **square corners**
+  (`WindowCorners.Square`, `DWMWA_WINDOW_CORNER_PREFERENCE` = do not round): with Windows 11's rounded corners the desktop
+  compositor blends translucent content over a swap chain three times along the window's diagonal, a bright dotted line
+  through every translucent card (`glass` theme, moving background). The log says `Window corners are square`.
+  `FrameClock` delivers about 21 frames per second, not 30 (`docs/perf/backgrounds.md`).
 - Do not add per-widget styling or resolution assumptions: styling belongs in the theme (`src/UrDeck.Engine/Themes`, `docs/themes.md`)
   and the user never sees resolution or scaling. Widgets draw no card and name no font; use the SDK components.
