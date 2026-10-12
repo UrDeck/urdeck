@@ -573,6 +573,22 @@ Confirmed 2026-10-04 as a platform goal: a custom image, a video file, and a pai
 Direct3D), behind translucent cards. This is the main reason composition moves to the GPU (item 14), and the spike
 there measures a video background. The decoded-video layer built here is also what a camera widget would use.
 
+### Background packages, the manifest and the `urdeck-cli` tool (decided 2026-10-12)
+
+A background becomes an installable folder with a required manifest, and a command line tool checks and builds them.
+Three changes, in this order; the detail of (b) and (c) is in `docs/handoff/2026-10-12-urdeck-cli.md`.
+
+- **(a) `shader-manifest`** (proposed, `openspec/changes/shader-manifest`): `backgrounds/<name>/manifest.json` plus the
+  entry `.sksl`; the manifest (version 1) annotates the shader's parameters and lists samples; `ShaderLint` with stable
+  `SHADER###` codes at load and in a test; built-ins as folders; `BackgroundRender`; the authoring guide. **Model:**
+  Opus for the reader and lint API and the `layout(color)` spike, Sonnet for the rest.
+- **(b) `urdeck-cli`** (after (a) is merged): a portable dotnet tool (DotMake.CommandLine) with `shader validate`,
+  `shader init` and `shader render`; `--fail-on-warnings`, `--format json`; the schema embedded. A community store would
+  run it in CI. **Model:** Sonnet.
+- **(c) generated documentation** (after (b)): `shader docs` and a CI drift check, like `dotnet format --verify-no-changes`.
+  **Model:** Sonnet.
+- The settings UI that builds a form from manifests belongs to the editor (item 11).
+
 ## 10. Dock / quick launch
 
 Launcher bar for apps and URLs (the `dock` config field exists but is unused). **Model:** Sonnet.

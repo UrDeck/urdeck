@@ -61,12 +61,15 @@ measurement so far is from one panel and one NVIDIA GPU, and that is the largest
 - Settings metadata in the SDK, so the editor can build a form from a widget's config type (item 15). This is public
   SDK API and the main reason milestone 5 comes after this one.
 - The reading picker with live values (item 3) and the theme picker.
+- Background manifests, so the editor can build a form for a background's parameters (item 9; the format is the
+  `shader-manifest` change, the checking tool `urdeck-cli` follows it).
 - The monitor picker with friendly names (the UI half of item 6; implemented in `settings-window`, and the first page of
   the settings window the editor grows from).
 
 **4. Living page.** What makes the page worth looking at, and the reason composition moved to the GPU.
 - Backgrounds: image, video, painted visualization (item 9). Image and painted (shader) backgrounds are implemented in
   `backgrounds`; a video file, per-page backgrounds and a guard for heavy shaders are still open.
+  Backgrounds as folders with a manifest, a lint and the `urdeck-cli` tool are planned next (item 9).
 - The web page widget, a hosted widget kind (item 7). Also public SDK API.
 - Media / now playing (item 7).
 - The motion level as a theme or page setting, and the later theme knobs (items 5 and 14).
