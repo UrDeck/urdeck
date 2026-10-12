@@ -44,7 +44,7 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
   `display-recovery`, checked on the panel for sleep, unplug and scaling; the picker UI waits for milestone 3).
 - CPU temperature through the opt-in elevated helper (item 3, fourth change). May slip to milestone 2 if the driver
   question takes long; the card shows a dash until then.
-- Start with Windows, in its simplest form (item 12).
+- Start with Windows, in its simplest form (item 12; done in `start-with-windows`, checked on three cold boots, a sign-out, an Explorer restart and a sleep).
 
 **2. Public preview (0.1).** For people who are willing to edit a JSON file. Its purpose is hardware variety: every
 measurement so far is from one panel and one NVIDIA GPU, and that is the largest unknown in the project.

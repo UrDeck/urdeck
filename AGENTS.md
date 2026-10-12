@@ -84,5 +84,12 @@ See the README license map before moving code between projects: it can change th
   were not collected); keep plugin types out of long-lived static caches.
 - The host build copies `src/UrDeck.Host/urdeck-config.json` over the one next to the exe whenever the source file is
   newer. After editing the tracked sample, a build replaces a working config in `bin/`: back it up first.
+- The daily copy is installed with `pwsh scripts/Install-Local.ps1` (`%LOCALAPPDATA%\Programs\UrDeck`); the build output
+  is only for development. The script never touches `urdeck-config.json`, the log, `cache/`, `themes/` or foreign plugins.
+- `urdeck.log` lines are `[yyyy-MM-dd HH:mm:ss.fff] LEVEL message`; the file rotates to `urdeck.log.1` at 5 MB.
+- One host per application folder: `Program.Main` handles `--snapshot`, then `--quit`, then the guard (a named mutex and
+  event keyed on the folder, `UrDeck.Engine/Startup/InstanceNames`), then the XAML application. `--quit` sets the event
+  and waits for the mutex. "Start with Windows" is the `UrDeck` value under `HKCU\...\Run` (`RunKeyAutostart`); Windows
+  owns the setting, the config has no field for it.
 - Do not add per-widget styling or resolution assumptions: styling belongs in the theme (`src/UrDeck.Engine/Themes`, `docs/themes.md`)
   and the user never sees resolution or scaling. Widgets draw no card and name no font; use the SDK components.

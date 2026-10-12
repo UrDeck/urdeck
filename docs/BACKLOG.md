@@ -89,8 +89,11 @@ everything else should be fine on Sonnet.
   display that is only switched off (Windows does not report it). Not checked on hardware: a move to another output (no
   spare output; the unit tests cover it). Idle GPU is 0.2 to 0.7% with the full widget set. It replaces the `display-targeting` draft; see item 6 and
   `docs/perf/display-recovery.md`.
-- Next: `display-recovery`, then start with Windows (item 12), which together let the two-week run of milestone 1
-  begin. Sensors that need elevation (item 3, fourth change) follow and may slip to milestone 2.
+- `start-with-windows` is implemented (2026-10-11, `openspec/changes/archive/2026-10-11-start-with-windows`): the tray entry "Start with
+  Windows" (Run key behind `IAutostart`), a complete `dotnet publish` folder, `scripts/Install-Local.ps1`, one host per
+  folder with `--quit`, and a dated, capped log. The cold-boot checks (section 6 of its tasks) are the owner's; see
+  `docs/perf/start-with-windows.md`.
+- Next: the cold-boot checks of `start-with-windows`, which begin the two-week run of milestone 1. Sensors that need elevation (item 3, fourth change) follow and may slip to milestone 2.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -577,6 +580,15 @@ framework follows the host decision in item 14: the same framework if WinUI 3 pa
 
 Installer, start with Windows, auto-update, logo and branding, winget manifest and GitHub release automation, and a third-party notices file
 (SkiaSharp is MIT and must be attributed in binary releases). **Model:** Sonnet.
+
+Done in `start-with-windows`: start with Windows (tray entry, Run key), the published folder with `plugins/`,
+`scripts/Install-Local.ps1`, a single-instance guard per folder, `--quit`, and a dated log capped at 5 MB. Still needed by
+the installer: a manifest of the files it installed (the script cannot remove a first-party plugin that was dropped), the
+per-user data folder (item 15), and the single-instance message the editor will want (bring the first copy forward).
+
+Owner's distribution goals: the Microsoft Store as an eventual target (start-up then goes through the `StartupTask` API
+and the application folder is read-only, so item 15 comes first), signing releases at no cost if that is possible, and
+research before an installer technology is chosen.
 
 Tray icon with Quit: done (`tray-icon`). The menu is a list of entries, so the editor's "Open editor" entry (and a
 single-instance guard, which would also be the place to bring the first copy's editor forward) are added later. Still
