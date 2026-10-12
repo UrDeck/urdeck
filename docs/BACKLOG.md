@@ -97,8 +97,8 @@ everything else should be fine on Sonnet.
   a `DispatcherQueueTimer` at 1/30 s fires late, as the spike's dispatcher timer did. A widget that asks for 15 fps (the
   weather icon) gets 11. Pace it from `CompositionTarget.Rendering` as the background does, or document 21. Not done in
   `backgrounds`.
-- `backgrounds` is implemented (2026-10-11, `openspec/changes/backgrounds`; the owner's checks on the panel are open, see
-  item 9): the `background` setting with shader and image kinds, four built-in shaders, user shaders in `backgrounds/`,
+- `backgrounds` is implemented and archived (2026-10-12, `openspec/changes/archive/2026-10-12-backgrounds`; all checks on the
+  panel done, see item 9): the `background` setting with shader and image kinds, four built-in shaders, user shaders in `backgrounds/`,
   the theme's `colors.backgroundPalette`, a GPU surface at 30 frames per second that runs only while it can be seen, and
   the background in `--snapshot`. Spike in `docs/perf/backgrounds-spike.md`.
 - `settings-window` is implemented and archived (2026-10-11, `openspec/changes/archive/2026-10-11-settings-window`; the
@@ -557,16 +557,16 @@ scrolls natively (a chat, a list) needs pan gestures with inertia from the host 
 Static image, video, and generative visualizations per page (the `pages[].background` config field exists but is unused).
 Video is expensive: gate it behind the performance budget and measure. **Model:** Sonnet.
 
-**Status (2026-10-11):** the image and the painted (shader) background are implemented in `backgrounds`
-(`openspec/changes/backgrounds`; docs in `docs/backgrounds.md`): a top-level `background` setting, four built-in SkSL
+**Status (2026-10-12):** the image and the painted (shader) background are implemented in `backgrounds`
+(`openspec/changes/archive/2026-10-12-backgrounds`; docs in `docs/backgrounds.md`): a top-level `background` setting, four built-in SkSL
 shaders (`plasma`, `aurora`, `gradient`, `julia`) that draw with the theme's palette (`colors.backgroundPalette`), the
 user's own `backgrounds/<name>.sksl` with parameters read from its uniforms, a wallpaper image that covers the panel, 30
 frames per second on one GPU surface at a configurable `scale` (default 0.5), no frames while the deck is hidden or the
 display is off, and the background in `--snapshot`. Checked by build, tests, snapshots and the real host: 30.0 frames per
 second, no restart on an unrelated config save, plugin hot-reload leaves it running; the owner checked the look, swipes,
 sleep/wake and display-off recovery on the panel. A dotted diagonal line under translucent cards was fixed by giving the
-deck window square corners (`WindowCorners`). **Open:** the cost table in `docs/perf/backgrounds.md` (owner); `FrameClock`
-runs at about 21 fps, not 30 (see Current state); per-page backgrounds (`pages[].background` stays unused), a video file, a guard for a heavy
+deck window square corners (`WindowCorners`); the cost table is in `docs/perf/backgrounds.md` (within budget, 23.8 fps
+beside a game). **Open:** `FrameClock` runs at about 21 fps, not 30 (see Current state); per-page backgrounds (`pages[].background` stays unused), a video file, a guard for a heavy
 user shader, backgrounds that react to readings, blur behind translucent cards.
 
 Confirmed 2026-10-04 as a platform goal: a custom image, a video file, and a painted visualization (OpenGL or

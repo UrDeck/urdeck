@@ -85,4 +85,4 @@ reference for group 6. Tasks marked **(owner)** need the owner at the panel: pre
 - [x] 10.3 `README.md`: a "Backgrounds" entry under "Configuration" linking to `docs/backgrounds.md`; the `backgrounds/` folder in the install section's list of kept files
 - [x] 10.4 `AGENTS.md`: `Backgrounds` in the engine's layout line; gotchas: the render-scale rule (visual scale, never `RenderTransform`), pacing from `CompositionTarget.Rendering` and why not `FrameClock`, the log lines to look for, `backgrounds/` next to the exe and that the install script keeps it
 - [x] 10.5 `docs/BACKLOG.md` item 9: status, what shipped, and what stays open (per-page backgrounds, a video file, a guard for heavy shaders, reacting to readings, blur behind cards); "Current state" if it lists backgrounds; `docs/ROADMAP.md` where it mentions backgrounds
-- [ ] 10.6 Archive the change when every task is ticked and verified
+- [x] 10.6 Archive the change when every task is ticked and verified

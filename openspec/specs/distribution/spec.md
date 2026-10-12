@@ -34,7 +34,7 @@ The repository MUST provide one command that installs the current sources for th
   replaced, and is started again afterwards. A copy that was not running is started only when `-Start` is given
 - The application's files are replaced, and files of earlier versions that are no longer published are removed
 - Files the user owns are never replaced or removed: `urdeck-config.json` once it exists, `urdeck.log` and
-  `urdeck.log.1`, `cache/`, `themes/`, and files in `plugins/` that the publish did not produce
+  `urdeck.log.1`, `cache/`, `themes/`, `backgrounds/`, and files in `plugins/` that the publish did not produce
 - A destination without `urdeck-config.json` receives the sample configuration
 - It does not register the app to start with Windows; that stays the user's choice in the tray menu
 - A failure (the publish fails, the running copy does not close, a file cannot be replaced) stops the command with a
@@ -45,10 +45,10 @@ The repository MUST provide one command that installs the current sources for th
 - **THEN** the destination holds a runnable copy with the sample configuration
 
 #### Scenario: Update keeps the user's files
-- **WHEN** the command is run over an installed copy whose configuration was edited and whose `themes/` and
-  `plugins/` hold files the user added
-- **THEN** the application's files are the new ones, and the configuration, the log, the themes and the added plugins
-  are unchanged
+- **WHEN** the command is run over an installed copy whose configuration was edited and whose `themes/`,
+  `backgrounds/` and `plugins/` hold files the user added
+- **THEN** the application's files are the new ones, and the configuration, the log, the themes, the backgrounds and
+  the added plugins are unchanged
 
 #### Scenario: Update while running
 - **WHEN** the command is run while the installed copy is running
