@@ -167,14 +167,14 @@ Config is `urdeck-config.json`, located next to the executable (`src/UrDeck.Host
 | `display` | The monitor the deck belongs to. UrDeck writes it the first time `monitorName` / `monitor` have chosen one, and when you choose a monitor in [Settings](#settings-window): `name` (for you; never used to find the monitor), `model` and `path` (how the monitor is found again after a restart, sleep, or a move to another output), and `selector` (what it was chosen with; a monitor you chose in Settings has none, so the selectors never replace it). You do not edit it; **choose automatically in Settings, or remove it, to make UrDeck choose again**, for example when the first start picked the wrong monitor because yours was switched off. See [The deck's monitor](#the-decks-monitor). |
 | `theme` | Name of the theme: `default-dark` (default), `default-light`, `glass`, or a folder under `themes/` next to the executable. See [docs/themes.md](docs/themes.md). Unknown names fall back to the default with a warning; changing it applies on config reload without a restart. |
 | `providers` | Optional settings per data provider, keyed by provider id: `"providers": { "system": { "intervalMs": 500 } }` samples the `system` provider every 500 ms instead of its default 2000 ms. A value below the provider's minimum (250 ms for `system`) is raised to it and logged. Applies on config reload without a restart. Absent by default; other properties are kept in the file. |
-| `background` | What the deck shows behind its cards: `{ "type": "shader", "name": "plasma" }` (a moving background: `plasma`, `aurora`, `gradient`, `julia`, or your own `backgrounds/<name>.sksl`) or `{ "type": "image", "path": "D:/Pictures/wall.jpg" }`. Absent by default: the theme's background colour. See [Backgrounds](#backgrounds). Applies on config reload without a restart. |
+| `background` | What the deck shows behind its cards: `{ "type": "shader", "name": "plasma" }` (a moving background: `plasma`, `aurora`, `gradient`, `julia`, or your own folder `backgrounds/<name>/`) or `{ "type": "image", "path": "D:/Pictures/wall.jpg" }`. Absent by default: the theme's background colour. See [Backgrounds](#backgrounds). Applies on config reload without a restart. |
 | `dock` | The widgets of the dock, up to four, in slot order: widget objects like those of a page, without `col` and `row`. Absent or empty: no dock. See [Dock](#dock). Applies on config reload without a restart, and widget-specific settings are kept in the file. |
 
 ### Backgrounds
 
 The `background` setting puts a moving picture or a wallpaper behind the cards; pages slide over it and translucent cards
-(the `glass` theme) show it through. Four shaders are built in and follow the theme's colours; your own is a text file,
-`backgrounds/<name>.sksl`, whose parameters are set from the configuration:
+(the `glass` theme) show it through. Four shaders are built in and follow the theme's colours; your own is a folder,
+`backgrounds/<name>/`, with a `manifest.json` and the shader, whose parameters are set from the configuration:
 
 ```json
 "background": { "type": "shader", "name": "aurora", "speed": 0.5 }
@@ -182,7 +182,7 @@ The `background` setting puts a moving picture or a wallpaper behind the cards; 
 
 A moving background costs about 3% of one CPU core and under 1% of the GPU at the default `scale` of 0.5, and nothing at all
 when there is none or it is still. It is drawn 30 times a second, and not while the deck is hidden or the display is off.
-Everything (the settings, writing a shader, images, what the log says) is in [docs/backgrounds.md](docs/backgrounds.md).
+Everything (the settings, authoring a background and its manifest, images, what the log says) is in [docs/backgrounds.md](docs/backgrounds.md).
 
 ### The deck's monitor
 

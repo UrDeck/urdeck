@@ -1,0 +1,29 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Aurora",
+  "description": "Three glowing curtains swaying along the longer side of the display.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "nature",
+    "calm"
+  ],
+  "parameters": {
+    "intensity": {
+      "label": "Intensity",
+      "description": "Brightness of the curtains; 0 is dark, 1 is the designed look.",
+      "min": 0,
+      "max": 3,
+      "step": 0.1
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Aurora in the default theme"
+    }
+  ]
+}

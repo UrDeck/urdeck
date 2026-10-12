@@ -35,6 +35,9 @@ public sealed partial class BackgroundSettings
 
     public static BackgroundSettings None { get; } = new();
 
+    /// <summary>True for one of the setting's own keys (<c>type</c>, <c>name</c>, <c>path</c>, <c>speed</c>, <c>scale</c>, <c>colors</c>).</summary>
+    internal static bool IsOwnKey(string key) => OwnKeys.Contains(key, StringComparer.OrdinalIgnoreCase);
+
     private BackgroundSettings()
     {
     }

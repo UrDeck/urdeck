@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "title": "UrDeck background manifest, version 1",
+  "description": "manifest.json of a background folder. Unknown keys are allowed so that a newer manifest does not light up red; UrDeck warns about them when it loads the background.",
+  "type": "object",
+  "required": ["manifest"],
+  "additionalProperties": true,
+  "properties": {
+    "$schema": { "type": "string", "description": "This schema's URL, for editor completion. Ignored." },
+    "manifest": { "const": 1, "description": "The version of the format. A background without it, or with another value, does not load." },
+    "title": { "type": "string", "description": "The name a person sees." },
+    "description": { "type": "string", "description": "What the background looks like." },
+    "entry": { "type": "string", "description": "The shader file inside the folder. Default: <folder name>.sksl." },
+    "author": { "type": "string" },
+    "license": { "type": "string", "description": "An SPDX identifier is best." },
+    "version": { "type": "string", "description": "The background's own version." },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "parameters": {
+      "type": "object",
+      "description": "Annotations, keyed by the name of a uniform the shader declares.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "label": { "type": "string" },
+          "description": { "type": "string" },
+          "kind": { "enum": ["number", "color"], "description": "color only for a parameter with three or four components." },
+          "min": { "type": "number", "description": "Per component for a vector." },
+          "max": { "type": "number", "description": "Per component for a vector." },
+          "step": { "type": "number" },
+          "unit": { "type": "string" },
+          "hidden": { "type": "boolean", "description": "Keeps the parameter out of an editor; the configuration can still set it." }
+        }
+      }
+    },
+    "samples": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "type": { "enum": ["image", "video"], "description": "video is accepted and never played." },
+          "file": { "type": "string", "description": "A file inside the folder." },
+          "order": { "type": "integer" },
+          "caption": { "type": "string" },
+          "settings": { "type": "object" }
+        }
+      }
+    }
+  }
+}

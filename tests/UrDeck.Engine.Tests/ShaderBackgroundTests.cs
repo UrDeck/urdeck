@@ -210,7 +210,7 @@ public sealed class ShaderBackgroundTests : IDisposable
         _fixture.WriteShader("broken", "half4 main(float2 p) { return half4(1, 0, 0, 1) }");
 
         Assert.Null(_fixture.Create(Json("broken")));
-        Assert.Contains("Background 'broken': the shader does not compile:", _fixture.Log);
+        Assert.Contains("Background 'broken': SHADER020 the shader does not compile:", _fixture.Log);
     }
 
     [Fact]

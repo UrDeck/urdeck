@@ -44,43 +44,32 @@ internal sealed class ShaderProgram : IDisposable
     public IReadOnlyDictionary<string, float[]> Parameters { get; }
 
     /// <summary>
-    /// Compiles <paramref name="shader"/> and resolves its uniforms against <paramref name="settings"/>; null (after one
-    /// warning that names the cause) when it cannot be used. Warnings about the configuration's keys are logged here.
+    /// Compiles the package's entry shader and resolves its uniforms against <paramref name="settings"/>; null when it
+    /// cannot be used, with the cause in <paramref name="failure"/> (the lint reports the same cause with a code).
+    /// Warnings about the configuration's keys and values are logged here.
     /// </summary>
-    public static ShaderProgram? Create(ShaderText shader, BackgroundSettings settings, SKColor[] palette)
+    public static ShaderProgram? Create(BackgroundPackage package, BackgroundSettings settings, SKColor[] palette, out string? failure)
     {
-        string label = shader.Name;
-        var declarations = ShaderDeclarations.Parse(shader.Text, label);
+        string label = package.Name;
+        var declarations = ShaderDeclarations.Parse(package.EntryText, label);
         if (declarations.HasChildShader)
         {
-            UrDeckLog.Warn($"Background '{label}': a 'uniform shader' (a child shader) cannot be used; there is nothing to give it.");
+            failure = "a 'uniform shader' (a child shader) cannot be used; there is nothing to give it.";
             return null;
         }
 
-        SKRuntimeEffect? effect;
-        string errors;
-        try
-        {
-            effect = SKRuntimeEffect.CreateShader(shader.Text, out errors);
-        }
-        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
-        {
-            UrDeckLog.Warn($"Background '{label}': the shader could not be compiled: {ex.Message}");
-            return null;
-        }
-
+        var effect = Compile(package.EntryText, out failure);
         if (effect == null)
-        {
-            UrDeckLog.Warn($"Background '{label}': the shader does not compile: {errors.Trim()}");
             return null;
-        }
 
         if (effect.Children.Count > 0)
         {
-            UrDeckLog.Warn($"Background '{label}': a child shader cannot be used; there is nothing to give it.");
+            failure = "a child shader cannot be used; there is nothing to give it.";
             effect.Dispose();
             return null;
         }
+
+        var annotated = BackgroundParameter.Join(declarations, package.Manifest).ToDictionary(p => p.Name, StringComparer.Ordinal);
 
         var known = new HashSet<string>(declarations.Uniforms.Select(u => u.Name).Concat(declarations.Unsupported), StringComparer.Ordinal);
         foreach (string name in effect.Uniforms)
@@ -99,7 +88,7 @@ internal sealed class ShaderProgram : IDisposable
             if (!compiled.Contains(uniform.Name))
                 continue;
 
-            if (IsHostInput(uniform.Name))
+            if (HostKeys.IsHostInput(uniform.Name))
             {
                 bool right = uniform.Name switch
                 {
@@ -126,7 +115,12 @@ internal sealed class ShaderProgram : IDisposable
             if (settings.Parameters.TryGetValue(uniform.Name, out var given))
             {
                 if (TryReadParameter(given, uniform.Components, out float[]? parsed))
-                    value = parsed;
+                {
+                    if (annotated.TryGetValue(uniform.Name, out var note) && !note.InRange(parsed))
+                        UrDeckLog.Warn($"Background '{label}': '{uniform.Name}' {given.GetRawText()} is outside the range {note.DescribeRange()}; using {Format(value)}.");
+                    else
+                        value = parsed;
+                }
                 else
                     UrDeckLog.Warn($"Background '{label}': '{uniform.Name}' {given.GetRawText()} must be {Describe(uniform.Components)}; using {Format(value)}.");
             }
@@ -137,12 +131,13 @@ internal sealed class ShaderProgram : IDisposable
 
         foreach (string key in settings.Parameters.Keys)
         {
-            if (IsHostInput(key))
+            if (HostKeys.IsHostInput(key))
                 UrDeckLog.Warn($"Background '{label}': '{key}' is an input the host sets and cannot be set in the configuration.");
             else if (!parameters.ContainsKey(key))
                 UrDeckLog.Warn($"Background '{label}': '{key}' is not a parameter of the shader.");
         }
 
+        failure = null;
         return new ShaderProgram(effect, uniforms, declaresTime, hasResolution, hasColor, palette, parameters);
     }
 
@@ -165,7 +160,24 @@ internal sealed class ShaderProgram : IDisposable
         _effect.Dispose();
     }
 
-    private static bool IsHostInput(string name) => name is TimeName or ResolutionName || Array.IndexOf(ColorNames, name) >= 0;
+    /// <summary>
+    /// Compiles <paramref name="text"/> without resolving any uniform (the lint's path). Null with the compiler's message
+    /// in <paramref name="failure"/>; the caller disposes the effect.
+    /// </summary>
+    internal static SKRuntimeEffect? Compile(string text, out string? failure)
+    {
+        try
+        {
+            var effect = SKRuntimeEffect.CreateShader(text, out string errors);
+            failure = effect == null ? $"the shader does not compile: {errors.Trim()}" : null;
+            return effect;
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+        {
+            failure = $"the shader could not be compiled: {ex.Message}";
+            return null;
+        }
+    }
 
     private static string HostType(string name) => name switch
     {

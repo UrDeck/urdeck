@@ -65,7 +65,7 @@ public sealed class DeckBackground : IDisposable
                 string parameters = string.Join(";", settings.Parameters
                     .OrderBy(p => p.Key, StringComparer.Ordinal)
                     .Select(p => $"{p.Key}={p.Value.GetRawText()}"));
-                string source = shader == null ? "missing" : $"{shader.Origin}:{Hash(shader.Text)}";
+                string source = shader == null ? "missing" : $"{shader.Origin}:{Hash(shader.EntryText)}:{Hash(shader.ManifestText)}";
                 return string.Create(CultureInfo.InvariantCulture,
                     $"shader|{settings.Name}|{source}|{settings.Speed}|{settings.Scale}|{palette}|{parameters}");
 
@@ -82,23 +82,46 @@ public sealed class DeckBackground : IDisposable
 
     /// <summary>
     /// Builds the configured background, or returns null for none and for every failure, after logging one warning that
-    /// names the cause. An image is only checked for existence here; <see cref="PrepareAsync"/> decodes it.
+    /// names the cause. A shader's lint diagnostics are logged once each, as <c>Background 'name': SHADERnnn message
+    /// (file)</c>. An image is only checked for existence here; <see cref="PrepareAsync"/> decodes it.
     /// </summary>
     public static DeckBackground? Create(BackgroundSettings settings, LoadedTheme theme, ShaderStore store, string appDirectory)
     {
         try
         {
-            return settings.Kind switch
-            {
-                BackgroundKind.Shader => CreateShader(settings, theme, store, appDirectory),
-                BackgroundKind.Image => CreateImage(settings, theme, store, appDirectory),
-                _ => null,
-            };
+            var background = TryCreate(settings, theme, store, appDirectory, out string? failure, out var diagnostics);
+            string who = settings.Kind == BackgroundKind.Shader ? $"Background '{settings.Name}': " : "Background: ";
+            foreach (var diagnostic in diagnostics)
+                UrDeckLog.Warn(who + diagnostic);
+            if (failure != null && !diagnostics.Any(d => d.ToString() == failure))
+                UrDeckLog.Warn(who + failure);
+            return background;
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             UrDeckLog.Warn($"Background: could not be created: {ex.Message}");
             return null;
+        }
+    }
+
+    /// <summary>
+    /// As <see cref="Create"/>, but logs nothing for the shader: <paramref name="failure"/> holds the reason when there is
+    /// none (null for no background configured) and <paramref name="diagnostics"/> the lint's findings, which can be
+    /// there with a background too.
+    /// </summary>
+    internal static DeckBackground? TryCreate(BackgroundSettings settings, LoadedTheme theme, ShaderStore store, string appDirectory,
+        out string? failure, out IReadOnlyList<ShaderDiagnostic> diagnostics)
+    {
+        failure = null;
+        diagnostics = [];
+        switch (settings.Kind)
+        {
+            case BackgroundKind.Shader:
+                return CreateShader(settings, theme, store, appDirectory, out failure, out diagnostics);
+            case BackgroundKind.Image:
+                return CreateImage(settings, theme, store, appDirectory, out failure);
+            default:
+                return null;
         }
     }
 
@@ -182,30 +205,45 @@ public sealed class DeckBackground : IDisposable
         }
     }
 
-    private static DeckBackground? CreateShader(BackgroundSettings settings, LoadedTheme theme, ShaderStore store, string appDirectory)
+    private static DeckBackground? CreateShader(BackgroundSettings settings, LoadedTheme theme, ShaderStore store, string appDirectory,
+        out string? failure, out IReadOnlyList<ShaderDiagnostic> diagnostics)
     {
-        var shader = store.Load(settings.Name!);
-        if (shader == null)
+        diagnostics = [];
+        var load = store.TryLoad(settings.Name!);
+        if (load.Package == null)
+        {
+            failure = load.Failure;
             return null;
+        }
+
+        var package = load.Package;
+        diagnostics = ShaderLint.Check(package.Source, package.Name);
+        var stop = diagnostics.FirstOrDefault(d => d.Severity == ShaderSeverity.Error && ShaderCodes.StopsLoading(d.Code));
+        if (stop != null)
+        {
+            failure = stop.ToString();
+            return null;
+        }
 
         var palette = BackgroundPalette.Resolve(settings.Colors, theme);
-        var program = ShaderProgram.Create(shader, settings, palette);
+        var program = ShaderProgram.Create(package, settings, palette, out failure);
         if (program == null)
             return null;
 
         string key = RequestKey(settings, theme, store, appDirectory)!;
-        return new DeckBackground(settings, key, $"shader '{settings.Name}' ({shader.Origin})", program, null);
+        return new DeckBackground(settings, key, $"shader '{settings.Name}' ({package.Origin})", program, null);
     }
 
-    private static DeckBackground? CreateImage(BackgroundSettings settings, LoadedTheme theme, ShaderStore store, string appDirectory)
+    private static DeckBackground? CreateImage(BackgroundSettings settings, LoadedTheme theme, ShaderStore store, string appDirectory, out string? failure)
     {
         string path = BackgroundImage.ResolvePath(settings.Path!, appDirectory);
         if (!File.Exists(path))
         {
-            UrDeckLog.Warn($"Background: the picture {path} does not exist.");
+            failure = $"the picture {path} does not exist.";
             return null;
         }
 
+        failure = null;
         string key = RequestKey(settings, theme, store, appDirectory)!;
         return new DeckBackground(settings, key, $"image '{path}'", null, path);
     }

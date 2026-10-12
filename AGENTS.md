@@ -108,8 +108,12 @@ See the README license map before moving code between projects: it can change th
   moving|still` (check the surface size at other display scalings), `Background frames started (reason)` and `Background
   frames stopped (reason): N frames in S s` (N/S about 30), `Windows: display off` / `display on`, and `Background: none`
   in `urdeck.log`. The layer keys on `DeckBackground.RequestKey`, so an unrelated config save does not restart the motion,
-  and a background that failed is not tried again until its key changes. User shaders are `backgrounds/<name>.sksl` next to
-  the exe and `scripts/Install-Local.ps1` never touches that folder. The deck window must keep **square corners**
+  and a background that failed is not tried again until its key changes. A background is a folder `backgrounds/<name>/` next to the exe
+  holding `manifest.json` (required, version 1) and the entry `<name>.sksl`; the four built-ins are embedded folders of the same shape
+  (`UrDeck.Backgrounds.<name>/<file>`) with a `sample.png` made by the explicit `BuiltInSampleTool` test (`docs/backgrounds.md`). A loose
+  `.sksl` is not loaded (the log names the folder to make). `ShaderLint` checks a folder and `DeckBackground.Create` logs each finding once as
+  `Background 'name': SHADERnnn message (file)` (the codes are in `docs/backgrounds.md`); the built-ins must lint clean. `scripts/Install-Local.ps1`
+  never touches `backgrounds/`. The deck window must keep **square corners**
   (`WindowCorners.Square`, `DWMWA_WINDOW_CORNER_PREFERENCE` = do not round): with Windows 11's rounded corners the desktop
   compositor blends translucent content over a swap chain three times along the window's diagonal, a bright dotted line
   through every translucent card (`glass` theme, moving background). The log says `Window corners are square`.

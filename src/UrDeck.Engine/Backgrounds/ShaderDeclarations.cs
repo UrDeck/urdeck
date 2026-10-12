@@ -4,12 +4,14 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using SkiaSharp;
-using UrDeck.Engine.Diagnostics;
 
 namespace UrDeck.Engine.Backgrounds;
 
-/// <summary>A uniform of a shader: its name, how many floats it has (1 to 4) and its declared default, if any.</summary>
-public sealed record ShaderUniform(string Name, int Components, float[]? Default);
+/// <summary>
+/// A uniform of a shader: its name, how many floats it has (1 to 4), its declared default, if any, and whether the
+/// declaration says <c>layout(color)</c>.
+/// </summary>
+public sealed record ShaderUniform(string Name, int Components, float[]? Default, bool IsColor = false);
 
 /// <summary>
 /// What a shader's text declares. SkiaSharp names a compiled effect's uniforms but not their types, so the declarations
@@ -17,11 +19,12 @@ public sealed record ShaderUniform(string Name, int Components, float[]? Default
 /// </summary>
 public sealed partial class ShaderDeclarations
 {
-    private ShaderDeclarations(List<ShaderUniform> uniforms, List<string> unsupported, bool hasChildShader)
+    private ShaderDeclarations(List<ShaderUniform> uniforms, List<string> unsupported, bool hasChildShader, List<ShaderDiagnostic> diagnostics)
     {
         Uniforms = uniforms;
         Unsupported = unsupported;
         HasChildShader = hasChildShader;
+        Diagnostics = diagnostics;
     }
 
     /// <summary>The uniforms of a supported type, in declaration order.</summary>
@@ -33,9 +36,16 @@ public sealed partial class ShaderDeclarations
     /// <summary>True when the file declares a <c>uniform shader</c>: the host has nothing to give it.</summary>
     public bool HasChildShader { get; }
 
-    /// <summary>Reads the declarations of <paramref name="text"/>; problems are logged as warnings naming <paramref name="shader"/>.</summary>
+    /// <summary>
+    /// What reading found: a type that cannot be set (SHADER022) and a default that cannot be read (SHADER023). Nothing is
+    /// logged here; the lint reports them, with the file filled in by the caller.
+    /// </summary>
+    public IReadOnlyList<ShaderDiagnostic> Diagnostics { get; }
+
+    /// <summary>Reads the declarations of <paramref name="text"/>; <paramref name="shader"/> names the background in messages.</summary>
     public static ShaderDeclarations Parse(string text, string shader)
     {
+        var diagnostics = new List<ShaderDiagnostic>();
         var uniforms = new List<ShaderUniform>();
         var unsupported = new List<string>();
         bool child = false;
@@ -55,7 +65,8 @@ public sealed partial class ShaderDeclarations
             int? components = Components(type);
             if (components == null)
             {
-                UrDeckLog.Warn($"Background '{shader}': uniform '{name}' has type '{type}', which is not supported (float, float2, float3, float4 and their aliases are); it stays 0.");
+                diagnostics.Add(new ShaderDiagnostic(ShaderCodes.UnsupportedUniform, ShaderSeverity.Warning,
+                    $"uniform '{name}' has type '{type}', which is not supported (float, float2, float3, float4 and their aliases are); it stays 0.", ""));
                 unsupported.Add(name);
                 continue;
             }
@@ -65,13 +76,17 @@ public sealed partial class ShaderDeclarations
             {
                 value = ParseDefault(comment, components.Value);
                 if (value == null)
-                    UrDeckLog.Warn($"Background '{shader}': the default '{comment}' of '{name}' is not {components} number(s) or a colour; using 0.");
+                {
+                    diagnostics.Add(new ShaderDiagnostic(ShaderCodes.BadDefault, ShaderSeverity.Warning,
+                        $"the default '{comment}' of '{name}' is not {components} number(s) or a colour; using 0.", ""));
+                }
             }
 
-            uniforms.Add(new ShaderUniform(name, components.Value, value));
+            bool isColor = match.Groups["layout"].Success && ColorWord().IsMatch(match.Groups["layout"].Value);
+            uniforms.Add(new ShaderUniform(name, components.Value, value, isColor));
         }
 
-        return new ShaderDeclarations(uniforms, unsupported, child);
+        return new ShaderDeclarations(uniforms, unsupported, child, diagnostics);
     }
 
     /// <summary>The float count of a supported type name, or null.</summary>
@@ -109,6 +124,9 @@ public sealed partial class ShaderDeclarations
         ? [color.Red / 255f, color.Green / 255f, color.Blue / 255f]
         : [color.Red / 255f, color.Green / 255f, color.Blue / 255f, color.Alpha / 255f];
 
-    [GeneratedRegex(@"^[ \t]*uniform[ \t]+(?<type>\w+)[ \t]+(?<name>\w+)[ \t]*;[ \t]*(?://[ \t]*default:(?<default>[^\r\n]*))?", RegexOptions.Multiline)]
+    [GeneratedRegex(@"^[ \t]*(?:layout[ \t]*\((?<layout>[^)\r\n]*)\)[ \t]*)?uniform[ \t]+(?<type>\w+)[ \t]+(?<name>\w+)[ \t]*;[ \t]*(?://[ \t]*default:(?<default>[^\r\n]*))?", RegexOptions.Multiline)]
     private static partial Regex DeclarationPattern();
+
+    [GeneratedRegex(@"(?:^|,)\s*color\s*(?:,|$)")]
+    private static partial Regex ColorWord();
 }
