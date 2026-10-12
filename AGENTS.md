@@ -17,11 +17,15 @@ Read `README.md` for what it is, `docs/ROADMAP.md` for the milestones, `docs/BAC
 ```powershell
 dotnet build urdeck.slnx -c Release                     # 0 warnings required; warnings are errors
 dotnet test urdeck.slnx -c Release
-dotnet test tests/UrDeck.Engine.Tests -c Release      # on Linux, with tests/UrDeck.Analyzer.Tests; urdeck.slnx holds the host, which needs Windows
+dotnet test tests/UrDeck.Engine.Tests -c Release      # on Linux, with tests/UrDeck.Analyzer.Tests and tests/UrDeck.Cli.Tests; urdeck.slnx holds the host, which needs Windows
 dotnet test tests/UrDeck.Engine.Tests -c Release -p:CollectCoverage=true   # enforces the UrDeck.Engine line-coverage floor
 dotnet format urdeck.slnx --severity warn               # apply style; CI runs it with --verify-no-changes
 openspec validate --all --strict
+dotnet run --project tools/UrDeck.Cli -c Release -- shader validate --all src/UrDeck.Engine/Backgrounds/Builtin --fail-on-warnings
+dotnet test tests/UrDeck.Cli.Tests -c Release           # the tool's tests (Windows and Linux); also in urdeck.slnx
 ```
+`urdeck-cli shader validate|render` (`docs/backgrounds.md`, "The command line tool") checks and renders a background folder; CI
+runs it on the four built-ins.
 
 Render without a screen (from `src/UrDeck.Host/bin/Release/net10.0-windows10.0.19041.0/`):
 `UrDeck.Host.exe --snapshot out.snapshot.png --size 1100x3840`.
@@ -38,6 +42,8 @@ sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
 src/UrDeck.Engine     GPL. Plugin loader, config store, grid and dock layout, display identity and placement, gestures and hit testing, PageRenderer, ReadingHub (runs the
                       providers), per-widget WidgetServices, Launcher, IconService (shell, file and site icons), Backgrounds (settings, shader store,
                       palette, image cover-fit, DeckBackground), logging
+tools/UrDeck.Cli      GPL. `urdeck-cli`, a portable dotnet tool (DotMake.CommandLine): `shader validate` and `shader render` on a background folder;
+                      uses only the engine's public API (not in its InternalsVisibleTo), runs on Windows and Linux, exit codes 0/1/2
 src/UrDeck.Host       GPL. WinUI 3 app: window/monitor placement, one SKXamlCanvas layer per widget
 providers/            GPL. First-party data provider plugins (UrDeck.Providers.System); reference only UrDeck.Sdk
 widgets/              first-party widget plugins (UrDeck.Widgets.Clock, .Stats, .Weather, .Shortcut); with the providers, copied to
@@ -118,7 +124,7 @@ See the README license map before moving code between projects: it can change th
   in `urdeck.log`. The layer keys on `DeckBackground.RequestKey`, so an unrelated config save does not restart the motion,
   and a background that failed is not tried again until its key changes. A background is a folder `backgrounds/<name>/` next to the exe
   holding `manifest.json` (required, version 1) and the entry `<name>.sksl`; the four built-ins are embedded folders of the same shape
-  (`UrDeck.Backgrounds.<name>/<file>`) with a `sample.png` made by the explicit `BuiltInSampleTool` test (`docs/backgrounds.md`). A loose
+  (`UrDeck.Backgrounds.<name>/<file>`) with a `sample.png` made by `urdeck-cli shader render` (`docs/backgrounds.md`). A loose
   `.sksl` is not loaded (the log names the folder to make). `ShaderLint` checks a folder and `DeckBackground.Create` logs each finding once as
   `Background 'name': SHADERnnn message (file)` (the codes are in `docs/backgrounds.md`); the built-ins must lint clean. `scripts/Install-Local.ps1`
   never touches `backgrounds/`. The deck window must keep **square corners**

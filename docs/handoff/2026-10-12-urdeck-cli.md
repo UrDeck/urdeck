@@ -7,6 +7,20 @@
 
 Nothing here is built. It is what the exploration decided, so the proposals do not start from zero.
 
+> **Update 2026-10-12 (change (b1), `openspec/changes/urdeck-cli`).** The tool is built, in two parts: this change has the
+> commands that only read a background (`shader validate`, `shader render`); `shader init` and `render --update-manifest` are
+> change (b2). Where it decided differently from the text below:
+>
+> - **No embedded schema.** `validate` calls `ShaderLint.Check` only; the hand-written reader already reports unknown keys, wrong
+>   types and unknown enum values, and a test keeps the schema equal to it.
+> - **The blank-picture check is in the render, not the lint** (`SHADER070`, a warning, added by `BackgroundRender` when every pixel is
+>   still the theme's background colour). A NaN is not blank: Skia's CPU path draws it white.
+> - **No `--scale`.** It never reached the raster path; `--size` is the size rendered (default 270x480).
+> - **Formats `text|markdown|json|sarif`** instead of `json` with SARIF later; no GitHub workflow-command format (`json` plus `jq`).
+> - **Exit code `2`** for "the tool could not do its job", so a parse error does not collide with "findings" (`1`).
+> - **`SHADER012`**: a folder whose name is not a valid background name, reported by the lint.
+> - The rest of this file (init, `--update-manifest`, the manifest writer, change (c)) is still to do.
+
 ## Where this comes from
 
 The owner wanted every shader background documented in a machine-readable way, for a future configuration UI and for a

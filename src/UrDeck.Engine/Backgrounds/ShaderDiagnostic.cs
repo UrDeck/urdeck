@@ -24,6 +24,7 @@ public static class ShaderCodes
     public const string ManifestVersion = "SHADER003";
     public const string UnknownKey = "SHADER004";
     public const string WrongType = "SHADER005";
+    public const string FolderName = "SHADER012";
     public const string EntryMissing = "SHADER010";
     public const string EntryLeavesFolder = "SHADER011";
     public const string CompileFailed = "SHADER020";
@@ -44,6 +45,9 @@ public static class ShaderCodes
     public const string SampleLeavesFolder = "SHADER052";
     public const string UnknownSampleType = "SHADER053";
     public const string LayoutKindDisagree = "SHADER060";
+
+    /// <summary>Added by a render, never by <see cref="ShaderLint"/>: the picture is one flat colour.</summary>
+    public const string BlankRender = "SHADER070";
 
     /// <summary>The errors that also stop the background from loading (the others leave it shown).</summary>
     public static bool StopsLoading(string code) =>

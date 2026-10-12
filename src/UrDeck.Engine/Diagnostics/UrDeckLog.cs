@@ -19,6 +19,7 @@ public static class UrDeckLog
     private static readonly string DefaultPath = Path.Combine(AppContext.BaseDirectory, "urdeck.log");
     private static readonly AsyncLocal<string?> Redirect = new();
     private static readonly AsyncLocal<long?> CapRedirect = new();
+    private static readonly AsyncLocal<Action<string, string>?> ListenerRedirect = new();
 
     /// <summary>
     /// Where the log is written. Setting it redirects only the code running in the current execution context (and what it
@@ -38,6 +39,17 @@ public static class UrDeckLog
         set => CapRedirect.Value = value;
     }
 
+    /// <summary>
+    /// When set, every line written in the current execution context goes to this function (the level, then the message)
+    /// and nowhere else: no file is created or touched. A command line tool uses it to show what the engine would log.
+    /// The application never sets it.
+    /// </summary>
+    public static Action<string, string>? Listener
+    {
+        get => ListenerRedirect.Value;
+        set => ListenerRedirect.Value = value;
+    }
+
     public static void Info(string message) => Write("INFO", message);
     public static void Warn(string message) => Write("WARN", message);
     public static void Error(string message, Exception? ex = null) =>
@@ -45,6 +57,12 @@ public static class UrDeckLog
 
     private static void Write(string level, string message)
     {
+        if (ListenerRedirect.Value is { } listener)
+        {
+            listener(level, message);
+            return;
+        }
+
         string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {level} {message}";
         System.Diagnostics.Debug.WriteLine(line);
         try

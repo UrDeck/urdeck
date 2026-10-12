@@ -54,6 +54,26 @@ public sealed class ShaderStore(string backgroundsDirectory)
         return result.Package;
     }
 
+    /// <summary>
+    /// The background in the folder at <paramref name="folder"/>, wherever it is: its name is the folder's last part, and a
+    /// built-in of the same name is never used in its place. The reason there is none is in the result. Nothing is logged.
+    /// </summary>
+    public static BackgroundLoad TryRead(string folder)
+    {
+        string full = Path.TrimEndingDirectorySeparator(Path.GetFullPath(folder));
+        string name = Path.GetFileName(full);
+        try
+        {
+            if (!Directory.Exists(full))
+                return Fail($"the folder {full} does not exist.");
+            return Read(name, full, new DirectoryBackgroundSource(full), builtIn: false);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return Fail($"the folder {full} could not be read: {ex.Message}");
+        }
+    }
+
     /// <summary>The background, or the reason it cannot be used. Nothing is logged.</summary>
     public BackgroundLoad TryLoad(string name)
     {

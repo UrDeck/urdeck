@@ -44,6 +44,23 @@ jobs:
       - name: Coverage floor (UrDeck.Engine)
         run: dotnet test tests/UrDeck.Engine.Tests -c Release --no-build -p:CollectCoverage=true
 
+      - name: Smoke test (urdeck-cli)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cli="dotnet tools/UrDeck.Cli/bin/Release/net10.0/urdeck-cli.dll"
+          builtin=src/UrDeck.Engine/Backgrounds/Builtin
+          $cli shader validate --all "$builtin" --fail-on-warnings
+          out="$RUNNER_TEMP/samples"
+          mkdir -p "$out"
+          for name in plasma aurora gradient julia; do
+            $cli shader render "$builtin/$name" -o "$out/$name.png" --fail-on-warnings
+            test -s "$out/$name.png"
+          done
+
+      - name: Pack (urdeck-cli)
+        run: dotnet pack tools/UrDeck.Cli -c Release --no-build
+
       - name: Validate OpenSpec
         run: npx --yes @fission-ai/openspec@1.7.0 validate --all --strict
 
@@ -54,8 +71,8 @@ jobs:
           path: artifacts/coverage/
           if-no-files-found: ignore
 
-  # The tests on Linux, in preparation for a cross-platform command line tool. urdeck.slnx holds the host, which needs
-  # Windows, so the test projects are built directly. Tests of Windows-only code are skipped there.
+  # The tests on Linux, and urdeck-cli (which runs there as well). urdeck.slnx holds the host, which needs Windows, so the
+  # test projects are built directly. Tests of Windows-only code are skipped there.
   test-linux:
     runs-on: ubuntu-latest
     steps:
@@ -70,6 +87,23 @@ jobs:
 
       - name: Test (analyzer)
         run: dotnet test tests/UrDeck.Analyzer.Tests -c Release
+
+      - name: Test (urdeck-cli)
+        run: dotnet test tests/UrDeck.Cli.Tests -c Release
+
+      - name: Smoke test (urdeck-cli)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cli="dotnet tools/UrDeck.Cli/bin/Release/net10.0/urdeck-cli.dll"
+          builtin=src/UrDeck.Engine/Backgrounds/Builtin
+          $cli shader validate --all "$builtin" --fail-on-warnings
+          out="$RUNNER_TEMP/samples"
+          mkdir -p "$out"
+          for name in plasma aurora gradient julia; do
+            $cli shader render "$builtin/$name" -o "$out/$name.png" --fail-on-warnings
+            test -s "$out/$name.png"
+          done
 
   # Required status check: the PR title becomes the squash commit title, so it must be a conventional commit.
   pr-title:

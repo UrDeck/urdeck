@@ -21,17 +21,40 @@ public static class BackgroundRender
     /// <summary>
     /// <paramref name="time"/> is <c>iTime</c> in seconds, <see cref="BackgroundClock.SnapshotTime"/> by default, so the same
     /// input gives the same picture on one machine. A background that cannot be built returns no bitmap and the reason
-    /// (the compiler's message for a shader that does not compile); nothing is logged.
+    /// (the compiler's message for a shader that does not compile); nothing is logged by the render itself. A picture that is
+    /// still the theme's background colour everywhere comes with a <see cref="ShaderCodes.BlankRender"/> warning.
     /// </summary>
     public static BackgroundRenderResult Render(BackgroundSettings settings, LoadedTheme theme, ShaderStore store, int width, int height,
-        float time = BackgroundClock.SnapshotTime)
+        float time = BackgroundClock.SnapshotTime) =>
+        RenderCore(width, height, theme, time, () =>
+        {
+            var background = DeckBackground.TryCreate(settings, theme, store, AppContext.BaseDirectory, out string? failure, out var diagnostics);
+            return (background, failure, diagnostics);
+        });
+
+    /// <summary>
+    /// As the overload that takes a store, for a shader read from a folder with <see cref="ShaderStore.TryRead"/>: that
+    /// package is rendered, never a built-in of the same name. <paramref name="settings"/> must be a shader background
+    /// named like the package.
+    /// </summary>
+    public static BackgroundRenderResult Render(BackgroundPackage package, BackgroundSettings settings, LoadedTheme theme, int width, int height,
+        float time = BackgroundClock.SnapshotTime) =>
+        RenderCore(width, height, theme, time, () =>
+        {
+            var background = DeckBackground.TryCreate(package, settings, theme, out string? failure, out var diagnostics);
+            return (background, failure, diagnostics);
+        });
+
+    private static BackgroundRenderResult RenderCore(int width, int height, LoadedTheme theme, float time,
+        Func<(DeckBackground? Background, string? Failure, IReadOnlyList<ShaderDiagnostic> Diagnostics)> create)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(width, 1);
         ArgumentOutOfRangeException.ThrowIfLessThan(height, 1);
 
         try
         {
-            using var background = DeckBackground.TryCreate(settings, theme, store, AppContext.BaseDirectory, out string? failure, out var diagnostics);
+            var (background, failure, diagnostics) = create();
+            using var _ = background;
             if (background == null)
                 return new BackgroundRenderResult(null, failure ?? "there is no background to render.", diagnostics);
 
@@ -41,11 +64,37 @@ public static class BackgroundRender
             canvas.Clear(resolved.Background);
             background.PrepareAsync(width, height).GetAwaiter().GetResult();
             background.PaintAtTime(canvas, width, height, time);
+
+            if (IsUnchanged(bitmap, resolved.Background))
+            {
+                diagnostics =
+                [
+                    .. diagnostics,
+                    new ShaderDiagnostic(ShaderCodes.BlankRender, ShaderSeverity.Warning,
+                        $"the shader drew nothing at time {time:0.###}: every pixel is still the theme's background colour.", ""),
+                ];
+            }
+
             return new BackgroundRenderResult(bitmap, null, diagnostics);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             return new BackgroundRenderResult(null, $"the background could not be rendered: {ex.Message}", []);
         }
+    }
+
+    /// <summary>True when every pixel of the bitmap is the colour it was cleared to.</summary>
+    private static bool IsUnchanged(SKBitmap bitmap, SKColor cleared)
+    {
+        using var reference = new SKBitmap(new SKImageInfo(1, 1, SKColorType.Rgba8888, SKAlphaType.Premul));
+        using (var canvas = new SKCanvas(reference))
+            canvas.Clear(cleared);
+
+        var expected = reference.GetPixelSpan();
+        var pixels = bitmap.GetPixelSpan();
+        for (int i = 0; i + 4 <= pixels.Length; i += 4)
+            if (!pixels.Slice(i, 4).SequenceEqual(expected))
+                return false;
+        return true;
     }
 }

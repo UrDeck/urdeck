@@ -11,12 +11,18 @@ public static class ShaderLint
 {
     /// <summary>
     /// Every diagnostic of the background in <paramref name="source"/>, in a stable order: the manifest, the entry, the
-    /// shader, the parameters, the description, the samples. <paramref name="name"/> is the folder's name (the default entry is
+    /// shader, the parameters, the description, the samples. <paramref name="name"/> is the folder's name, checked first (the default entry is
     /// <c>&lt;name&gt;.sksl</c>). An empty list is a clean background.
     /// </summary>
     public static IReadOnlyList<ShaderDiagnostic> Check(IBackgroundSource source, string name)
     {
         var found = new List<ShaderDiagnostic>();
+
+        if (!BackgroundSettings.IsValidName(name))
+        {
+            found.Add(new ShaderDiagnostic(ShaderCodes.FolderName, ShaderSeverity.Error,
+                $"the folder name '{name}' is not a valid background name; a name may only contain letters, digits, '-' and '_'.", ""));
+        }
 
         string? manifestText = source.ReadText(BackgroundManifest.FileName);
         if (manifestText == null)
