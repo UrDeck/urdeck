@@ -1,0 +1,35 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Julia",
+  "description": "A Julia set whose constant circles slowly. The heaviest built-in; lower the scale if it is too much.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "fractal"
+  ],
+  "parameters": {
+    "zoom": {
+      "label": "Zoom",
+      "description": "How far the set is magnified; 1 shows the whole set.",
+      "min": 0.25,
+      "max": 4,
+      "step": 0.05
+    },
+    "radius": {
+      "label": "Radius",
+      "description": "Size of the circle the Julia constant travels on; it changes the set's shape.",
+      "min": 0.5,
+      "max": 1,
+      "step": 0.005
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Julia in the default theme"
+    }
+  ]
+}

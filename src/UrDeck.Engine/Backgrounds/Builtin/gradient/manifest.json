@@ -1,0 +1,30 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Gradient",
+  "description": "A soft gradient whose colour bands drift slowly.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "gradient",
+    "calm"
+  ],
+  "parameters": {
+    "angle": {
+      "label": "Angle",
+      "description": "Direction of the gradient, in degrees.",
+      "min": 0,
+      "max": 360,
+      "step": 1,
+      "unit": "°"
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Gradient in the default theme"
+    }
+  ]
+}

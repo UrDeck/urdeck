@@ -578,7 +578,7 @@ there measures a video background. The decoded-video layer built here is also wh
 A background becomes an installable folder with a required manifest, and a command line tool checks and builds them.
 Three changes, in this order; the detail of (b) and (c) is in `docs/handoff/2026-10-12-urdeck-cli.md`.
 
-- **(a) `shader-manifest`** (proposed, `openspec/changes/shader-manifest`): `backgrounds/<name>/manifest.json` plus the
+- **(a) `shader-manifest`** (implemented 2026-10-12, in review; `openspec/changes/shader-manifest`): `backgrounds/<name>/manifest.json` plus the
   entry `.sksl`; the manifest (version 1) annotates the shader's parameters and lists samples; `ShaderLint` with stable
   `SHADER###` codes at load and in a test; built-ins as folders; `BackgroundRender`; the authoring guide. **Model:**
   Opus for the reader and lint API and the `layout(color)` spike, Sonnet for the rest.

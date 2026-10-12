@@ -105,7 +105,7 @@ public sealed class DeckBackgroundTests : IDisposable
 
         Assert.Equal("shader 'plasma' (built-in)", builtIn!.Describe);
         Assert.StartsWith("shader 'mine' (", user!.Describe);
-        Assert.EndsWith("mine.sksl)", user.Describe);
+        Assert.EndsWith("mine)", user.Describe);
     }
 
     [Fact]

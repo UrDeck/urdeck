@@ -1,0 +1,37 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Plasma",
+  "description": "Slow warped fields of colour, drawn with the theme's palette.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "abstract",
+    "calm"
+  ],
+  "parameters": {
+    "angle": {
+      "label": "Angle",
+      "description": "Direction the colour fields drift, in degrees.",
+      "min": 0,
+      "max": 360,
+      "step": 1,
+      "unit": "°"
+    },
+    "zoom": {
+      "label": "Zoom",
+      "description": "How many colour fields fit on the display; higher is busier.",
+      "min": 0.5,
+      "max": 10,
+      "step": 0.1
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Plasma in the default theme"
+    }
+  ]
+}

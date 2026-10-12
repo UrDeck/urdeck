@@ -21,9 +21,12 @@
     <EmbeddedResource Include="Themes\Builtin\*.json;Themes\Builtin\*.ttf;Themes\Builtin\*.txt" LogicalName="UrDeck.Themes.%(Filename)%(Extension)" />
   </ItemGroup>
 
-  <!-- Built-in background shaders (SkSL). They are the examples for a user's own backgrounds/<name>.sksl. -->
+  <!-- Built-in backgrounds: one folder each (manifest.json, the .sksl, sample pictures). They are the examples for a user's own
+       backgrounds/<name>/. RecursiveDir is "<name>\" on Windows, so the logical name turns the backslash into the "/" that
+       EmbeddedBackgroundSource looks up: UrDeck.Backgrounds.<name>/<file>. -->
   <ItemGroup>
-    <EmbeddedResource Include="Backgrounds\Builtin\*.sksl" LogicalName="UrDeck.Backgrounds.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Backgrounds\Builtin\**\*.sksl;Backgrounds\Builtin\**\manifest.json;Backgrounds\Builtin\**\*.png"
+                      LogicalName="UrDeck.Backgrounds.$([System.String]::Copy('%(RecursiveDir)').Replace('\', '/'))%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>
