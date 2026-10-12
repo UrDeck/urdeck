@@ -1,7 +1,20 @@
 name: Security
 
 on:
+  # Skipped for pull requests that only touch paths known not to affect the build or the dependencies (the deny-list of
+  # ci.yml). None of these jobs is a required check, so a skipped workflow blocks nothing. push and schedule run everything.
   pull_request:
+    paths:
+      - '**'
+      - '!*.md'
+      - '!docs/**'
+      - '!openspec/**'
+      - '!site/**'
+      - '!.github/**'
+      - '.github/workflows/security.yml'
+      - '!LICENSE'
+      - '!PLUGIN-EXCEPTION.md'
+      - '!THIRD-PARTY-NOTICES.md'
   push:
     branches: [main]
   schedule:
