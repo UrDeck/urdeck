@@ -156,6 +156,9 @@ internal static class MonitorPlacement
         return new Rectangle(origin.X, origin.Y, client.Right - client.Left, client.Bottom - client.Top);
     }
 
+    /// <summary>Where the pointer is, in screen coordinates, physical pixels.</summary>
+    public static Point GetCursor() => GetCursorPos(out var point) ? new Point(point.X, point.Y) : Point.Empty;
+
     private const int MONITORINFOF_PRIMARY = 1;
     private const int MDT_EFFECTIVE_DPI = 0;
     private const uint QDC_ONLY_ACTIVE_PATHS = 2;
@@ -200,6 +203,9 @@ internal static class MonitorPlacement
 
     [DllImport("user32.dll")]
     private static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetCursorPos(out POINT point);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct POINT

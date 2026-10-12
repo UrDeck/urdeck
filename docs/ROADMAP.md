@@ -41,7 +41,7 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
   `shortcut-and-tap`; done).
 - The dock, a row of up to four widget slots at the bottom of every page (item 10; implemented in `dock`).
 - Recovery after sleep, hot-plug and monitor wake order (the robustness half of item 6; implemented in
-  `display-recovery`, checked on the panel for sleep, unplug and scaling; the picker UI waits for milestone 3).
+  `display-recovery`, checked on the panel for sleep, unplug and scaling; the picker is `settings-window`, implemented).
 - CPU temperature through the opt-in elevated helper (item 3, fourth change). May slip to milestone 2 if the driver
   question takes long; the card shows a dash until then.
 - Start with Windows, in its simplest form (item 12; done in `start-with-windows`, checked on three cold boots, a sign-out, an Explorer restart and a sleep).
@@ -61,7 +61,8 @@ measurement so far is from one panel and one NVIDIA GPU, and that is the largest
 - Settings metadata in the SDK, so the editor can build a form from a widget's config type (item 15). This is public
   SDK API and the main reason milestone 5 comes after this one.
 - The reading picker with live values (item 3) and the theme picker.
-- The monitor picker with friendly names (the UI half of item 6).
+- The monitor picker with friendly names (the UI half of item 6; implemented in `settings-window`, and the first page of
+  the settings window the editor grows from).
 
 **4. Living page.** What makes the page worth looking at, and the reason composition moved to the GPU.
 - Backgrounds: image, video, painted visualization (item 9).

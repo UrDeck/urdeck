@@ -93,6 +93,15 @@ everything else should be fine on Sonnet.
   Windows" (Run key behind `IAutostart`), a complete `dotnet publish` folder, `scripts/Install-Local.ps1`, one host per
   folder with `--quit`, and a dated, capped log. The cold-boot checks (section 6 of its tasks) are the owner's; see
   `docs/perf/start-with-windows.md`.
+- `settings-window` is implemented and archived (2026-10-11, `openspec/changes/archive/2026-10-11-settings-window`; the
+  checks on the panel passed, except task 6.3, the window in front of the deck on a single display, which was skipped and
+  is unverified): a left click on the tray icon, or the new Settings entry, opens an ordinary window
+  (focus, a taskbar button while it is open, one copy) with the monitor picker: every display with its name, size,
+  orientation, position and number, a click moves the deck there and remembers it without a `selector`, Choose
+  automatically, Identify, and a greyed row for a remembered display that is not connected. Away from the deck's display.
+  The memory gate passed (`docs/perf/settings-window.md`: +1.9 MB private after 20 cycles). Gaps carried forward: the
+  window's look is unstyled (a design pass is planned), idle CPU and GPU with it open are not measured, and the title
+  bar does not follow the dark theme.
 - Next: the cold-boot checks of `start-with-windows`, which begin the two-week run of milestone 1. Sensors that need elevation (item 3, fourth change) follow and may slip to milestone 2.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
@@ -351,14 +360,15 @@ deleted and replaced.
   once instead of on every display event, placement after a display change is verified and retried instead of
   re-checked after fixed delays, and the deck hides while its display is absent. Its `design.md` has the measurements
   of the owner's three displays and the decisions.
-- `settings-window` (not proposed, milestone 3 or earlier): a small window opened from the tray icon, with the
-  monitor picker as its first page. Carried over from the old draft: list every connected display with its friendly
-  name (a generic name plus resolution and position when the display reports none), resolution, orientation, primary
-  flag and relative position; an Identify action that briefly shows a marker on every physical display; selecting an
-  entry moves the deck at once and writes `display` without a `selector`; the window is released after closing and
-  must not raise idle memory or CPU. It may add a "fall back to the primary monitor while absent" option. The picker
-  needs none of the editor's open decisions (settings metadata, grid shape), so it can be the editor's first slice and
-  settle the window shell, the tray entry and the single-instance guard (item 12).
+- `settings-window` (implemented 2026-10-11, `openspec/changes/archive/2026-10-11-settings-window`): a window opened from the tray icon
+  (a left click or the Settings entry), with the monitor picker as its first page: every connected display with its
+  friendly name, resolution, orientation, primary flag, relative position and a number; an Identify action that shows
+  the numbers; a click on a row moves the deck at once and writes `display` without a `selector`; Choose automatically
+  clears `display`; a remembered display that is not connected stays in the list, greyed out. It opens away from the deck's
+  display, takes focus (the deck still never does) and has a taskbar button while open. It runs in the host process behind
+  `ISettingsHost`, so it can move to a process of its own if the memory gate fails (it did not: `docs/perf/settings-window.md`).
+  The "fall back to the primary monitor while absent" option was decided against: the user chooses the monitor
+  explicitly. Left for later: an arrangement map, more pages (item 11), the window's styling.
 
 ## 7. Default widget set
 

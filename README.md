@@ -49,7 +49,8 @@ start from the same folder logs a line and exits, while a build beside the insta
 ### Closing the window
 
 The window never takes focus, so touching or clicking the deck does not interrupt a game or another application. As a
-consequence it receives no keyboard input and Escape does not close it. Close it from the tray icon (right-click, Quit). Windows 11
+consequence it receives no keyboard input and Escape does not close it. Close it from the tray icon (right-click, Quit); a
+left click on the icon opens [Settings](#settings-window). Windows 11
 may keep a new icon in the overflow flyout (the `^` arrow) until you drag it onto the taskbar. For development, set
 `URDECK_ACTIVATABLE=1` before starting the host: the window can then take focus and Escape closes it.
 
@@ -163,7 +164,7 @@ Config is `urdeck-config.json`, located next to the executable (`src/UrDeck.Host
 | `activePage` | Index of the page to show. |
 | `monitorName` | Which monitor to choose when none is remembered yet: `"primary"`, `"tallest"` (tallest portrait monitor), `"widest"`, `"largest"` (most pixels), or a device name such as `"DISPLAY1"`. It is used once: the chosen monitor is then remembered as `display` and followed from there on. Changing it chooses again. |
 | `monitor` | 1-based monitor index, used when `monitorName` matches nothing. Falls back to the primary monitor. Like `monitorName`, it makes the choice once. |
-| `display` | The monitor the deck belongs to. UrDeck writes it the first time `monitorName` / `monitor` have chosen one: `name` (for you; never used to find the monitor), `model` and `path` (how the monitor is found again after a restart, sleep, or a move to another output), and `selector` (what it was chosen with). You do not edit it; **remove it to make UrDeck choose again**, for example when the first start picked the wrong monitor because yours was switched off. See [The deck's monitor](#the-decks-monitor). |
+| `display` | The monitor the deck belongs to. UrDeck writes it the first time `monitorName` / `monitor` have chosen one, and when you choose a monitor in [Settings](#settings-window): `name` (for you; never used to find the monitor), `model` and `path` (how the monitor is found again after a restart, sleep, or a move to another output), and `selector` (what it was chosen with; a monitor you chose in Settings has none, so the selectors never replace it). You do not edit it; **choose automatically in Settings, or remove it, to make UrDeck choose again**, for example when the first start picked the wrong monitor because yours was switched off. See [The deck's monitor](#the-decks-monitor). |
 | `theme` | Name of the theme: `default-dark` (default), `default-light`, `glass`, or a folder under `themes/` next to the executable. See [docs/themes.md](docs/themes.md). Unknown names fall back to the default with a warning; changing it applies on config reload without a restart. |
 | `providers` | Optional settings per data provider, keyed by provider id: `"providers": { "system": { "intervalMs": 500 } }` samples the `system` provider every 500 ms instead of its default 2000 ms. A value below the provider's minimum (250 ms for `system`) is raised to it and logged. Applies on config reload without a restart. Absent by default; other properties are kept in the file. |
 | `dock` | The widgets of the dock, up to four, in slot order: widget objects like those of a page, without `col` and `row`. Absent or empty: no dock. See [Dock](#dock). Applies on config reload without a restart, and widget-specific settings are kept in the file. |
@@ -180,6 +181,22 @@ monitors to settle, puts the window back on its monitor and checks that it fits;
 While its monitor is not connected the deck is hidden: it does not move to another screen, its widgets and their data
 providers stop, and the tray icon's tooltip reads "UrDeck: waiting for" and the monitor's name. It comes back by
 itself when the monitor does. The same holds at startup: with the monitor off there is no window, only the tray icon.
+
+### Settings window
+
+Left-click the tray icon, or right-click it and choose **Settings**, to open the settings window. Unlike the deck it is an
+ordinary window: it takes focus, has a taskbar button while it is open, and closes with the window's close button or
+Escape. Clicking the icon again while it is open brings it forward. It opens on the display under the pointer, and never on the
+deck's display unless that is the only one.
+
+It has one page for now, the monitor picker. Every connected monitor is listed with its name, resolution, orientation,
+position relative to its neighbour and a number; the monitor the deck is on says "Deck is here". Click a monitor to move
+the deck there at once and keep it there (the choice is saved as `display` without a `selector`, so `monitorName` and
+`monitor` never replace it). **Choose automatically** hands the choice back to `monitorName` and `monitor`. **Identify**
+shows each monitor's number in its top-left corner for two seconds. A remembered monitor that is switched off or unplugged
+stays in the list, greyed out, so you can see what the deck is waiting for; the deck never moves to another monitor on its
+own. The list follows monitors that are plugged in or out, or rearranged, while the window is open. A monitor that is only
+switched off, with its cable still connected, is not reported by Windows and stays in the list, as it stays under the deck.
 
 ### Stats widget
 

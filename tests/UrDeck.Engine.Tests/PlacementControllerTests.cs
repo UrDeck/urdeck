@@ -480,4 +480,72 @@ public class PlacementControllerTests : IDisposable
         Assert.Contains(@"\\.\DISPLAY5", warning);
         Assert.Contains(@"\\.\DISPLAY6", warning);
     }
+
+    [Fact]
+    public void ExplicitChoice_MovesTheDeck_AndTheSelectorsNoLongerDecide()
+    {
+        StartPlaced();
+
+        Assert.True(DisplayChoice.Choose(_config, TestDisplays.Primary()));
+        Signal(PlacementSignal.ConfigReloaded);
+        Run();
+
+        Assert.Equal(TestDisplays.Primary().Bounds, _deck.ContentBounds);
+        Assert.Equal("LG ULTRAGEAR", _config.Display!.Name);
+        Assert.Null(_config.Display.Selector);
+        Assert.Empty(_deck.Saves);
+        Assert.Equal([false], _deck.Rebuilds);
+
+        // The selector says "tallest", which is the panel, and the choice still stands.
+        Signal(PlacementSignal.DisplaysChanged);
+        Run();
+        Assert.Equal(TestDisplays.Primary().Bounds, _deck.ContentBounds);
+    }
+
+    [Fact]
+    public void PinningTheCurrentDisplay_DoesNotMoveTheDeck_OrRebuildThePage()
+    {
+        StartPlaced();
+
+        Assert.True(DisplayChoice.Choose(_config, TestDisplays.Panel()));
+        Signal(PlacementSignal.ConfigReloaded);
+        Run();
+
+        Assert.Empty(_deck.Covers);
+        Assert.Empty(_deck.Rebuilds);
+        Assert.Null(_config.Display!.Selector);
+    }
+
+    [Fact]
+    public void ChoosingAutomatically_LetsTheSelectorsChooseAgain_AndRemembersTheirSelector()
+    {
+        _config.Display = TestDisplays.Remembered(TestDisplays.Side());
+        StartPlaced();
+        Assert.Equal(TestDisplays.Side().Bounds, _deck.ContentBounds);
+
+        Assert.True(DisplayChoice.ChooseAutomatically(_config));
+        Signal(PlacementSignal.ConfigReloaded);
+        Run();
+
+        Assert.Equal(PanelBounds, _deck.ContentBounds);
+        Assert.Equal("HYTE Y70Touch", _config.Display!.Name);
+        Assert.Equal("tallest", _config.Display.Selector);
+        Assert.Single(_deck.Saves);
+    }
+
+    [Fact]
+    public void AChosenDisplayThatIsUnplugged_HidesTheDeck_AndItIsNotShownElsewhere()
+    {
+        _config.Display = TestDisplays.Remembered(TestDisplays.Side());
+        StartPlaced();
+
+        _deck.Displays.RemoveAll(d => d.Model == "HPN347B");
+        Signal(PlacementSignal.DisplaysChanged);
+        Run();
+
+        Assert.Equal(PlacementState.Absent, _controller.State);
+        Assert.False(_deck.Visible);
+        Assert.Empty(_deck.Covers);
+        Assert.Equal("HP Z23n G2", _config.Display!.Name);
+    }
 }
