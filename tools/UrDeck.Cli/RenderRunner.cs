@@ -40,6 +40,13 @@ internal static partial class RenderRunner
         if (!Directory.Exists(Path.GetDirectoryName(outputPath)))
             throw new ToolFailureException($"the output {PathDisplay.Of(outputPath)} cannot be written: its folder does not exist.");
 
+        SampleUpdate? update = null;
+        if (options.UpdateManifest)
+        {
+            string file = SampleFile(folder, outputPath);
+            update = SampleUpdate.Plan(folder, file, RecordSettings(options, width, height, themeName));
+        }
+
         using var log = new LogCapture();
         var settings = BuildSettings(name, options);
 
@@ -71,6 +78,12 @@ internal static partial class RenderRunner
         }
 
         output.Write($"wrote {PathDisplay.Of(outputPath)} ({width}x{height})\n");
+        if (update != null)
+        {
+            bool added = update.Apply();
+            output.Write($"{(added ? "added" : "updated")} {SampleFile(folder, outputPath)} in the samples of {PathDisplay.Of(update.ManifestPath)}\n");
+        }
+
         var blank = result.Diagnostics.Where(d => d.Code == ShaderCodes.BlankRender).ToList();
         foreach (var diagnostic in blank)
             output.Write(ReportWriters.TextLine(PathDisplay.Of(folder), diagnostic) + "\n");
@@ -98,6 +111,77 @@ internal static partial class RenderRunner
         return (width, height);
     }
 
+    /// <summary>The picture's path relative to the folder with '/' separators; the picture must be inside the folder and not the manifest.</summary>
+    private static string SampleFile(string folder, string outputPath)
+    {
+        string relative = Path.GetRelativePath(folder, outputPath);
+        if (relative == ".." || relative.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal) || Path.IsPathRooted(relative))
+        {
+            throw new ToolFailureException(
+                $"--update-manifest needs the output inside the background folder; {PathDisplay.Of(outputPath)} is outside {PathDisplay.Of(folder)}. Nothing was rendered.");
+        }
+
+        relative = relative.Replace(Path.DirectorySeparatorChar, '/');
+        if (string.Equals(relative, BackgroundManifest.FileName, StringComparison.OrdinalIgnoreCase))
+            throw new ToolFailureException($"the output {PathDisplay.Of(outputPath)} is the manifest itself. Nothing was rendered.");
+
+        return relative;
+    }
+
+    /// <summary>How the picture is made, as a sample's <c>settings</c>: size, time and theme always, colours and parameters when given.</summary>
+    private static JsonObject RecordSettings(RenderOptions options, int width, int height, string themeName)
+    {
+        var settings = new JsonObject
+        {
+            ["size"] = $"{width}x{height}",
+            ["time"] = options.Time,
+            ["theme"] = themeName,
+        };
+
+        var colors = ColorList(options);
+        if (colors.Count > 0)
+        {
+            var array = new JsonArray();
+            foreach (string color in colors)
+                array.Add(color);
+            settings["colors"] = array;
+        }
+
+        var parameters = ParameterList(options);
+        if (parameters.Count > 0)
+        {
+            var values = new JsonObject();
+            foreach (var (key, value) in parameters)
+                values[key] = value;
+            settings["parameters"] = values;
+        }
+
+        return settings;
+    }
+
+    private static List<string> ColorList(RenderOptions options) =>
+        options.Colors?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).ToList() ?? [];
+
+    /// <summary>The <c>--param</c> values as parsed, in the order given; a repeated name keeps the last, as the configuration does.</summary>
+    private static List<(string Key, JsonNode? Value)> ParameterList(RenderOptions options)
+    {
+        var result = new List<(string Key, JsonNode? Value)>();
+        foreach (string parameter in options.Param)
+        {
+            int equals = parameter.IndexOf('=', StringComparison.Ordinal);
+            string key = equals > 0 ? parameter[..equals].Trim() : "";
+            if (key.Length == 0 || !BackgroundSettings.IsValidName(key))
+                throw new ToolFailureException($"--param '{parameter}' must be name=value, with a name of letters, digits, '-' and '_'.");
+            if (HostKeys.IsHostKey(key))
+                throw new ToolFailureException($"--param '{key}' is set by the product and cannot be a parameter of a shader.");
+
+            result.RemoveAll(entry => entry.Key == key);
+            result.Add((key, ParseValue(parameter[(equals + 1)..])));
+        }
+
+        return result;
+    }
+
     /// <summary>The options as the configuration's <c>background</c> object, so the engine reads (and refuses) them as it does there.</summary>
     private static BackgroundSettings BuildSettings(string name, RenderOptions options)
     {
@@ -111,22 +195,13 @@ internal static partial class RenderRunner
         if (options.Colors != null)
         {
             var colors = new JsonArray();
-            foreach (string color in options.Colors.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+            foreach (string color in ColorList(options))
                 colors.Add(color);
             background["colors"] = colors;
         }
 
-        foreach (string parameter in options.Param)
-        {
-            int equals = parameter.IndexOf('=', StringComparison.Ordinal);
-            string key = equals > 0 ? parameter[..equals].Trim() : "";
-            if (key.Length == 0 || !BackgroundSettings.IsValidName(key))
-                throw new ToolFailureException($"--param '{parameter}' must be name=value, with a name of letters, digits, '-' and '_'.");
-            if (HostKeys.IsHostKey(key))
-                throw new ToolFailureException($"--param '{key}' is set by the product and cannot be a parameter of a shader.");
-
-            background[key] = ParseValue(parameter[(equals + 1)..]);
-        }
+        foreach (var (key, value) in ParameterList(options))
+            background[key] = value;
 
         using var document = JsonDocument.Parse(background.ToJsonString());
         return BackgroundSettings.Parse(document.RootElement.Clone());

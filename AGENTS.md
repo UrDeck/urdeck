@@ -24,8 +24,8 @@ openspec validate --all --strict
 dotnet run --project tools/UrDeck.Cli -c Release -- shader validate --all src/UrDeck.Engine/Backgrounds/Builtin --fail-on-warnings
 dotnet test tests/UrDeck.Cli.Tests -c Release           # the tool's tests (Windows and Linux); also in urdeck.slnx
 ```
-`urdeck-cli shader validate|render` (`docs/backgrounds.md`, "The command line tool") checks and renders a background folder; CI
-runs it on the four built-ins.
+`urdeck-cli shader init|validate|render` (`docs/backgrounds.md`, "The command line tool") makes, checks and renders a background folder; CI
+runs it on the four built-ins and on an `init` of a copy of one. `render --update-manifest` rewrites `manifest.json` (refusing a comment, a trailing comma or a duplicate key).
 
 Render without a screen (from `src/UrDeck.Host/bin/Release/net10.0-windows10.0.19041.0/`):
 `UrDeck.Host.exe --snapshot out.snapshot.png --size 1100x3840`.
@@ -42,7 +42,7 @@ sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
 src/UrDeck.Engine     GPL. Plugin loader, config store, grid and dock layout, display identity and placement, gestures and hit testing, PageRenderer, ReadingHub (runs the
                       providers), per-widget WidgetServices, Launcher, IconService (shell, file and site icons), Backgrounds (settings, shader store,
                       palette, image cover-fit, DeckBackground), logging
-tools/UrDeck.Cli      GPL. `urdeck-cli`, a portable dotnet tool (DotMake.CommandLine): `shader validate` and `shader render` on a background folder;
+tools/UrDeck.Cli      GPL. `urdeck-cli`, a portable dotnet tool (DotMake.CommandLine): `shader init`, `shader validate` and `shader render` on a background folder;
                       uses only the engine's public API (not in its InternalsVisibleTo), runs on Windows and Linux, exit codes 0/1/2
 src/UrDeck.Host       GPL. WinUI 3 app: window/monitor placement, one SKXamlCanvas layer per widget
 providers/            GPL. First-party data provider plugins (UrDeck.Providers.System); reference only UrDeck.Sdk

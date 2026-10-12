@@ -105,11 +105,13 @@ reloaded: after editing a file, save the config. The four built-ins are folders 
 (`src/UrDeck.Engine/Backgrounds/Builtin/`): copy one to start.
 
 A loose `backgrounds/<name>.sksl` is **not** loaded any more. If the configuration selects it, `urdeck.log` says which
-folder to create and the deck shows the theme's colour.
+folder to create and the deck shows the theme's colour. `urdeck-cli shader init backgrounds/<name>.sksl` makes the folder
+and a manifest for you (see [`shader init`](#shader-init)).
 
 ### The minimal manifest
 
-Copy this, save it as `manifest.json` next to your shader and change the words:
+`urdeck-cli shader init` writes this and one entry for each parameter of the shader. By hand, copy this, save it as
+`manifest.json` next to your shader and change the words:
 
 ```json
 {
@@ -145,6 +147,11 @@ parameters exist, their types and their defaults; the manifest only annotates th
 
 A sample is `{ "type": "image", "file": "sample.png", "caption": "...", "order": 1 }`. `file` is inside the folder. A
 `video` type is accepted for later and never played. Sample pictures are never read by the deck.
+
+A sample may hold `settings`, an object saying how the picture was made so it can be made again: `size` (`"270x480"`),
+`time` (the shader's seconds), `theme` (a built-in theme's name), `colors` (an array, as the configuration's `colors`) and
+`parameters` (an object of values, as the configuration sets them); every key is optional and none is checked. It is a
+record for people and tools: the deck never uses it. `urdeck-cli shader render --update-manifest` writes it.
 
 A key the format does not define, a `kind` or sample `type` it does not define, and a value of the wrong JSON type each
 log one warning and are ignored, so a manifest written for a newer version still loads. The names `type`, `name`, `path`,
@@ -287,6 +294,41 @@ or install the package you made with `dotnet pack tools/UrDeck.Cli -c Release -o
 `dotnet tool install --tool-path tools-bin --add-source out urdeck-cli`, which gives `urdeck-cli` (`urdeck-cli.exe` on Windows).
 `--help` on the tool and on each command lists the options and the exit codes; `--version` prints the version.
 
+#### `shader init`
+
+```
+urdeck-cli shader init <shader.sksl | folder> [--output <directory>]
+```
+
+Makes a background folder with a manifest from a shader, so the first thing you see is a folder that loads and a list of
+what is left to write. It reads the shader's declarations and does not compile it: a shader with an error still gets its
+manifest, and `validate` reports the error next.
+
+| Argument | Result |
+|---|---|
+| `x.sksl`, no folder `x` | makes `x/`, **moves** the file in, writes the manifest |
+| `x.sksl`, folder `x` exists with neither `x.sksl` nor a manifest | moves the file in, writes the manifest |
+| `x.sksl`, folder `x` already holds `x.sksl` or a manifest | refuses; nothing is moved |
+| folder `x` holding `x.sksl` and no manifest | writes the manifest in place |
+| folder `x` with a manifest, or without `x.sksl` | refuses |
+| a name that is not a valid background name | refuses; nothing is created |
+
+`--output <directory>` (an existing directory) makes the folder there instead of next to the file. The file is moved, not
+copied, because a loose `.sksl` next to its folder is what the deck no longer loads. A refusal is exit code 2 and happens
+before anything is created; the manifest is written before the file moves, so a failure half-way leaves the file where
+it was. `init` never overwrites a manifest.
+
+The stub holds the `$schema` line, `"manifest": 1`, a `title` made from the name (`my-waves` becomes `My waves`), an empty
+`description`, and for each parameter of the shader, in its order, a `label` made the same way (`bandWidth` becomes
+`Band width`) and an empty `description`. The host's inputs, the setting's own keys and a uniform of a type that cannot be
+set get no entry (the last are named in the output). `"kind": "color"` is written for a three- or four-component parameter
+when the shader suggests a colour: a `layout(color)` declaration, a default written as `#rrggbb`, or a name that contains
+`color`, `colour` or `tint`. **That is a guess**; delete the line if it is wrong. Nothing else is guessed: no `min`, `max`,
+`step`, `unit`, `author`, `license` or `samples`.
+
+`shader validate` right after `init` has no errors, and its warnings are your to-do list: the descriptions and the missing
+samples.
+
 #### `shader validate`
 
 ```
@@ -370,7 +412,7 @@ finding (level `error`, `warning`, or `note` for `info`; the file as the locatio
 
 ```
 urdeck-cli shader render <folder> -o <file.png> [--size WxH] [--time seconds] [--theme name]
-                         [--colors #rrggbb,...] [--param name=value]... [--fail-on-warnings]
+                         [--colors #rrggbb,...] [--param name=value]... [--fail-on-warnings] [--update-manifest]
 ```
 
 Draws one frame on the CPU and writes it as a PNG; an existing file is replaced. It renders the folder it is given, never
@@ -386,6 +428,7 @@ a built-in of the same name.
 | `--colors` | one to four colours as `#RRGGBB`, separated by commas, as the configuration's `colors` |
 | `--param name=value` | a parameter, as the configuration sets it; repeatable. A number or an array (`1.5`, `[0.5,0.2]`) is read as JSON, anything else as text (`#ff8800`). A value the configuration would refuse is refused the same way, with the same warning on the error stream |
 | `--fail-on-warnings` | a blank picture fails the run |
+| `--update-manifest` | record the picture in the folder's `manifest.json` (below) |
 
 There is no `--scale`: it only sizes the layer in the deck, and the size given is the size rendered. Names the product
 owns (`speed`, `scale`, `colors`, `iTime`, ...) cannot be set with `--param`.
@@ -395,6 +438,30 @@ printed on the error stream and the exit code is 1. When the shader drew nothing
 says `SHADER070` as a warning: the exit code is 1 only with `--fail-on-warnings`. `render` reports only findings about the
 picture; the folder's other warnings are `validate`'s. Pictures made on different machines are not guaranteed to be
 identical (the text of a theme font is not, though a shader draws none).
+
+With `--update-manifest` the picture is also recorded in `samples`. The output must be inside the folder, and the entry's
+`file` is its path relative to the folder with `/` separators. An entry that already names the file is updated in place and
+keeps its `caption`, `order` and any other key; otherwise one with `"type": "image"` is added at the end. Its `settings` is
+replaced by how this picture was made: `size`, `time` and `theme` always (defaults included, so a later change of a default
+changes nothing already recorded), and `colors` and `parameters` when you gave them. A blank picture is recorded like any
+other; no picture, no change.
+
+The manifest is rewritten as indented JSON (two spaces, LF) with every key, value and their order kept; the only thing
+lost is your own layout (indentation, blank lines). When a rewrite would lose more, because the manifest has a comment, a
+trailing comma or the same key twice in one object (or its `samples` is not an array), the update is **refused before
+anything is rendered or written**: exit code 2, the reason on the error stream, and the entry to paste by hand:
+
+```
+error: waves/manifest.json was not updated: it has a comment, which a rewrite would lose.
+Nothing was rendered. Add this to its "samples" by hand, or put its "settings" in the entry for the file if it is there:
+{
+  "type": "image",
+  "file": "sample.png",
+  "settings": { ... }
+}
+```
+
+A manifest that is missing or not JSON is the render's own failure, as without the option.
 
 #### Exit codes
 
@@ -410,9 +477,11 @@ An `info` never changes the exit code. The format never changes the exit code.
 
 #### Writing a background
 
-1. Edit `waves.sksl` and `manifest.json`.
-2. `urdeck-cli shader render backgrounds/waves -o backgrounds/waves/sample.png`, look at the picture, list it under `samples`.
-3. `urdeck-cli shader validate backgrounds/waves --fail-on-warnings` until it is clean.
+1. `urdeck-cli shader init backgrounds/waves.sksl` makes `backgrounds/waves/` with the shader and a manifest stub.
+2. Fill in the descriptions in `manifest.json` (and `min`, `max`, `step` where they help); delete a `kind` that guessed wrong.
+3. `urdeck-cli shader render backgrounds/waves -o backgrounds/waves/sample.png --update-manifest`, look at the picture; it is
+   listed under `samples` with how it was made.
+4. `urdeck-cli shader validate backgrounds/waves --fail-on-warnings` until it is clean.
 
 #### Using it in CI
 
@@ -445,13 +514,14 @@ the tool.
 ### Regenerating the built-in samples
 
 The pictures in `src/UrDeck.Engine/Backgrounds/Builtin/<name>/sample.png` (270 x 480, the default theme, `iTime` 10) are
-made by `urdeck-cli`. Run it after changing a built-in shader, look at the four pictures, and commit them with the change:
+made by `urdeck-cli`. Run it after changing a built-in shader, look at the four pictures, and commit them and the manifests
+with the change (`--update-manifest` keeps each sample's `settings` current):
 
 ```powershell
 $cli = "dotnet tools/UrDeck.Cli/bin/Release/net10.0/urdeck-cli.dll"
 foreach ($name in "plasma", "aurora", "gradient", "julia") {
     $dir = "src/UrDeck.Engine/Backgrounds/Builtin/$name"
-    Invoke-Expression "$cli shader render $dir -o $dir/sample.png --fail-on-warnings"
+    Invoke-Expression "$cli shader render $dir -o $dir/sample.png --fail-on-warnings --update-manifest"
 }
 ```
 
@@ -463,8 +533,9 @@ committed one.
 The deck shows the theme's background colour, the widgets are unaffected, and `urdeck.log` has one line that starts with
 `Background` and names the cause:
 
-- an unknown shader name, a folder that cannot be read, or a loose `.sksl` file (the line names the folder to make);
-- a missing or unreadable `manifest.json` (`SHADER001` to `SHADER003`), or an `entry` that is missing or leaves the folder;
+- an unknown shader name, a folder that cannot be read, or a loose `.sksl` file (the line names the folder to make;
+  `urdeck-cli shader init` makes it);
+- a missing or unreadable `manifest.json` (`SHADER001` to `SHADER003`; `urdeck-cli shader init <folder>` writes one), or an `entry` that is missing or leaves the folder;
 - SkSL that does not compile (the compiler's message is in the line, with its line number);
 - a picture that is missing, too large, or not an image (its path is in the line);
 - a failure while painting, or a GPU surface that does not start.

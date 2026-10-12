@@ -42,6 +42,7 @@ public sealed class CliAppTests : IDisposable
     [Theory]
     [InlineData("shader", "validate")]
     [InlineData("shader", "render")]
+    [InlineData("shader", "init")]
     [InlineData("shader")]
     [InlineData]
     public void Help_is_0_and_names_the_exit_codes(params string[] command)
@@ -73,9 +74,28 @@ public sealed class CliAppTests : IDisposable
     {
         var run = Workspace.Invoke("shader", "render", "--help");
 
-        foreach (string option in new[] { "--output", "--size", "--time", "--theme", "--colors", "--param", "--fail-on-warnings" })
+        foreach (string option in new[] { "--output", "--size", "--time", "--theme", "--colors", "--param", "--fail-on-warnings", "--update-manifest" })
             Assert.Contains(option, run.Out);
         Assert.DoesNotContain("--scale", run.Out);
+    }
+
+    [Fact]
+    public void Init_help_lists_its_argument_and_option()
+    {
+        var run = Workspace.Invoke("shader", "init", "--help");
+
+        Assert.Contains("--output", run.Out);
+        Assert.Contains("<path>", run.Out);
+        Assert.Contains("Never overwrites", run.Out);
+    }
+
+    [Fact]
+    public void Init_without_a_path_is_a_parse_error()
+    {
+        var run = Workspace.Invoke("shader", "init");
+
+        Assert.Equal(2, run.Code);
+        Assert.StartsWith("error:", run.Error);
     }
 
     [Fact]

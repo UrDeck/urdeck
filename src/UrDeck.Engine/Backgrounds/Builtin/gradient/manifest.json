@@ -24,7 +24,12 @@
     {
       "type": "image",
       "file": "sample.png",
-      "caption": "Gradient in the default theme"
+      "caption": "Gradient in the default theme",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "default-dark"
+      }
     }
   ]
 }

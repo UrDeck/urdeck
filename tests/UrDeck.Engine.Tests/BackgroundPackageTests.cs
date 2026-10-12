@@ -242,6 +242,53 @@ public sealed class BackgroundPackageTests : IDisposable
         Assert.Equal([2f], uniform.Default!);
     }
 
+    [Theory]
+    [InlineData("uniform float3 x;   // default: #ff8800", true)]
+    [InlineData("uniform float4 x;   // default: #ff880080", true)]
+    [InlineData("uniform float3 x;   // default: 1, 0, 0", false)]
+    [InlineData("uniform float3 x;", false)]
+    [InlineData("uniform float x;   // default: #ff8800", false)]
+    public void A_default_written_as_a_colour_is_recorded(string line, bool written)
+    {
+        var uniform = Assert.Single(ShaderDeclarations.Parse(line, "t").Uniforms);
+
+        Assert.Equal(written, uniform.DefaultIsColor);
+        Assert.False(uniform.IsColor);
+    }
+
+    [Fact]
+    public void A_colour_default_on_a_float_is_still_a_bad_default()
+    {
+        var declarations = ShaderDeclarations.Parse("uniform float x;   // default: #ff8800", "t");
+
+        Assert.Contains(declarations.Diagnostics, d => d.Code == ShaderCodes.BadDefault);
+        Assert.Null(Assert.Single(declarations.Uniforms).Default);
+    }
+
+    [Fact]
+    public void A_sample_keeps_its_settings_after_the_reader_returns()
+    {
+        var result = BackgroundManifestReader.Read(
+            """{ "manifest": 1, "samples": [ { "file": "a.png", "settings": { "size": "270x480", "time": 10, "theme": "default", "note": "evening" } }, { "file": "b.png" } ] }""");
+
+        var settings = result.Manifest!.Samples[0].Settings!.Value;
+        Assert.Equal("270x480", settings.GetProperty("size").GetString());
+        Assert.Equal(10, settings.GetProperty("time").GetInt32());
+        Assert.Equal("default", settings.GetProperty("theme").GetString());
+        Assert.Null(result.Manifest.Samples[1].Settings);
+        Assert.DoesNotContain(result.Diagnostics, d => d.Message.Contains("note", StringComparison.Ordinal));
+        Assert.Empty(result.Diagnostics);
+    }
+
+    [Fact]
+    public void Settings_that_are_not_an_object_stay_a_warning_and_give_null()
+    {
+        var result = BackgroundManifestReader.Read("""{ "manifest": 1, "samples": [ { "file": "a.png", "settings": 5 } ] }""");
+
+        Assert.Null(result.Manifest!.Samples[0].Settings);
+        Assert.Single(result.Diagnostics, d => d.Code == ShaderCodes.WrongType);
+    }
+
     [Fact]
     public void A_line_that_is_not_a_declaration_is_not_read()
     {
