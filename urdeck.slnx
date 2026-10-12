@@ -7,6 +7,9 @@
     <Project Path="src/UrDeck.Engine/UrDeck.Engine.csproj" />
     <Project Path="src/UrDeck.Host/UrDeck.Host.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/UrDeck.Cli/UrDeck.Cli.csproj" />
+  </Folder>
   <Folder Name="/providers/">
     <Project Path="providers/UrDeck.Providers.System/UrDeck.Providers.System.csproj" />
     <Project Path="providers/UrDeck.Providers.Weather/UrDeck.Providers.Weather.csproj" />
@@ -19,6 +22,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/UrDeck.Analyzer.Tests/UrDeck.Analyzer.Tests.csproj" />
+    <Project Path="tests/UrDeck.Cli.Tests/UrDeck.Cli.Tests.csproj" />
     <Project Path="tests/UrDeck.Engine.Tests/UrDeck.Engine.Tests.csproj" />
   </Folder>
 </Solution>

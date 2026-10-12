@@ -253,7 +253,7 @@ public sealed class ReadingHubTests : IDisposable
     [Fact]
     public void ValuesOfOneSample_ArriveTogether_InOneNotification()
     {
-        Hub.Subscribe(["fake:a", "fake:b", "fake:c"]);
+        // The handler first: subscribing starts sampling on a pool thread, which must not run the default handler.
         Provider.OnSample = (_, sink, _) =>
         {
             sink.Publish("a", 1);
@@ -261,6 +261,7 @@ public sealed class ReadingHubTests : IDisposable
             sink.Publish("c", 3);
             return Task.CompletedTask;
         };
+        Hub.Subscribe(["fake:a", "fake:b", "fake:c"]);
         Assert.True(Wait(() => FirstSampleDone()));
 
         (string[] Ids, ReadingState StateOfA)[] batches;

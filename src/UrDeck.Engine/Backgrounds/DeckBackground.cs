@@ -60,14 +60,7 @@ public sealed class DeckBackground : IDisposable
         switch (settings.Kind)
         {
             case BackgroundKind.Shader:
-                var shader = store.Load(settings.Name!, warn: false);
-                string palette = string.Join(",", BackgroundPalette.Resolve(settings.Colors, theme).Select(c => c.ToString()));
-                string parameters = string.Join(";", settings.Parameters
-                    .OrderBy(p => p.Key, StringComparer.Ordinal)
-                    .Select(p => $"{p.Key}={p.Value.GetRawText()}"));
-                string source = shader == null ? "missing" : $"{shader.Origin}:{Hash(shader.EntryText)}:{Hash(shader.ManifestText)}";
-                return string.Create(CultureInfo.InvariantCulture,
-                    $"shader|{settings.Name}|{source}|{settings.Speed}|{settings.Scale}|{palette}|{parameters}");
+                return ShaderKey(settings, theme, store.Load(settings.Name!, warn: false));
 
             case BackgroundKind.Image:
                 string path = BackgroundImage.ResolvePath(settings.Path!, appDirectory);
@@ -78,6 +71,17 @@ public sealed class DeckBackground : IDisposable
             default:
                 return null;
         }
+    }
+
+    private static string ShaderKey(BackgroundSettings settings, LoadedTheme theme, BackgroundPackage? shader)
+    {
+        string palette = string.Join(",", BackgroundPalette.Resolve(settings.Colors, theme).Select(c => c.ToString()));
+        string parameters = string.Join(";", settings.Parameters
+            .OrderBy(p => p.Key, StringComparer.Ordinal)
+            .Select(p => $"{p.Key}={p.Value.GetRawText()}"));
+        string source = shader == null ? "missing" : $"{shader.Origin}:{Hash(shader.EntryText)}:{Hash(shader.ManifestText)}";
+        return string.Create(CultureInfo.InvariantCulture,
+            $"shader|{settings.Name}|{source}|{settings.Speed}|{settings.Scale}|{palette}|{parameters}");
     }
 
     /// <summary>
@@ -124,6 +128,11 @@ public sealed class DeckBackground : IDisposable
                 return null;
         }
     }
+
+    /// <summary>As the by-name <c>TryCreate</c> for a shader, from a package that was read from a folder rather than found by name.</summary>
+    internal static DeckBackground? TryCreate(BackgroundPackage package, BackgroundSettings settings, LoadedTheme theme,
+        out string? failure, out IReadOnlyList<ShaderDiagnostic> diagnostics) =>
+        CreateShader(package, settings, theme, out failure, out diagnostics);
 
     /// <summary>Draws the background at <paramref name="elapsedSeconds"/> of shown time, scaled by the speed and wrapped.</summary>
     public void Paint(SKCanvas canvas, int width, int height, double elapsedSeconds) =>
@@ -216,7 +225,12 @@ public sealed class DeckBackground : IDisposable
             return null;
         }
 
-        var package = load.Package;
+        return CreateShader(load.Package, settings, theme, out failure, out diagnostics);
+    }
+
+    private static DeckBackground? CreateShader(BackgroundPackage package, BackgroundSettings settings, LoadedTheme theme,
+        out string? failure, out IReadOnlyList<ShaderDiagnostic> diagnostics)
+    {
         diagnostics = ShaderLint.Check(package.Source, package.Name);
         var stop = diagnostics.FirstOrDefault(d => d.Severity == ShaderSeverity.Error && ShaderCodes.StopsLoading(d.Code));
         if (stop != null)
@@ -230,8 +244,7 @@ public sealed class DeckBackground : IDisposable
         if (program == null)
             return null;
 
-        string key = RequestKey(settings, theme, store, appDirectory)!;
-        return new DeckBackground(settings, key, $"shader '{settings.Name}' ({package.Origin})", program, null);
+        return new DeckBackground(settings, ShaderKey(settings, theme, package), $"shader '{settings.Name}' ({package.Origin})", program, null);
     }
 
     private static DeckBackground? CreateImage(BackgroundSettings settings, LoadedTheme theme, ShaderStore store, string appDirectory, out string? failure)

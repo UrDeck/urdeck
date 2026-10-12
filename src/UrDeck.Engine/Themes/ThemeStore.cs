@@ -90,7 +90,8 @@ public sealed class ThemeStore(string themesDirectory)
         return new LoadedTheme(name, user.MergeOver(baseline.Definition), font ?? baseline.Font);
     }
 
-    private static LoadedTheme? LoadBuiltIn(string name)
+    /// <summary>The built-in theme of that name (one of <see cref="BuiltInNames"/>), or null. Reads no folder and logs nothing.</summary>
+    public static LoadedTheme? LoadBuiltIn(string name)
     {
         using var stream = Self.GetManifestResourceStream($"UrDeck.Themes.{name}.json");
         if (stream == null)

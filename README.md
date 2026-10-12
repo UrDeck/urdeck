@@ -412,7 +412,7 @@ The Windows SDK suffix on the host and test target frameworks is required: the W
 
 | Path | License |
 |---|---|
-| `src/UrDeck.Host`, `src/UrDeck.Engine`, `providers/`, `widgets/`, `tests/` | [GPL-3.0-or-later](LICENSE) with the [plugin exception](PLUGIN-EXCEPTION.md) |
+| `src/UrDeck.Host`, `src/UrDeck.Engine`, `tools/` (`urdeck-cli`, which links the engine), `providers/`, `widgets/`, `tests/` | [GPL-3.0-or-later](LICENSE) with the [plugin exception](PLUGIN-EXCEPTION.md) |
 | `sdk/` (`UrDeck.Sdk`, `UrDeck.Analyzer`) | [MIT](sdk/LICENSE) |
 | Community widgets and data providers | The author's choice |
 | Windows App SDK (self-contained runtime shipped with the host) | Microsoft; see the licence files in the `Microsoft.WindowsAppSDK` NuGet package |

@@ -69,10 +69,11 @@ public sealed record BackgroundParameter(
 }
 
 /// <summary>The names the product owns: the setting's own keys and the inputs the host sets. They are never parameters.</summary>
-internal static class HostKeys
+public static class HostKeys
 {
     private static readonly string[] Inputs = ["iTime", "iResolution", "iColor0", "iColor1", "iColor2", "iColor3"];
 
+    /// <summary>True for a name a background cannot use as a parameter: one of the setting's own keys or a host input.</summary>
     public static bool IsHostKey(string name) => IsHostInput(name) || BackgroundSettings.IsOwnKey(name);
 
     public static bool IsHostInput(string name) => Array.IndexOf(Inputs, name) >= 0;
