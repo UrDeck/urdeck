@@ -17,6 +17,7 @@ Read `README.md` for what it is, `docs/ROADMAP.md` for the milestones, `docs/BAC
 ```powershell
 dotnet build urdeck.slnx -c Release                     # 0 warnings required; warnings are errors
 dotnet test urdeck.slnx -c Release
+dotnet test tests/UrDeck.Engine.Tests -c Release      # on Linux, with tests/UrDeck.Analyzer.Tests; urdeck.slnx holds the host, which needs Windows
 dotnet test tests/UrDeck.Engine.Tests -c Release -p:CollectCoverage=true   # enforces the UrDeck.Engine line-coverage floor
 dotnet format urdeck.slnx --severity warn               # apply style; CI runs it with --verify-no-changes
 openspec validate --all --strict
@@ -55,8 +56,15 @@ See the README license map before moving code between projects: it can change th
 
 ## Windows / WinUI 3 gotchas
 
-- Host and test projects must target `net10.0-windows10.0.19041.0` (`$(UrDeckWindowsTfm)`): the Windows App SDK and
-  `SkiaSharp.Views.WinUI` target that Windows SDK version; plain `net10.0-windows` does not resolve them.
+- Only the host must target `net10.0-windows10.0.19041.0` (`$(UrDeckWindowsTfm)`): the Windows App SDK and
+  `SkiaSharp.Views.WinUI` target that Windows SDK version; plain `net10.0-windows` does not resolve them. Everything
+  else, the test projects included, targets `net10.0` (`$(UrDeckTfm)`) and builds on Linux too.
+- The tests run on Windows and Linux (CI runs both). A test that needs Windows (shell icons, the system provider, named
+  kernel objects, `C:\` paths) is `[WindowsFact]` / `[WindowsTheory]` (`tests/UrDeck.Engine.Tests/Support/WindowsOnlyAttributes.cs`),
+  with `[SupportedOSPlatform("windows")]` on the class where the code under test has it; it shows as skipped with a reason
+  on Linux. `[WindowsGlyphFact]` is for a test that expects pixel-exact text (FreeType hints advances and its edge pixels
+  differ). Do not turn CA1416 off. In a test theme, take the typefaces from a resolved theme: the system default font
+  is empty in a bare Linux container and draws nothing.
 - The host is an unpackaged, self-contained WinUI 3 app with its own `Main` (`Program.cs`): `--snapshot` runs with the
   engine alone and exits before the XAML application starts. `App.xaml` must stay (building the application resources
   in code crashes). Widget types are never XAML types.

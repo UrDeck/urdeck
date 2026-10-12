@@ -384,7 +384,7 @@ public sealed class RealIconSourcesTests : IDisposable
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
 
-    [Fact]
+    [WindowsFact]
     public void LocalSources_NeedNoNetwork_AndCreateNoCacheFolder()
     {
         string cache = Path.Combine(_root, "cache", "icons");

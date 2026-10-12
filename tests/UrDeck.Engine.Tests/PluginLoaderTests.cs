@@ -5,6 +5,7 @@ using System.Runtime.Loader;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using UrDeck.Engine.Plugin;
+using UrDeck.Engine.Tests.Support;
 using UrDeck.Sdk;
 using Xunit;
 
@@ -352,7 +353,7 @@ public class IconWidget : Widget<IconCfg>, ITapTarget
     public void OnTap(SKPoint point) { }
 }";
 
-    [Fact]
+    [WindowsFact]
     public void AWidgetThatAskedForAnIcon_AndWasDisposed_LeavesItsContextCollectible()
     {
         string path = WriteSource("Icon.dll", IconWidgetSource);

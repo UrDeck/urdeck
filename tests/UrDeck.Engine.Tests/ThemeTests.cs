@@ -163,10 +163,15 @@ public sealed class ThemeTests : IDisposable
         Assert.Equal("default-dark", Store().Load("..\\themes").Name);
     }
 
-    [Fact]
-    public void FontPathOutsideTheFolder_IsRejected()
+    [Theory]
+    [InlineData("..\\other\\evil.ttf")]
+    [InlineData("../other/evil.ttf")]
+    [InlineData("sub\\..\\..\\evil.ttf")]
+    [InlineData("sub/..\\..\\evil.ttf")]
+    public void FontPathOutsideTheFolder_IsRejected(string font)
     {
-        WriteTheme("escape", """{ "typography": { "font": "..\\other\\evil.ttf" } }""");
+        // A backslash separates on every platform, so the check does not depend on where the tests run.
+        WriteTheme("escape", """{ "typography": { "font": "FONT" } }""".Replace("FONT", font.Replace("\\", "\\\\", StringComparison.Ordinal), StringComparison.Ordinal));
 
         var loaded = Store().Load("escape");
 

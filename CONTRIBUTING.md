@@ -42,7 +42,8 @@ force pushes or deletion, squash merges only.
   file-scoped namespaces, `using`s outside the namespace and sorted, `_camelCase` private instance fields, PascalCase
   static fields, `I` prefix for interfaces, `var` only when the type is apparent, LF line endings.
 - Shared MSBuild settings are in `Directory.Build.props`; package versions are only in `Directory.Packages.props`.
-- Tests: xUnit in `tests/`. `UrDeck.Engine` has a line-coverage floor (currently 65%, enforced in CI; raise it when
+- Tests: xUnit in `tests/`, on `net10.0`; CI runs them on Windows (with the solution) and on Linux (the test projects
+  alone). Mark a test that needs Windows `[WindowsFact]` (see [AGENTS.md](AGENTS.md)). `UrDeck.Engine` has a line-coverage floor (currently 65%, enforced in CI; raise it when
   coverage improves, never lower it to make a PR pass).
 - Dependencies are scanned for known vulnerabilities three ways: NuGet audit fails the build (`NuGetAudit` in
   `Directory.Build.props`), and `.github/workflows/security.yml` runs dependency review (vulnerabilities and licenses on

@@ -4,6 +4,7 @@
 using System.Text.Json;
 using SkiaSharp;
 using UrDeck.Engine.Config;
+using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Data;
@@ -148,7 +149,7 @@ public sealed class StatsWidgetTests : IDisposable
         Assert.True(Count(bitmap, _theme.TextMuted) > 0);
     }
 
-    [Fact]
+    [WindowsGlyphFact]
     public void TheLabel_IsTheCatalogsWhenAbsent_TheSlotsWhenSet_AndHiddenWhenEmpty()
     {
         _source.Readings[Core2] = Reading.Ok(37);
@@ -209,7 +210,7 @@ public sealed class StatsWidgetTests : IDisposable
         return label.Bottom - value.Bottom;
     }
 
-    [Fact]
+    [WindowsGlyphFact]
     public void TheTextSize_DoesNotChangeWithTheValue()
     {
         _source.Readings[Core2] = Reading.Ok(8);

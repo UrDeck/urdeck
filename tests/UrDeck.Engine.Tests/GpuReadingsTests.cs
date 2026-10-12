@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using System.Runtime.Versioning;
+using UrDeck.Engine.Tests.Support;
 using UrDeck.Providers.Machine;
 using UrDeck.Sdk.Data;
 using Xunit;
 
 namespace UrDeck.Engine.Tests;
 
+[SupportedOSPlatform("windows")]
 public class GpuReadingsTests
 {
     private const uint Nvidia = 0x10DE;
@@ -113,7 +116,7 @@ public class GpuReadingsTests
     private static List<ReadingDescriptor> GpuCatalog(FakePlatform platform) =>
         new SystemProvider(platform).Describe().Where(d => d.Path.StartsWith("gpu/", StringComparison.Ordinal)).ToList();
 
-    [Fact]
+    [WindowsFact]
     public void TheCatalog_ListsFourMainPathsAndFourPerAdapter()
     {
         var catalog = GpuCatalog(new FakePlatform(Discrete));
@@ -128,7 +131,7 @@ public class GpuReadingsTests
             catalog.Select(d => d.Name));
     }
 
-    [Fact]
+    [WindowsFact]
     public void TheCatalog_DescribesEachReadingsKindRangeLevelsAndUnit()
     {
         var catalog = GpuCatalog(new FakePlatform(Discrete));
@@ -155,14 +158,14 @@ public class GpuReadingsTests
         Assert.Equal((ReadingKind.Number, "MHz"), (clock.Kind, clock.Unit));
     }
 
-    [Fact]
+    [WindowsFact]
     public void WithoutAHardwareAdapter_TheCatalogHasNoGpuReadings()
     {
         Assert.Empty(GpuCatalog(new FakePlatform()));
         Assert.Empty(GpuCatalog(new FakePlatform(Adapter(7, "Basic Render", 0, software: true))));
     }
 
-    [Fact]
+    [WindowsFact]
     public void Adapters_AreNumberedByDedicatedMemory_TiesInWindowsOrder_AndSoftwareOnesAreDropped()
     {
         var platform = new FakePlatform(
@@ -181,7 +184,7 @@ public class GpuReadingsTests
         Assert.DoesNotContain(catalog, d => d.Path.StartsWith("gpu/4/", StringComparison.Ordinal));
     }
 
-    [Fact]
+    [WindowsFact]
     public void NoGpuSubscriber_MeansNoGpuQueryAndNoVendorLibrary()
     {
         var platform = new FakePlatform(Discrete);
@@ -196,7 +199,7 @@ public class GpuReadingsTests
         Assert.Empty(sink.Logs);
     }
 
-    [Fact]
+    [WindowsFact]
     public void OnlyLoadWanted_QueriesNeitherTemperatureNorTheVendorLibrary()
     {
         var platform = new FakePlatform(Discrete);
@@ -211,7 +214,7 @@ public class GpuReadingsTests
         Assert.Equal(0, platform.ReadersCreated);
     }
 
-    [Fact]
+    [WindowsFact]
     public void OnlyTemperatureWanted_DoesNotQueryLoad()
     {
         var platform = new FakePlatform(Discrete);
@@ -226,7 +229,7 @@ public class GpuReadingsTests
         Assert.Equal(["gpu/1/temperature"], sink.Values.Keys);
     }
 
-    [Fact]
+    [WindowsFact]
     public void Load_IsTheBusiestEnginesShareOfTimeSincetheLastSample_OnlyForWantedPaths()
     {
         var platform = new FakePlatform(Discrete);
@@ -245,7 +248,7 @@ public class GpuReadingsTests
         Assert.Equal(75, sink.Values["gpu/load"], 6);
     }
 
-    [Fact]
+    [WindowsFact]
     public void Load_IsAvailableThroughBothTheMainAndTheNumberedPath()
     {
         var platform = new FakePlatform(Discrete);
@@ -261,7 +264,7 @@ public class GpuReadingsTests
         Assert.Equal(20, sink.Values["gpu/1/load"], 6);
     }
 
-    [Fact]
+    [WindowsFact]
     public void Load_IsClampedToAHundred()
     {
         var platform = new FakePlatform(Discrete);
@@ -276,7 +279,7 @@ public class GpuReadingsTests
         Assert.Equal(100, sink.Values["gpu/load"]);
     }
 
-    [Fact]
+    [WindowsFact]
     public void WhenLoadIsWantedAgainAfterAPause_TheFirstSampleIsABaselineAgain()
     {
         var platform = new FakePlatform(Discrete);
@@ -297,7 +300,7 @@ public class GpuReadingsTests
         Assert.False(sink.Values.ContainsKey("gpu/load"));
     }
 
-    [Fact]
+    [WindowsFact]
     public void ADriverWithoutATemperature_IsUnavailableAndNeverZero()
     {
         var platform = new FakePlatform(Discrete);
@@ -311,7 +314,7 @@ public class GpuReadingsTests
         Assert.Contains("no temperature", sink.Unavailables["gpu/temperature"]);
     }
 
-    [Fact]
+    [WindowsFact]
     public void AnAdapterThatDoesNotExist_IsUnavailable()
     {
         var sink = new Sink();
@@ -324,7 +327,7 @@ public class GpuReadingsTests
         Assert.DoesNotContain("gpu/2/load", sink.Unavailables.Keys);
     }
 
-    [Fact]
+    [WindowsFact]
     public void WithoutAGpu_EveryGpuPathIsUnavailable()
     {
         var sink = new Sink();
@@ -336,7 +339,7 @@ public class GpuReadingsTests
         Assert.Contains("gpu/1/power", sink.Unavailables.Keys);
     }
 
-    [Fact]
+    [WindowsFact]
     public void PowerAndClock_ComeFromTheVendorReader_OpenedOnceAndClosedOnShutdown()
     {
         var platform = new FakePlatform(Discrete);
@@ -356,7 +359,7 @@ public class GpuReadingsTests
         Assert.Equal(1, platform.Reader.Closes);
     }
 
-    [Fact]
+    [WindowsFact]
     public void AReaderThatFailsToOpen_MakesPowerAndClockUnavailable_WhileLoadKeepsPublishing_AndIsNotRetried()
     {
         var platform = new FakePlatform(Discrete) { Reader = new FakeReader { Failure = "fake.dll could not be loaded" } };
@@ -377,7 +380,7 @@ public class GpuReadingsTests
         Assert.Equal(0, provider.GpuVendorQueries);
     }
 
-    [Fact]
+    [WindowsFact]
     public void AnAdapterWithoutAVendorReader_ReportsThatThereIsNoLibraryForItYet()
     {
         var platform = new FakePlatform(Adapter(1, "Radeon", 16, Amd)) { Reader = null };
@@ -391,7 +394,7 @@ public class GpuReadingsTests
         Assert.Equal(45, sink.Values["gpu/temperature"]);
     }
 
-    [Fact]
+    [WindowsFact]
     public void ThePowerOfAReaderWithoutAValue_IsUnavailable()
     {
         var platform = new FakePlatform(Discrete);
@@ -405,7 +408,7 @@ public class GpuReadingsTests
         Assert.Equal(2520, sink.Values["gpu/clock"]);
     }
 
-    [Fact]
+    [WindowsFact]
     public void TheLogNamesTheAdapterAndTheSourceOfEachReading_OnceEach()
     {
         var platform = new FakePlatform(Discrete);
@@ -422,7 +425,7 @@ public class GpuReadingsTests
         Assert.Equal("GPU 1: power and clock from fake.dll", sink.Logs[1]);
     }
 
-    [Theory]
+    [WindowsTheory]
     [InlineData("gpu/load", 1, "Load", true)]
     [InlineData("GPU/Temperature", 1, "Temperature", true)]
     [InlineData("gpu/2/power", 2, "Power", false)]
@@ -433,7 +436,7 @@ public class GpuReadingsTests
         Assert.Equal((adapter, kind, alias), (parsedAdapter, parsedKind.ToString(), parsedAlias));
     }
 
-    [Theory]
+    [WindowsTheory]
     [InlineData("gpu/")]
     [InlineData("gpu/fan")]
     [InlineData("gpu/x/load")]
@@ -442,7 +445,7 @@ public class GpuReadingsTests
     public void OtherPathsAreNotGpuPaths(string path) =>
         Assert.False(GpuReadings.TryParse(path, out _, out _, out _));
 
-    [Fact]
+    [WindowsFact]
     public void OnThisMachine_LoadIsAPercentageAfterTwoSamples()
     {
         var provider = new SystemProvider();

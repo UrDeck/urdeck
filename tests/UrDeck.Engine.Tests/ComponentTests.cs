@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using SkiaSharp;
+using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Components;
@@ -70,7 +71,7 @@ public sealed class ComponentTests : IDisposable
         Assert.Equal(current.Height, dash.Height, 3);
     }
 
-    [Fact]
+    [WindowsGlyphFact]
     public void ReadoutOfAReading_DrawsACurrentValueInTheTextColour_AndAStaleOneInTheMutedColour()
     {
         using var current = DrawReading(Text(Reading.Ok(37)));
@@ -92,7 +93,7 @@ public sealed class ComponentTests : IDisposable
         Assert.True(withUnit.Height < bare.Height);
     }
 
-    [Fact]
+    [WindowsGlyphFact]
     public void ReadoutOfAReading_StillTakesTheLabelFromTheOptions()
     {
         using var plain = DrawReading(Text(Reading.Ok(37)));
@@ -168,7 +169,7 @@ public sealed class ComponentTests : IDisposable
         Assert.Equal(font.MeasureText("Label"), r.Width, 1);
     }
 
-    [Fact]
+    [WindowsGlyphFact]
     public void TextLine_OverWideTitle_ShrinksToTheRectangle()
     {
         using var bitmap = new SKBitmap(200, 100);

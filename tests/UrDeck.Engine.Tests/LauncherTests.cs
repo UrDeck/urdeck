@@ -81,7 +81,7 @@ public sealed class LauncherTests : IDisposable
         Assert.True(info.UseShellExecute);
     }
 
-    [Fact]
+    [WindowsFact]
     public void AnEnvironmentVariable_IsExpandedBeforeTheShellSeesIt()
     {
         Assert.True(_launcher.Launch(@"%WINDIR%\explorer.exe"));
