@@ -88,6 +88,13 @@ public class UrDeckConfig
     [JsonPropertyName("icon")]
     public string? Icon { get; set; }
 
+    /// <summary>
+    /// What the deck shows behind its cards: a shader or an image. Kept raw; <c>BackgroundSettings.Parse</c> reads it
+    /// leniently so a wrong shape costs a warning, never the configuration. Absent from a default configuration.
+    /// </summary>
+    [JsonPropertyName("background")]
+    public JsonElement? Background { get; set; }
+
     /// <summary>1-based monitor index, used when <see cref="MonitorName"/> doesn't match anything.</summary>
     [JsonPropertyName("monitor")]
     public int Monitor { get; set; } = 1;
@@ -147,6 +154,7 @@ public sealed class ConfigStore : IDisposable
         Config.Pager ??= new PagerConfig();
         Config.Dock ??= new List<WidgetConfig>();
         Config.Pager.GetIndicatorMode(warn: true);
+        Backgrounds.BackgroundSettings.NotePageBackgrounds(Config);
         if (Config.Pages.Count == 0)
             Config.Pages.Add(new PageConfig());
     }

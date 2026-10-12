@@ -23,7 +23,7 @@ value (for example a colour that does not parse) is replaced by the default's va
 ```json
 {
   "colors": {
-    "background": "#0f0f1a", "cardFill": "#1a1a2e", "cardBorder": "#00000000",
+    "background": "#0f0f1a", "cardFill": "#b31a1a2e", "cardBorder": "#00000000",
     "text": "#ffffff", "textMuted": "#b3ffffff",
     "accent": "#4a9eff", "accentDim": "#664a9eff",
     "good": "#3ddc84", "warning": "#ffb020", "critical": "#ff5a4d"
@@ -82,11 +82,35 @@ value (for example a colour that does not parse) is replaced by the default's va
   row there; the owner approved the size by eye on that panel. A larger value takes a row there. A theme written before the dock existed takes the value from
   `default-dark`, with no warning.
 
+- **`colors.backgroundPalette`** is the palette the [background](backgrounds.md) shaders draw with: one to four colours
+  (`#RRGGBB`; fewer than four repeat the last, transparency is ignored). See [Background palette](#background-palette).
+
 A gauge draws its fill in `colors.accent`, or in `colors.warning` or `colors.critical` once its reading has reached
 that level, and its track in the same colour at the alpha of `colors.accentDim`. A reading that is not current (stale,
 pending, unavailable) uses `colors.textMuted` for both. The number keeps `colors.text`, except where it lies over the
 fill of a vertical bar: there it is `colors.text` or `colors.background`, whichever contrasts more with the fill.
 Thickness and line ends come from `stroke`.
+
+## Background palette
+
+The built-in background shaders (`plasma`, `aurora`, `gradient`, `julia`) draw with four colours that come from the theme.
+`colors.backgroundPalette` sets them; the built-in themes have:
+
+| Theme | `backgroundPalette` |
+|---|---|
+| `default-dark` | `#0f0f1a`, `#1a2350`, `#3a2a6e`, `#24507a` |
+| `default-light` | `#e9ebf2`, `#b9ccf2`, `#d9b8ee`, `#a6dbee` |
+| `glass` | `#131c4f`, `#1b2760`, `#3a3f9c`, `#6b3fa0` |
+
+**It is the one value that is not taken from `default-dark`.** Every other value you leave out falls back to the default
+theme's, but a light theme written before backgrounds existed would then get the dark palette. A theme without
+`backgroundPalette` gets one derived from its own colours instead: `colors.background` mixed towards `colors.accent` by 0,
+20, 40 and 60%, component by component. No warning is logged for that. A `backgroundPalette` that is not an array of one to
+four valid colours is dropped with a warning, and the derived palette is used. The `colors` of the `background` setting
+in `urdeck-config.json` win over both.
+
+Keep the palette dark and low in contrast unless the theme's cards are opaque: a bright, busy background under
+translucent cards makes their text hard to read.
 
 ## Bundled font
 

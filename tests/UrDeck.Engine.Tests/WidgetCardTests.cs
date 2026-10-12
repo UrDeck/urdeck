@@ -48,7 +48,8 @@ public class WidgetCardTests
         using var flat = Paint(new Probe(_ => { }), WithRadius(0), 275, 275);
 
         Assert.Equal(0, rounded.GetPixel(0, 0).Alpha);
-        Assert.Equal(255, flat.GetPixel(0, 0).Alpha);
+        // The card fill may be translucent: the flat card covers the corner with the fill's own alpha.
+        Assert.Equal(SKColor.Parse(Dark.Definition.Colors!.CardFill).Alpha, flat.GetPixel(0, 0).Alpha);
     }
 
     [Fact]

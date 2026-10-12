@@ -65,7 +65,8 @@ measurement so far is from one panel and one NVIDIA GPU, and that is the largest
   the settings window the editor grows from).
 
 **4. Living page.** What makes the page worth looking at, and the reason composition moved to the GPU.
-- Backgrounds: image, video, painted visualization (item 9).
+- Backgrounds: image, video, painted visualization (item 9). Image and painted (shader) backgrounds are implemented in
+  `backgrounds`; a video file, per-page backgrounds and a guard for heavy shaders are still open.
 - The web page widget, a hosted widget kind (item 7). Also public SDK API.
 - Media / now playing (item 7).
 - The motion level as a theme or page setting, and the later theme knobs (items 5 and 14).

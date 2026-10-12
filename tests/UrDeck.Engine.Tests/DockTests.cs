@@ -477,7 +477,14 @@ public sealed class DockSnapshotTests : IDisposable
         // The corner is rounded with that radius: its outermost pixel is the background, the card's centre is the fill.
         var slot = DockLayout.Compute(new Rectangle(0, 3645, 1100, 195), 1, card.Gap!.Value).Single();
         Assert.Equal(Background, bitmap.GetPixel(slot.Position.X, slot.Position.Y));
-        Assert.Equal(SKColor.Parse(Dark.Definition.Colors!.CardFill), bitmap.GetPixel(slot.Position.X + 91, slot.Position.Y + 91));
+
+        // The fill may be translucent, so the centre is the fill blended over the background.
+        var fill = SKColor.Parse(Dark.Definition.Colors!.CardFill);
+        var centre = bitmap.GetPixel(slot.Position.X + 91, slot.Position.Y + 91);
+        float a = fill.Alpha / 255f;
+        Assert.InRange(centre.Red, Math.Round((fill.Red * a) + (Background.Red * (1 - a))) - 1, Math.Round((fill.Red * a) + (Background.Red * (1 - a))) + 1);
+        Assert.InRange(centre.Green, Math.Round((fill.Green * a) + (Background.Green * (1 - a))) - 1, Math.Round((fill.Green * a) + (Background.Green * (1 - a))) + 1);
+        Assert.InRange(centre.Blue, Math.Round((fill.Blue * a) + (Background.Blue * (1 - a))) - 1, Math.Round((fill.Blue * a) + (Background.Blue * (1 - a))) + 1);
     }
 
     [Fact]

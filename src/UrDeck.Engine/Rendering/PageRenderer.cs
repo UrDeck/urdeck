@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using SkiaSharp;
+using UrDeck.Engine.Backgrounds;
+using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Layout;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
@@ -20,7 +22,8 @@ public static class PageRenderer
     /// <summary>
     /// Draws the page and, below it, the dock. <paramref name="dock"/> holds the dock's slots in order (see
     /// <see cref="DockLayout.Select"/>), each with its widget or null for a slot that stays empty; null or empty means
-    /// no dock, and nothing is reserved for it.
+    /// no dock, and nothing is reserved for it. A <paramref name="background"/> is painted over the theme's background colour,
+    /// at the snapshot time (see <see cref="BackgroundClock.SnapshotTime"/>), before anything else.
     /// </summary>
     public static void Render(
         SKCanvas canvas,
@@ -30,11 +33,14 @@ public static class PageRenderer
         LoadedTheme loaded,
         DateTime time,
         Chrome? chrome = null,
-        IReadOnlyList<(WidgetConfig Config, IWidget? Widget)>? dock = null)
+        IReadOnlyList<(WidgetConfig Config, IWidget? Widget)>? dock = null,
+        DeckBackground? background = null)
     {
         // Pixels are physical here, so the theme resolves against this canvas's own cell size.
         using var theme = ThemeResolver.Resolve(loaded, widthPx / 4f);
         canvas.Clear(theme.Background);
+        if (background != null)
+            PaintBackground(canvas, widthPx, heightPx, background);
 
         var screen = new System.Drawing.Size(widthPx, heightPx);
         var indicator = loaded.Definition.Indicator!;
@@ -86,12 +92,45 @@ public static class PageRenderer
         LoadedTheme loaded,
         DateTime time,
         Chrome? chrome = null,
-        IReadOnlyList<(WidgetConfig Config, IWidget? Widget)>? dock = null)
+        IReadOnlyList<(WidgetConfig Config, IWidget? Widget)>? dock = null,
+        DeckBackground? background = null)
     {
         var bitmap = new SKBitmap(widthPx, heightPx);
         using var canvas = new SKCanvas(bitmap);
-        Render(canvas, widthPx, heightPx, widgets, loaded, time, chrome, dock);
+        Render(canvas, widthPx, heightPx, widgets, loaded, time, chrome, dock, background);
         return bitmap;
+    }
+
+    /// <summary>
+    /// A shader renders into a surface of its scale times the page's size and is stretched over the page, so a snapshot
+    /// has the softness of the live layer; a picture is painted at full size. A failure is logged and the page is
+    /// drawn without a background.
+    /// </summary>
+    private static void PaintBackground(SKCanvas canvas, int widthPx, int heightPx, DeckBackground background)
+    {
+        try
+        {
+            int save = canvas.Save();
+            if (background.Kind == BackgroundKind.Shader && background.Scale < 1)
+            {
+                int width = Math.Max(1, (int)Math.Round(widthPx * background.Scale));
+                int height = Math.Max(1, (int)Math.Round(heightPx * background.Scale));
+                using var surface = SKSurface.Create(new SKImageInfo(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul));
+                surface.Canvas.Clear(SKColors.Transparent);
+                background.PaintAtTime(surface.Canvas, width, height, BackgroundClock.SnapshotTime);
+                using var image = surface.Snapshot();
+                canvas.DrawImage(image, SKRect.Create(widthPx, heightPx), new SKSamplingOptions(SKFilterMode.Linear));
+            }
+            else
+            {
+                background.PaintAtTime(canvas, widthPx, heightPx, BackgroundClock.SnapshotTime);
+            }
+            canvas.RestoreToCount(save);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            UrDeckLog.Warn($"Background: painting failed, the page is drawn without it: {ex.Message}");
+        }
     }
 
     private static void PaintAt(SKCanvas canvas, IWidget widget, WidgetLayoutItem item, Theme theme, DateTime time)

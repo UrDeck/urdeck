@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using UrDeck.Engine.Backgrounds;
 using UrDeck.Engine.Config;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
@@ -16,6 +17,10 @@ internal sealed class HostContext : IDisposable
 
     public ConfigStore Config { get; }
     public ThemeStore Themes { get; }
+    public ShaderStore Shaders { get; }
+
+    /// <summary>The application folder: where relative picture paths of a background start.</summary>
+    public string AppDirectory { get; } = AppContext.BaseDirectory;
     public WidgetPluginLoader Plugins { get; }
 
     /// <summary>The displays connected at startup.</summary>
@@ -43,6 +48,9 @@ internal sealed class HostContext : IDisposable
 
         // User themes live in a themes folder next to the executable; the built-in ones are embedded in the engine.
         Themes = new ThemeStore(Path.Combine(appDir, "themes"));
+
+        // User background shaders live in a backgrounds folder next to the executable; the built-in ones are embedded.
+        Shaders = new ShaderStore(Path.Combine(appDir, "backgrounds"));
 
         Plugins = new WidgetPluginLoader();
         Plugins.ScanAndLoadPlugins(Path.Combine(appDir, "plugins"));

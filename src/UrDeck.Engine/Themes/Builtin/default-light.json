@@ -1,7 +1,7 @@
 {
   "colors": {
     "background": "#e9ebf2",
-    "cardFill": "#ffffff",
+    "cardFill": "#b3ffffff",
     "cardBorder": "#1a000000",
     "text": "#14141f",
     "textMuted": "#b314141f",
@@ -9,7 +9,8 @@
     "accentDim": "#661f6feb",
     "good": "#1a9e55",
     "warning": "#c77700",
-    "critical": "#d92d20"
+    "critical": "#d92d20",
+    "backgroundPalette": ["#e9ebf2", "#b9ccf2", "#d9b8ee", "#a6dbee"]
   },
   "indicator": {
     "active": "#14141f",

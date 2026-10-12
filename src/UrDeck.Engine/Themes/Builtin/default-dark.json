@@ -1,7 +1,7 @@
 {
   "colors": {
     "background": "#0f0f1a",
-    "cardFill": "#1a1a2e",
+    "cardFill": "#b31a1a2e",
     "cardBorder": "#00000000",
     "text": "#ffffff",
     "textMuted": "#b3ffffff",
@@ -9,7 +9,8 @@
     "accentDim": "#664a9eff",
     "good": "#3ddc84",
     "warning": "#ffb020",
-    "critical": "#ff5a4d"
+    "critical": "#ff5a4d",
+    "backgroundPalette": ["#0f0f1a", "#1a2350", "#3a2a6e", "#24507a"]
   },
   "card": {
     "radius": 0.08,

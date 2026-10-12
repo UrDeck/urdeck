@@ -3,9 +3,11 @@
 
 using System.Globalization;
 using SkiaSharp;
+using UrDeck.Engine.Backgrounds;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Layout;
 using UrDeck.Engine.Rendering;
+using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 
 namespace UrDeck.Host;
@@ -13,12 +15,26 @@ namespace UrDeck.Host;
 /// <summary>
 /// <c>--snapshot out.png [--size WxH] [--theme name] [--page N]</c>: renders a page (default: the one at
 /// <c>activePage</c>) off-screen with the same layout and
-/// widget code as the live window, writes a PNG and exits. Defaults to the target monitor's resolution, to the primary
+/// widget code as the live window, and the configured <c>background</c> (a shader at a fixed time, in the palette of the
+/// theme in effect; a picture covering the page), writes a PNG and exits. Defaults to the target monitor's resolution, to the primary
 /// monitor's when the target is not connected. It uses the engine alone, runs before the XAML application starts and
 /// never writes the configuration.
 /// </summary>
 internal static class SnapshotCommand
 {
+    private static DeckBackground? BuildBackground(HostContext host, LoadedTheme theme, int width, int height)
+    {
+        var settings = BackgroundSettings.Parse(host.Config.Config.Background);
+        var background = DeckBackground.Create(settings, theme, host.Shaders, host.AppDirectory);
+        if (background != null && !background.PrepareAsync(width, height).GetAwaiter().GetResult())
+        {
+            background.Dispose();
+            return null;
+        }
+
+        return background;
+    }
+
     public static int Run(string[] args)
     {
         int index = Array.IndexOf(args, "--snapshot");
@@ -93,8 +109,11 @@ internal static class SnapshotCommand
             while (readings.AnyPending(ids) && DateTime.UtcNow < deadline)
                 Thread.Sleep(25);
 
+            // The background, built as the live window builds it; a picture is decoded now and the render waits for it.
+            using var background = BuildBackground(host, theme, width, height);
+
             var chrome = new PageRenderer.Chrome(config.Pager.GetIndicatorMode(), pageIndex, config.Pages.Count);
-            var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome, dock);
+            var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome, dock, background);
 
             // Icons are asked for while painting. If that paint asked for any, wait for them (a few seconds at most) and
             // paint again, so the image shows icons and not placeholders. A page without them is painted once.
@@ -105,7 +124,7 @@ internal static class SnapshotCommand
                 while (icons.AnyPending && DateTime.UtcNow < iconDeadline)
                     Thread.Sleep(25);
                 bitmap.Dispose();
-                bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome, dock);
+                bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome, dock, background);
             }
 
             using var image = bitmap;

@@ -93,6 +93,10 @@ everything else should be fine on Sonnet.
   Windows" (Run key behind `IAutostart`), a complete `dotnet publish` folder, `scripts/Install-Local.ps1`, one host per
   folder with `--quit`, and a dated, capped log. The cold-boot checks (section 6 of its tasks) are the owner's; see
   `docs/perf/start-with-windows.md`.
+- `backgrounds` is implemented (2026-10-11, `openspec/changes/backgrounds`; the owner's checks on the panel are open, see
+  item 9): the `background` setting with shader and image kinds, four built-in shaders, user shaders in `backgrounds/`,
+  the theme's `colors.backgroundPalette`, a GPU surface at 30 frames per second that runs only while it can be seen, and
+  the background in `--snapshot`. Spike in `docs/perf/backgrounds-spike.md`.
 - `settings-window` is implemented and archived (2026-10-11, `openspec/changes/archive/2026-10-11-settings-window`; the
   checks on the panel passed, except task 6.3, the window in front of the deck on a single display, which was skipped and
   is unverified): a left click on the tray icon, or the new Settings entry, opens an ordinary window
@@ -546,8 +550,19 @@ scrolls natively (a chat, a list) needs pan gestures with inertia from the host 
 
 ## 9. Backgrounds
 
-Static image, video, and generative visualizations per page (the `background` config field exists but is unused).
+Static image, video, and generative visualizations per page (the `pages[].background` config field exists but is unused).
 Video is expensive: gate it behind the performance budget and measure. **Model:** Sonnet.
+
+**Status (2026-10-11):** the image and the painted (shader) background are implemented in `backgrounds`
+(`openspec/changes/backgrounds`; docs in `docs/backgrounds.md`): a top-level `background` setting, four built-in SkSL
+shaders (`plasma`, `aurora`, `gradient`, `julia`) that draw with the theme's palette (`colors.backgroundPalette`), the
+user's own `backgrounds/<name>.sksl` with parameters read from its uniforms, a wallpaper image that covers the panel, 30
+frames per second on one GPU surface at a configurable `scale` (default 0.5), no frames while the deck is hidden or the
+display is off, and the background in `--snapshot`. Checked by build, tests, snapshots and the real host: 30.0 frames per
+second, no restart on an unrelated config save, plugin hot-reload leaves it running. **Open:** the owner's checks on the
+panel (the look of each built-in, sleep/wake and display-off recovery, the cost table in `docs/perf/backgrounds.md`, what
+`FrameClock` really delivers); per-page backgrounds (`pages[].background` stays unused), a video file, a guard for a heavy
+user shader, backgrounds that react to readings, blur behind translucent cards.
 
 Confirmed 2026-10-04 as a platform goal: a custom image, a video file, and a painted visualization (OpenGL or
 Direct3D), behind translucent cards. This is the main reason composition moves to the GPU (item 14), and the spike

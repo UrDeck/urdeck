@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// A Julia set whose constant circles slowly, drawn with the palette (iColor0..iColor3).
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float zoom;     // default: 1.0
+uniform float radius;   // default: 0.7885
+
+half4 main(float2 fragCoord) {
+    // The longer side of the surface is the real axis, so the set fills a tall panel.
+    float2 centred = fragCoord - 0.5 * iResolution;
+    float longSide = max(iResolution.x, iResolution.y);
+    float2 z = (iResolution.y > iResolution.x ? centred.yx : centred.xy) / longSide * 3.4 / zoom;
+    float t = iTime * 0.1;
+    float2 c = radius * float2(cos(t), sin(t));
+    float n = 0.0;
+    for (int i = 0; i < 128; i++) {
+        if (dot(z, z) > 256.0) break;
+        z = float2(z.x * z.x - z.y * z.y, 2.0 * z.x * z.y) + c;
+        n += 1.0;
+    }
+    // A smooth escape time, so the colour changes everywhere and not only in bands around the set.
+    float mu = n >= 127.0 ? 128.0 : n + 1.0 - log2(0.5 * log2(dot(z, z)));
+    float v = mu >= 128.0 ? 1.0 : sqrt(clamp(mu / 24.0, 0.0, 1.0));
+    float3 col = mix(iColor0.rgb, iColor1.rgb, smoothstep(0.0, 0.35, v));
+    col = mix(col, iColor2.rgb, smoothstep(0.3, 0.7, v));
+    col = mix(col, iColor3.rgb, smoothstep(0.65, 1.0, v));
+    return half4(half3(col), 1.0);
+}
