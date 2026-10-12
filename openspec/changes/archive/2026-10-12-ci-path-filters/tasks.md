@@ -27,6 +27,6 @@ Tasks marked **(owner)** need the owner: prepare what they need, then stop and a
 
 - [x] 4.1 `CONTRIBUTING.md`: the required checks are `ci-ok` and `pr-title`; a short table of what runs for which change; `workflow_dispatch` runs everything
 - [x] 4.2 `AGENTS.md`: replace "runs all of the above on `windows-latest`" with what runs when, and keep "run them locally before pushing"
-- [ ] 4.3 **(owner)** After the merge, edit the ruleset "main protection": required checks `ci-ok` and `pr-title`, `build` removed (design, Migration Plan)
-- [ ] 4.4 After 4.3, run the workflow once by hand (`workflow_dispatch`) on `main` and confirm every job runs and passes
+- [x] 4.3 **(owner)** After the merge, edit the ruleset "main protection": required checks `ci-ok` and `pr-title`, `build` removed (design, Migration Plan)
+- [x] 4.4 After 4.3, run the workflow once by hand (`workflow_dispatch`) on `main` and confirm every job runs and passes
 - [x] 4.5 `docs/BACKLOG.md`: note the change under item 1 ("Git workflow and GitHub maintenance")
