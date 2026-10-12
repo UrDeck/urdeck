@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://urdeck.app/schemas/v1/shader-manifest.json",
   "title": "UrDeck background manifest, version 1",
-  "description": "manifest.json of a background folder. Unknown keys are allowed so that a newer manifest does not light up red; UrDeck warns about them when it loads the background.",
+  "description": "The manifest.json of a background folder. Unknown keys are allowed so that a newer manifest does not light up red; UrDeck warns about them when it loads the background.",
   "type": "object",
   "required": ["manifest"],
   "additionalProperties": true,
