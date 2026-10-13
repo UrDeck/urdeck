@@ -52,9 +52,11 @@ of what to render, with sizes and file names, is in `MEDIA-CHECKLIST.md`.
 
 ## Widget and background media
 
-`npm run media` renders the pictures of each widget size and the background posters and loops with UrDeck itself (Windows,
-see the top of `scripts/render-media.mjs`); `MEDIA-CHECKLIST.md` lists what the page wants. Look at each picture before
-committing it.
+`npm run media` renders the pictures of each widget size, the background posters, and the loops with UrDeck itself
+(Windows; the loops need `ffmpeg`, `winget install Gyan.FFmpeg`). `npm run media -- widgets|posters|loops [name...]`
+limits it. The pictures use the host's `--snapshot` and `urdeck-cli shader render`; the clock and weather loops use the
+host's `--snapshot <folder> --frames N`, which renders the widgets at advancing times. `MEDIA-CHECKLIST.md` lists what the
+page wants and what has no loop yet. Look at each picture before committing it.
 
 ## Licence
 
