@@ -18,6 +18,10 @@ so write both for someone reading `git log`. Delete comments and empty sections 
 
 <!-- e.g. build, tests, `--snapshot` render, checked on the real panel. -->
 
+## Documentation
+
+<!-- A change to a widget's settings, a theme or a background: the page in `site/src/content/docs/` is updated, or "n/a". -->
+
 ## Performance impact
 
 <!-- Memory/CPU/render time impact, or "none". See CONTRIBUTING.md for the budgets. -->

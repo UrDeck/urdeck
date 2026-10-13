@@ -1,0 +1,116 @@
+{
+  "pages": [
+    {
+      "name": "Overview",
+      "widgets": [
+        {
+          "typeId": "urdeck.widgets.clock",
+          "col": 0,
+          "row": 0,
+          "width": 4,
+          "height": 2,
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        {
+          "typeId": "urdeck.widgets.weather",
+          "col": 0,
+          "row": 2,
+          "width": 4,
+          "height": 4,
+          "location": "Zurich",
+          "unit": "celsius",
+          "days": 5
+        },
+        {
+          "typeId": "urdeck.widgets.stats",
+          "col": 0,
+          "row": 6,
+          "width": 4,
+          "height": 4,
+          "slots": [
+            {
+              "reading": "system:cpu/load"
+            },
+            {
+              "reading": "system:gpu/temperature"
+            },
+            {
+              "reading": "system:gpu/load"
+            },
+            {
+              "reading": "system:memory/load",
+              "label": "RAM"
+            },
+            {
+              "reading": "system:gpu/power"
+            },
+            {
+              "reading": "system:gpu/clock"
+            },
+            {
+              "reading": "system:cpu/core/1/load"
+            }
+          ]
+        },
+        {
+          "typeId": "urdeck.widgets.stats",
+          "col": 0,
+          "row": 10,
+          "width": 4,
+          "height": 2,
+          "slots": [
+            {
+              "reading": "system:cpu/load",
+              "style": "bar"
+            },
+            {
+              "reading": "system:memory/load",
+              "label": "RAM",
+              "style": "ring"
+            },
+            {
+              "reading": "system:cpu/core/1/load"
+            },
+            {
+              "reading": "system:cpu/core/2/load"
+            },
+            {
+              "reading": "system:cpu/core/3/load"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "activePage": 0,
+  "dock": [
+    {
+      "typeId": "urdeck.widgets.shortcut",
+      "target": "https://github.com",
+      "label": "GitHub"
+    },
+    {
+      "typeId": "urdeck.widgets.shortcut",
+      "target": "https://en.wikipedia.org",
+      "label": "Wikipedia"
+    },
+    {
+      "typeId": "urdeck.widgets.shortcut",
+      "target": "C:\\Program Files (x86)\\Steam\\steam.exe",
+      "label": "Steam"
+    },
+    {
+      "typeId": "urdeck.widgets.shortcut",
+      "target": "%LOCALAPPDATA%\\Programs\\Microsoft VS Code\\Code.exe",
+      "label": "VS Code"
+    }
+  ],
+  "theme": "glass",
+  "monitorName": "tallest",
+  "background": {
+    "type": "shader",
+    "name": "aurora"
+  }
+}

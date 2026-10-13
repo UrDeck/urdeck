@@ -24,6 +24,15 @@ openspec validate --all --strict
 dotnet run --project tools/UrDeck.Cli -c Release -- shader validate --all src/UrDeck.Engine/Backgrounds/Builtin --fail-on-warnings
 dotnet test tests/UrDeck.Cli.Tests -c Release           # the tool's tests (Windows and Linux); also in urdeck.slnx
 ```
+
+The website (`site/`, needs Node 22; details in `site/README.md`):
+
+```powershell
+cd site; npm ci; npm run build   # builds and runs the checks (schema copy, internal links, third-party references)
+npm run dev                      # local preview
+pwsh scripts/Render-SiteDecks.ps1   # re-render the sample deck pictures (Windows, builds the host)
+```
+
 `urdeck-cli shader init|validate|render` (`docs/backgrounds.md`, "The command line tool") makes, checks and renders a background folder; CI
 runs it on the four built-ins and on an `init` of a copy of one. `render --update-manifest` rewrites `manifest.json` (refusing a comment, a trailing comma or a duplicate key).
 
@@ -51,6 +60,7 @@ providers/            GPL. First-party data provider plugins (UrDeck.Providers.S
 widgets/              first-party widget plugins (UrDeck.Widgets.Clock, .Stats, .Weather, .Shortcut); with the providers, copied to
                       plugins/ by the host build (the UrDeckPlugin list in UrDeck.Host.csproj)
 tests/                xUnit projects
+site/                 the website (Astro) published at urdeck.app; user documentation in `src/content/docs/`, sample decks in `decks/`
 docs/                 ROADMAP.md (milestones), BACKLOG.md (work items and status), perf/, design notes
 openspec/             spec-driven change documents
 ```
@@ -134,5 +144,6 @@ See the README license map before moving code between projects: it can change th
   compositor blends translucent content over a swap chain three times along the window's diagonal, a bright dotted line
   through every translucent card (`glass` theme, moving background). The log says `Window corners are square`.
   `FrameClock` delivers about 21 frames per second, not 30 (`docs/perf/backgrounds.md`).
+- A change to a widget's settings, a theme or a background updates its page in `site/src/content/docs/` as well as the README or `docs/`.
 - Do not add per-widget styling or resolution assumptions: styling belongs in the theme (`src/UrDeck.Engine/Themes`, `docs/themes.md`)
   and the user never sees resolution or scaling. Widgets draw no card and name no font; use the SDK components.

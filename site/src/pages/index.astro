@@ -1,0 +1,71 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import dark from '../assets/decks/default-dark.png';
+import glass from '../assets/decks/glass.png';
+import light from '../assets/decks/default-light.png';
+
+const decks = [
+  { src: glass, alt: 'A deck with the glass theme over a moving aurora background: a split-flap clock, weather with a five-day forecast, and gauges for CPU, GPU and memory.', caption: 'glass theme over the aurora background' },
+  { src: dark, alt: 'The same deck with the default dark theme: a clock, weather, gauges, and four shortcuts in the dock.', caption: 'default-dark' },
+  { src: light, alt: 'The same deck with the default light theme over a soft gradient background.', caption: 'default-light over a gradient' },
+];
+---
+<Base title="UrDeck" description="A lightweight widget dashboard for a secondary or case display on Windows. No account, no telemetry, free software.">
+  <section class="hero">
+    <div>
+      <h1>A small dashboard for the screen beside your screen.</h1>
+      <p class="lede">
+        UrDeck puts clocks, system readings, weather and shortcuts on a secondary or case display. It is a native Windows
+        app drawn on the GPU, and it redraws only what changed, so a page with nothing moving costs almost nothing.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/UrDeck/urdeck">Download: coming soon</a>
+        <a class="button" href="https://github.com/UrDeck/urdeck">Source on GitHub</a>
+      </div>
+      <p class="note">
+        There is no download yet: a release will come once its files can be signed, so Windows can tell they are mine. Until
+        then the button leads to the repository, where UrDeck can be built from source.
+      </p>
+    </div>
+    <figure class="deck-hero">
+      <Image class="deck-img" src={glass} alt={decks[0].alt} widths={[320, 480, 640]} sizes="(max-width: 52rem) 20rem, 28rem" loading="eager" />
+    </figure>
+  </section>
+
+  <section>
+    <h2>Why it exists</h2>
+    <p>I wanted the small screen in my case to show things without a program behind it that I cannot trust or see into.</p>
+    <ol class="reasons">
+      <li><strong>Private.</strong> No account, no telemetry. UrDeck makes two kinds of network request, both for something you put on the page: a forecast for a place you typed into a weather card, and the icon of a web address you gave a shortcut. Nothing else leaves your machine, and a local icon file avoids even that.</li>
+      <li><strong>Light.</strong> It is a native app that draws each widget on the GPU and redraws only what changed. A moving background is optional and has a setting to make it cheaper.</li>
+      <li><strong>Yours.</strong> One JSON file, themes you can write in a few lines, backgrounds written as small shaders. Widgets are plain C# plugins that load and reload while UrDeck runs. Sharing widgets, backgrounds and themes through a gallery is planned, not built.</li>
+      <li><strong>Open.</strong> The source is on GitHub under the GPL; the plugin SDK is MIT, so a widget can use any licence.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Sample decks</h2>
+    <p>
+      These are pictures made by UrDeck itself, from config files kept in the repository, at the size of the panel it was
+      made for (1100 by 3840). The readings and the time are those of the machine that drew them.
+    </p>
+    <div class="decks">
+      {decks.map((d) => (
+        <figure>
+          <Image class="deck-img" src={d.src} alt={d.alt} widths={[240, 360, 480]} sizes="(max-width: 52rem) 90vw, 20rem" />
+          <figcaption>{d.caption}</figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <section>
+    <h2>Go further</h2>
+    <ul>
+      <li><a href="/docs/">Configure it</a>: the config file, pages, the dock, each widget, themes and backgrounds.</li>
+      <li><a href="/tested-on/">Tested on</a>: the hardware it has run on, and how to report yours.</li>
+      <li><a href="https://github.com/UrDeck/urdeck">The repository</a>: source, roadmap and issues.</li>
+    </ul>
+  </section>
+</Base>

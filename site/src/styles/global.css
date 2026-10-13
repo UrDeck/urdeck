@@ -1,0 +1,102 @@
+/* Plain style. The design step replaces this file and the layouts/components; content files stay as they are. */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/InterVariable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --bg: #ffffff;
+  --text: #1c2030;
+  --muted: #5a6075;
+  --accent: #2c4fd6;
+  --rule: #dde0ea;
+  --code-bg: #f3f4f8;
+  --max: 70rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131c4f;
+    --text: #eef0fa;
+    --muted: #aab0d0;
+    --accent: #8ab8ff;
+    --rule: #2d3a7a;
+    --code-bg: #1b2760;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 1rem/1.6 'Inter', system-ui, sans-serif;
+}
+
+a { color: var(--accent); }
+img { max-width: 100%; height: auto; }
+
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 1rem; }
+
+.site-header { border-bottom: 1px solid var(--rule); }
+.site-header .wrap { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; align-items: center; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.site-header .brand { font-weight: 700; font-size: 1.25rem; color: var(--text); text-decoration: none; margin-right: auto; }
+.site-header nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+.site-header nav a { color: var(--text); text-decoration: none; }
+.site-header nav a[aria-current='page'] { font-weight: 700; text-decoration: underline; }
+
+.site-footer { border-top: 1px solid var(--rule); margin-top: 4rem; padding: 1.5rem 0 3rem; color: var(--muted); font-size: 0.9rem; }
+
+main { padding-top: 2rem; }
+
+h1 { font-size: 2.25rem; line-height: 1.2; margin: 0 0 1rem; }
+h2 { font-size: 1.5rem; margin: 2.5rem 0 0.75rem; }
+h3 { font-size: 1.15rem; margin: 1.75rem 0 0.5rem; }
+
+code, pre { font-family: ui-monospace, 'Cascadia Code', Consolas, monospace; font-size: 0.9em; }
+code { background: var(--code-bg); padding: 0.1em 0.3em; border-radius: 0.25em; }
+pre { background: var(--code-bg); padding: 1rem; overflow-x: auto; border-radius: 0.5rem; }
+pre code { background: none; padding: 0; }
+
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; display: block; overflow-x: auto; }
+th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--rule); }
+th { white-space: nowrap; }
+
+.docs { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 3rem; }
+.docs-nav h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 1.5rem 0 0.25rem; }
+.docs-nav h2:first-child { margin-top: 0; }
+.docs-nav ul { list-style: none; margin: 0; padding: 0; }
+.docs-nav li a { display: block; padding: 0.2rem 0; color: var(--text); text-decoration: none; }
+.docs-nav li a[aria-current='page'] { font-weight: 700; color: var(--accent); }
+.docs-body { max-width: 46rem; }
+.docs-body h1 { font-size: 2rem; }
+.docs-body figure { margin: 1.5rem 0; max-width: 20rem; }
+.docs-body figcaption { color: var(--muted); font-size: 0.9rem; }
+
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 3rem; align-items: start; }
+.hero .lede { font-size: 1.25rem; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1.5rem 0; }
+.button { display: inline-block; padding: 0.6rem 1.1rem; border: 1px solid var(--accent); border-radius: 0.5rem; text-decoration: none; font-weight: 600; }
+.button.primary { background: var(--accent); color: var(--bg); }
+.note { color: var(--muted); font-size: 0.9rem; }
+
+.decks { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+.decks figure { margin: 0; }
+.decks figcaption { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+.deck-hero { margin: 0; }
+.deck-img { border-radius: 0.5rem; border: 1px solid var(--rule); }
+
+.reasons { padding-left: 1.25rem; }
+.reasons li { margin-bottom: 0.75rem; }
+
+@media (max-width: 52rem) {
+  .docs, .hero { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  .hero .deck-hero { max-width: 20rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

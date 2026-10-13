@@ -50,71 +50,9 @@ start from the same folder logs a line and exits, while a build beside the insta
 
 The window never takes focus, so touching or clicking the deck does not interrupt a game or another application. As a
 consequence it receives no keyboard input and Escape does not close it. Close it from the tray icon (right-click, Quit); a
-left click on the icon opens [Settings](#settings-window). Windows 11
+left click on the icon opens [Settings](https://urdeck.app/docs/#the-monitor). Windows 11
 may keep a new icon in the overflow flyout (the `^` arrow) until you drag it onto the taskbar. For development, set
 `URDECK_ACTIVATABLE=1` before starting the host: the window can then take focus and Escape closes it.
-
-### Pages
-
-A configuration can hold several pages (`pages` in `urdeck-config.json`). Swipe left or right on the deck (mouse, touch
-or pen) to change page; the page follows your finger, and swiping past the first or last page bounces back, it never
-wraps. Only the page you are on is alive: the neighbour is built when a swipe starts and released once the slide has
-settled, so more pages cost nothing while you look at one. `activePage` is the page shown at startup; swiping does not
-change the file, and saving the config keeps you on the page you are on (matched by name, else by position).
-
-An indicator shows where you are: one dot per page, the current page as a pill that follows your finger. Tap a dot to go
-to that page. The `pager.indicator` setting chooses how it shows:
-
-```json
-{ "pager": { "indicator": "auto" } }
-```
-
-- `always`: a band at the bottom is reserved for it and it is always visible; widgets never go under it.
-- `fade`: it floats over the page, on a translucent pill, appears when a swipe starts or the page changes and fades out
-  a couple of seconds later. While it is faded out, taps go through it.
-- `off`: no indicator, no band.
-- `auto` (the default): hidden with one page; with several pages it behaves as `always` if at least four whole grid rows
-  remain after the band, otherwise as `fade`. The 1100x3840 panel keeps all 13 rows, because the band fits in the
-  space left over under them.
-
-A widget that no longer fits in the rows that remain is not placed, and an error is written to `urdeck.log`. The look of
-the indicator is part of the theme (`indicator`, see `docs/themes.md`). With a dock (below) the indicator sits directly
-above it: its band in the `always` mode, and the floating pill of the `fade` mode.
-
-### Dock
-
-The dock is a row of up to four widgets at the very bottom of the screen that is the same on every page, for the
-things you reach for most. It does not move while a page slides, and its widgets stay alive when the page changes. It
-is the `dock` list of `urdeck-config.json`. An entry is a widget object like the ones on a page, without a position:
-its place is its index in the list, the first at the left.
-
-```json
-{
-  "dock": [
-    { "typeId": "urdeck.widgets.shortcut", "target": "C:\\Program Files (x86)\\Steam\\steam.exe" },
-    { "typeId": "urdeck.widgets.shortcut", "target": "shell:AppsFolder\\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App" },
-    { "typeId": "urdeck.widgets.shortcut", "target": "%USERPROFILE%\\Documents" },
-    { "typeId": "urdeck.widgets.shortcut", "target": "https://example.com" }
-  ]
-}
-```
-
-- **Four slots.** The entries are shown as one group, centred, as wide as the number of entries. Entries after the
-  fourth are ignored with a warning in `urdeck.log`; they stay in the file.
-- **Any widget that supports the size 1x1 can sit in a slot**: a shortcut, and also a clock or a single stat. A slot
-  is a grid cell at a smaller size (0.71 of a cell with the built-in themes; `dock.height` in the theme, see
-  `docs/themes.md`), and the theme is applied at that size, so the card is a miniature of the widget's 1x1 card with
-  its corners, padding and text in proportion. `col`, `row`, `width` and `height` on an entry are ignored. A widget
-  type that has no 1x1 size, or a `typeId` that is not installed, leaves its slot empty with a warning in the log; an
-  entry with `"isVisible": false` leaves it empty too.
-- **Taps work as on a page**: a shortcut in the dock shows the press and opens its target. A swipe that starts on the
-  dock changes the page; the dock stays.
-- **Space.** From the bottom of the screen upwards the order is: dock, page indicator, widget grid. The dock is
-  reserved whenever `dock` has an entry. On the 1100x3840 panel the dock and the indicator's band fit in the space left
-  over under the thirteenth row, so no row is lost. On a display without that spare space the dock takes a row: a
-  widget in a row that is gone is not placed and an error is written to the log, and an `auto` indicator floats above
-  the dock (`fade`) when fewer than four rows would remain beside its band.
-- With `dock` empty or absent there is no dock and nothing is reserved for it.
 
 ### Snapshots
 
@@ -130,263 +68,18 @@ and exit code 1. `*.snapshot.png` files are git-ignored.
 
 ## Configuration
 
-Config is `urdeck-config.json`, located next to the executable (`src/UrDeck.Host/bin/<Configuration>/net10.0-windows10.0.19041.0/`). The tracked default lives at `src/UrDeck.Host/urdeck-config.json`; the build copies it to the output folder when the source is newer, so edit the copy next to the executable for live tweaks and the source file for new defaults. The file is hot-reloaded about a second after saving; an invalid edit is ignored and the last good config is kept. Missing files are created with defaults.
+UrDeck is configured by `urdeck-config.json` next to the executable (the tracked sample is
+`src/UrDeck.Host/urdeck-config.json`; the build copies it to the output folder when the source is newer, so edit the copy
+next to the executable for live tweaks). The file is hot-reloaded about a second after saving; an invalid edit is ignored
+and the last good config is kept.
 
-```json
-{
-  "pages": [
-    {
-      "name": "Default",
-      "widgets": [
-        {
-          "typeId": "urdeck.widgets.clock",
-          "col": 0,
-          "row": 0,
-          "width": 4,
-          "height": 2,
-          "format": "24h",
-          "showDate": true,
-          "fontSize": 1.0
-        }
-      ]
-    }
-  ],
-  "activePage": 0,
-  "theme": "default-dark",
-  "monitorName": "tallest"
-}
-```
-
-| Field | Meaning |
-|---|---|
-| `pages[].widgets[]` | Widgets on a page. `typeId` is the widget's `Id`; `col` (0-3), `row`, `width` (1-4) and `height` are in grid units. Invalid values are clamped and a warning is logged. An unknown `typeId` leaves its cell empty. |
-| any other property on a widget | Widget-specific settings, e.g. the Clock's `format` (`"24h"` or `"12h"`), `showDate`, `textColor` (hex), `fontSize` (multiplier) and `style` (`"simple"`, the default, or `"flap"`, a split-flap display whose digits flip when the minute changes). |
-| `activePage` | Index of the page to show. |
-| `monitorName` | Which monitor to choose when none is remembered yet: `"primary"`, `"tallest"` (tallest portrait monitor), `"widest"`, `"largest"` (most pixels), or a device name such as `"DISPLAY1"`. It is used once: the chosen monitor is then remembered as `display` and followed from there on. Changing it chooses again. |
-| `monitor` | 1-based monitor index, used when `monitorName` matches nothing. Falls back to the primary monitor. Like `monitorName`, it makes the choice once. |
-| `display` | The monitor the deck belongs to. UrDeck writes it the first time `monitorName` / `monitor` have chosen one, and when you choose a monitor in [Settings](#settings-window): `name` (for you; never used to find the monitor), `model` and `path` (how the monitor is found again after a restart, sleep, or a move to another output), and `selector` (what it was chosen with; a monitor you chose in Settings has none, so the selectors never replace it). You do not edit it; **choose automatically in Settings, or remove it, to make UrDeck choose again**, for example when the first start picked the wrong monitor because yours was switched off. See [The deck's monitor](#the-decks-monitor). |
-| `theme` | Name of the theme: `default-dark` (default), `default-light`, `glass`, or a folder under `themes/` next to the executable. See [docs/themes.md](docs/themes.md). Unknown names fall back to the default with a warning; changing it applies on config reload without a restart. |
-| `providers` | Optional settings per data provider, keyed by provider id: `"providers": { "system": { "intervalMs": 500 } }` samples the `system` provider every 500 ms instead of its default 2000 ms. A value below the provider's minimum (250 ms for `system`) is raised to it and logged. Applies on config reload without a restart. Absent by default; other properties are kept in the file. |
-| `background` | What the deck shows behind its cards: `{ "type": "shader", "name": "plasma" }` (a moving background: `plasma`, `aurora`, `gradient`, `julia`, or your own folder `backgrounds/<name>/`) or `{ "type": "image", "path": "D:/Pictures/wall.jpg" }`. Absent by default: the theme's background colour. See [Backgrounds](#backgrounds). Applies on config reload without a restart. |
-| `dock` | The widgets of the dock, up to four, in slot order: widget objects like those of a page, without `col` and `row`. Absent or empty: no dock. See [Dock](#dock). Applies on config reload without a restart, and widget-specific settings are kept in the file. |
-
-### Backgrounds
-
-The `background` setting puts a moving picture or a wallpaper behind the cards; pages slide over it and translucent cards
-(the `glass` theme) show it through. Four shaders are built in and follow the theme's colours; your own is a folder,
-`backgrounds/<name>/`, with a `manifest.json` and the shader, whose parameters are set from the configuration:
-
-```json
-"background": { "type": "shader", "name": "aurora", "speed": 0.5 }
-```
-
-A moving background costs about 3% of one CPU core and under 1% of the GPU at the default `scale` of 0.5, and nothing at all
-when there is none or it is still. It is drawn 30 times a second, and not while the deck is hidden or the display is off.
-Everything (the settings, authoring a background and its manifest, images, what the log says) is in [docs/backgrounds.md](docs/backgrounds.md).
-
-### The deck's monitor
-
-UrDeck stays on one physical monitor. Once it is remembered (`display` above), a monitor that would now match
-`monitorName` better, such as a taller one you plug in later, does not take the deck, and neither does the order in
-which Windows numbers the monitors.
-
-After sleep, a monitor being plugged in or out, or a change of resolution or scaling, UrDeck waits a moment for the
-monitors to settle, puts the window back on its monitor and checks that it fits; `urdeck.log` has a line for each step.
-
-While its monitor is not connected the deck is hidden: it does not move to another screen, its widgets and their data
-providers stop, and the tray icon's tooltip reads "UrDeck: waiting for" and the monitor's name. It comes back by
-itself when the monitor does. The same holds at startup: with the monitor off there is no window, only the tray icon.
-
-### Settings window
-
-Left-click the tray icon, or right-click it and choose **Settings**, to open the settings window. Unlike the deck it is an
-ordinary window: it takes focus, has a taskbar button while it is open, and closes with the window's close button or
-Escape. Clicking the icon again while it is open brings it forward. It opens on the display under the pointer, and never on the
-deck's display unless that is the only one.
-
-It has one page for now, the monitor picker. Every connected monitor is listed with its name, resolution, orientation,
-position relative to its neighbour and a number; the monitor the deck is on says "Deck is here". Click a monitor to move
-the deck there at once and keep it there (the choice is saved as `display` without a `selector`, so `monitorName` and
-`monitor` never replace it). **Choose automatically** hands the choice back to `monitorName` and `monitor`. **Identify**
-shows each monitor's number in its top-left corner for two seconds. A remembered monitor that is switched off or unplugged
-stays in the list, greyed out, so you can see what the deck is waiting for; the deck never moves to another monitor on its
-own. The list follows monitors that are plugged in or out, or rearranged, while the window is open. A monitor that is only
-switched off, with its cable still connected, is not reported by Windows and stays in the list, as it stays under the deck.
-
-### Stats widget
-
-`urdeck.widgets.stats` shows readings from any data provider: a large value with its unit and a label, optionally inside a
-gauge. Its settings are a list of `slots`, which fill the positions of the card's size in order:
-
-| Size | Positions |
-|---|---|
-| 1x1, 2x2 | one reading (slot 1) |
-| 4x2 | two gauges side by side (slots 1 and 2) above three text stats (slots 3 to 5) |
-| 4x4 | four gauges in two rows (slots 1 to 4) above three text stats (slots 5 to 7) |
-
-Slots beyond the positions of the size stay in the file; a position without a slot stays empty.
-
-```json
-{ "typeId": "urdeck.widgets.stats", "col": 0, "row": 2, "slots": [ { "reading": "system:cpu/core/2/load" } ] }
-```
-
-A 4x4 performance card: four gauges (CPU load, GPU temperature and load, memory load) above three text stats (the
-GPU's power, its clock and the CPU's first core):
-
-```json
-{ "typeId": "urdeck.widgets.stats", "col": 0, "row": 0, "width": 4, "height": 4, "slots": [
-  { "reading": "system:cpu/load" }, { "reading": "system:gpu/temperature" },
-  { "reading": "system:gpu/load" }, { "reading": "system:memory/load", "label": "RAM" },
-  { "reading": "system:gpu/power" }, { "reading": "system:gpu/clock" }, { "reading": "system:cpu/core/1/load" } ] }
-```
-
-| Slot field | Meaning |
-|---|---|
-| `reading` | The reading id, `<provider>:<path>`. With no slot the widget shows `system:cpu/load`. |
-| `label` | Absent: the label the provider declares (for example `Core 2`). A text: shown instead. `""`: no label. |
-| `unit` | `celsius` or `fahrenheit` for readings that have several units (otherwise the reading's default, then the region's). |
-| `decimals` | Number of decimals to show (default 0). |
-| `style` | `plain`, `gauge` (the theme's default gauge style), `ring`, `bar` or `verticalBar`. Absent: plain at 1x1 and 2x2, the theme's gauge style in a gauge position of a 4x2 or 4x4. Text positions are always plain. A reading that has no range to measure against (a text, a plain number) is drawn plain whatever the style. |
-| `min`, `max` | The gauge's range, replacing the one the provider declares (a percentage defaults to 0 to 100). |
-| `warning`, `critical` | From these values on the gauge is drawn in the theme's warning or critical colour. Replace the provider's own levels; of the `system` readings only the GPU temperature has any (80 and 90 degrees). In the reading's canonical unit (degrees Celsius for a temperature). |
-
-The fill eases to a new value over about 300 ms; the number and the colour change at once.
-
-The `system` provider offers `system:cpu/load` (all logical processors), `system:cpu/core/<n>/load` (logical processor `n`,
-counted from 1) and `system:memory/load`, all as percentages, with no administrator rights. CPU load is the share of time the processors are busy, so with a CPU that boosts it reads lower under load than Task Manager, which weighs by clock speed (`docs/perf/data-providers.md`). A reading that does not exist
-shows a dash and the id; a reading whose provider stopped answering keeps its last value in the dimmed text colour. Only
-providers that a shown widget uses are started, and one that nothing uses stops five seconds later.
-
-The GPU readings are `system:gpu/load`, `system:gpu/temperature`, `system:gpu/power` (watts) and `system:gpu/clock`
-(MHz) for the main GPU, the one with the most dedicated video memory, and `system:gpu/<n>/...` for each adapter,
-counted from 1 in that order. They need no administrator rights and cost nothing unless a GPU slot is shown.
-
-| Reading | Source | Verified |
-|---|---|---|
-| load, temperature | Windows itself (graphics kernel statistics and adapter performance data), any vendor | NVIDIA (RTX 4090) |
-| power, clock | the vendor's library: `nvml.dll`, which the NVIDIA driver installs | NVIDIA (RTX 4090) |
-
-On AMD and Intel the load and temperature should work (the code does not depend on the vendor) but nobody has run them
-yet, and power and clock show a dash until their vendor libraries are added. `urdeck.log` names each GPU and the source
-of each of its readings when it is first sampled, which makes a report from another GPU useful. GPU load is the busiest
-engine of the adapter, as in Task Manager; a load sample costs about 6 ms of one core every provider interval while a
-GPU load slot is shown (`docs/perf/gpu-readings.md`). Laptops whose NVIDIA GPU is powered down are untested.
-
-Making a theme: create `themes/<name>/theme.json` next to `UrDeck.Host.exe` with only the values you want to change (colours, card radius/gap/padding, font, text sizes); everything else comes from `default-dark`. Bundle a font by putting the `.ttf` in the same folder and naming it in the file. Edit the theme, then save the config file to apply it. Full format: [docs/themes.md](docs/themes.md).
-
-Grid math: `ColumnWidth = screenWidth / 4` and `RowHeight = ColumnWidth`, so on a 1100 px wide panel each cell is 275x275 and a 4x2 widget is 1100x550.
-
-### Weather widget
-
-`urdeck.widgets.weather` is a 4x2 card with an animated colour icon (day and night variants), the temperature, the
-condition in words, today's high and low, the place, and sunrise and sunset in the place's own local time. At 4x4 the
-same card sits on top of a forecast: a line of what it feels like, the humidity and the wind (`14 mph NW`), the snow
-expected over the days shown, and one column per day with the weekday, an icon, high and low, the chance of
-precipitation, and the rain and snow expected (an amount appears only on a day that has one). It takes its data from the
-`weather` provider and needs no provider setting: the place is typed into the widget.
-
-```json
-{ "typeId": "urdeck.widgets.weather", "col": 0, "row": 0, "width": 4, "height": 2, "location": "Portland, OR" }
-{ "typeId": "urdeck.widgets.weather", "col": 0, "row": 2, "width": 4, "height": 4, "location": "Portland, OR", "unit": "fahrenheit", "days": 5 }
-```
-
-| Setting | Meaning |
-|---|---|
-| `location` | The place, as text: a city (`Zurich`), `City, ST` (`Portland, OR`), `City, State` (`Portland, Oregon`), a postal code (`90210`), optionally with a country code after a comma (`Paris, FR`). It is looked up with Open-Meteo's geocoding, once per run, and the first match is used; `urdeck.log` lists the other matches, so an ambiguous name (`Springfield`) can be fixed by adding a state or by giving coordinates. No default: with none the card shows dashes. |
-| `latitude`, `longitude` | Decimal degrees. When both are set they replace `location` and no search is made. |
-| `label` | Absent: the place's resolved name (`Portland, Oregon`). A text: shown instead. `""`: no place is shown. |
-| `unit` | `celsius` or `fahrenheit`. Absent: the region's. It chooses the system of the whole card: Celsius is kilometres per hour, millimetres and centimetres, Fahrenheit is miles per hour and inches. |
-| `motion` | `periodic` (the default) plays the icon's loop once a minute and rests on its first frame in between; `full` loops it all the time; `off` shows only the first frame. Any other value counts as `periodic`. The icon animates at 15 frames a second. |
-| `periodSeconds` | Seconds between loops in the `periodic` mode (default 60; never less than a loop and a second). |
-| `days` | 4x4 only: how many forecast days to show, 1 to 7 (default 5; a number outside the range is the nearest end, and a value that is not a number counts as absent). The snow total covers the days shown. At 4x2 it has no effect and stays in the file. |
-| `animateForecast` | 4x4 only: `true` lets the forecast icons move as `motion` says, in step with the main icon; absent or `false` shows them as still pictures. Each moving icon costs about 2.7 MB of memory and repaints with the main icon, so it is off by default; `motion: off` always wins. |
-
-Any number of weather cards can show different places on one page; two cards with the same place share one request. The
-widget never costs anything on a page without it: the provider starts with the first weather reading and stops five
-seconds after the last, and a new or edited place is fetched at once, not at the next interval. The data is fetched every
-15 minutes (`"providers": { "weather": { "intervalMs": 600000 } }`; the minimum is 5 minutes). When the network is down the
-values stay on the card in the dimmed colour and come back by themselves.
-
-The provider's readings, for any place (`weather:<place>/<reading>`, `@lat,lon` for coordinates, `%2F` for a `/` and `%25`
-for a `%` in a place name), can also be shown by a stats slot:
-
-| Reading | Meaning |
-|---|---|
-| `place` | The resolved name of the place (text) |
-| `current/temperature`, `current/apparent` | Air temperature now, and what it feels like (degrees Celsius; the region or the slot's `unit` decides the display unit) |
-| `current/condition` | `clear`, `partly-cloudy`, `cloudy`, `fog`, `drizzle`, `rain`, `sleet`, `snow`, `thunder` or `unknown` |
-| `current/is-day` | Whether the sun is up at the place |
-| `current/humidity` | Relative humidity, in percent |
-| `current/wind-speed`, `current/wind-direction` | Wind speed (kilometres per hour; shown as mph or km/h) and the bearing it blows from, in degrees (0 to 360) |
-| `daily/N/date` | The start of day `N` at the place (`0` is today, up to `6`), shown as a weekday by default |
-| `daily/N/condition`, `daily/N/high`, `daily/N/low` | That day's condition class and extremes |
-| `daily/N/sunrise`, `daily/N/sunset` | A time in the place's own zone, shown in the region's 12 or 24 hour clock; unavailable where the sun does not rise or set |
-| `daily/N/precip-chance` | The chance of precipitation that day, in percent |
-| `daily/N/rain`, `daily/N/snow` | The rain (millimetres) and fresh snow (centimetres) expected that day; shown in inches for imperial units, and a positive amount under 0.1 inch as `<0.1"`; a day with none is `0` |
-
-```json
-{ "typeId": "urdeck.widgets.stats", "col": 0, "row": 2, "slots": [ { "reading": "weather:Tokyo/current/temperature", "label": "Tokyo" } ] }
-```
-
-**Breaking:** `today/high`, `today/low`, `today/sunrise` and `today/sunset` are now `daily/0/high`, `daily/0/low`,
-`daily/0/sunrise` and `daily/0/sunset`; a stats slot that names the old ids must be rewritten. Rain and snow are model
-forecasts, not measurements: they are as uncertain as the weather, and the snow total adds up what the model says for each
-shown day. A day whose snow is missing makes the total a dash rather than a partial sum.
-
-Weather data is by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), and every card that shows it draws the credit
-"Weather data by Open-Meteo.com"; the stats widget draws it too, and no setting hides it. Open-Meteo's free service is for
-**non-commercial use only**; commercial users need an Open-Meteo subscription, which UrDeck does not support yet. The icons
-are [Meteocons](https://github.com/basmilius/weather-icons) (MIT). Notices: [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
-
-### Shortcut widget
-
-`urdeck.widgets.shortcut` is a 1x1 card that shows the icon of an application, a file, a folder or a web address and
-opens it when you tap it, the way a desktop shortcut does. While your finger is down the card shrinks and dims
-slightly (the amounts are the theme's `press` values, see `docs/themes.md`); a swipe that starts on a shortcut still
-changes the page and opens nothing, and so does a long hold.
-
-```json
-{ "typeId": "urdeck.widgets.shortcut", "col": 0, "row": 8, "target": "C:\\Program Files (x86)\\Steam\\steam.exe" },
-{ "typeId": "urdeck.widgets.shortcut", "col": 1, "row": 8, "target": "shell:AppsFolder\\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App" },
-{ "typeId": "urdeck.widgets.shortcut", "col": 2, "row": 8, "target": "%USERPROFILE%\\Documents" },
-{ "typeId": "urdeck.widgets.shortcut", "col": 3, "row": 8, "target": "https://example.com", "icon": "C:\\Icons\\example.png" }
-```
-
-| Setting | Meaning |
-|---|---|
-| `target` | What to open. A rooted path to an executable, a `.lnk`, a document or a folder (`%NAME%` environment variables are expanded); a bare name Windows resolves itself (`notepad`); a `shell:` item; a web address (`http` or `https`); or any other address Windows has an application for (`steam://open/main`, `ms-settings:display`). A relative path is refused. With no target the card shows an empty placeholder and does not react. |
-| `arguments` | Arguments for a file target. Ignored, with a warning in the log, for an address. They are never written to the log. |
-| `icon` | Where the icon comes from instead of `target`: a local image file (PNG, JPEG, WebP, BMP, GIF or ICO), or anything else that could be a target. |
-| `label` | A text under the icon. Absent or `""`: no label, and the icon takes the whole card. |
-
-A packaged (Store) application has no path; its target is `shell:AppsFolder\` followed by its id, which
-`Get-StartApps` lists in PowerShell:
-
-```powershell
-Get-StartApps | Where-Object Name -like '*Terminal*'   # AppID: Microsoft.WindowsTerminal_8wekyb3d8bbwe!App
-```
-
-**Launching.** The target is handed to the Windows shell with its default action: never through a command interpreter
-and never elevated. Whether a running application is brought forward or a second window opens is the application's
-decision, as it is for a desktop shortcut, and Windows and the application decide which monitor the window opens on. A
-double tap opens one window. A target Windows refuses (a missing file, no application for the address) opens nothing
-and `urdeck.log` says why. Launch targets come from your own configuration file and are trusted like a shortcut on
-your desktop: do not paste in a page from somebody else without reading its targets.
-
-**Icons.** A local image file is shown as it is. For any other file, a folder or a `shell:` item the card shows the
-icon Windows shows for it (an executable's or a `.lnk`'s application icon, a package's icon). For a web address it
-shows the site's own icon, and the default browser's icon when the site offers none. Until the icon is there, and when
-there is none, the card shows a placeholder with the first letter of the label or of the target's name.
-
-**Network.** A site's icon is the one thing UrDeck itself fetches from the network (the weather data is fetched by the
-weather provider). It happens only for a shortcut whose icon source is an `http(s)` address, at most once per address
-in 30 days: a request for the address, one for the web manifest the page links, and at most four for icon candidates
-(the manifest's icons, the page's `apple-touch-icon` and `icon` links, `/favicon.ico`), which may live on another host
-such as a CDN, followed there over `https` only. The requests carry no cookies and no credentials, name UrDeck in the
-`User-Agent`, give up after ten seconds and never ignore a certificate error. A site behind a sign-in page yields no
-icon, and an address that yielded none is not asked again until the next start. To make no request at all, set `icon`
-to a local file. Fetched icons are kept as PNG files in `cache/icons` next to the executable; deleting the folder is
-always safe, the icons are fetched again.
+The user documentation lives on the website, at [urdeck.app/docs](https://urdeck.app/docs/): the config file, pages and
+the dock, the monitor and the settings window, each widget (
+[Clock](https://urdeck.app/docs/widgets/clock/), [Stats](https://urdeck.app/docs/widgets/stats/),
+[Weather](https://urdeck.app/docs/widgets/weather/), [Shortcut](https://urdeck.app/docs/widgets/shortcut/)),
+[themes](https://urdeck.app/docs/themes/) and [backgrounds](https://urdeck.app/docs/backgrounds/). Its source is
+`site/src/content/docs/`; change it in the pull request that changes a setting. The references for authors are
+[docs/themes.md](docs/themes.md) and [docs/backgrounds.md](docs/backgrounds.md).
 
 ## Writing a widget
 
@@ -403,6 +96,7 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 | `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather` | First-party data providers: `system` (CPU, memory and GPU readings) and `weather` (Open-Meteo, any number of places) |
 | `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather`, `widgets/UrDeck.Widgets.Shortcut` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`), Weather (`urdeck.widgets.weather`) and Shortcut (`urdeck.widgets.shortcut`) |
 | `tests/UrDeck.Engine.Tests`, `tests/UrDeck.Analyzer.Tests` | xUnit tests |
+| `site/` | The website at urdeck.app (Astro): landing page, user documentation (`src/content/docs/`), "Tested on"; see `site/README.md` |
 | `docs/` | `ROADMAP.md` (the milestones), `BACKLOG.md` (what to work on next), performance notes |
 | `openspec/` | Spec-driven documents: `specs/` holds the current capability specs (grid layout, host shell, widget SDK, Clock), `changes/` holds proposals in flight and the archive of finished changes |
 
@@ -413,6 +107,7 @@ The Windows SDK suffix on the host and test target frameworks is required: the W
 | Path | License |
 |---|---|
 | `src/UrDeck.Host`, `src/UrDeck.Engine`, `tools/` (`urdeck-cli`, which links the engine), `providers/`, `widgets/`, `tests/` | [GPL-3.0-or-later](LICENSE) with the [plugin exception](PLUGIN-EXCEPTION.md) |
+| `site/` (the website: text, pictures and code) | [GPL-3.0-or-later](LICENSE), except the Inter font below; code samples in the pages are MIT |
 | `sdk/` (`UrDeck.Sdk`, `UrDeck.Analyzer`) | [MIT](sdk/LICENSE) |
 | Community widgets and data providers | The author's choice |
 | Windows App SDK (self-contained runtime shipped with the host) | Microsoft; see the licence files in the `Microsoft.WindowsAppSDK` NuGet package |

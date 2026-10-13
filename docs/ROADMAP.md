@@ -54,7 +54,8 @@ measurement so far is from one panel and one NVIDIA GPU, and that is the largest
 - A first run that produces a sensible page on any monitor, including a landscape one (item 15).
 - A tray icon with Quit (item 12; shipped in `tray-icon`), later the entry that opens the config editor.
 - Code signing, so the download is not blocked by SmartScreen (item 15).
-- A hardware report template and a compatibility table: AMD and Intel GPUs, other panels (item 15).
+- A compatibility table: AMD and Intel GPUs, other panels (item 15). The hardware report issue template and the first "Tested on" page are done (`landing-site`); the table grows with reports.
+- The website at urdeck.app: landing page, user documentation, "Tested on" (`landing-site`); a working download follows with the signed release.
 - Screenshots and a short clip in the README, issue templates, Discussions.
 
 **3. Editor (0.5, beta).** Item 11, plus what it needs from the rest:

@@ -11,6 +11,15 @@ updates:
         patterns: ["xunit*"]
       skiasharp:
         patterns: ["SkiaSharp*"]
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      site:
+        patterns: ["*"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

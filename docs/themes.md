@@ -60,7 +60,7 @@ value (for example a colour that does not parse) is replaced by the default's va
   `plain` is not allowed here (a gauge that draws no shape is no gauge); it and any unknown name fall back to `ring`
   with a logged warning. A widget's own explicit style wins over it.
 
-- **`indicator`** is the page indicator (see the README, "Pages"). `bandHeight`, `dotSize`, `pillLength` and `spacing`
+- **`indicator`** is the page indicator (see [Pages](https://urdeck.app/docs/#pages)). `bandHeight`, `dotSize`, `pillLength` and `spacing`
   are fractions of one grid cell: `bandHeight` is the height of the band reserved at the bottom of the screen when the
   indicator is always shown, `dotSize` is the diameter of a dot (and the height of the pill), `pillLength` is the length
   of the current page's pill and `spacing` is the gap between neighbouring marks. `active` is the pill's colour,
@@ -73,7 +73,7 @@ value (for example a colour that does not parse) is replaced by the default's va
   the default's with a logged warning. Set both to `1` to switch the feedback off. The built-in themes use `0.96` and
   `0.85`, settled by eye on the Y70 panel. A theme written before these existed
   takes them from `default-dark`, with no warning. How fast the card moves is not a theme value.
-- **`dock`** is the dock (see the README, "Dock"). `height` is the height of the band reserved for it at the bottom
+- **`dock`** is the dock (see [The dock](https://urdeck.app/docs/#the-dock)). `height` is the height of the band reserved for it at the bottom
   of the screen, as a fraction of one grid cell, and also the side of a dock slot: the theme's sizes (`card.*`,
   `typography.*Size`) are applied to a slot as they are to a grid cell, so a docked card is a miniature whose corners,
   padding and text shrink with this value. It must be between `0.2` and `1`; a value outside that is replaced by the

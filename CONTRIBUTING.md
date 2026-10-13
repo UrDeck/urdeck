@@ -31,8 +31,20 @@ CI runs only the jobs a change can affect (`ci-ok` passes when every job that ra
 | Anything except the paths below (code, projects, build props, tests, a new folder) | `build` (Windows), `test-linux` |
 | Only root `*.md`, `docs/` (not `docs/schemas/`), `site/`, `.github/` (not `ci.yml`), `LICENSE`, `PLUGIN-EXCEPTION.md`, `THIRD-PARTY-NOTICES.md` | nothing but `ci-ok` and `pr-title` |
 | `openspec/` | `openspec` (validation) |
+| `site/`, `docs/schemas/`, `.github/workflows/site-deploy.yml` | `site` (the website's build and checks) |
 
 `workflow_dispatch` (Actions tab, Run workflow) runs every job.
+
+## The website
+
+`site/` is the Astro project behind urdeck.app (how to run and check it: `site/README.md`). A pull request that changes it
+is checked by the `site` job (build, schema copy, internal links, no third-party reference); a merge to `main` publishes
+it. A change to the settings of a widget, a theme or a background updates its page in `site/src/content/docs/` in the same
+pull request.
+
+**Adding a "Tested on" entry:** add an object to `site/src/data/tested-on.json` (display, connection, resolution, GPU,
+Windows version, what was checked) and open a pull request. The page is made from the file. People without a pull request
+use the hardware report issue form.
 
 ## Licensing
 
