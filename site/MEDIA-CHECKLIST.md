@@ -11,8 +11,10 @@ deck picture or taken from a built-in background's `sample.png`; replace them wi
 
 `npm run media` (Windows; builds the host and the tool) renders the widget pictures and the background posters, and the
 background loops when `ffmpeg` is on the PATH (`winget install Gyan.FFmpeg`). `npm run media -- widgets|posters|loops [name...]`
-limits it. It is how all the pictures below were made; a widget loop has no tool yet (the host cannot render a widget at a
-given time). The manual commands it wraps:
+limits it. It is how all the pictures below were made. The widget loops (clock, weather) come from the host's `--snapshot out --frames N
+--fps 30 --start <local time>`, which renders N frames of the time the widgets are given; the stats gauges and the tap on a
+shortcut have no loop yet (the gauges need readings that change, the press is drawn by the window's compositor, not by the
+widget). The manual commands it wraps:
 
 - **A widget:** put only that widget on a page in a scratch config and run
   `UrDeck.Host.exe --snapshot out.png --size 1100x<height>` (the grid is four square cells across: a 4x2 card is about
@@ -38,11 +40,12 @@ Folder: `site/src/assets/widgets/`. PNG, glass theme, sized as rendered (1100 px
 Folder: `site/public/media/widgets/`. MP4 (H.264), no audio, 3 to 6 seconds, the same size as the picture or smaller,
 under 1.5 MB, first frame equal to the picture, loops without a visible jump.
 
-- [ ] `clock-4x2.mp4`: the split-flap digits flipping at a minute change
-- [ ] `weather-4x4.mp4`: the animated weather icons
+- [x] `clock-4x2.mp4`: the split-flap digits flipping at a minute change
+- [x] `weather-4x4.mp4`: the animated weather icons
 - [ ] `stats-4x4.mp4`: the gauges moving to new readings
 - [ ] `shortcut-1x1.mp4`: a tap (the card shrinks and dims while the finger is down)
-- [ ] `stats-4x2.mp4`, `weather-4x2.mp4`: only if worth it
+- [ ] `stats-4x2.mp4`
+- [x] `weather-4x2.mp4`
 
 ## Backgrounds
 

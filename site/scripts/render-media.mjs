@@ -3,7 +3,7 @@
 //   npm run media                        everything it can
 //   npm run media -- widgets             the widget pictures (src/assets/widgets/)
 //   npm run media -- posters             the background posters (src/assets/backgrounds/)
-//   npm run media -- loops               the background loops (public/media/backgrounds/), needs ffmpeg on the PATH
+//   npm run media -- loops               the loops (public/media/backgrounds/ and public/media/widgets/), needs ffmpeg on the PATH
 //   npm run media -- widgets clock-4x2   only the named pictures / backgrounds
 //
 // Windows only: it builds the host and the tool, and renders with the host's --snapshot and `urdeck-cli shader render`.
@@ -49,14 +49,31 @@ const shortcuts = [
 // One picture per widget size: the page holds only that widget, `cols` by `rows` cells at the top left. The picture is
 // cropped to the card's edge (the gap the theme leaves around a card).
 const widgetPictures = {
-  'clock-4x2': { cols: 4, rows: 2, widget: { typeId: 'urdeck.widgets.clock', format: '24h', showDate: true, style: 'flap' } },
+  // A loop starts a second and a half before a minute changes, so the digits flip a little after it begins.
+  'clock-4x2': { cols: 4, rows: 2, widget: { typeId: 'urdeck.widgets.clock', format: '24h', showDate: true, style: 'flap' }, loop: { seconds: 3, beforeMinute: 1.5 } },
   'stats-4x4': { cols: 4, rows: 4, widget: { typeId: 'urdeck.widgets.stats', slots: stats4x4 } },
   'stats-4x2': { cols: 4, rows: 2, widget: { typeId: 'urdeck.widgets.stats', slots: stats4x2 } },
-  'weather-4x4': { cols: 4, rows: 4, widget: { typeId: 'urdeck.widgets.weather', location: 'Zurich', unit: 'celsius', days: 5 } },
-  'weather-4x2': { cols: 4, rows: 2, widget: { typeId: 'urdeck.widgets.weather', location: 'Zurich', unit: 'celsius' } },
+  'weather-4x4': { cols: 4, rows: 4, widget: { typeId: 'urdeck.widgets.weather', location: 'Zurich', unit: 'celsius', days: 5, motion: 'full', animateForecast: true }, loop: { seconds: 4 } },
+  'weather-4x2': { cols: 4, rows: 2, widget: { typeId: 'urdeck.widgets.weather', location: 'Zurich', unit: 'celsius', motion: 'full' }, loop: { seconds: 4 } },
   // The dock is the one place 1x1 shortcuts sit together: the page is empty and the picture is cut to the dock.
   'shortcut-1x1': { cols: 4, rows: 1, dock: shortcuts, crop: { width: 800, height: 200, fromBottom: 0 } },
 };
+
+const fps = 30;
+
+const pad = (n) => String(n).padStart(2, '0');
+// A local date and time as the host reads it (--start), with milliseconds.
+const localIso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3, '0')}`;
+
+// Frames f0000.png ... in `dir`, played forwards and then backwards (the turning frames not repeated), so a loop has no
+// seam, encoded as H.264 without audio.
+function encodeLoop(dir, frames, file, filters = []) {
+  for (let i = 0; i < frames - 2; i++) {
+    cpSync(join(dir, `f${String(frames - 2 - i).padStart(4, '0')}.png`), join(dir, `f${String(frames + i).padStart(4, '0')}.png`));
+  }
+  exe('ffmpeg', ['-y', '-v', 'error', '-framerate', String(fps), '-i', join(dir, 'f%04d.png'), ...filters, '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
+    '-crf', '28', '-movflags', '+faststart', '-an', file]);
+}
 
 const exe = (cmd, a, options = {}) => {
   const r = spawnSync(cmd, a, { stdio: 'inherit', ...options });
@@ -72,9 +89,14 @@ function hasFfmpeg() {
   return spawnSync('ffmpeg', ['-version'], { stdio: 'ignore' }).status === 0;
 }
 
-async function renderWidgets() {
-  const wantedPictures = Object.keys(widgetPictures).filter(wanted);
+async function renderWidgets(mode) {
+  // `pictures` renders every wanted widget's still; `loops` the loop of those that have one (and its first frame as the still).
+  const wantedPictures = Object.keys(widgetPictures).filter((n) => wanted(n) && (mode === 'pictures' || widgetPictures[n].loop));
   if (wantedPictures.length === 0) return;
+  if (mode === 'loops' && !hasFfmpeg()) {
+    console.error('Loops need ffmpeg on the PATH (winget install Gyan.FFmpeg). Skipped.');
+    return;
+  }
   build('src/UrDeck.Host');
   const bin = join(repo, 'src', 'UrDeck.Host', 'bin', 'Release', 'net10.0-windows10.0.19041.0');
   // A copy of the build output: --snapshot reads the config next to the executable, and a build replaces the one in bin/.
@@ -94,12 +116,38 @@ async function renderWidgets() {
       };
       if (p.dock) config.dock = p.dock;
       writeFileSync(join(stage, 'urdeck-config.json'), JSON.stringify(config, null, 2));
-      const raw = join(stage, `${name}.raw.png`);
       const width = p.cols * cell;
       const height = p.rows * cell;
-      console.log(`Rendering ${name}`);
-      exe(join(stage, 'UrDeck.Host.exe'), ['--snapshot', raw, '--size', `${width}x${height}`]);
-      await cropAndSave(raw, join(out, `${name}.png`), p, width, height);
+      if (mode === 'pictures') {
+        const raw = join(stage, `${name}.raw.png`);
+        console.log(`Rendering ${name}`);
+        exe(join(stage, 'UrDeck.Host.exe'), ['--snapshot', raw, '--size', `${width}x${height}`]);
+        await cropAndSave(raw, join(out, `${name}.png`), p, width, height);
+        continue;
+      }
+
+      // The widgets draw from the time they are given, so a loop is the host asked for N frames of time.
+      const frames = p.loop.seconds * fps;
+      const start = new Date();
+      if (p.loop.beforeMinute) {
+        start.setSeconds(0, 0);
+        start.setMinutes(start.getMinutes() + 1);
+        start.setTime(start.getTime() - p.loop.beforeMinute * 1000);
+      }
+      const raw = join(stage, `${name}-frames`);
+      console.log(`Loop ${name}: ${frames} frames`);
+      exe(join(stage, 'UrDeck.Host.exe'), ['--snapshot', raw, '--size', `${width}x${height}`, '--frames', String(frames), '--fps', String(fps), '--start', localIso(start)]);
+      const cropped = join(stage, `${name}-cropped`);
+      mkdirSync(cropped);
+      for (let i = 0; i < frames; i++) {
+        const f = `frame-${String(i).padStart(4, '0')}.png`;
+        await cropAndSave(join(raw, f), join(cropped, `f${String(i).padStart(4, '0')}.png`), p, width, height);
+      }
+      // The picture is the loop's first frame, so the page does not jump when the loop starts.
+      cpSync(join(cropped, 'f0000.png'), join(out, `${name}.png`));
+      const target = join(site, 'public', 'media', 'widgets');
+      mkdirSync(target, { recursive: true });
+      encodeLoop(cropped, frames, join(target, `${name}.mp4`), ['-vf', 'scale=800:-2']);
     }
   } finally {
     rmSync(stage, { recursive: true, force: true });
@@ -144,20 +192,13 @@ function renderLoops() {
   build('tools/UrDeck.Cli');
   const out = join(site, 'public', 'media', 'backgrounds');
   mkdirSync(out, { recursive: true });
-  const seconds = 3;
-  const fps = 30;
-  const frames = seconds * fps;
+  const frames = 3 * fps;
   for (const name of list) {
     const dir = mkdtempSync(join(tmpdir(), `urdeck-loop-${name}-`));
     try {
       console.log(`Loop ${name}: ${frames} frames`);
       for (let i = 0; i < frames; i++) renderBackground(name, join(dir, `f${String(i).padStart(4, '0')}.png`), '540x960', (i / fps).toFixed(4));
-      // Back again, without repeating the turning frames.
-      for (let i = 0; i < frames - 2; i++) {
-        cpSync(join(dir, `f${String(frames - 2 - i).padStart(4, '0')}.png`), join(dir, `f${String(frames + i).padStart(4, '0')}.png`));
-      }
-      exe('ffmpeg', ['-y', '-v', 'error', '-framerate', String(fps), '-i', join(dir, 'f%04d.png'), '-c:v', 'libx264', '-pix_fmt', 'yuv420p',
-        '-crf', '28', '-movflags', '+faststart', '-an', join(out, `${name}.mp4`)]);
+      encodeLoop(dir, frames, join(out, `${name}.mp4`));
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -170,9 +211,12 @@ if (process.platform !== 'win32') {
 }
 
 try {
-  if (run.includes('widgets')) await renderWidgets();
+  if (run.includes('widgets')) await renderWidgets('pictures');
   if (run.includes('posters')) renderPosters();
-  if (run.includes('loops')) renderLoops();
+  if (run.includes('loops')) {
+    await renderWidgets('loops');
+    renderLoops();
+  }
 } catch (e) {
   console.error(String(e.message ?? e));
   process.exit(1);

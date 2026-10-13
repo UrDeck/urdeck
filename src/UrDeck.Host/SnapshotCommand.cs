@@ -13,12 +13,15 @@ using UrDeck.Sdk;
 namespace UrDeck.Host;
 
 /// <summary>
-/// <c>--snapshot out.png [--size WxH] [--theme name] [--page N]</c>: renders a page (default: the one at
+/// <c>--snapshot out.png [--size WxH] [--theme name] [--page N] [--frames N [--fps F] [--start time]]</c>: renders a page (default: the one at
 /// <c>activePage</c>) off-screen with the same layout and
 /// widget code as the live window, and the configured <c>background</c> (a shader at a fixed time, in the palette of the
 /// theme in effect; a picture covering the page), writes a PNG and exits. Defaults to the target monitor's resolution, to the primary
 /// monitor's when the target is not connected. It uses the engine alone, runs before the XAML application starts and
-/// never writes the configuration.
+/// never writes the configuration. With <c>--frames N</c> the output is a folder and N pictures <c>frame-0000.png</c> ... are
+/// written, one every 1/<c>--fps</c> second (default 30) of the time the widgets are given, from <c>--start</c> (a local
+/// date and time, default now): a widget draws from that time, so an animation (the split-flap clock, the weather icons)
+/// moves from frame to frame. The background stays at its snapshot time.
 /// </summary>
 internal static class SnapshotCommand
 {
@@ -112,8 +115,27 @@ internal static class SnapshotCommand
             // The background, built as the live window builds it; a picture is decoded now and the render waits for it.
             using var background = BuildBackground(host, theme, width, height);
 
+            int frames = 0;
+            int framesIndex = Array.IndexOf(args, "--frames");
+            if (framesIndex >= 0 && framesIndex + 1 < args.Length)
+                frames = int.Parse(args[framesIndex + 1], CultureInfo.InvariantCulture);
+            double fps = 30;
+            int fpsIndex = Array.IndexOf(args, "--fps");
+            if (fpsIndex >= 0 && fpsIndex + 1 < args.Length)
+                fps = double.Parse(args[fpsIndex + 1], CultureInfo.InvariantCulture);
+            if (frames < 0 || fps <= 0)
+            {
+                UrDeckLog.Error("Snapshot failed: --frames must not be negative and --fps must be above zero");
+                return 1;
+            }
+
+            var start = DateTime.Now;
+            int startIndex = Array.IndexOf(args, "--start");
+            if (startIndex >= 0 && startIndex + 1 < args.Length)
+                start = DateTime.Parse(args[startIndex + 1], CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
+
             var chrome = new PageRenderer.Chrome(config.Pager.GetIndicatorMode(), pageIndex, config.Pages.Count);
-            var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome, dock, background);
+            var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, start, chrome, dock, background);
 
             // Icons are asked for while painting. If that paint asked for any, wait for them (a few seconds at most) and
             // paint again, so the image shows icons and not placeholders. A page without them is painted once.
@@ -124,7 +146,22 @@ internal static class SnapshotCommand
                 while (icons.AnyPending && DateTime.UtcNow < iconDeadline)
                     Thread.Sleep(25);
                 bitmap.Dispose();
-                bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, DateTime.Now, chrome, dock, background);
+                bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, start, chrome, dock, background);
+            }
+
+            if (frames > 0)
+            {
+                bitmap.Dispose();
+                Directory.CreateDirectory(output);
+                for (int i = 0; i < frames; i++)
+                {
+                    using var frame = PageRenderer.RenderToBitmap(width, height, widgets, theme, start + TimeSpan.FromSeconds(i / fps), chrome, dock, background);
+                    using var frameFile = File.Create(Path.Combine(output, $"frame-{i:D4}.png"));
+                    frame.Encode(frameFile, SKEncodedImageFormat.Png, 100);
+                }
+
+                UrDeckLog.Info($"Snapshot {width}x{height}: {frames} frames at {fps.ToString(CultureInfo.InvariantCulture)} per second from {start:HH:mm:ss.fff} written to {Path.GetFullPath(output)}");
+                return 0;
             }
 
             using var image = bitmap;

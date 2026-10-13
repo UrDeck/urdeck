@@ -62,7 +62,10 @@ may keep a new icon in the overflow flyout (the `^` arrow) until you drag it ont
 dotnet run --project src/UrDeck.Host -c Release -- --snapshot out.png --size 1100x3840
 ```
 
-`--size WxH` defaults to the target monitor's resolution. `--page N` renders the page at index N (0-based, default
+`--size WxH` defaults to the target monitor's resolution. `--frames N [--fps F] [--start <local time>]` writes N pictures
+(`frame-0000.png` ... into the folder given as the output) F per second (default 30) apart in the time the widgets draw from,
+starting at `--start` (default now), so a split-flap clock flips and the weather icons move from one picture to the next;
+the website's loops are made with it (`site/README.md`). `--page N` renders the page at index N (0-based, default
 `activePage`) with the band and the indicator showing that page; an index outside the page list fails with a logged reason
 and exit code 1. `*.snapshot.png` files are git-ignored.
 
