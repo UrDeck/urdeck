@@ -57,10 +57,10 @@ Posters, folder `site/src/assets/backgrounds/`, PNG, 540 by 960 (9:16):
 
 Loops, folder `site/public/media/backgrounds/`, MP4 (H.264), no audio, 540 by 960, 4 to 6 seconds, under 1 MB each, `glass` theme colours:
 
-- [ ] `aurora.mp4`
-- [ ] `plasma.mp4`
-- [ ] `gradient.mp4`
-- [ ] `julia.mp4`
+- [x] `aurora.mp4`
+- [x] `plasma.mp4`
+- [x] `gradient.mp4`
+- [x] `julia.mp4`
 
 ## When a theme, widget or background is added
 
