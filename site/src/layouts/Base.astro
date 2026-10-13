@@ -1,19 +1,24 @@
 ---
 import '../styles/global.css';
+import { hasSocialImage } from '../lib/media';
 
 interface Props {
   title: string;
   description: string;
+  /** Full-width page (the landing page lays out its own sections) instead of the centred column. */
+  bleed?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, bleed = false } = Astro.props;
 const path = Astro.url.pathname;
-const full = path === '/' ? 'UrDeck' : `${title} · UrDeck`;
+const home = path === '/';
+const full = home ? 'UrDeck' : `${title} · UrDeck`;
+const canonical = new URL(path, Astro.site);
 const nav = [
   { href: '/docs/', label: 'Docs', match: '/docs/' },
   { href: '/tested-on/', label: 'Tested on', match: '/tested-on/' },
-  { href: 'https://github.com/UrDeck/urdeck', label: 'GitHub', match: '' },
 ];
+const repo = 'https://github.com/UrDeck/urdeck';
 ---
 <!doctype html>
 <html lang="en">
@@ -22,27 +27,47 @@ const nav = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{full}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(path, Astro.site)} />
+    <meta name="theme-color" content="#080918" />
+    <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/BricolageGrotesque-latin-wght.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/InstrumentSans-latin-wght.woff2" as="font" type="font/woff2" crossorigin />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={full} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {hasSocialImage && <meta property="og:image" content={new URL('/og-image.png', Astro.site)} />}
+    <meta name="twitter:card" content={hasSocialImage ? 'summary_large_image' : 'summary'} />
   </head>
-  <body>
+  <body class={home ? 'home' : undefined}>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href="/">UrDeck</a>
+        <a class="brand" href="/">
+          <svg aria-hidden="true" width="22" height="30" viewBox="0 0 22 30" fill="none"><rect x="1" y="1" width="20" height="28" rx="5" stroke="#8AB8FF" stroke-width="2"/><rect x="5" y="5" width="12" height="6" rx="2" fill="#8AB8FF"/><rect x="5" y="13.5" width="12" height="6" rx="2" fill="#8AB8FF" fill-opacity=".55"/><rect x="5" y="22" width="12" height="3" rx="1.5" fill="#8AB8FF" fill-opacity=".3"/></svg>
+          UrDeck
+        </a>
         <nav aria-label="Main">
           {nav.map((item) => (
-            <a href={item.href} aria-current={item.match && path.startsWith(item.match) ? 'page' : undefined}>{item.label}</a>
+            <a href={item.href} aria-current={path.startsWith(item.match) ? 'page' : undefined}>{item.label}</a>
           ))}
+          <a class="pill" href={repo}>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+            GitHub
+          </a>
         </nav>
       </div>
     </header>
-    <main class="wrap">
+    <main class={bleed ? undefined : 'wrap'}>
       <slot />
     </main>
     <footer class="site-footer">
       <div class="wrap">
+        <a class="brand" href="/">
+          <svg aria-hidden="true" width="18" height="25" viewBox="0 0 22 30" fill="none"><rect x="1" y="1" width="20" height="28" rx="5" stroke="#8AB8FF" stroke-width="2"/><rect x="5" y="5" width="12" height="6" rx="2" fill="#8AB8FF"/><rect x="5" y="13.5" width="12" height="6" rx="2" fill="#8AB8FF" fill-opacity=".55"/><rect x="5" y="22" width="12" height="3" rx="1.5" fill="#8AB8FF" fill-opacity=".3"/></svg>
+          UrDeck
+        </a>
         <p>
-          UrDeck is free software, <a href="https://github.com/UrDeck/urdeck">source on GitHub</a>.
+          UrDeck is free software, <a href={repo}>source on GitHub</a>.
           This site sets no cookies, runs no analytics and loads nothing from anywhere else.
         </p>
       </div>

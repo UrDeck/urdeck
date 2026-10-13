@@ -1,71 +1,182 @@
 ---
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
-import dark from '../assets/decks/default-dark.png';
-import glass from '../assets/decks/glass.png';
-import light from '../assets/decks/default-light.png';
+import WidgetShowcase from '../components/WidgetShowcase.astro';
+import BackgroundShowcase from '../components/BackgroundShowcase.astro';
+import themes from '../data/themes.json';
+import { deckImage } from '../lib/media';
+import '../styles/home.css';
 
-const decks = [
-  { src: glass, alt: 'A deck with the glass theme over a moving aurora background: a split-flap clock, weather with a five-day forecast, and gauges for CPU, GPU and memory.', caption: 'glass theme over the aurora background' },
-  { src: dark, alt: 'The same deck with the default dark theme: a clock, weather, gauges, and four shortcuts in the dock.', caption: 'default-dark' },
-  { src: light, alt: 'The same deck with the default light theme over a soft gradient background.', caption: 'default-light over a gradient' },
-];
+const repo = 'https://github.com/UrDeck/urdeck';
+const glass = deckImage('glass')!;
+const decks = themes.themes.map((t) => ({ ...t, src: deckImage(t.id) })).filter((t) => t.src);
+const heroAlt = themes.themes.find((t) => t.id === 'glass')!.alt;
 ---
-<Base title="UrDeck" description="A lightweight widget dashboard for a secondary or case display on Windows. No account, no telemetry, free software.">
-  <section class="hero">
-    <div>
-      <h1>A small dashboard for the screen beside your screen.</h1>
-      <p class="lede">
-        UrDeck puts clocks, system readings, weather and shortcuts on a secondary or case display. It is a native Windows
-        app drawn on the GPU, and it redraws only what changed, so a page with nothing moving costs almost nothing.
-      </p>
-      <div class="actions">
-        <a class="button primary" href="https://github.com/UrDeck/urdeck">Download: coming soon</a>
-        <a class="button" href="https://github.com/UrDeck/urdeck">Source on GitHub</a>
+<Base title="UrDeck" description="A lightweight widget dashboard for a secondary or case display on Windows. No account, no telemetry, free software." bleed>
+
+  <section class="hero" id="top">
+    <div aria-hidden="true">
+      <div class="aurora aurora-a"></div>
+      <div class="aurora aurora-b"></div>
+      <div class="hero-fade"></div>
+    </div>
+    <div class="hero-grid">
+      <div>
+        <p class="chip"><i aria-hidden="true"></i>Free software for Windows 10 and 11</p>
+        <h1>A small dashboard for <span>the screen beside your screen.</span></h1>
+        <p class="lede">
+          UrDeck puts clocks, system readings, weather and shortcuts on a secondary or case display. It is a native Windows
+          app drawn on the GPU, and it redraws only what changed, so a page with nothing moving costs almost nothing.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href={repo}>Download: coming soon</a>
+          <a class="btn btn-ghost" href={repo}>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.25 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+            Source on GitHub
+          </a>
+        </div>
+        <p class="note">
+          There is no download yet: a release will come once its files can be signed, so Windows can tell they are mine. Until
+          then the button leads to the repository, where UrDeck can be built from source.
+        </p>
       </div>
-      <p class="note">
-        There is no download yet: a release will come once its files can be signed, so Windows can tell they are mine. Until
-        then the button leads to the repository, where UrDeck can be built from source.
+
+      <figure class="device">
+        <div class="device-glow" aria-hidden="true"></div>
+        <div class="bezel">
+          <div class="bezel-screen">
+            <Image src={glass} alt={heroAlt} widths={[300, 600, 720]} sizes="19rem" loading="eager" />
+          </div>
+        </div>
+        <figcaption>Drawn by UrDeck itself · 1100 × 3840</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow">Why it exists</p>
+    <p class="statement">
+      I wanted the small screen in my case to show things <span>without a program behind it that I cannot trust or see into.</span>
+    </p>
+
+    <div class="bento">
+      <article class="card wide">
+        <div>
+          <p class="num">01</p>
+          <h3>Private.</h3>
+          <p class="prose">No account, no telemetry. UrDeck makes two kinds of network request, both for something you put on the page. Nothing else leaves your machine, and a local icon file avoids even that.</p>
+        </div>
+        <div class="well ledger">
+          <div class="d head">outbound requests</div>
+          <div><span class="a">&rarr;</span><span class="k">a forecast</span><span class="d">for a place you typed into a weather card</span></div>
+          <div><span class="a">&rarr;</span><span class="k">an icon</span><span class="d">for a web address you gave a shortcut</span></div>
+          <div><span class="d">&times;</span><span class="k">everything else</span><span class="d">none</span></div>
+        </div>
+      </article>
+
+      <article class="card narrow">
+        <div>
+          <p class="num">02</p>
+          <h3>Light.</h3>
+          <p>A native app that draws each widget on the GPU and redraws only what changed. A moving background is optional and has a setting to make it cheaper.</p>
+        </div>
+        <div class="stats">
+          <div class="stats-row">
+            <div class="stat"><b>0<small>%</small></b><span>CPU, idle</span></div>
+            <div class="stat"><b>0<small>%</small></b><span>GPU, idle</span></div>
+            <div class="stat"><b>101<small> MB</small></b><span>private memory</span></div>
+          </div>
+          <p class="foot">Measured on the WinUI 3 host with one Clock widget on screen.</p>
+        </div>
+      </article>
+
+      <article class="card narrow">
+        <div>
+          <p class="num">03</p>
+          <h3>Yours.</h3>
+          <p>One JSON file, themes you can write in a few lines, backgrounds written as small shaders. Widgets are plain C# plugins that load and reload while UrDeck runs.</p>
+        </div>
+        <pre><code><span class="c">// urdeck-config.json</span>
+{ <span class="k">"typeId"</span>: <span class="s">"urdeck.widgets.clock"</span>,
+  <span class="k">"width"</span>: 4, <span class="k">"height"</span>: 2,
+  <span class="k">"format"</span>: <span class="s">"24h"</span>,
+  <span class="k">"style"</span>: <span class="s">"flap"</span> }</code></pre>
+        <p class="small">A config editor, so you will not have to open the file, and a gallery for sharing widgets, backgrounds and themes are planned, not built.</p>
+      </article>
+
+      <article class="card wide">
+        <div>
+          <p class="num">04</p>
+          <h3>Open.</h3>
+          <p class="prose">The source is on GitHub under the GPL. The plugin SDK is MIT, so a widget can use any licence.</p>
+        </div>
+        <div class="licences">
+          <div class="well"><b>GPL</b><span>the application</span></div>
+          <div class="well"><b class="accent">MIT</b><span>the plugin SDK</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="themes">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Sample decks</p>
+        <h2 class="h2">The same deck in different themes.</h2>
+      </div>
+      <p>
+        These are pictures made by UrDeck itself, from config files kept in the repository, at the size of the panel it was
+        made for. The readings and the time are those of the machine that drew them.
       </p>
     </div>
-    <figure class="deck-hero">
-      <Image class="deck-img" src={glass} alt={decks[0].alt} widths={[320, 480, 640]} sizes="(max-width: 52rem) 20rem, 28rem" loading="eager" />
-    </figure>
-  </section>
-
-  <section>
-    <h2>Why it exists</h2>
-    <p>I wanted the small screen in my case to show things without a program behind it that I cannot trust or see into.</p>
-    <ol class="reasons">
-      <li><strong>Private.</strong> No account, no telemetry. UrDeck makes two kinds of network request, both for something you put on the page: a forecast for a place you typed into a weather card, and the icon of a web address you gave a shortcut. Nothing else leaves your machine, and a local icon file avoids even that.</li>
-      <li><strong>Light.</strong> It is a native app that draws each widget on the GPU and redraws only what changed. A moving background is optional and has a setting to make it cheaper.</li>
-      <li><strong>Yours.</strong> One JSON file, themes you can write in a few lines, backgrounds written as small shaders. Widgets are plain C# plugins that load and reload while UrDeck runs. Sharing widgets, backgrounds and themes through a gallery is planned, not built.</li>
-      <li><strong>Open.</strong> The source is on GitHub under the GPL; the plugin SDK is MIT, so a widget can use any licence.</li>
-    </ol>
-  </section>
-
-  <section>
-    <h2>Sample decks</h2>
-    <p>
-      These are pictures made by UrDeck itself, from config files kept in the repository, at the size of the panel it was
-      made for (1100 by 3840). The readings and the time are those of the machine that drew them.
-    </p>
-    <div class="decks">
+    <div class="themes">
       {decks.map((d) => (
         <figure>
-          <Image class="deck-img" src={d.src} alt={d.alt} widths={[240, 360, 480]} sizes="(max-width: 52rem) 90vw, 20rem" />
-          <figcaption>{d.caption}</figcaption>
+          <div class="bezel">
+            <div class="bezel-screen">
+              <Image src={d.src!} alt={d.alt} widths={[240, 360, 480]} sizes="(min-width: 60rem) 22rem, 90vw" />
+            </div>
+          </div>
+          <figcaption><b>{d.id}</b><span>{d.caption}</span></figcaption>
         </figure>
       ))}
     </div>
   </section>
 
-  <section>
-    <h2>Go further</h2>
-    <ul>
-      <li><a href="/docs/">Configure it</a>: the config file, pages, the dock, each widget, themes and backgrounds.</li>
-      <li><a href="/tested-on/">Tested on</a>: the hardware it has run on, and how to report yours.</li>
-      <li><a href="https://github.com/UrDeck/urdeck">The repository</a>: source, roadmap and issues.</li>
-    </ul>
+  <section class="section" id="widgets">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Widgets</p>
+        <h2 class="h2">Built-in widgets, and more on the way.</h2>
+      </div>
+      <p>
+        Each widget draws itself on the GPU and sits on a grid of square cells, and some change shape with the room they are
+        given. Pick one to look closer. Others can be added as plain C# plugins.
+      </p>
+    </div>
+    <WidgetShowcase />
   </section>
+
+  <BackgroundShowcase />
+
+  <section class="section">
+    <div class="closing">
+      <div class="aurora aurora-1" aria-hidden="true"></div>
+      <div class="aurora aurora-2" aria-hidden="true"></div>
+      <div class="closing-copy">
+        <h2>Build it from source today. A signed download follows.</h2>
+        <p>A release will come once its files can be signed, so Windows can tell they are real. Until then the repository has everything you need.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href={repo}>Source on GitHub</a>
+          <a class="btn btn-ghost" href="/docs/">Configure it</a>
+        </div>
+      </div>
+    </div>
+    <div class="links">
+      <a class="link-card" href="/docs/"><b>Docs <i aria-hidden="true">&rarr;</i></b><span>The config file, pages, the dock, each widget, themes and backgrounds.</span></a>
+      <a class="link-card" href="/tested-on/"><b>Tested on <i aria-hidden="true">&rarr;</i></b><span>The hardware it has run on, and how to report yours.</span></a>
+      <a class="link-card" href={repo}><b>Repository <i aria-hidden="true">&rarr;</i></b><span>Source, roadmap and issues.</span></a>
+    </div>
+  </section>
+
 </Base>

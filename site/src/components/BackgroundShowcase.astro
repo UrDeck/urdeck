@@ -1,0 +1,62 @@
+---
+// The built-in animated backgrounds. Names and copy are in src/data/backgrounds.json. A background shows with a loop
+// (public/media/backgrounds/<name>.mp4), a still (src/assets/backgrounds/<name>.png) or both, the still being the loop's
+// poster. One with neither is left out of the built site and shows as a labelled blank while running `npm run dev`.
+import { Image } from 'astro:assets';
+import data from '../data/backgrounds.json';
+import { backgroundMedia } from '../lib/media';
+
+const dev = import.meta.env.DEV;
+const items = data.backgrounds
+  .map((b) => ({ ...b, media: backgroundMedia(b.name) }))
+  .filter((b) => dev || b.media.video || b.media.poster);
+---
+{items.length > 0 && (
+  <section class="section" id="backgrounds">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Backgrounds</p>
+        <h2 class="h2">Moving backgrounds, only if you want one.</h2>
+      </div>
+      <p>
+        Small shaders drawn on the GPU behind translucent cards. Without a background setting nothing of this exists: no
+        surface, no frames, no cost. They draw with the theme's palette, so they follow the theme.
+      </p>
+    </div>
+
+    <div class="backgrounds" data-backgrounds>
+      {items.map((b) => (
+        <figure>
+          <div class="bg-frame">
+            {b.media.video
+              ? <video src={b.media.video} poster={b.media.poster?.src} muted loop playsinline preload="none" aria-label={`The ${b.name} background, moving.`}></video>
+              : b.media.poster
+                ? <Image src={b.media.poster} alt={`The ${b.name} background.`} widths={[270, 540]} sizes="(min-width: 60rem) 17rem, 80vw" />
+                : <span class="todo">[ {b.name}.mp4 ]</span>}
+          </div>
+          <figcaption><b>{b.name}</b>{b.description}</figcaption>
+        </figure>
+      ))}
+    </div>
+    <p class="fine">
+      At the default half size a shader cost about 3% of one CPU core and under 1% of the GPU on the panel UrDeck was made
+      on. Write your own as a small folder of shader files, or use a picture instead.
+    </p>
+  </section>
+)}
+
+<script>
+  // Loops play while they are on screen, and not at all for a visitor who asks for less motion.
+  const grid = document.querySelector('[data-backgrounds]');
+  const videos = grid ? [...grid.querySelectorAll('video')] : [];
+  if (videos.length > 0 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    const watch = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const video = entry.target as HTMLVideoElement;
+        if (entry.isIntersecting) void video.play().catch(() => {});
+        else video.pause();
+      }
+    }, { threshold: 0.25 });
+    videos.forEach((v) => watch.observe(v));
+  }
+</script>
