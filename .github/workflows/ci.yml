@@ -16,7 +16,8 @@ permissions:
 
 jobs:
   # Decides which jobs below run. A skipped job counts as passed, so ci-ok (the required check) is what catches a failure
-  # here. `code` is a deny-list: everything not named is built, so a new folder is checked by default.
+  # here. Each filter group below has one pattern group (`every` would need a file to match all patterns of a group), so a
+  # set of paths is several groups OR-ed in the outputs. `code` is a deny-list: everything not named is built, so a new folder is checked by default.
   changes:
     runs-on: ubuntu-latest
     permissions:
@@ -25,7 +26,7 @@ jobs:
     outputs:
       code: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.code_candidate == 'true' || steps.filter.outputs.code_schema == 'true' || steps.filter.outputs.code_workflow == 'true' }}
       openspec: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.openspec == 'true' }}
-      site: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.site == 'true' }}
+      site: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.site_files == 'true' || steps.filter.outputs.site_schema == 'true' || steps.filter.outputs.site_workflow == 'true' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -52,9 +53,11 @@ jobs:
               - '.github/workflows/ci.yml'
             openspec:
               - 'openspec/**'
-            site:
+            site_files:
               - 'site/**'
+            site_schema:
               - 'docs/schemas/**'
+            site_workflow:
               - '.github/workflows/site-deploy.yml'
 
   # Build, format, tests and coverage floor (gated through ci-ok).

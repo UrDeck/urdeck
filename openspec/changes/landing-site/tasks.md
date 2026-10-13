@@ -40,7 +40,7 @@ what they need, then stop and ask.
 - [x] 5.1 `ci.yml`: a `site` output on `changes` (`site/**`, `docs/schemas/**`, `.github/workflows/site-deploy.yml`), a `site` job on `ubuntu-latest` (`npm ci`, build with the checks of section 4), and `site` added to `ci-ok`'s `needs`
 - [x] 5.2 `.github/workflows/site-deploy.yml` (design decision 4): push to `main` on the same paths and `workflow_dispatch`, `withastro/action` with `path: site`, `actions/deploy-pages`, write permissions on the deploy job only, third-party actions pinned as in `ci.yml`
 - [x] 5.3 `.github/dependabot.yml`: an `npm` entry for `/site`, weekly, grouped, prefix `chore(deps)`
-- [ ] 5.4 Look at the dependency review's result on the pull request; if it rejects a build tool's licence, apply the mitigation in the design's risks and say so in the pull request
+- [x] 5.4 Look at the dependency review's result on the pull request; if it rejects a build tool's licence, apply the mitigation in the design's risks and say so in the pull request
 
 ## 6. Repository documents
 
@@ -52,11 +52,11 @@ what they need, then stop and ask.
 
 ## 7. Going live
 
-- [ ] 7.1 **(owner)** Verify `urdeck.app` for the `UrDeck` organisation
-- [ ] 7.2 **(owner)** Enable Pages on the repository with the source "GitHub Actions"
-- [ ] 7.3 After the merge, confirm the deploy workflow ran and the site is at the `github.io` address
-- [ ] 7.4 **(owner)** Add the DNS records (design decision 5), set the custom domain, and turn on "Enforce HTTPS" when the certificate is there
-- [ ] 7.5 Check the spec's scenarios against the live site: the apex and `www`, the schema address answering with the repository's file, the download control, the report link
+- [x] 7.1 **(owner)** Verify `urdeck.app` for the `UrDeck` organisation
+- [x] 7.2 **(owner)** Enable Pages on the repository with the source "GitHub Actions"
+- [x] 7.3 After the merge, confirm the deploy workflow ran and the site is at the `github.io` address
+- [x] 7.4 **(owner)** Add the DNS records (design decision 5), set the custom domain, and turn on "Enforce HTTPS" when the certificate is there
+- [x] 7.5 Check the spec's scenarios against the live site: the apex and `www`, the schema address answering with the repository's file, the download control, the report link
 
 ## 8. Visual design (second pull request)
 
