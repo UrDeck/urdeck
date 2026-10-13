@@ -62,7 +62,10 @@ may keep a new icon in the overflow flyout (the `^` arrow) until you drag it ont
 dotnet run --project src/UrDeck.Host -c Release -- --snapshot out.png --size 1100x3840
 ```
 
-`--size WxH` defaults to the target monitor's resolution. `--page N` renders the page at index N (0-based, default
+`--size WxH` defaults to the target monitor's resolution. `--frames N [--fps F] [--start <local time>]` writes N pictures
+(`frame-0000.png` ... into the folder given as the output) F per second (default 30) apart in the time the widgets draw from,
+starting at `--start` (default now), so a split-flap clock flips and the weather icons move from one picture to the next;
+the website's loops are made with it (`site/README.md`). `--page N` renders the page at index N (0-based, default
 `activePage`) with the band and the indicator showing that page; an index outside the page list fails with a logged reason
 and exit code 1. `*.snapshot.png` files are git-ignored.
 
@@ -107,11 +110,12 @@ The Windows SDK suffix on the host and test target frameworks is required: the W
 | Path | License |
 |---|---|
 | `src/UrDeck.Host`, `src/UrDeck.Engine`, `tools/` (`urdeck-cli`, which links the engine), `providers/`, `widgets/`, `tests/` | [GPL-3.0-or-later](LICENSE) with the [plugin exception](PLUGIN-EXCEPTION.md) |
-| `site/` (the website: text, pictures and code) | [GPL-3.0-or-later](LICENSE), except the Inter font below; code samples in the pages are MIT |
+| `site/` (the website: text, pictures and code) | [GPL-3.0-or-later](LICENSE), except the website fonts below; code samples in the pages are MIT |
 | `sdk/` (`UrDeck.Sdk`, `UrDeck.Analyzer`) | [MIT](sdk/LICENSE) |
 | Community widgets and data providers | The author's choice |
 | Windows App SDK (self-contained runtime shipped with the host) | Microsoft; see the licence files in the `Microsoft.WindowsAppSDK` NuGet package |
 | Inter variable font (`src/UrDeck.Engine/Themes/Builtin/`) | [SIL Open Font License 1.1](src/UrDeck.Engine/Themes/Builtin/Inter-OFL.txt); the licence text ships with the font |
+| Bricolage Grotesque, Instrument Sans and JetBrains Mono variable fonts (`site/public/fonts/`, the website only) | [SIL Open Font License 1.1](site/public/fonts/); each licence text ships with its font |
 | Meteocons weather icons (embedded in `widgets/UrDeck.Widgets.Weather`) | [MIT](THIRD-PARTY-NOTICES.md#meteocons-weather-icons), Copyright (c) 2020-present Bas Milius; the licence text ships with the icons |
 
 **Data services.** The weather provider uses [Open-Meteo](https://open-meteo.com/) (CC BY 4.0; the card credits it) and its

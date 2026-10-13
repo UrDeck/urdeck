@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && node scripts/check-output.mjs",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "media": "node scripts/render-media.mjs"
   },
   "dependencies": {
     "astro": "7.3.8",

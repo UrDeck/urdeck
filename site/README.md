@@ -30,10 +30,12 @@ Content and layout are kept apart, so a new design replaces the second without t
 | `src/content/docs/` | The documentation pages, Markdown. `section` and `order` in the front matter place a page in the navigation. |
 | `src/data/tested-on.json` | The hardware list; the "Tested on" page is made from it. |
 | `src/pages/` | The landing page, "Tested on", and the route for the documentation. The landing copy is in `index.astro`. |
-| `src/layouts/`, `src/components/`, `src/styles/` | Layout and style. |
+| `src/layouts/`, `src/components/`, `src/styles/` | Layout and style. `home.css` is the landing page's, `global.css` is shared with the documentation. |
+| `src/data/widgets.json`, `themes.json`, `backgrounds.json` | What the landing page's showcases list: the widgets with their sizes, the sample decks, the backgrounds. |
+| `src/assets/widgets/`, `src/assets/backgrounds/`, `public/media/` | Pictures and loops of the widgets and backgrounds, found by file name. See `MEDIA-CHECKLIST.md`. |
 | `decks/<name>/urdeck-config.json` | The config of each sample deck. |
 | `src/assets/decks/<name>.png` | The sample decks, rendered by UrDeck itself and committed. |
-| `public/` | Served as they are: `CNAME`, the favicon, the Inter font with its licence. |
+| `public/` | Served as they are: `CNAME`, the favicon, the fonts with their licences, and the loops in `media/`. |
 
 ## Sample decks
 
@@ -42,10 +44,25 @@ Run `pwsh scripts/Render-SiteDecks.ps1` from the repository root on a Windows ma
 machine that drew them and the weather needs the network, so look at each one before committing it: nothing personal, the
 readings present, the weather drawn. CI does not render them.
 
+## Pictures and loops on the landing page
+
+The widget and background showcases list what is in `src/data/*.json` and look for media by name, so adding a widget, a size
+or a background is a data entry and a file. A size or background with no media is left out of the built page. The full list
+of what to render, with sizes and file names, is in `MEDIA-CHECKLIST.md`.
+
+## Widget and background media
+
+`npm run media` renders the pictures of each widget size, the background posters, and the loops with UrDeck itself
+(Windows; the loops need `ffmpeg`, `winget install Gyan.FFmpeg`). `npm run media -- widgets|posters|loops [name...]`
+limits it. The pictures use the host's `--snapshot` and `urdeck-cli shader render`; the clock and weather loops use the
+host's `--snapshot <folder> --frames N`, which renders the widgets at advancing times. `MEDIA-CHECKLIST.md` lists what the
+page wants and what has no loop yet. Look at each picture before committing it.
+
 ## Licence
 
-Everything in `site/` (text, pictures and code) is GPL-3.0-or-later, like the application, except the Inter font in
-`public/fonts/`, which is under the SIL Open Font License 1.1 (its licence file is next to it). Code samples in the pages
+Everything in `site/` (text, pictures and code) is GPL-3.0-or-later, like the application, except the fonts in
+`public/fonts/` (Bricolage Grotesque, Instrument Sans and JetBrains Mono), which are under the SIL Open Font License 1.1
+(their licence files are next to them). Code samples in the pages
 are MIT, as the README says for the docs.
 
 ## Publishing

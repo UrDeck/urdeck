@@ -1,0 +1,8 @@
+{
+  "backgrounds": [
+    { "name": "aurora", "description": "Three glowing curtains swaying along the longer side." },
+    { "name": "plasma", "description": "Slow warped fields of colour." },
+    { "name": "gradient", "description": "A soft gradient whose bands drift." },
+    { "name": "julia", "description": "A Julia set whose constant circles slowly. The heaviest of the four." }
+  ]
+}

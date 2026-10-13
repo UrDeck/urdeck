@@ -1,0 +1,133 @@
+---
+// The built-in widgets: a stage for the selected widget and size, and a slowly drifting row of every widget to pick from.
+// Widgets, sizes and their copy are in src/data/widgets.json; pictures and loops are found by name (src/lib/media.ts).
+import { Image } from 'astro:assets';
+import data from '../data/widgets.json';
+import { widgetMedia } from '../lib/media';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+// A size without a picture is left out; a widget without any size is left out with it.
+const widgets = data.widgets
+  .map((w) => ({
+    ...w,
+    sizes: w.sizes.map((s) => ({ ...s, media: widgetMedia(`${w.id}-${s.size}`) })).filter((s) => s.media.image),
+  }))
+  .filter((w) => w.sizes.length > 0);
+const total = widgets.length;
+const seconds = Math.max(40, (total + 1) * 8);
+---
+<div class="showcase" data-showcase>
+  <div class="stage">
+    <div class="aurora aurora-1" aria-hidden="true"></div>
+    <div class="aurora aurora-2" aria-hidden="true"></div>
+    {widgets.map((w, i) => (
+      <div class="panel" data-panel={i} hidden={i !== 0}>
+        <div class="panel-info">
+          <p class="count">{pad(i + 1)} / {pad(total)}</p>
+          <h3>{w.name}</h3>
+          <p class="desc">{w.description}</p>
+          <div class="sizes" role="group" aria-label={`${w.name} sizes`}>
+            <span class="label">Size</span>
+            {w.sizes.length > 1
+              ? w.sizes.map((s, j) => <button type="button" class="size-btn" data-size={j} aria-pressed={j === 0 ? 'true' : 'false'}>{s.size}</button>)
+              : <span class="size-tag">{w.sizes[0].size}</span>}
+          </div>
+          {w.sizes.map((s, j) => <p class="note-line" data-note={j} hidden={j !== 0}>{s.note}</p>)}
+          <p class="type-id">{w.typeId} · glass theme</p>
+        </div>
+        <div class="panel-media">
+          {w.sizes.map((s, j) => (
+            <div class="media" data-media={j} hidden={j !== 0}>
+              {s.media.video
+                ? <video src={s.media.video} poster={s.media.image!.src} muted loop playsinline preload="none" aria-label={s.alt}></video>
+                : <Image src={s.media.image!} alt={s.alt} widths={[480, 800, 1084]} sizes="(min-width: 60rem) 34rem, 90vw" loading={i === 0 && j === 0 ? 'eager' : 'lazy'} />}
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <div class="marquee">
+    <div class="marquee-track" style={`animation-duration: ${seconds}s`}>
+      {[false, true].map((dup) => (
+        <div class="marquee-half" data-dup={dup ? '' : undefined} aria-hidden={dup ? 'true' : undefined}>
+          {widgets.map((w, i) => (
+            <button type="button" class="marquee-chip" data-pick={i} aria-pressed={i === 0 ? 'true' : 'false'} tabindex={dup ? -1 : undefined}>
+              <b>{w.name}</b>
+              <small>{w.typeId}</small>
+            </button>
+          ))}
+          <div class="marquee-more">More to come</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-showcase]');
+  if (root) {
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-panel]')];
+    const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-pick]')];
+    let widget = 0;
+    let size = 0;
+    let timer: number | undefined;
+
+    const render = () => {
+      panels.forEach((panel, i) => {
+        panel.hidden = i !== widget;
+        if (i !== widget) {
+          panel.querySelectorAll('video').forEach((v) => v.pause());
+          return;
+        }
+        panel.querySelectorAll<HTMLElement>('[data-media]').forEach((m) => {
+          const on = Number(m.dataset.media) === size;
+          m.hidden = !on;
+          const video = m.querySelector('video');
+          if (video) on ? void video.play().catch(() => {}) : video.pause();
+        });
+        panel.querySelectorAll<HTMLElement>('[data-note]').forEach((n) => (n.hidden = Number(n.dataset.note) !== size));
+        panel.querySelectorAll<HTMLElement>('[data-size]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.size) === size)));
+      });
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(Number(c.dataset.pick) === widget)));
+    };
+
+    const stop = () => {
+      if (timer !== undefined) window.clearInterval(timer);
+      timer = undefined;
+    };
+
+    // Step through every widget and size until the visitor picks one.
+    const steps = panels.flatMap((p, i) => [...p.querySelectorAll('[data-media]')].map((_, j) => [i, j] as const));
+    const start = () => {
+      if (timer !== undefined || steps.length < 2) return;
+      timer = window.setInterval(() => {
+        const at = steps.findIndex(([i, j]) => i === widget && j === size);
+        [widget, size] = steps[(at + 1) % steps.length];
+        render();
+      }, 5000);
+    };
+
+    root.addEventListener('click', (event) => {
+      const target = (event.target as HTMLElement).closest<HTMLElement>('[data-pick], [data-size]');
+      if (!target) return;
+      stop();
+      steps.length = 0; // a choice ends the automatic tour for good
+      if (target.dataset.pick !== undefined) {
+        widget = Number(target.dataset.pick);
+        size = 0;
+      } else {
+        size = Number(target.dataset.size);
+      }
+      render();
+    });
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced && 'IntersectionObserver' in window) {
+      // Only tour while the showcase is on screen.
+      new IntersectionObserver(([entry]) => (entry.isIntersecting ? start() : stop()), { threshold: 0.3 }).observe(root);
+    }
+    render();
+  }
+</script>

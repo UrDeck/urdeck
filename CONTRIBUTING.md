@@ -42,6 +42,10 @@ is checked by the `site` job (build, schema copy, internal links, no third-party
 it. A change to the settings of a widget, a theme or a background updates its page in `site/src/content/docs/` in the same
 pull request.
 
+**The pictures and loops** of the landing page (one picture per widget size, the background posters, the loops) are
+rendered by UrDeck itself with `npm run media` in `site/` (Windows; `ffmpeg` for the loops). Re-render them when the
+app's look changes, and add the widget, theme or background to `MEDIA-CHECKLIST.md`'s list when you add one.
+
 **Adding a "Tested on" entry:** add an object to `site/src/data/tested-on.json` (display, connection, resolution, GPU,
 Windows version, what was checked) and open a pull request. The page is made from the file. People without a pull request
 use the hardware report issue form.

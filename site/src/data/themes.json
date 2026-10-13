@@ -1,0 +1,7 @@
+{
+  "themes": [
+    { "id": "glass", "caption": "over the aurora background", "alt": "A deck with the glass theme over a moving aurora background: a split-flap clock, weather with a five-day forecast, and gauges for CPU, GPU and memory." },
+    { "id": "default-dark", "caption": "the default", "alt": "The same deck with the default dark theme: a clock, weather, gauges, and four shortcuts in the dock." },
+    { "id": "default-light", "caption": "over a gradient", "alt": "The same deck with the default light theme over a soft gradient background." }
+  ]
+}
