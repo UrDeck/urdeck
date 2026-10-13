@@ -9,6 +9,11 @@ deck picture or taken from a built-in background's `sample.png`; replace them wi
 
 ## How to render
 
+`npm run media` (Windows; builds the host and the tool) renders the widget pictures and the background posters, and the
+background loops when `ffmpeg` is on the PATH (`winget install Gyan.FFmpeg`). `npm run media -- widgets|posters|loops [name...]`
+limits it. It is how all the pictures below were made; a widget loop has no tool yet (the host cannot render a widget at a
+given time). The manual commands it wraps:
+
 - **A widget:** put only that widget on a page in a scratch config and run
   `UrDeck.Host.exe --snapshot out.png --size 1100x<height>` (the grid is four square cells across: a 4x2 card is about
   1100 by 550). Use the `glass` theme over the `aurora` background so every picture matches. Crop to the card's edge.
@@ -21,12 +26,12 @@ deck picture or taken from a built-in background's `sample.png`; replace them wi
 
 Folder: `site/src/assets/widgets/`. PNG, glass theme, sized as rendered (1100 px wide for the four-cell-wide ones).
 
-- [ ] `clock-4x2.png` (interim)
-- [ ] `stats-4x4.png` (interim)
-- [ ] `stats-4x2.png` (interim)
-- [ ] `weather-4x4.png` (interim)
-- [ ] `weather-4x2.png` (new: the size is in `src/data/widgets.json` and appears once the picture exists)
-- [ ] `shortcut-1x1.png` (interim: the dock with four shortcuts; a single 1x1 card would also do)
+- [x] `clock-4x2.png`
+- [x] `stats-4x4.png`
+- [x] `stats-4x2.png`
+- [x] `weather-4x4.png`
+- [x] `weather-4x2.png`
+- [x] `shortcut-1x1.png`
 
 ## Widget loops (optional, shown instead of the picture, which becomes its poster)
 
@@ -45,10 +50,10 @@ All four show today as stills. Each wants a proper poster and a loop.
 
 Posters, folder `site/src/assets/backgrounds/`, PNG, 540 by 960 (9:16):
 
-- [ ] `aurora.png` (interim, 270 by 480)
-- [ ] `plasma.png` (interim, 270 by 480)
-- [ ] `gradient.png` (interim, 270 by 480)
-- [ ] `julia.png` (interim, 270 by 480)
+- [x] `aurora.png`
+- [x] `plasma.png`
+- [x] `gradient.png`
+- [x] `julia.png`
 
 Loops, folder `site/public/media/backgrounds/`, MP4 (H.264), no audio, 540 by 960, 4 to 6 seconds, under 1 MB each, `glass` theme colours:
 

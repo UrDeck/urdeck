@@ -50,6 +50,12 @@ The widget and background showcases list what is in `src/data/*.json` and look f
 or a background is a data entry and a file. A size or background with no media is left out of the built page. The full list
 of what to render, with sizes and file names, is in `MEDIA-CHECKLIST.md`.
 
+## Widget and background media
+
+`npm run media` renders the pictures of each widget size and the background posters and loops with UrDeck itself (Windows,
+see the top of `scripts/render-media.mjs`); `MEDIA-CHECKLIST.md` lists what the page wants. Look at each picture before
+committing it.
+
 ## Licence
 
 Everything in `site/` (text, pictures and code) is GPL-3.0-or-later, like the application, except the fonts in
