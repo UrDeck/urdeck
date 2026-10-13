@@ -33,7 +33,7 @@ what they need, then stop and ask.
 - [x] 4.1 Copy `docs/schemas/**` into the output under `/schemas/` at build time and fail when the copy differs from the source (design decision 6)
 - [x] 4.2 An internal link check that fails the build on a link to a page that does not exist
 - [x] 4.3 The third-party reference check of design decision 8 over the built output
-- [ ] 4.4 Check by hand, once: the landing page with JavaScript off, and with reduce-motion set; the network panel shows requests to the site only and no cookie
+- [x] 4.4 Check by hand, once: the landing page with JavaScript off, and with reduce-motion set; the network panel shows requests to the site only and no cookie
 
 ## 5. CI and deployment
 
@@ -62,5 +62,5 @@ what they need, then stop and ask.
 
 - [x] 8.1 **(owner)** Make the design in Claude Design from the brief: `proposal.md`, the merged copy, the rendered decks, the `glass` theme's palette, and the bounds in the spec ("Visitor Privacy", "Usable Without Script Or Motion")
 - [x] 8.2 Apply the design to `site/src/layouts` and `site/src/components` without changing content files; a moving element only over a still picture and off under reduce-motion
-- [ ] 8.3 Repeat 4.3 and 4.4 on the result
-- [ ] 8.4 **(owner)** Look at the site on a desktop and a phone, then merge
+- [x] 8.3 Repeat 4.3 and 4.4 on the result
+- [x] 8.4 **(owner)** Look at the site on a desktop and a phone, then merge
