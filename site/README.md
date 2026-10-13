@@ -50,6 +50,14 @@ The widget and background showcases list what is in `src/data/*.json` and look f
 or a background is a data entry and a file. A size or background with no media is left out of the built page. The full list
 of what to render, with sizes and file names, is in `MEDIA-CHECKLIST.md`.
 
+## Widget and background media
+
+`npm run media` renders the pictures of each widget size, the background posters, and the loops with UrDeck itself
+(Windows; the loops need `ffmpeg`, `winget install Gyan.FFmpeg`). `npm run media -- widgets|posters|loops [name...]`
+limits it. The pictures use the host's `--snapshot` and `urdeck-cli shader render`; the clock and weather loops use the
+host's `--snapshot <folder> --frames N`, which renders the widgets at advancing times. `MEDIA-CHECKLIST.md` lists what the
+page wants and what has no loop yet. Look at each picture before committing it.
+
 ## Licence
 
 Everything in `site/` (text, pictures and code) is GPL-3.0-or-later, like the application, except the fonts in
