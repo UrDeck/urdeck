@@ -60,7 +60,7 @@ what they need, then stop and ask.
 
 ## 8. Visual design (second pull request)
 
-- [ ] 8.1 **(owner)** Make the design in Claude Design from the brief: `proposal.md`, the merged copy, the rendered decks, the `glass` theme's palette, and the bounds in the spec ("Visitor Privacy", "Usable Without Script Or Motion")
-- [ ] 8.2 Apply the design to `site/src/layouts` and `site/src/components` without changing content files; a moving element only over a still picture and off under reduce-motion
+- [x] 8.1 **(owner)** Make the design in Claude Design from the brief: `proposal.md`, the merged copy, the rendered decks, the `glass` theme's palette, and the bounds in the spec ("Visitor Privacy", "Usable Without Script Or Motion")
+- [x] 8.2 Apply the design to `site/src/layouts` and `site/src/components` without changing content files; a moving element only over a still picture and off under reduce-motion
 - [ ] 8.3 Repeat 4.3 and 4.4 on the result
 - [ ] 8.4 **(owner)** Look at the site on a desktop and a phone, then merge

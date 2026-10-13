@@ -20,8 +20,9 @@ const seconds = Math.max(40, (total + 1) * 8);
   <div class="stage">
     <div class="aurora aurora-1" aria-hidden="true"></div>
     <div class="aurora aurora-2" aria-hidden="true"></div>
+    {/* No `hidden` on the panels, notes and media: without script every widget and size is shown; the script hides the others on load. */}
     {widgets.map((w, i) => (
-      <div class="panel" data-panel={i} hidden={i !== 0}>
+      <div class="panel" data-panel={i}>
         <div class="panel-info">
           <p class="count">{pad(i + 1)} / {pad(total)}</p>
           <h3>{w.name}</h3>
@@ -32,12 +33,12 @@ const seconds = Math.max(40, (total + 1) * 8);
               ? w.sizes.map((s, j) => <button type="button" class="size-btn" data-size={j} aria-pressed={j === 0 ? 'true' : 'false'}>{s.size}</button>)
               : <span class="size-tag">{w.sizes[0].size}</span>}
           </div>
-          {w.sizes.map((s, j) => <p class="note-line" data-note={j} hidden={j !== 0}>{s.note}</p>)}
+          {w.sizes.map((s, j) => <p class="note-line" data-note={j}>{s.note}</p>)}
           <p class="type-id">{w.typeId} · glass theme</p>
         </div>
         <div class="panel-media">
           {w.sizes.map((s, j) => (
-            <div class="media" data-media={j} hidden={j !== 0}>
+            <div class="media" data-media={j}>
               {s.media.video
                 ? <video src={s.media.video} poster={s.media.image!.src} muted loop playsinline preload="none" aria-label={s.alt}></video>
                 : <Image src={s.media.image!} alt={s.alt} widths={[480, 800, 1084]} sizes="(min-width: 60rem) 34rem, 90vw" loading={i === 0 && j === 0 ? 'eager' : 'lazy'} />}
@@ -73,6 +74,8 @@ const seconds = Math.max(40, (total + 1) * 8);
     let widget = 0;
     let size = 0;
     let timer: number | undefined;
+    // With reduce-motion the pictures stay still: no video plays and the tour does not start.
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const render = () => {
       panels.forEach((panel, i) => {
@@ -85,7 +88,7 @@ const seconds = Math.max(40, (total + 1) * 8);
           const on = Number(m.dataset.media) === size;
           m.hidden = !on;
           const video = m.querySelector('video');
-          if (video) on ? void video.play().catch(() => {}) : video.pause();
+          if (video) on && !reduced ? void video.play().catch(() => {}) : video.pause();
         });
         panel.querySelectorAll<HTMLElement>('[data-note]').forEach((n) => (n.hidden = Number(n.dataset.note) !== size));
         panel.querySelectorAll<HTMLElement>('[data-size]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.size) === size)));
@@ -123,7 +126,6 @@ const seconds = Math.max(40, (total + 1) * 8);
       render();
     });
 
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reduced && 'IntersectionObserver' in window) {
       // Only tour while the showcase is on screen.
       new IntersectionObserver(([entry]) => (entry.isIntersecting ? start() : stop()), { threshold: 0.3 }).observe(root);
