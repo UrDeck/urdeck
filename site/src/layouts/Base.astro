@@ -1,0 +1,51 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const path = Astro.url.pathname;
+const full = path === '/' ? 'UrDeck' : `${title} · UrDeck`;
+const nav = [
+  { href: '/docs/', label: 'Docs', match: '/docs/' },
+  { href: '/tested-on/', label: 'Tested on', match: '/tested-on/' },
+  { href: 'https://github.com/UrDeck/urdeck', label: 'GitHub', match: '' },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{full}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(path, Astro.site)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/">UrDeck</a>
+        <nav aria-label="Main">
+          {nav.map((item) => (
+            <a href={item.href} aria-current={item.match && path.startsWith(item.match) ? 'page' : undefined}>{item.label}</a>
+          ))}
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          UrDeck is free software, <a href="https://github.com/UrDeck/urdeck">source on GitHub</a>.
+          This site sets no cookies, runs no analytics and loads nothing from anywhere else.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

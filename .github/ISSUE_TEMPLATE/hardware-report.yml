@@ -1,0 +1,60 @@
+name: Hardware report
+description: Tell us how UrDeck runs on your display and machine.
+title: "Hardware report: "
+labels: ["hardware-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. Reports of what works and what does not feed the "Tested on" page of the website.
+        Look through anything you paste: `urdeck.log` names your monitors.
+  - type: input
+    id: display
+    attributes:
+      label: Display
+      description: Make and model, resolution, and how it is connected (HDMI, DisplayPort, USB-C, ...).
+      placeholder: "HYTE Y70 Touch, 1100x3840, USB-C"
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU
+      placeholder: "NVIDIA GeForce RTX 4090"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      description: "Run `winver` to see it."
+      placeholder: "Windows 11 Pro, 26200"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: UrDeck version or commit
+      placeholder: "main at 9e9be9c"
+    validations:
+      required: true
+  - type: textarea
+    id: works
+    attributes:
+      label: What works
+      description: Placement on the display, touch, readings, weather, themes, backgrounds.
+    validations:
+      required: true
+  - type: textarea
+    id: broken
+    attributes:
+      label: What does not work
+      description: Leave empty if nothing.
+  - type: textarea
+    id: log
+    attributes:
+      label: Startup lines of urdeck.log
+      description: The lines from the start of `urdeck.log` (next to `UrDeck.Host.exe`) about monitors, the display chosen, the background surface and the source of each reading.
+      render: text
+    validations:
+      required: true

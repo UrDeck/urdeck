@@ -1,0 +1,140 @@
+## Purpose
+
+The public website at `urdeck.app`: what its pages hold, the addresses it promises to keep, what it never does to a
+visitor, and how a change reaches it.
+
+## ADDED Requirements
+
+### Requirement: Address
+The site MUST be served at `https://urdeck.app`, over HTTPS only. `www.urdeck.app` MUST lead to the same site.
+
+#### Scenario: Apex address
+- **WHEN** a browser opens `https://urdeck.app/`
+- **THEN** the landing page is shown with a valid certificate
+
+#### Scenario: The www name
+- **WHEN** a browser opens `https://www.urdeck.app/`
+- **THEN** it arrives at `https://urdeck.app/`
+
+### Requirement: Landing Page
+The landing page MUST say what UrDeck is, why it exists, and where the source is. It holds, in this order of weight:
+
+- a statement of what UrDeck is and what it runs on
+- the reasons it exists, with privacy first
+- at least three sample decks
+- a link to the repository on GitHub
+- a link to the configuration pages and to the "Tested on" page
+
+Every statement about what UrDeck does over the network MUST match the application: it names the requests UrDeck makes
+(a forecast for a configured place, the icon of a site a shortcut points to) and does not claim that there are none.
+A feature that does not exist yet MUST be marked as planned.
+
+#### Scenario: A visitor who reads only the first screen
+- **WHEN** the landing page is opened on a desktop browser
+- **THEN** what UrDeck is, a sample deck and the link to the repository are visible without scrolling
+
+#### Scenario: A planned feature
+- **WHEN** the page mentions sharing widgets, backgrounds or themes through a gallery
+- **THEN** it is marked as planned
+
+### Requirement: Download State
+Until a signed release exists, the landing page MUST NOT offer a file to download. The download control says that a
+download is coming and leads to the repository.
+
+#### Scenario: No release yet
+- **WHEN** a visitor uses the download control
+- **THEN** no file is downloaded and the visitor arrives at the repository on GitHub
+
+### Requirement: Sample Decks Are Real
+Every picture of a deck on the site MUST be rendered by UrDeck itself from a config file kept in the repository, so
+that a visitor can reproduce it. A picture MUST NOT show the owner's own shortcuts, location or other personal content.
+
+#### Scenario: Reproducing a picture
+- **WHEN** somebody renders the config kept for a sample deck with the application's snapshot command at the size given
+- **THEN** the result shows the same page, widgets, theme and background as the picture on the site (the readings and
+  the time differ)
+
+### Requirement: Configuration Pages
+The site MUST hold user documentation for configuring UrDeck by hand: the config file and where it is, pages and the
+dock, each first-party widget and its settings, themes, and backgrounds. Each page is reachable from a navigation that
+every documentation page shows.
+
+#### Scenario: Finding a widget's settings
+- **WHEN** a visitor opens the configuration section and chooses a first-party widget
+- **THEN** the page lists that widget's settings with their values and an example
+
+#### Scenario: From the README
+- **WHEN** a reader follows the README's link for configuration
+- **THEN** they arrive at the configuration section of the site
+
+### Requirement: Tested On Page
+The site MUST hold a page listing the hardware UrDeck has been run on. Each entry gives the display, its resolution,
+the GPU, the Windows version and what was checked. The page also says:
+
+- that a display Windows treats as a monitor is expected to work, and that this is an expectation where it has not
+  been tested
+- which kinds of display do not work
+- how to send a hardware report
+
+Where the page names another company's product it MUST say that the name is that company's trademark and that UrDeck
+is not affiliated with it.
+
+#### Scenario: First entry
+- **WHEN** the page is opened
+- **THEN** it lists the HYTE Y70 Touch with its resolution, the GPU, the Windows version and what was checked on it
+
+#### Scenario: Sending a report
+- **WHEN** a visitor follows the page's link for reporting hardware
+- **THEN** they arrive at a new-issue form on GitHub that asks for the display, the GPU, the Windows version and the
+  startup lines of `urdeck.log`
+
+### Requirement: Schema Address
+The site MUST serve the background manifest schema at `/schemas/v1/shader-manifest.json`, byte for byte the file kept
+in the repository, with a JSON content type. An address under `/schemas/v1/` that has been published MUST keep
+answering.
+
+#### Scenario: An editor fetches the schema
+- **WHEN** `https://urdeck.app/schemas/v1/shader-manifest.json` is requested
+- **THEN** the response is the repository's schema file, unchanged
+
+#### Scenario: The schema changes in the repository
+- **WHEN** a change to the schema file is merged
+- **THEN** the site serves the new content at the same address after the next publication
+
+### Requirement: Visitor Privacy
+The site MUST NOT set a cookie, use local storage to identify a visitor, run analytics, or make any request to a host
+other than `urdeck.app` while a page loads or is used. Fonts, scripts, styles and pictures are served by the site
+itself. A link the visitor chooses to follow is not such a request.
+
+#### Scenario: Loading the landing page
+- **WHEN** the landing page is loaded with the network observed
+- **THEN** every request goes to `urdeck.app` and no cookie is set
+
+### Requirement: Usable Without Script Or Motion
+Every page's text, pictures and links MUST be usable with JavaScript turned off. With the visitor's "reduce motion"
+preference set, the site MUST NOT animate a background or a transition.
+
+#### Scenario: JavaScript off
+- **WHEN** the landing page is loaded with JavaScript turned off
+- **THEN** the text, the sample decks and every link are present and work
+
+#### Scenario: Reduced motion
+- **WHEN** the landing page is loaded with the reduce-motion preference set
+- **THEN** a still picture stands where a moving background would be
+
+### Requirement: Publication
+The site MUST be published only from the `main` branch, by the repository's automation. A pull request that changes
+the site or a file the site includes MUST build the site, and a failed build MUST fail the pull request's checks. A
+link from one page of the site to another that does not exist MUST fail the build.
+
+#### Scenario: A pull request
+- **WHEN** a pull request changes a page of the site
+- **THEN** the site is built as a check and nothing is published
+
+#### Scenario: A merge
+- **WHEN** a change to the site is merged to `main`
+- **THEN** the site at `urdeck.app` shows it without anybody acting by hand
+
+#### Scenario: A broken internal link
+- **WHEN** a page links to a page of the site that does not exist
+- **THEN** the build fails

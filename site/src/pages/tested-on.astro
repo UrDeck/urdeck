@@ -1,0 +1,57 @@
+---
+import Base from '../layouts/Base.astro';
+import data from '../data/tested-on.json';
+
+const report = 'https://github.com/UrDeck/urdeck/issues/new?template=hardware-report.yml';
+---
+<Base title="Tested on" description="The displays and machines UrDeck has been run on, what is expected to work, and how to send a report.">
+  <h1>Tested on</h1>
+  <p>
+    UrDeck was made for one panel and is checked on the hardware listed here. This list starts with one entry; it grows
+    with reports.
+  </p>
+
+  <h2>Tested</h2>
+  {data.entries.map((e) => (
+    <section>
+      <h3>{e.display}</h3>
+      <table>
+        <tbody>
+          <tr><th scope="row">Connection</th><td>{e.connection}</td></tr>
+          <tr><th scope="row">Resolution</th><td>{e.resolution}</td></tr>
+          <tr><th scope="row">GPU</th><td>{e.gpu}</td></tr>
+          <tr><th scope="row">Windows</th><td>{e.windows}</td></tr>
+        </tbody>
+      </table>
+      <p>What was checked:</p>
+      <ul>{e.checked.map((c) => <li>{c}</li>)}</ul>
+    </section>
+  ))}
+
+  <h2>Expected, not tested</h2>
+  <p>
+    A display that Windows treats as a monitor is expected to work: UrDeck lays out a grid of square cells from the
+    monitor's width, so the size and orientation should not matter. That is an expectation, not a result, wherever it is
+    not listed above. GPU load and temperature come from Windows and should work with any GPU; power and clock readings
+    need NVIDIA's driver library today and show a dash on AMD and Intel.
+  </p>
+
+  <h2>Does not work</h2>
+  <p>
+    Small USB LCD screens that Windows does not treat as a monitor (those driven by their own software through a
+    serial or HID protocol) do not work: UrDeck draws on a display Windows knows about.
+  </p>
+
+  <h2>Send a report</h2>
+  <p>
+    If you ran UrDeck on something, tell me how it went, whether it worked or not.
+    <a href={report}>Open the hardware report form</a>. It asks for the display and how it is connected, your GPU, your
+    Windows version, what worked, and the lines <code>urdeck.log</code> writes at startup (the monitors, the display
+    chosen, the background surface and the source of each reading). Look through those lines before you post them.
+  </p>
+
+  <p class="note">
+    HYTE and HYTE Y70 Touch are trademarks of their owner, mentioned here only to say what UrDeck was tested on. UrDeck is
+    not affiliated with HYTE. NVIDIA, GeForce and Windows are trademarks of their respective owners.
+  </p>
+</Base>

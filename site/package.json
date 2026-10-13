@@ -1,0 +1,16 @@
+{
+  "name": "urdeck-site",
+  "private": true,
+  "type": "module",
+  "version": "0.0.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/check-output.mjs",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "7.3.8",
+    "sharp": "0.35.5"
+  }
+}

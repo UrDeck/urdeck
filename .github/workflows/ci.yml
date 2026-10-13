@@ -25,6 +25,7 @@ jobs:
     outputs:
       code: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.code_candidate == 'true' || steps.filter.outputs.code_schema == 'true' || steps.filter.outputs.code_workflow == 'true' }}
       openspec: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.openspec == 'true' }}
+      site: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.site == 'true' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -51,6 +52,10 @@ jobs:
               - '.github/workflows/ci.yml'
             openspec:
               - 'openspec/**'
+            site:
+              - 'site/**'
+              - 'docs/schemas/**'
+              - '.github/workflows/site-deploy.yml'
 
   # Build, format, tests and coverage floor (gated through ci-ok).
   build:
@@ -167,10 +172,33 @@ jobs:
       - name: Validate OpenSpec
         run: npx --yes @fission-ai/openspec@1.7.0 validate --all --strict
 
+  # The website (site/): a build with its checks (schema copy, internal links, third-party references). Publishing is
+  # site-deploy.yml, on main only.
+  site:
+    needs: changes
+    if: needs.changes.outputs.site == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - run: npm ci
+
+      - name: Build and check
+        run: npm run build
+
   # Required status check, the one gate for the jobs above. Skipped counts as passed; failed or cancelled (a failed
   # `changes` included) fails it. Every job except pr-title belongs in `needs`: add a new job here in the pull request that adds it.
   ci-ok:
-    needs: [changes, build, test-linux, openspec]
+    needs: [changes, build, test-linux, openspec, site]
     if: always()
     runs-on: ubuntu-latest
     steps:

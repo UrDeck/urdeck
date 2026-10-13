@@ -696,6 +696,12 @@ The 2026-10-08 weather exploration took the poster frame and the motion level; s
 Out of scope here: the weather widget itself, the background feature (item 9; the spike only measures one), page
 navigation (item 8; the spike only tries a swipe), display targeting (item 6).
 
+## 14b. Website (`openspec/changes/landing-site`)
+
+- [x] Website in `site/` (Astro): landing page, configuration pages, "Tested on", the schema at `/schemas/v1/shader-manifest.json`; `site` CI job and a Pages deploy workflow.
+- [x] Hardware report issue template (`.github/ISSUE_TEMPLATE/hardware-report.yml`); the "Tested on" page is the start of milestone 2's compatibility table.
+- [ ] Owner steps: verify `urdeck.app` for the organisation, enable Pages, DNS, the design in Claude Design (see the change's tasks).
+
 ## 15. Ideas not yet scheduled (added 2026-10-08)
 
 Collected while the milestones were drawn up. Each names the milestone that needs it; none has an OpenSpec change yet.
