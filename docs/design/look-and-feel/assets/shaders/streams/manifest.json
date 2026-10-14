@@ -1,0 +1,55 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Streams",
+  "description": "Fine columns of light flowing downward, like data in a server room.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "technical",
+    "data",
+    "gaming"
+  ],
+  "pairsWith": {
+    "themes": [
+      "carbon",
+      "rigline",
+      "blueprint"
+    ]
+  },
+  "parameters": {
+    "density": {
+      "label": "Density",
+      "description": "Number of streams.",
+      "min": 0.3,
+      "max": 3,
+      "step": 0.05
+    },
+    "trail": {
+      "label": "Trail",
+      "description": "Length of each trail.",
+      "min": 0.3,
+      "max": 3,
+      "step": 0.05
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Streams in the Rigline palette",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "rigline",
+        "colors": [
+          "#060a0d",
+          "#0f4d41",
+          "#1f9e82",
+          "#8affd8"
+        ]
+      }
+    }
+  ]
+}

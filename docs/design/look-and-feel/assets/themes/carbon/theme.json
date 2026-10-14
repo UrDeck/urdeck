@@ -1,0 +1,170 @@
+{
+  "format": 2,
+  "meta": {
+    "name": "Carbon",
+    "description": "IT and business. Near-black, hairline cards with registration corners, mono numerals, segmented bars, one phosphor accent that turns amber under load.",
+    "mode": "dark",
+    "tags": [
+      "technical",
+      "business",
+      "dark"
+    ],
+    "pairsWith": {
+      "backgrounds": [
+        "contour",
+        "streams",
+        "plotter",
+        "nebula",
+        "warpgate"
+      ]
+    },
+    "license": "GPL-3.0-or-later"
+  },
+  "colors": {
+    "background": "#090b0e",
+    "cardFill": "#0f1318",
+    "cardBorder": "#232a33",
+    "text": "#e6e9ee",
+    "textMuted": "#8f9aa8",
+    "accent": "#4ff0c8",
+    "accentDim": "#334ff0c8",
+    "good": "#4ff0c8",
+    "warning": "#ffb020",
+    "critical": "#ff5a4d",
+    "backgroundPalette": [
+      "#090b0e",
+      "#10161b",
+      "#1f6f61",
+      "#4ff0c8"
+    ],
+    "ink": "#06120f"
+  },
+  "card": {
+    "radius": 0.03,
+    "borderWidth": 0.009,
+    "gap": 0.09,
+    "padding": 0.12,
+    "cornerMarks": {
+      "style": "bracket",
+      "corners": [
+        "tl",
+        "br"
+      ],
+      "size": 0.09,
+      "thickness": 0.018,
+      "inset": -0.009,
+      "color": "#4ff0c8"
+    },
+    "accentStrip": {
+      "side": "bottom",
+      "thickness": 0.018,
+      "length": 1.0,
+      "colors": [
+        "#4ff0c8"
+      ],
+      "fade": true
+    }
+  },
+  "pattern": {
+    "kind": "dots",
+    "spacing": 0.127,
+    "thickness": 0.009,
+    "color": "#10ffffff"
+  },
+  "divider": {
+    "style": "line",
+    "color": "#232a33",
+    "thickness": 0.009
+  },
+  "chip": {
+    "shape": "none",
+    "colorBy": "status"
+  },
+  "typography": {
+    "font": "InstrumentSans-Variable.ttf",
+    "fonts": {
+      "value": "JetBrainsMono-Variable.ttf",
+      "unit": "JetBrainsMono-Variable.ttf",
+      "label": "JetBrainsMono-Variable.ttf"
+    },
+    "weights": {
+      "value": 500,
+      "unit": 500,
+      "label": 500,
+      "body": 400,
+      "title": 500
+    },
+    "labelSize": 0.1,
+    "bodySize": 0.11,
+    "titleSize": 0.12,
+    "unitRatio": 0.38,
+    "valueScale": 1.0,
+    "case": {
+      "label": "upper",
+      "title": "upper"
+    },
+    "tracking": {
+      "value": -0.04,
+      "label": 0.14
+    }
+  },
+  "stroke": {
+    "thickness": 0.07,
+    "cap": "square"
+  },
+  "gauge": {
+    "style": "bar",
+    "segments": {
+      "length": 0.073,
+      "gap": 0.027
+    },
+    "colorBy": "accent",
+    "sparkline": {
+      "enabled": true,
+      "height": 0.33,
+      "historySeconds": 60,
+      "strokeWidth": 0.014
+    },
+    "status": {
+      "enabled": true,
+      "thresholds": [
+        0.7,
+        0.9
+      ],
+      "labels": [
+        "OK",
+        "WARM",
+        "HOT"
+      ]
+    }
+  },
+  "icons": {
+    "set": "outline",
+    "stroke": 0.066,
+    "tint": "accent",
+    "animated": false
+  },
+  "background": {
+    "default": {
+      "name": "contour"
+    },
+    "static": {
+      "color": "#090b0e"
+    }
+  },
+  "motion": {
+    "level": "full"
+  },
+  "indicator": {
+    "active": "#4ff0c8",
+    "inactive": "#40ffffff",
+    "backdrop": "#cc090b0e"
+  },
+  "press": {
+    "scale": 0.97,
+    "opacity": 0.9
+  },
+  "dock": {
+    "height": 0.71
+  }
+}

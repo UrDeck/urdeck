@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Map contour lines of a slowly changing landscape. Quiet and almost dark.
+// Palette roles: iColor0 ground, iColor1 ground lit, iColor2 minor lines, iColor3 index lines (every fifth).
+// The landscape repeats every 120 s, which divides the four-hour time wrap.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float density;     // default: 14.0
+uniform float lineWidth;   // default: 1.0
+uniform float relief;      // default: 1.0
+
+float field(float2 p, float t) {
+    float a = 6.2831853 * t / 120.0;
+    float v = 0.0;
+    v += 0.50 * sin(p.x * 2.1 + sin(p.y * 1.3 + a) * 1.4 + a);
+    v += 0.35 * sin(p.y * 3.3 + sin(p.x * 2.2 - a) * 1.1 - a * 2.0);
+    v += 0.22 * sin((p.x + p.y) * 4.7 + a * 3.0);
+    v += 0.12 * sin((p.x - p.y) * 9.1 - a * 5.0);
+    return v * relief;
+}
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float ar = iResolution.x / iResolution.y;
+    float2 p = float2(uv.x * ar, uv.y) * 2.2;
+    float h = field(p, iTime);
+    // Numeric gradient length gives a line width that stays about one pixel wide.
+    float e = 1.0 / iResolution.y * 2.2;
+    float gx = field(p + float2(e, 0.0), iTime) - h;
+    float gy = field(p + float2(0.0, e), iTime) - h;
+    float g = max(length(float2(gx, gy)) / e, 0.0001);
+    float level = h * density;
+    float dist = abs(fract(level) - 0.5);                 // 0.5 at a line centre... distance from line is 0.5 - dist
+    float lineDist = (0.5 - dist) / (g * density) * iResolution.y / 2.2;   // in pixels
+    float w = 0.75 * lineWidth;
+    float line = 1.0 - smoothstep(w, w + 1.2, lineDist);
+    float idx = floor(level + 0.5);
+    float isIndex = step(abs(mod(idx, 5.0)), 0.5);
+    float3 ground = mix(iColor0.rgb, iColor1.rgb, smoothstep(-1.0, 1.0, h));
+    float3 lineCol = mix(iColor2.rgb, iColor3.rgb, isIndex);
+    float3 col = mix(ground, lineCol, line * (0.55 + 0.45 * isIndex));
+    // The lines fade toward the top and bottom so a clock or a dock above them stays calm.
+    float calm = 1.0 - 0.45 * pow(abs(uv.y - 0.5) * 2.0, 3.0);
+    col = mix(ground, col, calm);
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

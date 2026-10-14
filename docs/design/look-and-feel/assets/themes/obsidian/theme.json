@@ -1,0 +1,167 @@
+{
+  "format": 2,
+  "meta": {
+    "name": "Obsidian",
+    "description": "Executive calm. Warm black, champagne hairlines, high-contrast Didone numerals, gauges reduced to a thin ring with one jewel marker, circular dock buttons.",
+    "mode": "dark",
+    "tags": [
+      "executive",
+      "calm",
+      "dark"
+    ],
+    "pairsWith": {
+      "backgrounds": [
+        "nebula",
+        "vortex",
+        "warpgate"
+      ]
+    },
+    "license": "GPL-3.0-or-later"
+  },
+  "colors": {
+    "background": "#0a0908",
+    "cardFill": "#15120e",
+    "cardBorder": "#33d9b86c",
+    "text": "#efe6d3",
+    "textMuted": "#b79a5e",
+    "accent": "#d9b86c",
+    "accentDim": "#33d9b86c",
+    "accent2": "#f3e3b5",
+    "good": "#9fc79b",
+    "warning": "#e0a84a",
+    "critical": "#d9715b",
+    "backgroundPalette": [
+      "#0a0908",
+      "#2a2114",
+      "#6b5528",
+      "#d9b86c"
+    ]
+  },
+  "card": {
+    "radius": 0.055,
+    "borderWidth": 0.009,
+    "gap": 0.09,
+    "padding": 0.145,
+    "fillGradient": {
+      "colors": [
+        "#15120e",
+        "#0e0c09"
+      ],
+      "angle": 100
+    },
+    "borderGradient": {
+      "colors": [
+        "#d9b86c",
+        "#33d9b86c"
+      ],
+      "kind": "linear",
+      "angle": 90
+    },
+    "highlight": {
+      "top": "#88d9b86c",
+      "thickness": 0.009
+    },
+    "compact": {
+      "shape": "circle",
+      "borderWidth": 0.009
+    }
+  },
+  "divider": {
+    "style": "gradient",
+    "color": "#d9b86c",
+    "gradientTo": "#00d9b86c",
+    "thickness": 0.009
+  },
+  "typography": {
+    "font": "Jost-Variable.ttf",
+    "fonts": {
+      "value": "BodoniModa-Variable.ttf",
+      "unit": "Jost-Variable.ttf",
+      "label": "Jost-Variable.ttf"
+    },
+    "weights": {
+      "value": 500,
+      "unit": 400,
+      "label": 500,
+      "body": 400,
+      "title": 500
+    },
+    "labelSize": 0.095,
+    "bodySize": 0.118,
+    "titleSize": 0.13,
+    "unitRatio": 0.3,
+    "valueScale": 1.25,
+    "case": {
+      "label": "upper",
+      "title": "upper"
+    },
+    "tracking": {
+      "value": -0.02,
+      "label": 0.28,
+      "title": 0.2
+    }
+  },
+  "stroke": {
+    "thickness": 0.02,
+    "cap": "round"
+  },
+  "gauge": {
+    "style": "marker",
+    "sweep": {
+      "start": 135,
+      "span": 270
+    },
+    "marker": {
+      "shape": "diamond",
+      "size": 0.06,
+      "color": "#f3e3b5",
+      "halo": true
+    },
+    "track": {
+      "color": "#33d9b86c",
+      "widthRatio": 1
+    }
+  },
+  "icons": {
+    "set": "outline",
+    "stroke": 0.05,
+    "tint": "accent",
+    "animated": false
+  },
+  "background": {
+    "default": {
+      "name": "nebula"
+    },
+    "static": {
+      "gradient": {
+        "colors": [
+          "#2a2114",
+          "#0a0908"
+        ],
+        "kind": "radial",
+        "cx": 0.5,
+        "cy": 0.0,
+        "radius": 0.9
+      }
+    },
+    "scrim": {
+      "color": "#000000",
+      "alpha": 0.2
+    }
+  },
+  "motion": {
+    "level": "reduced"
+  },
+  "indicator": {
+    "active": "#d9b86c",
+    "inactive": "#40d9b86c",
+    "backdrop": "#cc0a0908"
+  },
+  "press": {
+    "scale": 0.97,
+    "opacity": 0.9
+  },
+  "dock": {
+    "height": 0.71
+  }
+}
