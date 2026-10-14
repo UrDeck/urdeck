@@ -1,0 +1,221 @@
+{
+  "format": 2,
+  "meta": {
+    "name": "Rigline",
+    "description": "The RGB crowd. A slow spectrum travels round every card edge, numbers glow, gauges are gradient arcs whose hue follows load, tiles light a strip underneath like case fans.",
+    "mode": "dark",
+    "tags": [
+      "gaming",
+      "rgb",
+      "dark"
+    ],
+    "pairsWith": {
+      "backgrounds": [
+        "horizon",
+        "spectrum",
+        "equalizer",
+        "streams",
+        "warpgate",
+        "vortex",
+        "embers"
+      ]
+    },
+    "license": "GPL-3.0-or-later"
+  },
+  "colors": {
+    "background": "#07060d",
+    "cardFill": "#141026",
+    "cardBorder": "#2a2347",
+    "text": "#f4f2ff",
+    "textMuted": "#9d96c9",
+    "accent": "#19e6ff",
+    "accentDim": "#2519e6ff",
+    "accent2": "#ff3ea5",
+    "good": "#3dff8a",
+    "warning": "#ffb020",
+    "critical": "#ff3ea5",
+    "ramp": [
+      "#19e6ff",
+      "#7a5cff",
+      "#ff3ea5"
+    ],
+    "backgroundPalette": [
+      "#07060d",
+      "#2a1a5e",
+      "#7a5cff",
+      "#19e6ff"
+    ]
+  },
+  "card": {
+    "radius": 0.145,
+    "borderWidth": 0.014,
+    "gap": 0.09,
+    "padding": 0.127,
+    "fillGradient": {
+      "colors": [
+        "#141026",
+        "#0b0916"
+      ],
+      "angle": 70
+    },
+    "borderGradient": {
+      "colors": [
+        "#ff3ea5",
+        "#ffb020",
+        "#3dff8a",
+        "#19e6ff",
+        "#7a5cff",
+        "#ff3ea5"
+      ],
+      "kind": "conic"
+    },
+    "borderAnimate": {
+      "mode": "spin",
+      "period": 7
+    },
+    "glow": {
+      "blur": 0.24,
+      "color": "#aa7a5c",
+      "alpha": 0.35
+    },
+    "compact": {
+      "accentStrip": {
+        "thickness": 0.027,
+        "length": 0.72,
+        "colors": [
+          "#ff3ea5",
+          "#ffb020",
+          "#3dff8a",
+          "#19e6ff"
+        ],
+        "glow": {
+          "blur": 0.13,
+          "alpha": 0.8
+        },
+        "side": "bottom"
+      }
+    }
+  },
+  "pattern": {
+    "kind": "scanlines",
+    "spacing": 0.036,
+    "thickness": 0.009,
+    "color": "#07ffffff",
+    "scroll": {
+      "dx": 0,
+      "dy": 0.25
+    }
+  },
+  "chip": {
+    "shape": "none"
+  },
+  "typography": {
+    "font": "ChakraPetch-Bold.ttf",
+    "weights": {
+      "value": 700,
+      "unit": 700,
+      "label": 700,
+      "body": 500,
+      "title": 700
+    },
+    "labelSize": 0.1,
+    "bodySize": 0.115,
+    "titleSize": 0.13,
+    "unitRatio": 0.4,
+    "valueScale": 1.0,
+    "case": {
+      "label": "upper"
+    },
+    "tracking": {
+      "value": -0.02,
+      "label": 0.2
+    },
+    "slant": 10,
+    "valueFill": {
+      "colors": [
+        "#ff3ea5",
+        "#ffb020",
+        "#3dff8a",
+        "#19e6ff",
+        "#7a5cff",
+        "#ff3ea5"
+      ],
+      "angle": 0,
+      "animate": {
+        "period": 6
+      }
+    },
+    "valueGlow": {
+      "blur": 0.1,
+      "alpha": 0.4
+    }
+  },
+  "stroke": {
+    "thickness": 0.07,
+    "cap": "round"
+  },
+  "gauge": {
+    "style": "ring",
+    "sweep": {
+      "start": 135,
+      "span": 270
+    },
+    "gradient": "ramp",
+    "colorBy": "ramp",
+    "glow": {
+      "blur": 0.05,
+      "alpha": 0.8
+    },
+    "track": {
+      "color": "#12ffffff"
+    },
+    "valueTint": false
+  },
+  "icons": {
+    "set": "outline",
+    "stroke": 0.066,
+    "tint": "ramp",
+    "animated": false,
+    "glow": {
+      "blur": 0.055,
+      "alpha": 0.7
+    }
+  },
+  "background": {
+    "default": {
+      "name": "horizon"
+    },
+    "static": {
+      "gradient": {
+        "colors": [
+          "#07060d",
+          "#1a1240"
+        ],
+        "angle": 90
+      }
+    },
+    "scrim": {
+      "color": "#000000",
+      "alpha": 0.15
+    }
+  },
+  "motion": {
+    "level": "full"
+  },
+  "indicator": {
+    "active": "#19e6ff",
+    "inactive": "#40ffffff",
+    "backdrop": "#cc07060d"
+  },
+  "press": {
+    "scale": 0.96,
+    "opacity": 0.85
+  },
+  "dock": {
+    "height": 0.71
+  },
+  "well": {
+    "fill": "#0affffff",
+    "radius": 0.09
+  }
+}

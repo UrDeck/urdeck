@@ -1,0 +1,145 @@
+{
+  "format": 2,
+  "meta": {
+    "name": "Pop",
+    "description": "The loud one. Flat saturated colour per card, thick black outlines, hard offset shadows, huge heavy numerals. Photographs well for the site.",
+    "mode": "light",
+    "tags": [
+      "playful",
+      "light",
+      "bold"
+    ],
+    "pairsWith": {
+      "backgrounds": [
+        "shapes",
+        "ripple"
+      ]
+    },
+    "license": "GPL-3.0-or-later"
+  },
+  "colors": {
+    "background": "#f6f0e0",
+    "cardFill": "#ffd84a",
+    "cardBorder": "#111111",
+    "text": "#111111",
+    "textMuted": "#2b2b2b",
+    "accent": "#111111",
+    "accentDim": "#22111111",
+    "accent2": "#3b5bff",
+    "good": "#b9f24a",
+    "warning": "#ffd84a",
+    "critical": "#ff5a4d",
+    "cardTints": [
+      "#ffd84a",
+      "#8ee3ff",
+      "#ff8fc2",
+      "#b9f24a",
+      "#3b5bff"
+    ],
+    "ink": "#111111",
+    "backgroundPalette": [
+      "#f6f0e0",
+      "#3b5bff",
+      "#ff8fc2",
+      "#b9f24a"
+    ]
+  },
+  "card": {
+    "radius": 0.127,
+    "borderWidth": 0.027,
+    "gap": 0.11,
+    "padding": 0.127,
+    "tint": "cycle",
+    "shadow": {
+      "x": 0.055,
+      "y": 0.055,
+      "blur": 0,
+      "color": "#111111"
+    },
+    "compact": {
+      "radius": 0.127
+    }
+  },
+  "typography": {
+    "font": "Archivo-Variable.ttf",
+    "fonts": {
+      "value": "ArchivoBlack-Regular.ttf",
+      "unit": "Archivo-Variable.ttf"
+    },
+    "weights": {
+      "value": 400,
+      "unit": 800,
+      "label": 800,
+      "body": 500,
+      "title": 800
+    },
+    "labelSize": 0.11,
+    "bodySize": 0.127,
+    "titleSize": 0.14,
+    "unitRatio": 0.3,
+    "valueScale": 1.35,
+    "case": {
+      "label": "upper"
+    },
+    "tracking": {
+      "value": -0.04,
+      "label": 0.06
+    }
+  },
+  "stroke": {
+    "thickness": 0.09,
+    "cap": "square"
+  },
+  "gauge": {
+    "style": "thickbar",
+    "outline": {
+      "width": 0.027,
+      "color": "#111111"
+    },
+    "track": {
+      "color": "#ffffffff"
+    },
+    "colorBy": "accent"
+  },
+  "icons": {
+    "set": "outline",
+    "stroke": 0.085,
+    "tint": "text",
+    "animated": false
+  },
+  "background": {
+    "default": {
+      "name": "shapes"
+    },
+    "static": {
+      "color": "#f6f0e0"
+    }
+  },
+  "motion": {
+    "level": "full"
+  },
+  "indicator": {
+    "active": "#111111",
+    "inactive": "#55111111",
+    "backdrop": "#ccf6f0e0"
+  },
+  "press": {
+    "scale": 0.94,
+    "opacity": 1.0
+  },
+  "dock": {
+    "height": 0.71
+  },
+  "chip": {
+    "shape": "pill",
+    "fill": "#ffd84a",
+    "border": "#111111",
+    "textColor": "#111111",
+    "colorBy": "none"
+  },
+  "well": {
+    "fill": "#ffffff",
+    "radius": 0.09,
+    "border": "#111111"
+  }
+}

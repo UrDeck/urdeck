@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Sparks lift off a glowing horizon and fade. Three depths of particles over a heat glow, dark at the top where widgets live.
+// Palette roles: iColor0 night, iColor1 heat glow, iColor2 spark, iColor3 white-hot spark.
+// The three layers scroll at 0.5, 0.8 and 1.25 cells per second: each is a whole number of cells over the four-hour wrap.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float density;   // default: 1.0
+uniform float heat;      // default: 1.0
+
+float hash11(float n) { return fract(sin(n * 127.1) * 43758.5453); }
+float hash21(float2 p) { return fract(sin(dot(p, float2(127.1, 311.7))) * 43758.5453); }
+
+// One layer of sparks. The cell grid scrolls upward at a fixed rate; each cell holds at most one spark that drifts a little
+// sideways. The scroll rate times the four-hour time wrap is a whole number of cells, so the wrap is seamless.
+float sparks(float2 uv, float ar, float cells, float seed, float size, float rate) {
+    float tau = 6.2831853;
+    float2 g = float2(uv.x * ar * cells, uv.y * cells + iTime * rate);
+    float2 id = floor(g);
+    float2 f = fract(g);
+    float r = hash21(id + seed);
+    if (r > 0.5 * density) return 0.0;
+    float sway = sin(iTime * tau / 8.0 + hash21(id + seed + 2.0) * tau) * 0.12;
+    float2 pos = float2(0.5 + sway + (hash21(id + seed + 1.0) - 0.5) * 0.2, 0.3 + 0.4 * hash21(id + seed + 4.0));
+    float d = length(f - pos);
+    // Sparks brighten as they leave the glow and die toward the top: fade by screen height.
+    float fade = smoothstep(0.02, 0.2, uv.y) * smoothstep(1.0, 0.45, 1.0 - uv.y);
+    float flick = 0.75 + 0.25 * sin(tau * iTime / 0.8 + hash21(id + seed) * tau);
+    float core = smoothstep(size, 0.0, d);
+    float halo = exp(-d * d / (size * size * 5.0)) * 0.3;   // gone before the cell edge, so no square clipping
+    return (core + halo) * fade * flick;
+}
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float ar = iResolution.x / iResolution.y;
+    // Heat glow rising from the bottom edge.
+    float g = pow(clamp(uv.y, 0.0, 1.0), 2.6);
+    float3 col = mix(iColor0.rgb, iColor1.rgb, g * heat);
+    col += iColor2.rgb * pow(uv.y, 7.0) * 0.45 * heat;
+    float s = 0.0;
+    s += sparks(uv, ar, 11.0, 1.0, 0.09, 0.5) * 0.5;      // far
+    s += sparks(uv, ar, 7.0, 40.0, 0.09, 0.8) * 0.8;      // middle
+    s += sparks(uv, ar, 4.5, 90.0, 0.08, 1.25) * 1.0;      // near
+    col += mix(iColor2.rgb, iColor3.rgb, clamp(s, 0.0, 1.0)) * s;
+    // Keep the top quiet.
+    col = mix(iColor0.rgb, col, smoothstep(0.0, 0.3, uv.y));
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

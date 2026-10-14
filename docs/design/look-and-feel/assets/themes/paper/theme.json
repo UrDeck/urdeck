@@ -1,0 +1,138 @@
+{
+  "format": 2,
+  "meta": {
+    "name": "Paper",
+    "description": "The daylight option. Warm off-white, soft shadows instead of borders, one vermilion accent, tabular figures. Reads like a well-set report.",
+    "mode": "light",
+    "tags": [
+      "light",
+      "business",
+      "calm"
+    ],
+    "pairsWith": {
+      "backgrounds": [
+        "contour",
+        "ripple",
+        "plotter",
+        "shapes"
+      ]
+    },
+    "license": "GPL-3.0-or-later"
+  },
+  "colors": {
+    "background": "#e9e7e0",
+    "cardFill": "#f8f7f3",
+    "cardBorder": "#1217181c",
+    "text": "#17181c",
+    "textMuted": "#6a685f",
+    "accent": "#e5502b",
+    "accentDim": "#1417181c",
+    "good": "#2f9e5b",
+    "warning": "#d98a00",
+    "critical": "#c9302c",
+    "backgroundPalette": [
+      "#e9e7e0",
+      "#dcd8cc",
+      "#e6c9b8",
+      "#e5502b"
+    ]
+  },
+  "card": {
+    "radius": 0.09,
+    "borderWidth": 0,
+    "gap": 0.09,
+    "padding": 0.145,
+    "shadow": {
+      "x": 0,
+      "y": 0.127,
+      "blur": 0.25,
+      "spread": -0.16,
+      "color": "#553a301b"
+    },
+    "highlight": {
+      "top": "#ffffffff",
+      "thickness": 0.009
+    }
+  },
+  "divider": {
+    "style": "line",
+    "color": "#1817181c",
+    "thickness": 0.009
+  },
+  "typography": {
+    "font": "InstrumentSans-Variable.ttf",
+    "fonts": {
+      "value": "InstrumentSans-Variable.ttf",
+      "unit": "JetBrainsMono-Variable.ttf",
+      "label": "JetBrainsMono-Variable.ttf"
+    },
+    "weights": {
+      "value": 600,
+      "unit": 500,
+      "label": 500,
+      "body": 400,
+      "title": 600
+    },
+    "labelSize": 0.1,
+    "bodySize": 0.118,
+    "titleSize": 0.13,
+    "unitRatio": 0.35,
+    "valueScale": 1.1,
+    "case": {
+      "label": "upper"
+    },
+    "tracking": {
+      "value": -0.045,
+      "label": 0.1
+    }
+  },
+  "stroke": {
+    "thickness": 0.055,
+    "cap": "round"
+  },
+  "gauge": {
+    "style": "meter",
+    "scale": {
+      "labels": [
+        "0",
+        "50",
+        "100"
+      ],
+      "size": 0.09
+    },
+    "track": {
+      "color": "#1417181c",
+      "widthRatio": 1
+    },
+    "colorBy": "accent"
+  },
+  "icons": {
+    "set": "outline",
+    "stroke": 0.066,
+    "tint": "accent",
+    "animated": false
+  },
+  "background": {
+    "default": {
+      "name": "contour"
+    },
+    "static": {
+      "color": "#e9e7e0"
+    }
+  },
+  "motion": {
+    "level": "reduced"
+  },
+  "indicator": {
+    "active": "#17181c",
+    "inactive": "#4017181c",
+    "backdrop": "#aae9e7e0"
+  },
+  "press": {
+    "scale": 0.97,
+    "opacity": 0.9
+  },
+  "dock": {
+    "height": 0.71
+  }
+}

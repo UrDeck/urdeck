@@ -1,0 +1,186 @@
+{
+  "format": 2,
+  "meta": {
+    "name": "Ember",
+    "description": "An instrument cluster. Chamfered cards, tachometer gauges with a red-line zone that lights when load spikes, condensed italic numerals glowing amber.",
+    "mode": "dark",
+    "tags": [
+      "gaming",
+      "racing",
+      "dark"
+    ],
+    "pairsWith": {
+      "backgrounds": [
+        "embers",
+        "warpgate",
+        "equalizer"
+      ]
+    },
+    "license": "GPL-3.0-or-later"
+  },
+  "colors": {
+    "background": "#0b0806",
+    "cardFill": "#140d09",
+    "cardBorder": "#ff8a1f",
+    "text": "#fbeede",
+    "textMuted": "#d49a6a",
+    "accent": "#ffb347",
+    "accentDim": "#33ffb347",
+    "accent2": "#ff3b2a",
+    "good": "#7bd88f",
+    "warning": "#ff8a1f",
+    "critical": "#ff3b2a",
+    "backgroundPalette": [
+      "#0b0604",
+      "#5a1a07",
+      "#ff7a1a",
+      "#ffd9a0"
+    ]
+  },
+  "card": {
+    "radius": 0,
+    "borderWidth": 0.009,
+    "gap": 0.09,
+    "padding": 0.127,
+    "shape": "chamfer",
+    "cut": 0.145,
+    "cutCorners": [
+      "tr",
+      "bl"
+    ],
+    "fillGradient": {
+      "colors": [
+        "#1a120c",
+        "#0f0a07"
+      ],
+      "angle": 70
+    },
+    "borderGradient": {
+      "colors": [
+        "#ff8a1f",
+        "#5c2a0a",
+        "#ff8a1f"
+      ],
+      "kind": "linear",
+      "angle": 45
+    }
+  },
+  "pattern": {
+    "kind": "hatch",
+    "spacing": 0.082,
+    "angle": 45,
+    "thickness": 0.018,
+    "color": "#05ffffff"
+  },
+  "typography": {
+    "font": "BarlowCondensed-Bold.ttf",
+    "weights": {
+      "value": 700,
+      "unit": 700,
+      "label": 700,
+      "body": 500,
+      "title": 700
+    },
+    "labelSize": 0.118,
+    "bodySize": 0.127,
+    "titleSize": 0.14,
+    "unitRatio": 0.4,
+    "valueScale": 1.2,
+    "case": {
+      "label": "upper"
+    },
+    "tracking": {
+      "value": 0.01,
+      "label": 0.2
+    },
+    "slant": 10,
+    "valueGlow": {
+      "blur": 0.16,
+      "color": "#ff7a1a",
+      "alpha": 0.55
+    }
+  },
+  "stroke": {
+    "thickness": 0.08,
+    "cap": "square"
+  },
+  "gauge": {
+    "style": "tach",
+    "sweep": {
+      "start": 135,
+      "span": 270
+    },
+    "ticks": {
+      "count": 28,
+      "majorEvery": 4,
+      "length": 0.07,
+      "thickness": 0.01,
+      "color": "#ffffff1c",
+      "labels": false
+    },
+    "redline": {
+      "from": 0.8,
+      "color": "#ff3b2a",
+      "glow": {
+        "blur": 0.07,
+        "alpha": 0.7
+      },
+      "lightsAbove": true
+    },
+    "marker": {
+      "shape": "needle",
+      "size": 0.05,
+      "color": "#ffb347"
+    },
+    "track": {
+      "color": "#1cffffff"
+    },
+    "gradient": {
+      "colors": [
+        "#ffb347",
+        "#ff8a1f"
+      ],
+      "angle": 0
+    },
+    "glow": {
+      "blur": 0.05,
+      "color": "#ff7a1a",
+      "alpha": 0.6
+    }
+  },
+  "icons": {
+    "set": "outline",
+    "stroke": 0.075,
+    "tint": "accent",
+    "animated": false
+  },
+  "background": {
+    "default": {
+      "name": "embers"
+    },
+    "static": {
+      "gradient": {
+        "colors": [
+          "#0b0806",
+          "#2a1208"
+        ],
+        "angle": 90
+      }
+    }
+  },
+  "motion": {
+    "level": "full"
+  },
+  "indicator": {
+    "active": "#ffb347",
+    "inactive": "#40ffffff",
+    "backdrop": "#cc0b0806"
+  },
+  "press": {
+    "scale": 0.96,
+    "opacity": 0.85
+  },
+  "dock": {
+    "height": 0.71
+  }
+}

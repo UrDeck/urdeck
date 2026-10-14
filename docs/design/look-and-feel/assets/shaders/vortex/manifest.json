@@ -1,0 +1,62 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Vortex",
+  "description": "Light rays spiralling into a glowing core in two layers turning in opposite directions.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "hypnotic",
+    "space",
+    "gaming"
+  ],
+  "pairsWith": {
+    "themes": [
+      "rigline",
+      "prism",
+      "obsidian"
+    ]
+  },
+  "parameters": {
+    "arms": {
+      "label": "Arms",
+      "description": "Number of spiral arms.",
+      "min": 3,
+      "max": 24,
+      "step": 1
+    },
+    "twist": {
+      "label": "Twist",
+      "description": "How tightly the arms wind.",
+      "min": 0,
+      "max": 3,
+      "step": 0.05
+    },
+    "core": {
+      "label": "Core",
+      "description": "Size of the glowing core.",
+      "min": 0.3,
+      "max": 3,
+      "step": 0.05
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Vortex in the Prism palette",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "prism",
+        "colors": [
+          "#06040f",
+          "#3a2a8f",
+          "#7a5cff",
+          "#19e6ff"
+        ]
+      }
+    }
+  ]
+}

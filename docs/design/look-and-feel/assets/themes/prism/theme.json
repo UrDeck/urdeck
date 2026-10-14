@@ -1,0 +1,158 @@
+{
+  "format": 2,
+  "meta": {
+    "name": "Prism",
+    "description": "Glass, grown up. Thick frost, a specular top edge and inner rim light make cards read as cut glass. Light, wide numerals. The safe showpiece over any moving background.",
+    "mode": "dark",
+    "tags": [
+      "glass",
+      "calm",
+      "dark"
+    ],
+    "pairsWith": {
+      "backgrounds": [
+        "nebula",
+        "vortex",
+        "horizon",
+        "spectrum",
+        "ripple"
+      ]
+    },
+    "license": "GPL-3.0-or-later"
+  },
+  "colors": {
+    "background": "#10163a",
+    "cardFill": "#26ffffff",
+    "cardBorder": "#3dffffff",
+    "text": "#ffffff",
+    "textMuted": "#ccffffff",
+    "accent": "#ffffff",
+    "accentDim": "#26ffffff",
+    "accent2": "#bfe6ff",
+    "good": "#9dffcf",
+    "warning": "#ffd9a0",
+    "critical": "#ffb0c8",
+    "backgroundPalette": [
+      "#10163a",
+      "#7b5cff",
+      "#19c6c0",
+      "#ff6aa8"
+    ]
+  },
+  "card": {
+    "radius": 0.27,
+    "borderWidth": 0.009,
+    "gap": 0.09,
+    "padding": 0.145,
+    "fillGradient": {
+      "colors": [
+        "#30ffffff",
+        "#0cffffff",
+        "#18ffffff"
+      ],
+      "angle": 65
+    },
+    "highlight": {
+      "top": "#80ffffff",
+      "bottom": "#55ffffff",
+      "thickness": 0.009
+    },
+    "sheen": {
+      "color": "#38ffffff",
+      "x": 0.05,
+      "y": 0.0,
+      "size": 0.7
+    },
+    "shadow": {
+      "x": 0,
+      "y": 0.16,
+      "blur": 0.36,
+      "color": "#990a0a3a"
+    },
+    "blur": 0.2,
+    "compact": {
+      "radius": 0.24
+    }
+  },
+  "typography": {
+    "font": "BricolageGrotesque-Variable.ttf",
+    "weights": {
+      "value": 300,
+      "unit": 400,
+      "label": 500,
+      "body": 400,
+      "title": 300
+    },
+    "labelSize": 0.118,
+    "bodySize": 0.127,
+    "titleSize": 0.14,
+    "unitRatio": 0.4,
+    "valueScale": 1.15,
+    "tracking": {
+      "value": -0.05
+    }
+  },
+  "stroke": {
+    "thickness": 0.09,
+    "cap": "round"
+  },
+  "gauge": {
+    "style": "ring",
+    "sweep": {
+      "start": -90,
+      "span": 360
+    },
+    "gradient": {
+      "colors": [
+        "#ffffff",
+        "#bfe6ff"
+      ],
+      "angle": 45
+    },
+    "glow": {
+      "blur": 0.04,
+      "color": "#ffffff",
+      "alpha": 0.6
+    },
+    "track": {
+      "color": "#26ffffff"
+    },
+    "labelPosition": "below"
+  },
+  "icons": {
+    "set": "outline",
+    "stroke": 0.05,
+    "tint": "text",
+    "animated": true
+  },
+  "background": {
+    "default": {
+      "name": "nebula"
+    },
+    "static": {
+      "gradient": {
+        "colors": [
+          "#10163a",
+          "#3a2a8f",
+          "#0f8fa8"
+        ],
+        "angle": 125
+      }
+    }
+  },
+  "motion": {
+    "level": "full"
+  },
+  "indicator": {
+    "active": "#ffffff",
+    "inactive": "#59ffffff",
+    "backdrop": "#8c10163a"
+  },
+  "press": {
+    "scale": 0.96,
+    "opacity": 0.85
+  },
+  "dock": {
+    "height": 0.71
+  }
+}

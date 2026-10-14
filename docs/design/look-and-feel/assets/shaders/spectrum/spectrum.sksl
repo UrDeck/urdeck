@@ -1,0 +1,44 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Three soft lights that roam and slowly walk the colour wheel, over iColor0. RGB lighting for a screen.
+// This one deliberately ignores iColor1..3: its colours are hues, not the theme's palette (saturation 0 makes it follow iColor3).
+// Palette roles: iColor0 ground; iColor3 only when saturation is 0; iColor1 and iColor2 are not used (the colours are hues).
+// Every period (20, 24, 30 and 60 s) divides the four-hour time wrap, so there is no jump when time wraps.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor3;
+uniform float saturation;   // default: 0.85
+uniform float intensity;    // default: 1.0
+uniform float hueShift;     // default: 0.0
+uniform float vignette;     // default: 0.6
+
+float3 hsv(float h, float s, float v) {
+    float3 k = clamp(abs(fract(h + float3(0.0, 2.0 / 3.0, 1.0 / 3.0)) * 6.0 - 3.0) - 1.0, 0.0, 1.0);
+    return v * mix(float3(1.0), k, s);
+}
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float ar = iResolution.x / iResolution.y;
+    float2 p = float2((uv.x - 0.5) * ar, uv.y - 0.5);
+    float tau = 6.2831853;
+    float hueBase = hueShift + iTime / 60.0;
+
+    float3 col = iColor0.rgb;
+    for (int i = 0; i < 3; i++) {
+        float fi = float(i);
+        float period = 20.0 + 4.0 * fi + (fi > 1.5 ? 2.0 : 0.0);     // 20, 24, 30
+        float a = tau * iTime / period + fi * 2.1;
+        float2 c = float2(0.32 * sin(a) * ar * 1.3, 0.34 * sin(a * 0.5 + fi * 1.7 + 1.0)) + float2(0.0, 0.0);
+        c.y += (fi - 1.0) * 0.12;
+        float dist = length(p - c);
+        float glow = exp(-dist * dist / (0.05 + 0.02 * fi)) * intensity;
+        float3 hue = hsv(hueBase + fi / 3.0, saturation, 1.0);
+        hue = mix(hue, iColor3.rgb, step(saturation, 0.001));
+        col += hue * glow * 0.85;
+    }
+    // Vignette keeps the middle of the panel calm and the edges dark, so cards stay readable.
+    float edge = smoothstep(0.15, 0.85, length(float2((uv.x - 0.5) * 1.6, uv.y - 0.5)));
+    col = mix(col, iColor0.rgb, edge * vignette);
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

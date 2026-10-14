@@ -1,0 +1,266 @@
+## MODIFIED Requirements
+
+### Requirement: Theme Contents
+A theme MUST define all of the following values:
+
+- Colours, each with transparency: background, card fill, card border, text, muted text, accent, dimmed accent, good,
+  warning and critical
+- Card: corner radius, border width, gap between cards and inner padding
+- Typography: a font family, a weight for each text role (value, unit, label, body, title), a size for each of the
+  three small-text steps (label, body, title), and the ratio of a unit's size to its value's size
+- Stroke: line thickness as a ratio of the drawn element's size, and round or square line ends
+- Gauge: the default gauge style, one of `ring`, `bar` and `verticalBar` (see components, "Gauge Styles"), or one of
+  the format 2 styles `meter`, `tach`, `marker` and `thickbar`
+- Page indicator: the height of its band, the diameter of a dot, the length of the current page's pill, the space
+  between marks, the colour of the current page's mark, the colour of the other marks, and the colour of the
+  translucent pill behind a floating indicator (see page-navigation, "Indicator Mode")
+- Press: the scale and the opacity of a card while it is pressed, each a ratio where 1 means unchanged (see
+  widget-input, "Press Feedback")
+- Dock: the height of the dock's band, which is also the side of a dock slot, as a fraction of a grid cell (see dock,
+  "Dock Slots")
+
+A theme MAY also use the values of format 2 (see "Format 2 Values"); a theme never has to.
+
+A theme MUST NOT contain executable code. The built-in themes use `ring` as the default gauge style. A default gauge
+style that is not one of the seven is replaced by the default theme's value with a logged warning. Until widgets can
+draw the four format 2 styles, a widget that asks for the theme's default gauge style when it is one of them receives
+`ring`. A theme that omits a page indicator value, a press value or the dock height takes the default theme's value
+for it, so themes written before these existed keep working. A press scale outside 0.5 to 1 or a press opacity outside
+0.1 to 1 is replaced by the default theme's value with a logged warning, and so is a dock height outside 0.2 to 1. The
+built-in themes use a dock height of 0.71, which leaves the 1100x3840 panel its 13 rows beside the indicator's band.
+
+#### Scenario: Theme provides every value
+- **WHEN** a theme is loaded
+- **THEN** every value listed above is defined for it
+
+#### Scenario: Colour carries transparency
+- **WHEN** a theme sets the card fill to a colour with 80% opacity
+- **THEN** cards are drawn with that opacity over the window background
+
+#### Scenario: Theme changes the default gauge style
+- **WHEN** a user theme sets the default gauge style to `bar`
+- **THEN** a widget that asks for the theme's default gauge style receives `bar`
+
+#### Scenario: Plain is not a default gauge style
+- **WHEN** a user theme sets the default gauge style to `plain`
+- **THEN** the theme loads with `ring` and a warning is logged
+
+#### Scenario: Format 2 gauge style
+- **WHEN** a user theme sets the default gauge style to `tach`
+- **THEN** the theme loads without a warning and keeps `tach`, and a widget that asks for the default gauge style
+  receives `ring` until the gauge can be drawn that way
+
+#### Scenario: Theme restyles the indicator
+- **WHEN** a user theme sets a longer pill and a different colour for the current page's mark
+- **THEN** the indicator is drawn with that pill length and colour
+
+#### Scenario: Older theme without indicator values
+- **WHEN** a user theme written before the indicator existed is loaded
+- **THEN** it loads without a warning and the indicator uses the default theme's values
+
+#### Scenario: Theme restyles the press
+- **WHEN** a user theme sets the press scale to 0.9 and the press opacity to 1
+- **THEN** a pressed card shrinks to nine tenths of its size and does not dim
+
+#### Scenario: Theme switches press feedback off
+- **WHEN** a user theme sets the press scale and the press opacity to 1
+- **THEN** a pressed card does not change
+
+#### Scenario: Older theme without press values
+- **WHEN** a user theme written before press feedback existed is loaded
+- **THEN** it loads without a warning and a pressed card uses the default theme's values
+
+#### Scenario: Press value out of range
+- **WHEN** a user theme sets the press scale to 2
+- **THEN** the theme loads with the default theme's press scale and a warning is logged
+
+#### Scenario: Theme resizes the dock
+- **WHEN** a user theme sets the dock height to 0.5
+- **THEN** the dock's band and its slots are half a grid cell high
+
+#### Scenario: Older theme without a dock height
+- **WHEN** a user theme written before the dock existed is loaded
+- **THEN** it loads without a warning and the dock uses the default theme's height
+
+#### Scenario: Dock height out of range
+- **WHEN** a user theme sets the dock height to 3
+- **THEN** the theme loads with the default theme's dock height and a warning is logged
+
+## ADDED Requirements
+
+### Requirement: Theme Format Version
+The host MUST load themes of format 1 and format 2 with the same code. A theme MAY declare `"format": 1` or
+`"format": 2`; a theme without it is format 1, and a theme need not declare `format` to use format 2 values.
+
+- A `format` greater than the highest the host supports logs one warning naming the theme, the declared and the
+  supported format, and the theme still loads
+- A `format` that is not a whole number of at least 1 is dropped with a logged warning
+- A key the host does not know, at any depth, is ignored without a warning at load time, so a theme written for a newer
+  host shows its known values on an older one
+
+#### Scenario: Format 2 theme
+- **WHEN** a theme declares `"format": 2`
+- **THEN** it loads, and its format 2 values are available on the loaded theme
+
+#### Scenario: Newer format than the host knows
+- **WHEN** a theme declares `"format": 3`
+- **THEN** it loads with the values the host knows, and one warning says the theme declares format 3 and the host
+  supports 2
+
+#### Scenario: Unknown key
+- **WHEN** a theme contains a key that is not in the schema, such as one the product has set aside for later
+- **THEN** the key is ignored and no warning is logged at load
+
+#### Scenario: Format is not required
+- **WHEN** a theme uses `card.shadow` and has no `format`
+- **THEN** the shadow is read as a format 2 value
+
+### Requirement: Format 2 Values Are Optional And Additive
+Every value of format 2 MUST be optional, and an absent value MUST mean that the feature is off. A theme written before
+format 2 MUST load with the same values, the same warnings and the same drawing as before.
+
+- Every format 1 value keeps its name, range and meaning
+- A value whose absence means "off" stays absent in the loaded theme: merging a theme over the default theme never
+  creates one
+- These are never inherited from the default theme, so a theme that does not define them does not get them: the
+  background palette, `colors.ramp`, `colors.cardTints`, `pattern`, `background`, `icons`, and every card chrome,
+  typography effect and gauge modifier group of format 2
+- `meta` is never inherited either: a theme without it has none
+- The values that are inherited are the format 1 values and any format 2 value the default theme defines; the default
+  theme defines none of the groups above
+
+#### Scenario: Theme without format 2 values
+- **WHEN** a user theme written before format 2 is loaded
+- **THEN** it loads without a warning and none of the format 2 groups are present on it
+
+#### Scenario: Built-in themes are unchanged
+- **WHEN** `default-dark`, `default-light` and `glass` are loaded
+- **THEN** they load without a warning, define none of the groups that are never inherited, and everything drawn
+  with them is as before
+
+#### Scenario: Partial group
+- **WHEN** a theme sets `card.shadow` with only `blur` and `color`
+- **THEN** the shadow's offset and spread take their documented defaults, and no other group appears
+
+### Requirement: Theme Metadata
+The host MUST read an optional `meta` group that describes a theme and MUST NOT let it affect drawing: `name`,
+`description`, `author`, `license`, `version`, `mode` (`dark` or `light`), `tags`, `pairsWith.backgrounds` (background
+names, best first) and `samples`.
+
+- A theme without `meta.name` is shown by its folder name
+- A value of the wrong type is dropped with a logged warning; a name in `pairsWith.backgrounds` is not checked against
+  the backgrounds that exist
+- `mode` is informational: it does not change a colour and does not switch themes with the system setting
+
+#### Scenario: Described theme
+- **WHEN** a theme sets `meta.name` to "Carbon" and `meta.mode` to `dark`
+- **THEN** the loaded theme reports that name and mode
+
+#### Scenario: No metadata
+- **WHEN** a theme in the folder `mine` has no `meta`
+- **THEN** its display name is `mine` and it has no mode, tags or pairings
+
+#### Scenario: Unknown mode
+- **WHEN** a theme sets `meta.mode` to `sepia`
+- **THEN** the value is dropped with a logged warning and the theme loads
+
+### Requirement: Format 2 Values
+The host MUST accept the following groups in a theme, each documented key by key, with its range and default, in the
+theme reference and in the published schema. A value is read, checked, merged and kept on the loaded theme by this
+capability; what is drawn with it is specified by the capabilities that draw it.
+
+- Colours: `accent2`, `ramp` (two to five colours), `cardTints` (one to eight colours), `ink`
+- Card chrome: `shape` (`round` or `chamfer`), `cut`, `cutCorners`, `fillGradient`, `borderStyle` (`solid`, `dashed`
+  or `none`), `borderDash`, `borderGradient`, `borderAnimate`, `cornerMarks` (`bracket` or `tick`), `shadow`, `glow`,
+  `highlight`, `sheen`, `accentStrip`, `tint` (`none` or `cycle`), and `compact`, a partial override of the card values
+  for cards of one grid cell or less and for dock slots
+- Page: `pattern` (`dots`, `grid`, `hatch` or `scanlines`, with its spacing, thickness, colour and, for a grid, the
+  heavier lines)
+- Section parts: `divider`, `chip` and `well`
+- Typography: per-role fonts for `value`, `unit` and `label`, `valueScale`, `case`, `tracking`, `slant`, `valueFill`
+  and `valueGlow`
+- Gauge: the styles `meter`, `tach`, `marker` and `thickbar`, `sweep`, `segments`, `outline`, `ticks`, `scale`,
+  `redline`, `gradient`, `glow`, `marker`, `crosshair`, `track`, `labelPosition`, `colorBy`, `valueTint`, `sparkline`
+  and `status`
+- Icons: `set`, `stroke`, `tint`, `animated`, `glow`
+- Background: `default` (a background's name), `static` (a gradient, a colour or a picture file) and `scrim`
+- Motion: `level`, the ceiling for animation a theme drives
+
+The product has set some values aside for a later change; they are listed with their definitions in
+`docs/design/theme-format-2-deferred-keys.md` and are not part of this requirement.
+
+#### Scenario: Card chrome values
+- **WHEN** a theme sets `card.shape` to `chamfer`, `card.cut` to 0.14 and `card.cutCorners` to `["tr", "bl"]`
+- **THEN** the loaded theme has those values and nothing about the way cards are drawn changes yet
+
+#### Scenario: Compact override
+- **WHEN** a theme sets `card.compact.shape` to `circle`
+- **THEN** the loaded theme has a compact override with that shape and the other compact values absent
+
+#### Scenario: Value from a group the product does not draw yet
+- **WHEN** a theme sets `icons.set` to `outline`
+- **THEN** the value is kept and no warning is logged
+
+### Requirement: Format 2 Validation
+An invalid format 2 value MUST be handled as a format 1 value is: it is cleared, the loaded theme takes the default
+(which for an optional value is "absent"), and one warning names the theme, the key and the value.
+
+- A number outside its range, a colour that does not parse and a value that is not one of an enumeration's names are
+  invalid; enumeration names are read case-insensitively
+- An array outside its length limits, or one with an invalid element, is dropped whole
+- A value of the wrong type is invalid
+- A time is at least 1 second
+- Rules between values are checked after each value on its own. A rule that fails clears or downgrades only what it
+  names and logs one warning:
+  - `borderStyle`, `borderGradient` or `borderAnimate` with a border width of 0: warned, nothing has an effect
+  - `borderAnimate` with `mode` `spin` and a `borderGradient` whose kind is not `conic`: the animation is cleared
+  - `pattern` marks closer than three pixels at the 1100 pixel panel width (`spacing` / `thickness` below 3): warned
+  - `card.cornerMarks.inset` below 0 with `card.gap` smaller than its size: warned
+  - `card.shape` `chamfer` with `card.compact.shape` `circle`: allowed; the circle applies to compact cards only
+- A theme that turns on more than one continuous animation is allowed and logged at information level
+
+#### Scenario: Out-of-range value
+- **WHEN** a theme sets `card.shadow.blur` to 5
+- **THEN** the theme loads with no `blur` for the shadow and one warning names the theme, `card.shadow.blur` and the
+  range
+
+#### Scenario: One bad colour in an array
+- **WHEN** a theme sets `colors.cardTints` to three colours and one is not a colour
+- **THEN** `cardTints` is dropped whole, one warning is logged, and the other values load
+
+#### Scenario: Enumeration in another case
+- **WHEN** a theme sets `card.borderStyle` to `Dashed`
+- **THEN** it is read as `dashed` without a warning
+
+#### Scenario: Spinning border without a conic gradient
+- **WHEN** a theme sets `card.borderAnimate.mode` to `spin` and `card.borderGradient.kind` to `linear`
+- **THEN** the animation is cleared, the gradient is kept, and one warning says so
+
+#### Scenario: Border style with no border
+- **WHEN** a theme sets `card.borderStyle` to `dashed` and leaves the border width at 0
+- **THEN** the theme loads and one warning says the style has no effect with a border width of 0
+
+#### Scenario: Every value invalid
+- **WHEN** a theme sets every format 2 value to something invalid
+- **THEN** it loads with the default theme's values, no format 2 group is present, and there is one warning per key
+
+### Requirement: Published Theme Schema
+The product MUST publish the theme's format 2 schema as a JSON Schema in the repository, `docs/schemas/v2/theme.json`,
+and a theme MAY point at it with `$schema` for completion in an editor. The schema MUST describe exactly the values
+the theme model reads, and a test MUST fail when the two differ.
+
+- The schema lists each key with its type, range, default and a one-line description
+- A key the product has set aside for later is not in the schema
+- `docs/themes.md` and the schema describe the same keys
+
+#### Scenario: Draft themes satisfy the schema
+- **WHEN** each drafted theme is validated against the schema
+- **THEN** it is valid
+
+#### Scenario: Schema and model drift
+- **WHEN** the model gains a value that the schema does not describe
+- **THEN** the schema test fails and names the value
+
+#### Scenario: Drafted themes load clean
+- **WHEN** each of the eight drafted themes is loaded
+- **THEN** it loads with no warning

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Warp Gate",
+  "description": "Falling through an event horizon at light speed: starlight streaks, pulsing rings of light and a swirling bright core.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "space",
+    "sci-fi",
+    "gaming"
+  ],
+  "pairsWith": {
+    "themes": [
+      "carbon",
+      "rigline",
+      "ember",
+      "obsidian"
+    ]
+  },
+  "parameters": {
+    "streaks": {
+      "label": "Streaks",
+      "description": "How many starlight streaks.",
+      "min": 0.2,
+      "max": 2,
+      "step": 0.05
+    },
+    "ringRate": {
+      "label": "Ring size",
+      "description": "How far the rings of light reach.",
+      "min": 0.3,
+      "max": 2,
+      "step": 0.05
+    },
+    "coreSize": {
+      "label": "Core size",
+      "description": "Size of the glowing core.",
+      "min": 0.4,
+      "max": 2.5,
+      "step": 0.05
+    },
+    "swirl": {
+      "label": "Swirl",
+      "description": "How tightly the tunnel walls twist.",
+      "min": 0,
+      "max": 3,
+      "step": 0.05
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Warp Gate in the Carbon palette",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "carbon",
+        "colors": [
+          "#02050f",
+          "#0b3a66",
+          "#4aa8ff",
+          "#f2fbff"
+        ]
+      }
+    }
+  ]
+}

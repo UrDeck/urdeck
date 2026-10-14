@@ -1,0 +1,62 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Contour",
+  "description": "Topographic contour lines drifting slowly like a survey map.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "technical",
+    "calm",
+    "business"
+  ],
+  "pairsWith": {
+    "themes": [
+      "carbon",
+      "paper",
+      "blueprint"
+    ]
+  },
+  "parameters": {
+    "density": {
+      "label": "Density",
+      "description": "Number of contour lines.",
+      "min": 4,
+      "max": 40,
+      "step": 1
+    },
+    "lineWidth": {
+      "label": "Line width",
+      "description": "Thickness of the lines; 1 is the designed look.",
+      "min": 0.3,
+      "max": 3,
+      "step": 0.1
+    },
+    "relief": {
+      "label": "Relief",
+      "description": "How rugged the terrain is.",
+      "min": 0.3,
+      "max": 2,
+      "step": 0.05
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Contour in the Blueprint palette",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "blueprint",
+        "colors": [
+          "#090b0e",
+          "#10161b",
+          "#1f6f61",
+          "#4ff0c8"
+        ]
+      }
+    }
+  ]
+}
