@@ -1,0 +1,1564 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://urdeck.app/schemas/v2/theme.json",
+  "title": "UrDeck theme, format 2",
+  "description": "theme.json. Everything is optional and merges over default-dark. Unknown keys are allowed (an older host ignores what it does not know, which is how a format-2 theme degrades on a format-1 host). Sizes are fractions of one grid cell unless a unit is stated. Every v1 key keeps its meaning.",
+  "type": "object",
+  "additionalProperties": true,
+  "$defs": {
+    "color": {
+      "type": "string",
+      "pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$",
+      "description": "#RRGGBB or #AARRGGBB (alpha first, as in v1)."
+    },
+    "gradient": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "A linear gradient.",
+      "properties": {
+        "colors": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "items": {
+            "$ref": "#/$defs/color"
+          },
+          "description": "Stops, evenly spaced."
+        },
+        "angle": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360,
+          "description": "Degrees, 0 = left to right, 90 = top to bottom.",
+          "default": 90
+        }
+      },
+      "required": [
+        "colors"
+      ]
+    },
+    "glow": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "A soft glow. color omitted = the thing's own colour.",
+      "properties": {
+        "blur": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Blur radius, fraction of a cell."
+        },
+        "color": {
+          "$ref": "#/$defs/color"
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Strength.",
+          "default": 0.6
+        }
+      }
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "This schema's URL, for editor completion. Ignored."
+    },
+    "format": {
+      "type": "integer",
+      "enum": [
+        1,
+        2
+      ],
+      "description": "Optional. 2 declares that the file uses format-2 keys; the host warns if it is newer than it supports. Absent = 1."
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Descriptive data. Never affects rendering.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the editor."
+        },
+        "description": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "dark",
+            "light"
+          ],
+          "description": "Lets the editor group themes and pick a matching default."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pairsWith": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Recommendations for the config editor.",
+          "properties": {
+            "backgrounds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Background names that suit this theme, best first. Names of built-in or user backgrounds."
+            }
+          }
+        },
+        "samples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Screenshots inside the theme folder.",
+            "properties": {
+              "file": {
+                "type": "string"
+              },
+              "caption": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Same shape as a background manifest's samples."
+        }
+      }
+    },
+    "colors": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Colours.",
+      "properties": {
+        "background": {
+          "$ref": "#/$defs/color"
+        },
+        "cardFill": {
+          "$ref": "#/$defs/color"
+        },
+        "cardBorder": {
+          "$ref": "#/$defs/color"
+        },
+        "text": {
+          "$ref": "#/$defs/color"
+        },
+        "textMuted": {
+          "$ref": "#/$defs/color"
+        },
+        "accent": {
+          "$ref": "#/$defs/color"
+        },
+        "accentDim": {
+          "$ref": "#/$defs/color"
+        },
+        "good": {
+          "$ref": "#/$defs/color"
+        },
+        "warning": {
+          "$ref": "#/$defs/color"
+        },
+        "critical": {
+          "$ref": "#/$defs/color"
+        },
+        "backgroundPalette": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "$ref": "#/$defs/color"
+          },
+          "description": "v1: one to four shader colours."
+        },
+        "accent2": {
+          "$ref": "#/$defs/color",
+          "description": "NEW. A second accent for gradients, markers, redlines, tab highlights. Default: accent."
+        },
+        "ramp": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/color"
+          },
+          "description": "NEW. Low-to-high load colours. Default: [good, warning, critical]. Used when gauge.colorBy is 'ramp'."
+        },
+        "cardTints": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/color"
+          },
+          "description": "NEW. Fill colours that cards cycle through when card.tint is 'cycle' (Pop)."
+        },
+        "ink": {
+          "$ref": "#/$defs/color",
+          "description": "NEW. Text colour used on top of an accent or tint fill. Default: whichever of text/background contrasts most with the fill."
+        }
+      }
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Card chrome.",
+      "properties": {
+        "radius": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "v1. Capped at half the smaller side."
+        },
+        "borderWidth": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "v1."
+        },
+        "gap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "v1."
+        },
+        "padding": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "v1."
+        },
+        "shape": {
+          "enum": [
+            "round",
+            "chamfer"
+          ],
+          "description": "NEW. 'chamfer' cuts corners with straight lines (Ember). Default round.",
+          "default": "round"
+        },
+        "cut": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "NEW. Chamfer size, fraction of a cell, capped at half the smaller side.",
+          "default": 0.14
+        },
+        "cutCorners": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "tl",
+              "tr",
+              "br",
+              "bl"
+            ],
+            "description": "A card corner."
+          },
+          "uniqueItems": true,
+          "description": "NEW. Which corners are cut. Default [tr, bl].",
+          "default": [
+            "tr",
+            "bl"
+          ]
+        },
+        "fillGradient": {
+          "$ref": "#/$defs/gradient",
+          "description": "NEW. Replaces cardFill with a gradient."
+        },
+        "borderStyle": {
+          "enum": [
+            "solid",
+            "dashed",
+            "none"
+          ],
+          "description": "NEW. Default solid.",
+          "default": "solid"
+        },
+        "borderDash": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Dash pattern for dashed/dotted.",
+          "properties": {
+            "on": {
+              "type": "number",
+              "minimum": 0.002,
+              "maximum": 1,
+              "description": "Dash length."
+            },
+            "off": {
+              "type": "number",
+              "minimum": 0.002,
+              "maximum": 1,
+              "description": "Gap length."
+            }
+          }
+        },
+        "borderGradient": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Gradient border (Rigline, Ember, Obsidian hairline).",
+          "properties": {
+            "colors": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 8,
+              "items": {
+                "$ref": "#/$defs/color"
+              },
+              "description": "Stops."
+            },
+            "kind": {
+              "enum": [
+                "linear",
+                "conic"
+              ],
+              "description": "conic walks round the card, so it can rotate.",
+              "default": "linear"
+            },
+            "angle": {
+              "type": "number",
+              "minimum": -360,
+              "maximum": 360,
+              "description": "Linear only.",
+              "default": 135
+            }
+          },
+          "required": [
+            "colors"
+          ]
+        },
+        "borderAnimate": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Animated border. Bounded by motion.level.",
+          "properties": {
+            "mode": {
+              "enum": [
+                "none",
+                "spin",
+                "pulse"
+              ],
+              "description": "spin rotates a conic gradient; pulse breathes the alpha.",
+              "default": "none"
+            },
+            "period": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 120,
+              "description": "Seconds per cycle.",
+              "default": 7
+            }
+          }
+        },
+        "cornerMarks": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Registration marks (Carbon, Blueprint). Drawn outside the clip, so needs a bleed margin.",
+          "properties": {
+            "style": {
+              "enum": [
+                "none",
+                "bracket",
+                "tick"
+              ],
+              "description": "Shape of each mark.",
+              "default": "none"
+            },
+            "corners": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "tl",
+                  "tr",
+                  "br",
+                  "bl"
+                ],
+                "description": "A card corner."
+              },
+              "uniqueItems": true,
+              "description": "Default [tl, br]."
+            },
+            "size": {
+              "type": "number",
+              "minimum": 0.01,
+              "maximum": 0.5,
+              "description": "Arm length."
+            },
+            "thickness": {
+              "type": "number",
+              "minimum": 0.002,
+              "maximum": 0.1,
+              "description": "Line width."
+            },
+            "inset": {
+              "type": "number",
+              "minimum": -0.1,
+              "maximum": 0.1,
+              "description": "Offset from the corner; negative sits outside the card.",
+              "default": 0
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            }
+          }
+        },
+        "shadow": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Drop shadow. Bleeds outside the card.",
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": -0.5,
+              "maximum": 0.5,
+              "description": "Offset.",
+              "default": 0
+            },
+            "y": {
+              "type": "number",
+              "minimum": -0.5,
+              "maximum": 0.5,
+              "description": "Offset.",
+              "default": 0
+            },
+            "blur": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "0 = hard offset (Pop)."
+            },
+            "spread": {
+              "type": "number",
+              "minimum": -0.5,
+              "maximum": 0.5,
+              "description": "",
+              "default": 0
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            }
+          }
+        },
+        "glow": {
+          "$ref": "#/$defs/glow",
+          "description": "NEW. Outer glow. Bleeds outside the card."
+        },
+        "highlight": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Inset edge light (Prism).",
+          "properties": {
+            "top": {
+              "$ref": "#/$defs/color",
+              "description": "Specular line along the top edge."
+            },
+            "bottom": {
+              "$ref": "#/$defs/color",
+              "description": "Rim light along the bottom, inside."
+            },
+            "thickness": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 0.1,
+              "description": "",
+              "default": 0.01
+            }
+          }
+        },
+        "sheen": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. A radial light patch inside the card (Prism).",
+          "properties": {
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "x": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 2,
+              "description": "Centre, fraction of card width.",
+              "default": 0.1
+            },
+            "y": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 2,
+              "description": "Centre, fraction of card height.",
+              "default": 0
+            },
+            "size": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 3,
+              "description": "Radius, fraction of card width.",
+              "default": 0.7
+            }
+          }
+        },
+        "accentStrip": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. A lit line along one edge of every card, inside the clip (Carbon scan line, Rigline tile strips).",
+          "properties": {
+            "side": {
+              "enum": [
+                "top",
+                "bottom",
+                "left",
+                "right"
+              ],
+              "description": "",
+              "default": "bottom"
+            },
+            "thickness": {
+              "type": "number",
+              "minimum": 0.005,
+              "maximum": 0.2,
+              "description": "",
+              "default": 0.03
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 1,
+              "description": "Fraction of the side.",
+              "default": 0.72
+            },
+            "colors": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "$ref": "#/$defs/color"
+              },
+              "description": "Cycled by slot index (compact cards) or by card index. Default [accent]."
+            },
+            "fade": {
+              "type": "boolean",
+              "description": "Fade to transparent along the length (Carbon's scan line)."
+            },
+            "glow": {
+              "$ref": "#/$defs/glow"
+            }
+          }
+        },
+        "tint": {
+          "enum": [
+            "none",
+            "cycle"
+          ],
+          "description": "NEW. 'cycle' fills cards from colors.cardTints in page order.",
+          "default": "none"
+        },
+        "compact": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. A partial override applied to cards of 1x1 cell or less and to dock slots.",
+          "properties": {
+            "radius": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": ""
+            },
+            "borderWidth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": ""
+            },
+            "shape": {
+              "enum": [
+                "round",
+                "chamfer",
+                "circle"
+              ],
+              "description": "'circle' makes square cards round (Obsidian dock)."
+            },
+            "accentStrip": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "A lit strip on compact cards (Rigline tiles). Overrides card.accentStrip for them.",
+              "properties": {
+                "side": {
+                  "enum": [
+                    "top",
+                    "bottom",
+                    "left",
+                    "right"
+                  ],
+                  "description": "",
+                  "default": "bottom"
+                },
+                "thickness": {
+                  "type": "number",
+                  "minimum": 0.005,
+                  "maximum": 0.2,
+                  "description": "",
+                  "default": 0.03
+                },
+                "length": {
+                  "type": "number",
+                  "minimum": 0.1,
+                  "maximum": 1,
+                  "description": "Fraction of the side.",
+                  "default": 0.72
+                },
+                "colors": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 8,
+                  "items": {
+                    "$ref": "#/$defs/color"
+                  },
+                  "description": "Cycled by slot index (compact cards) or by card index. Default [accent]."
+                },
+                "glow": {
+                  "$ref": "#/$defs/glow"
+                }
+              }
+            },
+            "cornerMarks": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "Registration marks on compact cards. Overrides card.cornerMarks for them.",
+              "properties": {
+                "style": {
+                  "enum": [
+                    "none",
+                    "bracket",
+                    "tick"
+                  ],
+                  "description": "Shape of each mark.",
+                  "default": "none"
+                },
+                "corners": {
+                  "type": "array",
+                  "items": {
+                    "enum": [
+                      "tl",
+                      "tr",
+                      "br",
+                      "bl"
+                    ],
+                    "description": "A card corner."
+                  },
+                  "uniqueItems": true,
+                  "description": "Default [tl, br]."
+                },
+                "size": {
+                  "type": "number",
+                  "minimum": 0.01,
+                  "maximum": 0.5,
+                  "description": "Arm length."
+                },
+                "thickness": {
+                  "type": "number",
+                  "minimum": 0.002,
+                  "maximum": 0.1,
+                  "description": "Line width."
+                },
+                "inset": {
+                  "type": "number",
+                  "minimum": -0.1,
+                  "maximum": 0.1,
+                  "description": "Offset from the corner; negative sits outside the card.",
+                  "default": 0
+                },
+                "color": {
+                  "$ref": "#/$defs/color"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "pattern": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "NEW. A page-level texture drawn over the background and under the cards (not per card).",
+      "properties": {
+        "kind": {
+          "enum": [
+            "none",
+            "dots",
+            "grid",
+            "hatch",
+            "scanlines"
+          ],
+          "description": "Default none.",
+          "default": "none"
+        },
+        "spacing": {
+          "type": "number",
+          "minimum": 0.02,
+          "maximum": 2,
+          "description": "Distance between marks, fraction of a cell.",
+          "default": 0.13
+        },
+        "majorEvery": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 20,
+          "description": "Every Nth line of a grid is drawn heavier (Blueprint: 5)."
+        },
+        "thickness": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 0.1,
+          "description": "Line width / dot radius.",
+          "default": 0.01
+        },
+        "color": {
+          "$ref": "#/$defs/color"
+        },
+        "major": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Style of the heavier lines.",
+          "properties": {
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "thickness": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 0.1,
+              "description": ""
+            }
+          }
+        },
+        "angle": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "hatch/lines direction, degrees.",
+          "default": 45
+        }
+      }
+    },
+    "divider": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "NEW. The rule widgets draw between their sections.",
+      "properties": {
+        "style": {
+          "enum": [
+            "none",
+            "line",
+            "gradient",
+            "dimension"
+          ],
+          "description": "dimension = a line with end ticks and an optional centred label (Blueprint).",
+          "default": "line"
+        },
+        "color": {
+          "$ref": "#/$defs/color"
+        },
+        "thickness": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 0.05,
+          "description": "",
+          "default": 0.01
+        },
+        "gradientTo": {
+          "$ref": "#/$defs/color"
+        }
+      }
+    },
+    "well": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "NEW. A recessed rounded rectangle widgets draw behind grouped content such as the weather forecast days (Rigline). Absent = no well.",
+      "properties": {
+        "fill": {
+          "$ref": "#/$defs/color"
+        },
+        "radius": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "description": "",
+          "default": 0.09
+        },
+        "border": {
+          "$ref": "#/$defs/color"
+        }
+      }
+    },
+    "chip": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "NEW. Small status labels (OK, WARM, rig online).",
+      "properties": {
+        "shape": {
+          "enum": [
+            "none",
+            "pill"
+          ],
+          "description": "",
+          "default": "none"
+        },
+        "fill": {
+          "$ref": "#/$defs/color"
+        },
+        "border": {
+          "$ref": "#/$defs/color"
+        },
+        "textColor": {
+          "$ref": "#/$defs/color"
+        },
+        "colorBy": {
+          "enum": [
+            "none",
+            "status"
+          ],
+          "description": "status tints the chip by good/warning/critical.",
+          "default": "status"
+        }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Type.",
+      "properties": {
+        "font": {
+          "type": "string",
+          "description": "v1. Default family for every role."
+        },
+        "fonts": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Per-role overrides; each is a family or a file in the theme folder. Missing role falls back to typography.font.",
+          "properties": {
+            "value": {
+              "type": "string"
+            },
+            "unit": {
+              "type": "string"
+            },
+            "label": {
+              "type": "string"
+            }
+          }
+        },
+        "weights": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "v1.",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "description": ""
+            },
+            "unit": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "description": ""
+            },
+            "label": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "description": ""
+            },
+            "body": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "description": ""
+            },
+            "title": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 1000,
+              "description": ""
+            }
+          }
+        },
+        "labelSize": {
+          "type": "number",
+          "minimum": 0.005,
+          "maximum": 1,
+          "description": "v1."
+        },
+        "bodySize": {
+          "type": "number",
+          "minimum": 0.005,
+          "maximum": 1,
+          "description": "v1."
+        },
+        "titleSize": {
+          "type": "number",
+          "minimum": 0.005,
+          "maximum": 1,
+          "description": "v1."
+        },
+        "unitRatio": {
+          "type": "number",
+          "minimum": 0.05,
+          "maximum": 1,
+          "description": "v1."
+        },
+        "valueScale": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 2,
+          "description": "NEW. Multiplies the readout's size (Pop and Obsidian run big).",
+          "default": 1
+        },
+        "case": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Letter case applied at draw time.",
+          "properties": {
+            "label": {
+              "enum": [
+                "none",
+                "upper",
+                "lower"
+              ],
+              "description": "",
+              "default": "none"
+            },
+            "title": {
+              "enum": [
+                "none",
+                "upper",
+                "lower"
+              ],
+              "description": "",
+              "default": "none"
+            }
+          }
+        },
+        "tracking": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Letter spacing in em. Applied per glyph at draw time; the Readout's equal-width digits are kept.",
+          "properties": {
+            "value": {
+              "type": "number",
+              "minimum": -0.1,
+              "maximum": 0.6,
+              "description": "em"
+            },
+            "label": {
+              "type": "number",
+              "minimum": -0.1,
+              "maximum": 0.6,
+              "description": "em"
+            },
+            "title": {
+              "type": "number",
+              "minimum": -0.1,
+              "maximum": 0.6,
+              "description": "em"
+            }
+          }
+        },
+        "slant": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20,
+          "description": "NEW. Synthetic skew of the value, degrees. Prefer a real italic file when the family has one.",
+          "default": 0
+        },
+        "valueFill": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Fills the value text with a gradient (Rigline clock).",
+          "properties": {
+            "colors": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 6,
+              "items": {
+                "$ref": "#/$defs/color"
+              },
+              "description": "Gradient stops."
+            },
+            "angle": {
+              "type": "number",
+              "minimum": -360,
+              "maximum": 360,
+              "description": "",
+              "default": 0
+            }
+          }
+        },
+        "valueGlow": {
+          "$ref": "#/$defs/glow",
+          "description": "NEW. Glow behind value text."
+        }
+      }
+    },
+    "stroke": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "v1.",
+      "properties": {
+        "thickness": {
+          "type": "number",
+          "minimum": 0.001,
+          "maximum": 1,
+          "description": "v1."
+        },
+        "cap": {
+          "enum": [
+            "round",
+            "square"
+          ],
+          "description": "v1."
+        }
+      }
+    },
+    "gauge": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Gauges.",
+      "properties": {
+        "style": {
+          "enum": [
+            "ring",
+            "bar",
+            "verticalBar",
+            "meter",
+            "tach",
+            "marker",
+            "thickbar"
+          ],
+          "description": "v1 had ring|bar|verticalBar. NEW: meter (thin bar with ticks and scale), tach (arc with ticks, redline and a needle), marker (hairline ring/bar with a jewel), thickbar (heavy outlined bar). A widget's explicit style still wins.",
+          "default": "ring"
+        },
+        "labelPosition": {
+          "enum": [
+            "auto",
+            "inside",
+            "below",
+            "above"
+          ],
+          "description": "NEW. Where a gauge's label sits. auto keeps the v1 placement (Prism: below).",
+          "default": "auto"
+        },
+        "sweep": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Ring/tach/marker geometry.",
+          "properties": {
+            "start": {
+              "type": "number",
+              "minimum": -360,
+              "maximum": 360,
+              "description": "Degrees, 0 = 3 o'clock, clockwise. v1 ring: 135.",
+              "default": 135
+            },
+            "span": {
+              "type": "number",
+              "minimum": 30,
+              "maximum": 360,
+              "description": "v1 ring: 270.",
+              "default": 270
+            }
+          }
+        },
+        "segments": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Chops the fill into LED blocks.",
+          "properties": {
+            "length": {
+              "type": "number",
+              "minimum": 0.005,
+              "maximum": 1,
+              "description": "Segment length (bars) or arc length in cells (rings)."
+            },
+            "gap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Space between segments."
+            }
+          }
+        },
+        "outline": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Outline round the track (thickbar).",
+          "properties": {
+            "width": {
+              "type": "number",
+              "minimum": 0.002,
+              "maximum": 0.2,
+              "description": ""
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            }
+          }
+        },
+        "ticks": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Tick marks on rings/tach/meter.",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 60
+            },
+            "majorEvery": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0.005,
+              "maximum": 0.5,
+              "description": ""
+            },
+            "thickness": {
+              "type": "number",
+              "minimum": 0.001,
+              "maximum": 0.05,
+              "description": ""
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "labels": {
+              "type": "boolean",
+              "description": "Print numbers at major ticks."
+            }
+          }
+        },
+        "scale": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Scale labels under a bar (Paper).",
+          "properties": {
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 2,
+              "maxItems": 11,
+              "description": "Printed under a bar at even spacing, e.g. [\"0\",\"50\",\"100\"]."
+            },
+            "size": {
+              "type": "number",
+              "minimum": 0.005,
+              "maximum": 0.5,
+              "description": ""
+            }
+          }
+        },
+        "redline": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW.",
+          "properties": {
+            "from": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Fraction where the zone starts.",
+              "default": 0.85
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "glow": {
+              "$ref": "#/$defs/glow"
+            },
+            "lightsAbove": {
+              "type": "boolean",
+              "description": "Zone only lights while the value is inside it (Ember)."
+            }
+          }
+        },
+        "gradient": {
+          "oneOf": [
+            {
+              "const": "ramp"
+            },
+            {
+              "$ref": "#/$defs/gradient"
+            }
+          ],
+          "description": "NEW. Fill gradient along the value: 'ramp' uses colors.ramp, or give stops."
+        },
+        "glow": {
+          "$ref": "#/$defs/glow",
+          "description": "NEW. Glow round the fill. color omitted = fill colour."
+        },
+        "marker": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Value marker (Obsidian jewel, Blueprint needle).",
+          "properties": {
+            "shape": {
+              "enum": [
+                "diamond",
+                "needle"
+              ],
+              "description": "",
+              "default": "diamond"
+            },
+            "size": {
+              "type": "number",
+              "minimum": 0.005,
+              "maximum": 0.5,
+              "description": ""
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "halo": {
+              "type": "boolean",
+              "description": "Dark ring round the marker."
+            }
+          }
+        },
+        "crosshair": {
+          "type": "boolean",
+          "description": "NEW. Centre cross on dials (Blueprint)."
+        },
+        "track": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Overrides the default accentDim track.",
+          "properties": {
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "widthRatio": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 2,
+              "description": "Track width relative to stroke.thickness.",
+              "default": 1
+            }
+          }
+        },
+        "colorBy": {
+          "enum": [
+            "accent",
+            "ramp"
+          ],
+          "description": "NEW. 'ramp' colours the fill by value along colors.ramp instead of the accent/warning/critical steps.",
+          "default": "accent"
+        },
+        "valueTint": {
+          "type": "boolean",
+          "description": "NEW. Colours the readout with the same colour as the fill.",
+          "default": false
+        },
+        "sparkline": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. A history line under the readout; needs Stats to keep a ring buffer.",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "height": {
+              "type": "number",
+              "minimum": 0.05,
+              "maximum": 1,
+              "description": "",
+              "default": 0.3
+            },
+            "historySeconds": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 600,
+              "description": "",
+              "default": 60
+            },
+            "strokeWidth": {
+              "type": "number",
+              "minimum": 0.002,
+              "maximum": 0.1,
+              "description": ""
+            }
+          }
+        },
+        "status": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. A status chip beside the label.",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "thresholds": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "[warm, hot] as 0..1. Default [0.7,0.9]."
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 3,
+              "maxItems": 3,
+              "description": "[ok, warm, hot]."
+            }
+          }
+        }
+      }
+    },
+    "indicator": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "v1, unchanged.",
+      "properties": {
+        "bandHeight": {
+          "type": "number",
+          "minimum": 0.02,
+          "maximum": 1,
+          "description": "Height of the band reserved at the bottom of the screen, fraction of a cell."
+        },
+        "dotSize": {
+          "type": "number",
+          "minimum": 0.005,
+          "maximum": 0.5,
+          "description": "Diameter of a dot."
+        },
+        "pillLength": {
+          "type": "number",
+          "minimum": 0.005,
+          "maximum": 1,
+          "description": "Length of the current page's pill."
+        },
+        "spacing": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Space between marks."
+        },
+        "active": {
+          "$ref": "#/$defs/color",
+          "description": "Colour of the current page's mark."
+        },
+        "inactive": {
+          "$ref": "#/$defs/color",
+          "description": "Colour of the other marks."
+        },
+        "backdrop": {
+          "$ref": "#/$defs/color",
+          "description": "Colour of the translucent pill behind a floating indicator."
+        }
+      }
+    },
+    "press": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "v1, unchanged.",
+      "properties": {
+        "scale": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1,
+          "description": "The pressed card's size; 1 leaves it unchanged."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 1,
+          "description": "The pressed card's opacity; 1 leaves it unchanged."
+        }
+      }
+    },
+    "dock": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "v1, unchanged.",
+      "properties": {
+        "height": {
+          "type": "number",
+          "minimum": 0.2,
+          "maximum": 1,
+          "description": "Height of the dock's band, which is also the side of a dock slot, fraction of a cell."
+        }
+      }
+    },
+    "icons": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "NEW. Theme-specific icon set.",
+      "properties": {
+        "set": {
+          "type": "string",
+          "description": "Folder name inside the theme folder (icons/<set>/<key>.svg), or a built-in set name. Keys are in 04-widgets-and-icons.md. A missing key falls back to the built-in 'outline' set, then to the widget's own icon."
+        },
+        "stroke": {
+          "type": "number",
+          "minimum": 0.005,
+          "maximum": 0.2,
+          "description": "Override stroke width for set icons, fraction of the icon size."
+        },
+        "tint": {
+          "type": "string",
+          "description": "'accent', 'accent2', 'text', 'ramp', 'none' (keep the SVG's colours) or a #colour."
+        },
+        "glow": {
+          "$ref": "#/$defs/glow",
+          "description": "Glow behind set icons (Rigline). Colour defaults to the icon's tint."
+        },
+        "animated": {
+          "type": "boolean",
+          "description": "false = static icons even where the widget would use Lottie (weather). Default true.",
+          "default": true
+        }
+      }
+    },
+    "background": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "NEW. Background pairing.",
+      "properties": {
+        "default": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. The animated background this theme selects when the user has not picked one.",
+          "properties": {
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "static": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. Still background used when no animated background is selected, or when motion is off. Image, gradient or colour.",
+          "properties": {
+            "image": {
+              "type": "string",
+              "description": "File in the theme folder."
+            },
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "gradient": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "Linear or radial gradient.",
+              "properties": {
+                "colors": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 6,
+                  "items": {
+                    "$ref": "#/$defs/color"
+                  },
+                  "description": "Stops."
+                },
+                "kind": {
+                  "enum": [
+                    "linear",
+                    "radial"
+                  ],
+                  "description": "",
+                  "default": "linear"
+                },
+                "angle": {
+                  "type": "number",
+                  "minimum": -360,
+                  "maximum": 360,
+                  "description": "Linear only.",
+                  "default": 90
+                },
+                "cx": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 2,
+                  "description": "Radial centre x, fraction of width.",
+                  "default": 0.5
+                },
+                "cy": {
+                  "type": "number",
+                  "minimum": -1,
+                  "maximum": 2,
+                  "description": "Radial centre y, fraction of height.",
+                  "default": 0
+                },
+                "radius": {
+                  "type": "number",
+                  "minimum": 0.1,
+                  "maximum": 3,
+                  "description": "Radial radius, fraction of width.",
+                  "default": 0.7
+                }
+              },
+              "required": [
+                "colors"
+              ]
+            }
+          }
+        },
+        "scrim": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "NEW. A veil between the background and the cards, to hold text contrast.",
+          "properties": {
+            "color": {
+              "$ref": "#/$defs/color"
+            },
+            "alpha": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": ""
+            }
+          }
+        }
+      }
+    },
+    "motion": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "NEW.",
+      "properties": {
+        "level": {
+          "enum": [
+            "full",
+            "reduced",
+            "off"
+          ],
+          "description": "The ceiling for theme-driven animation (borderAnimate, and what a later change adds). The effective level is the lower of this and the user/OS setting. Does not touch the shader background, which has its own control.",
+          "default": "full"
+        }
+      }
+    }
+  }
+}

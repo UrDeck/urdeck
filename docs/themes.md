@@ -56,9 +56,10 @@ value (for example a colour that does not parse) is replaced by the default's va
 - **`typography.unitRatio`** is the size of a readout's unit as a fraction of its value's size.
 - **`stroke`** is for components that draw lines: thickness as a fraction of the drawn element and `round` or `square`
   ends.
-- **`gauge.style`** is the shape a gauge takes when a widget asks for "the theme's" gauge: `ring`, `bar` or `verticalBar`.
-  `plain` is not allowed here (a gauge that draws no shape is no gauge); it and any unknown name fall back to `ring`
-  with a logged warning. A widget's own explicit style wins over it.
+- **`gauge.style`** is the shape a gauge takes when a widget asks for "the theme's" gauge: `ring`, `bar` or `verticalBar`
+  (format 2 adds `meter`, `tach`, `marker` and `thickbar`, see [Format 2](#format-2); a widget that asks for one of those
+  receives a `ring` until the gauge can be drawn that way). `plain` is not allowed here (a gauge that draws no shape is no
+  gauge); it and any unknown name fall back to `ring` with a logged warning. A widget's own explicit style wins over it.
 
 - **`indicator`** is the page indicator (see [Pages](https://urdeck.app/docs/#pages)). `bandHeight`, `dotSize`, `pillLength` and `spacing`
   are fractions of one grid cell: `bandHeight` is the height of the band reserved at the bottom of the screen when the
@@ -111,6 +112,317 @@ in `urdeck-config.json` win over both.
 
 Keep the palette dark and low in contrast unless the theme's cards are opaque: a bright, busy background under
 translucent cards makes their text hard to read.
+
+## Format 2
+
+Format 2 adds optional values to the theme file for cards, type, gauges, icons and a background of its own. A theme can use any of them without declaring anything; `"format": 2` says that the file does, and a number above 2 logs one warning and still loads. [`docs/schemas/v2/theme.json`](schemas/v2/theme.json) is the same list as a JSON Schema (point `$schema` at `https://urdeck.app/schemas/v2/theme.json` for completion in an editor).
+
+- **Everything is optional, and absent means off.** A theme written before format 2 loads with the same values, the same warnings and the same drawing as before. Merging a theme over `default-dark` never adds a format 2 group.
+- **A value is read, checked and kept; most are not drawn yet.** The tables say which later change draws each group. Until then a value is accepted without a warning and has no effect on the screen. The gauge styles `meter`, `tach`, `marker` and `thickbar` are kept and a widget that asks for the theme's gauge gets a `ring`.
+- **An invalid value is replaced by the default** (for an optional value, by "absent") and one warning in `urdeck.log` names the theme, the key and the value. A number outside its range, a colour that does not parse, a name that is not listed, a value of the wrong kind (text where a number goes) and a list with a bad item are all invalid; a bad item drops the whole list, except in `card.cutCorners` and `card.cornerMarks.corners`, where an unknown name is dropped and the others stay. Names are read in any case.
+- **Some groups are never taken from `default-dark`:** `colors.ramp`, `colors.cardTints`, `colors.backgroundPalette`, `pattern`, `background`, `icons`, `meta`, every card chrome value, `typography.valueFill` and `valueGlow`, and every gauge value except `style`. The rest merge key by key, like the format 1 values.
+- **Sizes** are fractions of one grid cell, **angles** are degrees (0 is left to right or 3 o'clock, clockwise), **times** are seconds (1 or more), **tracking** is in em, and **colours** are `#RRGGBB` or `#AARRGGBB`.
+
+Rules between values, checked after each value on its own (each warns once and changes only what it names):
+
+- `card.borderStyle`, `borderGradient` or `borderAnimate` with a border width of 0 has no effect: warned.
+- `card.borderAnimate` with `mode` `spin` needs a `borderGradient` of kind `conic`; without one the animation is switched off.
+- `pattern.spacing` less than three times `pattern.thickness` makes the marks run together: warned.
+- `card.cornerMarks.inset` below 0 reaches outside the card; with `card.gap` smaller than that the marks would overlap the next card: warned.
+- `card.shape` `chamfer` with `card.compact.shape` `circle` is allowed; the circle applies to compact cards only.
+- More than one continuous animation is allowed and written to the log at information level.
+
+### `meta`
+
+Drawn by: nothing; it describes the theme to the settings window.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `meta.name` | text |  | Display name for the editor. |
+| `meta.description` | text |  |  |
+| `meta.author` | text |  |  |
+| `meta.license` | text |  |  |
+| `meta.version` | text |  |  |
+| `meta.mode` | `dark`, `light` |  | Lets the editor group themes and pick a matching default. |
+| `meta.tags` | list of text |  |  |
+| `meta.pairsWith` | group |  | Recommendations for the config editor. |
+| `meta.pairsWith.backgrounds` | list of text |  | Background names that suit this theme, best first. Names of built-in or user backgrounds. |
+| `meta.samples` | list of groups |  | Same shape as a background manifest's samples. |
+| `meta.samples[].file` | text |  |  |
+| `meta.samples[].caption` | text |  |  |
+
+### `colors`
+
+Drawn by: the changes that use them.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `colors.accent2` | colour |  | A second accent for gradients, markers, redlines, tab highlights. Default: accent. |
+| `colors.ramp` | list of 2 to 5 colours |  | Low-to-high load colours. Default: [good, warning, critical]. Used when gauge.colorBy is 'ramp'. |
+| `colors.cardTints` | list of 1 to 8 colours |  | Fill colours that cards cycle through when card.tint is 'cycle' (Pop). |
+| `colors.ink` | colour |  | Text colour used on top of an accent or tint fill. Default: whichever of text/background contrasts most with the fill. |
+
+### `card`
+
+Drawn by: the card chrome change.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `card.shape` | `round`, `chamfer` | `"round"` | 'chamfer' cuts corners with straight lines (Ember). Default round. |
+| `card.cut` | 0 to 0.5 | `0.14` | Chamfer size, fraction of a cell, capped at half the smaller side. |
+| `card.cutCorners` | list of names of `tl`, `tr`, `br`, `bl` | `["tr","bl"]` | Which corners are cut. Default [tr, bl]. |
+| `card.fillGradient` | group |  | Replaces cardFill with a gradient. |
+| `card.fillGradient.colors` | list of 2 to 6 colours |  | Stops, evenly spaced. |
+| `card.fillGradient.angle` | -360 to 360 | `90` | Degrees, 0 = left to right, 90 = top to bottom. |
+| `card.borderStyle` | `solid`, `dashed`, `none` | `"solid"` | Default solid. |
+| `card.borderDash` | group |  | Dash pattern for dashed/dotted. |
+| `card.borderDash.on` | 0.002 to 1 |  | Dash length. |
+| `card.borderDash.off` | 0.002 to 1 |  | Gap length. |
+| `card.borderGradient` | group |  | Gradient border (Rigline, Ember, Obsidian hairline). |
+| `card.borderGradient.colors` | list of 2 to 8 colours |  | Stops. |
+| `card.borderGradient.kind` | `linear`, `conic` | `"linear"` | conic walks round the card, so it can rotate. |
+| `card.borderGradient.angle` | -360 to 360 | `135` | Linear only. |
+| `card.borderAnimate` | group |  | Animated border. Bounded by motion.level. |
+| `card.borderAnimate.mode` | `none`, `spin`, `pulse` | `"none"` | spin rotates a conic gradient; pulse breathes the alpha. |
+| `card.borderAnimate.period` | 1 to 120 | `7` | Seconds per cycle. |
+| `card.cornerMarks` | group |  | Registration marks (Carbon, Blueprint). Drawn outside the clip, so needs a bleed margin. |
+| `card.cornerMarks.style` | `none`, `bracket`, `tick` | `"none"` | Shape of each mark. |
+| `card.cornerMarks.corners` | list of names of `tl`, `tr`, `br`, `bl` |  | Default [tl, br]. |
+| `card.cornerMarks.size` | 0.01 to 0.5 |  | Arm length. |
+| `card.cornerMarks.thickness` | 0.002 to 0.1 |  | Line width. |
+| `card.cornerMarks.inset` | -0.1 to 0.1 | `0` | Offset from the corner; negative sits outside the card. |
+| `card.cornerMarks.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `card.shadow` | group |  | Drop shadow. Bleeds outside the card. |
+| `card.shadow.x` | -0.5 to 0.5 | `0` | Offset. |
+| `card.shadow.y` | -0.5 to 0.5 | `0` | Offset. |
+| `card.shadow.blur` | 0 to 1 |  | 0 = hard offset (Pop). |
+| `card.shadow.spread` | -0.5 to 0.5 | `0` |  |
+| `card.shadow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `card.glow` | group |  | Outer glow. Bleeds outside the card. |
+| `card.glow.blur` | 0 to 1 |  | Blur radius, fraction of a cell. |
+| `card.glow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `card.glow.alpha` | 0 to 1 | `0.6` | Strength. |
+| `card.highlight` | group |  | Inset edge light (Prism). |
+| `card.highlight.top` | colour |  | Specular line along the top edge. |
+| `card.highlight.bottom` | colour |  | Rim light along the bottom, inside. |
+| `card.highlight.thickness` | 0.001 to 0.1 | `0.01` |  |
+| `card.sheen` | group |  | A radial light patch inside the card (Prism). |
+| `card.sheen.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `card.sheen.x` | -1 to 2 | `0.1` | Centre, fraction of card width. |
+| `card.sheen.y` | -1 to 2 | `0` | Centre, fraction of card height. |
+| `card.sheen.size` | 0.1 to 3 | `0.7` | Radius, fraction of card width. |
+| `card.accentStrip` | group |  | A lit line along one edge of every card, inside the clip (Carbon scan line, Rigline tile strips). |
+| `card.accentStrip.side` | `top`, `bottom`, `left`, `right` | `"bottom"` |  |
+| `card.accentStrip.thickness` | 0.005 to 0.2 | `0.03` |  |
+| `card.accentStrip.length` | 0.1 to 1 | `0.72` | Fraction of the side. |
+| `card.accentStrip.colors` | list of 1 to 8 colours |  | Cycled by slot index (compact cards) or by card index. Default [accent]. |
+| `card.accentStrip.fade` | true or false |  | Fade to transparent along the length (Carbon's scan line). |
+| `card.accentStrip.glow` | group |  | A soft glow. color omitted = the thing's own colour. |
+| `card.accentStrip.glow.blur` | 0 to 1 |  | Blur radius, fraction of a cell. |
+| `card.accentStrip.glow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `card.accentStrip.glow.alpha` | 0 to 1 | `0.6` | Strength. |
+| `card.tint` | `none`, `cycle` | `"none"` | 'cycle' fills cards from colors.cardTints in page order. |
+| `card.compact` | group |  | A partial override applied to cards of 1x1 cell or less and to dock slots. |
+| `card.compact.radius` | 0 to 1 |  |  |
+| `card.compact.borderWidth` | 0 to 1 |  |  |
+| `card.compact.shape` | `round`, `chamfer`, `circle` |  | 'circle' makes square cards round (Obsidian dock). |
+| `card.compact.accentStrip` | group |  | A lit strip on compact cards (Rigline tiles). Overrides card.accentStrip for them. |
+| `card.compact.accentStrip.side` | `top`, `bottom`, `left`, `right` | `"bottom"` |  |
+| `card.compact.accentStrip.thickness` | 0.005 to 0.2 | `0.03` |  |
+| `card.compact.accentStrip.length` | 0.1 to 1 | `0.72` | Fraction of the side. |
+| `card.compact.accentStrip.colors` | list of 1 to 8 colours |  | Cycled by slot index (compact cards) or by card index. Default [accent]. |
+| `card.compact.accentStrip.glow` | group |  | A soft glow. color omitted = the thing's own colour. |
+| `card.compact.accentStrip.glow.blur` | 0 to 1 |  | Blur radius, fraction of a cell. |
+| `card.compact.accentStrip.glow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `card.compact.accentStrip.glow.alpha` | 0 to 1 | `0.6` | Strength. |
+| `card.compact.cornerMarks` | group |  | Registration marks on compact cards. Overrides card.cornerMarks for them. |
+| `card.compact.cornerMarks.style` | `none`, `bracket`, `tick` | `"none"` | Shape of each mark. |
+| `card.compact.cornerMarks.corners` | list of names of `tl`, `tr`, `br`, `bl` |  | Default [tl, br]. |
+| `card.compact.cornerMarks.size` | 0.01 to 0.5 |  | Arm length. |
+| `card.compact.cornerMarks.thickness` | 0.002 to 0.1 |  | Line width. |
+| `card.compact.cornerMarks.inset` | -0.1 to 0.1 | `0` | Offset from the corner; negative sits outside the card. |
+| `card.compact.cornerMarks.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+
+### `pattern`
+
+Drawn by: the card chrome change.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `pattern.kind` | `none`, `dots`, `grid`, `hatch`, `scanlines` | `"none"` | Default none. |
+| `pattern.spacing` | 0.02 to 2 | `0.13` | Distance between marks, fraction of a cell. |
+| `pattern.majorEvery` | whole number, 2 to 20 |  | Every Nth line of a grid is drawn heavier (Blueprint: 5). |
+| `pattern.thickness` | 0.001 to 0.1 | `0.01` | Line width / dot radius. |
+| `pattern.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `pattern.major` | group |  | Style of the heavier lines. |
+| `pattern.major.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `pattern.major.thickness` | 0.001 to 0.1 |  |  |
+| `pattern.angle` | -180 to 180 | `45` | hatch/lines direction, degrees. |
+
+### `divider`
+
+Drawn by: the widget parts change.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `divider.style` | `none`, `line`, `gradient`, `dimension` | `"line"` | dimension = a line with end ticks and an optional centred label (Blueprint). |
+| `divider.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `divider.thickness` | 0.001 to 0.05 | `0.01` |  |
+| `divider.gradientTo` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+
+### `well`
+
+Drawn by: the widget parts change.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `well.fill` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `well.radius` | 0 to 0.5 | `0.09` |  |
+| `well.border` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+
+### `chip`
+
+Drawn by: the widget parts change.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `chip.shape` | `none`, `pill` | `"none"` |  |
+| `chip.fill` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `chip.border` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `chip.textColor` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `chip.colorBy` | `none`, `status` | `"status"` | status tints the chip by good/warning/critical. |
+
+### `typography`
+
+Drawn by: the typography change.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `typography.fonts` | group |  | Per-role overrides; each is a family or a file in the theme folder. Missing role falls back to typography.font. |
+| `typography.fonts.value` | text |  |  |
+| `typography.fonts.unit` | text |  |  |
+| `typography.fonts.label` | text |  |  |
+| `typography.valueScale` | 0.5 to 2 | `1` | Multiplies the readout's size (Pop and Obsidian run big). |
+| `typography.case` | group |  | Letter case applied at draw time. |
+| `typography.case.label` | `none`, `upper`, `lower` | `"none"` |  |
+| `typography.case.title` | `none`, `upper`, `lower` | `"none"` |  |
+| `typography.tracking` | group |  | Letter spacing in em. Applied per glyph at draw time; the Readout's equal-width digits are kept. |
+| `typography.tracking.value` | -0.1 to 0.6 |  | em |
+| `typography.tracking.label` | -0.1 to 0.6 |  | em |
+| `typography.tracking.title` | -0.1 to 0.6 |  | em |
+| `typography.slant` | 0 to 20 | `0` | Synthetic skew of the value, degrees. Prefer a real italic file when the family has one. |
+| `typography.valueFill` | group |  | Fills the value text with a gradient (Rigline clock). |
+| `typography.valueFill.colors` | list of 2 to 6 colours |  | Gradient stops. |
+| `typography.valueFill.angle` | -360 to 360 | `0` |  |
+| `typography.valueGlow` | group |  | Glow behind value text. |
+| `typography.valueGlow.blur` | 0 to 1 |  | Blur radius, fraction of a cell. |
+| `typography.valueGlow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `typography.valueGlow.alpha` | 0 to 1 | `0.6` | Strength. |
+
+### `gauge`
+
+Drawn by: the gauge change.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `gauge.labelPosition` | `auto`, `inside`, `below`, `above` | `"auto"` | Where a gauge's label sits. auto keeps the v1 placement (Prism: below). |
+| `gauge.sweep` | group |  | Ring/tach/marker geometry. |
+| `gauge.sweep.start` | -360 to 360 | `135` | Degrees, 0 = 3 o'clock, clockwise. v1 ring: 135. |
+| `gauge.sweep.span` | 30 to 360 | `270` | v1 ring: 270. |
+| `gauge.segments` | group |  | Chops the fill into LED blocks. |
+| `gauge.segments.length` | 0.005 to 1 |  | Segment length (bars) or arc length in cells (rings). |
+| `gauge.segments.gap` | 0 to 1 |  | Space between segments. |
+| `gauge.outline` | group |  | Outline round the track (thickbar). |
+| `gauge.outline.width` | 0.002 to 0.2 |  |  |
+| `gauge.outline.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `gauge.ticks` | group |  | Tick marks on rings/tach/meter. |
+| `gauge.ticks.count` | whole number, 2 to 60 |  |  |
+| `gauge.ticks.majorEvery` | whole number, 1 to 20 |  |  |
+| `gauge.ticks.length` | 0.005 to 0.5 |  |  |
+| `gauge.ticks.thickness` | 0.001 to 0.05 |  |  |
+| `gauge.ticks.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `gauge.ticks.labels` | true or false |  | Print numbers at major ticks. |
+| `gauge.scale` | group |  | Scale labels under a bar (Paper). |
+| `gauge.scale.labels` | list of 2 to 11 text |  | Printed under a bar at even spacing, e.g. ["0","50","100"]. |
+| `gauge.scale.size` | 0.005 to 0.5 |  |  |
+| `gauge.redline` | group |  |  |
+| `gauge.redline.from` | 0 to 1 | `0.85` | Fraction where the zone starts. |
+| `gauge.redline.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `gauge.redline.glow` | group |  | A soft glow. color omitted = the thing's own colour. |
+| `gauge.redline.glow.blur` | 0 to 1 |  | Blur radius, fraction of a cell. |
+| `gauge.redline.glow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `gauge.redline.glow.alpha` | 0 to 1 | `0.6` | Strength. |
+| `gauge.redline.lightsAbove` | true or false |  | Zone only lights while the value is inside it (Ember). |
+| `gauge.gradient` | `"ramp"` or a gradient |  | Fill gradient along the value: 'ramp' uses colors.ramp, or give stops. |
+| `gauge.glow` | group |  | Glow round the fill. color omitted = fill colour. |
+| `gauge.glow.blur` | 0 to 1 |  | Blur radius, fraction of a cell. |
+| `gauge.glow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `gauge.glow.alpha` | 0 to 1 | `0.6` | Strength. |
+| `gauge.marker` | group |  | Value marker (Obsidian jewel, Blueprint needle). |
+| `gauge.marker.shape` | `diamond`, `needle` | `"diamond"` |  |
+| `gauge.marker.size` | 0.005 to 0.5 |  |  |
+| `gauge.marker.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `gauge.marker.halo` | true or false |  | Dark ring round the marker. |
+| `gauge.crosshair` | true or false |  | Centre cross on dials (Blueprint). |
+| `gauge.track` | group |  | Overrides the default accentDim track. |
+| `gauge.track.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `gauge.track.widthRatio` | 0.1 to 2 | `1` | Track width relative to stroke.thickness. |
+| `gauge.colorBy` | `accent`, `ramp` | `"accent"` | 'ramp' colours the fill by value along colors.ramp instead of the accent/warning/critical steps. |
+| `gauge.valueTint` | true or false | `false` | Colours the readout with the same colour as the fill. |
+| `gauge.sparkline` | group |  | A history line under the readout; needs Stats to keep a ring buffer. |
+| `gauge.sparkline.enabled` | true or false |  |  |
+| `gauge.sparkline.height` | 0.05 to 1 | `0.3` |  |
+| `gauge.sparkline.historySeconds` | 10 to 600 | `60` |  |
+| `gauge.sparkline.strokeWidth` | 0.002 to 0.1 |  |  |
+| `gauge.status` | group |  | A status chip beside the label. |
+| `gauge.status.enabled` | true or false |  |  |
+| `gauge.status.thresholds` | list of 2 numbers |  | [warm, hot] as 0..1. Default [0.7,0.9]. |
+| `gauge.status.labels` | list of 3 text |  | [ok, warm, hot]. |
+
+### `icons`
+
+Drawn by: the icons change.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `icons.set` | text |  | Folder name inside the theme folder (icons/<set>/<key>.svg), or a built-in set name. Keys are in 04-widgets-and-icons.md. A missing key falls back to the built-in 'outline' set, then to the widget's own icon. |
+| `icons.stroke` | 0.005 to 0.2 |  | Override stroke width for set icons, fraction of the icon size. |
+| `icons.tint` | text |  | 'accent', 'accent2', 'text', 'ramp', 'none' (keep the SVG's colours) or a #colour. |
+| `icons.glow` | group |  | Glow behind set icons (Rigline). Colour defaults to the icon's tint. |
+| `icons.glow.blur` | 0 to 1 |  | Blur radius, fraction of a cell. |
+| `icons.glow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `icons.glow.alpha` | 0 to 1 | `0.6` | Strength. |
+| `icons.animated` | true or false | `true` | false = static icons even where the widget would use Lottie (weather). Default true. |
+
+### `background`
+
+Drawn by: `theme-backgrounds`.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `background.default` | group |  | The animated background this theme selects when the user has not picked one. |
+| `background.default.name` | text |  |  |
+| `background.static` | group |  | Still background used when no animated background is selected, or when motion is off. Image, gradient or colour. |
+| `background.static.image` | text |  | File in the theme folder. |
+| `background.static.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `background.static.gradient` | group |  | Linear or radial gradient. |
+| `background.static.gradient.colors` | list of 2 to 6 colours |  | Stops. |
+| `background.static.gradient.kind` | `linear`, `radial` | `"linear"` |  |
+| `background.static.gradient.angle` | -360 to 360 | `90` | Linear only. |
+| `background.static.gradient.cx` | -1 to 2 | `0.5` | Radial centre x, fraction of width. |
+| `background.static.gradient.cy` | -1 to 2 | `0` | Radial centre y, fraction of height. |
+| `background.static.gradient.radius` | 0.1 to 3 | `0.7` | Radial radius, fraction of width. |
+| `background.scrim` | group |  | A veil between the background and the cards, to hold text contrast. |
+| `background.scrim.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
+| `background.scrim.alpha` | 0 to 1 |  |  |
+
+### `motion`
+
+Drawn by: the motion change.
+
+| Key | Value | Default | Meaning |
+|---|---|---|---|
+| `motion.level` | `full`, `reduced`, `off` | `"full"` | The ceiling for theme-driven animation (borderAnimate, and what a later change adds). The effective level is the lower of this and the user/OS setting. Does not touch the shader background, which has its own control. |
 
 ## Bundled font
 

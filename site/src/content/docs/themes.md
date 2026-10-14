@@ -41,5 +41,10 @@ Colours are `#RRGGBB` or `#AARRGGBB` (alpha first). Sizes are fractions of one g
 display. A theme can set the colours, the card (radius, border, gap, padding), the typography, the shape of gauges, the
 page indicator, how a card looks while pressed, the dock's size, and the palette the built-in backgrounds draw with.
 
+Format 2 adds optional values for card chrome (chamfered corners, shadows, dashed or gradient borders), a page pattern, per-role
+fonts, more gauge styles, icons and a background of its own. They are checked and kept today and drawn by later releases; a
+file that uses none of them is unaffected. The
+[JSON Schema](/schemas/v2/theme.json) lists them for editor completion.
+
 The complete list of settings, with the range of each, is the
 [theme reference on GitHub](https://github.com/UrDeck/urdeck/blob/main/docs/themes.md).

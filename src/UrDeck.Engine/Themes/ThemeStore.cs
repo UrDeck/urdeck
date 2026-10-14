@@ -12,7 +12,14 @@ namespace UrDeck.Engine.Themes;
 public sealed record ThemeFont(string Spec, Func<string, Stream?> Open);
 
 /// <summary>A theme with every value defined (user values merged over the default theme) plus its font source.</summary>
-public sealed record LoadedTheme(string Name, ThemeDefinition Definition, ThemeFont Font);
+public sealed record LoadedTheme(string Name, ThemeDefinition Definition, ThemeFont Font)
+{
+    /// <summary>The theme's <c>meta.name</c>, or its folder name when it has none.</summary>
+    public string DisplayName => Definition.Meta?.Name ?? Name;
+
+    /// <summary>The theme's <c>meta.mode</c> (<c>dark</c> or <c>light</c>), or null. Informational: it changes no colour.</summary>
+    public string? Mode => Definition.Meta?.Mode;
+}
 
 /// <summary>
 /// Finds themes: user themes in <c>themes/&lt;name&gt;/theme.json</c> first, then the built-in ones embedded in this
@@ -60,10 +67,10 @@ public sealed class ThemeStore(string themesDirectory)
             return null;
 
         ThemeDefinition user;
+        HashSet<string> reported;
         try
         {
-            user = JsonSerializer.Deserialize<ThemeDefinition>(File.ReadAllText(settings), UrDeckJson.Options)
-                   ?? throw new JsonException("the file is empty");
+            user = ThemeLenientJson.Read(File.ReadAllText(settings), name, UrDeckJson.Options, out reported);
         }
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
         {
@@ -71,7 +78,7 @@ public sealed class ThemeStore(string themesDirectory)
             return null;
         }
 
-        user.Sanitize(name);
+        user.Sanitize(name, reported);
 
         ThemeFont? font = null;
         if (user.Typography?.Font is { } spec)
@@ -87,7 +94,9 @@ public sealed class ThemeStore(string themesDirectory)
             }
         }
 
-        return new LoadedTheme(name, user.MergeOver(baseline.Definition), font ?? baseline.Font);
+        var merged = user.MergeOver(baseline.Definition);
+        merged.CheckRules(name);
+        return new LoadedTheme(name, merged, font ?? baseline.Font);
     }
 
     /// <summary>The built-in theme of that name (one of <see cref="BuiltInNames"/>), or null. Reads no folder and logs nothing.</summary>
