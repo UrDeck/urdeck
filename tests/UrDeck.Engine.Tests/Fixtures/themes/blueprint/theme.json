@@ -1,0 +1,168 @@
+{
+  "format": 2,
+  "meta": {
+    "name": "Blueprint",
+    "description": "A technical drawing come alive. Cyanotype ground with a drafting grid, dashed outlines, yellow corner marks and dimension lines. Gauges are protractor dials with one needle.",
+    "mode": "dark",
+    "tags": [
+      "technical",
+      "engineering",
+      "dark"
+    ],
+    "pairsWith": {
+      "backgrounds": [
+        "plotter",
+        "contour",
+        "streams"
+      ]
+    },
+    "license": "GPL-3.0-or-later"
+  },
+  "colors": {
+    "background": "#0c2d52",
+    "cardFill": "#cc0c2d52",
+    "cardBorder": "#999fd0ff",
+    "text": "#dcecff",
+    "textMuted": "#9fc4ec",
+    "accent": "#ffd34d",
+    "accentDim": "#33ffd34d",
+    "accent2": "#9fd0ff",
+    "good": "#7fe3b0",
+    "warning": "#ffd34d",
+    "critical": "#ff7a6b",
+    "backgroundPalette": [
+      "#0c2d52",
+      "#123c6b",
+      "#9fd0ff",
+      "#ffd34d"
+    ]
+  },
+  "card": {
+    "radius": 0,
+    "borderWidth": 0.009,
+    "gap": 0.09,
+    "padding": 0.127,
+    "borderStyle": "dashed",
+    "borderDash": {
+      "on": 0.055,
+      "off": 0.036
+    },
+    "cornerMarks": {
+      "style": "bracket",
+      "corners": [
+        "tl",
+        "br"
+      ],
+      "size": 0.082,
+      "thickness": 0.014,
+      "inset": -0.045,
+      "color": "#ffd34d"
+    },
+    "compact": {
+      "cornerMarks": {
+        "style": "tick",
+        "corners": [
+          "bl"
+        ],
+        "size": 0.064,
+        "inset": 0.036
+      }
+    }
+  },
+  "pattern": {
+    "kind": "grid",
+    "spacing": 0.182,
+    "majorEvery": 5,
+    "thickness": 0.009,
+    "color": "#10ffffff",
+    "major": {
+      "color": "#26ffffff",
+      "thickness": 0.009
+    }
+  },
+  "divider": {
+    "style": "dimension",
+    "color": "#ffd34d",
+    "thickness": 0.009
+  },
+  "typography": {
+    "font": "IBMPlexMono-Regular.ttf",
+    "weights": {
+      "value": 400,
+      "unit": 400,
+      "label": 400,
+      "body": 400,
+      "title": 500
+    },
+    "labelSize": 0.095,
+    "bodySize": 0.11,
+    "titleSize": 0.12,
+    "unitRatio": 0.35,
+    "valueScale": 1.05,
+    "case": {
+      "label": "upper",
+      "title": "upper"
+    },
+    "tracking": {
+      "value": -0.06,
+      "label": 0.12
+    }
+  },
+  "stroke": {
+    "thickness": 0.02,
+    "cap": "square"
+  },
+  "gauge": {
+    "style": "marker",
+    "sweep": {
+      "start": 180,
+      "span": 180
+    },
+    "ticks": {
+      "count": 19,
+      "majorEvery": 3,
+      "length": 0.06,
+      "thickness": 0.008,
+      "color": "#9fd0ff",
+      "labels": true
+    },
+    "marker": {
+      "shape": "needle",
+      "size": 0.06,
+      "color": "#ffd34d"
+    },
+    "crosshair": true,
+    "track": {
+      "color": "#559fd0ff"
+    }
+  },
+  "icons": {
+    "set": "outline",
+    "stroke": 0.058,
+    "tint": "text",
+    "animated": false
+  },
+  "background": {
+    "default": {
+      "name": "plotter"
+    },
+    "static": {
+      "color": "#0c2d52"
+    }
+  },
+  "motion": {
+    "level": "reduced"
+  },
+  "indicator": {
+    "active": "#ffd34d",
+    "inactive": "#559fd0ff",
+    "backdrop": "#cc0c2d52"
+  },
+  "press": {
+    "scale": 0.97,
+    "opacity": 0.9
+  },
+  "dock": {
+    "height": 0.71
+  }
+}

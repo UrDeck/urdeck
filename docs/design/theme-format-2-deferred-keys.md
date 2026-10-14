@@ -20,7 +20,6 @@ Unknown keys are ignored at load (as in format 1), so a user theme can already c
 
 | Key | Definition in the package | Why deferred | Restore when |
 |---|---|---|---|
-| `card.accentStrip.glow` | glow object on the lit strip | No draft theme glows a strip; `card.glow` and `icons.glow` cover glow | A theme wants a glowing scan line |
 | `card.compact.padding` | number 0..1, padding override for compact cards | Decision D10 keeps compact chrome-only; no draft needs it | 1x1 tiles look cramped in a real theme |
 | `card.compact.accentStrip.fade` | boolean, fade strip to transparent | Only Carbon fades, and Carbon's strip is on full cards | A compact tile wants a fading strip |
 | `divider.inset` | number 0..0.5, indent from the section edges | All drafts run edge to edge | A theme wants an indented rule |
@@ -38,6 +37,13 @@ Unknown keys are ignored at load (as in format 1), so a user theme can already c
 covers the panel like the `image` background type, and a user's `background` setting (shader, image or `none`) replaces
 it like any other theme default. Its path must stay inside the theme folder (path-escape rejected, as for fonts).
 | `card.blur` | reserved (decision D1): backdrop blur | Not implementable on the current surfaces; Prism ships frostless and its draft theme drops the key | A compositor backdrop brush exists |
+
+### Carried although listed here
+
+The change `theme-format-2` found that Rigline's draft glows its compact strip (`card.compact.accentStrip.glow`), so
+`card.accentStrip.glow` (the same shape, `glow`) is in the model and the schema after all, for the full card and for the compact
+partial. `card.compact.cornerMarks` is also in (the task list names it; the package's compact table did not), a partial of
+`card.cornerMarks`. `card.compact.accentStrip.fade` stays deferred.
 
 ### Deferred by the spikes (2026-10-13, `docs/perf/theme-look.md` on the spike branches)
 

@@ -1,0 +1,392 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Patrick Bigler
+
+namespace UrDeck.Engine.Themes;
+
+public sealed partial class ThemeCardDefinition
+{
+    /// <summary>'chamfer' cuts corners with straight lines (Ember). Default round.</summary>
+    [Format2]
+    public string? Shape { get; set; }
+
+    /// <summary>Chamfer size, fraction of a cell, capped at half the smaller side.</summary>
+    [Format2]
+    public double? Cut { get; set; }
+
+    /// <summary>Which corners are cut. Default [tr, bl].</summary>
+    [Format2]
+    public List<string>? CutCorners { get; set; }
+
+    /// <summary>Replaces cardFill with a gradient.</summary>
+    [Format2]
+    public ThemeGradientDefinition? FillGradient { get; set; }
+
+    /// <summary>Default solid.</summary>
+    [Format2]
+    public string? BorderStyle { get; set; }
+
+    /// <summary>Dash pattern for dashed/dotted.</summary>
+    [Format2]
+    public ThemeCardBorderDashDefinition? BorderDash { get; set; }
+
+    /// <summary>Gradient border (Rigline, Ember, Obsidian hairline).</summary>
+    [Format2]
+    public ThemeCardBorderGradientDefinition? BorderGradient { get; set; }
+
+    /// <summary>Animated border. Bounded by motion.level.</summary>
+    [Format2]
+    public ThemeCardBorderAnimateDefinition? BorderAnimate { get; set; }
+
+    /// <summary>Registration marks (Carbon, Blueprint). Drawn outside the clip, so needs a bleed margin.</summary>
+    [Format2]
+    public ThemeCardCornerMarksDefinition? CornerMarks { get; set; }
+
+    /// <summary>Drop shadow. Bleeds outside the card.</summary>
+    [Format2]
+    public ThemeCardShadowDefinition? Shadow { get; set; }
+
+    /// <summary>Outer glow. Bleeds outside the card.</summary>
+    [Format2]
+    public ThemeGlowDefinition? Glow { get; set; }
+
+    /// <summary>Inset edge light (Prism).</summary>
+    [Format2]
+    public ThemeCardHighlightDefinition? Highlight { get; set; }
+
+    /// <summary>A radial light patch inside the card (Prism).</summary>
+    [Format2]
+    public ThemeCardSheenDefinition? Sheen { get; set; }
+
+    /// <summary>A lit line along one edge of every card, inside the clip (Carbon scan line, Rigline tile strips).</summary>
+    [Format2]
+    public ThemeCardAccentStripDefinition? AccentStrip { get; set; }
+
+    /// <summary>'cycle' fills cards from colors.cardTints in page order.</summary>
+    [Format2]
+    public string? Tint { get; set; }
+
+    /// <summary>A partial override applied to cards of 1x1 cell or less and to dock slots.</summary>
+    [Format2]
+    public ThemeCardCompactDefinition? Compact { get; set; }
+
+    private void MergeFormat2(ThemeCardDefinition? b, ThemeCardDefinition result)
+    {
+        result.Shape = Shape;
+        result.Cut = Cut;
+        result.CutCorners = CutCorners;
+        result.FillGradient = FillGradient;
+        result.BorderStyle = BorderStyle;
+        result.BorderDash = BorderDash;
+        result.BorderGradient = BorderGradient;
+        result.BorderAnimate = BorderAnimate;
+        result.CornerMarks = CornerMarks;
+        result.Shadow = Shadow;
+        result.Glow = Glow;
+        result.Highlight = Highlight;
+        result.Sheen = Sheen;
+        result.AccentStrip = AccentStrip;
+        result.Tint = Tint;
+        result.Compact = Compact;
+    }
+
+    internal void SanitizeFormat2(ThemeValueCheck check, string path)
+    {
+        Shape = check.Enum($"{path}.shape", Shape, "round", "chamfer");
+        Cut = check.Number($"{path}.cut", Cut, 0, 0.5);
+        CutCorners = check.NameList($"{path}.cutCorners", CutCorners, "tl", "tr", "br", "bl");
+        if (FillGradient is { } fillGradientValue)
+        {
+            bool had = fillGradientValue.Colors is not null;
+            fillGradientValue.Sanitize(check, $"{path}.fillGradient");
+            if (fillGradientValue.Colors is null)
+            {
+                if (!had)
+                    check.Missing($"{path}.fillGradient", "colors");
+                FillGradient = null;
+            }
+        }
+        BorderStyle = check.Enum($"{path}.borderStyle", BorderStyle, "solid", "dashed", "none");
+        BorderDash?.Sanitize(check, $"{path}.borderDash");
+        if (BorderGradient is { } borderGradientValue)
+        {
+            bool had = borderGradientValue.Colors is not null;
+            borderGradientValue.Sanitize(check, $"{path}.borderGradient");
+            if (borderGradientValue.Colors is null)
+            {
+                if (!had)
+                    check.Missing($"{path}.borderGradient", "colors");
+                BorderGradient = null;
+            }
+        }
+        BorderAnimate?.Sanitize(check, $"{path}.borderAnimate");
+        CornerMarks?.Sanitize(check, $"{path}.cornerMarks");
+        Shadow?.Sanitize(check, $"{path}.shadow");
+        Glow?.Sanitize(check, $"{path}.glow");
+        Highlight?.Sanitize(check, $"{path}.highlight");
+        Sheen?.Sanitize(check, $"{path}.sheen");
+        AccentStrip?.Sanitize(check, $"{path}.accentStrip");
+        Tint = check.Enum($"{path}.tint", Tint, "none", "cycle");
+        Compact?.Sanitize(check, $"{path}.compact");
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardBorderDashDefinition
+{
+    /// <summary>Dash length.</summary>
+    public double? On { get; set; }
+
+    /// <summary>Gap length.</summary>
+    public double? Off { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        On = check.Number($"{path}.on", On, 0.002, 1);
+        Off = check.Number($"{path}.off", Off, 0.002, 1);
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardBorderGradientDefinition
+{
+    /// <summary>Stops.</summary>
+    public List<string>? Colors { get; set; }
+
+    /// <summary>conic walks round the card, so it can rotate.</summary>
+    public string? Kind { get; set; }
+
+    /// <summary>Linear only.</summary>
+    public double? Angle { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Colors = check.Colors($"{path}.colors", Colors, 2, 8);
+        Kind = check.Enum($"{path}.kind", Kind, "linear", "conic");
+        Angle = check.Angle($"{path}.angle", Angle, -360, 360);
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardBorderAnimateDefinition
+{
+    /// <summary>spin rotates a conic gradient; pulse breathes the alpha.</summary>
+    public string? Mode { get; set; }
+
+    /// <summary>Seconds per cycle.</summary>
+    public double? Period { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Mode = check.Enum($"{path}.mode", Mode, "none", "spin", "pulse");
+        Period = check.Number($"{path}.period", Period, 1, 120);
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardCornerMarksDefinition
+{
+    /// <summary>Shape of each mark.</summary>
+    public string? Style { get; set; }
+
+    /// <summary>Default [tl, br].</summary>
+    public List<string>? Corners { get; set; }
+
+    /// <summary>Arm length.</summary>
+    public double? Size { get; set; }
+
+    /// <summary>Line width.</summary>
+    public double? Thickness { get; set; }
+
+    /// <summary>Offset from the corner; negative sits outside the card.</summary>
+    public double? Inset { get; set; }
+
+    public string? Color { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Style = check.Enum($"{path}.style", Style, "none", "bracket", "tick");
+        Corners = check.NameList($"{path}.corners", Corners, "tl", "tr", "br", "bl");
+        Size = check.Number($"{path}.size", Size, 0.01, 0.5);
+        Thickness = check.Number($"{path}.thickness", Thickness, 0.002, 0.1);
+        Inset = check.Number($"{path}.inset", Inset, -0.1, 0.1);
+        Color = check.Color($"{path}.color", Color);
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardShadowDefinition
+{
+    /// <summary>Offset.</summary>
+    public double? X { get; set; }
+
+    /// <summary>Offset.</summary>
+    public double? Y { get; set; }
+
+    /// <summary>0 = hard offset (Pop).</summary>
+    public double? Blur { get; set; }
+
+    public double? Spread { get; set; }
+
+    public string? Color { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        X = check.Number($"{path}.x", X, -0.5, 0.5);
+        Y = check.Number($"{path}.y", Y, -0.5, 0.5);
+        Blur = check.Number($"{path}.blur", Blur, 0, 1);
+        Spread = check.Number($"{path}.spread", Spread, -0.5, 0.5);
+        Color = check.Color($"{path}.color", Color);
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardHighlightDefinition
+{
+    /// <summary>Specular line along the top edge.</summary>
+    public string? Top { get; set; }
+
+    /// <summary>Rim light along the bottom, inside.</summary>
+    public string? Bottom { get; set; }
+
+    public double? Thickness { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Top = check.Color($"{path}.top", Top);
+        Bottom = check.Color($"{path}.bottom", Bottom);
+        Thickness = check.Number($"{path}.thickness", Thickness, 0.001, 0.1);
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardSheenDefinition
+{
+    public string? Color { get; set; }
+
+    /// <summary>Centre, fraction of card width.</summary>
+    public double? X { get; set; }
+
+    /// <summary>Centre, fraction of card height.</summary>
+    public double? Y { get; set; }
+
+    /// <summary>Radius, fraction of card width.</summary>
+    public double? Size { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Color = check.Color($"{path}.color", Color);
+        X = check.Number($"{path}.x", X, -1, 2);
+        Y = check.Number($"{path}.y", Y, -1, 2);
+        Size = check.Number($"{path}.size", Size, 0.1, 3);
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardAccentStripDefinition
+{
+    public string? Side { get; set; }
+
+    public double? Thickness { get; set; }
+
+    /// <summary>Fraction of the side.</summary>
+    public double? Length { get; set; }
+
+    /// <summary>Cycled by slot index (compact cards) or by card index. Default [accent].</summary>
+    public List<string>? Colors { get; set; }
+
+    /// <summary>Fade to transparent along the length (Carbon's scan line).</summary>
+    public bool? Fade { get; set; }
+
+    public ThemeGlowDefinition? Glow { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Side = check.Enum($"{path}.side", Side, "top", "bottom", "left", "right");
+        Thickness = check.Number($"{path}.thickness", Thickness, 0.005, 0.2);
+        Length = check.Number($"{path}.length", Length, 0.1, 1);
+        Colors = check.Colors($"{path}.colors", Colors, 1, 8);
+        Glow?.Sanitize(check, $"{path}.glow");
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardCompactDefinition
+{
+    public double? Radius { get; set; }
+
+    public double? BorderWidth { get; set; }
+
+    /// <summary>'circle' makes square cards round (Obsidian dock).</summary>
+    public string? Shape { get; set; }
+
+    /// <summary>A lit strip on compact cards (Rigline tiles). Overrides card.accentStrip for them.</summary>
+    public ThemeCardCompactAccentStripDefinition? AccentStrip { get; set; }
+
+    /// <summary>Registration marks on compact cards. Overrides card.cornerMarks for them.</summary>
+    public ThemeCardCompactCornerMarksDefinition? CornerMarks { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Radius = check.Number($"{path}.radius", Radius, 0, 1);
+        BorderWidth = check.Number($"{path}.borderWidth", BorderWidth, 0, 1);
+        Shape = check.Enum($"{path}.shape", Shape, "round", "chamfer", "circle");
+        AccentStrip?.Sanitize(check, $"{path}.accentStrip");
+        CornerMarks?.Sanitize(check, $"{path}.cornerMarks");
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardCompactAccentStripDefinition
+{
+    public string? Side { get; set; }
+
+    public double? Thickness { get; set; }
+
+    /// <summary>Fraction of the side.</summary>
+    public double? Length { get; set; }
+
+    /// <summary>Cycled by slot index (compact cards) or by card index. Default [accent].</summary>
+    public List<string>? Colors { get; set; }
+
+    public ThemeGlowDefinition? Glow { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Side = check.Enum($"{path}.side", Side, "top", "bottom", "left", "right");
+        Thickness = check.Number($"{path}.thickness", Thickness, 0.005, 0.2);
+        Length = check.Number($"{path}.length", Length, 0.1, 1);
+        Colors = check.Colors($"{path}.colors", Colors, 1, 8);
+        Glow?.Sanitize(check, $"{path}.glow");
+    }
+}
+
+[Format2]
+public sealed partial class ThemeCardCompactCornerMarksDefinition
+{
+    /// <summary>Shape of each mark.</summary>
+    public string? Style { get; set; }
+
+    /// <summary>Default [tl, br].</summary>
+    public List<string>? Corners { get; set; }
+
+    /// <summary>Arm length.</summary>
+    public double? Size { get; set; }
+
+    /// <summary>Line width.</summary>
+    public double? Thickness { get; set; }
+
+    /// <summary>Offset from the corner; negative sits outside the card.</summary>
+    public double? Inset { get; set; }
+
+    public string? Color { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Style = check.Enum($"{path}.style", Style, "none", "bracket", "tick");
+        Corners = check.NameList($"{path}.corners", Corners, "tl", "tr", "br", "bl");
+        Size = check.Number($"{path}.size", Size, 0.01, 0.5);
+        Thickness = check.Number($"{path}.thickness", Thickness, 0.002, 0.1);
+        Inset = check.Number($"{path}.inset", Inset, -0.1, 0.1);
+        Color = check.Color($"{path}.color", Color);
+    }
+}
