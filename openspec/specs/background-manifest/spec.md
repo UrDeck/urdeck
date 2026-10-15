@@ -207,7 +207,7 @@ A background folder MUST be checkable without showing it, and the host MUST repo
 - When the host loads a background it logs each diagnostic once per load as one line with its code and the folder.
   An `error` stops the background only where this specification says the background fails; every other diagnostic,
   errors included, leaves it shown
-- The four built-in backgrounds MUST produce no diagnostic of any severity. A test enforces it
+- Every built-in background MUST produce no diagnostic of any severity. A test enforces it for each of the sixteen
 
 #### Scenario: Clean background
 - **WHEN** a folder has a manifest with a title, a description, every parameter described and a sample
@@ -226,7 +226,7 @@ A background folder MUST be checkable without showing it, and the host MUST repo
 - **THEN** no diagnostic is reported for the missing description
 
 #### Scenario: Built-ins
-- **WHEN** the check runs on `plasma`, `aurora`, `gradient` and `julia`
+- **WHEN** the check runs on each of the sixteen built-in backgrounds
 - **THEN** each returns no diagnostics
 
 #### Scenario: Folder name
@@ -272,3 +272,25 @@ A background MUST be renderable to a picture without a window or a GPU, so tools
 - **WHEN** a built-in background is rendered
 - **THEN** there is no `SHADER070` diagnostic
 
+### Requirement: Built-In Pairing Data
+The shipped pairing data MUST agree between themes and backgrounds: for every built-in background and every shipped or
+drafted theme, if the background's `pairsWith.themes` names the theme then the theme's `meta.pairsWith.backgrounds`
+names the background, and the other way round, so that every listed pair of shipped data is mutual. A name of a theme
+or a background that does not exist in the product is a failure of the check.
+
+- Every built-in background of the twelve new ones names at least two themes, and every drafted theme names between
+  two and seven backgrounds
+- The check reads the drafted themes' files until they are built-in themes, and the built-in themes after
+- User themes and user backgrounds are not held to this
+
+#### Scenario: Symmetric data
+- **WHEN** the check reads the twelve new manifests and the eight drafted themes
+- **THEN** every listed pair is named by both sides
+
+#### Scenario: One side missing
+- **WHEN** a manifest names `carbon` and `carbon` does not list that background
+- **THEN** the check fails and names the pair
+
+#### Scenario: A name that does not exist
+- **WHEN** a manifest names the theme `carbonn`
+- **THEN** the check fails and names `carbonn`
