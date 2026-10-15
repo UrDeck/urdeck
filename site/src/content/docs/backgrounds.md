@@ -45,14 +45,28 @@ themes choose no background, so nothing changes for them. A theme's `motion.leve
 
 ## Built-in shaders
 
-All four draw with the theme's palette, so they follow the theme.
+Sixteen ship with UrDeck. They draw with the theme's palette, so they follow the theme (`spectrum` is the exception: its
+colours are hues). Each has a few settings; the [reference](https://github.com/UrDeck/urdeck/blob/main/docs/backgrounds.md#built-in-shaders)
+lists them with their ranges and what the four palette colours mean.
 
 | Name | Looks like |
 |---|---|
 | `plasma` | slow warped fields of colour |
 | `aurora` | three glowing curtains swaying along the longer side |
 | `gradient` | a soft gradient whose bands drift |
-| `julia` | a Julia set whose constant circles slowly (the heaviest) |
+| `julia` | a Julia set whose constant circles slowly (the heaviest of the first four) |
+| `horizon` | a retro striped sun over a neon grid rolling toward you |
+| `spectrum` | three soft lights walking the colour wheel, RGB-keyboard style |
+| `contour` | topographic contour lines of a slowly changing landscape |
+| `nebula` | warped colour clouds under an uneven, twinkling star field |
+| `streams` | thin packets of light falling in columns, like data |
+| `ripple` | sunlight caustics on a pool floor |
+| `embers` | sparks lifting off a glowing horizon, dark at the top |
+| `plotter` | a drafting grid with a slow scan line and dashed rings |
+| `shapes` | flat outlined shapes bobbing and turning, for light, bold themes |
+| `warpgate` | falling through a tunnel of starlight streaks, rings and a swirling core |
+| `equalizer` | spectrum bars with falling peak caps (it does not listen to audio) |
+| `vortex` | light rays spiralling into a glowing core in two opposite layers |
 
 ## Cost
 

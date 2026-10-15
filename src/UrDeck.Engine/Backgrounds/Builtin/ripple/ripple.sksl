@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Light through moving water: caustic webs that drift, as on the floor of a pool. Gives frosted cards something to refract.
+// Palette roles: iColor0 deep water, iColor1 water, iColor2 light, iColor3 hot highlights.
+// Based on the well-known tileable water caustic construction (folding the plane over itself).
+// The motion repeats every 40 s, which divides the four-hour time wrap.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float ripples;      // default: 1.0
+uniform float sharpness;   // default: 1.0
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float ar = iResolution.x / iResolution.y;
+    float tau = 6.2831853;
+    float a = tau * iTime / 40.0;
+    float2 p = mod(float2(uv.x * ar, uv.y) * tau * 1.2 * ripples, tau) - 250.0;
+    float2 i = p;
+    float c = 1.0;
+    float inten = 0.005;
+    for (int n = 0; n < 5; n++) {
+        float t = a * (1.0 - 3.5 / float(n + 1)) ;
+        i = p + float2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));
+        c += 1.0 / length(float2(p.x / (sin(i.x + t) / inten), p.y / (cos(i.y + t) / inten)));
+    }
+    c /= 5.0;
+    c = 1.17 - pow(c, 1.4);
+    float v = clamp(pow(abs(c), 6.0 + 2.0 * sharpness), 0.0, 1.0);
+    float3 col = mix(iColor0.rgb, iColor1.rgb, smoothstep(0.0, 1.0, uv.y * 0.7 + 0.15));
+    col += iColor2.rgb * v * 1.1;
+    col += iColor3.rgb * pow(v, 2.5) * 0.7;
+    col *= 1.0 - 0.3 * uv.y;
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

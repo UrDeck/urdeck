@@ -96,7 +96,7 @@ finding:
 - **THEN** the output has the findings of the fourth under its name, and the exit code is 1
 
 #### Scenario: The built-in backgrounds
-- **WHEN** `--all` is given the directory that holds the product's four built-in backgrounds, with `--fail-on-warnings`
+- **WHEN** `--all` is given the directory that holds the product's built-in backgrounds, with `--fail-on-warnings`
 - **THEN** there are no findings and the exit code is 0
 
 #### Scenario: Empty directory

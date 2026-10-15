@@ -94,7 +94,7 @@ Thickness and line ends come from `stroke`.
 
 ## Background palette
 
-The built-in background shaders (`plasma`, `aurora`, `gradient`, `julia`) draw with four colours that come from the theme.
+The built-in background shaders (`plasma`, `aurora`, `gradient`, `julia` and the twelve others, see `docs/backgrounds.md`) draw with four colours that come from the theme.
 `colors.backgroundPalette` sets them; the built-in themes have:
 
 | Theme | `backgroundPalette` |

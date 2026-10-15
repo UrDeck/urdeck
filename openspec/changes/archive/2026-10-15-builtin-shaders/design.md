@@ -52,6 +52,15 @@ construction. A test renders every moving built-in at time 0 and 14,400 and comp
 that does not divide the wrap. GPU-only artefacts (banding, the `atan` seam in Warp Gate and Vortex, hash precision at
 large times in Nebula and Embers) cannot be tested on the CPU and are a manual task on the panel.
 
+**The wrap test found five shaders that were not periodic, and they were fixed in their sources.** The authoring claim
+("every period divides 14,400") held for seven of the twelve. Equalizer used a 7 s period and a continuous 1.2 to 2.0 s one
+(now 3, 4 or 5 s, and 1.2, 1.6 or 2.0 s); Shapes rotated with a continuous 60 to 120 s period (now 60 or 120 s); Nebula's
+clouds slid along a straight line in noise space (now a circle, 240 s); Embers and Plotter indexed their hash by a cell or
+ring number that grows without bound (now taken modulo the number of cells or rings in the wrap, 14,400 times the scroll
+rate, or 2,400). The four earlier built-ins are not periodic and are not held to the test (`docs/backgrounds.md`, "Speed,
+scale and cost"). The test allows 1% of pixels to differ by more than three levels: Equalizer's 0.8 s sine loses precision
+in float at an argument near 113,000 and moves a bar edge by a pixel.
+
 **The built-in list has one source.** `ShaderStore.BuiltInNames` is what the embedded folders and the tests enumerate.
 A test asserts that the list and the embedded folders agree, so a folder added without a name, or a name without a
 folder, fails in CI.

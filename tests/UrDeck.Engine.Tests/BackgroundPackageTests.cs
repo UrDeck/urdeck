@@ -432,10 +432,10 @@ public sealed class BackgroundPackageTests : IDisposable
     [Fact]
     public void Rendering_a_name_that_is_not_there_returns_the_reason()
     {
-        using var result = BackgroundRender.Render(BackgroundFixture.Parse(Json("nebula")), _fixture.Theme(), _fixture.Store, 10, 10);
+        using var result = BackgroundRender.Render(BackgroundFixture.Parse(Json("nonesuch")), _fixture.Theme(), _fixture.Store, 10, 10);
 
         Assert.Null(result.Bitmap);
-        Assert.Contains("no shader named 'nebula'", result.Failure);
+        Assert.Contains("no shader named 'nonesuch'", result.Failure);
     }
 
     // Pairing

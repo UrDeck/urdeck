@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Falling through an event horizon at light speed: starlight streaks stretch out from the centre, rings of liquid light
+// pulse past and a bright, swirling core churns ahead. Part wormhole, part warp drive.
+// Palette roles: iColor0 deep space, iColor1 tunnel wall, iColor2 streaks and rings, iColor3 white-hot core.
+// Streaks cycle every 3, 4 or 5 s, rings every 4.8 s and the swirl every 24 s: all divide the four-hour time wrap.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float streaks;    // default: 1.0
+uniform float ringRate;   // default: 1.0
+uniform float coreSize;   // default: 1.0
+uniform float swirl;      // default: 1.0
+
+float hash11(float n) { return fract(sin(n * 127.1) * 43758.5453); }
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float ar = iResolution.x / iResolution.y;
+    float tau = 6.2831853;
+    float2 p = float2((uv.x - 0.5) * ar, uv.y - 0.5);
+    float r = length(p);
+    float ang = atan(p.y, p.x);
+
+    // Tunnel wall: a gentle radial gradient with a swirl of lighter and darker bands.
+    float sw = 24.0;
+    float spin = tau * iTime / sw;
+    float bands = 0.5 + 0.5 * sin(ang * 3.0 + r * 14.0 * swirl - spin * 2.0);
+    float3 col = mix(iColor0.rgb, iColor1.rgb, smoothstep(0.55, 0.0, r) * (0.55 + 0.45 * bands));
+
+    // Streaks: each of many angular bins carries one streak that flies from the core to the edge and accelerates.
+    float bins = 90.0 * streaks;
+    float s = ang / tau * bins;
+    float id = floor(s);
+    float across = abs(fract(s) - 0.5);
+    float h1 = hash11(id);
+    float h2 = hash11(id + 71.0);
+    float period = 3.0 + floor(h1 * 3.0);                         // 3, 4 or 5 s
+    float life = fract(iTime / period + h2);
+    float head = pow(life, 2.2) * 0.9;                            // radius of the head: slow, then fast
+    float len = 0.02 + head * 0.55 * (0.5 + h1);
+    float along = head - r;
+    float streak = (along > 0.0 && along < len) ? pow(1.0 - along / len, 1.5) : 0.0;
+    float width = (0.04 + 0.16 * head) ;
+    streak *= 1.0 - smoothstep(0.0, width + 0.02, across * (1.0 / bins) * tau * 0.5 * 6.0 * (1.0 / max(r, 0.02)) * 0.15);
+    streak *= smoothstep(0.02, 0.12, r) * (0.3 + 0.7 * smoothstep(0.0, 0.5, life));
+    col += iColor2.rgb * streak * 1.1;
+    col += iColor3.rgb * streak * streak * 0.5;
+
+    // Rings of light: every 4.8 s, three rings are in flight, born at the core and growing past the edge.
+    for (int k = 0; k < 3; k++) {
+        float ph = fract(iTime / 4.8 * ringRate + float(k) / 3.0);
+        float rr = pow(ph, 1.7) * 0.85;
+        float w = 0.012 + 0.05 * ph;
+        float ring = exp(-pow((r - rr) / w, 2.0)) * (1.0 - ph) * smoothstep(0.0, 0.06, ph);
+        col += iColor2.rgb * ring * 0.6;
+    }
+
+    // The event horizon: a churning bright core.
+    float cr = 0.075 * coreSize;
+    float swirlPat = 0.5 + 0.5 * sin(ang * 5.0 - r * 60.0 + spin * 6.0 + sin(r * 30.0 - spin * 3.0) * 1.5);
+    float core = exp(-pow(r / (cr * 1.4), 2.0));
+    col = mix(col, mix(iColor2.rgb, iColor3.rgb, swirlPat), core * 0.9);
+    col += iColor3.rgb * exp(-pow(r / (cr * 0.45), 2.0)) * 0.9;
+    col += iColor2.rgb * exp(-r * 6.0) * 0.18;
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Spectrum bars dancing along the bottom of the display, with peak caps that fall slowly.
+// Palette roles: iColor0 ground, iColor1 bar bottom, iColor2 bar middle, iColor3 bar top.
+// Free-running: each bar is a sum of sines with periods that divide the four-hour time wrap. A later host input for an
+// audio level (see the handoff, "Audio-reactive backgrounds") would multiply the bar heights.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float bars;      // default: 16.0
+uniform float reach;     // default: 0.55
+uniform float gap;       // default: 0.28
+
+float hash11(float n) { return fract(sin(n * 91.17) * 43758.5453); }
+
+float barHeight(float id, float t) {
+    float tau = 6.2831853;
+    float h = 0.0;
+    h += 0.45 * sin(tau * t / (3.0 + floor(hash11(id) * 3.0)) + hash11(id + 3.0) * tau);     // 3, 4 or 5 s
+    h += 0.30 * sin(tau * t / (1.2 + 0.4 * floor(hash11(id + 9.0) * 3.0)) + hash11(id + 5.0) * tau);
+    h += 0.25 * sin(tau * t / 0.8 + hash11(id + 7.0) * tau);
+    return clamp(0.5 + 0.5 * h, 0.04, 1.0);
+}
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float n = clamp(bars, 4.0, 40.0);
+    float x = uv.x * n;
+    float id = floor(x);
+    float fx = fract(x);
+    float h = barHeight(id, iTime) * reach;
+    // Peak cap: the maximum height over the last 1.5 s, sampled at four moments, decaying.
+    float peak = 0.0;
+    for (int k = 0; k < 4; k++) {
+        float tk = iTime - float(k) * 0.4;
+        peak = max(peak, barHeight(id, tk) * reach - float(k) * 0.012);
+    }
+    float y = 1.0 - uv.y;                                  // 0 at the bottom
+    float hg = gap * 0.5;
+    float inBar = smoothstep(hg, hg + 0.04, fx) * (1.0 - smoothstep(1.0 - hg - 0.04, 1.0 - hg, fx));
+    float body = (1.0 - smoothstep(h - 0.004, h + 0.004, y)) * inBar;
+    float cap = (1.0 - smoothstep(0.0, 0.006, abs(y - peak - 0.012))) * inBar;
+    float t = clamp(y / max(reach, 0.01), 0.0, 1.0);
+    float3 barCol = t < 0.5 ? mix(iColor1.rgb, iColor2.rgb, t * 2.0) : mix(iColor2.rgb, iColor3.rgb, (t - 0.5) * 2.0);
+    float3 col = iColor0.rgb;
+    col += iColor2.rgb * 0.10 * exp(-y * 5.0);             // light pooled at the bottom
+    col = mix(col, barCol, body * 0.92);
+    col = mix(col, iColor3.rgb, cap * 0.9);
+    // A faint reflection under the base is not drawn: the cards cover the lower part of most decks.
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

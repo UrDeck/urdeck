@@ -265,17 +265,14 @@ public sealed class ShaderLintTests : IDisposable
     }
 
     [Theory]
-    [InlineData("plasma")]
-    [InlineData("aurora")]
-    [InlineData("gradient")]
-    [InlineData("julia")]
+    [MemberData(nameof(BuiltInShaderTests.Names), MemberType = typeof(BuiltInShaderTests))]
     public void The_built_ins_have_no_diagnostic_of_any_severity(string name)
     {
         Assert.Empty(ShaderLint.Check(new EmbeddedBackgroundSource(name), name));
     }
 
     [Fact]
-    public void The_built_in_names_are_the_four_embedded_folders()
+    public void The_built_in_names_are_the_embedded_folders()
     {
         foreach (string name in ShaderStore.BuiltInNames)
         {

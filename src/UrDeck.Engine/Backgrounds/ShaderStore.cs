@@ -39,7 +39,7 @@ public sealed class ShaderStore(string backgroundsDirectory)
 {
     public const string FileExtension = ".sksl";
 
-    public static IReadOnlyList<string> BuiltInNames { get; } = ["plasma", "aurora", "gradient", "julia"];
+    public static IReadOnlyList<string> BuiltInNames { get; } = ["plasma", "aurora", "gradient", "julia", "horizon", "spectrum", "contour", "nebula", "streams", "ripple", "embers", "plotter", "shapes", "warpgate", "equalizer", "vortex"];
 
     /// <summary>The folder user backgrounds are read from.</summary>
     public string BackgroundsDirectory => backgroundsDirectory;
