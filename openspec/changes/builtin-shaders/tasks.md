@@ -26,11 +26,11 @@
 
 ## 5. On the panel
 
-- [ ] 5.1 For each shader at the default scale on the owner's usual page: select it in the configuration, run the host detached, read `urdeck.log` (`Background: shader '...'` and the `frames started` and `frames stopped` lines, about 30 frames per second), and look at the screen
-- [ ] 5.2 Check each for banding in dark gradients, the `atan` seam at the left of centre in Warp Gate and Vortex, and (after letting the clock run past the first wrap if practical, or by starting the host at a late time) hash artefacts in Nebula and Embers
-- [ ] 5.3 Measure CPU, GPU and memory with the method of `docs/perf/nexus-baseline.md` against the same page without a background; Nebula and Shapes first; record all twelve in `docs/perf/builtin-shaders.md`
-- [ ] 5.4 If Nebula or Shapes is over the budget, lighten its default parameters (fewer star layers or stars, fewer shapes), re-measure, and note it in the manifest's description and the perf note
-- [ ] 5.5 Replace any sample that no longer matches after tuning (task 3.1 again for that shader)
+- [x] 5.1 For each shader at the default scale on the owner's usual page: select it in the configuration, run the host detached, read `urdeck.log` (`Background: shader '...'` and the `frames started` and `frames stopped` lines, about 30 frames per second), and look at the screen
+- [x] 5.2 Check each for banding in dark gradients, the `atan` seam at the left of centre in Warp Gate and Vortex, and (after letting the clock run past the first wrap if practical, or by starting the host at a late time) hash artefacts in Nebula and Embers
+- [x] 5.3 Measure CPU, GPU and memory with the method of `docs/perf/nexus-baseline.md` against the same page without a background; Nebula and Shapes first; record all twelve in `docs/perf/builtin-shaders.md`
+- [x] 5.4 (not needed: both within budget) If Nebula or Shapes is over the budget, lighten its default parameters (fewer star layers or stars, fewer shapes), re-measure, and note it in the manifest's description and the perf note
+- [x] 5.5 (nothing to replace: no defaults changed) Replace any sample that no longer matches after tuning (task 3.1 again for that shader)
 
 ## 6. Documentation
 
