@@ -51,7 +51,7 @@ A background MUST have a readable `manifest.json` of a supported version, and fa
   cause, the theme's background colour shown, widgets unaffected
 - Nothing else in the manifest fails the background. A problem in any other field is a lint diagnostic and the
   background is shown, using what could be read
-- The four built-in backgrounds have manifests and are loaded as any other
+- Every built-in background has a manifest and is loaded as any other
 
 #### Scenario: Manifest missing
 - **WHEN** the folder `backgrounds/waves` holds `waves.sksl` and no `manifest.json`

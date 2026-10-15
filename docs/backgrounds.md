@@ -152,7 +152,7 @@ backgrounds/waves/
 
 Copy a folder in to install it, delete it to remove it. A folder with the name of a built-in one replaces it. The
 folder is kept when you install a copy with `scripts/Install-Local.ps1`. Folders are re-read whenever the configuration is
-reloaded: after editing a file, save the config. The four built-ins are folders of the same shape inside the program
+reloaded: after editing a file, save the config. The built-ins are folders of the same shape inside the program
 (`src/UrDeck.Engine/Backgrounds/Builtin/`): copy one to start.
 
 A loose `backgrounds/<name>.sksl` is **not** loaded any more. If the configuration selects it, `urdeck.log` says which
@@ -256,7 +256,7 @@ the background. **warning** means it works but could be better described. **info
 | SHADER060 | info | the shader says `layout(color)` and the manifest says `kind` `number`: the manifest wins |
 | SHADER070 | warning | only `urdeck-cli shader render` reports it: the picture is still the theme's background colour everywhere, so the shader drew nothing at that time. Check `--time` and the alpha of the returned colour; a shader can be legitimately blank at one instant |
 
-The four built-ins produce none of these; a test requires it. `SHADER070` is never part of the lint (it needs a rendered picture).
+The built-ins produce none of these; a test requires it. `SHADER070` is never part of the lint (it needs a rendered picture).
 
 ### The shader
 
@@ -565,9 +565,11 @@ the tool.
 
 ### Regenerating the built-in samples
 
-The pictures in `src/UrDeck.Engine/Backgrounds/Builtin/<name>/sample.png` (270 x 480, the default theme, `iTime` 10) are
-made by `urdeck-cli`. Run it after changing a built-in shader, look at the four pictures, and commit them and the manifests
-with the change (`--update-manifest` keeps each sample's `settings` current):
+The pictures in `src/UrDeck.Engine/Backgrounds/Builtin/<name>/sample.png` (270 x 480, `iTime` 10) are
+made by `urdeck-cli`: the first four with the default theme, the other twelve with the palette of the theme their manifest
+records in the sample's `settings` (pass it with `--colors`, since those themes are not built in yet). Run it after
+changing a built-in shader, look at the picture, and commit it and the manifest with the change (`--update-manifest`
+keeps each sample's `settings` current; it records the default theme when `--colors` is given, so set `theme` back by hand):
 
 ```powershell
 $cli = "dotnet tools/UrDeck.Cli/bin/Release/net10.0/urdeck-cli.dll"
@@ -577,7 +579,7 @@ foreach ($name in "plasma", "aurora", "gradient", "julia") {
 }
 ```
 
-CI renders the four into a temporary folder on every run, to prove the tool works; it never compares a picture with the
+CI renders every built-in into a temporary folder on every run, to prove the tool works; it never compares a picture with the
 committed one.
 
 ## When something is wrong
