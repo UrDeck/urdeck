@@ -1,0 +1,54 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Ripple",
+  "description": "Sunlight caustics rippling across a pool floor.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "water",
+    "calm"
+  ],
+  "pairsWith": {
+    "themes": [
+      "prism",
+      "paper",
+      "pop"
+    ]
+  },
+  "parameters": {
+    "ripples": {
+      "label": "Ripple density",
+      "description": "How many ripples fit across the display; larger is smaller ripples.",
+      "min": 0.4,
+      "max": 3,
+      "step": 0.05
+    },
+    "sharpness": {
+      "label": "Sharpness",
+      "description": "Contrast of the bright lines.",
+      "min": 0.3,
+      "max": 2.5,
+      "step": 0.05
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Ripple in the Pop palette",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "pop",
+        "colors": [
+          "#f6f0e0",
+          "#3b5bff",
+          "#ff8fc2",
+          "#b9f24a"
+        ]
+      }
+    }
+  ]
+}

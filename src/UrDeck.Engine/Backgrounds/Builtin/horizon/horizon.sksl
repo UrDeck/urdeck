@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// A neon grid rolling toward a striped sun. Palette roles: iColor0 sky, iColor1 horizon glow, iColor2 sun, iColor3 grid.
+// The grid scrolls with a period of 2.5 s, which divides the four-hour time wrap, so there is no jump when time wraps.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float gridDensity;   // default: 1.0
+uniform float sunSize;       // default: 1.0
+uniform float horizon;       // default: 0.55
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float ar = iResolution.x / iResolution.y;
+    float hy = horizon;
+
+    // Sky: from iColor0 at the top to iColor1 at the horizon.
+    float3 col = mix(iColor0.rgb, iColor1.rgb, pow(clamp(uv.y / hy, 0.0, 1.0), 2.4));
+
+    // Sun: a disc sitting on the horizon, cut by bars that widen toward the bottom.
+    float r = 0.13 * sunSize;
+    float2 q = float2((uv.x - 0.5) * ar, uv.y - (hy - r * 0.95));
+    float d = length(q);
+    float lower = clamp(q.y / r, 0.0, 1.0);
+    float f = fract(q.y * 34.0 / sunSize);
+    float cut = q.y > 0.0 ? smoothstep(lower * 0.8 - 0.04, lower * 0.8 + 0.04, f) : 1.0;
+    float sun = (1.0 - smoothstep(r - 0.003, r + 0.003, d)) * cut;
+    float3 sunCol = mix(iColor2.rgb * 0.8 + 0.25, iColor2.rgb, lower);
+    col += iColor2.rgb * exp(-d * 7.0) * 0.28;
+    col = mix(col, sunCol, sun);
+
+    if (uv.y >= hy) {
+        float dy = max(uv.y - hy, 0.0005);
+        float z = 0.9 / dy;                           // depth: grows toward the horizon
+        float dens = gridDensity;
+        float xw = (uv.x - 0.5) * ar * z * 7.0;       // world x
+        float zw = z * 3.0 * dens + fract(iTime * 0.4);
+        // Line coverage with a width that follows the pixel footprint, so far lines do not shimmer.
+        float px = ar * z * 7.0 / iResolution.x * dens;
+        float pz = 3.0 * dens * (0.9 / (dy * dy)) / iResolution.y;
+        float lx = 1.0 - smoothstep(0.0, 1.6 * px + 0.012, abs(fract(xw * dens + 0.5) - 0.5));
+        float lz = 1.0 - smoothstep(0.0, 1.6 * pz + 0.012, abs(fract(zw) - 0.5));
+        float line = clamp(lx + lz, 0.0, 1.0);
+        float fade = smoothstep(0.0, 0.18, dy);       // lines melt into the horizon glow
+        float3 floorBase = mix(iColor1.rgb * 0.55, iColor0.rgb * 0.55, smoothstep(0.0, 0.5, dy));
+        col = floorBase;
+        col += iColor3.rgb * line * fade * 0.95;
+        col += iColor3.rgb * line * fade * fade * 0.25;
+    }
+    // Glow along the horizon line.
+    col += iColor1.rgb * exp(-abs(uv.y - hy) * 70.0) * 0.55;
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

@@ -218,7 +218,7 @@ public sealed class ValidateTests : IDisposable
         var run = Workspace.Invoke("shader", "validate", "--all", Workspace.BuiltIns(), "--fail-on-warnings");
 
         Assert.Equal(0, run.Code);
-        Assert.Equal("4 backgrounds checked: 0 errors, 0 warnings, 0 remarks.\n", run.Out);
+        Assert.Equal("16 backgrounds checked: 0 errors, 0 warnings, 0 remarks.\n", run.Out);
     }
 
     [Theory]

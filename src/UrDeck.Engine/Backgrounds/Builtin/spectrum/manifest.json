@@ -1,0 +1,68 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Spectrum",
+  "description": "Slow shifting rainbow light, the RGB-keyboard look, kept soft so widgets stay readable.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "rgb",
+    "gaming",
+    "calm"
+  ],
+  "pairsWith": {
+    "themes": [
+      "rigline",
+      "prism"
+    ]
+  },
+  "parameters": {
+    "saturation": {
+      "label": "Saturation",
+      "description": "Colour strength.",
+      "min": 0,
+      "max": 1.5,
+      "step": 0.05
+    },
+    "intensity": {
+      "label": "Intensity",
+      "description": "Brightness.",
+      "min": 0,
+      "max": 2,
+      "step": 0.05
+    },
+    "hueShift": {
+      "label": "Hue shift",
+      "description": "Rotates the colours around the wheel.",
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "vignette": {
+      "label": "Vignette",
+      "description": "How strongly the edges darken.",
+      "min": 0,
+      "max": 1,
+      "step": 0.05
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Spectrum in the Carbon palette",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "carbon",
+        "colors": [
+          "#090b0e",
+          "#10161b",
+          "#1f6f61",
+          "#4ff0c8"
+        ]
+      }
+    }
+  ]
+}

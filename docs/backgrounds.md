@@ -69,16 +69,31 @@ The log says what was chosen, once per change: `Background: shader 'horizon' (bu
 
 ## Built-in shaders
 
-All four draw only with the palette, so they follow the theme (see [Colours](#colours)). Each is a folder with a
-`manifest.json`, which is the source of truth for its parameters and their ranges; this table is written by hand and a
-later change will check it against the manifests.
+Sixteen ship with the product. Each is a folder with a `manifest.json`, which is the source of truth for its parameters and
+their ranges; this section is written by hand, and a test fails when a built-in is missing from it. Every one draws with the
+palette, so it follows the theme (see [Colours](#colours)), except `spectrum`, whose colours are hues. "Colours" says what
+`iColor0` to `iColor3` mean to that shader, in order. The twelve after `julia` are periodic: their motion repeats across the
+time wrap (see [Speed, scale and cost](#speed-scale-and-cost)). Each names the themes it suits (`pairsWith`) for the
+settings editor.
 
-| Name | Looks like | Parameters |
-|---|---|---|
-| `plasma` | slow warped fields of colour | `angle` (degrees, 0), `zoom` (3.0) |
-| `aurora` | three glowing curtains swaying along the longer side | `intensity` (1.0) |
-| `gradient` | a soft gradient whose bands drift | `angle` (degrees, 30) |
-| `julia` | a Julia set whose constant circles slowly (the heaviest) | `zoom` (1.0), `radius` (0.7885) |
+| Name | Looks like | Parameters (default) | Colours |
+|---|---|---|---|
+| `plasma` | slow warped fields of colour | `angle` (degrees, 0), `zoom` (3.0) | the palette, in order |
+| `aurora` | three glowing curtains swaying along the longer side | `intensity` (1.0) | the palette, in order |
+| `gradient` | a soft gradient whose bands drift | `angle` (degrees, 30) | the palette, in order |
+| `julia` | a Julia set whose constant circles slowly (the heaviest of the first four) | `zoom` (1.0), `radius` (0.7885) | the palette, in order |
+| `horizon` | a retro striped sun over a neon grid rolling toward you | `gridDensity` (1.0, 0.4 to 3), `sunSize` (1.0, 0.4 to 1.8), `horizon` (0.55, 0.3 to 0.8) | sky, horizon glow, sun, grid |
+| `spectrum` | three soft lights walking the colour wheel, RGB-keyboard style | `saturation` (0.85, 0 to 1.5), `intensity` (1.0, 0 to 2), `hueShift` (0, 0 to 1), `vignette` (0.6, 0 to 1) | ground; `iColor3` only at saturation 0; the other two unused |
+| `contour` | topographic contour lines of a slowly changing landscape | `density` (14, 4 to 40), `lineWidth` (1.0, 0.3 to 3), `relief` (1.0, 0.3 to 2) | ground, ground lit, minor lines, index lines |
+| `nebula` | warped colour clouds under an uneven, twinkling star field | `zoom` (1.0, 0.5 to 2.5), `starDensity` (1.0, 0 to 3), `starClustering` (0.6, 0 to 1), `twinkle` (1.0, 0 to 2) | space, three cloud colours |
+| `streams` | thin packets of light falling in columns, like data | `density` (1.0, 0.3 to 3), `trail` (1.0, 0.3 to 3) | background, faint trail, body, bright head |
+| `ripple` | sunlight caustics on a pool floor | `ripples` (1.0, 0.4 to 3), `sharpness` (1.0, 0.3 to 2.5) | deep water, water, light, highlights |
+| `embers` | sparks lifting off a glowing horizon, dark at the top | `density` (1.0, 0.2 to 2), `heat` (1.0, 0 to 2) | night, heat glow, spark, white-hot spark |
+| `plotter` | a drafting grid with a slow scan line and dashed rings | `cells` (16, 6 to 40), `ringRate` (1.0, 0.3 to 2), `scan` (1.0, 0 to 2) | paper, minor grid, major grid and rings, scan line |
+| `shapes` | flat outlined shapes bobbing and turning (for light, bold themes) | `count` (9, 2 to 12), `outline` (1.0, 0 to 3), `outlineColor` (`#111111`) | ground, three fills |
+| `warpgate` | falling through a tunnel of starlight streaks, rings and a swirling core | `streaks` (1.0, 0.2 to 2), `ringRate` (1.0, 0.3 to 2), `coreSize` (1.0, 0.4 to 2.5), `swirl` (1.0, 0 to 3) | deep space, tunnel wall, streaks and rings, core |
+| `equalizer` | spectrum bars with falling peak caps, free-running (it does not hear audio) | `bars` (16, 4 to 40), `reach` (0.55, 0.2 to 0.9), `gap` (0.28, 0 to 0.7) | ground, bar bottom, bar middle, bar top |
+| `vortex` | light rays spiralling into a glowing core in two opposite layers | `arms` (12, 3 to 24), `twist` (1.0, 0 to 3), `core` (1.0, 0.3 to 3) | void, outer rays, inner rays, core |
 
 ## Speed, scale and cost
 
@@ -95,8 +110,8 @@ CPU core and under 1% of the GPU, plus about 25 MB of memory ([the spike](perf/b
 - A background that does not move (an image, `speed` 0, a shader that does not use `iTime`) is drawn once and costs
   nothing afterwards.
 - Time wraps to 0 after four hours of scaled time (`speed` times the seconds shown), so motion stays smooth after weeks of
-  uptime. A shader that is not periodic over that span jumps once at the wrap; the built-ins are slow enough that it is
-  hard to see. Time restarts at 0 only when the background itself changes, not on an unrelated config save.
+  uptime. A shader that is not periodic over that span jumps once at the wrap: the first four built-ins are slow enough
+  that it is hard to see, and the other twelve repeat exactly (every period in them divides 14,400 seconds). Time restarts at 0 only when the background itself changes, not on an unrelated config save.
 
 ## Colours
 

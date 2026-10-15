@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Thin packets of light falling down the display at three depths. Reads as data in motion.
+// Palette roles: iColor0 background, iColor1 faint trail, iColor2 body, iColor3 bright head.
+// Each column cycles every 4, 6, 8 or 10 s, which all divide the four-hour time wrap.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float density;   // default: 1.0
+uniform float trail;     // default: 1.0
+
+float hash11(float n) { return fract(sin(n * 91.3458) * 47453.5453); }
+
+float layer(float2 uv, float cols, float seed, float tailLen, float thin) {
+    float x = uv.x * cols;
+    float col = floor(x);
+    float fx = fract(x) - 0.5;
+    float h1 = hash11(col + seed);
+    float h2 = hash11(col * 1.7 + seed + 3.0);
+    float h3 = hash11(col * 2.3 + seed + 9.0);
+    if (h1 > 0.45 * density) return 0.0;                       // this column is empty
+    float period = 4.0 + 2.0 * floor(h2 * 4.0);                // 4, 6, 8 or 10 s
+    float head = fract(iTime / period + h3);                   // 0 at the top, 1 at the bottom
+    float yy = uv.y;
+    float tail = tailLen * trail * (0.6 + 0.8 * h2);
+    float behind = head - yy;                                  // positive above the head
+    float body = (behind > 0.0 && behind < tail) ? pow(1.0 - behind / tail, 1.6) : 0.0;
+    float headGlow = exp(-abs(behind) * 90.0) * step(-0.02, behind) * 1.0;
+    float across = 1.0 - smoothstep(0.0, thin, abs(fx));
+    return (body * 0.8 + headGlow) * across;
+}
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float3 col = iColor0.rgb;
+    float far = layer(uv, 54.0, 0.0, 0.30, 0.10);
+    float mid = layer(uv, 30.0, 100.0, 0.38, 0.09);
+    float near = layer(uv, 16.0, 200.0, 0.46, 0.07);
+    col += iColor1.rgb * far * 0.9;
+    col += iColor2.rgb * mid * 1.0;
+    col += iColor3.rgb * near * 1.0;
+    // Soft fade at the top and bottom edges.
+    col = mix(iColor0.rgb, col, smoothstep(0.0, 0.08, uv.y) * smoothstep(1.0, 0.92, uv.y));
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

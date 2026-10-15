@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Flat outlined shapes bobbing and turning at different speeds. Made for light, bold themes.
+// Palette roles: iColor0 ground, iColor1..3 fills (the shapes cycle through them and two tints of them).
+// Each shape orbits its home with a period of 20, 24, 30, 36, 40 or 48 s; all divide the four-hour time wrap.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float count;       // default: 9.0
+uniform float outline;     // default: 1.0
+layout(color) uniform float4 outlineColor;   // default: #111111
+
+float hash11(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
+
+float sdCircle(float2 p, float r) { return length(p) - r; }
+float sdBox(float2 p, float2 b) { float2 d = abs(p) - b; return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0); }
+float sdRoundBox(float2 p, float2 b, float r) { return sdBox(p, b - r) - r; }
+float sdTriangle(float2 p, float r) {
+    float k = 1.7320508;
+    p.x = abs(p.x) - r;
+    p.y = p.y + r / k;
+    if (p.x + k * p.y > 0.0) p = float2(p.x - k * p.y, -k * p.x - p.y) / 2.0;
+    p.x -= clamp(p.x, -2.0 * r, 0.0);
+    return -length(p) * sign(p.y);
+}
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float ar = iResolution.x / iResolution.y;
+    float2 p = float2(uv.x * ar, uv.y);
+    float tau = 6.2831853;
+    float3 col = iColor0.rgb;
+    float ow = 0.0035 * outline;
+    for (int i = 0; i < 12; i++) {
+        if (float(i) >= count) break;
+        float fi = float(i);
+        float h1 = hash11(fi + 1.0);
+        float h2 = hash11(fi + 17.0);
+        float h3 = hash11(fi + 31.0);
+        float h4 = hash11(fi + 47.0);
+        float pk = floor(h1 * 6.0);
+        float period = pk < 1.0 ? 20.0 : (pk < 2.0 ? 24.0 : (pk < 3.0 ? 30.0 : (pk < 4.0 ? 36.0 : (pk < 5.0 ? 40.0 : 48.0))));
+        float a = tau * iTime / period + h3 * tau;
+        float2 home = float2(0.12 + 0.76 * hash11(fi * 3.7 + 2.0), 0.08 + 0.84 * hash11(fi * 5.3 + 4.0)) * float2(ar, 1.0);
+        float2 c = home + float2(sin(a), cos(a * 0.8 + h4 * tau)) * float2(0.05, 0.06);
+        float rot = tau * iTime / (h2 > 0.5 ? 120.0 : 60.0) * (h4 > 0.5 ? 1.0 : -1.0) + h1 * tau;   // 60 s or 120 s
+        float2 q = p - c;
+        float cs = cos(rot);
+        float sn = sin(rot);
+        q = float2(q.x * cs - q.y * sn, q.x * sn + q.y * cs);
+        float size = 0.05 + 0.05 * h2;
+        float kind = floor(h1 * 4.0);
+        float d;
+        if (kind < 1.0) d = sdCircle(q, size);
+        else if (kind < 2.0) d = sdRoundBox(q, float2(size * 0.9), size * 0.2);
+        else if (kind < 3.0) d = sdTriangle(q, size);
+        else d = sdRoundBox(q, float2(size * 1.5, size * 0.55), size * 0.55);
+        float m3 = mod(fi, 3.0);
+        float3 fill = m3 < 0.5 ? iColor1.rgb : (m3 < 1.5 ? iColor2.rgb : iColor3.rgb);
+        fill = mix(fill, iColor0.rgb, mod(fi, 2.0) < 0.5 ? 0.0 : 0.35);
+        float inside = 1.0 - smoothstep(-0.0015, 0.0015, d);
+        float rim = 1.0 - smoothstep(ow - 0.0015, ow + 0.0015, abs(d));
+        col = mix(col, fill, inside);
+        col = mix(col, outlineColor.rgb, rim);
+    }
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

@@ -31,10 +31,7 @@ public sealed class ShaderBackgroundTests : IDisposable
     }
 
     [Theory]
-    [InlineData("plasma")]
-    [InlineData("aurora")]
-    [InlineData("gradient")]
-    [InlineData("julia")]
+    [MemberData(nameof(BuiltInShaderTests.Names), MemberType = typeof(BuiltInShaderTests))]
     public void Each_built_in_compiles_and_paints_an_opaque_picture(string name)
     {
         using var background = _fixture.Create(Json(name, "\"scale\": 1"));
@@ -50,10 +47,7 @@ public sealed class ShaderBackgroundTests : IDisposable
     }
 
     [Theory]
-    [InlineData("plasma")]
-    [InlineData("aurora")]
-    [InlineData("gradient")]
-    [InlineData("julia")]
+    [MemberData(nameof(BuiltInShaderTests.Names), MemberType = typeof(BuiltInShaderTests))]
     public void Each_built_in_changes_with_time(string name)
     {
         using var background = _fixture.Create(Json(name));
@@ -225,8 +219,8 @@ public sealed class ShaderBackgroundTests : IDisposable
     [Fact]
     public void An_unknown_name_fails_with_a_warning_naming_it()
     {
-        Assert.Null(_fixture.Create(Json("nebula")));
-        Assert.Contains("no shader named 'nebula'", _fixture.Log);
+        Assert.Null(_fixture.Create(Json("nonesuch")));
+        Assert.Contains("no shader named 'nonesuch'", _fixture.Log);
     }
 
     [Fact]

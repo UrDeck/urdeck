@@ -1,0 +1,59 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Shapes",
+  "description": "Flat outlined shapes bobbing and turning slowly. Made for light, bold themes.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "playful",
+    "light",
+    "flat"
+  ],
+  "pairsWith": {
+    "themes": [
+      "paper",
+      "pop"
+    ]
+  },
+  "parameters": {
+    "count": {
+      "label": "Count",
+      "description": "Number of shapes, up to 12.",
+      "min": 2,
+      "max": 12,
+      "step": 1
+    },
+    "outline": {
+      "label": "Outline",
+      "description": "Thickness of the outlines; 0 removes them.",
+      "min": 0,
+      "max": 3,
+      "step": 0.1
+    },
+    "outlineColor": {
+      "label": "Outline colour",
+      "description": "Colour of the outlines.",
+      "kind": "color"
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Shapes in the Pop palette",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "pop",
+        "colors": [
+          "#f6f0e0",
+          "#3b5bff",
+          "#ff8fc2",
+          "#b9f24a"
+        ]
+      }
+    }
+  ]
+}

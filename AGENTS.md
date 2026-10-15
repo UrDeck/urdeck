@@ -35,7 +35,7 @@ npm run media                    # the widget pictures, background posters and l
 ```
 
 `urdeck-cli shader init|validate|render` (`docs/backgrounds.md`, "The command line tool") makes, checks and renders a background folder; CI
-runs it on the four built-ins and on an `init` of a copy of one. `render --update-manifest` rewrites `manifest.json` (refusing a comment, a trailing comma or a duplicate key).
+runs it on the sixteen built-ins and on an `init` of a copy of one. `render --update-manifest` rewrites `manifest.json` (refusing a comment, a trailing comma or a duplicate key).
 
 Render without a screen (from `src/UrDeck.Host/bin/Release/net10.0-windows10.0.19041.0/`):
 `UrDeck.Host.exe --snapshot out.snapshot.png --size 1100x3840`. `--snapshot <folder> --frames N [--fps F] [--start <local time>]` writes N
@@ -145,7 +145,7 @@ See the README license map before moving code between projects: it can change th
   frames stopped (reason): N frames in S s` (N/S about 30), `Windows: display off` / `display on`, and `Background: none`
   in `urdeck.log`. The layer keys on `DeckBackground.RequestKey`, so an unrelated config save does not restart the motion,
   and a background that failed is not tried again until its key changes. A background is a folder `backgrounds/<name>/` next to the exe
-  holding `manifest.json` (required, version 1) and the entry `<name>.sksl`; the four built-ins are embedded folders of the same shape
+  holding `manifest.json` (required, version 1) and the entry `<name>.sksl`; the sixteen built-ins are embedded folders of the same shape
   (`UrDeck.Backgrounds.<name>/<file>`) with a `sample.png` made by `urdeck-cli shader render` (`docs/backgrounds.md`). A loose
   `.sksl` is not loaded (the log names the folder to make). `ShaderLint` checks a folder and `DeckBackground.Create` logs each finding once as
   `Background 'name': SHADERnnn message (file)` (the codes are in `docs/backgrounds.md`); the built-ins must lint clean. `scripts/Install-Local.ps1`

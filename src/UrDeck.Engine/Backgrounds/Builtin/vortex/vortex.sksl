@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Light rays spiralling into a glowing core, two layers turning in opposite directions. Hypnotic.
+// Palette roles: iColor0 void, iColor1 outer rays, iColor2 inner rays, iColor3 core.
+// The layers turn once in 120 s and 180 s, which divide the four-hour time wrap.
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float4 iColor2;
+uniform float4 iColor3;
+uniform float arms;    // default: 12.0
+uniform float twist;   // default: 1.0
+uniform float core;    // default: 1.0
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float ar = iResolution.x / iResolution.y;
+    float tau = 6.2831853;
+    float2 p = float2((uv.x - 0.5) * ar, uv.y - 0.5);
+    float r = length(p);
+    float a = atan(p.y, p.x);
+    float3 col = iColor0.rgb;
+
+    // Layer one: spiral arms, turning one way.
+    float spiral1 = a * arms / tau + log(r + 0.02) * 2.6 * twist - iTime / 120.0 * arms;
+    float rays1 = pow(0.5 + 0.5 * cos(spiral1 * tau), 3.0);
+    float fade1 = smoothstep(0.75, 0.05, r) * smoothstep(0.0, 0.08, r);
+    col = mix(col, iColor1.rgb, rays1 * fade1 * 0.85);
+
+    // Layer two: finer arms, turning the other way, closer in.
+    float spiral2 = a * arms * 1.5 / tau - log(r + 0.02) * 3.4 * twist + iTime / 180.0 * arms * 1.5;
+    float rays2 = pow(0.5 + 0.5 * cos(spiral2 * tau), 5.0);
+    float fade2 = smoothstep(0.45, 0.04, r) * smoothstep(0.0, 0.05, r);
+    col = mix(col, iColor2.rgb, rays2 * fade2 * 0.9);
+
+    // The core.
+    float cr = 0.06 * core;
+    col += iColor3.rgb * exp(-pow(r / (cr * 1.6), 2.0)) * 0.9;
+    col += iColor2.rgb * exp(-r * 5.0) * 0.15;
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Equalizer",
+  "description": "Spectrum bars dancing along the bottom edge, with peak caps that fall slowly.",
+  "author": "Patrick Bigler",
+  "license": "GPL-3.0-or-later",
+  "version": "1.0.0",
+  "tags": [
+    "music",
+    "rgb",
+    "gaming"
+  ],
+  "pairsWith": {
+    "themes": [
+      "rigline",
+      "ember"
+    ]
+  },
+  "parameters": {
+    "bars": {
+      "label": "Bars",
+      "description": "Number of bars.",
+      "min": 4,
+      "max": 40,
+      "step": 1
+    },
+    "reach": {
+      "label": "Reach",
+      "description": "How tall the bars can grow, as a fraction of the display.",
+      "min": 0.2,
+      "max": 0.9,
+      "step": 0.01
+    },
+    "gap": {
+      "label": "Gap",
+      "description": "Space between bars.",
+      "min": 0,
+      "max": 0.7,
+      "step": 0.01
+    }
+  },
+  "samples": [
+    {
+      "type": "image",
+      "file": "sample.png",
+      "caption": "Equalizer in the Carbon palette",
+      "settings": {
+        "size": "270x480",
+        "time": 10,
+        "theme": "carbon",
+        "colors": [
+          "#090b0e",
+          "#10161b",
+          "#1f6f61",
+          "#4ff0c8"
+        ]
+      }
+    }
+  ]
+}
