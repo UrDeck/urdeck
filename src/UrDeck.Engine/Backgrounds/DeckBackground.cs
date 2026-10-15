@@ -19,26 +19,40 @@ public sealed class DeckBackground : IDisposable
     private readonly BackgroundSettings _settings;
     private readonly ShaderProgram? _program;
     private readonly string? _imagePath;
+    private readonly BackgroundKind _kind;
+    private readonly ThemeBackgroundStaticDefinition? _still;
+    private readonly string _key;
     private readonly object _gate = new();
+    private SKColor? _scrim;
+    private string _scrimKey = "";
     private SKBitmap? _bitmap;
     private bool _disposed;
 
-    private DeckBackground(BackgroundSettings settings, string key, string description, ShaderProgram? program, string? imagePath)
+    private DeckBackground(BackgroundSettings settings, string key, string description, ShaderProgram? program, string? imagePath,
+        BackgroundKind? kind = null, ThemeBackgroundStaticDefinition? still = null)
     {
         _settings = settings;
-        Key = key;
+        _kind = kind ?? settings.Kind;
+        _still = still;
+        _key = key;
         Describe = description;
         _program = program;
         _imagePath = imagePath;
     }
 
-    public BackgroundKind Kind => _settings.Kind;
+    public BackgroundKind Kind => _kind;
+
+    /// <summary>Where the choice came from; <see cref="BackgroundOrigin.Configuration"/> unless a plan built it for a theme.</summary>
+    public BackgroundOrigin Origin { get; private set; } = BackgroundOrigin.Configuration;
+
+    /// <summary>The position in the plan's candidates that built this background, so a failure can go on from the next one.</summary>
+    public int CandidateIndex { get; private set; }
 
     /// <summary>
     /// Equal for two backgrounds that look the same: kind, shader and its text, speed, scale, parameters and palette, or
-    /// the picture's path and file stamp. A change of any of them gives a different key.
+    /// the picture's path and file stamp, and the scrim over it. A change of any of them gives a different key.
     /// </summary>
-    public string Key { get; }
+    public string Key => _key + _scrimKey;
 
     /// <summary>For the log: <c>shader 'plasma' (built-in)</c> or <c>image 'C:\wall.jpg'</c>.</summary>
     public string Describe { get; }
@@ -48,6 +62,33 @@ public sealed class DeckBackground : IDisposable
 
     /// <summary>The fraction of the panel's resolution it renders at; 1 for an image.</summary>
     public double Scale => Kind == BackgroundKind.Shader ? _settings.Scale : 1;
+
+    /// <summary>The theme's scrim drawn over this background, or null.</summary>
+    public SKColor? Scrim => _scrim;
+
+    /// <summary>Records where a plan found this background and the scrim of the theme that is drawn over it.</summary>
+    internal void Adopt(BackgroundOrigin origin, int candidateIndex, LoadedTheme theme)
+    {
+        Origin = origin;
+        CandidateIndex = candidateIndex;
+        _scrim = ScrimColor(theme);
+        _scrimKey = ScrimKey(theme);
+    }
+
+    /// <summary>The scrim's colour with its alpha multiplied by <c>background.scrim.alpha</c>, or null when the theme has no usable scrim.</summary>
+    internal static SKColor? ScrimColor(LoadedTheme theme)
+    {
+        if (theme.Definition.Background?.Scrim is not { Color: { } text, Alpha: { } alpha })
+            return null;
+        if (!BackgroundSettings.TryParseColor(text, out var color))
+            return null;
+
+        byte combined = (byte)Math.Round(Math.Clamp(alpha, 0, 1) * color.Alpha);
+        return combined == 0 ? null : color.WithAlpha(combined);
+    }
+
+    internal static string ScrimKey(LoadedTheme theme) =>
+        ScrimColor(theme) is { } scrim ? $"|scrim={scrim}" : "";
 
     public double Speed => _settings.Speed;
 
@@ -145,16 +186,35 @@ public sealed class DeckBackground : IDisposable
     /// </summary>
     public void PaintAtTime(SKCanvas canvas, int width, int height, float time)
     {
+        if (!PaintContent(canvas, width, height, time))
+            return;
+
+        // The theme's veil goes last, over whatever was drawn, so it works for a shader, a picture and a still alike.
+        if (_scrim is { } scrim)
+        {
+            using var paint = new SKPaint { Color = scrim };
+            canvas.DrawRect(0, 0, width, height, paint);
+        }
+    }
+
+    private bool PaintContent(SKCanvas canvas, int width, int height, float time)
+    {
         if (_program != null)
         {
             using var shader = _program.CreateShader(width, height, time);
             using var paint = new SKPaint { Shader = shader };
             canvas.DrawRect(0, 0, width, height, paint);
-            return;
+            return true;
+        }
+
+        if (_still != null && _imagePath == null)
+        {
+            StillPainter.Paint(canvas, width, height, _still);
+            return true;
         }
 
         if (!IsReadyFor(width, height) && !PrepareAsync(width, height).GetAwaiter().GetResult())
-            return;
+            return false;
 
         lock (_gate)
         {
@@ -164,13 +224,15 @@ public sealed class DeckBackground : IDisposable
                 canvas.DrawImage(image, 0, 0, new SKSamplingOptions(SKFilterMode.Nearest));
             }
         }
+
+        return true;
     }
 
     /// <summary>True when there is nothing to prepare for this size (a shader, or a picture already scaled to it).</summary>
     public bool IsReadyFor(int width, int height)
     {
         lock (_gate)
-            return _program != null || (_bitmap != null && _bitmap.Width == width && _bitmap.Height == height);
+            return _program != null || (_imagePath == null && _still != null) || (_bitmap != null && _bitmap.Width == width && _bitmap.Height == height);
     }
 
     /// <summary>
@@ -259,6 +321,76 @@ public sealed class DeckBackground : IDisposable
         failure = null;
         string key = RequestKey(settings, theme, store, appDirectory)!;
         return new DeckBackground(settings, key, $"image '{path}'", null, path);
+    }
+
+    /// <summary>
+    /// Builds a theme's still background: a picture inside the theme's folder, a gradient or a colour (in that order, when
+    /// the theme gives more than one). <paramref name="failure"/> says why there is none; nothing is logged here.
+    /// </summary>
+    internal static DeckBackground? TryCreateStill(ThemeBackgroundStaticDefinition still, LoadedTheme theme, out string? failure)
+    {
+        failure = null;
+        if (!string.IsNullOrWhiteSpace(still.Image))
+        {
+            if (theme.Folder == null)
+            {
+                failure = $"the theme {theme.Name} is built in and has no folder to read the picture '{still.Image}' from.";
+                return null;
+            }
+
+            string path = ThemeStore.ResolveIn(theme.Folder, still.Image);
+            if (!ThemeStore.IsInside(theme.Folder, path))
+            {
+                failure = $"the picture '{still.Image}' of theme {theme.Name} leaves the theme folder and is ignored.";
+                return null;
+            }
+
+            if (!File.Exists(path))
+            {
+                failure = $"the picture {path} does not exist.";
+                return null;
+            }
+
+            return new DeckBackground(BackgroundSettings.None, StillRequestKey(still, theme), $"image '{path}'", null, path,
+                BackgroundKind.Image, still);
+        }
+
+        if (still.Gradient is { Colors: { Count: >= 2 } colors })
+        {
+            if (!colors.All(c => BackgroundSettings.TryParseColor(c, out _)))
+            {
+                failure = "the theme's still gradient has a colour that is not #RRGGBB or #AARRGGBB.";
+                return null;
+            }
+
+            return new DeckBackground(BackgroundSettings.None, StillRequestKey(still, theme), "gradient", null, null, BackgroundKind.Gradient, still);
+        }
+
+        if (BackgroundSettings.TryParseColor(still.Color, out _))
+            return new DeckBackground(BackgroundSettings.None, StillRequestKey(still, theme), $"colour {still.Color}", null, null, BackgroundKind.Color, still);
+
+        failure = "the theme's still background has no usable picture, gradient or colour.";
+        return null;
+    }
+
+    /// <summary>True when the theme's <c>background.static</c> names something to draw.</summary>
+    internal static bool HasStill(ThemeBackgroundStaticDefinition? still) =>
+        still != null && (!string.IsNullOrWhiteSpace(still.Image) || still.Gradient?.Colors is { Count: >= 2 } || still.Color != null);
+
+    /// <summary>The key of a still, without building it: a picture's file stamp is part of it.</summary>
+    internal static string StillRequestKey(ThemeBackgroundStaticDefinition still, LoadedTheme theme)
+    {
+        if (!string.IsNullOrWhiteSpace(still.Image))
+        {
+            string path = theme.Folder == null ? still.Image : ThemeStore.ResolveIn(theme.Folder, still.Image);
+            var file = new FileInfo(path);
+            string stamp = file.Exists ? $"{file.LastWriteTimeUtc.Ticks}:{file.Length}" : "missing";
+            return $"still|image|{path}|{stamp}";
+        }
+
+        return still.Gradient is { Colors: { Count: >= 2 } } gradient
+            ? "still|gradient|" + StillPainter.Describe(gradient)
+            : $"still|color|{still.Color}";
     }
 
     private static string Hash(string text) =>

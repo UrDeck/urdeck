@@ -77,6 +77,8 @@ The version 1 manifest MAY hold the following; every key but `manifest` is optio
 - `entry`: see "Background Folder"
 - `author`, `license`, `version` and `tags` (an array of strings): text for a person and for a store; never used to
   decide what runs
+- `pairsWith`: an object whose `themes` is an array of theme names the background suits, best first; it is used to
+  recommend, never to decide what runs (see background-pairing)
 - `parameters`: an object keyed by the name of a uniform the shader declares, each value an object with `label`,
   `description`, `kind`, `min`, `max`, `step`, `unit` and `hidden`
 - `samples`: an array of objects with `type` (`image`, or `video`, which is accepted and not used), `file`, `order`,
@@ -126,6 +128,18 @@ The meaning of a sample's `settings`:
 #### Scenario: Unknown key
 - **WHEN** the manifest has a key `"rating": 5`
 - **THEN** a lint warning names it and the background is shown
+
+#### Scenario: Pairing
+- **WHEN** the manifest has `"pairsWith": { "themes": ["carbon", "rigline"] }`
+- **THEN** a reader of the manifest gets those two names in that order, and there is no lint diagnostic
+
+#### Scenario: Pairing of the wrong type
+- **WHEN** the manifest has `"pairsWith": { "themes": "carbon" }`
+- **THEN** one lint warning says `themes` must be an array of strings, no pairing is read, and the background is shown
+
+#### Scenario: Unknown key inside pairing
+- **WHEN** the manifest has `"pairsWith": { "themes": ["carbon"], "moods": ["calm"] }`
+- **THEN** one lint warning names `pairsWith.moods` and the themes are still read
 
 #### Scenario: Reserved sample type
 - **WHEN** a sample has `"type": "video"`

@@ -1,4 +1,9 @@
 {
+  "meta": {
+    "name": "Default Dark",
+    "description": "The standard UrDeck look: deep navy cards with a blue accent.",
+    "mode": "dark"
+  },
   "colors": {
     "background": "#0f0f1a",
     "cardFill": "#b31a1a2e",

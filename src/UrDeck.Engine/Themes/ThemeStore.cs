@@ -11,8 +11,11 @@ namespace UrDeck.Engine.Themes;
 /// <summary>Where a theme's font comes from: a family name or file name, and how to open a bundled file.</summary>
 public sealed record ThemeFont(string Spec, Func<string, Stream?> Open);
 
-/// <summary>A theme with every value defined (user values merged over the default theme) plus its font source.</summary>
-public sealed record LoadedTheme(string Name, ThemeDefinition Definition, ThemeFont Font)
+/// <summary>
+/// A theme with every value defined (user values merged over the default theme) plus its font source. <see cref="Folder"/>
+/// is the user theme's folder, which its picture is read from; null for a built-in theme.
+/// </summary>
+public sealed record LoadedTheme(string Name, ThemeDefinition Definition, ThemeFont Font, string? Folder = null)
 {
     /// <summary>The theme's <c>meta.name</c>, or its folder name when it has none.</summary>
     public string DisplayName => Definition.Meta?.Name ?? Name;
@@ -33,6 +36,20 @@ public sealed class ThemeStore(string themesDirectory)
     private static readonly Assembly Self = typeof(ThemeStore).Assembly;
 
     public static IReadOnlyList<string> BuiltInNames { get; } = [DefaultName, "default-light", "glass"];
+
+    /// <summary>The folder user themes are read from.</summary>
+    public string ThemesDirectory => themesDirectory;
+
+    /// <summary>
+    /// The theme of that name exactly as it is: the user's, else the built-in one, else null (no fallback to the default
+    /// theme, no warning that it is missing). A user theme that cannot be read logs its warning and gives null, or the
+    /// built-in theme of that name.
+    /// </summary>
+    internal LoadedTheme? LoadExact(string name)
+    {
+        var baseline = LoadBuiltIn(DefaultName)!;
+        return LoadUser(name, baseline) ?? (name == DefaultName ? baseline : LoadBuiltIn(name));
+    }
 
     /// <summary>
     /// Returns the named theme. Never throws: an unknown or unusable theme gives the default theme, and a user theme's
@@ -96,7 +113,7 @@ public sealed class ThemeStore(string themesDirectory)
 
         var merged = user.MergeOver(baseline.Definition);
         merged.CheckRules(name);
-        return new LoadedTheme(name, merged, font ?? baseline.Font);
+        return new LoadedTheme(name, merged, font ?? baseline.Font, folder);
     }
 
     /// <summary>The built-in theme of that name (one of <see cref="BuiltInNames"/>), or null. Reads no folder and logs nothing.</summary>
@@ -128,9 +145,9 @@ public sealed class ThemeStore(string themesDirectory)
     }
 
     // A backslash is a separator in a theme file on every platform, so ..\x cannot slip past the check where it is not one.
-    private static string ResolveIn(string folder, string relative) =>
+    internal static string ResolveIn(string folder, string relative) =>
         Path.GetFullPath(Path.Combine(folder, relative.Replace('\\', Path.DirectorySeparatorChar)));
 
-    private static bool IsInside(string folder, string path) =>
+    internal static bool IsInside(string folder, string path) =>
         path.StartsWith(folder.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
 }

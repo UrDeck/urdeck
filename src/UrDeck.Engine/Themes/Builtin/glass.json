@@ -1,4 +1,9 @@
 {
+  "meta": {
+    "name": "Glass",
+    "description": "Translucent cards over a deep blue-violet ground, made for a moving background.",
+    "mode": "dark"
+  },
   "colors": {
     "background": "#1b2760",
     "cardFill": "#38ffffff",

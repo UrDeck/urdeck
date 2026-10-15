@@ -38,6 +38,7 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
 
     private DeckBackground? _background;
     private string? _requestKey;
+    private Func<int, DeckBackground?>? _create;
     private FrameworkElement? _element;
     private Action? _invalidate;
     private SKColor _themeColor;
@@ -53,11 +54,12 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
     private DispatcherQueueTimer? _firstFrameCheck;
 
     /// <summary>
-    /// Shows the background of <paramref name="requestKey"/> (see <see cref="DeckBackground.RequestKey"/>; null for none).
+    /// Shows the background of <paramref name="requestKey"/> (see <see cref="BackgroundPlan.RequestKey"/>; null for none).
     /// With the key already shown, whether it worked or not, nothing is rebuilt and the motion is not interrupted;
-    /// otherwise the old one is dropped and <paramref name="create"/> builds the new one, with its time at 0.
+    /// otherwise the old one is dropped and <paramref name="create"/> builds the new one, with its time at 0. It takes the
+    /// plan's candidate to start from, so a picture that cannot be decoded goes on to the next candidate.
     /// </summary>
-    public void Apply(string? requestKey, Func<DeckBackground?> create, System.Drawing.Size screenDips, double scaling, SKColor themeColor)
+    public void Apply(string? requestKey, Func<int, DeckBackground?> create, System.Drawing.Size screenDips, double scaling, SKColor themeColor)
     {
         bool colorChanged = themeColor != _themeColor;
         _themeColor = themeColor;
@@ -70,6 +72,7 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
             bool hadOne = _requestKey != null;
             Discard("background changed");
             _requestKey = requestKey;
+            _create = requestKey == null ? null : create;
             if (requestKey == null)
             {
                 if (hadOne)
@@ -77,9 +80,7 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
             }
             else
             {
-                _background = create();
-                if (_background != null)
-                    Attach(_background);
+                Show(create(0));
             }
         }
         else if (_element != null && (sizeChanged || colorChanged))
@@ -90,6 +91,29 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
         }
 
         UpdateRunning(_background == null ? "no background" : "background applied");
+    }
+
+    /// <summary>Attaches what the plan built, or says that only the theme's colour is left.</summary>
+    private void Show(DeckBackground? background)
+    {
+        _background = background;
+        if (background != null)
+            Attach(background);
+        else
+            UrDeckLog.Info($"Background: colour ({BackgroundOrigin.ThemeColour.Label()})");
+    }
+
+    /// <summary>The background cannot go on: drop it and show the plan's next candidate, or the colour.</summary>
+    private void Fall(DeckBackground failed, string reason)
+    {
+        int next = failed.CandidateIndex + 1;
+        var create = _create;
+        Discard(reason);
+        if (create != null)
+        {
+            Show(create(next));
+            UpdateRunning(reason);
+        }
     }
 
     public void SetVisible(bool visible)
@@ -113,12 +137,14 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
     {
         Discard("released");
         _requestKey = null;
+        _create = null;
     }
 
     public void Dispose()
     {
         Discard("window closed");
         _requestKey = null;
+        _create = null;
     }
 
     private void Attach(DeckBackground background)
@@ -192,7 +218,7 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
                 string scale = background.Kind == BackgroundKind.Shader
                     ? string.Create(CultureInfo.InvariantCulture, $", scale {background.Scale}")
                     : "";
-                UrDeckLog.Info($"Background: {background.Describe}, surface {info.Width}x{info.Height}{scale}, {(background.IsMoving ? "moving" : "still")}");
+                UrDeckLog.Info($"Background: {background.Describe} from {background.Origin.Label()}, surface {info.Width}x{info.Height}{scale}, {(background.IsMoving ? "moving" : "still")}");
             }
         }
         catch (Exception ex)
@@ -201,7 +227,7 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
             _dispatcher.TryEnqueue(() =>
             {
                 if (ReferenceEquals(_background, background))
-                    Discard("painting failed");
+                    Fall(background, "painting failed");
             });
         }
     }
@@ -236,7 +262,7 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
             if (ok)
                 _invalidate?.Invoke();
             else
-                Discard("picture failed");
+                Fall(background, "picture failed");
         });
     }
 

@@ -4,7 +4,9 @@ The deck can show a moving picture or a wallpaper behind its cards. It is one la
 it, cards are drawn on it with their own transparency (a translucent theme such as `glass` lets it show through), and it
 never takes a swipe or a tap.
 
-Without a `background` setting nothing of this exists: no surface, no frames, no cost.
+A theme can bring a background of its own (see [Theme backgrounds](#theme-backgrounds)). A configuration without a
+`background` shows the theme's choice, and `"background": { "type": "none" }` switches every background off. A theme that
+chooses nothing, and a background that is off, cost nothing: no surface, no frames.
 
 ## The `background` setting
 
@@ -15,11 +17,12 @@ A top-level object in `urdeck-config.json`. It applies when the file is saved, w
 "background": { "type": "shader", "name": "plasma", "colors": ["#0f1a4d", "#8c268c", "#fa9e40"] }
 "background": { "type": "shader", "name": "my-thing", "scale": 0.25, "density": 3.0, "glow": "#ff8800" }
 "background": { "type": "image", "path": "D:/Pictures/wall.jpg" }
+"background": { "type": "none" }
 ```
 
 | Key | For | Meaning | Default | Valid |
 |---|---|---|---|---|
-| `type` | both | `shader` or `image` | required | those two |
+| `type` | all | `shader`, `image` or `none` (nothing else is needed for `none`) | required | those three |
 | `name` | shader | a built-in name, or a folder in `backgrounds/` (see [Authoring backgrounds](#authoring-backgrounds)) | required | letters, digits, `-`, `_` |
 | `speed` | shader | multiplies time: 2 is twice as fast, 0 stops it | `1` | 0 to 10 |
 | `scale` | shader | the resolution it is drawn at, as a fraction of the panel's | `0.5` | 0.1 to 1 |
@@ -27,9 +30,42 @@ A top-level object in `urdeck-config.json`. It applies when the file is saved, w
 | `path` | image | the picture | required | see [Images](#images) |
 | any other key | shader | a parameter of that shader | the shader's default | |
 
-A value that is wrong (not an object, an unknown `type`, a missing `name` or `path`) is logged and the deck shows the
-theme's background colour. `speed` or `scale` out of range is logged and the default is used. A page's own `background`
-is not supported: it is ignored, and `urdeck.log` says so; set the top-level one.
+A configuration with no `background`, or with `"background": null`, leaves the choice to the theme. A value that is wrong
+(not an object, an unknown `type`, a missing `name` or `path`) is logged and the deck shows what a failed background shows:
+the theme's still background if it has one, else its background colour. `speed` or `scale` out of range is logged and the
+default is used. A page's own `background` is not supported: it is ignored, and `urdeck.log` says so; set the top-level one.
+
+## Theme backgrounds
+
+A theme can choose its background with its `background` group ([themes](themes.md#background)): a default shader
+(`background.default.name`), a still background (`background.static`: a gradient, a colour, or a picture file inside the
+theme's folder, scaled to cover) and a scrim. What the deck shows is the first of these that applies:
+
+1. the configuration's `background`, `none` included
+2. the theme's default shader
+3. the theme's still background
+4. the theme's background colour
+
+A background that fails (an unknown shader name, SkSL that does not compile, a missing picture) is logged once and the
+next one in the list is tried, so a theme with a still gradient shows the gradient when its shader cannot run. The theme's
+default is only used when the configuration says nothing: choose a shader or an image and that is shown, in the theme's
+palette unless you give `colors`; the theme's default does not take its place, and its still background is only what a
+failure of yours falls back to. A picture path that leaves the theme's folder is ignored with a warning, and built-in
+themes have no pictures.
+
+**To switch a theme's background off**, set `"background": { "type": "none" }`: the deck shows the theme's background
+colour and nothing else, no still background and no scrim. Deleting the `background` key brings the theme's choice back.
+The three built-in themes choose no background, so a deck that uses them looks the same as it did.
+
+The **scrim** (`background.scrim`, a colour and an alpha from 0 to 1) is a veil drawn over the shader, the picture or the
+still background, whoever chose it, so text keeps its contrast over a bright or busy one. The colour's own transparency
+multiplies the alpha. It is not drawn over the plain background colour, and not when the background is `none`.
+
+The theme's `motion.level` does not change the background: a moving default moves. A shader has its own `speed`, and the
+deck stops its frames while it is hidden or the display is off. A still background is drawn once, with no frames.
+
+The log says what was chosen, once per change: `Background: shader 'horizon' (built-in) from theme default, surface ...`
+(or `configuration`, `theme still background`), and `Background: colour (theme colour)` when only the colour is left.
 
 ## Built-in shaders
 
@@ -136,6 +172,7 @@ accepted, as in the configuration file.
 | `entry` | string | the shader file inside the folder; default `<name>.sksl`. No absolute path, no `..` |
 | `author`, `license`, `version` | string | for a person and a store; never used to decide what runs |
 | `tags` | array of strings | for finding it |
+| `pairsWith` | object | `themes`: an array of theme names the background suits, best first. Used to recommend a background for a theme in a settings page; it never decides what runs |
 | `parameters` | object | annotations, keyed by the name of a uniform the shader declares (below) |
 | `samples` | array | pictures of the background (below) |
 
@@ -540,10 +577,13 @@ The deck shows the theme's background colour, the widgets are unaffected, and `u
 - a picture that is missing, too large, or not an image (its path is in the line);
 - a failure while painting, or a GPU surface that does not start.
 
+With a theme that has a still background, that is what shows instead of the colour (and the colour when it fails too).
+
 Warnings that do not stop the background (a parameter without a description, an unknown manifest key) are logged the same
 way, with their `SHADERnnn` code: see [Lint](#lint). A background that failed is not tried again until its configuration,
 its files or the theme changes; fix the file and save the config.
 
 `UrDeck.Host.exe --snapshot out.png` draws the background too (a shader at `iTime` 10, whatever the speed, with the palette of the
-theme in use), so a snapshot with the same configuration is the same every time. The snapshot is drawn on the CPU and does
+theme in use; a theme's default, still background and scrim as the deck draws them), so a snapshot with the same
+configuration is the same every time. The snapshot is drawn on the CPU and does
 not need the GPU.

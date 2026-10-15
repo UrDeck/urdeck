@@ -15,7 +15,7 @@ cards:
 - The background is selected on startup and again on every configuration reload
 - A page's own `background` value is not supported: it is ignored, and one log line per reload says so
 
-#### Scenario: No background configured, theme has none
+#### Scenario: No background configured
 - **WHEN** the configuration has no `background` and the theme defines no background
 - **THEN** the deck shows the theme's background colour and nothing else is created or run for a background
 

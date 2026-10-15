@@ -419,10 +419,10 @@ public sealed class MainWindow : Window, ISettingsHost
     {
         var settings = _backgroundSettings;
         var theme = _loadedTheme;
-        string? key = DeckBackground.RequestKey(settings, theme, _shaders, _appDirectory);
+        var plan = BackgroundPlan.Resolve(settings, theme);
         _backgroundLayer.Apply(
-            key,
-            () => DeckBackground.Create(settings, theme, _shaders, _appDirectory),
+            plan.RequestKey(_shaders, _appDirectory),
+            first => plan.Build(_shaders, _appDirectory, first),
             screen,
             scale,
             SKColor.Parse(theme.Definition.Colors!.Background));

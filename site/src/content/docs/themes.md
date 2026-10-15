@@ -43,7 +43,9 @@ page indicator, how a card looks while pressed, the dock's size, and the palette
 
 Format 2 adds optional values for card chrome (chamfered corners, shadows, dashed or gradient borders), a page pattern, per-role
 fonts, more gauge styles, icons and a background of its own. They are checked and kept today and drawn by later releases; a
-file that uses none of them is unaffected. The
+file that uses none of them is unaffected. A theme's [background](/docs/backgrounds/#theme-backgrounds), a default shader, a
+still gradient, colour or picture and a scrim, is drawn today when your configuration has no `background` of its own, and
+`meta.pairsWith.backgrounds` lists the backgrounds that suit the theme, for a settings page to recommend. The
 [JSON Schema](/schemas/v2/theme.json) lists them for editor completion.
 
 The complete list of settings, with the range of each, is the

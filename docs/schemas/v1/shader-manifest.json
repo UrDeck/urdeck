@@ -16,6 +16,14 @@
     "license": { "type": "string", "description": "An SPDX identifier is best." },
     "version": { "type": "string", "description": "The background's own version." },
     "tags": { "type": "array", "items": { "type": "string" } },
+    "pairsWith": {
+      "type": "object",
+      "description": "Themes this background suits. Used to recommend, never to decide what runs.",
+      "additionalProperties": true,
+      "properties": {
+        "themes": { "type": "array", "items": { "type": "string" }, "description": "Theme names, best first." }
+      }
+    },
     "parameters": {
       "type": "object",
       "description": "Annotations, keyed by the name of a uniform the shader declares.",
