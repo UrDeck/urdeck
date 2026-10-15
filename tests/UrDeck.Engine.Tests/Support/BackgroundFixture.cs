@@ -79,6 +79,17 @@ internal sealed class BackgroundFixture : IDisposable
         }
     }
 
+    /// <summary>Writes <c>themes/&lt;name&gt;/theme.json</c> and loads the theme the way the host does.</summary>
+    public LoadedTheme WriteTheme(string name, string json)
+    {
+        string folder = ThemeFolder(name);
+        Directory.CreateDirectory(folder);
+        File.WriteAllText(Path.Combine(folder, ThemeStore.SettingsFileName), json);
+        return Themes.Load(name);
+    }
+
+    public string ThemeFolder(string name) => Path.Combine(Root, "themes", name);
+
     public string FolderPath(string name) => Path.Combine(Root, "backgrounds", name);
 
     public DeckBackground? Create(string json, string themeName = "default-dark") =>

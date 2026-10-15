@@ -145,8 +145,8 @@ Drawn by: nothing; it describes the theme to the settings window.
 | `meta.version` | text |  |  |
 | `meta.mode` | `dark`, `light` |  | Lets the editor group themes and pick a matching default. |
 | `meta.tags` | list of text |  |  |
-| `meta.pairsWith` | group |  | Recommendations for the config editor. |
-| `meta.pairsWith.backgrounds` | list of text |  | Background names that suit this theme, best first. Names of built-in or user backgrounds. |
+| `meta.pairsWith` | group |  | Recommendations for the settings editor. They never decide what the deck shows. |
+| `meta.pairsWith.backgrounds` | list of text |  | Background names that suit this theme, best first. Names of built-in or user backgrounds; a name that does not exist is skipped. A background's manifest can name themes too (`pairsWith.themes`); a pair is recommended if either side names the other. The theme's default background belongs in this list. |
 | `meta.samples` | list of groups |  | Same shape as a background manifest's samples. |
 | `meta.samples[].file` | text |  |  |
 | `meta.samples[].caption` | text |  |  |
@@ -396,14 +396,16 @@ Drawn by: the icons change.
 
 ### `background`
 
-Drawn by: `theme-backgrounds`.
+What the deck shows behind the cards when the configuration has no `background`; see [Theme backgrounds](backgrounds.md#theme-backgrounds)
+for the order (the user's choice, `"type": "none"` included, then `default`, then `static`, then `colors.background`) and
+for what happens when one fails. The built-in themes define none.
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
 | `background.default` | group |  | The animated background this theme selects when the user has not picked one. |
-| `background.default.name` | text |  |  |
-| `background.static` | group |  | Still background used when no animated background is selected, or when motion is off. Image, gradient or colour. |
-| `background.static.image` | text |  | File in the theme folder. |
+| `background.default.name` | text |  | A shader background's name, built in or a folder in `backgrounds/`. It uses the theme's background palette. |
+| `background.static` | group |  | Still background used when there is no default, or when the default cannot be shown. Image, gradient or colour (the first that is given, in that order). It is drawn once. `motion.level` does not change which one shows. |
+| `background.static.image` | text |  | File in the theme folder, scaled to cover the deck. A path that leaves the folder is ignored with a warning. User themes only. |
 | `background.static.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
 | `background.static.gradient` | group |  | Linear or radial gradient. |
 | `background.static.gradient.colors` | list of 2 to 6 colours |  | Stops. |
@@ -412,9 +414,9 @@ Drawn by: `theme-backgrounds`.
 | `background.static.gradient.cx` | -1 to 2 | `0.5` | Radial centre x, fraction of width. |
 | `background.static.gradient.cy` | -1 to 2 | `0` | Radial centre y, fraction of height. |
 | `background.static.gradient.radius` | 0.1 to 3 | `0.7` | Radial radius, fraction of width. |
-| `background.scrim` | group |  | A veil between the background and the cards, to hold text contrast. |
+| `background.scrim` | group |  | A veil between the background and the cards, to hold text contrast. Drawn over a shader, a picture and a still background, not over the plain colour and not with `"type": "none"`. |
 | `background.scrim.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
-| `background.scrim.alpha` | 0 to 1 |  |  |
+| `background.scrim.alpha` | 0 to 1 |  | Multiplied by the colour's own alpha. Without both values there is no scrim. |
 
 ### `motion`
 

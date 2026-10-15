@@ -438,6 +438,44 @@ public sealed class BackgroundPackageTests : IDisposable
         Assert.Contains("no shader named 'nebula'", result.Failure);
     }
 
+    // Pairing
+
+    [Fact]
+    public void Pairing_themes_are_read_in_order_without_a_diagnostic()
+    {
+        var result = BackgroundManifestReader.Read("""{ "manifest": 1, "pairsWith": { "themes": ["rigline", "carbon"] } }""");
+        Assert.Equal(["rigline", "carbon"], result.Manifest!.PairsWith!.Themes);
+        Assert.Empty(result.Diagnostics);
+    }
+
+    [Fact]
+    public void Pairing_of_the_wrong_type_is_one_warning_and_no_pairing()
+    {
+        var result = BackgroundManifestReader.Read("""{ "manifest": 1, "pairsWith": { "themes": "carbon" } }""");
+        Assert.Null(result.Manifest!.PairsWith);
+        var diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal(ShaderCodes.WrongType, diagnostic.Code);
+        Assert.Contains("pairsWith.themes", diagnostic.Message);
+
+        Assert.Null(BackgroundManifestReader.Read("""{ "manifest": 1, "pairsWith": [] }""").Manifest!.PairsWith);
+    }
+
+    [Fact]
+    public void An_unknown_key_inside_pairing_is_one_warning_and_the_themes_are_kept()
+    {
+        var result = BackgroundManifestReader.Read("""{ "manifest": 1, "pairsWith": { "themes": ["carbon"], "moods": ["calm"] } }""");
+        Assert.Equal(["carbon"], result.Manifest!.PairsWith!.Themes);
+        var diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal(ShaderCodes.UnknownKey, diagnostic.Code);
+        Assert.Contains("moods", diagnostic.Message);
+    }
+
+    [Fact]
+    public void A_manifest_without_pairing_has_none()
+    {
+        Assert.Null(BackgroundManifestReader.Read("""{ "manifest": 1 }""").Manifest!.PairsWith);
+    }
+
     // The schema
 
     [Fact]
@@ -456,6 +494,9 @@ public sealed class BackgroundPackageTests : IDisposable
         Assert.Equal(Sorted(BackgroundManifestReader.TopKeys), Names(top.GetProperty("properties")));
         Assert.Equal(["manifest"], top.GetProperty("required").EnumerateArray().Select(e => e.GetString()));
         Assert.True(top.GetProperty("additionalProperties").GetBoolean());
+
+        Assert.Equal(Sorted(BackgroundManifestReader.PairsWithKeys),
+            Names(top.GetProperty("properties").GetProperty("pairsWith").GetProperty("properties")));
 
         var parameter = top.GetProperty("properties").GetProperty("parameters").GetProperty("additionalProperties");
         Assert.Equal(Sorted(BackgroundManifestReader.ParameterKeys), Names(parameter.GetProperty("properties")));

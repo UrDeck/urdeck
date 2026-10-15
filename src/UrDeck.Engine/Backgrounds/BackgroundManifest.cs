@@ -21,6 +21,9 @@ public sealed record ManifestParameter(
 /// </summary>
 public sealed record ManifestSample(string Type, string? File, int? Order, string? Caption, JsonElement? Settings = null);
 
+/// <summary>The themes a background suits, best first (<c>pairsWith.themes</c>). Used to recommend, never to decide what runs.</summary>
+public sealed record ManifestPairsWith(IReadOnlyList<string> Themes);
+
 /// <summary>The version 1 manifest as far as it could be read; every field but <see cref="Version"/> may be missing.</summary>
 public sealed record BackgroundManifest(
     int Version,
@@ -32,7 +35,8 @@ public sealed record BackgroundManifest(
     string? PackageVersion,
     IReadOnlyList<string> Tags,
     IReadOnlyDictionary<string, ManifestParameter> Parameters,
-    IReadOnlyList<ManifestSample> Samples)
+    IReadOnlyList<ManifestSample> Samples,
+    ManifestPairsWith? PairsWith = null)
 {
     public const string FileName = "manifest.json";
     public const int SupportedVersion = 1;
@@ -48,9 +52,10 @@ public sealed record ManifestReadResult(BackgroundManifest? Manifest, IReadOnlyL
 public static class BackgroundManifestReader
 {
     internal static readonly string[] TopKeys =
-        ["$schema", "manifest", "title", "description", "entry", "author", "license", "version", "tags", "parameters", "samples"];
+        ["$schema", "manifest", "title", "description", "entry", "author", "license", "version", "tags", "pairsWith", "parameters", "samples"];
 
     internal static readonly string[] ParameterKeys = ["label", "description", "kind", "min", "max", "step", "unit", "hidden"];
+    internal static readonly string[] PairsWithKeys = ["themes"];
     internal static readonly string[] SampleKeys = ["type", "file", "order", "caption", "settings"];
     internal static readonly string[] Kinds = ["number", "color"];
     internal static readonly string[] SampleTypes = ["image", "video"];
@@ -130,6 +135,8 @@ public static class BackgroundManifestReader
             }
         }
 
+        var pairsWith = ReadPairsWith(root, found);
+
         var parameters = new Dictionary<string, ManifestParameter>(StringComparer.Ordinal);
         if (root.TryGetProperty("parameters", out var parametersElement))
         {
@@ -180,7 +187,39 @@ public static class BackgroundManifestReader
             Text(root, "version", "version", found),
             tags,
             parameters,
-            samples);
+            samples,
+            pairsWith);
+    }
+
+    private static ManifestPairsWith? ReadPairsWith(JsonElement root, List<ShaderDiagnostic> found)
+    {
+        if (!root.TryGetProperty("pairsWith", out var element))
+            return null;
+        if (element.ValueKind != JsonValueKind.Object)
+        {
+            found.Add(WrongType("pairsWith", "an object", element));
+            return null;
+        }
+
+        CheckKeys(element, PairsWithKeys, "pairsWith", found);
+        if (!element.TryGetProperty("themes", out var themes))
+            return null;
+        if (themes.ValueKind != JsonValueKind.Array)
+        {
+            found.Add(WrongType("pairsWith.themes", "an array of strings", themes));
+            return null;
+        }
+
+        var names = new List<string>();
+        foreach (var item in themes.EnumerateArray())
+        {
+            if (item.ValueKind == JsonValueKind.String)
+                names.Add(item.GetString()!);
+            else
+                found.Add(WrongType("pairsWith.themes", "a string", item));
+        }
+
+        return new ManifestPairsWith(names);
     }
 
     private static ManifestParameter ReadParameter(string name, JsonElement element, List<ShaderDiagnostic> found)

@@ -1,4 +1,9 @@
 {
+  "meta": {
+    "name": "Default Light",
+    "description": "The standard UrDeck look on a light ground.",
+    "mode": "light"
+  },
   "colors": {
     "background": "#e9ebf2",
     "cardFill": "#b3ffffff",

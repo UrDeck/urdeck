@@ -6,25 +6,42 @@ order: 21
 ---
 
 The deck can show a moving picture or a wallpaper behind its cards. Pages slide over it and translucent cards, such as
-the `glass` [theme](/docs/themes/), show it through. Without a `background` setting nothing of this exists: no surface,
-no frames, no cost.
+the `glass` [theme](/docs/themes/), show it through. A theme can bring a background of its own, and a configuration
+without a `background` shows the theme's choice; **`"background": { "type": "none" }` switches every background off**. A
+deck with no background costs nothing: no surface, no frames.
 
 ```json
 "background": { "type": "shader", "name": "aurora", "speed": 0.5 }
 "background": { "type": "image", "path": "D:/Pictures/wall.jpg" }
+"background": { "type": "none" }
 ```
 
 | Key | For | Meaning |
 |---|---|---|
-| `type` | both | `shader` or `image`. |
+| `type` | all | `shader`, `image` or `none`. |
 | `name` | shader | A built-in name, or a folder in `backgrounds/` next to the executable. |
 | `speed` | shader | Multiplies time: 2 is twice as fast, 0 stops it. Default 1, from 0 to 10. |
 | `scale` | shader | The resolution it is drawn at, as a fraction of the panel's. Default 0.5, from 0.1 to 1. |
 | `colors` | shader | One to four colours replacing the theme's palette. |
 | `path` | image | The picture. |
 
-Any other key is a parameter of that shader. A background that is wrong is logged and the deck shows the theme's
-background colour.
+Any other key is a parameter of that shader. A background that is wrong is logged and the deck shows what a failed
+background shows: the theme's still background if it has one, else its background colour.
+
+## Theme backgrounds
+
+A theme can choose a default shader, a still background (a gradient, a colour or a picture in the theme's folder) and a
+scrim, a veil that keeps text readable over a busy background. The deck shows the first of these that applies:
+
+1. your `background`, `none` included
+2. the theme's default shader
+3. the theme's still background
+4. the theme's background colour
+
+A background that fails is logged once and the next one is tried, so a theme with a still gradient shows the gradient
+when its shader cannot run. Choosing a shader or an image yourself shows that one, not the theme's. To switch a theme's
+background off, set `"background": { "type": "none" }`; delete the key to get the theme's choice back. The three built-in
+themes choose no background, so nothing changes for them. A theme's `motion.level` does not affect the background.
 
 ## Built-in shaders
 

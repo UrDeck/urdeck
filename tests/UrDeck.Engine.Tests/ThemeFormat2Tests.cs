@@ -382,10 +382,12 @@ public sealed class ThemeFormat2Tests : IDisposable
 
     // ---------------------------------------------------------------- merge
 
-    private static void AssertNoFormat2Groups(ThemeDefinition d)
+    /// <summary><paramref name="allowMeta"/>: the built-in themes carry <c>meta</c> (a catalog lists them by it) and nothing else of format 2.</summary>
+    private static void AssertNoFormat2Groups(ThemeDefinition d, bool allowMeta = false)
     {
         Assert.Null(d.Format);
-        Assert.Null(d.Meta);
+        if (!allowMeta)
+            Assert.Null(d.Meta);
         Assert.Null(d.Pattern);
         Assert.Null(d.Divider);
         Assert.Null(d.Chip);
@@ -393,7 +395,7 @@ public sealed class ThemeFormat2Tests : IDisposable
         Assert.Null(d.Icons);
         Assert.Null(d.Background);
         Assert.Null(d.Motion);
-        foreach (string path in Paths(Schema, "", groups: false).Where(p => p != "format" && IsFormat2(p)))
+        foreach (string path in Paths(Schema, "", groups: false).Where(p => p != "format" && IsFormat2(p) && !(allowMeta && p.StartsWith("meta.", StringComparison.Ordinal))))
             Assert.Null(Dig(d, path));
     }
 
@@ -401,12 +403,15 @@ public sealed class ThemeFormat2Tests : IDisposable
     [InlineData("default-dark")]
     [InlineData("default-light")]
     [InlineData("glass")]
-    public void TheBuiltInThemes_LoadCleanWithNoFormat2Group(string name)
+    public void TheBuiltInThemes_LoadCleanWithOnlyMetaOfFormat2(string name)
     {
         var theme = new ThemeStore(Path.Combine(_root, "themes")).Load(name);
 
         Assert.Equal(name, theme.Name);
-        AssertNoFormat2Groups(theme.Definition);
+        AssertNoFormat2Groups(theme.Definition, allowMeta: true);
+        Assert.False(string.IsNullOrWhiteSpace(theme.Definition.Meta?.Name));
+        Assert.False(string.IsNullOrWhiteSpace(theme.Definition.Meta?.Description));
+        Assert.NotNull(theme.Definition.Meta?.Mode);
         Assert.Empty(Log);
     }
 

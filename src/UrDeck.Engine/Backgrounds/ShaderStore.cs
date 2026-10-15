@@ -41,6 +41,9 @@ public sealed class ShaderStore(string backgroundsDirectory)
 
     public static IReadOnlyList<string> BuiltInNames { get; } = ["plasma", "aurora", "gradient", "julia"];
 
+    /// <summary>The folder user backgrounds are read from.</summary>
+    public string BackgroundsDirectory => backgroundsDirectory;
+
     /// <summary>
     /// The named background, or null when there is none (the reason is logged unless <paramref name="warn"/> is false,
     /// which keeps the log quiet for key building). A name outside letters, digits, '-' and '_' is refused before any

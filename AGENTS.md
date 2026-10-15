@@ -126,7 +126,15 @@ See the README license map before moving code between projects: it can change th
   event keyed on the folder, `UrDeck.Engine/Startup/InstanceNames`), then the XAML application. `--quit` sets the event
   and waits for the mutex. "Start with Windows" is the `UrDeck` value under `HKCU\...\Run` (`RunKeyAutostart`); Windows
   owns the setting, the config has no field for it.
-- The background (`docs/backgrounds.md`, `src/UrDeck.Engine/Backgrounds`, host `BackgroundLayer`): a moving shader is an
+- The background (`docs/backgrounds.md`, `src/UrDeck.Engine/Backgrounds`, host `BackgroundLayer`): what it is comes from `BackgroundPlan.Resolve(settings, theme)`,
+  an ordered list of candidates: the configuration's `background` (`none` is explicit; absent and `null` leave the choice to the theme), the
+  theme's `background.default` shader, its `background.static` (picture inside the theme folder, gradient or colour, drawn by `StillPainter`) and the
+  colour. `Build` tries them in order and logs each failure once; the layer goes on from `CandidateIndex + 1` when a picture cannot be decoded.
+  `RequestKey` joins every candidate's key with its origin, the theme's name and the scrim, so a theme change that alters the result restarts the layer and
+  an unrelated save does not. The scrim (`background.scrim`) is painted last by `DeckBackground.PaintAtTime`, so the swap chain panel, the still canvas and
+  `--snapshot` all draw it. `motion.level` does not touch the background. `ThemeCatalog`, `BackgroundCatalog` and `PairingIndex` (`Recommend`) are the
+  read-only services for a settings editor. In `urdeck.log` look for `Background: shader '...' (built-in) from theme default, surface ...` (or `configuration`,
+  `theme still background`) and `Background: colour (theme colour)`. A moving shader is an
   `SKSwapChainPanel` (`EnableRenderLoop = false`), a still one or a picture an `SKXamlCanvas`, both under the cards in the
   `_background` grid with `IsHitTestVisible = false`. The render scale is the element's size times `scale` with its
   composition visual scaled back (`ElementCompositionPreview.GetElementVisual(el).Scale`): never a `RenderTransform` or

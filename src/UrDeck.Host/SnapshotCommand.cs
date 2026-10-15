@@ -28,14 +28,20 @@ internal static class SnapshotCommand
     private static DeckBackground? BuildBackground(HostContext host, LoadedTheme theme, int width, int height)
     {
         var settings = BackgroundSettings.Parse(host.Config.Config.Background);
-        var background = DeckBackground.Create(settings, theme, host.Shaders, host.AppDirectory);
-        if (background != null && !background.PrepareAsync(width, height).GetAwaiter().GetResult())
+        var plan = BackgroundPlan.Resolve(settings, theme);
+
+        // As the live layer does: a picture that cannot be decoded goes on to the plan's next candidate.
+        int first = 0;
+        while (plan.Build(host.Shaders, host.AppDirectory, first) is { } background)
         {
+            if (background.PrepareAsync(width, height).GetAwaiter().GetResult())
+                return background;
+
+            first = background.CandidateIndex + 1;
             background.Dispose();
-            return null;
         }
 
-        return background;
+        return null;
     }
 
     public static int Run(string[] args)

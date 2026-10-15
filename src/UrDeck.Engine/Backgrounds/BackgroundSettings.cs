@@ -15,6 +15,12 @@ public enum BackgroundKind
     None,
     Shader,
     Image,
+
+    /// <summary>A theme's still gradient; never from the configuration.</summary>
+    Gradient,
+
+    /// <summary>A theme's still colour; never from the configuration.</summary>
+    Color,
 }
 
 /// <summary>
@@ -33,7 +39,17 @@ public sealed partial class BackgroundSettings
     /// <summary>The setting's own keys; any other key of a shader background is a parameter of the shader.</summary>
     private static readonly string[] OwnKeys = ["type", "name", "path", "speed", "scale", "colors"];
 
+    /// <summary>No choice: the configuration has no <c>background</c> (or <c>null</c>), so the theme chooses.</summary>
     public static BackgroundSettings None { get; } = new();
+
+    /// <summary><c>{ "type": "none" }</c>: the user chose no background, so neither the theme's default nor its still background shows.</summary>
+    public static BackgroundSettings Disabled { get; } = new() { IsExplicit = true };
+
+    /// <summary>A <c>background</c> that could not be read (a warning was logged): the user chose something that failed.</summary>
+    public static BackgroundSettings Invalid { get; } = new() { IsExplicit = true, IsInvalid = true };
+
+    /// <summary>A shader named by a theme's <c>background.default</c>: the shader's own defaults for everything else.</summary>
+    internal static BackgroundSettings ForThemeShader(string name) => new() { Kind = BackgroundKind.Shader, Name = name };
 
     /// <summary>True for one of the setting's own keys (<c>type</c>, <c>name</c>, <c>path</c>, <c>speed</c>, <c>scale</c>, <c>colors</c>).</summary>
     internal static bool IsOwnKey(string key) => OwnKeys.Contains(key, StringComparer.OrdinalIgnoreCase);
@@ -43,6 +59,15 @@ public sealed partial class BackgroundSettings
     }
 
     public BackgroundKind Kind { get; private init; }
+
+    /// <summary>True when the configuration said something (a shader, an image, <c>none</c>, or a value that failed); false for no choice.</summary>
+    public bool IsExplicit { get; private init; }
+
+    /// <summary>True for a <c>background</c> value that could not be used.</summary>
+    public bool IsInvalid { get; private init; }
+
+    /// <summary>True for the user's <c>none</c>.</summary>
+    public bool IsDisabled => IsExplicit && !IsInvalid && Kind == BackgroundKind.None;
 
     /// <summary>The shader's name; null for an image.</summary>
     public string? Name { get; private init; }
@@ -60,8 +85,8 @@ public sealed partial class BackgroundSettings
     public IReadOnlyDictionary<string, JsonElement> Parameters { get; private init; } = new Dictionary<string, JsonElement>();
 
     /// <summary>
-    /// Reads the <c>background</c> value. Null, an absent value and JSON <c>null</c> are no background without a warning;
-    /// anything unusable is no background with one.
+    /// Reads the <c>background</c> value. Null, an absent value and JSON <c>null</c> are no choice (the theme's) without a
+    /// warning; <c>none</c> is <see cref="Disabled"/>; anything unusable is <see cref="Invalid"/> with a warning.
     /// </summary>
     public static BackgroundSettings Parse(JsonElement? element)
     {
@@ -69,8 +94,8 @@ public sealed partial class BackgroundSettings
             return None;
         if (value.ValueKind != JsonValueKind.Object)
         {
-            Warn($"'background' must be an object, not {value.ValueKind}; no background.");
-            return None;
+            Warn($"'background' must be an object, not {value.ValueKind}; the theme's background colour or still background is shown.");
+            return Invalid;
         }
 
         var members = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
@@ -80,17 +105,19 @@ public sealed partial class BackgroundSettings
         string? type = Own(members, "type") is { ValueKind: JsonValueKind.String } t ? t.GetString() : null;
         if (type == null)
         {
-            Warn("'type' is missing; it must be 'shader' or 'image'. No background.");
-            return None;
+            Warn("'type' is missing; it must be 'shader', 'image' or 'none'. No background.");
+            return Invalid;
         }
 
+        if (type.Equals("none", StringComparison.OrdinalIgnoreCase))
+            return Disabled;
         if (type.Equals("shader", StringComparison.OrdinalIgnoreCase))
             return ParseShader(members);
         if (type.Equals("image", StringComparison.OrdinalIgnoreCase))
             return ParseImage(members);
 
-        Warn($"'type' '{type}' must be 'shader' or 'image'. No background.");
-        return None;
+        Warn($"'type' '{type}' must be 'shader', 'image' or 'none'. No background.");
+        return Invalid;
     }
 
     /// <summary>
@@ -118,13 +145,13 @@ public sealed partial class BackgroundSettings
         if (string.IsNullOrEmpty(name))
         {
             Warn("a shader background needs a 'name'. No background.");
-            return None;
+            return Invalid;
         }
 
         if (!IsValidName(name))
         {
             Warn($"shader name '{name}' may only contain letters, digits, '-' and '_'. No background.");
-            return None;
+            return Invalid;
         }
 
         var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
@@ -135,6 +162,7 @@ public sealed partial class BackgroundSettings
         return new BackgroundSettings
         {
             Kind = BackgroundKind.Shader,
+            IsExplicit = true,
             Name = name,
             Speed = Number(members, "speed", DefaultSpeed, 0, MaxSpeed),
             Scale = Number(members, "scale", DefaultScale, MinScale, MaxScale),
@@ -149,14 +177,14 @@ public sealed partial class BackgroundSettings
         if (string.IsNullOrWhiteSpace(path))
         {
             Warn("an image background needs a 'path'. No background.");
-            return None;
+            return Invalid;
         }
 
         foreach (string key in members.Keys)
             if (!key.Equals("type", StringComparison.OrdinalIgnoreCase) && !key.Equals("path", StringComparison.OrdinalIgnoreCase))
                 Warn($"'{key}' has no meaning for an image background and is ignored.");
 
-        return new BackgroundSettings { Kind = BackgroundKind.Image, Path = path };
+        return new BackgroundSettings { Kind = BackgroundKind.Image, IsExplicit = true, Path = path };
     }
 
     private static JsonElement? Own(Dictionary<string, JsonElement> members, string key)
