@@ -34,7 +34,8 @@
 - [ ] 6.1 v1 goldens unchanged; new goldens of the sample page for Ember, Blueprint, Obsidian and Pop (what this change draws of them), looked at by eye before they are committed
 - [ ] 6.2 Paint benchmark (the method of `docs/perf/card-chrome.md`): each draft at most 1.5 times `default-dark` on the same machine; record the rows
 - [ ] 6.3 On the panel: private memory of a gradient theme against `default-dark` on the sample configuration; record it; if the back images cost more than 5 MB, stop and bring the compositor fallback to the owner
-- [ ] 6.4 `dotnet build urdeck.slnx -c Release` 0 warnings; `dotnet format urdeck.slnx --severity warn`; `openspec validate --all --strict`; the engine tests with the coverage floor; the Linux tests
+- [ ] 6.4 Before archive: `theme-gauges` also modifies the theme spec's "Format 2 Values" (it adds `gauge.layout`). This change's delta carries that addition; if `theme-gauges` is archived after this change, its delta must carry this change's "Card chrome values" scenario, and the other way round
+- [ ] 6.5 `dotnet build urdeck.slnx -c Release` 0 warnings; `dotnet format urdeck.slnx --severity warn`; `openspec validate --all --strict`; the engine tests with the coverage floor; the Linux tests
 
 ## 7. Documentation
 
