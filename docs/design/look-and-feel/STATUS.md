@@ -22,7 +22,7 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 5: backgrounds, pairing, plan, scrim, catalogs | `theme-backgrounds` | **Done**, archived (#52). `PreviewRenderer` (PR 18) is not built |
 | PR 6, PR 7: twelve shaders | `builtin-shaders` | **Done**, archived (#53). Site posters and loops not made |
 | PR 3: typography (per-role fonts, case, tracking, slant, value fill, glow) | `theme-typography` | **Done**: per-role fonts with the fallback chain, `typography.opticalSize`, the weight warnings, `Theme.TextStyle` (SDK 0.9.0), drawn by `Readout` and `TextLine`. Findings for the theme changes are in its design ("Findings during apply") |
-| PR 2: card chrome (shape, borders, shadow, glow, highlight, sheen, marks, compact, tint) | `card-chrome` | **Next. Explore first** (see "Open design points"). Handoff for the explore session: `docs/handoff/2026-10-15-card-chrome-explore.md` |
+| PR 2: card chrome (shape, borders, shadow, glow, highlight, sheen, marks, compact, tint) | `card-chrome-back`, `-front`, `card-underlay`, `card-compact` | **Explored; next: propose `card-chrome-back`.** Decisions and the split: `docs/design/card-chrome.md`; numbers: `docs/perf/card-chrome.md` |
 | PR 8: pattern layer and motion policy | `page-pattern`, later `motion` | After card chrome. Pattern uses a page-sized surface; the memory cost is accepted |
 | PR 4: gauge styles and modifiers | `theme-gauges` | **Proposed.** Does not need card chrome. SDK `GaugeStyle` gains `Meter, Tach, Marker, ThickBar`; adds one key, `gauge.layout` (the board draws Carbon's, Paper's and Pop's bars with the value above the bar) |
 | PR 4: sparkline, status chip, divider, well, clock options, weather sections | `theme-widget-parts` | **Proposed**; apply after `theme-gauges`. Stats keeps its own short history (a hub-provided one is the alternative); the Clock header and per-second options are opt-in |
@@ -60,9 +60,10 @@ and the OpenSpec specs (`openspec/specs/`) win.
 
 ## Open design points (decide in the explore for the change that owns them)
 
-- **Card chrome:** how `WidgetPainter` splits into back and front passes while a v1 theme stays byte-identical; whether the press
-  effect carries the shadow sprite; dashed border on a chamfered card (a nine-grid cannot stretch a dash); the dock's own underlay;
-  a translucent card showing its neighbours' shadow when the reach exceeds the gap (a validator warning, not an error; Prism does it).
+- **Card chrome:** decided in `docs/design/card-chrome.md`. Two decisions changed: the engine limits a shadow's or glow's reach to
+  the gap when the card fill is translucent (Prism's 193 px showed as a cloud through its neighbours, and its picture was over both
+  underlay budgets), and a back with a gradient or a sheen is cached as an image per size (a gradient over a card costs about 1.1 ms
+  in software). The press carries the sprite. The owner should look at `prism-reach.png` (branch `spike/card-chrome-paint`).
 - **Typography:** `opsz` was decided in `theme-typography` (`opticalSize: auto`: the display cut for values, the pixel size for the
   rest). Still open: sharing the base typeface between page and dock (a second family measured 2.3 MB on the panel; optional), and
   whether a slanted value should count its lean in the fit and the unit gap (Ember, Rigline; see that change's design).
@@ -73,7 +74,8 @@ and the OpenSpec specs (`openspec/specs/`) win.
 
 A weight outside a variable font's range, or a weight a static font does not have, is now one warning per role when the theme
 loads (`theme-typography`); the CLI should report the same without the host. Shadow or glow reach beyond the gap over a
-translucent fill; text contrast on the card fill (under 4.5:1); a theme's default background that is not in its own `pairsWith` list;
+translucent fill (the engine limits it, `docs/design/card-chrome.md`); text contrast on the card fill (under 4.5:1), and on every
+`cardTints` entry (a tinted card keeps `Theme.Text`); outside corner marks with `|inset| + thickness` over half the gap; a theme's default background that is not in its own `pairsWith` list;
 `icons.set` and `meta.pairsWith.backgrounds` naming things that do not exist; keys that are unknown (with "did you mean").
 
 ## Not verified, in case it matters later
