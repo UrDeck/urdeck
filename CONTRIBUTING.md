@@ -77,6 +77,25 @@ use the hardware report issue form.
 - New files get the license header automatically via `dotnet format`.
 - Comments explain why, not what. Match the surrounding code.
 
+## Golden images
+
+A golden image is a PNG in `tests/UrDeck.Engine.Tests/Goldens/` that a test renders again and compares with. The sample page
+(`Support/SamplePage.cs`: a clock, two stats cards, a weather card and four shortcuts, with fixed readings and the time
+13 October 2026, 21:47:32) is drawn with `default-dark`, `default-light` and `glass` at 1100x1920, and with `default-dark` plus a
+dock and a page indicator. A change that moves a pixel of a v1 theme fails `GoldenTests`.
+
+- The goldens run on Windows only (FreeType and DirectWrite rasterise text differently); on Linux they show as skipped.
+- A picture passes when at most 0.01 % of its pixels (about 211 of the 2.1 million) have a channel more than 2 away from the
+  golden. The limits are `ChannelLimit` and `PixelFraction` in `Support/GoldenImage.cs`; keep them as tight as the noise between
+  the developer's machine and `windows-latest` allows.
+- On a failure the test writes `<name>.actual.png` and `<name>.diff.png` (differences in red) to `artifacts/golden-failures/`, and CI
+  uploads that folder as the `golden-failures` artifact.
+- To change a golden on purpose: `URDECK_UPDATE_GOLDENS=1 dotnet test tests/UrDeck.Engine.Tests -c Release --filter Golden`
+  (PowerShell: `$env:URDECK_UPDATE_GOLDENS=1` first, and clear it afterwards). Look at every picture that changed before committing it.
+  A missing golden fails with the same instruction.
+- A pull request that changes a golden says why in its description; a change to a v1 theme golden (`default-dark`, `default-light`,
+  `glass`) needs a reason there, because a v1 theme is not meant to move.
+
 ## Writing a widget
 
 A widget is a class deriving from `Widget<TConfig>` in a class library that references `UrDeck.Sdk`. Attributes

@@ -84,6 +84,14 @@ jobs:
       - name: Test
         run: dotnet test urdeck.slnx -c Release --no-build
 
+      - name: Upload golden image failures
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: golden-failures
+          path: artifacts/golden-failures/
+          if-no-files-found: ignore
+
       - name: Coverage floor (UrDeck.Engine)
         run: dotnet test tests/UrDeck.Engine.Tests -c Release --no-build -p:CollectCoverage=true
 
