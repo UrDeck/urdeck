@@ -22,11 +22,11 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 5: backgrounds, pairing, plan, scrim, catalogs | `theme-backgrounds` | **Done**, archived (#52). `PreviewRenderer` (PR 18) is not built |
 | PR 6, PR 7: twelve shaders | `builtin-shaders` | **Done**, archived (#53). Site posters and loops not made |
 | PR 3: typography (per-role fonts, case, tracking, slant, value fill, glow) | `theme-typography` | **Done**: per-role fonts with the fallback chain, `typography.opticalSize`, the weight warnings, `Theme.TextStyle` (SDK 0.9.0), drawn by `Readout` and `TextLine`. Findings for the theme changes are in its design ("Findings during apply") |
-| PR 2: card chrome (shape, borders, shadow, glow, highlight, sheen, marks, compact, tint) | `card-chrome` | Next. **Explore first** (see "Open design points") |
+| PR 2: card chrome (shape, borders, shadow, glow, highlight, sheen, marks, compact, tint) | `card-chrome` | **Next. Explore first** (see "Open design points"). Handoff for the explore session: `docs/handoff/2026-10-15-card-chrome-explore.md` |
 | PR 8: pattern layer and motion policy | `page-pattern`, later `motion` | After card chrome. Pattern uses a page-sized surface; the memory cost is accepted |
-| PR 4: gauge styles, sparkline, status chip, divider, well, clock options | `gauges-and-widgets` | After typography. SDK `GaugeStyle` gains `Meter, Tach, Marker, ThickBar` here |
+| PR 4: gauge styles, sparkline, status chip, divider, well, clock options | `gauges-and-widgets` | **Unblocked** (typography is done); does not need card chrome. Propose directly. SDK `GaugeStyle` gains `Meter, Tach, Marker, ThickBar` here |
 | PR 10: icon sets, themed weather and glyph shortcuts | `theme-icons` | After gauges. About 30 icons still to draw (`04`) |
-| PR 11: `urdeck-cli theme validate`, `render`, `init` | `theme-cli` | Independent; can start any time. Carries the validator findings listed below |
+| PR 11: `urdeck-cli theme validate`, `render`, `init` | `theme-cli` | Independent; can start any time. Carries the validator findings listed below. The sample page is in the engine tests (`Support/SamplePage.cs`); the CLI has to move or share it |
 | PR 9: animated border, value fill, pattern scroll, `reduceMotion` | `motion` | After card chrome and pattern; **Opus**. Spike S2 decided the mechanism |
 | PR 12 to 16: the eight themes | one change per pair | After the knobs they use. Order: Carbon and Paper; Prism and Obsidian; Ember and Blueprint; Pop; Rigline last |
 | PR 17: docs, site gallery, media | with each theme, rest at the end | The site needs a deck and pictures per theme (`site/MEDIA-CHECKLIST.md`) |
@@ -45,6 +45,15 @@ and the OpenSpec specs (`openspec/specs/`) win.
 - **Underlay (S1):** compositor sprites with a nine-grid, not a page-sized canvas. **Animated border (S2):** a sprite with a stepped
   rotation at 15 steps per second, a host constant.
 - **Installer size is not a concern.** CPU and memory are.
+- **Goldens guard v1 pixels** (`theme-golden-harness`): `default-dark`, `default-light`, `glass` at 1100x1920 and a dock page, Windows
+  only. Any change that draws must leave them unchanged or say why in its pull request.
+- **Typography as built:** the SDK member is `Theme.TextStyle` (`Theme.Text` is the text colour). `valueScale` is limited to the
+  fitted size, and the mocks draw numerals smaller than the fitted readout, so the themes need no padding workaround. The value glow
+  costs 2 to 3.7 times a plain readout (over the package's 2x; 0.19 ms per repaint with the copy cached). A slanted value leans past
+  its rectangle (about 50 px for Ember on a 4 x 2 clock); Ember and Rigline should check it. `docs/perf/theme-look.md`, "Value glow
+  and fill".
+- **Weight warnings on the drafts:** Ember's and Rigline's body weight 500 is on a Bold-only file, so each logs one warning on load.
+  Their theme changes either use a real 500 file or set the weight the file has.
 - **The shaders:** five of the twelve had periods that did not divide the 4-hour time wrap and were fixed in their sources.
   Nebula and Shapes cost no more than the others on the GPU, so no default was lightened (`docs/perf/builtin-shaders.md`).
 
