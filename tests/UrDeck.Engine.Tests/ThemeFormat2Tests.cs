@@ -519,6 +519,32 @@ public sealed class ThemeFormat2Tests : IDisposable
         Assert.Equal("bracket", loaded.Definition.Card.CornerMarks!.Style);
     }
 
+    [Theory]
+    [InlineData("""{ "typography": { "opticalSize": "auto" } }""", "auto")]
+    [InlineData("""{ "typography": { "opticalSize": "off" } }""", "off")]
+    [InlineData("""{ "typography": { "opticalSize": "Auto" } }""", "auto")]
+    [InlineData("""{ "typography": { } }""", null)]
+    public void OpticalSize_IsReadInAnyCase_AndAbsentIsNull(string json, string? expected)
+    {
+        var loaded = Load(json);
+
+        Assert.Empty(ThemeLines);
+        Assert.Equal(expected, loaded.Definition.Typography!.OpticalSize);
+    }
+
+    [Theory]
+    [InlineData("\"large\"", "large")]
+    [InlineData("5", "5")]
+    public void OpticalSize_OfAnUnknownValueOrKind_IsClearedWithOneWarning(string value, string shown)
+    {
+        var loaded = Load($$"""{ "typography": { "opticalSize": {{value}} } }""");
+
+        string line = Assert.Single(ThemeLines);
+        Assert.Contains("typography.opticalSize", line, StringComparison.Ordinal);
+        Assert.Contains(shown, line, StringComparison.Ordinal);
+        Assert.Null(loaded.Definition.Typography!.OpticalSize);
+    }
+
     [Fact]
     public void ADeferredEnumerationValue_IsRefused()
     {

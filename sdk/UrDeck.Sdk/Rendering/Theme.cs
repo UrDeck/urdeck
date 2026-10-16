@@ -47,6 +47,9 @@ public sealed class Theme : IDisposable
     /// <summary>The shape a widget draws for a gauge it was asked to draw "as the theme says"; never <see cref="GaugeStyle.Plain"/>.</summary>
     public GaugeStyle GaugeStyle { get; init; } = GaugeStyle.Ring;
 
+    /// <summary>Letter case, spacing, slant, size, fill and glow of text, in pixels; a theme that sets none changes nothing.</summary>
+    public TextStyle TextStyle { get; init; } = new();
+
     /// <summary>One typeface per role; the theme owns them. Missing roles use the system default.</summary>
     public IReadOnlyDictionary<TextRole, SKTypeface> Typefaces
     {
@@ -67,6 +70,7 @@ public sealed class Theme : IDisposable
 
     public void Dispose()
     {
+        TextStyle.Dispose();
         foreach (var typeface in _typefaces.Values.Distinct())
             typeface.Dispose();
         _typefaces = new Dictionary<TextRole, SKTypeface>();

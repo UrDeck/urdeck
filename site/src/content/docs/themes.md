@@ -42,8 +42,11 @@ display. A theme can set the colours, the card (radius, border, gap, padding), t
 page indicator, how a card looks while pressed, the dock's size, and the palette the built-in backgrounds draw with.
 
 Format 2 adds optional values for card chrome (chamfered corners, shadows, dashed or gradient borders), a page pattern, per-role
-fonts, more gauge styles, icons and a background of its own. They are checked and kept today and drawn by later releases; a
-file that uses none of them is unaffected. A theme's [background](/docs/backgrounds/#theme-backgrounds), a default shader, a
+fonts, more gauge styles, icons and a background of its own. The typography values are drawn today: a font per role (values,
+units, labels) with a fallback to the theme's font, the optical size of fonts that have one (`"opticalSize": "auto"`), upper- or
+lower-case labels and titles, letter spacing, slanted values, a gradient fill and a glow behind values. A weight the font
+cannot make is written to `urdeck.log` once. The other values are checked and kept today and drawn by later releases; a file
+that uses none of them is unaffected. A theme's [background](/docs/backgrounds/#theme-backgrounds), a default shader, a
 still gradient, colour or picture and a scrim, is drawn today when your configuration has no `background` of its own, and
 `meta.pairsWith.backgrounds` lists the backgrounds that suit the theme, for a settings page to recommend. The
 [JSON Schema](/schemas/v2/theme.json) lists them for editor completion.
