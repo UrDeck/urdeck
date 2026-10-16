@@ -17,7 +17,7 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | Package item | Change | State |
 |---|---|---|
 | PR 0: spikes S1 underlay, S2 animated border, S3 fonts | none (notes only) | **Done.** `docs/perf/theme-look.md`; prototype code is on local branches `spike/theme-look-s1`, `-s2`, `-s3` |
-| PR 0: golden-image harness (`GoldenImage.Compare`, `--update-goldens`, sample page) | `theme-golden-harness` | **Next.** Settled enough to propose. Nothing guards v1 pixels except byte comparisons by hand |
+| PR 0: golden-image harness (`GoldenImage.Compare`, `--update-goldens`, sample page) | `theme-golden-harness` | **Done**, archived (#55). Goldens for the three v1 themes and a dock page; update with `URDECK_UPDATE_GOLDENS=1` (`CONTRIBUTING.md`, "Golden images") |
 | PR 1: format 2 model | `theme-format-2` | **Done**, archived (#49) |
 | PR 5: backgrounds, pairing, plan, scrim, catalogs | `theme-backgrounds` | **Done**, archived (#52). `PreviewRenderer` (PR 18) is not built |
 | PR 6, PR 7: twelve shaders | `builtin-shaders` | **Done**, archived (#53). Site posters and loops not made |

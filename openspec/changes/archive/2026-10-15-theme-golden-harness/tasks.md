@@ -16,7 +16,7 @@
 - [x] 3.1 Render `default-dark`, `default-light` and `glass` at 1100x1920, look at each picture, and commit them as the goldens
 - [x] 3.2 Render `default-dark` with a dock of four shortcuts and the dot indicator, look at it, commit it
 - [x] 3.3 `GoldenTests`: one test per golden, Windows only with the skip reason of `[WindowsGlyphFact]`
-- [ ] 3.4 Measure the noise: render each golden on the developer's machine twice and read the CI result; set the limits no wider than needed and write them into `Compare` and `CONTRIBUTING.md`
+- [x] 3.4 Measure the noise: render each golden on the developer's machine twice and read the CI result; set the limits no wider than needed and write them into `Compare` and `CONTRIBUTING.md`
 - [x] 3.5 A negative test: draw the dark page with the card border one pixel wider and expect `Compare` to fail
 - [x] 3.6 Change a v1 theme value in a scratch copy (for example the card radius), confirm the matching golden fails and the others do not; note the result in the pull request
 
@@ -26,4 +26,4 @@
 - [x] 4.2 `CONTRIBUTING.md`: a "Golden images" section (what they are, the update command, the tolerance, "a pull request that changes a golden says why; a change to a v1 theme golden needs a reason in the description")
 - [x] 4.3 `AGENTS.md`: one line under Commands for the update variable
 - [x] 4.4 Build with 0 warnings, `dotnet format urdeck.slnx --severity warn`, `openspec validate --all --strict`, the engine tests with the coverage floor
-- [ ] 4.5 Open the pull request; confirm `ci-ok` is green on `windows-latest`, and that the goldens agree between the developer's machine and CI
+- [x] 4.5 Open the pull request; confirm `ci-ok` is green on `windows-latest`, and that the goldens agree between the developer's machine and CI
