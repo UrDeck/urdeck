@@ -20,6 +20,7 @@ dotnet test urdeck.slnx -c Release
 dotnet test tests/UrDeck.Engine.Tests -c Release      # on Linux, with tests/UrDeck.Analyzer.Tests and tests/UrDeck.Cli.Tests; urdeck.slnx holds the host, which needs Windows
 dotnet test tests/UrDeck.Engine.Tests -c Release -p:CollectCoverage=true   # enforces the UrDeck.Engine line-coverage floor
 dotnet format urdeck.slnx --severity warn               # apply style; CI runs it with --verify-no-changes
+$env:URDECK_UPDATE_GOLDENS=1; dotnet test tests/UrDeck.Engine.Tests -c Release --filter Golden   # rewrite the golden images (Windows), then clear the variable; CONTRIBUTING.md "Golden images"
 openspec validate --all --strict
 dotnet run --project tools/UrDeck.Cli -c Release -- shader validate --all src/UrDeck.Engine/Backgrounds/Builtin --fail-on-warnings
 dotnet test tests/UrDeck.Cli.Tests -c Release           # the tool's tests (Windows and Linux); also in urdeck.slnx

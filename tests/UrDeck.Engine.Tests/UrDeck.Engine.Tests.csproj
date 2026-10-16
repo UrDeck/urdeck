@@ -36,6 +36,8 @@
   <ItemGroup>
     <!-- Recorded answers of the weather services, fed to the provider in place of the network. -->
     <Content Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The checked-in pictures the golden tests compare with (see CONTRIBUTING.md, "Golden images"). -->
+    <Content Include="Goldens\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
