@@ -7,7 +7,8 @@ namespace UrDeck.Sdk.Components;
 
 /// <summary>
 /// One line of text at one of the theme's three steps. The text is drawn at the step's size, and only shrinks, never
-/// grows, when it is wider than the rectangle.
+/// grows, when it is wider than the rectangle. The theme's letter case and spacing apply to the label and title steps
+/// (<see cref="Theme.TextStyle"/>), before the text is measured.
 /// </summary>
 public static class TextLine
 {
@@ -48,13 +49,15 @@ public static class TextLine
 
         var role = step switch { TextStep.Label => TextRole.Label, TextStep.Body => TextRole.Body, _ => TextRole.Title };
         float size = theme.GetTextSize(step);
+        text = TextStyle.Apply(TextStyle.CaseFor(theme.TextStyle, step), text);
+        float tracking = TextStyle.TrackingFor(theme.TextStyle, step);
 
         using var font = TextMetrics.CreateFont(theme.GetTypeface(role), size);
-        float width = font.MeasureText(text);
+        float width = TextMetrics.Measure(font, text, tracking);
         if (width > rect.Width)
         {
             font.Size = size * rect.Width / width;
-            width = font.MeasureText(text);
+            width = TextMetrics.Measure(font, text, tracking);
         }
 
         float cap = TextMetrics.CapHeight(font);
@@ -74,7 +77,10 @@ public static class TextLine
         if (canvas != null)
         {
             using var paint = new SKPaint { Color = emphasis == TextEmphasis.Muted ? theme.TextMuted : theme.Text, IsAntialias = true };
-            canvas.DrawText(text, left, top + cap, SKTextAlign.Left, font, paint);
+            if (tracking == 0)
+                canvas.DrawText(text, left, top + cap, SKTextAlign.Left, font, paint);
+            else
+                TextMetrics.DrawTracked(canvas, text, left, top + cap, font, paint, tracking);
         }
         return SKRect.Create(left, top, width, cap);
     }

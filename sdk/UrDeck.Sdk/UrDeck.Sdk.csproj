@@ -22,10 +22,16 @@
          the ImageTile component. All additive, so the assembly version stays.
          Package 0.8.0 (weather-4x4-forecast): ReadingKind.Date, Speed and Depth, DepthUnit and ReadingDescriptor.DepthUnit,
          DateStyle and ReadingFormatOptions.DateStyle, IReadingSource.RegionCulture (default member) and
-         ReadingFormatter.CompassPoint. All additive, so the assembly version stays. -->
-    <Version>0.8.0</Version>
+         ReadingFormatter.CompassPoint. All additive, so the assembly version stays.
+         Package 0.9.0 (theme-typography): TextStyle, TextCase, TextFill, TextGlow and Theme.TextStyle; Readout and TextLine
+         draw the style. All additive, so the assembly version stays. -->
+    <Version>0.9.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="SkiaSharp" />

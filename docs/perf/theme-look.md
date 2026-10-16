@@ -348,3 +348,35 @@ memory read after a forced collection.
   17 MB page bitmap of each render and the glyph cache settling.
 - Not measured: the live host on the panel. S3 needs no panel; the order in `ApplyLayout` (`_pager.Release()` before
   `DisposeThemes()`) was read, not run. A switch between two themes in the running host is worth one look during S1.
+
+## Value glow and fill (theme-typography)
+
+Measured 2026-10-15 in the engine tests' process, Windows 11, Release build, SkiaSharp 4.153.1, software raster, no panel. One
+`Readout` of `41` with a unit and a label in a 1100 x 550 rectangle (the value about 400 px high), drawn 500 times after 50 to
+warm up, the canvas cleared before each draw; "a new value" draws 100 different values in a row, so every draw blurs. Each row
+is the median of three runs, which differed by under 5 %.
+
+| Theme style | Same value (ms per draw) | A new value each draw (ms) |
+|---|---|---|
+| none (a v1 theme) | 0.105 | 0.15 |
+| `valueGlow` blur 0.16, alpha 0.55 | 0.29 | 2.1 |
+| Ember-like: `slant` 8 and that glow | 0.30 | 2.3 |
+| Rigline-like: a three-colour `valueFill` and a glow (blur 0.1) | 0.74 | 3.7 |
+
+- **Over the package's budget of 2x, at an absolute cost that does not matter.** A glowing readout that repaints with the same
+  value costs 0.19 ms more than a plain one (2.8x); the blurred copy is cached on the theme (16 entries), so the blur itself
+  (about 2 ms at this size) is paid once per new value: once a minute for a clock, once a second for a stats tile.
+- **How the copy is drawn decides the cost.** The first version, an RGBA copy drawn with bilinear sampling through the slant's
+  skew, cost 3.2 ms per draw (30x). Keeping the copy in the platform's colour type (BGRA on Windows, so no swizzle per draw),
+  drawing it with nearest sampling (it is blurred, so this is invisible) and baking the slant into the copy, so the draw is a
+  plain translation, brought it to 0.29 ms. A copy kept as coverage only (A8) and tinted when drawn was slower (1.2 ms) and was
+  not kept.
+- The fill's extra cost (Rigline, 0.45 ms over the glow) is the gradient shader over the glyphs, paid on every draw; it is not
+  cached. Worth a look only if a filled clock shows up in a CPU profile.
+
+### Fonts on the panel
+
+The host on the HYTE Y70 (1100 x 3840, the sample configuration: clock, stats, weather, one shortcut in the dock), private
+memory 25 s after start, median of three runs, themes on `default-dark`'s colours: `default-dark` (Inter) 134.5 MB; Obsidian's
+typography with Jost alone 131.9 MB; with Jost and Bodoni Moda per role and `opticalSize: auto` 134.2 MB. A second family is
+about 2.3 MB: S3's 1 MB estimate per resolve, paid twice because the page and the dock each resolve the theme.

@@ -21,7 +21,7 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 1: format 2 model | `theme-format-2` | **Done**, archived (#49) |
 | PR 5: backgrounds, pairing, plan, scrim, catalogs | `theme-backgrounds` | **Done**, archived (#52). `PreviewRenderer` (PR 18) is not built |
 | PR 6, PR 7: twelve shaders | `builtin-shaders` | **Done**, archived (#53). Site posters and loops not made |
-| PR 3: typography (per-role fonts, case, tracking, slant, value fill, glow) | `theme-typography` | Next. Propose directly |
+| PR 3: typography (per-role fonts, case, tracking, slant, value fill, glow) | `theme-typography` | **Done**: per-role fonts with the fallback chain, `typography.opticalSize`, the weight warnings, `Theme.TextStyle` (SDK 0.9.0), drawn by `Readout` and `TextLine`. Findings for the theme changes are in its design ("Findings during apply") |
 | PR 2: card chrome (shape, borders, shadow, glow, highlight, sheen, marks, compact, tint) | `card-chrome` | Next. **Explore first** (see "Open design points") |
 | PR 8: pattern layer and motion policy | `page-pattern`, later `motion` | After card chrome. Pattern uses a page-sized surface; the memory cost is accepted |
 | PR 4: gauge styles, sparkline, status chip, divider, well, clock options | `gauges-and-widgets` | After typography. SDK `GaugeStyle` gains `Meter, Tach, Marker, ThickBar` here |
@@ -53,14 +53,16 @@ and the OpenSpec specs (`openspec/specs/`) win.
 - **Card chrome:** how `WidgetPainter` splits into back and front passes while a v1 theme stays byte-identical; whether the press
   effect carries the shadow sprite; dashed border on a chamfered card (a nine-grid cannot stretch a dash); the dock's own underlay;
   a translucent card showing its neighbours' shadow when the reach exceeds the gap (a validator warning, not an error; Prism does it).
-- **Typography:** drive the `opsz` axis from the role's size (Bodoni Moda sits at its text cut otherwise); sharing the base typeface
-  between page and dock saves about 0.9 MB per family (optional).
+- **Typography:** `opsz` was decided in `theme-typography` (`opticalSize: auto`: the display cut for values, the pixel size for the
+  rest). Still open: sharing the base typeface between page and dock (a second family measured 2.3 MB on the panel; optional), and
+  whether a slanted value should count its lean in the fit and the unit gap (Ember, Rigline; see that change's design).
 - **Motion:** each of `motion.level`, a user `reduceMotion`, display off and a hidden deck must stop the border animation.
   Whether a reduced-motion setting should swap a shader for the theme's still background (the package said both yes and no).
 
 ## Validator findings the theme CLI must carry
 
-A weight outside a variable font's range, or any weight on a static font, is silent today; shadow or glow reach beyond the gap over a
+A weight outside a variable font's range, or a weight a static font does not have, is now one warning per role when the theme
+loads (`theme-typography`); the CLI should report the same without the host. Shadow or glow reach beyond the gap over a
 translucent fill; text contrast on the card fill (under 4.5:1); a theme's default background that is not in its own `pairsWith` list;
 `icons.set` and `meta.pairsWith.backgrounds` naming things that do not exist; keys that are unknown (with "did you mean").
 

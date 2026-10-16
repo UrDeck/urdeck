@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using UrDeck.Engine.Config;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Sdk;
 
 namespace UrDeck.Engine.Themes;
 
@@ -17,6 +18,15 @@ public sealed record ThemeFont(string Spec, Func<string, Stream?> Open);
 /// </summary>
 public sealed record LoadedTheme(string Name, ThemeDefinition Definition, ThemeFont Font, string? Folder = null)
 {
+    /// <summary>
+    /// The fonts <c>typography.fonts</c> names for the value, unit and label roles. A role that is not here uses
+    /// <see cref="Font"/>.
+    /// </summary>
+    public IReadOnlyDictionary<TextRole, ThemeFont> RoleFonts { get; init; } = new Dictionary<TextRole, ThemeFont>();
+
+    /// <summary>What the resolver has already warned about for this theme, so each finding is logged once per load.</summary>
+    internal ThemeWarnings Warnings { get; } = new();
+
     /// <summary>The theme's <c>meta.name</c>, or its folder name when it has none.</summary>
     public string DisplayName => Definition.Meta?.Name ?? Name;
 
@@ -97,6 +107,8 @@ public sealed class ThemeStore(string themesDirectory)
 
         user.Sanitize(name, reported);
 
+        // One open function per folder: the resolver reads a file once per resolve, keyed by the function and the name.
+        Func<string, Stream?> open = file => OpenThemeFile(folder, file);
         ThemeFont? font = null;
         if (user.Typography?.Font is { } spec)
         {
@@ -107,14 +119,39 @@ public sealed class ThemeStore(string themesDirectory)
             }
             else
             {
-                font = new ThemeFont(spec, file => OpenThemeFile(folder, file));
+                font = new ThemeFont(spec, open);
             }
+        }
+
+        var roleFonts = new Dictionary<TextRole, ThemeFont>();
+        if (user.Typography?.Fonts is { } fonts)
+        {
+            fonts.Value = RoleFont(name, folder, open, TextRole.Value, fonts.Value, roleFonts);
+            fonts.Unit = RoleFont(name, folder, open, TextRole.Unit, fonts.Unit, roleFonts);
+            fonts.Label = RoleFont(name, folder, open, TextRole.Label, fonts.Label, roleFonts);
         }
 
         var merged = user.MergeOver(baseline.Definition);
         merged.CheckRules(name);
-        return new LoadedTheme(name, merged, font ?? baseline.Font, folder);
+        return new LoadedTheme(name, merged, font ?? baseline.Font, folder) { RoleFonts = roleFonts };
     }
+
+    /// <summary>Adds a role's font to <paramref name="roleFonts"/>, or refuses a path that leaves the folder; returns the spec kept.</summary>
+    private static string? RoleFont(
+        string name, string folder, Func<string, Stream?> open, TextRole role, string? spec, Dictionary<TextRole, ThemeFont> roleFonts)
+    {
+        if (string.IsNullOrWhiteSpace(spec))
+            return null;
+        if (IsFontFile(spec) && !IsInside(folder, ResolveIn(folder, spec)))
+        {
+            UrDeckLog.Warn($"Theme '{name}': font '{spec}' for the {RoleName(role)} role leaves the theme folder and is ignored.");
+            return null;
+        }
+        roleFonts[role] = new ThemeFont(spec, open);
+        return spec;
+    }
+
+    internal static string RoleName(TextRole role) => role.ToString().ToLowerInvariant();
 
     /// <summary>The built-in theme of that name (one of <see cref="BuiltInNames"/>), or null. Reads no folder and logs nothing.</summary>
     public static LoadedTheme? LoadBuiltIn(string name)
@@ -126,7 +163,13 @@ public sealed class ThemeStore(string themesDirectory)
         var definition = JsonSerializer.Deserialize<ThemeDefinition>(stream, UrDeckJson.Options)!;
         if (name != DefaultName)
             definition = definition.MergeOver(LoadBuiltIn(DefaultName)!.Definition);
-        return new LoadedTheme(name, definition, new ThemeFont(definition.Typography!.Font ?? "", OpenBuiltInFile));
+
+        var roleFonts = new Dictionary<TextRole, ThemeFont>();
+        if (definition.Typography!.Fonts is { } fonts)
+            foreach (var (role, spec) in new[] { (TextRole.Value, fonts.Value), (TextRole.Unit, fonts.Unit), (TextRole.Label, fonts.Label) })
+                if (!string.IsNullOrWhiteSpace(spec))
+                    roleFonts[role] = new ThemeFont(spec, OpenBuiltInFile);
+        return new LoadedTheme(name, definition, new ThemeFont(definition.Typography.Font ?? "", OpenBuiltInFile)) { RoleFonts = roleFonts };
     }
 
     internal static ThemeFont BuiltInDefaultFont => LoadBuiltIn(DefaultName)!.Font;

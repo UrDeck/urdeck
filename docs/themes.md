@@ -52,7 +52,8 @@ value (for example a colour that does not parse) is replaced by the default's va
   `card.gap` is the space between neighbouring cards.
 - **`typography.font`** is either an installed font family name or the name of a `.ttf`/`.otf` file in the theme folder.
   A path that leaves the theme folder is rejected. Weights (1 to 1000) are applied through the variable-font weight
-  axis; a static font is used as it is.
+  axis; a static font is used as it is. A weight the file cannot make is warned about once (see `typography` under
+  Format 2).
 - **`typography.unitRatio`** is the size of a readout's unit as a fraction of its value's size.
 - **`stroke`** is for components that draw lines: thickness as a fraction of the drawn element and `round` or `square`
   ends.
@@ -118,7 +119,7 @@ translucent cards makes their text hard to read.
 Format 2 adds optional values to the theme file for cards, type, gauges, icons and a background of its own. A theme can use any of them without declaring anything; `"format": 2` says that the file does, and a number above 2 logs one warning and still loads. [`docs/schemas/v2/theme.json`](schemas/v2/theme.json) is the same list as a JSON Schema (point `$schema` at `https://urdeck.app/schemas/v2/theme.json` for completion in an editor).
 
 - **Everything is optional, and absent means off.** A theme written before format 2 loads with the same values, the same warnings and the same drawing as before. Merging a theme over `default-dark` never adds a format 2 group.
-- **A value is read, checked and kept; most are not drawn yet.** The tables say which later change draws each group. Until then a value is accepted without a warning and has no effect on the screen. The gauge styles `meter`, `tach`, `marker` and `thickbar` are kept and a widget that asks for the theme's gauge gets a `ring`.
+- **A value is read, checked and kept; some are not drawn yet.** The tables say which change draws each group. Until then a value is accepted without a warning and has no effect on the screen. The gauge styles `meter`, `tach`, `marker` and `thickbar` are kept and a widget that asks for the theme's gauge gets a `ring`.
 - **An invalid value is replaced by the default** (for an optional value, by "absent") and one warning in `urdeck.log` names the theme, the key and the value. A number outside its range, a colour that does not parse, a name that is not listed, a value of the wrong kind (text where a number goes) and a list with a bad item are all invalid; a bad item drops the whole list, except in `card.cutCorners` and `card.cornerMarks.corners`, where an unknown name is dropped and the others stay. Names are read in any case.
 - **Some groups are never taken from `default-dark`:** `colors.ramp`, `colors.cardTints`, `colors.backgroundPalette`, `pattern`, `background`, `icons`, `meta`, every card chrome value, `typography.valueFill` and `valueGlow`, and every gauge value except `style`. The rest merge key by key, like the format 1 values.
 - **Sizes** are fractions of one grid cell, **angles** are degrees (0 is left to right or 3 o'clock, clockwise), **times** are seconds (1 or more), **tracking** is in em, and **colours** are `#RRGGBB` or `#AARRGGBB`.
@@ -294,7 +295,38 @@ Drawn by: the widget parts change.
 
 ### `typography`
 
-Drawn by: the typography change.
+Drawn by: the `Readout` and `TextLine` components of the SDK, so every widget that uses them, and the resolver (fonts, optical
+size). The split-flap clock's digits, a gauge's own centre text and an image tile's letter take the role's font and optical
+size, but not the case, spacing, slant, fill or glow.
+
+- **Fonts per role.** `fonts.value`, `fonts.unit` and `fonts.label` name a family or a file in the theme folder for that role;
+  a role without one, and the body and title, use `typography.font`. A role whose font cannot be loaded falls back one step at a
+  time: the role's font, `typography.font`, the default theme's font (Inter), the system font. Each missing font is one warning
+  per loaded theme, naming the theme, the role and the font, however often the theme is resolved (the page and the dock each
+  resolve it); editing and saving the theme loads it again and warns again. A file path that leaves the theme folder is refused
+  for each role. Roles that end up with the same font and weight share one typeface.
+- **Weights the font cannot make.** A weight outside a variable font's weight axis is drawn at the nearest end of the axis, and
+  a weight on a single-weight file is drawn at the file's own weight; each is one warning per role per loaded theme (for example
+  `Theme 'ember': the body weight 500 has no effect: font 'BarlowCondensed-Bold.ttf' has one weight (700).`). An installed family
+  is not checked. The built-in themes log nothing.
+- **`opticalSize`.** `off` (the default, and every theme written before it) leaves a font's optical size axis (`opsz`) where the
+  font puts it. `auto` sets it for each role whose font has the axis: the top of the axis (the display cut) for values and units,
+  which are drawn large, and the role's size in pixels, limited to the axis, for labels, body and titles. A Didone such as Bodoni
+  Moda needs it for its hairlines at large sizes; a font without the axis is unaffected.
+- **Case** applies to a readout's label and to a text line at the label step (`case.label`) and to a text line at the title step
+  (`case.title`), with invariant casing, before the text is measured. Body text and values are never recased.
+- **Tracking** is added after each character but the last, in em of the text's size: `value` to a readout's value (the digits
+  keep their equal widths and the spacing is part of the fit, so the size does not change with the value), `label` to a readout's
+  label and label lines, `title` to title lines. Body text and units are not spaced.
+- **`slant`** leans a readout's value to the right about its baseline. The readout keeps the rectangle and size of the upright
+  value, so the top of a slanted value reaches past the rectangle's right edge by the slant's tangent times the cap height.
+- **`valueScale`** multiplies the size a widget asks of a readout, and the result is never larger than the size at which the
+  value, unit and label fill the rectangle. Above 1 it enlarges only a readout a widget draws smaller than it could (a gauge's
+  readout, a clock set below full size); a full-size readout stays as it is. Below 1 it shrinks every readout.
+- **`valueFill`** fills a readout's value with the gradient across the value's box, at `angle`; the unit and label keep their
+  colours, and a stale reading (muted) or a colour the widget gives the value replaces the gradient. It does not move.
+- **`valueGlow`** draws a blurred copy behind a readout's value, in `color` (absent: the value's colour or gradient), at `alpha`.
+  The copy is kept while the value, size and colour stay the same, so a repaint does not blur again.
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
@@ -318,6 +350,7 @@ Drawn by: the typography change.
 | `typography.valueGlow.blur` | 0 to 1 |  | Blur radius, fraction of a cell. |
 | `typography.valueGlow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
 | `typography.valueGlow.alpha` | 0 to 1 | `0.6` | Strength. |
+| `typography.opticalSize` | `off`, `auto` | `"off"` | off leaves a font's optical size axis (opsz) at its default; auto sets it per role: the top of the axis for value and unit, the role's pixel size for label, body and title. A font without the axis is unaffected. |
 
 ### `gauge`
 

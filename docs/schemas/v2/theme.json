@@ -978,6 +978,14 @@
             }
           }
         },
+        "opticalSize": {
+          "enum": [
+            "off",
+            "auto"
+          ],
+          "description": "NEW. off leaves a font's optical size axis (opsz) at its default; auto sets it per role: the top of the axis for value and unit, the role's pixel size for label, body and title. A font without the axis is unaffected.",
+          "default": "off"
+        },
         "slant": {
           "type": "number",
           "minimum": 0,

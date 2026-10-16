@@ -123,6 +123,30 @@ SDK note in `AGENTS.md` says to keep plugin types out of long-lived static cache
 None for users: no key changes meaning, and every existing theme is unchanged (the goldens say so). This change
 depends on `theme-golden-harness` being merged first; without the goldens its central promise cannot be checked.
 
+## Findings during apply
+
+- **The member is `Theme.TextStyle`, not `Theme.Text`.** `Theme.Text` is the text colour (an `SKColor`) and cannot change
+  type without breaking widgets. The types are `TextStyle`, `TextCase`, `TextFill` and `TextGlow` in `UrDeck.Sdk`; the
+  package version is 0.9.0, the assembly version unchanged.
+- **valueScale against the mocks (task 6.3).** The design board (`themes-2-ember-blueprint-pop-obsidian.png` and
+  `themes-1-...` in the handoff's `assets/design-board`) draws every clock and tile value *smaller* than our fitted readout:
+  Pop's `21:47` fills about half its clock card, Obsidian's sits left-aligned under the date, Ember's beside a session
+  readout. "Runs big" in the mocks is numerals large against small labels, which the fitted readout already gives. The
+  limit to the fit therefore leaves no theme short of its mock; the visible differences are the clock and gauge layouts
+  (alignment, the date's position, a gauge's `readoutScale`), which belong to the widget and gauge changes, not to
+  `valueScale`. The theme changes need no padding workaround for it.
+- **A slant leans out of the readout's rectangle.** With the layout unchanged, the top of a slanted value reaches
+  `tan(slant)` times its cap height past the rectangle's right edge (about 50 px for Ember's 10 degrees on a 4 x 2 clock),
+  and a raised unit touches the top of the last digit (Ember's `63%` on a gauge). The theme changes for Ember and Rigline
+  should check both on their sample page; if it shows, the fix is to count the lean in the unit gap and the fit (a change
+  to the Slanted Value requirement), not padding.
+- **The glow cost is over the package's 2x budget** (2.8x: 0.29 ms against 0.105 ms for a 400 px value, the copy cached);
+  the absolute cost is 0.19 ms per repaint. How it was brought down from 30x is in `docs/perf/theme-look.md`.
+- **Memory on the panel (task 6.4).** The host with Obsidian's typography (Jost and Bodoni Moda, per-role, `opticalSize`
+  `auto`) holds 134.2 MB private against 131.9 MB with Jost alone and 134.5 MB with `default-dark` (median of three runs
+  each): a second family is about 2.3 MB, twice the S3 estimate because the page and the dock each resolve the theme.
+  Sharing the base typeface between the two resolves (S3 finding 4) would halve it; still not worth doing.
+
 ## Open Questions
 
 - Whether the unit role should follow the value's optical size (decision 2 says yes). It affects only `auto` themes and

@@ -45,6 +45,10 @@ The change `theme-format-2` found that Rigline's draft glows its compact strip (
 partial. `card.compact.cornerMarks` is also in (the task list names it; the package's compact table did not), a partial of
 `card.cornerMarks`. `card.compact.accentStrip.fade` stays deferred.
 
+The change `theme-typography` restored no key from this file. It added one the package did not have: `typography.opticalSize`
+(`off` | `auto`, default `off`), because S3 found Bodoni Moda stays at its text cut for large numerals unless the optical size
+axis is driven. `typography.fonts.body` and `title`, `case.unit` and `tracking.body` stay deferred.
+
 ### Deferred by the spikes (2026-10-13, `docs/perf/theme-look.md` on the spike branches)
 
 | Feature | Definition in the package | Why deferred | Restore when |

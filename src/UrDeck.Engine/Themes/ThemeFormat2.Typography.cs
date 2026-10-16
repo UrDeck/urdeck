@@ -33,6 +33,13 @@ public sealed partial class ThemeTypographyDefinition
     [Format2]
     public ThemeGlowDefinition? ValueGlow { get; set; }
 
+    /// <summary>
+    /// <c>off</c> (absent) leaves a font's <c>opsz</c> axis at its default; <c>auto</c> sets it per role: the top of the axis
+    /// for value and unit, the role's pixel size for label, body and title.
+    /// </summary>
+    [Format2]
+    public string? OpticalSize { get; set; }
+
     private void MergeFormat2(ThemeTypographyDefinition? b, ThemeTypographyDefinition result)
     {
         result.Fonts = ThemeMerge.Group(Fonts, b?.Fonts, (own, from) => own.MergeOver(from));
@@ -42,6 +49,7 @@ public sealed partial class ThemeTypographyDefinition
         result.Slant = Slant ?? b?.Slant;
         result.ValueFill = ValueFill;
         result.ValueGlow = ValueGlow;
+        result.OpticalSize = OpticalSize ?? b?.OpticalSize;
     }
 
     internal void SanitizeFormat2(ThemeValueCheck check, string path)
@@ -52,6 +60,7 @@ public sealed partial class ThemeTypographyDefinition
         Slant = check.Number($"{path}.slant", Slant, 0, 20);
         ValueFill?.Sanitize(check, $"{path}.valueFill");
         ValueGlow?.Sanitize(check, $"{path}.valueGlow");
+        OpticalSize = check.Enum($"{path}.opticalSize", OpticalSize, "off", "auto");
     }
 }
 
