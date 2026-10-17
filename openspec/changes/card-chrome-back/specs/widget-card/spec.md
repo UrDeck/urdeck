@@ -1,0 +1,170 @@
+## MODIFIED Requirements
+
+### Requirement: Host-Drawn Card
+The host MUST draw a card for every placed widget before the widget renders, using the theme's card values: its shape,
+its fill (the card fill, a fill gradient or the card's tint), its border (width, colour or gradient, solid or dashed) and
+its corner radius. The card covers the widget's whole surface: the surface and the card are the same rectangle. Widgets
+MUST NOT need to draw their own background or card.
+
+#### Scenario: Widget draws only content
+- **WHEN** a widget's render draws nothing
+- **THEN** its place on the page shows an empty card in the theme's card fill
+
+#### Scenario: Theme changes the card
+- **WHEN** the same widget renders under two themes with different card fills and corner radii
+- **THEN** its card differs accordingly without any change to the widget
+
+### Requirement: Card Shape Is Page-Wide
+Every card on a page MUST use the same shape and border width, whatever the widget's grid size. The shape is a rounded
+rectangle (`card.shape` absent or `round`) or a rectangle with cut corners (`chamfer`).
+
+- A rounded card's corner radius is limited to half of the card's smaller side; a radius of 0 gives square cards
+- A chamfered card cuts the corners named by `card.cutCorners` (top-right and bottom-left when absent) with a straight
+  line, `card.cut` from the corner along each side, limited to half of the card's smaller side; its other corners are
+  square and `card.radius` is not used. An empty `cutCorners` gives a square card
+- Neither a widget nor a per-widget setting can change or remove the card
+
+#### Scenario: Different widget sizes
+- **WHEN** a 4x2 widget and a 1x1 widget are on the same page
+- **THEN** both cards have the same corner radius and border width in pixels
+
+#### Scenario: Flat tiles
+- **WHEN** the theme's corner radius is 0
+- **THEN** every card on the page is drawn with square corners
+
+#### Scenario: Chamfered cards
+- **WHEN** a theme sets `card.shape` to `chamfer`, `card.cut` to 0.145 and `card.cutCorners` to `["tr", "bl"]`
+- **THEN** every card has its top-right and bottom-left corners cut by 0.145 of a cell along each side, square
+  top-left and bottom-right corners, and the widget's content is clipped to that shape
+
+#### Scenario: Cut larger than the card
+- **WHEN** a chamfer's cut is larger than half of a card's smaller side
+- **THEN** that card's corners are cut by half of its smaller side
+
+### Requirement: Themed Error State
+When a widget's render fails, the host MUST show the failure inside that widget's card, in the card's shape and with all
+of the card's chrome, using the theme's critical colour, with the widget name and the error message. Nothing the widget
+drew before it failed stays visible. Other widgets are unaffected and the failure is logged.
+
+#### Scenario: Widget render throws
+- **WHEN** a widget throws during render
+- **THEN** its card shows the widget name and message in the theme's critical colour, clipped to the card shape
+
+#### Scenario: Error on a chamfered gradient card
+- **WHEN** a widget throws during render under a theme with a chamfered shape and a fill gradient
+- **THEN** the error is shown on a chamfered card with the gradient fill and the border, as the card would be without
+  the error
+
+### Requirement: Same Card Everywhere
+The card MUST look the same in the live window and in a snapshot rendered without a screen: its position, size, shape,
+fill, border and everything the theme draws on it or around it. In a snapshot nothing a card's chrome or content draws
+reaches past the card's rectangle except what the theme draws outside the card.
+
+#### Scenario: Snapshot matches the window
+- **WHEN** a page is rendered with `--snapshot` at the live window's pixel size
+- **THEN** each card's position, size, fill, border and corner radius match the live window
+
+#### Scenario: Format 2 chrome in a snapshot
+- **WHEN** a page under a theme with a chamfer, a fill gradient and a dashed border is rendered with `--snapshot`
+- **THEN** each card's shape, fill and border match the live window's
+
+## ADDED Requirements
+
+### Requirement: Card Fill
+A card's fill MUST be, in this order of precedence: the theme's fill gradient (`card.fillGradient`), the card's tint
+(`card.tint` `cycle`), the theme's card fill colour.
+
+- A fill gradient is linear across the card at its angle (0 runs left to right, 90 top to bottom), from its first colour
+  to its last, evenly spaced
+- With `tint` `cycle` and `colors.cardTints` set, a card is filled with the tint at its index, counting round the list.
+  A card's index is its place among its page's placed and visible cards, ordered by grid row and then by grid column,
+  starting at 0 on every page; a hidden widget or one that is not placed takes no index. A dock slot's index is its
+  position in the dock, whether or not the slots before it show a widget. Without `colors.cardTints` the card fill is used
+- The text colour does not change with the tint
+
+#### Scenario: Gradient fill
+- **WHEN** a theme sets `card.fillGradient` to two colours at angle 90
+- **THEN** every card is filled from the first colour at its top edge to the second at its bottom edge, and the card
+  fill colour is not used
+
+#### Scenario: Tints in page order
+- **WHEN** a theme sets `card.tint` to `cycle` with three `cardTints` and a page has four visible cards, one in each of
+  two rows of two
+- **THEN** the cards of the first row take the first and second tints from left to right, the second row's left card the
+  third, and its right card the first again
+
+#### Scenario: A hidden widget takes no tint
+- **WHEN** the second of three cards in page order is hidden
+- **THEN** the remaining cards take the first and second tints
+
+#### Scenario: Every page starts at the first tint
+- **WHEN** a configuration with two pages is shown under a theme with `tint` `cycle`
+- **THEN** the first card of each page has the first tint
+
+#### Scenario: Dock slots by position
+- **WHEN** the dock's second entry shows no widget and its third does
+- **THEN** the third slot's card takes the third tint
+
+### Requirement: Card Border Styles
+A card's border MUST be drawn inside the card's edge, for every shape, in the theme's border width, in this style:
+
+- `card.borderStyle` `solid` (the default) draws a continuous line; `none` draws no border
+- `dashed` draws dashes and gaps of `card.borderDash` (`on` and `off`; three and two border widths when absent),
+  following the shape round its corners. The dash length and the gap are scaled together by the same factor, so that a
+  whole number of periods fits the border's length and no corner shows a short dash or a long gap
+- `card.borderGradient` colours the border, solid or dashed, with a gradient instead of the border colour: `linear` runs
+  across the card at its angle as a fill gradient does; `conic` sweeps once round the card's centre, starting at the
+  right. The gradient does not move
+- A border width of 0 draws no border, whatever its style or gradient
+
+#### Scenario: Dashed square card
+- **WHEN** a theme sets `card.borderStyle` to `dashed` and a border width of 2 pixels on square cards
+- **THEN** each card's border is a dashed line inside its edge whose dashes meet each corner the same way
+
+#### Scenario: Dashed chamfer
+- **WHEN** a theme with chamfered cards sets `card.borderStyle` to `dashed`
+- **THEN** the dashes follow the cut corners without a gap in the line's course
+
+#### Scenario: Conic border
+- **WHEN** a theme sets `card.borderGradient` with `kind` `conic` and six colours
+- **THEN** each card's border runs through the six colours once round the card and does not change between repaints
+
+### Requirement: Hairlines Are Whole Pixels
+A line width of a format 2 card style that resolves to 2 pixels or less MUST be drawn at a whole number of pixels, rounded
+to the nearest and never less than 1. One warning per key per loaded theme says when a width resolves under 1 pixel. A
+version 1 card (one that uses no card value of format 2) keeps its border width unrounded.
+
+#### Scenario: A thin border is crisp
+- **WHEN** a theme with a format 2 card value sets a border width that resolves to 2.5 pixels on one panel and 1.6 on
+  another
+- **THEN** the border is 2.5 pixels wide on the first and 2 on the second
+
+#### Scenario: Under a pixel
+- **WHEN** a format 2 card's border width resolves to 0.6 pixels
+- **THEN** it is drawn 1 pixel wide and one warning names the theme and `card.borderWidth`
+
+#### Scenario: Version 1 border
+- **WHEN** `glass` is shown in the dock, where its border width resolves to about 1.6 pixels
+- **THEN** the border is drawn at that width, as before
+
+### Requirement: Version 1 Cards Are Unchanged
+A theme that uses no card value of format 2 MUST draw its cards exactly as before card chrome existed: the same pixels,
+in the window and in a snapshot.
+
+#### Scenario: Built-in themes
+- **WHEN** a page is rendered under `default-dark`, `default-light` or `glass`
+- **THEN** the picture is identical to the one before this requirement
+
+### Requirement: Card Chrome Does Not Slow Repaints
+A widget's repaint under any theme MUST cost at most 1.5 times the repaint of the same widget under a version 1 theme of
+the same card size, measured on the engine's software raster. What a card's chrome needs that does not change between
+repaints (its shape, its gradients, a fill with a gradient) is made once for each card size when the theme or the layout
+changes, not on each repaint.
+
+#### Scenario: Gradient card repaint
+- **WHEN** a 4x2 card under a theme with a fill gradient and a gradient border repaints with unchanged content
+- **THEN** the repaint takes at most 1.5 times that of the same card under `default-dark`
+
+#### Scenario: Nothing is made per repaint
+- **WHEN** a widget repaints a hundred times without a change of theme or layout
+- **THEN** the gradient fill is drawn into an image once for its card size, not a hundred times
