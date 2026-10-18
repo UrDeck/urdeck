@@ -124,3 +124,34 @@ Measured 2026-10-18 on the Y70 panel (1100 x 3840, 100 %), the build output's co
   fill gradient, a v1 theme pays nothing, and the compositor fallback (`docs/design/card-chrome.md` 10) stays available if it
   ever matters.
 - The rest of Ember's difference from `default-dark` (about 45 MB) is its moving `embers` background and its theme, not the cards.
+
+## As built (card-chrome-front)
+
+Measured 2026-10-18 with the engine's `WidgetPainter` and `ResolvedCardStyle`, the content and surface as above (1100 x 550,
+`21:47` at 300 px in the default typeface), Windows 11, Release, software raster. The machine's speed drifted during the runs
+(every median rose by about 1.8 times part way through), so the themes were interleaved, nine runs of 300 paints after 50 each,
+and the table gives the **fastest** run of each; the ratios of the medians agree within 0.05. "Back only" is the same draft with
+`highlight`, `sheen`, `accentStrip` and `cornerMarks` removed: the A/B for this change.
+
+| Style | Paint (ms) | Against default-dark | Back only (ms) |
+|---|---|---|---|
+| default-dark (v1) | 0.216 | 1.00 | |
+| glass (v1) | 0.261 | 1.21 | |
+| Carbon (strip with fade, marks; back now an image) | 0.268 | 1.24 | 0.201 |
+| Ember | 0.261 | 1.21 | |
+| Blueprint (marks wholly outside: nothing on the card) | 0.247 | 1.14 | |
+| Obsidian (top highlight) | 0.285 | 1.32 | 0.261 |
+| Paper (top highlight) | 0.220 | 1.02 | |
+| Pop | 0.257 | 1.19 | |
+| **Prism** (sheen in the back image, two highlights) | **0.395** | **1.83** | 0.301 |
+| Rigline (page cards: nothing new) | 0.273 | 1.26 | |
+
+- **Prism is over the 1.5 times budget, and the owner accepted it** (2026-10-18). Its back alone is 1.39 times here (1.29 in the
+  `card-chrome-back` table, measured on a quieter run), which leaves 0.02 ms for its two highlights; they cost 0.09 ms. The sheen
+  costs nothing per paint: it is in the back image. Prism's theme change may look at it again.
+- **The highlight is a path made once per size**, drawn after the shape's clip is restored: the outline stroked twice the
+  line's thickness and intersected with the shape and the band (`SKPath.Op`). Stroked under the shape's clip on every paint, as
+  the design had it, Prism's two cost 0.16 ms (0.463 in all). Splitting each into a rectangle for the straight middle and two
+  corner paths gained nothing (0.413).
+- Carbon's back is an image now (a strip shades many pixels): 0.067 ms more than its plain back, all of it the strip and the
+  marks, within budget. Its memory on the panel is as for a gradient theme (above); not measured.

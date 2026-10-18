@@ -396,13 +396,15 @@
               "type": "number",
               "minimum": 0.01,
               "maximum": 0.5,
-              "description": "Arm length."
+              "description": "Arm length.",
+              "default": 0.08
             },
             "thickness": {
               "type": "number",
               "minimum": 0.002,
               "maximum": 0.1,
-              "description": "Line width."
+              "description": "Line width.",
+              "default": 0.01
             },
             "inset": {
               "type": "number",
@@ -723,7 +725,7 @@
           "minimum": 0.001,
           "maximum": 0.1,
           "description": "Line width / dot radius.",
-          "default": 0.01
+              "default": 0.01
         },
         "color": {
           "$ref": "#/$defs/color"
@@ -776,7 +778,7 @@
           "minimum": 0.001,
           "maximum": 0.05,
           "description": "",
-          "default": 0.01
+              "default": 0.01
         },
         "gradientTo": {
           "$ref": "#/$defs/color"

@@ -35,8 +35,20 @@ public sealed class ResolvedCardStyle : IDisposable
     private const double DefaultCut = 0.14;
     private const double DefaultFillAngle = 90;
     private const double DefaultBorderAngle = 135;
+    private const double DefaultHighlightThickness = 0.01;
+    private const double DefaultSheenX = 0.1;
+    private const double DefaultSheenY = 0;
+    private const double DefaultSheenSize = 0.7;
+    private const double DefaultStripThickness = 0.03;
+    private const double DefaultStripLength = 0.72;
+    private const double DefaultGlowAlpha = 0.6;
+    private const double DefaultMarkInset = 0;
 
-    private readonly Dictionary<(int Tint, int Width, int Height), SizedCardChrome> _sized = [];
+    // The schema gives no default for a mark's size and thickness.
+    private const double DefaultMarkSize = 0.08;
+    private const double DefaultMarkThickness = 0.01;
+
+    private readonly Dictionary<(int Tint, int Strip, int Width, int Height), SizedCardChrome> _sized = [];
     private int _backImagesMade;
     private bool _disposed;
 
@@ -88,6 +100,18 @@ public sealed class ResolvedCardStyle : IDisposable
     /// <summary>The colours of <c>tint: cycle</c>, or null when cards are not tinted.</summary>
     internal SKColor[]? Tints { get; private init; }
 
+    /// <summary>The edge light, drawn over the content; null for none.</summary>
+    internal CardHighlight? Highlight { get; private init; }
+
+    /// <summary>The radial light over the fill; null for none.</summary>
+    internal CardSheen? Sheen { get; private init; }
+
+    /// <summary>The lit line along one edge; null for none.</summary>
+    internal CardStrip? Strip { get; private init; }
+
+    /// <summary>The corner marks; null for none.</summary>
+    internal CardMarks? Marks { get; private init; }
+
     /// <summary>How many back images this style has drawn (tests check that one is made per size, not per paint).</summary>
     internal int BackImagesMade => Volatile.Read(ref _backImagesMade);
 
@@ -106,16 +130,7 @@ public sealed class ResolvedCardStyle : IDisposable
         if (!plain)
             borderWidth = Hairline(loaded, "card.borderWidth", borderWidth);
 
-        var corners = CardCorners.None;
-        foreach (string name in card.CutCorners ?? ["tr", "bl"])
-            corners |= name switch
-            {
-                "tl" => CardCorners.TopLeft,
-                "tr" => CardCorners.TopRight,
-                "br" => CardCorners.BottomRight,
-                "bl" => CardCorners.BottomLeft,
-                _ => CardCorners.None,
-            };
+        var accent = SKColor.Parse(colors.Accent);
 
         return new ResolvedCardStyle
         {
@@ -126,7 +141,7 @@ public sealed class ResolvedCardStyle : IDisposable
             BorderWidth = borderWidth,
             Chamfer = card.Shape == "chamfer",
             Cut = (float)(card.Cut ?? DefaultCut) * cellPx,
-            CutCorners = corners,
+            CutCorners = Corners(card.CutCorners ?? ["tr", "bl"]),
             FillGradient = Parse(card.FillGradient?.Colors),
             FillAngle = (float)(card.FillGradient?.Angle ?? DefaultFillAngle),
             Dashed = card.BorderStyle == "dashed",
@@ -138,7 +153,80 @@ public sealed class ResolvedCardStyle : IDisposable
             BorderConic = card.BorderGradient?.Kind == "conic",
             BorderAngle = (float)(card.BorderGradient?.Angle ?? DefaultBorderAngle),
             Tints = card.Tint == "cycle" ? Parse(colors.CardTints) : null,
+            Highlight = ResolveHighlight(loaded, card.Highlight, cellPx),
+            Sheen = card.Sheen is { Color: { } sheen } s
+                ? new CardSheen(SKColor.Parse(sheen), (float)(s.X ?? DefaultSheenX), (float)(s.Y ?? DefaultSheenY), (float)(s.Size ?? DefaultSheenSize))
+                : null,
+            Strip = ResolveStrip(loaded, card.AccentStrip, accent, cellPx),
+            Marks = ResolveMarks(loaded, card.CornerMarks, accent, cellPx),
         };
+    }
+
+    private static CardHighlight? ResolveHighlight(LoadedTheme loaded, ThemeCardHighlightDefinition? highlight, float cellPx)
+    {
+        if (highlight == null || (highlight.Top == null && highlight.Bottom == null))
+            return null;
+        float thickness = Hairline(loaded, "card.highlight.thickness", (float)(highlight.Thickness ?? DefaultHighlightThickness) * cellPx);
+        return new CardHighlight(ParseOne(highlight.Top), ParseOne(highlight.Bottom), thickness);
+    }
+
+    private static CardStrip? ResolveStrip(LoadedTheme loaded, ThemeCardAccentStripDefinition? strip, SKColor accent, float cellPx)
+    {
+        if (strip == null)
+            return null;
+        var glow = strip.Glow;
+        return new CardStrip(
+            strip.Side switch
+            {
+                "top" => CardSide.Top,
+                "left" => CardSide.Left,
+                "right" => CardSide.Right,
+                _ => CardSide.Bottom,
+            },
+            Hairline(loaded, "card.accentStrip.thickness", (float)(strip.Thickness ?? DefaultStripThickness) * cellPx),
+            (float)(strip.Length ?? DefaultStripLength),
+            Parse(strip.Colors) ?? [accent],
+            strip.Fade == true,
+            (float)(glow?.Blur ?? 0) * cellPx,
+            ParseOne(glow?.Color),
+            (float)(glow?.Alpha ?? DefaultGlowAlpha));
+    }
+
+    private static CardMarks? ResolveMarks(LoadedTheme loaded, ThemeCardCornerMarksDefinition? marks, SKColor accent, float cellPx)
+    {
+        CornerMarkStyle? style = marks?.Style switch
+        {
+            "bracket" => CornerMarkStyle.Bracket,
+            "tick" => CornerMarkStyle.Tick,
+            _ => null,
+        };
+        if (style == null)
+            return null;
+        var corners = Corners(marks!.Corners ?? ["tl", "br"]);
+        if (corners == CardCorners.None)
+            return null;
+        return new CardMarks(
+            style.Value,
+            corners,
+            (float)(marks.Size ?? DefaultMarkSize) * cellPx,
+            Hairline(loaded, "card.cornerMarks.thickness", (float)(marks.Thickness ?? DefaultMarkThickness) * cellPx),
+            (float)(marks.Inset ?? DefaultMarkInset) * cellPx,
+            ParseOne(marks.Color) ?? accent);
+    }
+
+    private static CardCorners Corners(IEnumerable<string> names)
+    {
+        var corners = CardCorners.None;
+        foreach (string name in names)
+            corners |= name switch
+            {
+                "tl" => CardCorners.TopLeft,
+                "tr" => CardCorners.TopRight,
+                "br" => CardCorners.BottomRight,
+                "bl" => CardCorners.BottomLeft,
+                _ => CardCorners.None,
+            };
+        return corners;
     }
 
     /// <summary>
@@ -155,13 +243,14 @@ public sealed class ResolvedCardStyle : IDisposable
     internal SizedCardChrome For(int index, System.Drawing.Size size)
     {
         int tint = TintSlot(index);
-        var key = (tint, size.Width, size.Height);
+        int strip = Strip?.Slot(index) ?? 0;
+        var key = (tint, strip, size.Width, size.Height);
         lock (_sized)
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
             if (!_sized.TryGetValue(key, out var chrome))
             {
-                _sized[key] = chrome = new SizedCardChrome(this, tint, size);
+                _sized[key] = chrome = new SizedCardChrome(this, tint, strip, size);
                 if (chrome.HasBackImage)
                     Interlocked.Increment(ref _backImagesMade);
             }
@@ -197,6 +286,8 @@ public sealed class ResolvedCardStyle : IDisposable
                 $"Theme '{loaded.Name}': {key} resolves to {px:0.##} px, under one pixel; it is drawn 1 px wide.");
         return Math.Max(1, MathF.Round(px, MidpointRounding.AwayFromZero));
     }
+
+    private static SKColor? ParseOne(string? color) => color == null ? null : SKColor.Parse(color);
 
     private static SKColor[]? Parse(List<string>? colors) => colors is { Count: > 0 } ? colors.Select(SKColor.Parse).ToArray() : null;
 }

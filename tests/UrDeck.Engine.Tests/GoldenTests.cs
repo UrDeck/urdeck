@@ -77,6 +77,10 @@ public sealed class GoldenTests
     [InlineData("blueprint")]
     [InlineData("obsidian")]
     [InlineData("pop")]
+    [InlineData("carbon")]
+    [InlineData("paper")]
+    [InlineData("prism")]
+    [InlineData("rigline")]
     public void Draft_Page(string theme)
     {
         using var bitmap = Render(theme, draft: true);

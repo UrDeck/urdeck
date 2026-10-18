@@ -11,7 +11,10 @@ using Xunit;
 
 namespace UrDeck.Engine.Tests;
 
-/// <summary>The card's back of format 2 (card-chrome-back): the resolved style, the order, the shape, the fill and the border.</summary>
+/// <summary>
+/// The card chrome of format 2: the resolved style, the order, the shape, the fill and the border (card-chrome-back); the
+/// highlight, sheen, accent strip and corner marks on the card (card-chrome-front).
+/// </summary>
 public sealed class CardChromeTests
 {
     private static readonly LoadedTheme Dark = new ThemeStore("").Load(ThemeStore.DefaultName);
@@ -562,5 +565,373 @@ public sealed class CardChromeTests
         style.Dispose();
 
         Assert.Throws<ObjectDisposedException>(() => style.For(0, new System.Drawing.Size(100, 100)));
+    }
+
+    // ---- card-chrome-front: highlight, sheen, accent strip, corner marks
+
+    private static readonly SKColor Black = SKColor.Parse("#000000");
+
+    /// <summary>A square black card without a border, with <paramref name="card"/>'s front pieces.</summary>
+    private static LoadedTheme Front(ThemeCardDefinition card)
+    {
+        card.Radius ??= 0;
+        card.BorderWidth ??= 0;
+        return With(card, new ThemeColorsDefinition { CardFill = "#000000" });
+    }
+
+    private static readonly Probe Red = new(c => c.Canvas.Clear(SKColors.Red));
+
+    [Fact]
+    public void CornerMarks_DefaultToTopLeftAndBottomRight_InTheAccent()
+    {
+        var loaded = With(new ThemeCardDefinition { CornerMarks = new ThemeCardCornerMarksDefinition { Style = "bracket" } });
+        using var style = ResolvedCardStyle.Resolve(loaded, 200);
+
+        var marks = style.Marks!;
+        Assert.Equal(CardCorners.TopLeft | CardCorners.BottomRight, marks.Corners);
+        Assert.Equal(SKColor.Parse(Dark.Definition.Colors!.Accent), marks.Color);
+        Assert.Equal(0, marks.Inset);
+    }
+
+    [Fact]
+    public void CornerMarksWithoutAStyle_DrawNothing()
+    {
+        var loaded = With(new ThemeCardDefinition { CornerMarks = new ThemeCardCornerMarksDefinition { Size = 0.1 } });
+        using var style = ResolvedCardStyle.Resolve(loaded, 200);
+
+        Assert.Null(style.Marks);
+    }
+
+    [Fact]
+    public void TheAccentStrip_DefaultsToTheSchema_InTheAccent()
+    {
+        var loaded = With(new ThemeCardDefinition { AccentStrip = new ThemeCardAccentStripDefinition() });
+        using var style = ResolvedCardStyle.Resolve(loaded, 200);
+
+        var strip = style.Strip!;
+        Assert.Equal(CardSide.Bottom, strip.Side);
+        Assert.Equal(6, strip.Thickness, 3);
+        Assert.Equal(0.72f, strip.Length, 3);
+        Assert.Equal([SKColor.Parse(Dark.Definition.Colors!.Accent)], strip.Colors);
+        Assert.False(strip.Fade);
+        Assert.Equal(0, strip.GlowBlur);
+    }
+
+    [Theory]
+    [InlineData("card.highlight.thickness", 0.005, 1f)]
+    [InlineData("card.accentStrip.thickness", 0.005, 1f)]
+    [InlineData("card.cornerMarks.thickness", 0.006, 2f)]
+    [InlineData("card.cornerMarks.thickness", 0.02, 5.5f)]
+    public void EachThickness_IsAHairline(string key, double fraction, float expected)
+    {
+        var card = new ThemeCardDefinition();
+        if (key == "card.highlight.thickness")
+            card.Highlight = new ThemeCardHighlightDefinition { Top = "#ffffff", Thickness = fraction };
+        else if (key == "card.accentStrip.thickness")
+            card.AccentStrip = new ThemeCardAccentStripDefinition { Thickness = fraction };
+        else
+            card.CornerMarks = new ThemeCardCornerMarksDefinition { Style = "tick", Thickness = fraction };
+        using var style = ResolvedCardStyle.Resolve(With(card), 275);
+
+        float actual = key switch
+        {
+            "card.highlight.thickness" => style.Highlight!.Thickness,
+            "card.accentStrip.thickness" => style.Strip!.Thickness,
+            _ => style.Marks!.Thickness,
+        };
+        Assert.Equal(expected, actual, 3);
+    }
+
+    [Fact]
+    public void AHighlightUnderAPixel_IsWarnedOnce()
+    {
+        var loaded = With(new ThemeCardDefinition
+        {
+            Highlight = new ThemeCardHighlightDefinition { Top = "#ffffff", Thickness = 0.001 },
+        }, name: "thin-highlight");
+
+        var lines = Warnings(() =>
+        {
+            ResolvedCardStyle.Resolve(loaded, 275).Dispose();
+            ResolvedCardStyle.Resolve(loaded, 275).Dispose();
+        });
+
+        Assert.Contains("card.highlight.thickness", Assert.Single(lines));
+    }
+
+    [Fact]
+    public void TheStripColour_GoesRoundTheList_ByIndex()
+    {
+        var strip = new CardStrip(CardSide.Bottom, 4, 1, Tints, false, 0, null, 0.6f);
+
+        Assert.Equal([0, 1, 2, 0, 1, 0], new[] { 0, 1, 2, 3, 4, -1 }.Select(strip.Slot));
+    }
+
+    [Fact]
+    public void FiveCards_TakeFourStripColoursInOrder_AndTheFifthTheFirst()
+    {
+        string[] colours = ["#ff0000", "#00ff00", "#0000ff", "#ffff00"];
+        var loaded = Front(new ThemeCardDefinition
+        {
+            AccentStrip = new ThemeCardAccentStripDefinition { Side = "bottom", Thickness = 0.04, Length = 1, Colors = [.. colours] },
+        });
+
+        using var bitmap = PageRenderer.RenderToBitmap(1100, 1100, [Card(0, 0), Card(2, 0), Card(0, 1), Card(2, 1), Card(0, 2)], loaded, DateTime.Now);
+
+        // Down from the card's centre to where the fill ends: the strip, 11 pixels thick.
+        SKColor Strip(int col, int row)
+        {
+            int x = col * 275 + 275, y = row * 275 + 137;
+            while (bitmap.GetPixel(x, y) == Black)
+                y++;
+            return bitmap.GetPixel(x, y + 4);
+        }
+        Assert.Equal(SKColor.Parse(colours[0]), Strip(0, 0));
+        Assert.Equal(SKColor.Parse(colours[1]), Strip(2, 0));
+        Assert.Equal(SKColor.Parse(colours[2]), Strip(0, 1));
+        Assert.Equal(SKColor.Parse(colours[3]), Strip(2, 1));
+        Assert.Equal(SKColor.Parse(colours[0]), Strip(0, 2));
+    }
+
+    [Fact]
+    public void TheBackImage_IsMadePerStripColour()
+    {
+        var loaded = Front(new ThemeCardDefinition
+        {
+            AccentStrip = new ThemeCardAccentStripDefinition { Colors = ["#ff0000", "#00ff00"] },
+        });
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        var size = new System.Drawing.Size(100, 100);
+
+        foreach (int index in new[] { 0, 1, 2, 3, 0 })
+            style.For(index, size);
+
+        Assert.Equal(2, style.BackImagesMade);
+    }
+
+    [Fact]
+    public void TheTopHighlight_IsOverTheContent_AndFadesAtBothEnds()
+    {
+        var loaded = Front(new ThemeCardDefinition
+        {
+            Highlight = new ThemeCardHighlightDefinition { Top = "#ffffff", Thickness = 0.02 },
+        });
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var bitmap = Paint(Red, loaded, 400, 200, style);
+
+        Assert.Equal(SKColors.White, bitmap.GetPixel(200, 2));
+        Assert.Equal(SKColors.White, bitmap.GetPixel(60, 2));
+        // Gone at the very ends, half way through the fade over the first and last eighth.
+        AssertNear(SKColors.Red, bitmap.GetPixel(0, 2), 8);
+        AssertNear(SKColors.Red, bitmap.GetPixel(399, 2), 8);
+        AssertNear(new SKColor(255, 128, 128), bitmap.GetPixel(25, 2), 8);
+        // Only along the top: below the line, and along the bottom, the content.
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(200, 8));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(200, 198));
+    }
+
+    [Fact]
+    public void TheBottomHighlight_FollowsARoundedCorner()
+    {
+        var loaded = Front(new ThemeCardDefinition
+        {
+            Radius = 0.2,
+            Highlight = new ThemeCardHighlightDefinition { Bottom = "#ffffff", Thickness = 0.02 },
+        });
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var bitmap = Paint(Red, loaded, 400, 200, style);
+
+        Assert.Equal(SKColors.White, bitmap.GetPixel(200, 197));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(200, 2));
+        // Round the corner (radius 55) the line rises with the edge: at 45 degrees it is inside the arc, lit.
+        float r = 55, c = r - r / MathF.Sqrt(2);
+        var onArc = bitmap.GetPixel((int)(400 - c - 2), (int)(200 - c - 2));
+        Assert.True(onArc.Green > 40, $"got {onArc}");
+        // Outside the shape nothing is drawn.
+        Assert.Equal(0, bitmap.GetPixel(399, 199).Alpha);
+    }
+
+    [Fact]
+    public void TheSheen_IsLightestAtItsCentre_AndGoneAtItsSize()
+    {
+        var loaded = Front(new ThemeCardDefinition
+        {
+            Sheen = new ThemeCardSheenDefinition { Color = "#ffffffff", X = 0.05, Y = 0, Size = 0.7 },
+        });
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var bitmap = Paint(Empty, loaded, 400, 200, style);
+
+        byte at(int x, int y) => bitmap.GetPixel(x, y).Red;
+        Assert.True(at(20, 0) > at(100, 0) && at(100, 0) > at(200, 0), "lightest near the top-left");
+        Assert.True(at(20, 0) > at(20, 100));
+        // 0.7 of the width from (20, 0) is 280: past it, the fill.
+        Assert.Equal(Black, bitmap.GetPixel(310, 0));
+        Assert.Equal(Black, bitmap.GetPixel(399, 199));
+    }
+
+    [Fact]
+    public void TheSheen_IsUnderTheContent()
+    {
+        var loaded = Front(new ThemeCardDefinition { Sheen = new ThemeCardSheenDefinition { Color = "#ffffffff", Size = 1 } });
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var bitmap = Paint(Red, loaded, 200, 200, style);
+
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(20, 0));
+    }
+
+    [Theory]
+    [InlineData("top")]
+    [InlineData("bottom")]
+    [InlineData("left")]
+    [InlineData("right")]
+    public void TheStrip_RunsAlongItsSide_Centred(string side)
+    {
+        var loaded = Front(new ThemeCardDefinition
+        {
+            AccentStrip = new ThemeCardAccentStripDefinition { Side = side, Thickness = 0.04, Length = 0.5, Colors = ["#ff0000"] },
+        });
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var bitmap = Paint(Empty, loaded, 400, 200, style);
+
+        // 11 pixels thick; half the side long, from a quarter to three quarters.
+        bool across = side is "top" or "bottom";
+        int length = across ? 400 : 200;
+        SKColor At(int along, int depth) => side switch
+        {
+            "top" => bitmap.GetPixel(along, depth),
+            "bottom" => bitmap.GetPixel(along, 199 - depth),
+            "left" => bitmap.GetPixel(depth, along),
+            _ => bitmap.GetPixel(399 - depth, along),
+        };
+        Assert.Equal(SKColors.Red, At(length / 2, 0));
+        Assert.Equal(SKColors.Red, At(length / 4 + 1, 9));
+        Assert.Equal(SKColors.Red, At(length * 3 / 4 - 2, 9));
+        Assert.Equal(Black, At(length / 4 - 2, 0));
+        Assert.Equal(Black, At(length * 3 / 4 + 1, 0));
+        Assert.Equal(Black, At(length / 2, 12));
+    }
+
+    [Fact]
+    public void AFadingStrip_IsStrongestAtItsStart_AndGoneAtItsEnd()
+    {
+        var loaded = Front(new ThemeCardDefinition
+        {
+            AccentStrip = new ThemeCardAccentStripDefinition { Side = "bottom", Thickness = 0.04, Length = 1, Colors = ["#ff0000"], Fade = true },
+        });
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var bitmap = Paint(Empty, loaded, 400, 200, style);
+
+        AssertNear(SKColors.Red, bitmap.GetPixel(0, 195), 3);
+        AssertNear(Black, bitmap.GetPixel(399, 195), 3);
+        AssertNear(new SKColor(128, 0, 0), bitmap.GetPixel(200, 195), 3);
+    }
+
+    [Fact]
+    public void TheStrip_IsUnderTheContent_AndItsGlowInsideTheCard()
+    {
+        var loaded = Front(new ThemeCardDefinition
+        {
+            AccentStrip = new ThemeCardAccentStripDefinition
+            {
+                Side = "bottom",
+                Thickness = 0.02,
+                Length = 1,
+                Colors = ["#ff0000"],
+                Glow = new ThemeGlowDefinition { Blur = 0.1, Alpha = 1 },
+            },
+        });
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var glowing = Paint(Empty, loaded, 400, 200, style);
+        using var covered = Paint(Red, loaded, 400, 200, style);
+
+        // Above the strip, the glow tints the fill red.
+        var above = glowing.GetPixel(200, 185);
+        Assert.True(above.Red > 0 && above.Green == 0, $"got {above}");
+        Assert.Equal(SKColors.Red, covered.GetPixel(200, 199));
+        Assert.Equal(SKColors.Red, covered.GetPixel(200, 185));
+    }
+
+    private static LoadedTheme Marks(double inset, double thickness, string style = "bracket") => Front(new ThemeCardDefinition
+    {
+        CornerMarks = new ThemeCardCornerMarksDefinition
+        {
+            Style = style,
+            Size = 0.1,
+            Thickness = thickness,
+            Inset = inset,
+            Color = "#00ff00",
+        },
+    });
+
+    [Fact]
+    public void Brackets_AreOverTheContent_AtTopLeftAndBottomRight()
+    {
+        var loaded = Marks(0.02, 0.02);
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var bitmap = Paint(Red, loaded, 400, 200, style);
+
+        // Inset 5.5, thickness 5.5: the line covers 5.5 to 11 from each edge; arms 27.5 long from the outer corner.
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(8, 20));
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(20, 8));
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(7, 7));
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(391, 180));
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(380, 191));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(2, 20));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(8, 36));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(391, 8));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(8, 191));
+    }
+
+    [Fact]
+    public void ATick_IsOneLineAlongTheTopOrBottomEdge()
+    {
+        var loaded = Marks(0.02, 0.02, "tick");
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var bitmap = Paint(Red, loaded, 400, 200, style);
+
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(20, 8));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(8, 20));
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(380, 191));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(391, 180));
+    }
+
+    [Fact]
+    public void AMarkInsetByMinusHalfItsThickness_IsHalfOnTheCard()
+    {
+        var loaded = Marks(-0.02, 0.04);
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var bitmap = Paint(Red, loaded, 400, 200, style);
+
+        // Thickness 11, inset -5.5: 5.5 pixels of the line lie on the card, over the content.
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(20, 0));
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(20, 4));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(20, 7));
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(4, 20));
+        Assert.Equal(SKColors.Red, bitmap.GetPixel(7, 20));
+    }
+
+    [Fact]
+    public void AMarkWhollyOutsideTheCard_IsNotDrawnOnIt()
+    {
+        var loaded = Marks(-0.05, 0.02);
+        using var style = ResolvedCardStyle.Resolve(loaded, 275);
+        using var chrome = new SizedCardChrome(style, -1, 0, new System.Drawing.Size(400, 200));
+
+        Assert.Null(chrome.Marks);
+    }
+
+    [Fact]
+    public void ASnapshot_CutsAMarkAtTheCardsEdge()
+    {
+        var loaded = Marks(-0.02, 0.04);
+        using var bitmap = PageRenderer.RenderToBitmap(1100, 1100, [Card(0, 1)], loaded, DateTime.Now);
+
+        // The card's top and left edges, found from its fill; the half of the bracket outside them belongs to the underlay
+        // (card-underlay), not the surface.
+        int top = Enumerable.Range(250, 60).First(y => bitmap.GetPixel(150, y) == Black);
+        int left = Enumerable.Range(0, 60).First(x => bitmap.GetPixel(x, top + 40) == Black);
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(left + 10, top + 1));
+        Assert.NotEqual(SKColors.Lime, bitmap.GetPixel(left + 10, top - 2));
+        Assert.NotEqual(SKColors.Lime, bitmap.GetPixel(left - 2, top + 10));
     }
 }
