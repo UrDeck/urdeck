@@ -48,7 +48,10 @@ lower-case labels and titles, letter spacing, slanted values, a gradient fill an
 cannot make is written to `urdeck.log` once. The card's shape, fill and border are drawn today too: chamfered corners
 (`card.shape`, `cut`, `cutCorners`), a gradient fill (`card.fillGradient`), a colour per card from `colors.cardTints`
 (`card.tint: "cycle"`, row by row on each page, by position in the dock), and dashed or gradient borders (`card.borderStyle`,
-`borderDash`, `borderGradient`, linear or conic); a dashed border has a dash on every corner. The other values are checked and kept today and drawn by later releases; a file
+`borderDash`, `borderGradient`, linear or conic); a dashed border has a dash on every corner. So is the light and the marks on
+a card: a highlight along the top or bottom edge and a radial sheen (`card.highlight`, `card.sheen`), a lit strip along one
+edge in a colour per card (`card.accentStrip`), and registration marks at the corners (`card.cornerMarks`; the part of a mark
+outside the card comes in a later release). The other values are checked and kept today and drawn by later releases; a file
 that uses none of them is unaffected. A theme's [background](/docs/backgrounds/#theme-backgrounds), a default shader, a
 still gradient, colour or picture and a scrim, is drawn today when your configuration has no `background` of its own, and
 `meta.pairsWith.backgrounds` lists the backgrounds that suit the theme, for a settings page to recommend. The

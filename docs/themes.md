@@ -165,9 +165,10 @@ Drawn by: the changes that use them.
 
 ### `card`
 
-Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`, `tint`) and the border (`borderStyle`,
-`borderDash`, `borderGradient`). Kept and drawn by the later card chrome changes: `borderAnimate`, `cornerMarks`, `shadow`,
-`glow`, `highlight`, `sheen`, `accentStrip` and `compact`.
+Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`, `tint`), the border (`borderStyle`,
+`borderDash`, `borderGradient`), the light inside the card (`highlight`, `sheen`), the `accentStrip` and the part of the
+`cornerMarks` that lies on the card. Kept and drawn by the later card chrome changes: `borderAnimate`, `shadow`, `glow`, the
+part of a corner mark outside the card, and `compact`.
 
 - **Shape.** `round` is the rounded rectangle of `card.radius`, limited to half the card's smaller side. `chamfer` cuts the
   corners in `cutCorners` with a straight line `cut` along each side, limited to half the smaller side; the other corners are
@@ -185,8 +186,25 @@ Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`,
 - **Hairlines.** In a theme that sets any card value of format 2, a border of 2 pixels or less is drawn at a whole number of
   pixels, never under 1; under one pixel it is written to `urdeck.log` once. A theme with no such value draws its cards
   exactly as before, unrounded.
-- A fill gradient is drawn once per card size and reused, so a repaint costs about what it does with a plain fill
-  ([`docs/perf/card-chrome.md`](perf/card-chrome.md)).
+- **Highlight.** `highlight.top` and `highlight.bottom` draw a line `thickness` wide just inside the top or bottom edge, round
+  the corners with the edge, in their colour, fading to transparent over the first and the last eighth of the card's width. It
+  is drawn after the widget's content, so content never covers it.
+- **Sheen.** A radial light centred at `x` times the card's width and `y` times its height, reaching `size` times the card's
+  width, from `color` to transparent; over the fill, under the content. Without a `color` there is no sheen.
+- **Accent strip.** A line `thickness` wide along `side`, inside the card, `length` times the side long and centred on it, over
+  the fill and under the content. Its colour is the entry of `colors` at the card's index, counting round the list (the same
+  index as the tint); the theme's accent without `colors`. `fade` fades it from its colour at the start (the left, or the top on
+  the left and right sides) to transparent at the end. `glow` lays a blurred copy under it, inside the card, in the glow's
+  `color` (the strip's own without one) at the glow's `alpha`; a glow without `blur` draws nothing.
+- **Corner marks.** `bracket` draws an L at each corner in `corners`, one arm along each edge; `tick` draws one arm, along the
+  top or bottom edge. Each arm is `size` long from the mark's outer corner and `thickness` wide, in `color` (the accent without
+  one). `inset` is the distance from the card's edge to the mark's outer edge: positive moves the mark in, negative puts it
+  partly or wholly outside the card (minus half the thickness puts the line across the edge). Marks are drawn after the
+  content, so content never covers them. The part outside the card is not drawn yet. `style` `none` (the default) draws no
+  marks.
+- The highlight, accent strip and mark thicknesses are hairlines like the border: 2 pixels or less is drawn whole.
+- A fill gradient, a sheen or an accent strip is drawn once per card size (and strip colour) and reused, so a repaint costs
+  about what it does with a plain fill ([`docs/perf/card-chrome.md`](perf/card-chrome.md)).
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
@@ -210,8 +228,8 @@ Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`,
 | `card.cornerMarks` | group |  | Registration marks (Carbon, Blueprint). Drawn outside the clip, so needs a bleed margin. |
 | `card.cornerMarks.style` | `none`, `bracket`, `tick` | `"none"` | Shape of each mark. |
 | `card.cornerMarks.corners` | list of names of `tl`, `tr`, `br`, `bl` |  | Default [tl, br]. |
-| `card.cornerMarks.size` | 0.01 to 0.5 |  | Arm length. |
-| `card.cornerMarks.thickness` | 0.002 to 0.1 |  | Line width. |
+| `card.cornerMarks.size` | 0.01 to 0.5 | `0.08` | Arm length. |
+| `card.cornerMarks.thickness` | 0.002 to 0.1 | `0.01` | Line width. |
 | `card.cornerMarks.inset` | -0.1 to 0.1 | `0` | Offset from the corner; negative sits outside the card. |
 | `card.cornerMarks.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
 | `card.shadow` | group |  | Drop shadow. Bleeds outside the card. |

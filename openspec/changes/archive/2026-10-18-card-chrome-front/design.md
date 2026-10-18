@@ -60,3 +60,20 @@ style by eye, and this change does not need to know.
   added in the test theme.
 - [Marks cut at the card's edge until `card-underlay`] → Carbon shows half brackets and Blueprint no page marks in between;
   both changes are proposed together and land in order.
+
+## Findings during apply
+
+- **The highlight is drawn after the clip is restored, as a path made per size.** The design had it stroked under the shape's
+  clip with only its shaders cached; that cost Prism 0.16 ms per paint for two highlights. The outline stroked twice the
+  thickness, intersected with the shape and the band once per size (`SKPath.Op`), costs 0.09 ms and draws the same pixels
+  within the golden tolerance. Prism still measures 1.83 times `default-dark` against the budget of 1.5, mostly its back
+  (1.39 alone): `docs/perf/card-chrome.md`, "As built (card-chrome-front)". **The owner accepted the cost** (2026-10-18).
+- **On the panel:** Obsidian and Carbon looked at by the owner on the Y70 (2026-10-18), with their own fonts: approved.
+- **Defaults the schema did not give:** a corner mark's `size` 0.08 and `thickness` 0.01 (added to the schema); a sheen without
+  `color` and a strip glow without `blur` draw nothing. `cornerMarks.style` keeps the schema's default `none`, so a theme must
+  name `bracket` or `tick`.
+- **A mark's arm is `size` long from the mark's outer corner** (the spike measured it from the line's centre). Both arms of a
+  bracket are one stroked path with a mitred corner, so a translucent mark does not darken where the arms meet.
+- **`fade` on a left or right strip** runs from the top to the bottom; the spec names only the start and the end.
+- **A mark that lies wholly outside the card** (Blueprint's page marks, `inset` + `thickness` <= 0) is not drawn by the card's
+  surface at all; `card-underlay` draws it.

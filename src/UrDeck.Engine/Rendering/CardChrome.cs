@@ -2,13 +2,15 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using SkiaSharp;
+using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 
 namespace UrDeck.Engine.Rendering;
 
 /// <summary>
-/// The card's two passes around the widget's content: <see cref="DrawBack"/> draws the shape, fill and border and leaves
-/// the canvas clipped to the shape; <see cref="DrawFront"/> restores it (the pieces drawn over the content come later).
+/// The card's two passes around the widget's content: <see cref="DrawBack"/> draws the shape, fill, sheen, accent strip and
+/// border and leaves the canvas clipped to the shape; <see cref="DrawFront"/> restores it and draws the highlight (made
+/// within the shape) and the part of the corner marks that lies on the card.
 /// A plain style (<see cref="Themes.ResolvedCardStyle.IsPlain"/>) takes the drawing of before card chrome, unchanged.
 /// </summary>
 internal static class CardChrome
@@ -43,11 +45,65 @@ internal static class CardChrome
         return save;
     }
 
-    /// <summary>Ends the card after the content: restores the canvas to before <see cref="DrawBack"/>.</summary>
+    /// <summary>
+    /// Ends the card after the content: restores the canvas to before <see cref="DrawBack"/>, then draws the highlight,
+    /// which lies within the shape, and the corner marks, which the surface's edge (or the snapshot's clip to the card's
+    /// rectangle) cuts at the card's edge.
+    /// </summary>
     public static void DrawFront(SKCanvas canvas, SizedCardChrome? chrome, int save)
     {
-        _ = chrome;
         canvas.RestoreToCount(save);
+        if (chrome is { HasHighlight: true })
+            chrome.DrawHighlights(canvas);
+        if (chrome is { Marks: { } marks, MarkPaint: { } paint })
+            DrawMarks(canvas, chrome.Shape.Bounds, marks, paint);
+    }
+
+    /// <summary>The stroke a mark is drawn with: its colour and thickness, square ends and a mitred corner.</summary>
+    internal static SKPaint MarkPaint(CardMarks marks) => new()
+    {
+        Color = marks.Color,
+        IsAntialias = true,
+        Style = SKPaintStyle.Stroke,
+        StrokeWidth = marks.Thickness,
+        StrokeCap = SKStrokeCap.Butt,
+        StrokeJoin = SKStrokeJoin.Miter,
+    };
+
+    /// <summary>
+    /// Draws <paramref name="marks"/> at the corners of <paramref name="card"/>, whole: the card's surface draws them and its
+    /// edge cuts them; what lies outside the card is drawn with the card's rectangle clipped away. Each arm is
+    /// <see cref="CardMarks.Size"/> long from the mark's outer corner, which is <see cref="CardMarks.Inset"/> in from both
+    /// edges. A bracket runs along both edges, a tick along the top or bottom edge only.
+    /// </summary>
+    internal static void DrawMarks(SKCanvas canvas, SKRect card, CardMarks marks, SKPaint paint)
+    {
+        // The line's centre is half its thickness further in than its outer edge.
+        float outer = marks.Inset;
+        float centre = outer + marks.Thickness / 2;
+        foreach (var corner in new[] { CardCorners.TopLeft, CardCorners.TopRight, CardCorners.BottomRight, CardCorners.BottomLeft })
+        {
+            if (!marks.Corners.HasFlag(corner))
+                continue;
+            bool left = corner is CardCorners.TopLeft or CardCorners.BottomLeft;
+            bool top = corner is CardCorners.TopLeft or CardCorners.TopRight;
+            float sx = left ? 1 : -1, sy = top ? 1 : -1;
+            float edgeX = left ? card.Left : card.Right, edgeY = top ? card.Top : card.Bottom;
+
+            using var path = new SKPathBuilder();
+            path.MoveTo(edgeX + sx * (outer + marks.Size), edgeY + sy * centre);
+            if (marks.Style == CornerMarkStyle.Bracket)
+            {
+                path.LineTo(edgeX + sx * centre, edgeY + sy * centre);
+                path.LineTo(edgeX + sx * centre, edgeY + sy * (outer + marks.Size));
+            }
+            else
+            {
+                path.LineTo(edgeX + sx * outer, edgeY + sy * centre);
+            }
+            using var line = path.Detach();
+            canvas.DrawPath(line, paint);
+        }
     }
 
     /// <summary>Clips to the card's shape, for wiping what a failed widget drew.</summary>
