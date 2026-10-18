@@ -71,4 +71,24 @@ internal sealed record CardMarks(CornerMarkStyle Style, CardCorners Corners, flo
 {
     /// <summary>True when some of a mark lies on the card (the card's surface draws that part).</summary>
     public bool ReachesTheCard => Inset + Thickness > 0;
+
+    /// <summary>True when some of a mark lies outside the card (the underlay draws that part).</summary>
+    public bool ReachesOutside => Inset < 0;
+}
+
+/// <summary>
+/// <c>card.shadow</c> in pixels, after the reach limit: the card's shape moved by <see cref="X"/> and <see cref="Y"/>, grown
+/// by <see cref="Spread"/>, blurred by <see cref="Blur"/> (0 is a hard edge; the blur's sigma is half of it, as for every
+/// glow), in <see cref="Color"/>.
+/// </summary>
+internal sealed record CardShadow(float X, float Y, float Blur, float Spread, SKColor Color)
+{
+    /// <summary>How far past the card's edge the shadow reaches: the larger offset, three sigmas of blur and the spread.</summary>
+    public float Reach => MathF.Max(MathF.Abs(X), MathF.Abs(Y)) + Blur * 1.5f + Spread;
+}
+
+/// <summary><c>card.glow</c> in pixels, after the reach limit: the shape blurred outwards by <see cref="Blur"/>, its alpha applied.</summary>
+internal sealed record CardGlow(float Blur, SKColor Color)
+{
+    public float Reach => Blur * 1.5f;
 }

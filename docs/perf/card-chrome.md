@@ -155,3 +155,30 @@ and the table gives the **fastest** run of each; the ratios of the medians agree
   corner paths gained nothing (0.413).
 - Carbon's back is an image now (a strip shades many pixels): 0.067 ms more than its plain back, all of it the strip and the
   marks, within budget. Its memory on the panel is as for a gradient theme (above); not measured.
+
+## As built (card-underlay)
+
+Measured 2026-10-18 on the Y70 panel (1100 x 3840 at 100 %), Release build of the host, a test page of nine cards (a 4x1
+clock, a 4x2 weather card, two 1x1 and one 2x1 shortcut, a 4x4 stats card, a 2x2 clock and two more 1x1 shortcuts) and a dock
+of two shortcuts. The method is S1's: the same theme with the underlay on and off (a temporary switch, removed), the host's
+private memory 20 s after start, five runs of each, interleaved.
+
+| Theme | Pictures (page, then dock) | Private memory, on minus off | First build in the process | Warm build |
+|---|---|---|---|---|
+| Paper (soft shadow, opaque) | 633x221, 259x259 nine-grid, 221x221, 358x221; 156x156 (all half size) | **+7.7 MB** (188.1 against 180.4) | 36 to 38 ms | 9.6 to 11.2 ms |
+| Prism (soft shadow, limited to the gap) | 125x125 nine-grid; 90x90 (half size) | about +4 MB (noisy: the runs without it fell in two groups) | 28 ms | 1.3 ms |
+| Rigline (glow, opaque) | 637x225, 239x239 nine-grid, 225x225, 362x225; 160x160 (half size) | about +4 MB (three runs, noisy) | 36 to 38 ms | 11.3 to 12.6 ms |
+
+- **Memory is over the design's 2 MB, and the owner changed the budget to 10 MB** (2026-10-18) for the pictures of a theme, which
+  every page shares. Paper's pictures hold about 1.3 MB of pixels; the rest is the decoding path (PNG into a
+  `LoadedImageSurface`), which a picture of 125 x 125 pays almost as much of as five larger ones.
+- **The alternative was measured and is worse**: a Direct3D 11 device of the host's own, a composition graphics device from it
+  (`ICompositorInterop.CreateGraphicsDevice`) and a `CompositionDrawingSurface` per picture written with `UpdateSubresource`
+  (no PNG, no image decoder) cost **+30 MB** for Paper and +19 MB for Prism, the same five runs each. The compositor's own
+  device is not reachable from WinUI 3, so a second device is the price of that path. Not tried: XAML `Image` elements with a
+  `WriteableBitmap` and `Image.NineGrid`, which use the XAML device.
+- **Build time is inside the budget** (20 ms) once the process is warm, measured by switching the theme in one process.
+  The first build after start is 28 to 38 ms (the first blur, encode and decode), accepted as S1 accepted it.
+- **Idle:** with Paper and two ticking clocks for 75 s, the log has one `Underlay (One)` and one `Underlay (Dock)` line.
+- The cards smaller than twice the corner zone (Paper's and Rigline's 4x1, 2x1 and 1x1 cards) take exact pictures, as the
+  explore found; a picture per row height stretched only sideways would roughly halve Paper's pixels, not the decoding cost.

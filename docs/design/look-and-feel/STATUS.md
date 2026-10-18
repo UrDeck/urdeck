@@ -1,6 +1,6 @@
 # Look-and-feel work: status and how to pick it up
 
-**Updated 2026-10-18** (after the apply of `card-chrome-front`). The other files in this folder are a snapshot of the original design handoff and are not edited.
+**Updated 2026-10-18** (after the apply of `card-underlay`). The other files in this folder are a snapshot of the original design handoff and are not edited.
 This file says what has been built, what changed on the way, and what is next. Where it disagrees with them, this file
 and the OpenSpec specs (`openspec/specs/`) win.
 
@@ -24,8 +24,8 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 3: typography (per-role fonts, case, tracking, slant, value fill, glow) | `theme-typography` | **Done**: per-role fonts with the fallback chain, `typography.opticalSize`, the weight warnings, `Theme.TextStyle` (SDK 0.9.0), drawn by `Readout` and `TextLine`. Findings for the theme changes are in its design ("Findings during apply") |
 | PR 2: card chrome, 1 of 4: painter split, shape, fill, tint, border, hairlines, cached gradient backs | `card-chrome-back` | **Done**, archived. `ResolvedCardStyle`, `CardLook`, `CardOrder`, `CardChrome`, `SizedCardChrome`. Goldens for Ember, Blueprint, Obsidian, Pop (page and dock); every draft within 1.5x `default-dark`; the cached backs cost about 8 to 9 MB on the panel, accepted (`docs/perf/card-chrome.md`, "As built"). Looked at on the panel with Ember: approved. Findings in its design (`openspec/changes/archive/2026-10-18-card-chrome-back/design.md`): the dash is fitted per side with a dash on every corner, the error card wipes the shape only. Decisions for all four: `docs/design/card-chrome.md` |
 | PR 2: card chrome, 2 of 4: highlight, sheen, accent strip, corner marks on the card | `card-chrome-front` | **Done**, archived. Highlight as a path per size drawn after the clip; sheen and strip in the cached back. Goldens for Carbon, Paper, Prism, Rigline; Obsidian redrawn. Prism paints at 1.83x `default-dark` (budget 1.5x, its back alone 1.39x): **accepted by the owner** (`docs/perf/card-chrome.md`, "As built (card-chrome-front)"). Looked at on the panel with Obsidian and Carbon: approved. Findings in its design (`openspec/changes/archive/2026-10-18-card-chrome-front/design.md`) |
-| PR 2: card chrome, 3 of 4: shadow, glow and outside marks as sprites, reach limit, press, dock | `card-underlay` | **Proposed. Next: apply**. **Model: Opus** (compositor work, measured on the panel) |
-| PR 2: card chrome, 4 of 4: compact cards (dock slots, 1x1), circle, partial overrides | `card-compact` | **Proposed**; apply last. **Model: Sonnet** (settled rules against goldens) |
+| PR 2: card chrome, 3 of 4: shadow, glow and outside marks as sprites, reach limit, press, dock | `card-underlay` | **Done**, archived. `CardUnderlay` (one routine for the window and the snapshot), `UnderlayPicture` (nine-grid or exact size, half size when all blurred, kept on the style), the host's `UnderlayView` (one sprite per card, a PNG decoded into a `LoadedImageSurface`). Goldens for Paper, Pop, Prism, Rigline (page and dock), Blueprint and Carbon. **Memory budget changed by the owner from 2 MB to 10 MB** for a theme's pictures: Paper measures +7.7 MB, mostly the decoding path; a `CompositionDrawingSurface` with a Direct3D device of the host's own cost +30 MB and was dropped (`docs/perf/card-chrome.md`, "As built (card-underlay)"). Warm build 1.3 to 12.6 ms. Looked at on the panel by the owner (press, slide, Prism's limited shadow, 150 %): approved. Findings in its design (`openspec/changes/archive/2026-10-18-card-underlay/design.md`) |
+| PR 2: card chrome, 4 of 4: compact cards (dock slots, 1x1), circle, partial overrides | `card-compact` | **Proposed. Next: apply**. **Model: Sonnet** (settled rules against goldens). The compact underlay picture keys on the compact style; today the dock's underlay uses the dock's full style at the slot's size |
 | PR 8: pattern layer and motion policy | `page-pattern`, later `motion` | After card chrome. Pattern uses a page-sized surface; the memory cost is accepted |
 | PR 4: gauge styles and modifiers | `theme-gauges` | **Proposed.** Does not need card chrome. SDK `GaugeStyle` gains `Meter, Tach, Marker, ThickBar`; adds one key, `gauge.layout` (the board draws Carbon's, Paper's and Pop's bars with the value above the bar) |
 | PR 4: sparkline, status chip, divider, well, clock options, weather sections | `theme-widget-parts` | **Proposed**; apply after `theme-gauges`. Stats keeps its own short history (a hub-provided one is the alternative); the Clock header and per-second options are opt-in |
@@ -51,6 +51,10 @@ and the OpenSpec specs (`openspec/specs/`) win.
 - **Installer size is not a concern.** CPU and memory are.
 - **Goldens guard v1 pixels** (`theme-golden-harness`): `default-dark`, `default-light`, `glass` at 1100x1920 and a dock page, Windows
   only. Any change that draws must leave them unchanged or say why in its pull request.
+- **Card chrome as built (underlay):** a shadow without `color` is black at 40 %, without `blur` a hard edge; a glow without `color`
+  takes `colors.cardBorder`. The reach limit scales offset and blur together, not the spread, and logs one information line per
+  loaded theme. The press binds the sprite to the card's visual with expressions; `WidgetView` did not change. The pictures are
+  made in physical pixels, so a display scaling changes nothing but their stretch.
 - **Card chrome as built (back):** a theme with no card value of format 2 draws exactly as before (the goldens prove it); any
   such value puts it on the new path, where a border of 2 px or less is a whole pixel. A dashed border has a dash centred on
   every corner (fitted per side, not to the perimeter as the design said). The error card wipes only the card's shape. A back
@@ -71,7 +75,8 @@ and the OpenSpec specs (`openspec/specs/`) win.
 - **Card chrome:** decided in `docs/design/card-chrome.md`. Two decisions changed: the engine limits a shadow's or glow's reach to
   the gap when the card fill is translucent (Prism's 193 px showed as a cloud through its neighbours, and its picture was over both
   underlay budgets), and a back with a gradient or a sheen is cached as an image per size (a gradient over a card costs about 1.1 ms
-  in software). The press carries the sprite. The owner should look at `prism-reach.png` (branch `spike/card-chrome-paint`).
+  in software). The press carries the sprite. Prism's limited shadow was looked at on the panel and approved (`card-underlay`);
+  its theme change may still widen the gap.
 - **Typography:** `opsz` was decided in `theme-typography` (`opticalSize: auto`: the display cut for values, the pixel size for the
   rest). Still open: sharing the base typeface between page and dock (a second family measured 2.3 MB on the panel; optional), and
   whether a slanted value should count its lean in the fit and the unit gap (Ember, Rigline; see that change's design).
@@ -88,9 +93,9 @@ translucent fill (the engine limits it, `docs/design/card-chrome.md`); text cont
 
 ## Not verified, in case it matters later
 
-- Whether the border's 15-step rotation and the underlay's page slide look smooth: only still captures were taken (S1, S2).
+- Whether the border's 15-step rotation looks smooth: only still captures were taken (S2). The underlay's page slide was looked at on
+  the panel (`card-underlay`).
 - A shader run on the GPU past the 4-hour wrap; only CPU renders at 14,399 s were made.
-- The sprite underlay at display scalings other than 100 %.
 - Value fill animation and pattern scroll were never tested (deferred).
 
 ## Separate backlog items found on the way
@@ -99,4 +104,7 @@ translucent fill (the engine limits it, `docs/design/card-chrome.md`); text cont
   Not caused by this work; it will show more once themes switch visibly.
 - The cached card backs of a gradient theme cost about 8 to 9 MB on the panel (`docs/perf/card-chrome.md`), accepted; if memory ever
   matters, the fill can move to a `CompositionLinearGradientBrush` under each card (`docs/design/card-chrome.md` 10).
+- The underlay's memory (+7.7 MB for Paper, mostly the PNG decoding path): XAML `Image` elements with a `WriteableBitmap` and
+  `Image.NineGrid` (the XAML device, no decoder) were not tried, and may cost less (`docs/perf/card-chrome.md`, "As built
+  (card-underlay)").
 - Website posters and loops for the twelve backgrounds; a "Pairs with" badge on the site (package `08`).

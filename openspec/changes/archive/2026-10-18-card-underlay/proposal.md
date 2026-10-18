@@ -21,7 +21,8 @@ is the third of the four card chrome changes.
 - **Dock.** The dock's cards get the same underlay, from the dock's own size, kept inside the dock's band so it never lies
   over the page.
 - **Snapshot.** A snapshot draws the same underlay with the same routine before the cards.
-- **Cost.** Made when the layout or the theme changes, never per repaint; at most 20 ms to make and 2 MB per page.
+- **Cost.** Made when the layout or the theme changes, never per repaint; at most 20 ms to make a page and 10 MB for a theme's
+  pictures (2 MB in the explore; changed after measuring on the panel, see the design's findings).
 
 Not in this change: compact cards' own chrome (`card-compact`), the animated border (`motion`), `pattern` (`page-pattern`), the
 validator's findings (`theme-cli`).

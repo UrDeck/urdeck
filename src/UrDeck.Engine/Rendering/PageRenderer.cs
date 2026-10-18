@@ -52,6 +52,8 @@ public static class PageRenderer
         var layout = new GridLayoutManager(widthPx, heightPx, gap, frame.Grid.Height)
             .RenderWidgetLayout(widgets.Select(w => w.Config).ToList(), new System.Drawing.Size(widthPx, heightPx));
         int[] order = CardOrder.Assign(layout);
+        var shown = Enumerable.Range(0, widgets.Count).Where(i => widgets[i].Config.IsVisible && layout[i].Placed).ToList();
+        PaintUnderlay(canvas, shown.Select(i => (layout[i], order[i])), cardStyle, null);
 
         for (int i = 0; i < widgets.Count; i++)
         {
@@ -73,6 +75,8 @@ public static class PageRenderer
             using var slotStyle = ResolvedCardStyle.Resolve(loaded, side);
             var slots = DockLayout.Compute(frame.Dock, dock!.Count, gap);
             int[] slotOrder = CardOrder.Dock(slots.Count);
+            var filled = Enumerable.Range(0, slots.Count).Where(i => dock[i].Widget != null && dock[i].Config.IsVisible).ToList();
+            PaintUnderlay(canvas, filled.Select(i => (slots[i], slotOrder[i])), slotStyle, frame.Dock);
             for (int i = 0; i < slots.Count; i++)
             {
                 var (config, widget) = dock[i];
@@ -135,6 +139,27 @@ public static class PageRenderer
         {
             UrDeckLog.Warn($"Background: painting failed, the page is drawn without it: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// What the theme draws outside the cards, under all of them, with the routine the host's pictures use; the dock's is
+    /// kept inside its band (<paramref name="band"/>), as the host clips it.
+    /// </summary>
+    private static void PaintUnderlay(SKCanvas canvas, IEnumerable<(WidgetLayoutItem Item, int Index)> cards, ResolvedCardStyle style, System.Drawing.Rectangle? band)
+    {
+        if (!style.HasOutside)
+            return;
+        int save = canvas.Save();
+        if (band is { } b)
+            canvas.ClipRect(SKRect.Create(b.X, b.Y, b.Width, b.Height));
+        foreach (var (item, index) in cards)
+        {
+            int card = canvas.Save();
+            canvas.Translate(item.Position.X, item.Position.Y);
+            CardUnderlay.Draw(canvas, style, style.For(index, item.Size).Shape);
+            canvas.RestoreToCount(card);
+        }
+        canvas.RestoreToCount(save);
     }
 
     /// <summary>Paints one card clipped to its rectangle, as its own surface clips it in the window.</summary>

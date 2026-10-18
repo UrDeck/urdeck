@@ -167,8 +167,8 @@ Drawn by: the changes that use them.
 
 Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`, `tint`), the border (`borderStyle`,
 `borderDash`, `borderGradient`), the light inside the card (`highlight`, `sheen`), the `accentStrip` and the part of the
-`cornerMarks` that lies on the card. Kept and drawn by the later card chrome changes: `borderAnimate`, `shadow`, `glow`, the
-part of a corner mark outside the card, and `compact`.
+`cornerMarks` on and outside the card, the `shadow` and the `glow`. Kept and drawn by the later card chrome changes:
+`borderAnimate` and `compact`.
 
 - **Shape.** `round` is the rounded rectangle of `card.radius`, limited to half the card's smaller side. `chamfer` cuts the
   corners in `cutCorners` with a straight line `cut` along each side, limited to half the smaller side; the other corners are
@@ -200,8 +200,22 @@ part of a corner mark outside the card, and `compact`.
   top or bottom edge. Each arm is `size` long from the mark's outer corner and `thickness` wide, in `color` (the accent without
   one). `inset` is the distance from the card's edge to the mark's outer edge: positive moves the mark in, negative puts it
   partly or wholly outside the card (minus half the thickness puts the line across the edge). Marks are drawn after the
-  content, so content never covers them. The part outside the card is not drawn yet. `style` `none` (the default) draws no
-  marks.
+  content, so content never covers them. The part outside the card is drawn under the cards with the shadow, and continues
+  the part on the card without a break. `style` `none` (the default) draws no marks.
+- **Shadow.** `shadow` is the card's shape moved by `x` and `y`, grown by `spread` on every side (shrunk when negative),
+  blurred by `blur`, in `color`. `blur` 0, or no `blur`, is a hard edge (Pop); without a `color` it is black at 40 %. All four
+  lengths are fractions of a cell.
+- **Glow.** `glow` blurs the card's shape outwards by `blur`, in `color` (the card border colour without one) at `alpha`. A glow
+  without `blur` draws nothing.
+- **Under every card.** The shadow, the glow and the outside part of the marks are drawn under all the cards of the page, so
+  they never cover a card's content, and each card's own shape is cut out of its own shadow and glow, so a translucent card
+  does not show them through its fill. They take no input, and a pressed card's shadow shrinks and dims with the card. In the
+  dock they are drawn at the dock's size and kept inside the dock's band.
+- **Translucent cards.** When any card fill colour (`colors.cardFill`, a `fillGradient` colour, a `cardTints` entry in a tinted
+  theme) has some transparency, a neighbour's shadow would show through the card. The shadow's offset and blur, and the glow's
+  blur, are then scaled down together until they reach no further than `card.gap` past the card; `urdeck.log` says so once,
+  with the reach before and after. A theme with opaque cards keeps its full reach.
+- What is drawn outside the cards is made when the layout or the theme changes, never when a widget repaints.
 - The highlight, accent strip and mark thicknesses are hairlines like the border: 2 pixels or less is drawn whole.
 - A fill gradient, a sheen or an accent strip is drawn once per card size (and strip colour) and reused, so a repaint costs
   about what it does with a plain fill ([`docs/perf/card-chrome.md`](perf/card-chrome.md)).

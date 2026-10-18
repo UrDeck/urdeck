@@ -14,7 +14,7 @@ larger than the budget.
 **Goals:**
 - One routine draws a card's outside (shadow, glow, the outside part of its marks, its own shape cut out); the sprite
   picture and the snapshot both use it.
-- Inside the budget for every draft: 20 ms, 2 MB per page.
+- Inside the budget for every draft: 20 ms per page, 10 MB for a theme's pictures (2 MB until the apply; see the findings).
 - Press, slide and input behave as without it (S1 showed it for slide and input).
 
 **Non-Goals:**
@@ -77,3 +77,28 @@ nine-grid: it draws at each card's size), then the dock's clipped to its band.
   `prism-reach.png`); Prism's theme change may still widen its gap.
 - [The first build in a process over 20 ms (S1: 22 to 34 ms, the first blur and encode)] → accepted for the first
   page at startup, as S1 did; measured again here.
+
+## Findings during apply
+
+- **The memory budget is 10 MB, not 2 MB** (owner's decision, 2026-10-18). Measured on the panel with the underlay on and off
+  (`docs/perf/card-chrome.md`, "As built (card-underlay)"): Paper +7.7 MB, Prism and Rigline about +4 MB. The pixels are a
+  small part (Paper's five pictures hold about 1.3 MB); most of it is the decoding path, PNG into a `LoadedImageSurface`.
+- **The risk's alternative, a `CompositionDrawingSurface` filled from the Skia pixels, was built and measured, and dropped**:
+  WinUI 3 does not expose the compositor's own Direct3D device, so it needs a device of the host's own, and that cost +30 MB
+  for Paper (+19 MB for Prism). The pictures stay PNGs in the engine (`UnderlayPicture.Png`) and are decoded once per process.
+- **Build time is inside its budget** warm (Paper 9.6 to 11.2 ms, Rigline 11.3 to 12.6, Prism 1.3); the first build after start
+  is 28 to 38 ms, accepted as S1 did. The underlay is built once per page and not again while clocks tick.
+- **The press binding runs** (decision 4): the `ExpressionAnimation`s on the sprite's `Scale` and `Opacity`, reading the view's
+  hand-off visual, follow `WidgetView.AnimatePress`, so the fallback in `AnimatePress` was not needed and `WidgetView` is unchanged.
+- **Looked at on the panel by the owner** (2026-10-18), all approved: a held press on Pop's hard shadow (the shadow shrinks and
+  dims with the card, no band of background), a slide between two pages (the second page reuses the pictures, "kept" in the
+  log), Prism's shadow limited to the gap, and the soft edge of its half-size picture under the translucent cards (no ring, so
+  Prism stays at half size), and the panel at 150 % scaling (the deck re-placed and rebuilt; the same 25 px of physical bleed).
+- **Defaults the schema did not give:** a shadow without `color` is black at 40 %, without `blur` a hard edge; a glow without
+  `blur` draws nothing, without `color` takes `colors.cardBorder`. A shadow's `spread` keeps a rounded card's corners
+  concentric and moves a chamfer's cut out with its sides; the reach limit scales the offset and blur, not the spread.
+- **Bleed and corner zone** are the explore's formulas (`docs/perf/card-chrome.md`, "Underlay pictures"), including its margin of
+  one thickness past an outside mark's edge; the unit tests hold every draft to the table.
+- **A nine-grid picture is drawn round a card of twice the corner zone plus 2 px**; a card is stretched by it when both its sides
+  are at least twice the zone. On the panel no seam shows at the inset lines (Paper, 100 %).
+- `card-chrome-front`'s test that a snapshot cuts a mark at the card's edge now checks that the mark continues past it.
