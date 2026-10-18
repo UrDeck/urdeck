@@ -55,6 +55,11 @@ public sealed class ResolvedCardStyle : IDisposable
 
     private readonly Dictionary<(int Tint, int Strip, int Width, int Height), SizedCardChrome> _sized = [];
 
+    // The compact variant when the theme sets card.compact; owned, and disposed with this style.
+    private ResolvedCardStyle? _compact;
+    private LoadedTheme _loaded = null!;
+    private bool _circle;
+
     // The underlay pictures: the nine-grid one under (0, 0), an exact one under its card's size.
     private readonly Dictionary<(int Width, int Height), UnderlayPicture> _underlays = [];
     private int _backImagesMade;
@@ -156,10 +161,29 @@ public sealed class ResolvedCardStyle : IDisposable
     /// </summary>
     public static ResolvedCardStyle Resolve(LoadedTheme loaded, float cellPx)
     {
+        var card = loaded.Definition.Card!;
+        var style = Build(loaded, cellPx, card, circle: false, compact: false);
+        if (card.Compact is { } compact)
+            style._compact = Build(loaded, cellPx, card.ForCompact(compact), compact.Shape == "circle", compact: true);
+        return style;
+    }
+
+    /// <summary>
+    /// The style of the cards that are compact (a dock slot, a page card of one cell): the theme's <c>card.compact</c> values
+    /// over the page card's. This style itself when the theme sets none.
+    /// </summary>
+    public ResolvedCardStyle Compact => _compact ?? this;
+
+    /// <summary>The style of a page card: <see cref="Compact"/> for a card of one grid cell, this style otherwise.</summary>
+    public ResolvedCardStyle ForCard(Layout.WidgetLayoutItem item) =>
+        item.GridSize.Width <= 1 && item.GridSize.Height <= 1 ? Compact : this;
+
+    private static ResolvedCardStyle Build(LoadedTheme loaded, float cellPx, ThemeCardDefinition card, bool circle, bool compact)
+    {
         var d = loaded.Definition;
-        var card = d.Card!;
         var colors = d.Colors!;
-        bool plain = Format2CardKeys.All(p => p.GetValue(card) == null);
+        // The compact variant is never plain: the plain path draws with the SDK theme's radius, which is the page's.
+        bool plain = !compact && Format2CardKeys.All(p => p.GetValue(card) == null);
 
         float borderWidth = Px(card.BorderWidth, cellPx);
         if (!plain)
@@ -171,8 +195,9 @@ public sealed class ResolvedCardStyle : IDisposable
         var fillGradient = Parse(card.FillGradient?.Colors);
         var tints = card.Tint == "cycle" ? Parse(colors.CardTints) : null;
         var marks = ResolveMarks(loaded, card.CornerMarks, accent, cellPx);
-        float radius = Px(card.Radius, cellPx);
-        bool chamfer = card.Shape == "chamfer";
+        // A circle is a radius of half a cell: a card is never larger, so its shape limits it to half its smaller side.
+        float radius = circle ? cellPx / 2 : Px(card.Radius, cellPx);
+        bool chamfer = !circle && card.Shape == "chamfer";
         float cut = (float)(card.Cut ?? DefaultCut) * cellPx;
 
         var shadow = ResolveShadow(card.Shadow, cellPx);
@@ -187,6 +212,8 @@ public sealed class ResolvedCardStyle : IDisposable
         return new ResolvedCardStyle
         {
             IsPlain = plain,
+            _loaded = loaded,
+            _circle = circle,
             Fill = fill,
             Border = border,
             Radius = radius,
@@ -383,6 +410,10 @@ public sealed class ResolvedCardStyle : IDisposable
             ObjectDisposedException.ThrowIf(_disposed, this);
             if (!_sized.TryGetValue(key, out var chrome))
             {
+                if (_circle && Math.Abs(size.Width - size.Height) > 1)
+                    _loaded.Warnings.InfoOnce("capsule",
+                        $"Theme '{_loaded.Name}': card.compact.shape circle on a card of {size.Width}x{size.Height} px is a capsule; " +
+                        "it has room for one information line.");
                 _sized[key] = chrome = new SizedCardChrome(this, tint, strip, size);
                 if (chrome.HasBackImage)
                     Interlocked.Increment(ref _backImagesMade);
@@ -429,6 +460,7 @@ public sealed class ResolvedCardStyle : IDisposable
                 picture.Dispose();
             _underlays.Clear();
         }
+        _compact?.Dispose();
     }
 
     private static float Px(double? fraction, float cellPx) => (float)fraction!.Value * cellPx;

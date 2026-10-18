@@ -31,17 +31,16 @@ internal sealed class UnderlayView : Canvas, IDisposable
     }
 
     /// <summary>
-    /// The underlay of <paramref name="cards"/> (positions in DIPs) in <paramref name="style"/>, at <paramref name="scale"/>
-    /// physical pixels per DIP, cut to <paramref name="clip"/> when one is given; null when the style draws nothing outside.
+    /// The underlay of <paramref name="cards"/> (positions in DIPs, each with its own style), at <paramref name="scale"/>
+    /// physical pixels per DIP, cut to <paramref name="clip"/> when one is given; null when no card's style draws anything outside.
     /// </summary>
     public static UnderlayView? Create(
-        IReadOnlyList<(WidgetLayoutItem Item, WidgetView View)> cards,
-        ResolvedCardStyle style,
+        IReadOnlyList<(WidgetLayoutItem Item, WidgetView View, ResolvedCardStyle Style)> cards,
         double scale,
         System.Drawing.Rectangle? clip,
         string name)
     {
-        if (!style.HasOutside || cards.Count == 0)
+        if (cards.Count == 0 || !cards.Any(c => c.Style.HasOutside))
             return null;
         long started = Stopwatch.GetTimestamp();
         var view = new UnderlayView();
@@ -52,7 +51,7 @@ internal sealed class UnderlayView : Canvas, IDisposable
 
         var brushes = new Dictionary<UnderlayPicture, CompositionBrush>();
         var made = new List<UnderlayPicture>();
-        foreach (var (item, card) in cards)
+        foreach (var (item, card, style) in cards)
         {
             var px = new System.Drawing.Size(
                 Math.Max(1, (int)Math.Round(item.Size.Width * scale)),
@@ -82,7 +81,7 @@ internal sealed class UnderlayView : Canvas, IDisposable
             $"{p.PixelWidth}x{p.PixelHeight} {(p.IsNineGrid ? "nine-grid" : "exact")}{(p.Scale < 1 ? " half size" : "")} {(made.Contains(p) ? $"made in {p.BuildTime.TotalMilliseconds:F1} ms" : "kept")}");
         string pictures = string.Join(", ", brushes.Keys.Select(Describe));
         UrDeckLog.Info(string.Create(CultureInfo.InvariantCulture,
-            $"Underlay ({name}): {cards.Count} cards, bleed {style.Bleed} px, pictures [{pictures}], {Stopwatch.GetElapsedTime(started).TotalMilliseconds:F1} ms"));
+            $"Underlay ({name}): {cards.Count} cards, bleed {cards.Max(c => c.Style.Bleed)} px, pictures [{pictures}], {Stopwatch.GetElapsedTime(started).TotalMilliseconds:F1} ms"));
         return view;
     }
 

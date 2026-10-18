@@ -394,7 +394,7 @@ public sealed class MainWindow : Window, ISettingsHost
         int slot = DockLayout.SlotSide(chrome.Dock);
         if (slot > 0)
         {
-            var dockTheme = _dockTheme = ThemeResolver.Resolve(_loadedTheme, (float)(slot * scale));
+            var dockTheme = _dockTheme = ThemeResolver.Resolve(_loadedTheme, (float)(slot * scale), compact: true);
             var dockCardStyle = _dockCardStyle = ResolvedCardStyle.Resolve(_loadedTheme, (float)(slot * scale));
             buildDock = () =>
             {

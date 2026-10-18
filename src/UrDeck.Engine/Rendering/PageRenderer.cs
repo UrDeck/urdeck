@@ -53,7 +53,7 @@ public static class PageRenderer
             .RenderWidgetLayout(widgets.Select(w => w.Config).ToList(), new System.Drawing.Size(widthPx, heightPx));
         int[] order = CardOrder.Assign(layout);
         var shown = Enumerable.Range(0, widgets.Count).Where(i => widgets[i].Config.IsVisible && layout[i].Placed).ToList();
-        PaintUnderlay(canvas, shown.Select(i => (layout[i], order[i])), cardStyle, null);
+        PaintUnderlay(canvas, shown.Select(i => (layout[i], order[i], cardStyle.ForCard(layout[i]))), null);
 
         for (int i = 0; i < widgets.Count; i++)
         {
@@ -64,24 +64,24 @@ public static class PageRenderer
             var item = layout[i];
             if (!item.Placed)
                 continue;
-            PaintAt(canvas, widget, item, theme, new CardLook(cardStyle, order[i]), time);
+            PaintAt(canvas, widget, item, theme, new CardLook(cardStyle.ForCard(item), order[i]), time);
         }
 
         int side = hasDock ? DockLayout.SlotSide(frame.Dock) : 0;
         if (side > 0)
         {
             // A slot is a small grid cell: the theme is resolved again for its size, so the card is a miniature.
-            using var slotTheme = ThemeResolver.Resolve(loaded, side);
+            using var slotTheme = ThemeResolver.Resolve(loaded, side, compact: true);
             using var slotStyle = ResolvedCardStyle.Resolve(loaded, side);
             var slots = DockLayout.Compute(frame.Dock, dock!.Count, gap);
             int[] slotOrder = CardOrder.Dock(slots.Count);
             var filled = Enumerable.Range(0, slots.Count).Where(i => dock[i].Widget != null && dock[i].Config.IsVisible).ToList();
-            PaintUnderlay(canvas, filled.Select(i => (slots[i], slotOrder[i])), slotStyle, frame.Dock);
+            PaintUnderlay(canvas, filled.Select(i => (slots[i], slotOrder[i], slotStyle.ForCard(slots[i]))), frame.Dock);
             for (int i = 0; i < slots.Count; i++)
             {
                 var (config, widget) = dock[i];
                 if (widget != null && config.IsVisible)
-                    PaintAt(canvas, widget, slots[i], slotTheme, new CardLook(slotStyle, slotOrder[i]), time);
+                    PaintAt(canvas, widget, slots[i], slotTheme, new CardLook(slotStyle.ForCard(slots[i]), slotOrder[i]), time);
             }
         }
 
@@ -142,17 +142,18 @@ public static class PageRenderer
     }
 
     /// <summary>
-    /// What the theme draws outside the cards, under all of them, with the routine the host's pictures use; the dock's is
+    /// What the theme draws outside the cards (each in its own style), under all of them, with the routine the host's pictures use; the dock's is
     /// kept inside its band (<paramref name="band"/>), as the host clips it.
     /// </summary>
-    private static void PaintUnderlay(SKCanvas canvas, IEnumerable<(WidgetLayoutItem Item, int Index)> cards, ResolvedCardStyle style, System.Drawing.Rectangle? band)
+    private static void PaintUnderlay(SKCanvas canvas, IEnumerable<(WidgetLayoutItem Item, int Index, ResolvedCardStyle Style)> cards, System.Drawing.Rectangle? band)
     {
-        if (!style.HasOutside)
+        var outside = cards.Where(c => c.Style.HasOutside).ToList();
+        if (outside.Count == 0)
             return;
         int save = canvas.Save();
         if (band is { } b)
             canvas.ClipRect(SKRect.Create(b.X, b.Y, b.Width, b.Height));
-        foreach (var (item, index) in cards)
+        foreach (var (item, index, style) in outside)
         {
             int card = canvas.Save();
             canvas.Translate(item.Position.X, item.Position.Y);

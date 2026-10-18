@@ -89,6 +89,41 @@ public sealed partial class ThemeCardDefinition
         result.Compact = Compact;
     }
 
+    /// <summary>
+    /// The card values of a compact card: a copy of this card with the compact radius, border width and (round or chamfer)
+    /// shape, and the compact strip and marks merged key by key over this card's.
+    /// </summary>
+    internal ThemeCardDefinition ForCompact(ThemeCardCompactDefinition compact)
+    {
+        var result = (ThemeCardDefinition)MemberwiseClone();
+        result.Compact = null;
+        result.Radius = compact.Radius ?? Radius;
+        result.BorderWidth = compact.BorderWidth ?? BorderWidth;
+        if (compact.Shape is "round" or "chamfer")
+            result.Shape = compact.Shape;
+        if (compact.AccentStrip is { } strip)
+            result.AccentStrip = new ThemeCardAccentStripDefinition
+            {
+                Side = strip.Side ?? AccentStrip?.Side,
+                Thickness = strip.Thickness ?? AccentStrip?.Thickness,
+                Length = strip.Length ?? AccentStrip?.Length,
+                Colors = strip.Colors ?? AccentStrip?.Colors,
+                Fade = AccentStrip?.Fade,
+                Glow = strip.Glow ?? AccentStrip?.Glow,
+            };
+        if (compact.CornerMarks is { } marks)
+            result.CornerMarks = new ThemeCardCornerMarksDefinition
+            {
+                Style = marks.Style ?? CornerMarks?.Style,
+                Corners = marks.Corners ?? CornerMarks?.Corners,
+                Size = marks.Size ?? CornerMarks?.Size,
+                Thickness = marks.Thickness ?? CornerMarks?.Thickness,
+                Inset = marks.Inset ?? CornerMarks?.Inset,
+                Color = marks.Color ?? CornerMarks?.Color,
+            };
+        return result;
+    }
+
     internal void SanitizeFormat2(ThemeValueCheck check, string path)
     {
         Shape = check.Enum($"{path}.shape", Shape, "round", "chamfer");
