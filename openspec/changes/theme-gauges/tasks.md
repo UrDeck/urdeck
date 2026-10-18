@@ -38,5 +38,5 @@
 ## 6. Verification and documentation
 
 - [x] 6.1 The goldens are unchanged; `dotnet build urdeck.slnx -c Release` has 0 warnings; `dotnet format urdeck.slnx --severity warn`; `openspec validate --all --strict`; the engine tests with the coverage floor
-- [ ] 6.2 On the panel, look at one fixture theme with a tach and one with a thick bar (Stats at 2x2 and 4x2); memory and CPU against the ring baseline
+- [x] 6.2 On the panel, look at one fixture theme with a tach and one with a thick bar (Stats at 2x2 and 4x2); memory and CPU against the ring baseline
 - [x] 6.3 `docs/themes.md` gauge section (remove "drawn by the gauge change", add `layout`), the site's theme and Stats pages, `docs/design/look-and-feel/STATUS.md` (row and the findings of 5.2 and 5.3)

@@ -401,3 +401,5 @@ draws on the development machine, Release build, software canvas. The v1 ring is
   help during an ease, because the fraction changes each frame; it is not done. Needs the owner's acceptance, as for Prism's chrome.
 - The shaders (sweep, linear) and the blur filters are cached on the theme per size and disposed with it: five repaints of a ring
   and a bar with a gradient and a glow build three objects (`TheShaders_AreBuiltOncePerSize_AndDisposedWithTheTheme`).
+
+**On the panel** (HYTE Y70, 1100 x 3840; four Stats cards at 4x4, 2x2, 2x2 and 4x2, private memory 25 s after start, CPU over 20 s; `default-dark` with every slot set to one style): ring 124.7 MB and 1.6 % of a core, tach 127.9 MB and 1.5 %, thick bar 125.1 MB and 1.4 %. So a tach costs about 3 MB and a thick bar under 1 MB, with no CPU difference. Ember and Pop as themes (their own backgrounds and card chrome) were 180.0 MB / 5.9 % and 181.5 MB / 4.8 %; that is the shader and the chrome, not the gauges. Looked at by eye: Ember's tach (needle, lit redline, ticks) and Pop's outlined thick bar at 4x4, 2x2 and 4x2 draw as in the gallery.
