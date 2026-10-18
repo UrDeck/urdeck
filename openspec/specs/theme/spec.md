@@ -342,8 +342,8 @@ capability; what is drawn with it is specified by the capabilities that draw it.
 - Typography: per-role fonts for `value`, `unit` and `label`, `valueScale`, `case`, `tracking`, `slant`, `valueFill`
   and `valueGlow`
 - Gauge: the styles `meter`, `tach`, `marker` and `thickbar`, `sweep`, `segments`, `outline`, `ticks`, `scale`,
-  `redline`, `gradient`, `glow`, `marker`, `crosshair`, `track`, `labelPosition`, `colorBy`, `valueTint`, `sparkline`
-  and `status`
+  `redline`, `gradient`, `glow`, `marker`, `crosshair`, `track`, `labelPosition`, `layout` (`auto` or `stacked`),
+  `colorBy`, `valueTint`, `sparkline` and `status`
 - Icons: `set`, `stroke`, `tint`, `animated`, `glow`
 - Background: `default` (a background's name), `static` (a gradient, a colour or a picture file) and `scrim`
 - Motion: `level`, the ceiling for animation a theme drives
@@ -353,7 +353,7 @@ The product has set some values aside for a later change; they are listed with t
 
 #### Scenario: Card chrome values
 - **WHEN** a theme sets `card.shape` to `chamfer`, `card.cut` to 0.14 and `card.cutCorners` to `["tr", "bl"]`
-- **THEN** the loaded theme has those values and nothing about the way cards are drawn changes yet
+- **THEN** the loaded theme has those values, and the cards are drawn with them as `widget-card` specifies
 
 #### Scenario: Compact override
 - **WHEN** a theme sets `card.compact.shape` to `circle`
@@ -473,4 +473,3 @@ other invalid format 2 value.
 #### Scenario: Unknown value
 - **WHEN** a theme sets `typography.opticalSize` to `large`
 - **THEN** the key is cleared as `off` and one warning names the theme, the key and the value
-

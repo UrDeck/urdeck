@@ -45,7 +45,10 @@ Format 2 adds optional values for card chrome (chamfered corners, shadows, dashe
 fonts, more gauge styles, icons and a background of its own. The typography values are drawn today: a font per role (values,
 units, labels) with a fallback to the theme's font, the optical size of fonts that have one (`"opticalSize": "auto"`), upper- or
 lower-case labels and titles, letter spacing, slanted values, a gradient fill and a glow behind values. A weight the font
-cannot make is written to `urdeck.log` once. The other values are checked and kept today and drawn by later releases; a file
+cannot make is written to `urdeck.log` once. The card's shape, fill and border are drawn today too: chamfered corners
+(`card.shape`, `cut`, `cutCorners`), a gradient fill (`card.fillGradient`), a colour per card from `colors.cardTints`
+(`card.tint: "cycle"`, row by row on each page, by position in the dock), and dashed or gradient borders (`card.borderStyle`,
+`borderDash`, `borderGradient`, linear or conic); a dashed border has a dash on every corner. The other values are checked and kept today and drawn by later releases; a file
 that uses none of them is unaffected. A theme's [background](/docs/backgrounds/#theme-backgrounds), a default shader, a
 still gradient, colour or picture and a scrim, is drawn today when your configuration has no `background` of its own, and
 `meta.pairsWith.backgrounds` lists the backgrounds that suit the theme, for a settings page to recommend. The

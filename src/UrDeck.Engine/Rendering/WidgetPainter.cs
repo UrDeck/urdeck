@@ -8,31 +8,41 @@ using UrDeck.Sdk;
 namespace UrDeck.Engine.Rendering;
 
 /// <summary>
-/// The one paint path for a widget's surface, shared by the live window and snapshots: the host draws the card,
-/// clips to its shape and then lets the widget draw. A widget that throws is drawn as a themed error card.
+/// The one paint path for a widget's surface, shared by the live window and snapshots: the host draws the card's back,
+/// clips to its shape, lets the widget draw, then ends the card (<see cref="CardChrome"/>). A widget that throws is drawn
+/// as a themed error card.
 /// </summary>
 public static class WidgetPainter
 {
-    /// <summary>
-    /// Paints <paramref name="widget"/> on <paramref name="canvas"/>, whose origin is the top-left corner of the
-    /// widget's card and whose size is <paramref name="size"/> (the card's size). The corners outside the card's
-    /// rounded shape are left untouched.
-    /// </summary>
+    /// <summary>As <see cref="Paint(IWidget, SKCanvas, System.Drawing.Size, Theme, CardLook?, DateTime, CancellationToken)"/> with the plain card.</summary>
     public static void Paint(
         IWidget widget,
         SKCanvas canvas,
         System.Drawing.Size size,
         Theme theme,
         DateTime time,
+        CancellationToken cancellationToken) =>
+        Paint(widget, canvas, size, theme, null, time, cancellationToken);
+
+    /// <summary>
+    /// Paints <paramref name="widget"/> on <paramref name="canvas"/>, whose origin is the top-left corner of the
+    /// widget's card and whose size is <paramref name="size"/> (the card's size), in the card's <paramref name="look"/>
+    /// (null, or a plain style, for the card drawn from <paramref name="theme"/> alone). The parts of the surface outside
+    /// the card's shape are left untouched.
+    /// </summary>
+    public static void Paint(
+        IWidget widget,
+        SKCanvas canvas,
+        System.Drawing.Size size,
+        Theme theme,
+        CardLook? look,
+        DateTime time,
         CancellationToken cancellationToken)
     {
-        var card = CardShape(size, theme);
-        DrawCard(canvas, card, theme);
-
-        int save = canvas.Save();
+        var chrome = look is { Style: { IsPlain: false } style } ? style.For(look.Value.Index, size) : null;
+        int save = CardChrome.DrawBack(canvas, size, theme, chrome);
         try
         {
-            canvas.ClipRoundRect(card, antialias: true);
             var context = new WidgetRenderContext(
                 canvas, time, size, theme, ContentRect(size, theme), widget.Config, cancellationToken);
             widget.Render(context);
@@ -41,24 +51,20 @@ public static class WidgetPainter
         {
             UrDeckLog.Error($"Widget '{widget.Name}' render failed", ex);
             canvas.RestoreToCount(save);
-            save = canvas.Save();
-            canvas.ClipRoundRect(card, antialias: true);
-            // Wipe whatever the widget managed to draw, then show the error on a fresh card.
+
+            // Wipe whatever the widget managed to draw (its content is clipped to the shape), then show the error on a
+            // fresh card with all of its chrome.
+            int wipe = canvas.Save();
+            CardChrome.ClipToShape(canvas, size, theme, chrome);
             canvas.DrawColor(SKColors.Transparent, SKBlendMode.Src);
-            DrawCard(canvas, card, theme);
+            canvas.RestoreToCount(wipe);
+            save = CardChrome.DrawBack(canvas, size, theme, chrome);
             DrawError(canvas, size, theme, widget.Name, ex.Message);
         }
         finally
         {
-            canvas.RestoreToCount(save);
+            CardChrome.DrawFront(canvas, chrome, save);
         }
-    }
-
-    /// <summary>The card's rounded rectangle; the corner radius is limited to half the smaller side.</summary>
-    internal static SKRoundRect CardShape(System.Drawing.Size size, Theme theme)
-    {
-        float radius = Math.Min(theme.CardRadius, Math.Min(size.Width, size.Height) / 2f);
-        return new SKRoundRect(SKRect.Create(size.Width, size.Height), radius, radius);
     }
 
     /// <summary>The card's area inset by the theme's padding, never smaller than nothing.</summary>
@@ -66,28 +72,6 @@ public static class WidgetPainter
     {
         float pad = Math.Min(theme.Padding, Math.Min(size.Width, size.Height) / 2f);
         return new SKRect(pad, pad, size.Width - pad, size.Height - pad);
-    }
-
-    private static void DrawCard(SKCanvas canvas, SKRoundRect card, Theme theme)
-    {
-        using var fill = new SKPaint { Color = theme.CardFill, IsAntialias = true };
-        canvas.DrawRoundRect(card, fill);
-
-        if (theme.CardBorderWidth <= 0 || theme.CardBorder.Alpha == 0)
-            return;
-
-        // The border is drawn inside the card's edge so it never extends past the surface.
-        float half = theme.CardBorderWidth / 2f;
-        var inner = new SKRoundRect(card.Rect, card.Radii[0].X, card.Radii[0].Y);
-        inner.Deflate(half, half);
-        using var border = new SKPaint
-        {
-            Color = theme.CardBorder,
-            IsAntialias = true,
-            Style = SKPaintStyle.Stroke,
-            StrokeWidth = theme.CardBorderWidth,
-        };
-        canvas.DrawRoundRect(inner, border);
     }
 
     private static void DrawError(SKCanvas canvas, System.Drawing.Size size, Theme theme, string name, string message)

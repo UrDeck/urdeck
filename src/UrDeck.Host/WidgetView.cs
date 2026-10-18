@@ -25,6 +25,7 @@ internal sealed class WidgetView : SKXamlCanvas, IFrameClient, IDisposable
     // Cleared on Dispose: WinUI can keep a removed canvas alive for a while, and it must not keep the plugin alive with it.
     private IWidget? _widget;
     private readonly Theme _theme;
+    private readonly CardLook _look;
     private readonly FrameClock _frameClock;
     private readonly DispatcherQueueTimer? _timer;
     private DispatcherQueueTimer? _wake;
@@ -47,6 +48,7 @@ internal sealed class WidgetView : SKXamlCanvas, IFrameClient, IDisposable
         WidgetServices? services,
         WidgetDescriptor descriptor,
         Theme theme,
+        CardLook look,
         PressStyle press,
         FrameClock frameClock,
         ReadingHub readings)
@@ -58,6 +60,7 @@ internal sealed class WidgetView : SKXamlCanvas, IFrameClient, IDisposable
         _dispatcher = DispatcherQueue.GetForCurrentThread();
         _frameClock = frameClock;
         _theme = theme;
+        _look = look;
         _readings = readings;
         PaintSurface += OnPaintSurface;
         if (services != null)
@@ -272,6 +275,7 @@ internal sealed class WidgetView : SKXamlCanvas, IFrameClient, IDisposable
             canvas,
             new System.Drawing.Size(e.Info.Width, e.Info.Height),
             _theme,
+            _look,
             DateTime.Now,
             _cts.Token);
         _hasPainted = true;

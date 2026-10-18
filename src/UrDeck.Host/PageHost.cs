@@ -6,6 +6,7 @@ using UrDeck.Engine.Config;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Layout;
 using UrDeck.Engine.Plugin;
+using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 
@@ -27,6 +28,8 @@ internal sealed class PageHost : Canvas, IDisposable
         IReadOnlyList<WidgetLayoutItem> layout,
         WidgetPluginLoader plugins,
         Theme theme,
+        ResolvedCardStyle cardStyle,
+        IReadOnlyList<int> cardIndex,
         PressStyle press,
         FrameClock frameClock)
     {
@@ -52,7 +55,7 @@ internal sealed class PageHost : Canvas, IDisposable
             try
             {
                 var widget = plugins.CreateWidget(config, out var services)!;
-                var view = new WidgetView(widget, services, descriptor, theme, press, frameClock, plugins.Readings)
+                var view = new WidgetView(widget, services, descriptor, theme, new CardLook(cardStyle, cardIndex[i]), press, frameClock, plugins.Readings)
                 {
                     Width = item.Size.Width,
                     Height = item.Size.Height,

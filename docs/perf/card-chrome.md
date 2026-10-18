@@ -79,3 +79,48 @@ gap look almost the same: with a gap of 25 px the shadow shows only in the gaps 
 fault. Unfitted, the period ends wherever the perimeter does, so one corner has a stub or a long gap; fitting the period to
 the perimeter (`n = round(length / period)`, both lengths scaled to fill it) removes it at no measurable cost. The diagonal edge
 is antialiased (a 2 px line cannot be pixel-snapped at 45 degrees); the straight edges are crisp at a whole-pixel width.
+
+## As built (card-chrome-back)
+
+Measured 2026-10-18 with the engine's own `WidgetPainter` and `ResolvedCardStyle`, the same method as above (one 1100 x 550
+surface, `21:47` at 300 px, median of three runs of 300 paints after 50, Windows 11, Release, software raster). This change
+draws the shape, the fill (gradient or tint), and the border (solid, dashed, linear or conic gradient); the highlight, sheen,
+strip, marks, shadow and glow are not drawn yet, so Carbon, Paper and Prism are cheaper here than they will be.
+
+| Style | Paint (ms) | Against default-dark |
+|---|---|---|
+| default-dark (v1) | 0.232 | 1.00 |
+| glass (v1) | 0.273 | 1.18 |
+| Carbon | 0.237 | 1.02 |
+| Ember (chamfer, gradient fill and border, back cached) | 0.266 | 1.15 |
+| Blueprint (dashed, fitted per side) | 0.241 | 1.04 |
+| Obsidian (gradient fill and border, back cached) | 0.274 | 1.18 |
+| Paper | 0.197 | 0.85 |
+| Pop (tint) | 0.257 | 1.10 |
+| Prism (gradient fill, back cached) | 0.299 | 1.29 |
+| Rigline (gradient fill, static conic border, back cached) | 0.273 | 1.17 |
+
+- Every draft is within the budget of 1.5 times `default-dark`. A back with a fill gradient is drawn once per (tint, size)
+  into an image with its border, and blitted; the border is in the image too, since nothing over it changes between paints.
+- The dash is fitted per side, not once to the perimeter: one period fitted to the whole outline puts the joint right but
+  leaves the other corners at whatever phase they fall on (on a 4x1 card each corner differs). Each side between two
+  corners takes a whole number of periods, scaled by its own factor, and a dash is centred on every corner. Built once per
+  size, it costs nothing measurable (Blueprint 0.241 ms).
+
+### Memory of the cached backs, on the panel
+
+Measured 2026-10-18 on the Y70 panel (1100 x 3840, 100 %), the build output's configuration: a 4x2 clock, a 4x4 stats card, a
+4x2 weather card and one dock slot. Private memory 20 s after start, three runs each.
+
+| Theme | Private memory (MB) |
+|---|---|
+| default-dark | 135.8, 133.7, 134.1 |
+| Ember without `fillGradient` | 178.7, 180.6, 180.0 |
+| Ember | 189.0, 186.1, 190.5 |
+
+- **The back images cost about 8 to 9 MB** here (Ember against the same theme without the gradient), near the arithmetic of
+  4 bytes per pixel per distinct size: 2.3 MB for 1076 x 526, 4.6 MB for 1076 x 1076, 0.1 MB for the slot. That is over the
+  5 MB the design guessed for the S1 page. **The owner accepted the cost** (2026-10-18): it applies only to a theme with a
+  fill gradient, a v1 theme pays nothing, and the compositor fallback (`docs/design/card-chrome.md` 10) stays available if it
+  ever matters.
+- The rest of Ember's difference from `default-dark` (about 45 MB) is its moving `embers` background and its theme, not the cards.

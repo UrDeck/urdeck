@@ -84,3 +84,24 @@ painter restores, clears the whole surface (`SKBlendMode.Src`, transparent), and
 - [Tint index differs between window and snapshot] → one function, called by both, with its own tests.
 - [Hairlines at display scalings other than 100 %: a card at a fractional physical position is resampled] → one look on the
   panel at 150 %; recorded, not fixed here.
+
+## Findings during apply
+
+- **The dash is fitted per side, not to the perimeter.** Decision 4's single factor puts the path's joint right but leaves
+  the other corners at whatever phase they fall on, which the spec ("dashes meet each corner the same way") does not allow.
+  `SizedCardChrome.FitDash` takes the corners' distances along the outline (`CardShape.ToPath`: a square's or a chamfer's
+  vertices, a rounded corner's middle), fits a whole number of periods to each side with its own factor, and centres a dash
+  on every corner, as one dash pattern with a phase. The outline is built from the middle of the top edge for every shape,
+  because a round rectangle stroked by Skia starts where Skia chooses.
+- **The border is part of the back image** when the back has one: nothing over it changes between paints. Decision 3 drew it
+  after the blit.
+- **The error card wipes the shape, not the whole surface.** In a snapshot the surface is the page's canvas (clipped to the
+  card's rectangle), so clearing it would leave a transparent hole in the corners outside a round or cut shape. The content is
+  clipped to the shape, and the front pieces are drawn after the content, so nothing outside the shape needs wiping;
+  `card-chrome-front` keeps it so.
+- **A paint's alpha multiplies its shader**: a gradient fill or border is drawn with an opaque paint colour, or a translucent
+  `cardFill` dims the gradient.
+- `ResolvedCardStyle.IsPlain` is computed from the `[Format2]` properties of `ThemeCardDefinition`, so a card key added later
+  makes a theme non-plain without a second list.
+- The v1 goldens are unchanged. The update switch rewrites every golden a run compares, so `default-dark-dock.png` and
+  `glass-page.png` came back as different bytes with identical pixels (the PNG encoder); they were restored, not committed.
