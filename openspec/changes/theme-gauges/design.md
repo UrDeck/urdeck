@@ -119,6 +119,28 @@ None for users. Existing configurations, themes and widgets draw as before; a th
 now receives it instead of a ring. This is the only visible change for a user theme that already set `meter`, `tach`,
 `marker` or `thickbar`, and it is the point.
 
+## Findings during apply
+
+- **One file for the arcs.** `ring`, `tach` and `marker` share `ArcGauge` (geometry, track, ticks, redline, marker); `meter` is a stacked
+  `BarGauge` with a scale. The v1 drawing stays as `LegacyGauge`, used when the theme sets no gauge value (the invariance test compares it
+  with a copy kept in the tests, three themes, two sizes, three styles).
+- **A tach has ticks and a redline of its own** (28 marks, every fourth longer, a redline from 0.85) when the theme sets none: the spec
+  says a widget that asks for `tach` gets a ring of ticks. The track is cut into blocks as well as the fill, so a segmented bar shows
+  its unlit blocks (Carbon).
+- **Room for an inside label.** With ticks the circle is small (Ember's 0.07 ticks leave a 49 px inner radius at a 1x1 card), and the
+  value shrank to one pixel beside a 32 px label. An arc that is open at the bottom now gives an inside label extra readout height
+  below its middle.
+- **A sweep gradient wraps.** The round cap before the start of the arc sampled the end of the sweep and drew a magenta dot on Rigline;
+  the gap now holds the last colour to its middle and then the first.
+- **Blueprint's 180 degree sweep** leaves the lower half of the cell empty and puts the value on the needle's hub. Its theme change should
+  sweep 270 degrees (or the component should centre a half dial lower); not decided here.
+- **Colours in the drafts are `#AARRGGBB`:** Ember's tick colour `#ffffff1c` is opaque yellow, and Blueprint's track `#559fd0ff` is a
+  yellow-green; the theme changes should write them alpha first.
+- **Pop's thick bar** shows a hairline seam between the outline and the fill (the clip's anti-aliasing); Prism's white values need its
+  translucent cards. Neither is the component's.
+- **Cost.** See `docs/perf/theme-look.md`, "Gauge styles": every style is inside 2x without a glow; the glow themes are 3.5x to 5.1x
+  (0.18 to 0.25 ms a repaint) and need acceptance.
+
 ## Open Questions
 
 - Whether `ticks.labels` should use the reading's formatter (units) or plain numbers. The drafts print plain numbers

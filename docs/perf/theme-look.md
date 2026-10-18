@@ -380,3 +380,24 @@ The host on the HYTE Y70 (1100 x 3840, the sample configuration: clock, stats, w
 memory 25 s after start, median of three runs, themes on `default-dark`'s colours: `default-dark` (Inter) 134.5 MB; Obsidian's
 typography with Jost alone 131.9 MB; with Jost and Bodoni Moda per role and `opticalSize: auto` 134.2 MB. A second family is
 about 2.3 MB: S3's 1 MB estimate per resolve, paid twice because the page and the dock each resolve the theme.
+
+## Gauge styles (theme-gauges)
+
+One repaint of a gauge at a 275 px cell (a 205 px square, a label, a changing fraction), mean of 300 draws after 20 warm-up
+draws on the development machine, Release build, software canvas. The v1 ring is 0.051 ms.
+
+| Theme (style) | ms | x the ring | Glow |
+|---|---|---|---|
+| Ember (tach) | 0.21 | 4.3 | yes (fill and redline) |
+| Rigline (ring, gradient) | 0.25 | 5.1 | yes |
+| Prism (ring, gradient) | 0.18 | 3.5 | yes |
+| Blueprint (marker, ticks with numbers) | 0.09 | 1.7 | no |
+| Obsidian (marker) | 0.05 | 1.0 | no |
+| Paper (meter), Carbon (segmented bar), Pop (thick bar) | 0.03 to 0.04 | 0.7 to 0.8 | no |
+
+- Without a glow every style is inside the budget (2x). With a glow three draft themes are over the 3x budget (3.5x to 5.1x);
+  the cost is the blurred stroke, drawn on every repaint. A gauge repaints only when its rounded value changes or while its
+  300 ms ease runs, so the worst case is about 0.25 ms a few times a second per gauge. Caching the blur per fraction would not
+  help during an ease, because the fraction changes each frame; it is not done. Needs the owner's acceptance, as for Prism's chrome.
+- The shaders (sweep, linear) and the blur filters are cached on the theme per size and disposed with it: five repaints of a ring
+  and a bar with a gradient and a glow build three objects (`TheShaders_AreBuiltOncePerSize_AndDisposedWithTheTheme`).

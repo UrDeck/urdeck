@@ -167,8 +167,29 @@ internal static class ArcGauge
     private static SKShader GradientShader(GaugeContext c, ArcLayout layout, IReadOnlyList<SKColor> colors) =>
         c.G.Cache.Get(("arc", c.Rect, layout.Start, layout.Span, c.G.Gradient!.Ramp), () =>
         {
-            using var sweep = SKShader.CreateSweepGradient(layout.Center, [.. colors], null, SKShaderTileMode.Clamp, 0, layout.Span);
-            return sweep.WithLocalMatrix(SKMatrix.CreateRotationDegrees(layout.Start, layout.Center.X, layout.Center.Y));
+            var rotation = SKMatrix.CreateRotationDegrees(layout.Start, layout.Center.X, layout.Center.Y);
+            if (layout.Span >= 360f)
+            {
+                using var closed = SKShader.CreateSweepGradient(layout.Center, [.. colors], null, SKShaderTileMode.Clamp, 0, 360);
+                return closed.WithLocalMatrix(rotation);
+            }
+
+            // Over the sweep the colours run evenly; in the gap the last colour holds to its middle and the first takes over, so the
+            // round cap at the start of the arc is not tinted with the end's colour.
+            float share = layout.Span / 360f;
+            float middle = share + (1 - share) / 2;
+            var stops = new List<SKColor>(colors);
+            var positions = new List<float>();
+            for (int i = 0; i < colors.Count; i++)
+                positions.Add(share * i / (colors.Count - 1));
+            stops.Add(colors[^1]);
+            positions.Add(middle - 0.0005f);
+            stops.Add(colors[0]);
+            positions.Add(middle);
+            stops.Add(colors[0]);
+            positions.Add(1f);
+            using var sweep = SKShader.CreateSweepGradient(layout.Center, [.. stops], [.. positions], SKShaderTileMode.Clamp, 0, 360);
+            return sweep.WithLocalMatrix(rotation);
         });
 
     private static void DrawRedline(GaugeContext c, ArcLayout layout, SKRect oval, GaugeRedline redline, bool lit)

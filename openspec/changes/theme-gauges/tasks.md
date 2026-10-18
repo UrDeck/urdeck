@@ -31,9 +31,9 @@
 ## 5. Stats and the drafted themes
 
 - [x] 5.1 Stats slot styles `meter`, `tach`, `marker`, `thickbar`; the theme default is drawn as itself; tests for a named style, the theme default, and a text reading with a new style
-- [ ] 5.2 Render the sample page under each drafted theme as a fixture (Carbon's bar and stacked layout, Rigline, Prism, Paper, Ember, Blueprint, Pop, Obsidian) and look at each gauge beside the board; note every difference and why in the pull request
-- [ ] 5.3 Check Blueprint's sweep against its mock (design, risks) and Ember's and Pop's gauges at 1x1 and 2x2; record the finding for the theme changes
-- [ ] 5.4 Measure a repaint of each style against today's ring and with a glow (budget 2x and 3x), and record it in `docs/perf/theme-look.md`; confirm the cache is built once per size and disposed with the theme
+- [x] 5.2 Render the sample page under each drafted theme as a fixture (Carbon's bar and stacked layout, Rigline, Prism, Paper, Ember, Blueprint, Pop, Obsidian) and look at each gauge beside the board; note every difference and why in the pull request
+- [x] 5.3 Check Blueprint's sweep against its mock (design, risks) and Ember's and Pop's gauges at 1x1 and 2x2; record the finding for the theme changes
+- [x] 5.4 Measure a repaint of each style against today's ring and with a glow (budget 2x and 3x), and record it in `docs/perf/theme-look.md`; confirm the cache is built once per size and disposed with the theme
 
 ## 6. Verification and documentation
 
