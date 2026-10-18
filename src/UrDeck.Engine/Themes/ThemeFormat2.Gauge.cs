@@ -9,6 +9,10 @@ public sealed partial class ThemeGaugeDefinition
     [Format2]
     public string? LabelPosition { get; set; }
 
+    /// <summary>'stacked' draws a bar with the readout above, left-aligned, and the track at the bottom (Carbon). A meter and a thick bar are stacked by definition.</summary>
+    [Format2]
+    public string? Layout { get; set; }
+
     /// <summary>Ring/tach/marker geometry.</summary>
     [Format2]
     public ThemeGaugeSweepDefinition? Sweep { get; set; }
@@ -71,6 +75,7 @@ public sealed partial class ThemeGaugeDefinition
     private void MergeFormat2(ThemeGaugeDefinition? b, ThemeGaugeDefinition result)
     {
         result.LabelPosition = LabelPosition;
+        result.Layout = Layout;
         result.Sweep = Sweep;
         result.Segments = Segments;
         result.Outline = Outline;
@@ -91,6 +96,7 @@ public sealed partial class ThemeGaugeDefinition
     internal void SanitizeFormat2(ThemeValueCheck check, string path)
     {
         LabelPosition = check.Enum($"{path}.labelPosition", LabelPosition, "auto", "inside", "below", "above");
+        Layout = check.Enum($"{path}.layout", Layout, "auto", "stacked");
         Sweep?.Sanitize(check, $"{path}.sweep");
         Segments?.Sanitize(check, $"{path}.segments");
         Outline?.Sanitize(check, $"{path}.outline");

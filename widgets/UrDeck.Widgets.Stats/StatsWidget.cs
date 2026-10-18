@@ -26,7 +26,7 @@ public class StatsWidget : Widget<StatsConfig>
     private enum PositionKind { Single, Gauge, Text }
 
     /// <summary>What a slot asks of the gauge, before the theme and the reading have their say.</summary>
-    private enum StyleRequest { Absent, Plain, ThemeDefault, Ring, Bar, VerticalBar }
+    private enum StyleRequest { Absent, Plain, ThemeDefault, Ring, Bar, VerticalBar, Meter, Tach, Marker, ThickBar }
 
     /// <summary>One place on the card and the slot (or the default reading, when null) that fills it.</summary>
     private readonly record struct Position(PositionKind Kind, int Cell, StatsSlot? Slot);
@@ -207,6 +207,10 @@ public class StatsWidget : Widget<StatsConfig>
             "ring" => StyleRequest.Ring,
             "bar" => StyleRequest.Bar,
             "verticalbar" => StyleRequest.VerticalBar,
+            "meter" => StyleRequest.Meter,
+            "tach" => StyleRequest.Tach,
+            "marker" => StyleRequest.Marker,
+            "thickbar" => StyleRequest.ThickBar,
             _ => position.Kind == PositionKind.Single ? StyleRequest.Plain : StyleRequest.ThemeDefault,
         };
     }
@@ -218,6 +222,10 @@ public class StatsWidget : Widget<StatsConfig>
             StyleRequest.Ring => GaugeStyle.Ring,
             StyleRequest.Bar => GaugeStyle.Bar,
             StyleRequest.VerticalBar => GaugeStyle.VerticalBar,
+            StyleRequest.Meter => GaugeStyle.Meter,
+            StyleRequest.Tach => GaugeStyle.Tach,
+            StyleRequest.Marker => GaugeStyle.Marker,
+            StyleRequest.ThickBar => GaugeStyle.ThickBar,
             StyleRequest.ThemeDefault => theme.GaugeStyle,
             _ => GaugeStyle.Plain,
         };

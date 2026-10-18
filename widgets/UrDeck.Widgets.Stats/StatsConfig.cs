@@ -24,7 +24,8 @@ public class StatsSlot
     public int? Decimals { get; set; }
 
     /// <summary>
-    /// <c>plain</c>, <c>gauge</c> (the theme's default gauge style), <c>ring</c>, <c>bar</c> or <c>verticalBar</c>. Null or
+    /// <c>plain</c>, <c>gauge</c> (the theme's default gauge style), <c>ring</c>, <c>bar</c>, <c>verticalBar</c>, <c>meter</c>, <c>tach</c>,
+    /// <c>marker</c> or <c>thickbar</c>. Null or
     /// a name this version does not know counts as not present.
     /// </summary>
     public string? Style { get; set; }

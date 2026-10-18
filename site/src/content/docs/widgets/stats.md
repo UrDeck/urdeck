@@ -38,7 +38,7 @@ power and clock, and the CPU's first core):
 | `label` | Absent: the label the provider declares (for example `Core 2`). A text: shown instead. `""`: no label. |
 | `unit` | `celsius` or `fahrenheit` for readings that have several units (otherwise the reading's default, then the region's). |
 | `decimals` | Number of decimals to show (default 0). |
-| `style` | `plain`, `gauge` (the theme's default gauge), `ring`, `bar` or `verticalBar`. Absent: plain at 1x1 and 2x2, the theme's gauge style in a gauge position. Text positions are always plain, and so is a reading with no range to measure against. |
+| `style` | `plain`, `gauge` (the theme's default gauge), `ring`, `bar`, `verticalBar`, `meter`, `tach`, `marker` or `thickbar`. Absent: plain at 1x1 and 2x2, the theme's gauge style in a gauge position. Text positions are always plain, and so is a reading with no range to measure against. |
 | `min`, `max` | The gauge's range, replacing the one the provider declares (a percentage is 0 to 100). |
 | `warning`, `critical` | From these values on the gauge is drawn in the theme's warning or critical colour. In the reading's canonical unit (degrees Celsius for a temperature). |
 

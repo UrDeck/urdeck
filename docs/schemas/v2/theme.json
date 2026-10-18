@@ -1072,6 +1072,14 @@
           "description": "NEW. Where a gauge's label sits. auto keeps the v1 placement (Prism: below).",
           "default": "auto"
         },
+        "layout": {
+          "enum": [
+            "auto",
+            "stacked"
+          ],
+          "description": "NEW. stacked draws a bar with the readout above, left-aligned, and the track at the bottom (Carbon). A meter and a thick bar are stacked by definition. auto keeps the bar's own layout.",
+          "default": "auto"
+        },
         "sweep": {
           "type": "object",
           "additionalProperties": true,
