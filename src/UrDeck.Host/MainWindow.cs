@@ -60,6 +60,8 @@ public sealed class MainWindow : Window, ISettingsHost
     private LoadedTheme _loadedTheme;
     private Theme? _theme;
     private Theme? _dockTheme;
+    private ResolvedCardStyle? _cardStyle;
+    private ResolvedCardStyle? _dockCardStyle;
     private LayoutKey _lastLayout;
 
     /// <summary>What a built page depends on: the window size, the display scaling, the active theme and the dock's size.</summary>
@@ -378,6 +380,7 @@ public sealed class MainWindow : Window, ISettingsHost
         // is resolved against the physical size of one grid cell.
         float cellPx = (float)(screen.Width * scale / 4);
         _theme = ThemeResolver.Resolve(_loadedTheme, cellPx);
+        var cardStyle = _cardStyle = ResolvedCardStyle.Resolve(_loadedTheme, cellPx);
         // Whether there is a dock is the configuration's decision alone, so the layout does not depend on the plugins.
         var chrome = ChromeLayout.Compute(screen, mode, config.Pages.Count, _loadedTheme.Definition.Indicator!.BandHeight!.Value,
             config.Dock.Count > 0 ? _loadedTheme.Definition.Dock!.Height!.Value : 0);
@@ -392,11 +395,13 @@ public sealed class MainWindow : Window, ISettingsHost
         if (slot > 0)
         {
             var dockTheme = _dockTheme = ThemeResolver.Resolve(_loadedTheme, (float)(slot * scale));
+            var dockCardStyle = _dockCardStyle = ResolvedCardStyle.Resolve(_loadedTheme, (float)(slot * scale));
             buildDock = () =>
             {
                 var entries = DockLayout.Select(config.Dock, _plugins.GetDescriptor);
                 var page = new PageConfig { Name = "Dock", Widgets = entries.Select(e => e.Config).ToList() };
-                return new PageHost(page, DockLayout.Compute(chrome.Dock, entries, gap), _plugins, dockTheme, press, _frameClock);
+                var slots = DockLayout.Compute(chrome.Dock, entries, gap);
+                return new PageHost(page, slots, _plugins, dockTheme, dockCardStyle, CardOrder.Dock(slots.Count), press, _frameClock);
             };
         }
 
@@ -410,7 +415,7 @@ public sealed class MainWindow : Window, ISettingsHost
                 var page = config.Pages[index];
                 var layout = new GridLayoutManager(screen.Width, screen.Height, gap, chrome.Grid.Height)
                     .RenderWidgetLayout(page.Widgets, screen);
-                return new PageHost(page, layout, _plugins, theme, press, _frameClock);
+                return new PageHost(page, layout, _plugins, theme, cardStyle, CardOrder.Assign(layout), press, _frameClock);
             },
             buildDock));
     }
@@ -434,6 +439,10 @@ public sealed class MainWindow : Window, ISettingsHost
         _theme = null;
         _dockTheme?.Dispose();
         _dockTheme = null;
+        _cardStyle?.Dispose();
+        _cardStyle = null;
+        _dockCardStyle?.Dispose();
+        _dockCardStyle = null;
     }
 
     /// <summary>Runs on a sampling thread: collects the ids and asks the UI thread, once, to look at them.</summary>

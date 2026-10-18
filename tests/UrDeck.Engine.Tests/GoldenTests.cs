@@ -21,10 +21,12 @@ public sealed class GoldenTests
     private const int Width = 1100;
     private const int Height = 1920;
 
-    private static SKBitmap Render(string theme, bool dock = false)
+    private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
+
+    private static SKBitmap Render(string theme, bool dock = false, bool draft = false)
     {
         using var page = SamplePage.Build();
-        var loaded = new ThemeStore("").Load(theme);
+        var loaded = new ThemeStore(draft ? FixtureFolder : "").Load(theme);
         return PageRenderer.RenderToBitmap(
             Width, Height, page.Widgets, loaded, SamplePage.Time,
             dock ? new PageRenderer.Chrome(IndicatorMode.Always, 0, 2) : null,
@@ -64,6 +66,28 @@ public sealed class GoldenTests
     {
         using var bitmap = Render("default-dark", dock: true);
         GoldenImage.Compare(bitmap, "default-dark-dock");
+    }
+
+    /// <summary>
+    /// The draft themes (test fixtures) with what card chrome draws of them so far: each later chrome change that draws
+    /// more of a draft rewrites its picture, and says so.
+    /// </summary>
+    [WindowsGlyphTheory]
+    [InlineData("ember")]
+    [InlineData("blueprint")]
+    [InlineData("obsidian")]
+    [InlineData("pop")]
+    public void Draft_Page(string theme)
+    {
+        using var bitmap = Render(theme, draft: true);
+        GoldenImage.Compare(bitmap, $"{theme}-page");
+    }
+
+    [WindowsGlyphFact]
+    public void Pop_PageWithDock_TintsTheSlotsByPosition()
+    {
+        using var bitmap = Render("pop", dock: true, draft: true);
+        GoldenImage.Compare(bitmap, "pop-dock");
     }
 
     [Fact]

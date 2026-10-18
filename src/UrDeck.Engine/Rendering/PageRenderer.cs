@@ -38,6 +38,7 @@ public static class PageRenderer
     {
         // Pixels are physical here, so the theme resolves against this canvas's own cell size.
         using var theme = ThemeResolver.Resolve(loaded, widthPx / 4f);
+        using var cardStyle = ResolvedCardStyle.Resolve(loaded, widthPx / 4f);
         canvas.Clear(theme.Background);
         if (background != null)
             PaintBackground(canvas, widthPx, heightPx, background);
@@ -50,6 +51,7 @@ public static class PageRenderer
             hasDock ? loaded.Definition.Dock!.Height!.Value : 0);
         var layout = new GridLayoutManager(widthPx, heightPx, gap, frame.Grid.Height)
             .RenderWidgetLayout(widgets.Select(w => w.Config).ToList(), new System.Drawing.Size(widthPx, heightPx));
+        int[] order = CardOrder.Assign(layout);
 
         for (int i = 0; i < widgets.Count; i++)
         {
@@ -60,7 +62,7 @@ public static class PageRenderer
             var item = layout[i];
             if (!item.Placed)
                 continue;
-            PaintAt(canvas, widget, item, theme, time);
+            PaintAt(canvas, widget, item, theme, new CardLook(cardStyle, order[i]), time);
         }
 
         int side = hasDock ? DockLayout.SlotSide(frame.Dock) : 0;
@@ -68,12 +70,14 @@ public static class PageRenderer
         {
             // A slot is a small grid cell: the theme is resolved again for its size, so the card is a miniature.
             using var slotTheme = ThemeResolver.Resolve(loaded, side);
+            using var slotStyle = ResolvedCardStyle.Resolve(loaded, side);
             var slots = DockLayout.Compute(frame.Dock, dock!.Count, gap);
+            int[] slotOrder = CardOrder.Dock(slots.Count);
             for (int i = 0; i < slots.Count; i++)
             {
                 var (config, widget) = dock[i];
                 if (widget != null && config.IsVisible)
-                    PaintAt(canvas, widget, slots[i], slotTheme, time);
+                    PaintAt(canvas, widget, slots[i], slotTheme, new CardLook(slotStyle, slotOrder[i]), time);
             }
         }
 
@@ -133,11 +137,13 @@ public static class PageRenderer
         }
     }
 
-    private static void PaintAt(SKCanvas canvas, IWidget widget, WidgetLayoutItem item, Theme theme, DateTime time)
+    /// <summary>Paints one card clipped to its rectangle, as its own surface clips it in the window.</summary>
+    private static void PaintAt(SKCanvas canvas, IWidget widget, WidgetLayoutItem item, Theme theme, CardLook look, DateTime time)
     {
         int save = canvas.Save();
         canvas.Translate(item.Position.X, item.Position.Y);
-        WidgetPainter.Paint(widget, canvas, item.Size, theme, time, CancellationToken.None);
+        canvas.ClipRect(SKRect.Create(item.Size.Width, item.Size.Height));
+        WidgetPainter.Paint(widget, canvas, item.Size, theme, look, time, CancellationToken.None);
         canvas.RestoreToCount(save);
     }
 }

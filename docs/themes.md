@@ -165,7 +165,28 @@ Drawn by: the changes that use them.
 
 ### `card`
 
-Drawn by: the card chrome change.
+Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`, `tint`) and the border (`borderStyle`,
+`borderDash`, `borderGradient`). Kept and drawn by the later card chrome changes: `borderAnimate`, `cornerMarks`, `shadow`,
+`glow`, `highlight`, `sheen`, `accentStrip` and `compact`.
+
+- **Shape.** `round` is the rounded rectangle of `card.radius`, limited to half the card's smaller side. `chamfer` cuts the
+  corners in `cutCorners` with a straight line `cut` along each side, limited to half the smaller side; the other corners are
+  square and `radius` is not used. An empty `cutCorners` gives square cards. The widget's content is clipped to the shape.
+- **Fill**, first that applies: `fillGradient` (linear across the card at its angle, the colours evenly spaced); `tint`
+  `cycle` with `colors.cardTints`; `colors.cardFill`. Without `cardTints` a tinted theme uses the card fill. The text colour does
+  not change with the tint.
+- **Tint order.** A card takes the tint at its index, counting round the list. The index is its place among its page's placed,
+  visible cards, row by row and then column by column of the grid, from the first tint on every page; a hidden widget, or one
+  that does not fit, takes none. A dock slot takes its position in the dock, whether or not the slots before it show a widget.
+- **Border**, always inside the card's edge, in `card.borderWidth`: `solid`, `none`, or `dashed` with `borderDash` (`on` and
+  `off`; three and two border widths when absent). A dashed border has a dash centred on every corner: on each side the dash
+  and the gap are scaled together so that a whole number of them fits. `borderGradient` colours the border, solid or dashed:
+  `linear` at its angle, `conic` once round the card's centre, starting at the right. A border width of 0 draws nothing.
+- **Hairlines.** In a theme that sets any card value of format 2, a border of 2 pixels or less is drawn at a whole number of
+  pixels, never under 1; under one pixel it is written to `urdeck.log` once. A theme with no such value draws its cards
+  exactly as before, unrounded.
+- A fill gradient is drawn once per card size and reused, so a repaint costs about what it does with a plain fill
+  ([`docs/perf/card-chrome.md`](perf/card-chrome.md)).
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|

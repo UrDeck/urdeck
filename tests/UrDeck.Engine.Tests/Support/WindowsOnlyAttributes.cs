@@ -47,11 +47,26 @@ internal sealed class WindowsGlyphFactAttribute : FactAttribute
         : base(sourceFilePath, sourceLineNumber)
     {
         if (!OperatingSystem.IsWindows())
-            Skip = "Windows only: it expects pixel-exact text; FreeType hints advances and its antialiased edges can equal a flat colour.";
+            Skip = WindowsOnly.GlyphReason;
+    }
+}
+
+/// <summary>A <c>[Theory]</c> that expects pixel-exact text; see <see cref="WindowsGlyphFactAttribute"/>.</summary>
+[AttributeUsage(AttributeTargets.Method)]
+internal sealed class WindowsGlyphTheoryAttribute : TheoryAttribute
+{
+    public WindowsGlyphTheoryAttribute([CallerFilePath] string? sourceFilePath = null, [CallerLineNumber] int sourceLineNumber = -1)
+        : base(sourceFilePath, sourceLineNumber)
+    {
+        if (!OperatingSystem.IsWindows())
+            Skip = WindowsOnly.GlyphReason;
     }
 }
 
 internal static class WindowsOnly
 {
+    public const string GlyphReason =
+        "Windows only: it expects pixel-exact text; FreeType hints advances and its antialiased edges can equal a flat colour.";
+
     public const string Reason = "Windows only: the code under test uses the Windows shell, registry or kernel objects.";
 }

@@ -113,7 +113,7 @@ The product has set some values aside for a later change; they are listed with t
 
 #### Scenario: Card chrome values
 - **WHEN** a theme sets `card.shape` to `chamfer`, `card.cut` to 0.14 and `card.cutCorners` to `["tr", "bl"]`
-- **THEN** the loaded theme has those values and nothing about the way cards are drawn changes yet
+- **THEN** the loaded theme has those values, and the cards are drawn with them as `widget-card` specifies
 
 #### Scenario: Compact override
 - **WHEN** a theme sets `card.compact.shape` to `circle`

@@ -1,6 +1,6 @@
 # Look-and-feel work: status and how to pick it up
 
-**Updated 2026-10-15.** The other files in this folder are a snapshot of the original design handoff and are not edited.
+**Updated 2026-10-18.** The other files in this folder are a snapshot of the original design handoff and are not edited.
 This file says what has been built, what changed on the way, and what is next. Where it disagrees with them, this file
 and the OpenSpec specs (`openspec/specs/`) win.
 
@@ -22,8 +22,8 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 5: backgrounds, pairing, plan, scrim, catalogs | `theme-backgrounds` | **Done**, archived (#52). `PreviewRenderer` (PR 18) is not built |
 | PR 6, PR 7: twelve shaders | `builtin-shaders` | **Done**, archived (#53). Site posters and loops not made |
 | PR 3: typography (per-role fonts, case, tracking, slant, value fill, glow) | `theme-typography` | **Done**: per-role fonts with the fallback chain, `typography.opticalSize`, the weight warnings, `Theme.TextStyle` (SDK 0.9.0), drawn by `Readout` and `TextLine`. Findings for the theme changes are in its design ("Findings during apply") |
-| PR 2: card chrome, 1 of 4: painter split, shape, fill, tint, border, hairlines, cached gradient backs | `card-chrome-back` | **Proposed. Next: apply. Model: Opus** (the painter's shape, the cache, the per-card look through host and snapshot). Decisions for all four: `docs/design/card-chrome.md`; numbers: `docs/perf/card-chrome.md` |
-| PR 2: card chrome, 2 of 4: highlight, sheen, accent strip, corner marks on the card | `card-chrome-front` | **Proposed**; apply after `card-chrome-back`. **Model: Sonnet** (additive pieces against goldens) |
+| PR 2: card chrome, 1 of 4: painter split, shape, fill, tint, border, hairlines, cached gradient backs | `card-chrome-back` | **Done**, archived. `ResolvedCardStyle`, `CardLook`, `CardOrder`, `CardChrome`, `SizedCardChrome`. Goldens for Ember, Blueprint, Obsidian, Pop (page and dock); every draft within 1.5x `default-dark`; the cached backs cost about 8 to 9 MB on the panel, accepted (`docs/perf/card-chrome.md`, "As built"). Looked at on the panel with Ember: approved. Findings in its design (`openspec/changes/archive/2026-10-18-card-chrome-back/design.md`): the dash is fitted per side with a dash on every corner, the error card wipes the shape only. Decisions for all four: `docs/design/card-chrome.md` |
+| PR 2: card chrome, 2 of 4: highlight, sheen, accent strip, corner marks on the card | `card-chrome-front` | **Proposed. Next: apply**. **Model: Sonnet** (additive pieces against goldens) |
 | PR 2: card chrome, 3 of 4: shadow, glow and outside marks as sprites, reach limit, press, dock | `card-underlay` | **Proposed**; apply after `card-chrome-front`. **Model: Opus** (compositor work, measured on the panel) |
 | PR 2: card chrome, 4 of 4: compact cards (dock slots, 1x1), circle, partial overrides | `card-compact` | **Proposed**; apply last. **Model: Sonnet** (settled rules against goldens) |
 | PR 8: pattern layer and motion policy | `page-pattern`, later `motion` | After card chrome. Pattern uses a page-sized surface; the memory cost is accepted |
@@ -51,6 +51,11 @@ and the OpenSpec specs (`openspec/specs/`) win.
 - **Installer size is not a concern.** CPU and memory are.
 - **Goldens guard v1 pixels** (`theme-golden-harness`): `default-dark`, `default-light`, `glass` at 1100x1920 and a dock page, Windows
   only. Any change that draws must leave them unchanged or say why in its pull request.
+- **Card chrome as built (back):** a theme with no card value of format 2 draws exactly as before (the goldens prove it); any
+  such value puts it on the new path, where a border of 2 px or less is a whole pixel. A dashed border has a dash centred on
+  every corner (fitted per side, not to the perimeter as the design said). The error card wipes only the card's shape. A back
+  with a fill gradient is an image per (tint, size), border included: about 8 to 9 MB for a gradient theme on the panel,
+  accepted by the owner over the design's 5 MB. Defaults are the schema's (`cut` 0.14, fill angle 90, border angle 135).
 - **Typography as built:** the SDK member is `Theme.TextStyle` (`Theme.Text` is the text colour). `valueScale` is limited to the
   fitted size, and the mocks draw numerals smaller than the fitted readout, so the themes need no padding workaround. The value glow
   costs 2 to 3.7 times a plain readout (over the package's 2x; 0.19 ms per repaint with the copy cached). A slanted value leans past
@@ -92,4 +97,6 @@ translucent fill (the engine limits it, `docs/design/card-chrome.md`); text cont
 
 - The unchanged host holds about 54 MB more after 20 theme switches, even after a collection; the first switch alone adds about 21 MB.
   Not caused by this work; it will show more once themes switch visibly.
+- The cached card backs of a gradient theme cost about 8 to 9 MB on the panel (`docs/perf/card-chrome.md`), accepted; if memory ever
+  matters, the fill can move to a `CompositionLinearGradientBrush` under each card (`docs/design/card-chrome.md` 10).
 - Website posters and loops for the twelve backgrounds; a "Pairs with" badge on the site (package `08`).
