@@ -167,8 +167,8 @@ Drawn by: the changes that use them.
 
 Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`, `tint`), the border (`borderStyle`,
 `borderDash`, `borderGradient`), the light inside the card (`highlight`, `sheen`), the `accentStrip` and the part of the
-`cornerMarks` on and outside the card, the `shadow` and the `glow`. Kept and drawn by the later card chrome changes:
-`borderAnimate` and `compact`.
+`cornerMarks` on and outside the card, the `shadow` and the `glow`, and the `compact` override for small cards. Kept and drawn by
+the later card chrome change: `borderAnimate`.
 
 - **Shape.** `round` is the rounded rectangle of `card.radius`, limited to half the card's smaller side. `chamfer` cuts the
   corners in `cutCorners` with a straight line `cut` along each side, limited to half the smaller side; the other corners are
@@ -215,6 +215,18 @@ Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`,
   theme) has some transparency, a neighbour's shadow would show through the card. The shadow's offset and blur, and the glow's
   blur, are then scaled down together until they reach no further than `card.gap` past the card; `urdeck.log` says so once,
   with the reach before and after. A theme with opaque cards keeps its full reach.
+- **Compact cards.** A dock slot and a page card of one grid cell (1x1) are compact; every other card is not. A compact card
+  takes `card.compact` in place of the page card's values, each on its own: `radius`, `borderWidth` and `shape` (`round`,
+  `chamfer` or `circle`) replace the page's, and a value `compact` does not set is the page card's. `compact.accentStrip` and
+  `compact.cornerMarks` are merged key by key over `card.accentStrip` and `card.cornerMarks`: a key the compact group sets
+  wins and the others come from the page's group (Blueprint's tick gives its style, corner, size and inset, and the
+  thickness and colour come from the page's marks); with no page group the compact group stands alone, so a strip in
+  `compact` alone is on tiles and not on larger cards. `circle` is a rounded card of half its smaller side as the radius: a
+  circle on a square card, a capsule on one that is not square (one information line says so, and the card has room for one
+  line of text). The fill, tint, border style, highlight, shadow, glow and marks of a compact card are drawn from its compact
+  shape, and a dock slot's tint and strip colour count by its position. The padding is not overridden. A widget in the dock
+  is given a theme with the compact corner radius and border width (a circle's radius is half the slot); a 1x1 widget on a
+  page is given the page's theme, so only its card is compact.
 - What is drawn outside the cards is made when the layout or the theme changes, never when a widget repaints.
 - The highlight, accent strip and mark thicknesses are hairlines like the border: 2 pixels or less is drawn whole.
 - A fill gradient, a sheen or an accent strip is drawn once per card size (and strip colour) and reused, so a repaint costs

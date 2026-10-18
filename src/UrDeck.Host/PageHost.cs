@@ -38,7 +38,7 @@ internal sealed class PageHost : Canvas, IDisposable
         System.Drawing.Rectangle? underlayClip = null)
     {
         _layout = layout;
-        var placed = new List<(WidgetLayoutItem, WidgetView)>();
+        var placed = new List<(WidgetLayoutItem, WidgetView, ResolvedCardStyle)>();
         for (int i = 0; i < page.Widgets.Count; i++)
         {
             var config = page.Widgets[i];
@@ -49,6 +49,7 @@ internal sealed class PageHost : Canvas, IDisposable
             if (!item.Placed)
                 continue;
 
+            var style = cardStyle.ForCard(item);
             var descriptor = plugins.GetDescriptor(config.WidgetTypeId);
             if (descriptor == null)
             {
@@ -60,7 +61,7 @@ internal sealed class PageHost : Canvas, IDisposable
             try
             {
                 var widget = plugins.CreateWidget(config, out var services)!;
-                var view = new WidgetView(widget, services, descriptor, theme, new CardLook(cardStyle, cardIndex[i]), press, frameClock, plugins.Readings)
+                var view = new WidgetView(widget, services, descriptor, theme, new CardLook(style, cardIndex[i]), press, frameClock, plugins.Readings)
                 {
                     Width = item.Size.Width,
                     Height = item.Size.Height,
@@ -70,7 +71,7 @@ internal sealed class PageHost : Canvas, IDisposable
                 Children.Add(view);
                 _views.Add(view);
                 _viewsByIndex[i] = view;
-                placed.Add((item, view));
+                placed.Add((item, view, style));
                 foreach (string reading in view.Subscriptions)
                 {
                     if (!_viewsByReading.TryGetValue(reading, out var users))
@@ -88,7 +89,7 @@ internal sealed class PageHost : Canvas, IDisposable
         }
 
         // First, so it lies under every card; the dock's is cut to its band, so it never lies over the page.
-        _underlay = UnderlayView.Create(placed, cardStyle, scale, underlayClip, page.Name);
+        _underlay = UnderlayView.Create(placed, scale, underlayClip, page.Name);
         if (_underlay != null)
             Children.Insert(0, _underlay);
     }

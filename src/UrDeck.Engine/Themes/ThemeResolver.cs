@@ -15,14 +15,16 @@ public static class ThemeResolver
 
     /// <summary>
     /// Resolves <paramref name="loaded"/> for a surface whose grid cell is <paramref name="cellPx"/> physical pixels
-    /// wide. The caller owns the result and must dispose it; it owns the typefaces.
+    /// wide. The caller owns the result and must dispose it; it owns the typefaces. With <paramref name="compact"/> (the dock)
+    /// the card radius and border width are the theme's <c>card.compact</c> ones; the rest is the page's.
     /// </summary>
-    public static Theme Resolve(LoadedTheme loaded, float cellPx)
+    public static Theme Resolve(LoadedTheme loaded, float cellPx, bool compact = false)
     {
         var d = loaded.Definition;
         var c = d.Colors!;
         var card = d.Card!;
         var type = d.Typography!;
+        var shape = CardShapeValues(card, cellPx, compact);
         var stroke = d.Stroke!;
 
         return new Theme
@@ -37,8 +39,8 @@ public static class ThemeResolver
             Good = Color(c.Good),
             Warning = Color(c.Warning),
             Critical = Color(c.Critical),
-            CardRadius = Px(card.Radius, cellPx),
-            CardBorderWidth = Px(card.BorderWidth, cellPx),
+            CardRadius = shape.Radius,
+            CardBorderWidth = shape.BorderWidth,
             Gap = Px(card.Gap, cellPx),
             Padding = Px(card.Padding, cellPx),
             LabelSize = Px(type.LabelSize, cellPx),
@@ -53,6 +55,13 @@ public static class ThemeResolver
             TextStyle = Style(type, cellPx),
             Typefaces = LoadTypefaces(loaded, cellPx),
         };
+    }
+
+    private static (float Radius, float BorderWidth) CardShapeValues(ThemeCardDefinition card, float cellPx, bool compact)
+    {
+        var over = compact ? card.Compact : null;
+        float radius = over?.Shape == "circle" ? cellPx / 2 : Px(over?.Radius ?? card.Radius, cellPx);
+        return (radius, Px(over?.BorderWidth ?? card.BorderWidth, cellPx));
     }
 
     private static TextStyle Style(ThemeTypographyDefinition type, float cellPx) => new()
