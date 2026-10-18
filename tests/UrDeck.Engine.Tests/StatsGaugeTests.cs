@@ -5,6 +5,7 @@ using System.Text.Json;
 using SkiaSharp;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
+using UrDeck.Sdk.Components;
 using UrDeck.Sdk.Data;
 using UrDeck.Widgets.Stats;
 using Xunit;
@@ -55,13 +56,14 @@ public sealed class StatsGaugeTests : IDisposable
 
     private StatsWidget One(params StatsSlot[] slots) => Sized(1, 1, slots);
 
-    private SKBitmap PaintAt(StatsWidget widget, DateTime time, int width = 275, int height = 275)
+    private SKBitmap PaintAt(StatsWidget widget, DateTime time, int width = 275, int height = 275, Theme? theme = null)
     {
+        theme ??= _theme;
         var bitmap = new SKBitmap(width, height);
         using var canvas = new SKCanvas(bitmap);
-        float pad = _theme.Padding;
+        float pad = theme.Padding;
         widget.Render(new WidgetRenderContext(
-            canvas, time, new System.Drawing.Size(width, height), _theme, new SKRect(pad, pad, width - pad, height - pad), widget.Config, CancellationToken.None));
+            canvas, time, new System.Drawing.Size(width, height), theme, new SKRect(pad, pad, width - pad, height - pad), widget.Config, CancellationToken.None));
         return bitmap;
     }
 
@@ -143,6 +145,58 @@ public sealed class StatsGaugeTests : IDisposable
         using var bitmap = PaintAt(One(Slot(Core2, style)), T0);
 
         Assert.True(Count(bitmap, _theme.Accent) > 0);
+    }
+
+    [Theory]
+    [InlineData("meter")]
+    [InlineData("tach")]
+    [InlineData("marker")]
+    [InlineData("thickbar")]
+    [InlineData("thickBar")]
+    public void ANewGaugeStyle_IsDrawnAsAsked_NotAsARing(string style)
+    {
+        _source.Readings[Core2] = Reading.Ok(37);
+        using var asked = PaintAt(One(Slot(Core2, style)), T0);
+        using var ring = PaintAt(One(Slot(Core2, "ring")), T0);
+
+        Assert.True(Count(asked, _theme.Accent) > 0);
+        Assert.False(SameImage(asked, ring));
+    }
+
+    [Fact]
+    public void TheThemesDefaultStyle_IsDrawnWhicheverItIs()
+    {
+        _source.Readings[Core2] = Reading.Ok(37);
+        using var marker = new Theme
+        {
+            GaugeStyle = GaugeStyle.Marker,
+            Typefaces = _theme.Typefaces,
+            StrokeRatio = _theme.StrokeRatio,
+            Padding = _theme.Padding,
+            LabelSize = _theme.LabelSize,
+        };
+        using var viaTheme = PaintAt(One(Slot(Core2, "gauge")), T0, theme: marker);
+        using var named = PaintAt(One(Slot(Core2, "marker")), T0, theme: marker);
+        using var ring = PaintAt(One(Slot(Core2, "ring")), T0, theme: marker);
+
+        Assert.True(SameImage(viaTheme, named));
+        Assert.False(SameImage(viaTheme, ring));
+    }
+
+    [Fact]
+    public void ATextReading_WithANewStyle_IsDrawnPlain()
+    {
+        const string name = "system:cpu/name";
+        _source.Readings[name] = Reading.Ok("Ryzen");
+        _source.Catalog[name] = new ReadingDescriptor("cpu/name", ReadingKind.Text, "CPU", "CPU name");
+        using var plain = PaintAt(One(Slot(name, "plain")), T0);
+
+        foreach (string style in new[] { "meter", "tach", "marker", "thickbar" })
+        {
+            using var asked = PaintAt(One(Slot(name, style)), T0);
+
+            Assert.True(SameImage(asked, plain), style);
+        }
     }
 
     [Fact]

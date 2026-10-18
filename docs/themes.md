@@ -59,7 +59,7 @@ value (for example a colour that does not parse) is replaced by the default's va
   ends.
 - **`gauge.style`** is the shape a gauge takes when a widget asks for "the theme's" gauge: `ring`, `bar` or `verticalBar`
   (format 2 adds `meter`, `tach`, `marker` and `thickbar`, see [Format 2](#format-2); a widget that asks for one of those
-  receives a `ring` until the gauge can be drawn that way). `plain` is not allowed here (a gauge that draws no shape is no
+  receives it). `plain` is not allowed here (a gauge that draws no shape is no
   gauge); it and any unknown name fall back to `ring` with a logged warning. A widget's own explicit style wins over it.
 
 - **`indicator`** is the page indicator (see [Pages](https://urdeck.app/docs/#pages)). `bandHeight`, `dotSize`, `pillLength` and `spacing`
@@ -119,7 +119,7 @@ translucent cards makes their text hard to read.
 Format 2 adds optional values to the theme file for cards, type, gauges, icons and a background of its own. A theme can use any of them without declaring anything; `"format": 2` says that the file does, and a number above 2 logs one warning and still loads. [`docs/schemas/v2/theme.json`](schemas/v2/theme.json) is the same list as a JSON Schema (point `$schema` at `https://urdeck.app/schemas/v2/theme.json` for completion in an editor).
 
 - **Everything is optional, and absent means off.** A theme written before format 2 loads with the same values, the same warnings and the same drawing as before. Merging a theme over `default-dark` never adds a format 2 group.
-- **A value is read, checked and kept; some are not drawn yet.** The tables say which change draws each group. Until then a value is accepted without a warning and has no effect on the screen. The gauge styles `meter`, `tach`, `marker` and `thickbar` are kept and a widget that asks for the theme's gauge gets a `ring`.
+- **A value is read, checked and kept; some are not drawn yet.** The tables say which change draws each group. Until then a value is accepted without a warning and has no effect on the screen. The gauge styles and values are drawn.
 - **An invalid value is replaced by the default** (for an optional value, by "absent") and one warning in `urdeck.log` names the theme, the key and the value. A number outside its range, a colour that does not parse, a name that is not listed, a value of the wrong kind (text where a number goes) and a list with a bad item are all invalid; a bad item drops the whole list, except in `card.cutCorners` and `card.cornerMarks.corners`, where an unknown name is dropped and the others stay. Names are read in any case.
 - **Some groups are never taken from `default-dark`:** `colors.ramp`, `colors.cardTints`, `colors.backgroundPalette`, `pattern`, `background`, `icons`, `meta`, every card chrome value, `typography.valueFill` and `valueGlow`, and every gauge value except `style`. The rest merge key by key, like the format 1 values.
 - **Sizes** are fractions of one grid cell, **angles** are degrees (0 is left to right or 3 o'clock, clockwise), **times** are seconds (1 or more), **tracking** is in em, and **colours** are `#RRGGBB` or `#AARRGGBB`.
@@ -419,11 +419,16 @@ size, but not the case, spacing, slant, fill or glow.
 
 ### `gauge`
 
-Drawn by: the gauge change.
+Drawn by: the gauge component, for the style each value applies to; a value that does not apply to the style is ignored without a warning.
+A `meter` and a `thickbar` put the readout above the track, left-aligned; a `bar` does so with `layout` `stacked`. A `tach` has ticks
+(28, every fourth longer) and a redline from 0.85 even when the theme sets none. A group the theme writes takes defaults for the keys
+it leaves out: ticks 11 marks, every fifth longer, 0.04 long and 0.006 thick; redline from 0.85; marker a diamond 0.05 across.
+Tick numbers run 0 to 100. `labelPosition` `below` and `above` apply to arcs. The track is cut into blocks like the fill when `segments` is set.
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
 | `gauge.labelPosition` | `auto`, `inside`, `below`, `above` | `"auto"` | Where a gauge's label sits. auto keeps the v1 placement (Prism: below). |
+| `gauge.layout` | `auto`, `stacked` | `"auto"` | `stacked` draws a bar with the readout above, left-aligned, and the track at the bottom (Carbon). A meter and a thick bar are stacked by definition. |
 | `gauge.sweep` | group |  | Ring/tach/marker geometry. |
 | `gauge.sweep.start` | -360 to 360 | `135` | Degrees, 0 = 3 o'clock, clockwise. v1 ring: 135. |
 | `gauge.sweep.span` | 30 to 360 | `270` | v1 ring: 270. |

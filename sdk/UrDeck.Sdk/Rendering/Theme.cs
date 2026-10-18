@@ -14,6 +14,9 @@ namespace UrDeck.Sdk;
 public sealed class Theme : IDisposable
 {
     private IReadOnlyDictionary<TextRole, SKTypeface> _typefaces = new Dictionary<TextRole, SKTypeface>();
+    private SKColor? _accent2;
+    private SKColor? _ink;
+    private IReadOnlyList<SKColor>? _ramp;
 
     public SKColor Background { get; init; } = SKColor.Parse("#0f0f1a");
     public SKColor CardFill { get; init; } = SKColor.Parse("#1a1a2e");
@@ -25,6 +28,27 @@ public sealed class Theme : IDisposable
     public SKColor Good { get; init; } = SKColor.Parse("#3ddc84");
     public SKColor Warning { get; init; } = SKColor.Parse("#ffb020");
     public SKColor Critical { get; init; } = SKColor.Parse("#ff5a4d");
+
+    /// <summary>The second accent colour; the accent when the theme has none.</summary>
+    public SKColor Accent2
+    {
+        get => _accent2 ?? Accent;
+        init => _accent2 = value;
+    }
+
+    /// <summary>The colour for text on an accent fill; the text or the background colour, whichever contrasts more with the accent, when the theme has none.</summary>
+    public SKColor Ink
+    {
+        get => _ink ?? ColorMath.MoreContrasting(Accent, Text, Background);
+        init => _ink = value;
+    }
+
+    /// <summary>Two to five colours a value can be coloured along; the good, warning and critical colours when the theme has none.</summary>
+    public IReadOnlyList<SKColor> Ramp
+    {
+        get => _ramp ?? [Good, Warning, Critical];
+        init => _ramp = value;
+    }
 
     /// <summary>Corner radius of every card, in pixels.</summary>
     public float CardRadius { get; init; } = 12f;
@@ -46,6 +70,9 @@ public sealed class Theme : IDisposable
 
     /// <summary>The shape a widget draws for a gauge it was asked to draw "as the theme says"; never <see cref="GaugeStyle.Plain"/>.</summary>
     public GaugeStyle GaugeStyle { get; init; } = GaugeStyle.Ring;
+
+    /// <summary>The gauge values of the theme (sweep, segments, ticks, redline, marker and the rest), in pixels; a theme that sets none changes nothing.</summary>
+    public GaugeTheme Gauge { get; init; } = new();
 
     /// <summary>Letter case, spacing, slant, size, fill and glow of text, in pixels; a theme that sets none changes nothing.</summary>
     public TextStyle TextStyle { get; init; } = new();
@@ -71,6 +98,7 @@ public sealed class Theme : IDisposable
     public void Dispose()
     {
         TextStyle.Dispose();
+        Gauge.Dispose();
         foreach (var typeface in _typefaces.Values.Distinct())
             typeface.Dispose();
         _typefaces = new Dictionary<TextRole, SKTypeface>();

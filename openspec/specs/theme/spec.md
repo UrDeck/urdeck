@@ -27,9 +27,8 @@ A theme MUST define all of the following values:
 A theme MAY also use the values of format 2 (see "Format 2 Values"); a theme never has to.
 
 A theme MUST NOT contain executable code. The built-in themes use `ring` as the default gauge style. A default gauge
-style that is not one of the seven is replaced by the default theme's value with a logged warning. Until widgets can
-draw the four format 2 styles, a widget that asks for the theme's default gauge style when it is one of them receives
-`ring`. A theme that omits a page indicator value, a press value or the dock height takes the default theme's value
+style that is not one of the seven is replaced by the default theme's value with a logged warning. A widget that asks
+for the theme's default gauge style receives it, whichever of the seven it is. A theme that omits a page indicator value, a press value or the dock height takes the default theme's value
 for it, so themes written before these existed keep working. A press scale outside 0.5 to 1 or a press opacity outside
 0.1 to 1 is replaced by the default theme's value with a logged warning, and so is a dock height outside 0.2 to 1. The
 built-in themes use a dock height of 0.71, which leaves the 1100x3840 panel its 13 rows beside the indicator's band.
@@ -53,7 +52,7 @@ built-in themes use a dock height of 0.71, which leaves the 1100x3840 panel its 
 #### Scenario: Format 2 gauge style
 - **WHEN** a user theme sets the default gauge style to `tach`
 - **THEN** the theme loads without a warning and keeps `tach`, and a widget that asks for the default gauge style
-  receives `ring` until the gauge can be drawn that way
+  receives `tach`
 
 #### Scenario: Theme restyles the indicator
 - **WHEN** a user theme sets a longer pill and a different colour for the current page's mark
@@ -473,3 +472,4 @@ other invalid format 2 value.
 #### Scenario: Unknown value
 - **WHEN** a theme sets `typography.opticalSize` to `large`
 - **THEN** the key is cleared as `off` and one warning names the theme, the key and the value
+

@@ -39,6 +39,9 @@ public static class ThemeResolver
             Good = Color(c.Good),
             Warning = Color(c.Warning),
             Critical = Color(c.Critical),
+            Accent2 = Color(c.Accent2 ?? c.Accent),
+            Ink = c.Ink != null ? Color(c.Ink) : ColorContrast.MoreContrasting(Color(c.Accent), Color(c.Text), Color(c.Background)),
+            Ramp = c.Ramp is { Count: >= 2 } ramp ? ramp.Select(Color).ToList() : [Color(c.Good), Color(c.Warning), Color(c.Critical)],
             CardRadius = shape.Radius,
             CardBorderWidth = shape.BorderWidth,
             Gap = Px(card.Gap, cellPx),
@@ -52,6 +55,7 @@ public static class ThemeResolver
                 ? SKStrokeCap.Square
                 : SKStrokeCap.Round,
             GaugeStyle = ThemeGaugeDefinition.Parse(d.Gauge?.Style) ?? GaugeStyle.Ring,
+            Gauge = Gauge(d.Gauge, cellPx),
             TextStyle = Style(type, cellPx),
             Typefaces = LoadTypefaces(loaded, cellPx),
         };
@@ -85,6 +89,77 @@ public static class ThemeResolver
             }
             : null,
     };
+
+    /// <summary>
+    /// The gauge values of the theme in pixels. A value the theme leaves out gives null (nothing to draw), except in a group
+    /// the theme did write, where a key it left out takes the default listed here.
+    /// </summary>
+    private static GaugeTheme Gauge(ThemeGaugeDefinition? g, float cellPx)
+    {
+        if (g == null)
+            return new GaugeTheme();
+
+        return new GaugeTheme
+        {
+            Layout = g.Layout == "stacked" ? GaugeLayout.Stacked : GaugeLayout.Auto,
+            LabelPosition = g.LabelPosition switch
+            {
+                "inside" => GaugeLabelPosition.Inside,
+                "below" => GaugeLabelPosition.Below,
+                "above" => GaugeLabelPosition.Above,
+                _ => GaugeLabelPosition.Auto,
+            },
+            Sweep = g.Sweep is { } sweep && (sweep.Start != null || sweep.Span != null)
+                ? new GaugeSweep((float)(sweep.Start ?? 135), (float)(sweep.Span ?? 270))
+                : null,
+            Segments = g.Segments is { Length: { } length } segments
+                ? new GaugeSegments(Px(length, cellPx), Px(segments.Gap ?? 0, cellPx))
+                : null,
+            Track = g.Track is { } track && (track.Color != null || track.WidthRatio != null)
+                ? new GaugeTrack(OptionalColor(track.Color), (float)(track.WidthRatio ?? 1))
+                : null,
+            Outline = g.Outline is { Width: { } width } outline
+                ? new GaugeOutline(Px(width, cellPx), OptionalColor(outline.Color))
+                : null,
+            Ticks = g.Ticks is { } ticks
+                ? new GaugeTicks(
+                    ticks.Count ?? 11,
+                    ticks.MajorEvery ?? 5,
+                    Px(ticks.Length ?? 0.04, cellPx),
+                    Px(ticks.Thickness ?? 0.006, cellPx),
+                    OptionalColor(ticks.Color),
+                    ticks.Labels ?? false)
+                : null,
+            Scale = g.Scale is { Labels: { Count: >= 2 } labels } scale
+                ? new GaugeScaleLabels(labels, Px(scale.Size ?? 0, cellPx))
+                : null,
+            Redline = g.Redline is { } redline
+                ? new GaugeRedline((float)(redline.From ?? 0.85), OptionalColor(redline.Color), Glow(redline.Glow, cellPx), redline.LightsAbove ?? false)
+                : null,
+            Marker = g.Marker is { } marker
+                ? new GaugeMarker(
+                    string.Equals(marker.Shape, "needle", StringComparison.OrdinalIgnoreCase) ? GaugeMarkerShape.Needle : GaugeMarkerShape.Diamond,
+                    Px(marker.Size ?? 0.05, cellPx),
+                    OptionalColor(marker.Color),
+                    marker.Halo ?? false)
+                : null,
+            Crosshair = g.Crosshair == true,
+            Gradient = g.Gradient switch
+            {
+                { Ramp: true } => new GaugeGradient([], 0f, true),
+                { Stops: { Colors: { Count: >= 2 } colors } stops } => new GaugeGradient(colors.Select(Color).ToList(), (float)(stops.Angle ?? 0), false),
+                _ => null,
+            },
+            Glow = Glow(g.Glow, cellPx),
+            ColorByRamp = g.ColorBy == "ramp",
+            ValueTint = g.ValueTint == true,
+        };
+    }
+
+    private static GaugeGlow? Glow(ThemeGlowDefinition? glow, float cellPx) =>
+        glow is { Blur: > 0 } ? new GaugeGlow(Px(glow.Blur, cellPx), OptionalColor(glow.Color), (float)(glow.Alpha ?? 0.6)) : null;
+
+    private static SKColor? OptionalColor(string? hex) => hex == null ? null : Color(hex);
 
     private static TextCase Case(string? name) => name switch
     {

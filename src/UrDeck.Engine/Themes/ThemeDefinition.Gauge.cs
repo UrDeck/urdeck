@@ -25,20 +25,21 @@ public sealed partial class ThemeGaugeDefinition
 {
     internal const string StyleNames = "'ring', 'bar', 'verticalBar', 'meter', 'tach', 'marker' or 'thickbar'";
 
-    private static readonly string[] Format2Styles = ["meter", "tach", "marker", "thickbar"];
-
     /// <summary>"ring", "bar" or "verticalBar", or a format 2 style: "meter", "tach", "marker" or "thickbar".</summary>
     public string? Style { get; set; }
 
-    internal static bool IsStyle(string style) =>
-        Parse(style) != null || Format2Styles.Contains(style.Trim(), StringComparer.OrdinalIgnoreCase);
+    internal static bool IsStyle(string style) => Parse(style) != null;
 
-    /// <summary>The style the SDK draws. A format 2 style is not one yet, so it gives null and the caller uses a ring.</summary>
+    /// <summary>The style the SDK draws, or null for a name that is none (the caller then uses the default).</summary>
     internal static GaugeStyle? Parse(string? style) => style?.Trim().ToLowerInvariant() switch
     {
         "ring" => GaugeStyle.Ring,
         "bar" => GaugeStyle.Bar,
         "verticalbar" => GaugeStyle.VerticalBar,
+        "meter" => GaugeStyle.Meter,
+        "tach" => GaugeStyle.Tach,
+        "marker" => GaugeStyle.Marker,
+        "thickbar" => GaugeStyle.ThickBar,
         _ => null,
     };
 

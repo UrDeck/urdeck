@@ -14,6 +14,14 @@ public enum GaugeStyle
     Bar,
     /// <summary>The whole rectangle as the track, filled from the bottom, with the readout inside at the bottom.</summary>
     VerticalBar,
+    /// <summary>A thin track with the readout above it and the theme's scale under it.</summary>
+    Meter,
+    /// <summary>An arc with a ring of tick marks outside it, a redline zone and, if the theme asks, a needle.</summary>
+    Tach,
+    /// <summary>A hairline arc with a marker at the value instead of a filled arc.</summary>
+    Marker,
+    /// <summary>A heavy, optionally outlined track with the readout above it.</summary>
+    ThickBar,
 }
 
 /// <summary>How far a value is along its range: normal, or from the warning or critical value on.</summary>

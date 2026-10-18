@@ -639,14 +639,14 @@ public sealed class ThemeFormat2Tests : IDisposable
     [InlineData("marker")]
     [InlineData("thickbar")]
     [InlineData("THICKBAR")]
-    public void AFormat2GaugeStyle_IsKept_AndTheResolverGivesARing(string style)
+    public void AFormat2GaugeStyle_IsKept_AndTheResolverGivesIt(string style)
     {
         var loaded = Load("{ \"gauge\": { \"style\": \"" + style + "\" } }");
         using var theme = ThemeResolver.Resolve(loaded, 275);
 
         Assert.Empty(ThemeLines);
         Assert.Equal(style, loaded.Definition.Gauge!.Style);
-        Assert.Equal(GaugeStyle.Ring, theme.GaugeStyle);
+        Assert.Equal(Enum.Parse<GaugeStyle>(style, ignoreCase: true), theme.GaugeStyle);
     }
 
     [Fact]
