@@ -12,7 +12,7 @@
 ## 3. Verification
 
 - [x] 3.1 v1 goldens unchanged; goldens of the dock page and a page with 1x1 cards for Obsidian, Rigline, Blueprint and Prism, looked at by eye before they are committed
-- [ ] 3.2 On the panel with the owner: Obsidian's and Rigline's docks
+- [x] 3.2 On the panel with the owner: Obsidian's and Rigline's docks
 - [x] 3.3 `dotnet build urdeck.slnx -c Release` 0 warnings; `dotnet format urdeck.slnx --severity warn`; `openspec validate --all --strict`; the engine tests with the coverage floor; the Linux tests
 
 ## 4. Documentation
