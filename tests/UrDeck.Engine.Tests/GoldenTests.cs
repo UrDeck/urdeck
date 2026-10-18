@@ -94,6 +94,17 @@ public sealed class GoldenTests
         GoldenImage.Compare(bitmap, "pop-dock");
     }
 
+    /// <summary>The drafts that draw outside their cards, with the dock: the dock's underlay stays inside its band.</summary>
+    [WindowsGlyphTheory]
+    [InlineData("paper")]
+    [InlineData("prism")]
+    [InlineData("rigline")]
+    public void Draft_PageWithDock(string theme)
+    {
+        using var bitmap = Render(theme, dock: true, draft: true);
+        GoldenImage.Compare(bitmap, $"{theme}-dock");
+    }
+
     [Fact]
     public void TheSamplePage_RendersToTheSameBytesTwice()
     {

@@ -21,4 +21,13 @@ internal sealed class ThemeWarnings
                 return;
         UrDeckLog.Warn(message);
     }
+
+    /// <summary>As <see cref="Once"/>, at information level: a finding the engine has dealt with.</summary>
+    public void InfoOnce(string key, string message)
+    {
+        lock (_reported)
+            if (!_reported.Add(key))
+                return;
+        UrDeckLog.Info(message);
+    }
 }

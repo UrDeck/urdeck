@@ -921,17 +921,16 @@ public sealed class CardChromeTests
     }
 
     [Fact]
-    public void ASnapshot_CutsAMarkAtTheCardsEdge()
+    public void ASnapshot_DrawsAMarkOnBothSidesOfTheCardsEdge()
     {
         var loaded = Marks(-0.02, 0.04);
         using var bitmap = PageRenderer.RenderToBitmap(1100, 1100, [Card(0, 1)], loaded, DateTime.Now);
 
-        // The card's top and left edges, found from its fill; the half of the bracket outside them belongs to the underlay
-        // (card-underlay), not the surface.
+        // The card's top edge, found from its fill: the card's surface draws the half of the bracket inside it, the underlay
+        // (card-underlay) the half outside.
         int top = Enumerable.Range(250, 60).First(y => bitmap.GetPixel(150, y) == Black);
         int left = Enumerable.Range(0, 60).First(x => bitmap.GetPixel(x, top + 40) == Black);
         Assert.Equal(SKColors.Lime, bitmap.GetPixel(left + 10, top + 1));
-        Assert.NotEqual(SKColors.Lime, bitmap.GetPixel(left + 10, top - 2));
-        Assert.NotEqual(SKColors.Lime, bitmap.GetPixel(left - 2, top + 10));
+        Assert.Equal(SKColors.Lime, bitmap.GetPixel(left + 10, top - 2));
     }
 }

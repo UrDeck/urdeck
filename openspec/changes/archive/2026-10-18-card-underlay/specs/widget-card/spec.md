@@ -45,8 +45,9 @@ the reach was limited and to what. A theme whose card fills are all opaque keeps
 
 ### Requirement: Outside The Card Costs Nothing At Rest
 What is drawn outside the cards MUST be made when the layout or the theme changes and MUST NOT be redrawn when a widget
-repaints, the readings change or a page slides. For one page it MUST take at most 20 ms to make once the process is warm
-and at most 2 MB of memory. A theme that draws nothing outside its cards creates nothing for it.
+repaints, the readings change or a page slides. For one page it MUST take at most 20 ms to make once the process is warm,
+and the pictures of a theme, which all its pages share, MUST take at most 10 MB of memory. A theme that draws nothing outside
+its cards creates nothing for it.
 
 #### Scenario: Clocks ticking
 - **WHEN** a page with shadows shows three clocks that repaint every second for a minute

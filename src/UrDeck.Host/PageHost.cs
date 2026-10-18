@@ -13,8 +13,9 @@ using UrDeck.Sdk;
 namespace UrDeck.Host;
 
 /// <summary>
-/// The widgets of one page, or of the dock: a canvas of <see cref="WidgetView"/>s, owning its reading-to-view map. Disposing it releases
-/// every view (readings unsubscribed, frame-clock entries removed), so a page that is not shown costs nothing.
+/// The widgets of one page, or of the dock: a canvas of <see cref="WidgetView"/>s, owning its reading-to-view map, and under them
+/// the <see cref="UnderlayView"/> when the theme draws outside its cards. Disposing it releases every view (readings unsubscribed,
+/// frame-clock entries removed), so a page that is not shown costs nothing.
 /// </summary>
 internal sealed class PageHost : Canvas, IDisposable
 {
@@ -22,6 +23,7 @@ internal sealed class PageHost : Canvas, IDisposable
     private readonly Dictionary<string, List<WidgetView>> _viewsByReading = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<int, WidgetView> _viewsByIndex = new();
     private readonly IReadOnlyList<WidgetLayoutItem> _layout;
+    private readonly UnderlayView? _underlay;
 
     public PageHost(
         PageConfig page,
@@ -31,9 +33,12 @@ internal sealed class PageHost : Canvas, IDisposable
         ResolvedCardStyle cardStyle,
         IReadOnlyList<int> cardIndex,
         PressStyle press,
-        FrameClock frameClock)
+        FrameClock frameClock,
+        double scale,
+        System.Drawing.Rectangle? underlayClip = null)
     {
         _layout = layout;
+        var placed = new List<(WidgetLayoutItem, WidgetView)>();
         for (int i = 0; i < page.Widgets.Count; i++)
         {
             var config = page.Widgets[i];
@@ -65,6 +70,7 @@ internal sealed class PageHost : Canvas, IDisposable
                 Children.Add(view);
                 _views.Add(view);
                 _viewsByIndex[i] = view;
+                placed.Add((item, view));
                 foreach (string reading in view.Subscriptions)
                 {
                     if (!_viewsByReading.TryGetValue(reading, out var users))
@@ -80,6 +86,11 @@ internal sealed class PageHost : Canvas, IDisposable
                 UrDeckLog.Error($"Failed to create widget '{config.WidgetTypeId}'", ex);
             }
         }
+
+        // First, so it lies under every card; the dock's is cut to its band, so it never lies over the page.
+        _underlay = UnderlayView.Create(placed, cardStyle, scale, underlayClip, page.Name);
+        if (_underlay != null)
+            Children.Insert(0, _underlay);
     }
 
     /// <summary>How many widgets are shown.</summary>
@@ -109,6 +120,7 @@ internal sealed class PageHost : Canvas, IDisposable
         _views.Clear();
         _viewsByIndex.Clear();
         _viewsByReading.Clear();
+        _underlay?.Dispose();
         Children.Clear();
     }
 }

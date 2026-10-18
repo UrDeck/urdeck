@@ -401,7 +401,7 @@ public sealed class MainWindow : Window, ISettingsHost
                 var entries = DockLayout.Select(config.Dock, _plugins.GetDescriptor);
                 var page = new PageConfig { Name = "Dock", Widgets = entries.Select(e => e.Config).ToList() };
                 var slots = DockLayout.Compute(chrome.Dock, entries, gap);
-                return new PageHost(page, slots, _plugins, dockTheme, dockCardStyle, CardOrder.Dock(slots.Count), press, _frameClock);
+                return new PageHost(page, slots, _plugins, dockTheme, dockCardStyle, CardOrder.Dock(slots.Count), press, _frameClock, scale, chrome.Dock);
             };
         }
 
@@ -415,7 +415,7 @@ public sealed class MainWindow : Window, ISettingsHost
                 var page = config.Pages[index];
                 var layout = new GridLayoutManager(screen.Width, screen.Height, gap, chrome.Grid.Height)
                     .RenderWidgetLayout(page.Widgets, screen);
-                return new PageHost(page, layout, _plugins, theme, cardStyle, CardOrder.Assign(layout), press, _frameClock);
+                return new PageHost(page, layout, _plugins, theme, cardStyle, CardOrder.Assign(layout), press, _frameClock, scale);
             },
             buildDock));
     }

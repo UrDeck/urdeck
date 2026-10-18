@@ -50,8 +50,10 @@ cannot make is written to `urdeck.log` once. The card's shape, fill and border a
 (`card.tint: "cycle"`, row by row on each page, by position in the dock), and dashed or gradient borders (`card.borderStyle`,
 `borderDash`, `borderGradient`, linear or conic); a dashed border has a dash on every corner. So is the light and the marks on
 a card: a highlight along the top or bottom edge and a radial sheen (`card.highlight`, `card.sheen`), a lit strip along one
-edge in a colour per card (`card.accentStrip`), and registration marks at the corners (`card.cornerMarks`; the part of a mark
-outside the card comes in a later release). The other values are checked and kept today and drawn by later releases; a file
+edge in a colour per card (`card.accentStrip`), and registration marks at the corners (`card.cornerMarks`), on or outside the
+card. Outside the card, a drop shadow (`card.shadow`, soft or a hard offset) and a glow (`card.glow`) are drawn under all the
+cards, so they never cover a card's content; a pressed card's shadow shrinks with it. On a translucent card, a shadow or glow
+reaches no further than the gap between cards, so it never shows through the neighbouring card. The other values are checked and kept today and drawn by later releases; a file
 that uses none of them is unaffected. A theme's [background](/docs/backgrounds/#theme-backgrounds), a default shader, a
 still gradient, colour or picture and a scrim, is drawn today when your configuration has no `background` of its own, and
 `meta.pairsWith.backgrounds` lists the backgrounds that suit the theme, for a settings page to recommend. The

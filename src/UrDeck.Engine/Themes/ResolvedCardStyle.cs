@@ -43,12 +43,20 @@ public sealed class ResolvedCardStyle : IDisposable
     private const double DefaultStripLength = 0.72;
     private const double DefaultGlowAlpha = 0.6;
     private const double DefaultMarkInset = 0;
+    private const double DefaultShadowOffset = 0;
+    private const double DefaultShadowSpread = 0;
+
+    // The schema gives no default for a shadow's colour and blur: black at 40 %, and a hard edge.
+    private static readonly SKColor DefaultShadowColor = new(0, 0, 0, 0x66);
 
     // The schema gives no default for a mark's size and thickness.
     private const double DefaultMarkSize = 0.08;
     private const double DefaultMarkThickness = 0.01;
 
     private readonly Dictionary<(int Tint, int Strip, int Width, int Height), SizedCardChrome> _sized = [];
+
+    // The underlay pictures: the nine-grid one under (0, 0), an exact one under its card's size.
+    private readonly Dictionary<(int Width, int Height), UnderlayPicture> _underlays = [];
     private int _backImagesMade;
     private bool _disposed;
 
@@ -112,6 +120,33 @@ public sealed class ResolvedCardStyle : IDisposable
     /// <summary>The corner marks; null for none.</summary>
     internal CardMarks? Marks { get; private init; }
 
+    /// <summary>The shadow, its reach limited on translucent cards; null for none.</summary>
+    internal CardShadow? Shadow { get; private init; }
+
+    /// <summary>The glow, its reach limited on translucent cards; null for none.</summary>
+    internal CardGlow? Glow { get; private init; }
+
+    /// <summary>
+    /// How many whole pixels past the card's edge the underlay draws (shadow, glow, the outside part of the marks); 0 when it
+    /// draws nothing.
+    /// </summary>
+    public int Bleed { get; private init; }
+
+    /// <summary>
+    /// How far into the card along an edge the underlay still varies, in whole pixels: the corner's radius or cut, plus the
+    /// blur's falloff and the offset of what is blurred, or a mark's arm. A nine-grid picture stretches what lies beyond it.
+    /// </summary>
+    public int CornerZone { get; private init; }
+
+    /// <summary>True when the theme draws something outside its cards: the host then makes an underlay.</summary>
+    public bool HasOutside => Bleed > 0;
+
+    /// <summary>True when every piece of the underlay is blurred (no hard shadow, no marks): its pictures are made at half size.</summary>
+    internal bool UnderlayIsSoft { get; private init; }
+
+    /// <summary>How many underlay pictures this style has made (tests check that one is made per size class, not per page).</summary>
+    internal int UnderlayPicturesMade { get; private set; }
+
     /// <summary>How many back images this style has drawn (tests check that one is made per size, not per paint).</summary>
     internal int BackImagesMade => Volatile.Read(ref _backImagesMade);
 
@@ -131,18 +166,35 @@ public sealed class ResolvedCardStyle : IDisposable
             borderWidth = Hairline(loaded, "card.borderWidth", borderWidth);
 
         var accent = SKColor.Parse(colors.Accent);
+        var fill = SKColor.Parse(colors.CardFill);
+        var border = SKColor.Parse(colors.CardBorder);
+        var fillGradient = Parse(card.FillGradient?.Colors);
+        var tints = card.Tint == "cycle" ? Parse(colors.CardTints) : null;
+        var marks = ResolveMarks(loaded, card.CornerMarks, accent, cellPx);
+        float radius = Px(card.Radius, cellPx);
+        bool chamfer = card.Shape == "chamfer";
+        float cut = (float)(card.Cut ?? DefaultCut) * cellPx;
+
+        var shadow = ResolveShadow(card.Shadow, cellPx);
+        var glow = ResolveGlow(card.Glow, border, cellPx);
+        bool translucent = fillGradient != null
+            ? fillGradient.Any(c => c.Alpha < 255)
+            : fill.Alpha < 255 || (tints?.Any(c => c.Alpha < 255) ?? false);
+        if (translucent)
+            LimitReach(loaded, (float)card.Gap!.Value * cellPx, ref shadow, ref glow);
+        var outsideMarks = marks is { ReachesOutside: true } ? marks : null;
 
         return new ResolvedCardStyle
         {
             IsPlain = plain,
-            Fill = SKColor.Parse(colors.CardFill),
-            Border = SKColor.Parse(colors.CardBorder),
-            Radius = Px(card.Radius, cellPx),
+            Fill = fill,
+            Border = border,
+            Radius = radius,
             BorderWidth = borderWidth,
-            Chamfer = card.Shape == "chamfer",
-            Cut = (float)(card.Cut ?? DefaultCut) * cellPx,
+            Chamfer = chamfer,
+            Cut = cut,
             CutCorners = Corners(card.CutCorners ?? ["tr", "bl"]),
-            FillGradient = Parse(card.FillGradient?.Colors),
+            FillGradient = fillGradient,
             FillAngle = (float)(card.FillGradient?.Angle ?? DefaultFillAngle),
             Dashed = card.BorderStyle == "dashed",
             HasBorderStyle = card.BorderStyle != "none",
@@ -152,14 +204,95 @@ public sealed class ResolvedCardStyle : IDisposable
             BorderGradient = Parse(card.BorderGradient?.Colors),
             BorderConic = card.BorderGradient?.Kind == "conic",
             BorderAngle = (float)(card.BorderGradient?.Angle ?? DefaultBorderAngle),
-            Tints = card.Tint == "cycle" ? Parse(colors.CardTints) : null,
+            Tints = tints,
             Highlight = ResolveHighlight(loaded, card.Highlight, cellPx),
             Sheen = card.Sheen is { Color: { } sheen } s
                 ? new CardSheen(SKColor.Parse(sheen), (float)(s.X ?? DefaultSheenX), (float)(s.Y ?? DefaultSheenY), (float)(s.Size ?? DefaultSheenSize))
                 : null,
             Strip = ResolveStrip(loaded, card.AccentStrip, accent, cellPx),
-            Marks = ResolveMarks(loaded, card.CornerMarks, accent, cellPx),
+            Marks = marks,
+            Shadow = shadow,
+            Glow = glow,
+            Bleed = UnderlayBleed(shadow, glow, outsideMarks),
+            CornerZone = UnderlayCornerZone(chamfer ? cut : radius, shadow, glow, outsideMarks),
+            UnderlayIsSoft = (shadow != null || glow != null) && shadow is not { Blur: <= 0 } && outsideMarks == null,
         };
+    }
+
+    private static CardShadow? ResolveShadow(ThemeCardShadowDefinition? shadow, float cellPx)
+    {
+        if (shadow == null)
+            return null;
+        var color = ParseOne(shadow.Color) ?? DefaultShadowColor;
+        if (color.Alpha == 0)
+            return null;
+        return new CardShadow(
+            (float)(shadow.X ?? DefaultShadowOffset) * cellPx,
+            (float)(shadow.Y ?? DefaultShadowOffset) * cellPx,
+            (float)(shadow.Blur ?? 0) * cellPx,
+            (float)(shadow.Spread ?? DefaultShadowSpread) * cellPx,
+            color);
+    }
+
+    /// <summary>A glow without blur draws nothing; its colour is the border's when absent, with the glow's alpha applied.</summary>
+    private static CardGlow? ResolveGlow(ThemeGlowDefinition? glow, SKColor border, float cellPx)
+    {
+        float blur = (float)(glow?.Blur ?? 0) * cellPx;
+        if (glow == null || blur <= 0)
+            return null;
+        var color = ParseOne(glow.Color) ?? border;
+        color = color.WithAlpha((byte)Math.Round(color.Alpha * Math.Clamp(glow.Alpha ?? DefaultGlowAlpha, 0, 1)));
+        return color.Alpha == 0 ? null : new CardGlow(blur, color);
+    }
+
+    /// <summary>
+    /// On translucent cards a neighbour's shadow or glow would show through the fill: each is scaled down, offset and blur
+    /// together, until it reaches no further than the gap. One information line per loaded theme.
+    /// </summary>
+    private static void LimitReach(LoadedTheme loaded, float gap, ref CardShadow? shadow, ref CardGlow? glow)
+    {
+        float before = MathF.Max(shadow?.Reach ?? 0, glow?.Reach ?? 0);
+        if (before <= gap)
+            return;
+        if (shadow is { } s && s.Reach > gap)
+        {
+            // The spread is not scaled; the offset and the blur make up the rest of the gap.
+            float spread = MathF.Min(s.Spread, gap);
+            float scaled = MathF.Max(MathF.Abs(s.X), MathF.Abs(s.Y)) + s.Blur * 1.5f;
+            float k = scaled > 0 ? Math.Clamp((gap - spread) / scaled, 0, 1) : 1;
+            shadow = s with { X = s.X * k, Y = s.Y * k, Blur = s.Blur * k, Spread = spread };
+        }
+        if (glow is { } g && g.Reach > gap)
+            glow = g with { Blur = g.Blur * gap / g.Reach };
+        loaded.Warnings.InfoOnce("reach",
+            $"Theme '{loaded.Name}': the cards are translucent, so the shadow and glow reach no further than the gap: " +
+            $"{before:0} px limited to {gap:0} px.");
+    }
+
+    private static int UnderlayBleed(CardShadow? shadow, CardGlow? glow, CardMarks? outsideMarks)
+    {
+        float bleed = 0;
+        if (shadow != null)
+            bleed = MathF.Max(bleed, shadow.Reach);
+        if (glow != null)
+            bleed = MathF.Max(bleed, glow.Reach);
+        if (outsideMarks != null)
+            bleed = MathF.Max(bleed, -outsideMarks.Inset + outsideMarks.Thickness);
+        return (int)MathF.Ceiling(MathF.Max(0, bleed - 0.001f));
+    }
+
+    private static int UnderlayCornerZone(float corner, CardShadow? shadow, CardGlow? glow, CardMarks? outsideMarks)
+    {
+        if (shadow == null && glow == null && outsideMarks == null)
+            return 0;
+        float zone = corner;
+        if (shadow != null)
+            zone = MathF.Max(zone, corner + shadow.Blur * 1.5f + MathF.Max(MathF.Abs(shadow.X), MathF.Abs(shadow.Y)) + MathF.Max(0, shadow.Spread));
+        if (glow != null)
+            zone = MathF.Max(zone, corner + glow.Reach);
+        if (outsideMarks != null)
+            zone = MathF.Max(zone, outsideMarks.Size + outsideMarks.Thickness);
+        return (int)MathF.Ceiling(zone - 0.001f);
     }
 
     private static CardHighlight? ResolveHighlight(LoadedTheme loaded, ThemeCardHighlightDefinition? highlight, float cellPx)
@@ -258,6 +391,30 @@ public sealed class ResolvedCardStyle : IDisposable
         }
     }
 
+    /// <summary>
+    /// The underlay picture for a card of <paramref name="cardPx"/> physical pixels, or null when the style draws nothing
+    /// outside its cards. Cards at least twice the corner zone in both directions share one nine-grid picture; a smaller
+    /// card gets one at its exact size. Made on first use and kept until the style is disposed, so a page after the first
+    /// finds its pictures made.
+    /// </summary>
+    public UnderlayPicture? Underlay(System.Drawing.Size cardPx)
+    {
+        if (!HasOutside || cardPx.Width <= 0 || cardPx.Height <= 0)
+            return null;
+        bool nineGrid = cardPx.Width >= 2 * CornerZone && cardPx.Height >= 2 * CornerZone;
+        var key = nineGrid ? (0, 0) : (cardPx.Width, cardPx.Height);
+        lock (_sized)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (!_underlays.TryGetValue(key, out var picture))
+            {
+                _underlays[key] = picture = nineGrid ? UnderlayPicture.MakeNineGrid(this) : UnderlayPicture.MakeExact(this, cardPx);
+                UnderlayPicturesMade++;
+            }
+            return picture;
+        }
+    }
+
     public void Dispose()
     {
         lock (_sized)
@@ -268,6 +425,9 @@ public sealed class ResolvedCardStyle : IDisposable
             foreach (var chrome in _sized.Values)
                 chrome.Dispose();
             _sized.Clear();
+            foreach (var picture in _underlays.Values)
+                picture.Dispose();
+            _underlays.Clear();
         }
     }
 
