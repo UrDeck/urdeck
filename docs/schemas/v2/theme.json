@@ -1080,6 +1080,13 @@
           "description": "NEW. stacked draws a bar with the readout above, left-aligned, and the track at the bottom (Carbon). A meter and a thick bar are stacked by definition. auto keeps the bar's own layout.",
           "default": "auto"
         },
+        "readoutGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "NEW. The space between a bar's, meter's or thick bar's track and its readout, in thicknesses of the track.",
+          "default": 0.5
+        },
         "sweep": {
           "type": "object",
           "additionalProperties": true,

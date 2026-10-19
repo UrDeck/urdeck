@@ -431,6 +431,7 @@ Tick numbers run 0 to 100. `labelPosition` `below` and `above` apply to arcs. Th
 |---|---|---|---|
 | `gauge.labelPosition` | `auto`, `inside`, `below`, `above` | `"auto"` | Where a gauge's label sits. auto keeps the v1 placement (Prism: below). |
 | `gauge.layout` | `auto`, `stacked` | `"auto"` | `stacked` draws a bar with the readout above, left-aligned, and the track at the bottom (Carbon). A meter and a thick bar are stacked by definition. |
+| `gauge.readoutGap` | number, 0 to 4 | `0.5` | The space between a bar's (or meter's, or thick bar's) track and its readout, in thicknesses of the track. Raise it to give the value more air above the bar (Carbon). |
 | `gauge.sweep` | group |  | Ring/tach/marker geometry. |
 | `gauge.sweep.start` | -360 to 360 | `135` | Degrees, 0 = 3 o'clock, clockwise. v1 ring: 135. |
 | `gauge.sweep.span` | 30 to 360 | `270` | v1 ring: 270. |

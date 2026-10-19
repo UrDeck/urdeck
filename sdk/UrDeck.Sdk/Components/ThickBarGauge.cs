@@ -59,7 +59,7 @@ internal static class ThickBarGauge
         float height = Math.Min(unit * ThicknessRatio, Math.Max(0f, rect.Height - outline * 2));
         var track = new SKRect(rect.Left + outline, rect.Bottom - outline - height, rect.Right - outline, rect.Bottom - outline);
         float radius = theme.StrokeCap == SKStrokeCap.Round ? height / 2 : 0f;
-        float readoutBottom = Math.Max(rect.Top, track.Top - outline - unit * GaugePaint.ReadoutGap);
+        float readoutBottom = Math.Max(rect.Top, track.Top - outline - unit * (theme.Gauge.ReadoutGap ?? GaugePaint.ReadoutGap));
         return new Layout(track, radius, outline, new SKRect(rect.Left, rect.Top, rect.Right, readoutBottom));
     }
 

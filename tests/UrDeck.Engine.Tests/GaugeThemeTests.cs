@@ -64,6 +64,25 @@ public sealed class GaugeThemeTests : IDisposable
         Assert.Single(Log.Split('\n', StringSplitOptions.RemoveEmptyEntries), line => line.Contains("gauge.layout", StringComparison.Ordinal));
     }
 
+    // gauge.readoutGap
+
+    [Fact]
+    public void TheReadoutGap_IsNull_UnlessTheThemeSetsIt_AndIsCheckedAgainstItsRange()
+    {
+        using var none = Resolve("""{ "gauge": { "style": "bar" } }""");
+        using var set = Resolve("""{ "gauge": { "readoutGap": 1.1 } }""");
+
+        Assert.Null(none.Gauge.ReadoutGap);
+        Assert.Equal(1.1f, set.Gauge.ReadoutGap);
+        Assert.False(set.Gauge.IsEmpty);
+        Assert.Empty(Log);
+
+        using var wild = Resolve("""{ "gauge": { "readoutGap": 40 } }""");
+
+        Assert.Null(wild.Gauge.ReadoutGap);
+        Assert.Single(Log.Split('\n', StringSplitOptions.RemoveEmptyEntries), line => line.Contains("gauge.readoutGap", StringComparison.Ordinal));
+    }
+
     // The values
 
     [Fact]

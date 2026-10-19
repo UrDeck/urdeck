@@ -105,6 +105,7 @@ public static class ThemeResolver
         return new GaugeTheme
         {
             Layout = g.Layout == "stacked" ? GaugeLayout.Stacked : GaugeLayout.Auto,
+            ReadoutGap = g.ReadoutGap is { } readoutGap ? (float)readoutGap : null,
             LabelPosition = g.LabelPosition switch
             {
                 "inside" => GaugeLabelPosition.Inside,

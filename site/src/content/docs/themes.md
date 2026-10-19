@@ -47,7 +47,7 @@ Format 2 adds optional values for card chrome (chamfered corners, shadows, dashe
 fonts, more gauge styles, icons and a background of its own. The typography values are drawn today: a font per role (values,
 units, labels) with a fallback to the theme's font, the optical size of fonts that have one (`"opticalSize": "auto"`), upper- or
 lower-case labels and titles, letter spacing, slanted values, a gradient fill and a glow behind values. A weight the font
-cannot make is written to `urdeck.log` once. The gauge styles `meter`, `tach`, `marker` and `thickbar` and the gauge values (`sweep`, `segments`, `ticks`, `scale`, `redline`, `marker`, `gradient`, `glow`, `track`, `outline`, `layout`, `labelPosition`) are drawn too. The card's shape, fill and border are drawn today too: chamfered corners
+cannot make is written to `urdeck.log` once. The gauge styles `meter`, `tach`, `marker` and `thickbar` and the gauge values (`sweep`, `segments`, `ticks`, `scale`, `redline`, `marker`, `gradient`, `glow`, `track`, `outline`, `layout`, `readoutGap`, `labelPosition`) are drawn too. The card's shape, fill and border are drawn today too: chamfered corners
 (`card.shape`, `cut`, `cutCorners`), a gradient fill (`card.fillGradient`), a colour per card from `colors.cardTints`
 (`card.tint: "cycle"`, row by row on each page, by position in the dock), and dashed or gradient borders (`card.borderStyle`,
 `borderDash`, `borderGradient`, linear or conic); a dashed border has a dash on every corner. So is the light and the marks on

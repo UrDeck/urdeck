@@ -468,6 +468,21 @@ public sealed class GaugeStylesTests : IDisposable
     }
 
     [Fact]
+    public void TheReadoutGap_MovesTheStackedReadoutUp_ByThicknessesOfTheTrack()
+    {
+        var rect = new SKRect(0, 0, 280, 200);
+        using var plain = new GaugeTheme { Layout = GaugeLayout.Stacked };
+        using var roomy = new GaugeTheme { Layout = GaugeLayout.Stacked, ReadoutGap = 1.5f };
+        var a = Themed(plain, GaugeStyle.Bar);
+        var b = Themed(roomy, GaugeStyle.Bar);
+        float thickness = BarGauge.Thickness(a, rect);
+
+        Assert.Equal(a.Gauge.Layout, b.Gauge.Layout);
+        Assert.Equal(thickness, BarGauge.Thickness(b, rect));
+        Assert.Equal(thickness * 1f, BarGauge.ReadoutRect(a, rect).Bottom - BarGauge.ReadoutRect(b, rect).Bottom, 2);
+    }
+
+    [Fact]
     public void AMeter_PrintsItsScaleUnderTheTrack_AtBothEndsAndTheMiddle()
     {
         using var gauge = new GaugeTheme { Scale = new GaugeScaleLabels(["0", "50", "100"], 0f) };

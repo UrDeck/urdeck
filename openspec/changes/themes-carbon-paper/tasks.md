@@ -46,3 +46,7 @@
 - [x] 7.2 `openspec validate themes-carbon-paper --strict`
 - [x] 7.3 Update `docs/design/look-and-feel/STATUS.md`: the PR 12 row done; Carbon's pattern waits for `page-pattern` (which redraws Carbon's goldens and gets a second panel look); follow-ups found while tuning (for example a fill colour that follows the status level)
 - [ ] 7.4 Pull request `feat(theme): Carbon and Paper built-in themes` with the tuning table, the contrast table and side-by-side pictures with the board
+
+## 8. Panel tuning findings
+
+- [x] 8.1 Add `gauge.readoutGap` (model, schema, resolver, `GaugeTheme.ReadoutGap`, `BarGauge`/`ThickBarGauge`), docs and spec delta; Carbon sets 1.1 and `valueScale` 0.8

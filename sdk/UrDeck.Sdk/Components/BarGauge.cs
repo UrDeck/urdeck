@@ -45,13 +45,14 @@ internal static class BarGauge
         if (!stacked)
         {
             float y = rect.Top + thickness / 2;
-            float top = rect.Top + thickness * (1 + GaugePaint.ReadoutGap);
+            float top = rect.Top + thickness * (1 + (g.ReadoutGap ?? GaugePaint.ReadoutGap));
             return new BarLayout(left, right, y, thickness, trackThickness, new SKRect(rect.Left, Math.Min(top, rect.Bottom), rect.Right, rect.Bottom), false);
         }
 
+        float gap = g.ReadoutGap ?? GaugePaint.ReadoutGap;
         float below = meter ? BelowTrack(theme, thickness) : 0f;
         float centre = rect.Bottom - below - widest / 2;
-        float readoutBottom = Math.Max(rect.Top, centre - widest / 2 - thickness * GaugePaint.ReadoutGap);
+        float readoutBottom = Math.Max(rect.Top, centre - widest / 2 - thickness * gap);
         return new BarLayout(left, right, centre, thickness, trackThickness, new SKRect(rect.Left, rect.Top, rect.Right, readoutBottom), true);
     }
 

@@ -35,6 +35,7 @@ None.
 
 ### Modified Capabilities
 
+- `components`: "Gauge Readout Gap" (new `gauge.readoutGap` theme key, SDK 0.12.0), added during panel tuning because Carbon's values sat tight on the bar.
 - `theme`: "Built-in Themes" lists Carbon and Paper among the shipped themes, and the built-ins may bundle font files;
   "Built-in Theme Metadata" gives their names, modes, pairings and default background.
 
