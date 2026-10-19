@@ -99,3 +99,26 @@ optional. This change should follow `theme-gauges`, which it builds on.
 ## Open Questions
 
 - The week number's text (`Wk 42`) is English; a localised form can come with the rest of the widgets' strings.
+
+## Findings during apply
+
+- **Stats history at a single position.** A 1x1 or 2x2 card shows one reading as a single position, not a gauge position; the
+  history and the status work there too (a 2x2 card with `style: "gauge"` is the Carbon case). Text positions keep neither.
+- **The status row is carved out of the gauge's rectangle.** The gauge draws the label at the left and the chip at the right of
+  a row of `1.5 x` the label size, and the shape gets the rest with no label; the sparkline takes the bottom `gauge.sparkline.height`
+  (at most 40 % of the rectangle). `Gauge.Measure` plans the same carving, so the one-readout-size rule holds. The status is
+  not limited by height; the sparkline is (0.9 of a cell). Neither is part of `GaugeTheme.IsEmpty`, so a v1 gauge is untouched.
+- **Chip colour.** A theme with a `chip` group and no `colorBy` colours by status (the schema's default); a theme with no group
+  does not. A chip given no level (Weather's condition) keeps the theme's colours either way. `Chip.Draw` takes the text step,
+  `Title` for Weather so the plain case is `TextLine.Draw` byte for byte.
+- **Blinking colon.** An off tick draws the colon as a space in the `simple` style (the width differs by a few pixels with a
+  proportional face; none with a monospaced one) and leaves the dots out in `flap`. Seconds are drawn at the size the widest
+  (`88`) gives, so the time does not change size from second to second.
+- **Clock header.** The week goes in the header's right-hand text for `date`; with `label` it follows the date. A header does
+  not draw when the content is not taller than its row.
+- **Drafts.** Only Pop's fixture sets a `well` (Rigline has none), so Pop's page and dock goldens were redrawn (its condition is a
+  pill); the other drafts' goldens are unchanged because the sample page has no gauge card tall enough for a sparkline and no 4x4
+  Weather. Carbon (status and history) and Paper (week) were rendered beside the board and look right; Obsidian's two-part date is
+  `header: "label"` with a subtitle and the date. The dimension divider's printed label is not given by any widget yet.
+- **Cost.** A clock that shows seconds repaints once a second: 0.17 ms (simple) or 1.0 ms (flap) a repaint, about 10 ms and 60 ms
+  of CPU a minute (`docs/perf/theme-look.md`, "Widget parts").

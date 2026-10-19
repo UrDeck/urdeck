@@ -28,6 +28,8 @@ It takes its data from the `weather` provider and needs no provider setting: the
 | `days` | 4x4 only: how many forecast days, 1 to 7 (default 5). |
 | `animateForecast` | 4x4 only: `true` lets the forecast icons move as `motion` says. Off by default: each moving icon costs about 2.7 MB of memory. |
 
+The card's parts follow the [theme](/docs/themes/): at 4x4 the rule between now and the forecast is the theme's `divider`, each forecast day can sit on the theme's `well`, and the condition on its `chip` (a pill, in some themes). A theme that sets none of them draws the card as before.
+
 Any number of weather cards can show different places on one page; two cards with the same place share one request.
 A new or edited place is fetched at once. The data is fetched every 15 minutes
 (`"providers": { "weather": { "intervalMs": 600000 } }`; the minimum is 5 minutes). When the network is down the values

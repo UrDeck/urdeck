@@ -90,6 +90,12 @@ public sealed class GaugeTheme : IDisposable
     /// <summary>True when the value is drawn in the fill's colour.</summary>
     public bool ValueTint { get; init; }
 
+    /// <summary>The history line under the readout, or null when the theme does not enable it. Not part of <see cref="IsEmpty"/>: it is drawn round the gauge, not by it.</summary>
+    public GaugeSparkline? Sparkline { get; init; }
+
+    /// <summary>The status chip beside the label, or null when the theme does not enable it. Not part of <see cref="IsEmpty"/>.</summary>
+    public GaugeStatusStyle? Status { get; init; }
+
     /// <summary>Shaders and blurred copies kept while the theme lives (a theme per surface size, so the size is not in the key).</summary>
     internal GaugeCache Cache { get; } = new();
 

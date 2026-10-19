@@ -403,3 +403,25 @@ draws on the development machine, Release build, software canvas. The v1 ring is
   and a bar with a gradient and a glow build three objects (`TheShaders_AreBuiltOncePerSize_AndDisposedWithTheTheme`).
 
 **On the panel** (HYTE Y70, 1100 x 3840; four Stats cards at 4x4, 2x2, 2x2 and 4x2, private memory 25 s after start, CPU over 20 s; `default-dark` with every slot set to one style): ring 124.7 MB and 1.6 % of a core, tach 127.9 MB and 1.5 %, thick bar 125.1 MB and 1.4 %. So a tach costs about 3 MB and a thick bar under 1 MB, with no CPU difference. Ember and Pop as themes (their own backgrounds and card chrome) were 180.0 MB / 5.9 % and 181.5 MB / 4.8 %; that is the shader and the chrome, not the gauges. Looked at by eye: Ember's tach (needle, lit redline, ticks) and Pop's outlined thick bar at 4x4, 2x2 and 4x2 draw as in the gallery.
+
+## Widget parts (theme-widget-parts)
+
+**The Clock's per-second repaint.** One repaint of a clock card at 1100 x 550 (a 275 px cell, `default-dark`), mean of 600 draws
+after 100 warm-up draws, Release build, software canvas, development machine:
+
+| Clock | ms a repaint | repaints a minute | ms a minute |
+|---|---|---|---|
+| simple, as before (once a minute) | 0.14 | 1 | 0.14 |
+| simple, `showSeconds` and `blinkSeparator` with a date header | 0.17 | 60 | 10 |
+| flap, as before | 1.4 | 1 | 1.4 |
+| flap, with the same options | 1.0 | 60 | 62 |
+
+A card that shows seconds costs about 10 ms of CPU a minute (flap: about 60 ms), that is 0.02 % (0.1 %) of one core, and nothing
+else changes: no new picture or buffer. Both options are off by default.
+
+**The history.** A gauge position with a sparkline keeps at most 600 floats (2.4 KB), allocated only while the theme enables the
+sparkline and the position is tall enough, and dropped when either stops being true; adding a value to a full history allocates
+nothing (`Stats_AHistoryIsAtMostSixHundredFloats`).
+
+**The parts.** `Chip`, `Divider`, `Well` and `Sparkline` draw straight to the canvas and keep nothing. A v1 theme draws the same
+pixels as before: the goldens for `default-dark`, `default-light` and `glass` are unchanged.

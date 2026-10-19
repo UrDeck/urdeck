@@ -225,8 +225,7 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
             float half = (body.Height - (2 * room)) / 2;
             top = new SKRect(body.Left, body.Top, body.Right, body.Top + half);
             lower = new SKRect(body.Left, top.Bottom + (2 * room), body.Right, body.Bottom);
-            using var rule = new SKPaint { Color = theme.TextMuted.WithAlpha(0x55), IsAntialias = true, StrokeWidth = Math.Max(1f, theme.Gap * 0.15f) };
-            canvas.DrawLine(body.Left, top.Bottom + room, body.Right, top.Bottom + room, rule);
+            Divider.Draw(canvas, theme, SKRect.Create(body.Left, top.Bottom + room, body.Width, 0));
         }
 
         double seconds = Advance(context.Time);
@@ -257,8 +256,8 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
         float half = body.Width / 2;
         float top = body.Bottom - bottom;
         var left = SKRect.Create(body.Left, top, half, bottom);
-        TextLine.Draw(canvas, theme, SKRect.Create(left.Left, left.Top, left.Width, titleLine), shown.Condition, TextStep.Title,
-            shown.ConditionCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Left, VerticalAlign.Middle);
+        Chip.Draw(canvas, theme, SKRect.Create(left.Left, left.Top, left.Width, titleLine), shown.Condition, null, TextStep.Title,
+            HorizontalAlign.Left, VerticalAlign.Middle, shown.ConditionCurrent ? TextEmphasis.Primary : TextEmphasis.Muted);
         string range = $"{shown.HighLabel[..1]}: {Temp(shown.High)}   {shown.LowLabel[..1]}: {Temp(shown.Low)}";
         TextLine.Draw(canvas, theme, SKRect.Create(left.Left, left.Top + titleLine, left.Width, bodyLine), range, small,
             shown.High.IsCurrent && shown.Low.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Left, VerticalAlign.Middle);
@@ -352,6 +351,9 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
             DayShown day = forecast.Days[i];
             float left = area.Left + (i * column);
             float x = y;
+
+            // A well, when the theme has one, behind the whole column; the column itself is laid out as without it.
+            Well.Draw(canvas, theme, SKRect.Create(left + (inset / 2), y - inset, column - inset, (5 * titleLine) + icon + (2 * inset)));
 
             TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), day.Weekday.Value, TextStep.Title,
                 day.Weekday.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);

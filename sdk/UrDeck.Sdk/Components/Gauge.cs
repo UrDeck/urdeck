@@ -21,6 +21,25 @@ public sealed class GaugeOptions
 
     /// <summary>Fraction of the fitted readout size to draw at, from 0.1 to 1.0; lets the gauges of one card share a size.</summary>
     public float ReadoutScale { get; init; } = 1f;
+
+    /// <summary>
+    /// Recent fractions, oldest first, for the sparkline under the readout. Drawn only when the theme enables the sparkline,
+    /// there are two or more and the rectangle is at least 0.9 of a grid cell tall.
+    /// </summary>
+    public IReadOnlyList<float>? History { get; init; }
+
+    /// <summary>A status chip beside the label. Drawn only when the theme enables the status.</summary>
+    public GaugeStatusText? Status { get; init; }
+
+    /// <summary>The options for the gauge itself once the status row and the sparkline are taken off: without them, and without the label when the row carries it.</summary>
+    internal GaugeOptions ForShape(bool labelOnRow) => new()
+    {
+        Label = labelOnRow ? null : Label,
+        Fraction = Fraction,
+        TargetFraction = TargetFraction,
+        Level = Level,
+        ReadoutScale = ReadoutScale,
+    };
 }
 
 /// <summary>
@@ -37,6 +56,14 @@ public static class Gauge
         options ??= new GaugeOptions();
         if (rect.Width <= 0 || rect.Height <= 0)
             return SKRect.Create(rect.Left, rect.Top, 0, 0);
+
+        var parts = GaugeParts.Plan(theme, rect, options);
+        if (parts.Any)
+        {
+            var readout = Draw(canvas, theme, parts.Inner, style, reading, parts.Options);
+            parts.Draw(canvas, theme, reading, options);
+            return readout;
+        }
 
         if (style == GaugeStyle.Plain)
             return Readout.Draw(canvas, theme, rect, reading, new ReadoutOptions { Label = options.Label, Scale = options.ReadoutScale });
@@ -61,6 +88,14 @@ public static class Gauge
     /// </summary>
     public static float Measure(Theme theme, SKRect rect, GaugeStyle style, ReadingText reading, GaugeOptions? options = null)
     {
+        // The status row and the sparkline take their share first, so the size is the one the shape is drawn at.
+        if (options != null)
+        {
+            var parts = GaugeParts.Plan(theme, rect, options);
+            if (parts.Any)
+                return Measure(theme, parts.Inner, style, reading, parts.Options);
+        }
+
         if (UsesV1(theme, style))
             return LegacyGauge.Measure(theme, rect, style, reading, options);
 

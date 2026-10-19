@@ -327,7 +327,7 @@ Drawn by: the card chrome change.
 
 ### `divider`
 
-Drawn by: the widget parts change.
+Drawn by: the `Divider` component of the SDK: Weather's rule between now and the forecast at 4x4. A theme with no `divider` gets the rule Weather always drew (the muted text colour at about a third of its opacity, at least one pixel thick).
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
@@ -338,7 +338,7 @@ Drawn by: the widget parts change.
 
 ### `well`
 
-Drawn by: the widget parts change.
+Drawn by: the `Well` component of the SDK: Weather puts one behind each forecast day at 4x4. With no `well` nothing is drawn.
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
@@ -348,7 +348,7 @@ Drawn by: the widget parts change.
 
 ### `chip`
 
-Drawn by: the widget parts change.
+Drawn by: the `Chip` component of the SDK: the status beside a gauge's label (Stats) and Weather's condition. A pill is drawn round the text and shrinks with it; with `colorBy` `status` a gauge's status text takes the colour of its level (a chip given no level keeps the theme's colours).
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
@@ -472,12 +472,12 @@ Tick numbers run 0 to 100. `labelPosition` `below` and `above` apply to arcs. Th
 | `gauge.track.widthRatio` | 0.1 to 2 | `1` | Track width relative to stroke.thickness. |
 | `gauge.colorBy` | `accent`, `ramp` | `"accent"` | 'ramp' colours the fill by value along colors.ramp instead of the accent/warning/critical steps. |
 | `gauge.valueTint` | true or false | `false` | Colours the readout with the same colour as the fill. |
-| `gauge.sparkline` | group |  | A history line under the readout; needs Stats to keep a ring buffer. |
+| `gauge.sparkline` | group |  | A history line under the readout, in the colour of the fill. Stats keeps the last `historySeconds` of each gauge (one value a second, only while this is enabled) and draws the line when the card is at least 0.9 of a cell tall. |
 | `gauge.sparkline.enabled` | true or false |  |  |
 | `gauge.sparkline.height` | 0.05 to 1 | `0.3` |  |
 | `gauge.sparkline.historySeconds` | 10 to 600 | `60` |  |
 | `gauge.sparkline.strokeWidth` | 0.002 to 0.1 |  |  |
-| `gauge.status` | group |  | A status chip beside the label. |
+| `gauge.status` | group |  | A status chip beside the label, on the label's row. Stats chooses the label from the fraction and the thresholds, or from the level a slot's own `warning` and `critical` give. |
 | `gauge.status.enabled` | true or false |  |  |
 | `gauge.status.thresholds` | list of 2 numbers |  | [warm, hot] as 0..1. Default [0.7,0.9]. |
 | `gauge.status.labels` | list of 3 text |  | [ok, warm, hot]. |

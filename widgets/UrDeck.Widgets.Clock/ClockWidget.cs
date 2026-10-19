@@ -28,11 +28,18 @@ public class ClockWidget : Widget<ClockConfig>
     // but only repaints when the displayed minute (which also covers the date) changes.
     private DateTime? _lastRenderedMinute;
 
-    public override bool NeedsRender(DateTime now) => _lastRenderedMinute != TruncateToMinute(now);
+    // Only used with showSeconds or blinkSeparator: the second that was last painted.
+    private DateTime? _lastRenderedSecond;
+
+    private bool EverySecond => Config.ShowSeconds || Config.BlinkSeparator;
+
+    public override bool NeedsRender(DateTime now) =>
+        EverySecond ? _lastRenderedSecond != TruncateToSecond(now) : _lastRenderedMinute != TruncateToMinute(now);
 
     protected override void OnConfigured()
     {
         _lastRenderedMinute = null;
+        _lastRenderedSecond = null;
         _shownTiles = null;
         _flipping = false;
     }
@@ -44,6 +51,7 @@ public class ClockWidget : Widget<ClockConfig>
     public override void Render(WidgetRenderContext context)
     {
         _lastRenderedMinute = TruncateToMinute(context.Time);
+        _lastRenderedSecond = TruncateToSecond(context.Time);
         if (IsFlap)
         {
             RenderFlap(context);
@@ -52,17 +60,16 @@ public class ClockWidget : Widget<ClockConfig>
 
         var canvas = context.Canvas;
         var theme = context.Theme;
-        var content = context.ContentRect;
+        var content = DrawHeader(context, out bool dateBelow);
 
         bool is12h = Config.Format == "12h";
-        string timeText = is12h
-            ? context.Time.ToString("h:mm", CultureInfo.InvariantCulture)
-            : context.Time.ToString("HH:mm", CultureInfo.InvariantCulture);
+        string separator = SeparatorVisible(context.Time) ? ":" : " ";
+        string timeText = context.Time.ToString(is12h ? "%h" : "HH", CultureInfo.InvariantCulture) + separator + context.Time.ToString("mm", CultureInfo.InvariantCulture);
         string dateText = context.Time.ToString("ddd MMM d, yyyy", CultureInfo.CurrentCulture);
 
         var options = new ReadoutOptions
         {
-            Unit = is12h ? (context.Time.Hour >= 12 ? "PM" : "AM") : null,
+            Unit = Suffix(context.Time, is12h),
             UnitPlacement = UnitPlacement.Baseline,
             WidestValue = WidestTime,
             Vertical = VerticalAlign.Bottom,
@@ -74,13 +81,14 @@ public class ClockWidget : Widget<ClockConfig>
         // then shift the whole block up by the space the time did not need.
         float dateHeight = 0f;
         float gap = 0f;
-        if (Config.ShowDate)
+        if (dateBelow)
         {
             dateHeight = TextLine.Measure(theme, content, dateText, TextStep.Title).Height + theme.TitleSize * DescentAllowance;
             gap = theme.TitleSize;
         }
 
         var timeSlot = new SKRect(content.Left, content.Top, content.Right, Math.Max(content.Top + 1, content.Bottom - dateHeight - gap));
+        options = KeepSize(theme, timeSlot, timeText, options, is12h);
         var timeRect = Readout.Measure(theme, timeSlot, timeText, options);
         float blockHeight = timeRect.Height + gap + dateHeight;
         float shift = (content.Height - blockHeight) / 2f;
@@ -88,7 +96,7 @@ public class ClockWidget : Widget<ClockConfig>
         int save = canvas.Save();
         canvas.Translate(0, -shift);
         Readout.Draw(canvas, theme, timeSlot, timeText, options);
-        if (Config.ShowDate)
+        if (dateBelow)
         {
             var dateSlot = new SKRect(content.Left, content.Bottom - dateHeight, content.Right, content.Bottom);
             TextLine.Draw(canvas, theme, dateSlot, dateText, TextStep.Title, TextEmphasis.Muted, vertical: VerticalAlign.Top);
@@ -108,7 +116,7 @@ public class ClockWidget : Widget<ClockConfig>
     {
         var canvas = context.Canvas;
         var theme = context.Theme;
-        var content = context.ContentRect;
+        var content = DrawHeader(context, out bool dateBelow);
 
         bool is12h = Config.Format == "12h";
         string tiles = Tiles(context.Time, is12h);
@@ -141,21 +149,21 @@ public class ClockWidget : Widget<ClockConfig>
 
         float dateHeight = 0f;
         float gap = 0f;
-        if (Config.ShowDate)
+        if (dateBelow)
         {
             dateHeight = TextLine.Measure(theme, content, dateText, TextStep.Title).Height + theme.TitleSize * DescentAllowance;
             gap = theme.TitleSize;
         }
 
         var tileSlot = new SKRect(content.Left, content.Top, content.Right, Math.Max(content.Top + 1, content.Bottom - dateHeight - gap));
-        var layout = FlapDisplay.Fit(theme, tileSlot, is12h, (float)Config.FontSize);
+        var layout = FlapDisplay.Fit(theme, tileSlot, is12h || Config.ShowSeconds, (float)Config.FontSize, WidestSuffix(is12h));
         float top = content.Top + (content.Height - (layout.TileHeight + gap + dateHeight)) / 2f;
 
         var color = Config.TextColor != null && SKColor.TryParse(Config.TextColor, out var custom) ? custom : theme.Text;
         var flip = new FlapDisplay.Flip(_flipping ? _flipFrom : tiles, tiles, progress);
-        FlapDisplay.Draw(canvas, theme, layout, top, flip, color, context.PixelSize.Height, is12h ? (context.Time.Hour >= 12 ? "PM" : "AM") : null);
+        FlapDisplay.Draw(canvas, theme, layout, top, flip, color, context.PixelSize.Height, Suffix(context.Time, is12h), SeparatorVisible(context.Time));
 
-        if (Config.ShowDate)
+        if (dateBelow)
         {
             var dateSlot = new SKRect(content.Left, top + layout.TileHeight + gap, content.Right, top + layout.TileHeight + gap + dateHeight);
             TextLine.Draw(canvas, theme, dateSlot, dateText, TextStep.Title, TextEmphasis.Muted, vertical: VerticalAlign.Top);
@@ -166,6 +174,107 @@ public class ClockWidget : Widget<ClockConfig>
     private static string Tiles(DateTime time, bool is12h) => is12h
         ? time.ToString("%h", CultureInfo.InvariantCulture).PadLeft(2) + time.ToString("mm", CultureInfo.InvariantCulture)
         : time.ToString("HHmm", CultureInfo.InvariantCulture);
+
+    // ---------------------------------------------------------------- header and options
+
+    private enum HeaderMode { Absent, Date, Label, None }
+
+    private HeaderMode Header => Config.Header?.Trim().ToLowerInvariant() switch
+    {
+        "date" => HeaderMode.Date,
+        "label" => HeaderMode.Label,
+        "none" => HeaderMode.None,
+        _ => HeaderMode.Absent,
+    };
+
+    /// <summary>
+    /// Draws the header row when the configuration asks for one and returns the rectangle left for the time (and, without a
+    /// header, the date below it). <paramref name="dateBelow"/> says whether the date goes below the time.
+    /// </summary>
+    private SKRect DrawHeader(WidgetRenderContext context, out bool dateBelow)
+    {
+        var content = context.ContentRect;
+        var mode = Header;
+        dateBelow = mode == HeaderMode.Absent && Config.ShowDate;
+        if (mode is HeaderMode.Absent or HeaderMode.None)
+            return content;
+
+        var theme = context.Theme;
+        string date = context.Time.ToString("ddd MMM d, yyyy", CultureInfo.CurrentCulture);
+        string week = $"Wk {ISOWeek.GetWeekOfYear(context.Time)}";
+        string subtitle = Config.Subtitle ?? "";
+        (string left, string right) = mode == HeaderMode.Date
+            ? (date, Config.ShowWeek ? week : subtitle)
+            : (subtitle, Config.ShowWeek ? $"{date}  {week}" : date);
+
+        float height = theme.LabelSize * 1.5f;
+        if (height >= content.Height)
+            return content;
+
+        // Each text has half of the row at most; the left one takes what the right one leaves.
+        var row = SKRect.Create(content.Left, content.Top, content.Width, height);
+        float half = (row.Width - theme.Gap) / 2;
+        var rightRect = string.IsNullOrEmpty(right)
+            ? SKRect.Empty
+            : TextLine.Measure(theme, new SKRect(row.Right - half, row.Top, row.Right, row.Bottom), right, TextStep.Label, HorizontalAlign.Right);
+        float leftLimit = rightRect.Width > 0 ? row.Right - Math.Max(rightRect.Width, 0) - theme.Gap : row.Right;
+        TextLine.Draw(context.Canvas, theme, new SKRect(row.Left, row.Top, Math.Max(row.Left, leftLimit), row.Bottom),
+            left, TextStep.Label, TextEmphasis.Muted, HorizontalAlign.Left);
+        if (rightRect.Width > 0)
+            TextLine.Draw(context.Canvas, theme, new SKRect(row.Right - half, row.Top, row.Right, row.Bottom),
+                right, TextStep.Label, TextEmphasis.Muted, HorizontalAlign.Right);
+
+        return new SKRect(content.Left, row.Bottom + theme.Gap, content.Right, content.Bottom);
+    }
+
+    /// <summary>The colon shows, except on every other second with <c>blinkSeparator</c>.</summary>
+    private bool SeparatorVisible(DateTime time) => !Config.BlinkSeparator || time.Second % 2 == 0;
+
+    /// <summary>The small text after the time: the seconds, the 12-hour period, both or none.</summary>
+    private string? Suffix(DateTime time, bool is12h)
+    {
+        string? period = is12h ? (time.Hour >= 12 ? "PM" : "AM") : null;
+        if (!Config.ShowSeconds)
+            return period;
+        string seconds = time.ToString("ss", CultureInfo.InvariantCulture);
+        return period == null ? seconds : seconds + " " + period;
+    }
+
+    /// <summary>The widest the small text gets, so the size does not change from second to second; null for the usual AM or PM.</summary>
+    private string? WidestSuffix(bool is12h) => Config.ShowSeconds ? (is12h ? "88 AM" : "88") : null;
+
+    /// <summary>With seconds the unit's width changes with the digits; the time is drawn at the size the widest unit gives.</summary>
+    private ReadoutOptions KeepSize(Theme theme, SKRect slot, string timeText, ReadoutOptions options, bool is12h)
+    {
+        if (!Config.ShowSeconds)
+            return options;
+
+        var widest = new ReadoutOptions
+        {
+            Unit = WidestSuffix(is12h),
+            UnitPlacement = options.UnitPlacement,
+            WidestValue = options.WidestValue,
+            Vertical = options.Vertical,
+            Scale = options.Scale,
+        };
+        float wide = Readout.Measure(theme, slot, timeText, widest).Height;
+        float actual = Readout.Measure(theme, slot, timeText, options).Height;
+        if (actual <= 0 || wide <= 0 || wide >= actual)
+            return options;
+
+        return new ReadoutOptions
+        {
+            Unit = options.Unit,
+            UnitPlacement = options.UnitPlacement,
+            WidestValue = options.WidestValue,
+            Vertical = options.Vertical,
+            ValueColor = options.ValueColor,
+            Scale = options.Scale * wide / actual,
+        };
+    }
+
+    private static DateTime TruncateToSecond(DateTime time) =>
+        new(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second, time.Kind);
 
     private static DateTime TruncateToMinute(DateTime time) =>
         new(time.Year, time.Month, time.Day, time.Hour, time.Minute, 0, time.Kind);

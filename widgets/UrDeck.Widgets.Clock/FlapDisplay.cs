@@ -46,7 +46,7 @@ internal static class FlapDisplay
     /// <summary>The characters of the four tiles for a frame: <see cref="From"/> to <see cref="To"/> at <see cref="Progress"/>, or at rest on <see cref="To"/>.</summary>
     internal readonly record struct Flip(string From, string To, float? Progress);
 
-    public static Layout Fit(Theme theme, SKRect slot, bool withSuffix, float scale)
+    public static Layout Fit(Theme theme, SKRect slot, bool withSuffix, float scale, string? widestSuffix = null)
     {
         using var valueFont = new SKFont(theme.GetTypeface(TextRole.Value), ReferenceSize);
         using var unitFont = new SKFont(theme.GetTypeface(TextRole.Unit), ReferenceSize);
@@ -55,7 +55,7 @@ internal static class FlapDisplay
         float digitPerHeight = DigitCapRatio * ReferenceSize / cap;
         float unitPerHeight = digitPerHeight * theme.UnitRatio;
         float suffixPerHeight = withSuffix
-            ? SuffixGap + Math.Max(unitFont.MeasureText("AM"), unitFont.MeasureText("PM")) / ReferenceSize * unitPerHeight
+            ? SuffixGap + (widestSuffix != null ? unitFont.MeasureText(widestSuffix) : Math.Max(unitFont.MeasureText("AM"), unitFont.MeasureText("PM"))) / ReferenceSize * unitPerHeight
             : 0f;
         float widthPerHeight = 4 * TileAspect + 2 * TileGap + ColonWidth + suffixPerHeight;
 
@@ -70,7 +70,7 @@ internal static class FlapDisplay
             unitPerHeight * height);
     }
 
-    public static void Draw(SKCanvas canvas, Theme theme, Layout layout, float top, Flip flip, SKColor textColor, int cardHeight, string? suffix)
+    public static void Draw(SKCanvas canvas, Theme theme, Layout layout, float top, Flip flip, SKColor textColor, int cardHeight, string? suffix, bool colonVisible = true)
     {
         float h = layout.TileHeight;
         float w = layout.TileWidth;
@@ -105,8 +105,11 @@ internal static class FlapDisplay
         // Colon between the pairs.
         float colonX = (lefts[1] + w + lefts[2]) / 2f;
         float mid = top + h / 2f;
-        canvas.DrawCircle(colonX, mid - ColonDotOffset * h, ColonDotRadius * h, textPaint);
-        canvas.DrawCircle(colonX, mid + ColonDotOffset * h, ColonDotRadius * h, textPaint);
+        if (colonVisible)
+        {
+            canvas.DrawCircle(colonX, mid - ColonDotOffset * h, ColonDotRadius * h, textPaint);
+            canvas.DrawCircle(colonX, mid + ColonDotOffset * h, ColonDotRadius * h, textPaint);
+        }
 
         if (suffix != null)
         {

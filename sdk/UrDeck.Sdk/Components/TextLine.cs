@@ -34,6 +34,18 @@ public static class TextLine
         VerticalAlign vertical = VerticalAlign.Middle) =>
         Run(null, theme, rect, text, step, TextEmphasis.Primary, horizontal, vertical);
 
+    /// <summary>Draws the line in <paramref name="color"/> instead of one of the theme's text colours.</summary>
+    internal static SKRect DrawColored(
+        SKCanvas canvas,
+        Theme theme,
+        SKRect rect,
+        string text,
+        TextStep step,
+        SKColor color,
+        HorizontalAlign horizontal = HorizontalAlign.Center,
+        VerticalAlign vertical = VerticalAlign.Middle) =>
+        Run(canvas, theme, rect, text, step, TextEmphasis.Primary, horizontal, vertical, color);
+
     private static SKRect Run(
         SKCanvas? canvas,
         Theme theme,
@@ -42,7 +54,8 @@ public static class TextLine
         TextStep step,
         TextEmphasis emphasis,
         HorizontalAlign horizontal,
-        VerticalAlign vertical)
+        VerticalAlign vertical,
+        SKColor? color = null)
     {
         if (string.IsNullOrEmpty(text) || rect.Width <= 0 || rect.Height <= 0)
             return SKRect.Create(rect.Left, rect.Top, 0, 0);
@@ -76,7 +89,7 @@ public static class TextLine
 
         if (canvas != null)
         {
-            using var paint = new SKPaint { Color = emphasis == TextEmphasis.Muted ? theme.TextMuted : theme.Text, IsAntialias = true };
+            using var paint = new SKPaint { Color = color ?? (emphasis == TextEmphasis.Muted ? theme.TextMuted : theme.Text), IsAntialias = true };
             if (tracking == 0)
                 canvas.DrawText(text, left, top + cap, SKTextAlign.Left, font, paint);
             else

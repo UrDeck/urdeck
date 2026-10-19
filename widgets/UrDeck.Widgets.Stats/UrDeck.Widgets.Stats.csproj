@@ -13,4 +13,8 @@
     </ProjectReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
+
 </Project>

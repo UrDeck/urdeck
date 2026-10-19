@@ -26,8 +26,10 @@
          Package 0.9.0 (theme-typography): TextStyle, TextCase, TextFill, TextGlow and Theme.TextStyle; Readout and TextLine
          draw the style. All additive, so the assembly version stays.
          Package 0.10.0 (theme-gauges): GaugeStyle.Meter, Tach, Marker and ThickBar, GaugeTheme and its records, Theme.Gauge,
-         Accent2, Ink and Ramp. All additive, so the assembly version stays. -->
-    <Version>0.10.0</Version>
+         Accent2, Ink and Ramp. All additive, so the assembly version stays.
+         Package 0.11.0 (theme-widget-parts): Chip, Divider, Well and Sparkline, Theme.Chip, Divider and Well, GaugeTheme.Sparkline
+         and Status, GaugeOptions.History and Status. All additive, so the assembly version stays. -->
+    <Version>0.11.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 
