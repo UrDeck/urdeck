@@ -56,6 +56,9 @@ public static class ThemeResolver
                 : SKStrokeCap.Round,
             GaugeStyle = ThemeGaugeDefinition.Parse(d.Gauge?.Style) ?? GaugeStyle.Ring,
             Gauge = Gauge(d.Gauge, cellPx),
+            Chip = Chip(d.Chip),
+            Divider = Divider(d.Divider, Color(c.TextMuted).WithAlpha(0x55), Px(card.Gap, cellPx), cellPx),
+            Well = Well(d.Well, cellPx),
             TextStyle = Style(type, cellPx),
             Typefaces = LoadTypefaces(loaded, cellPx),
         };
@@ -153,8 +156,55 @@ public static class ThemeResolver
             Glow = Glow(g.Glow, cellPx),
             ColorByRamp = g.ColorBy == "ramp",
             ValueTint = g.ValueTint == true,
+            Sparkline = g.Sparkline is { Enabled: true } sparkline
+                ? new GaugeSparkline(
+                    Px(sparkline.Height ?? 0.3, cellPx),
+                    Px(sparkline.StrokeWidth ?? 0.012, cellPx),
+                    (int)(sparkline.HistorySeconds ?? 60),
+                    SparklineMinRectCells * cellPx)
+                : null,
+            Status = g.Status is { Enabled: true } status
+                ? new GaugeStatusStyle(
+                    status.Labels is { Count: 3 } statusLabels ? statusLabels : ["OK", "WARM", "HOT"],
+                    (float)(status.Thresholds is { Count: 2 } t ? t[0] : 0.7),
+                    (float)(status.Thresholds is { Count: 2 } u ? u[1] : 0.9))
+                : null,
         };
     }
+
+    /// <summary>A gauge rectangle must be this many grid cells tall to show a sparkline.</summary>
+    private const float SparklineMinRectCells = 0.9f;
+
+    private static ChipTheme Chip(ThemeChipDefinition? chip) => chip == null
+        ? new ChipTheme()
+        : new ChipTheme(
+            chip.Shape == "pill" ? ChipShape.Pill : ChipShape.None,
+            OptionalColor(chip.Fill),
+            OptionalColor(chip.Border),
+            OptionalColor(chip.TextColor),
+            chip.ColorBy != "none");
+
+    /// <summary>A theme that sets no divider gets the rule the Weather card has always drawn (the muted text colour at 0x55, a pixel or 0.15 of the gap).</summary>
+    private static DividerTheme Divider(ThemeDividerDefinition? divider, SKColor defaultColor, float gapPx, float cellPx)
+    {
+        if (divider == null)
+            return new DividerTheme(DividerStyle.Line, defaultColor, Math.Max(1f, gapPx * 0.15f));
+        var style = divider.Style switch
+        {
+            "none" => DividerStyle.None,
+            "gradient" => DividerStyle.Gradient,
+            "dimension" => DividerStyle.Dimension,
+            _ => DividerStyle.Line,
+        };
+        return new DividerTheme(
+            style,
+            OptionalColor(divider.Color) ?? defaultColor,
+            Math.Max(1f, Px(divider.Thickness ?? 0.01, cellPx)),
+            OptionalColor(divider.GradientTo));
+    }
+
+    private static WellTheme? Well(ThemeWellDefinition? well, float cellPx) =>
+        well == null ? null : new WellTheme(OptionalColor(well.Fill), Px(well.Radius ?? 0.09, cellPx), OptionalColor(well.Border));
 
     private static GaugeGlow? Glow(ThemeGlowDefinition? glow, float cellPx) =>
         glow is { Blur: > 0 } ? new GaugeGlow(Px(glow.Blur, cellPx), OptionalColor(glow.Color), (float)(glow.Alpha ?? 0.6)) : null;

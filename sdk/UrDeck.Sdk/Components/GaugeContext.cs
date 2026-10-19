@@ -53,7 +53,7 @@ internal sealed class GaugeContext
     public IReadOnlyList<SKColor>? GradientColors =>
         Current && G.Gradient is { } gradient ? (gradient.Ramp ? Theme.Ramp : gradient.Colors) : null;
 
-    private static SKColor FillColor(Theme theme, ReadingText reading, GaugeOptions options, float? fraction)
+    internal static SKColor FillColor(Theme theme, ReadingText reading, GaugeOptions options, float? fraction)
     {
         if (!reading.IsCurrent)
             return theme.TextMuted;

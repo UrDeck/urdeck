@@ -17,6 +17,7 @@ public sealed class Theme : IDisposable
     private SKColor? _accent2;
     private SKColor? _ink;
     private IReadOnlyList<SKColor>? _ramp;
+    private DividerTheme? _divider;
 
     public SKColor Background { get; init; } = SKColor.Parse("#0f0f1a");
     public SKColor CardFill { get; init; } = SKColor.Parse("#1a1a2e");
@@ -73,6 +74,19 @@ public sealed class Theme : IDisposable
 
     /// <summary>The gauge values of the theme (sweep, segments, ticks, redline, marker and the rest), in pixels; a theme that sets none changes nothing.</summary>
     public GaugeTheme Gauge { get; init; } = new();
+
+    /// <summary>The chip values of the theme; a theme that sets none gives plain text.</summary>
+    public ChipTheme Chip { get; init; } = new();
+
+    /// <summary>The divider; a theme that sets none gives the rule the Weather card always drew (muted text at about a third of its opacity, at least a pixel thick).</summary>
+    public DividerTheme Divider
+    {
+        get => _divider ?? new DividerTheme(DividerStyle.Line, TextMuted.WithAlpha(0x55), Math.Max(1f, Gap * 0.15f));
+        init => _divider = value;
+    }
+
+    /// <summary>The well drawn behind grouped content, or null when the theme sets none.</summary>
+    public WellTheme? Well { get; init; }
 
     /// <summary>Letter case, spacing, slant, size, fill and glow of text, in pixels; a theme that sets none changes nothing.</summary>
     public TextStyle TextStyle { get; init; } = new();

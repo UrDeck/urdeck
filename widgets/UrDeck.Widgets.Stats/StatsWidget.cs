@@ -47,6 +47,7 @@ public class StatsWidget : Widget<StatsConfig>
     private Position[]? _positions;
     private Shown[]? _drawn;
     private Ease[] _eases = [];
+    private FractionHistory?[] _histories = [];
     private bool _animating;
 
     public override IReadOnlyCollection<string> Subscriptions =>
@@ -62,6 +63,7 @@ public class StatsWidget : Widget<StatsConfig>
         _positions = null;
         _drawn = null;
         _eases = [];
+        _histories = [];
         _animating = false;
     }
 
@@ -107,7 +109,12 @@ public class StatsWidget : Widget<StatsConfig>
         }
 
         var rects = Layout(context, content, positions);
-        float[] scales = ReadoutScales(theme, positions, rects, shown, styles);
+        float[]?[] histories = UpdateHistories(theme, positions, rects, shown, context.Time);
+        var statuses = new GaugeStatusText?[positions.Length];
+        for (int i = 0; i < positions.Length; i++)
+            statuses[i] = StatusFor(theme, positions[i], shown[i]);
+
+        float[] scales = ReadoutScales(theme, positions, rects, shown, styles, histories, statuses);
         for (int i = 0; i < positions.Length; i++)
         {
             var options = new GaugeOptions
@@ -117,9 +124,56 @@ public class StatsWidget : Widget<StatsConfig>
                 TargetFraction = shown[i].Fraction,
                 Level = shown[i].Level,
                 ReadoutScale = scales[i],
+                History = histories[i],
+                Status = statuses[i],
             };
             Gauge.Draw(context.Canvas, theme, rects[i], styles[i], shown[i].Text, options);
         }
+    }
+
+    /// <summary>
+    /// Adds the fraction each gauge position shows to its history and returns the histories to draw. A history exists only
+    /// while the theme enables the sparkline and the position is tall enough for it; otherwise none is kept.
+    /// </summary>
+    private float[]?[] UpdateHistories(Theme theme, Position[] positions, SKRect[] rects, Shown[] shown, DateTime now)
+    {
+        if (_histories.Length != positions.Length)
+            _histories = new FractionHistory?[positions.Length];
+
+        float[]?[] result = new float[]?[positions.Length];
+        var sparkline = theme.Gauge.Sparkline;
+        for (int i = 0; i < positions.Length; i++)
+        {
+            if (sparkline == null || positions[i].Kind == PositionKind.Text || shown[i].Fraction is not { } fraction || rects[i].Height < sparkline.MinRectHeight)
+            {
+                _histories[i] = null;
+                continue;
+            }
+
+            var history = _histories[i];
+            if (history == null || history.Capacity != sparkline.HistorySeconds)
+                _histories[i] = history = new FractionHistory(sparkline.HistorySeconds);
+            history.Add(now, fraction);
+            result[i] = history.ToArray();
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The status of a gauge position: the theme's label for the fraction, or for the level the slot's own warning and critical
+    /// values give. No fraction, no status.
+    /// </summary>
+    private static GaugeStatusText? StatusFor(Theme theme, Position position, Shown shown)
+    {
+        if (theme.Gauge.Status is not { } style || position.Kind == PositionKind.Text || shown.Fraction is not { } fraction)
+            return null;
+
+        if (position.Slot is { Warning: not null } or { Critical: not null })
+            return new GaugeStatusText(style.Labels[(int)shown.Level], shown.Level);
+
+        (string text, var level) = style.For(fraction);
+        return new GaugeStatusText(text, level);
     }
 
     /// <summary>Moves the drawn fraction of one position toward its target as of <paramref name="now"/>.</summary>
@@ -288,7 +342,8 @@ public class StatsWidget : Widget<StatsConfig>
     }
 
     /// <summary>One readout size for all gauge positions: each is drawn at the smallest fitted size among them.</summary>
-    private static float[] ReadoutScales(Theme theme, Position[] positions, SKRect[] rects, Shown[] shown, GaugeStyle[] styles)
+    private static float[] ReadoutScales(
+        Theme theme, Position[] positions, SKRect[] rects, Shown[] shown, GaugeStyle[] styles, float[]?[] histories, GaugeStatusText?[] statuses)
     {
         float[] scales = new float[positions.Length];
         Array.Fill(scales, 1f);
@@ -299,7 +354,7 @@ public class StatsWidget : Widget<StatsConfig>
             if (positions[i].Kind != PositionKind.Gauge)
                 continue;
             sizes[i] = Gauge.Measure(theme, rects[i], styles[i], shown[i].Text,
-                new GaugeOptions { Label = string.IsNullOrEmpty(shown[i].Label) ? null : shown[i].Label });
+                new GaugeOptions { Label = string.IsNullOrEmpty(shown[i].Label) ? null : shown[i].Label, History = histories[i], Status = statuses[i] });
             if (sizes[i] > 0)
                 smallest = Math.Min(smallest, sizes[i]);
         }

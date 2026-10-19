@@ -44,6 +44,12 @@ power and clock, and the CPU's first core):
 
 The fill eases to a new value over about 300 ms; the number and the colour change at once.
 
+A theme can ask a gauge for two more parts. With `gauge.status` the label's row also carries a short status word (`OK`, `WARM`,
+`HOT` in the themes that use it), chosen from the gauge's fraction by the theme's thresholds; a slot that sets `warning` or
+`critical` is judged by those instead. With `gauge.sparkline` a line of the last minute or so is drawn under the number; Stats
+keeps that history itself, one value a second, only for a gauge the theme gives a sparkline and that is tall enough for it, and
+it starts again when the slot's reading or the settings change. See [Themes](/docs/themes/).
+
 ## The `system` readings
 
 The `system` provider needs no administrator rights.
