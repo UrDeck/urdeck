@@ -1,6 +1,6 @@
 ## 1. Fonts
 
-- [ ] 1.1 Compare `InstrumentSans-Variable.ttf` and `JetBrainsMono-Variable.ttf` in `spikes/theme-look-s3/fonts/` with their upstream releases; note each version and copyright line; confirm each licence file is OFL 1.1
+- [x] 1.1 Compare `InstrumentSans-Variable.ttf` and `JetBrainsMono-Variable.ttf` in `spikes/theme-look-s3/fonts/` with their upstream releases; note each version and copyright line; confirm each licence file is OFL 1.1
 - [x] 1.2 Copy both fonts and `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt` to `src/UrDeck.Engine/Themes/Builtin/`; check they appear as `UrDeck.Themes.<file>` resources in the built assembly
 - [x] 1.3 Add both families to `THIRD-PARTY-NOTICES.md` (copyright holder, version, licence, where they are used)
 
@@ -8,7 +8,7 @@
 
 - [x] 2.1 Move the drafts to `src/UrDeck.Engine/Themes/Builtin/carbon.json` and `paper.json`; remove Paper's `typography.valueScale` (design 4); add `carbon` and `paper` to `ThemeStore.BuiltInNames`
 - [x] 2.2 Delete `tests/UrDeck.Engine.Tests/Fixtures/themes/carbon` and `paper`; repoint `GoldenTests`, `CardChromeTests`, `CardUnderlayTests`, `GaugeThemeTests` (and any other user) at the built-ins; keep the other six drafts as fixtures
-- [ ] 2.3 Test: each new built-in loads with no themes folder, logs no font or weight warning, and resolves the value, unit, label and body roles to the families in the spec (on Windows and Linux)
+- [x] 2.3 Test: each new built-in loads with no themes folder, logs no font or weight warning, and resolves the value, unit, label and body roles to the families in the spec (on Windows and Linux)
 - [x] 2.4 Test: every v1 colour of `paper` (background, card fill, card border, text, muted text, accent, accent dim, good, warning, critical) equals the value in `paper.json`, none from `default-dark`; same for `carbon`
 - [x] 2.5 Test: `ThemeCatalog` lists both with name, mode and pairings; `PairingIndex` recommends `contour` first for each; every background they name is a built-in
 - [x] 2.6 Test: with no `background` in the config, `BackgroundPlan.Resolve` for each gives `contour` from the theme default, then the theme's static colour
@@ -22,10 +22,10 @@
 ## 4. Tuning on the panel
 
 - [x] 4.1 Build and install a local copy; show Carbon and then Paper on the 1100x3840 panel over `contour`, at 100 % and 150 % scaling, with a deck like the site deck (sparkline, status words, Clock header and week)
-- [ ] 4.2 Show each over its static colour (shaders unavailable or a scratch override)
+- [x] 4.2 Show each over its static colour (shaders unavailable or a scratch override)
 - [ ] 4.3 Apply the owner's adjustments to `carbon.json` and `paper.json`; keep a table of key, draft value, final value and reason for the pull request; update any test assertion a changed value moves, with the reason
 - [x] 4.4 Decide Carbon's `meta.description` wording about load colour (design 4); confirm `gauge.colorBy` stays `accent` or record why not
-- [ ] 4.5 Check whether Paper draws accent-coloured text anywhere a user must read it; if so darken the accent to at least 4.5:1 on the card fill and record it
+- [x] 4.5 Check whether Paper draws accent-coloured text anywhere a user must read it; if so darken the accent to at least 4.5:1 on the card fill and record it
 - [ ] 4.6 Redraw the goldens after tuning (repeat 3.1) and get the owner's approval of the panel look
 
 ## 5. Contrast record
@@ -42,7 +42,7 @@
 
 ## 7. Wrap-up
 
-- [ ] 7.1 `dotnet build urdeck.slnx -c Release` with 0 warnings; `dotnet test urdeck.slnx -c Release`; `dotnet format urdeck.slnx --severity warn --verify-no-changes`; the Linux test projects on WSL
-- [ ] 7.2 `openspec validate themes-carbon-paper --strict`
+- [x] 7.1 `dotnet build urdeck.slnx -c Release` with 0 warnings; `dotnet test urdeck.slnx -c Release`; `dotnet format urdeck.slnx --severity warn --verify-no-changes`; the Linux test projects on WSL
+- [x] 7.2 `openspec validate themes-carbon-paper --strict`
 - [x] 7.3 Update `docs/design/look-and-feel/STATUS.md`: the PR 12 row done; Carbon's pattern waits for `page-pattern` (which redraws Carbon's goldens and gets a second panel look); follow-ups found while tuning (for example a fill colour that follows the status level)
 - [ ] 7.4 Pull request `feat(theme): Carbon and Paper built-in themes` with the tuning table, the contrast table and side-by-side pictures with the board

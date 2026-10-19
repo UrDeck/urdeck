@@ -20,7 +20,7 @@
           "col": 0,
           "row": 2,
           "width": 2,
-          "height": 1,
+          "height": 2,
           "slots": [
             {
               "reading": "system:cpu/load",
@@ -33,7 +33,7 @@
           "col": 2,
           "row": 2,
           "width": 2,
-          "height": 1,
+          "height": 2,
           "slots": [
             {
               "reading": "system:gpu/load",
@@ -44,7 +44,7 @@
         {
           "typeId": "urdeck.widgets.weather",
           "col": 0,
-          "row": 3,
+          "row": 4,
           "width": 4,
           "height": 2,
           "location": "Zurich",

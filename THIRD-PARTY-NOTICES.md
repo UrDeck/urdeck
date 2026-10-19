@@ -81,5 +81,5 @@ embedded with the fonts.
 | Family | Copyright | Version | Used by |
 |---|---|---|---|
 | Inter | Copyright (c) 2016 The Inter Project Authors (<https://github.com/rsms/inter>) | `InterVariable.ttf` | `default-dark`, `default-light`, `glass` |
-| Instrument Sans | Copyright 2022 The Instrument Sans Project Authors (<https://github.com/Instrument/instrument-sans>) | 1.000 | `carbon` (body text), `paper` (values, body text) |
-| JetBrains Mono | Copyright 2020 The JetBrains Mono Project Authors (<https://github.com/JetBrains/JetBrainsMono>) | 2.211 | `carbon` (values, units, labels), `paper` (units, labels) |
+| Instrument Sans | Copyright 2022 The Instrument Sans Project Authors (<https://github.com/Instrument/instrument-sans>) | 1.000 (Google Fonts release) | `carbon` (body text), `paper` (values, body text) |
+| JetBrains Mono | Copyright 2020 The JetBrains Mono Project Authors (<https://github.com/JetBrains/JetBrainsMono>) | 2.211 (Google Fonts release) | `carbon` (values, units, labels), `paper` (units, labels) |
