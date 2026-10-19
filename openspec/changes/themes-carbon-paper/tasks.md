@@ -23,7 +23,7 @@
 
 - [x] 4.1 Build and install a local copy; show Carbon and then Paper on the 1100x3840 panel over `contour`, at 100 % and 150 % scaling, with a deck like the site deck (sparkline, status words, Clock header and week)
 - [x] 4.2 Show each over its static colour (shaders unavailable or a scratch override)
-- [ ] 4.3 Apply the owner's adjustments to `carbon.json` and `paper.json`; keep a table of key, draft value, final value and reason for the pull request; update any test assertion a changed value moves, with the reason
+- [x] 4.3 Apply the owner's adjustments to `carbon.json` and `paper.json`; keep a table of key, draft value, final value and reason for the pull request; update any test assertion a changed value moves, with the reason
 - [x] 4.4 Decide Carbon's `meta.description` wording about load colour (design 4); confirm `gauge.colorBy` stays `accent` or record why not
 - [x] 4.5 Check whether Paper draws accent-coloured text anywhere a user must read it; if so darken the accent to at least 4.5:1 on the card fill and record it
 - [ ] 4.6 Redraw the goldens after tuning (repeat 3.1) and get the owner's approval of the panel look

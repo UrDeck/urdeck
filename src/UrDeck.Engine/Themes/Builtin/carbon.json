@@ -98,7 +98,7 @@
     "bodySize": 0.11,
     "titleSize": 0.12,
     "unitRatio": 0.38,
-    "valueScale": 1.0,
+    "valueScale": 0.8,
     "case": {
       "label": "upper",
       "title": "upper"
