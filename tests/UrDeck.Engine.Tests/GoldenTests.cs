@@ -26,7 +26,7 @@ public sealed class GoldenTests
     private static SKBitmap Render(string theme, bool dock = false, bool draft = false)
     {
         using var page = SamplePage.Build();
-        var loaded = new ThemeStore(draft ? FixtureFolder : "").Load(theme);
+        var loaded = new ThemeStore(draft && !ThemeStore.BuiltInNames.Contains(theme) ? FixtureFolder : "").Load(theme);
         return PageRenderer.RenderToBitmap(
             Width, Height, page.Widgets, loaded, SamplePage.Time,
             dock ? new PageRenderer.Chrome(IndicatorMode.Always, 0, 2) : null,
@@ -77,14 +77,32 @@ public sealed class GoldenTests
     [InlineData("blueprint")]
     [InlineData("obsidian")]
     [InlineData("pop")]
-    [InlineData("carbon")]
-    [InlineData("paper")]
     [InlineData("prism")]
     [InlineData("rigline")]
     public void Draft_Page(string theme)
     {
         using var bitmap = Render(theme, draft: true);
         GoldenImage.Compare(bitmap, $"{theme}-page");
+    }
+
+    /// <summary>Carbon and Paper, the built-in format 2 themes, in their own fonts.</summary>
+    [WindowsGlyphTheory]
+    [InlineData("carbon")]
+    [InlineData("paper")]
+    public void BuiltIn_Page(string theme)
+    {
+        using var bitmap = Render(theme);
+        GoldenImage.Compare(bitmap, $"{theme}-page");
+    }
+
+    /// <summary>With the dock: Carbon's corner marks and compact cards, Paper's shadows kept inside the band.</summary>
+    [WindowsGlyphTheory]
+    [InlineData("carbon")]
+    [InlineData("paper")]
+    public void BuiltIn_PageWithDock(string theme)
+    {
+        using var bitmap = Render(theme, dock: true);
+        GoldenImage.Compare(bitmap, $"{theme}-dock");
     }
 
     [WindowsGlyphFact]
@@ -96,7 +114,6 @@ public sealed class GoldenTests
 
     /// <summary>The drafts that draw outside their cards or have compact cards, with the dock: the dock's underlay stays inside its band.</summary>
     [WindowsGlyphTheory]
-    [InlineData("paper")]
     [InlineData("prism")]
     [InlineData("rigline")]
     [InlineData("obsidian")]

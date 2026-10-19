@@ -38,16 +38,29 @@ public sealed class BuiltInShaderTests : IDisposable
                 : [];
         });
 
-    // Theme name -> the backgrounds its meta names. These are the drafted themes (fixtures) until the themes ship; the
-    // change that makes them built-in switches this to the built-in themes.
-    private static Dictionary<string, string[]> ThemePairs() =>
-        Directory.GetDirectories(ThemeFixtures).ToDictionary(folder => Path.GetFileName(folder), folder =>
+    // Theme name -> the backgrounds its meta names: the built-in themes that have a pairing list, and the drafted themes
+    // (fixtures) until they ship.
+    private static Dictionary<string, string[]> ThemePairs()
+    {
+        var texts = Directory.GetDirectories(ThemeFixtures).Where(f => File.Exists(Path.Combine(f, "theme.json"))).ToDictionary(folder => Path.GetFileName(folder), folder => File.ReadAllText(Path.Combine(folder, "theme.json")));
+        foreach (string name in new[] { "carbon", "paper" })
+            texts[name] = EmbeddedThemeText(name);
+
+        return texts.ToDictionary(t => t.Key, t =>
         {
-            using var theme = JsonDocument.Parse(File.ReadAllText(Path.Combine(folder, "theme.json")));
+            using var theme = JsonDocument.Parse(t.Value);
             return theme.RootElement.GetProperty("meta").TryGetProperty("pairsWith", out var pairs) && pairs.TryGetProperty("backgrounds", out var list)
                 ? ReadNames(list)
                 : [];
         });
+    }
+
+    private static string EmbeddedThemeText(string name)
+    {
+        using var stream = typeof(ShaderStore).Assembly.GetManifestResourceStream("UrDeck.Themes." + name + ".json")!;
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
+    }
 
     /// <summary>Every problem in the pairing data of the given backgrounds and themes; empty when it is sound.</summary>
     private static List<string> PairingProblems(Dictionary<string, string[]> backgrounds, Dictionary<string, string[]> themes)

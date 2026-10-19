@@ -1,7 +1,7 @@
 # Themes
 
 A theme is a folder holding one settings file and, optionally, font files. The theme decides how every card on a page
-looks; widgets only draw content. Three themes are built in (`default-dark`, `default-light` and `glass`, frosted translucent cards on a blue background). Your own go in a `themes`
+looks; widgets only draw content. Five themes are built in (`default-dark`, `default-light`, `glass` (frosted translucent cards on a blue background), `carbon` (near-black, hairline cards with corner marks, mono numerals, a phosphor accent) and `paper` (warm off-white, soft shadows, one vermilion accent)). `carbon` and `paper` use Instrument Sans and JetBrains Mono and default to the `contour` background, over their own still colour where shaders are unavailable; select one with `"theme": "carbon"` or `"theme": "paper"`. Your own go in a `themes`
 folder next to `UrDeck.Host.exe`:
 
 ```
@@ -103,6 +103,8 @@ The built-in background shaders (`plasma`, `aurora`, `gradient`, `julia` and the
 | `default-dark` | `#0f0f1a`, `#1a2350`, `#3a2a6e`, `#24507a` |
 | `default-light` | `#e9ebf2`, `#b9ccf2`, `#d9b8ee`, `#a6dbee` |
 | `glass` | `#131c4f`, `#1b2760`, `#3a3f9c`, `#6b3fa0` |
+| `carbon` | `#090b0e`, `#10161b`, `#1f6f61`, `#4ff0c8` |
+| `paper` | `#e9e7e0`, `#dcd8cc`, `#e6c9b8`, `#e5502b` |
 
 **It is the one value that is not taken from `default-dark`.** Every other value you leave out falls back to the default
 theme's, but a light theme written before backgrounds existed would then get the dark palette. A theme without
@@ -531,5 +533,5 @@ Drawn by: the motion change.
 
 ## Bundled font
 
-The built-in themes use Inter (variable), SIL Open Font License 1.1; its licence text is in
-`src/UrDeck.Engine/Themes/Builtin/Inter-OFL.txt`.
+`default-dark`, `default-light` and `glass` use Inter (variable); `carbon` and `paper` use Instrument Sans and JetBrains Mono (variable). All are under the SIL Open Font License 1.1; the licence texts are in
+`src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`) and `THIRD-PARTY-NOTICES.md` lists them.

@@ -2,6 +2,8 @@
   "themes": [
     { "id": "glass", "caption": "over the aurora background", "alt": "A deck with the glass theme over a moving aurora background: a split-flap clock, weather with a five-day forecast, and gauges for CPU, GPU and memory." },
     { "id": "default-dark", "caption": "the default", "alt": "The same deck with the default dark theme: a clock, weather, gauges, and four shortcuts in the dock." },
-    { "id": "default-light", "caption": "over a gradient", "alt": "The same deck with the default light theme over a soft gradient background." }
+    { "id": "default-light", "caption": "over a gradient", "alt": "The same deck with the default light theme over a soft gradient background." },
+    { "id": "carbon", "caption": "over the contour background", "alt": "A deck with the carbon theme over a contour background: a clock with a Local time header, corner marks on every card, CPU and GPU with status words and segmented bars, weather, and four labelled shortcuts in the dock." },
+    { "id": "paper", "caption": "over the contour background", "alt": "A deck with the paper theme: warm off-white cards with soft shadows, a clock with the date in its header, CPU and GPU readings, weather, and four labelled shortcuts over a contour background." }
   ]
 }

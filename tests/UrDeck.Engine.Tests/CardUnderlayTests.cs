@@ -25,7 +25,7 @@ public sealed class CardUnderlayTests
 
     private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
 
-    private static LoadedTheme Draft(string name) => new ThemeStore(FixtureFolder).Load(name);
+    private static LoadedTheme Draft(string name) => new ThemeStore(ThemeStore.BuiltInNames.Contains(name) ? "" : FixtureFolder).Load(name);
 
     /// <summary>The default theme with <paramref name="card"/> and <paramref name="colors"/> over it, as a theme of its own.</summary>
     private static LoadedTheme With(ThemeCardDefinition card, ThemeColorsDefinition? colors = null, string name = "underlay-test")

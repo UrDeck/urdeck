@@ -10,12 +10,12 @@ using Xunit;
 namespace UrDeck.Engine.Tests;
 
 /// <summary>
-/// The eight themes the design pass drafted (Fixtures/themes), kept as fixtures: they are not built in, but each must satisfy
+/// The six themes the design pass drafted that are not built in (Fixtures/themes), kept as fixtures: they are not built in, but each must satisfy
 /// the published schema and load without a warning.
 /// </summary>
 public sealed class ThemeDraftTests : IDisposable
 {
-    private static readonly string[] Drafts = ["carbon", "rigline", "prism", "paper", "ember", "blueprint", "pop", "obsidian"];
+    private static readonly string[] Drafts = ["rigline", "prism", "ember", "blueprint", "pop", "obsidian"];
 
     private readonly string _root = Path.Combine(Path.GetTempPath(), "urdeck-draft-tests-" + Guid.NewGuid().ToString("N"));
     private readonly string _logBefore = UrDeckLog.LogPath;
@@ -87,12 +87,12 @@ public sealed class ThemeDraftTests : IDisposable
     [Fact]
     public void TheDrafts_AreNotBuiltIn()
     {
-        Assert.Equal(["default-dark", "default-light", "glass"], ThemeStore.BuiltInNames);
+        Assert.Equal(["default-dark", "default-light", "glass", "carbon", "paper"], ThemeStore.BuiltInNames);
 
-        var loaded = new ThemeStore(Path.Combine(_root, "themes")).Load("carbon");
+        var loaded = new ThemeStore(Path.Combine(_root, "themes")).Load("rigline");
 
         Assert.Equal(ThemeStore.DefaultName, loaded.Name);
-        Assert.Contains("Theme 'carbon' was not found", Log, StringComparison.Ordinal);
+        Assert.Contains("Theme 'rigline' was not found", Log, StringComparison.Ordinal);
         foreach (string name in Drafts)
             Assert.Null(ThemeStore.LoadBuiltIn(name));
     }

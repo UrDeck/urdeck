@@ -81,7 +81,7 @@ public sealed class ThemeTests : IDisposable
     [Fact]
     public void GaugeStyle_IsRingInTheBuiltInThemes_AndAUserThemeCanChangeIt()
     {
-        foreach (string name in ThemeStore.BuiltInNames)
+        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper")))
         {
             using var builtIn = ThemeResolver.Resolve(Store().Load(name), 275);
             Assert.Equal(UrDeck.Sdk.Components.GaugeStyle.Ring, builtIn.GaugeStyle);

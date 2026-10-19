@@ -32,7 +32,7 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 10: icon sets, themed weather and glyph shortcuts | `theme-icons` | After gauges. About 30 icons still to draw (`04`) |
 | PR 11: `urdeck-cli theme validate`, `render`, `init` | `theme-cli` | **To run in parallel** (another worktree). Independent. Carries the validator findings listed below and owns the contrast rule (`themes-carbon-paper` checks contrast by hand and does not edit `ThemeDefinition.Rules.cs`). The sample page is in the engine tests (`Support/SamplePage.cs`); the CLI has to move or share it, and `GoldenTests.cs` is the only overlap with the theme change. Whichever lands second must validate Carbon and Paper clean |
 | PR 9: animated border, value fill, pattern scroll, `reduceMotion` | `motion` | After card chrome and pattern; **Opus**. Spike S2 decided the mechanism |
-| PR 12: Carbon and Paper | `themes-carbon-paper` | **Proposed** (`openspec/changes/themes-carbon-paper/`), ready for `/opsx:apply`. Ships without Carbon's dot grid (option C of the 2026-10-19 explore): the `pattern` value stays in `carbon.json` and draws once `page-pattern` lands. Bundles Instrument Sans and JetBrains Mono; the drafts' fixtures are replaced by the built-ins (their goldens were drawn in the fallback font, the fixture folders have no fonts) |
+| PR 12: Carbon and Paper | `themes-carbon-paper` | **Built** (pull request open). Carbon and Paper are built in with Instrument Sans and JetBrains Mono; the fixture copies are gone and their goldens redrawn in the real fonts (`carbon-dock.png` added). Carbon's dot grid waits for `page-pattern`, which redraws Carbon's goldens and gets a second panel look. Compared on the panel with the board; the differences that only the engine can fix are the follow-ups below |
 | PR 13 to 16: the other six themes | one change per pair | After the knobs they use. Order: Prism and Obsidian; Ember and Blueprint; Pop; Rigline last |
 | PR 17: docs, site gallery, media | with each theme, rest at the end | The site needs a deck and pictures per theme (`site/MEDIA-CHECKLIST.md`) |
 | PR 18: preview renderer and catalog seams | `theme-preview` | `ThemeCatalog`, `BackgroundCatalog` and `PairingIndex` exist; `PreviewRenderer` does not |
@@ -52,6 +52,11 @@ last       motion (Opus), then Rigline  Rigline needs the animated border
   picker would be thrown away by it. Themes are chosen with `theme` in `urdeck-config.json`; each theme's site page shows the
   snippet. Anything that describes themes stays in the engine (`ThemeCatalog`, `BackgroundCatalog`, `PairingIndex`), where a
   future editor can use it. The editor's approach deserves its own explore.
+- **Follow-ups found on the panel (`themes-carbon-paper`, against the design board):**
+  - Stats: the board's card order is label (top left), value, sparkline, bar; the engine's stacked layout puts the value above the bar and the sparkline only when the card is tall enough and has history.
+  - Stats: the value is too large in a 2x2 Stats card; a value is limited to its fitted size, so `valueScale` only shrinks (and would shrink every widget).
+  - Clock: the board pins the time bottom left, with a header row above; the engine centres the time. There is no alignment key.
+  - Clock: Paper's colon is the accent colour on the board; no theme key colours the separator.
 - **Follow-ups found in the explore:** a gauge fill that follows the status level (Carbon's bar would turn amber at `WARM`;
   `colorBy` has only `accent` and `ramp` today). `valueScale` above 1 has no effect (a value is limited to its fitted size), so
   the drafts that set it should drop it in their theme changes.

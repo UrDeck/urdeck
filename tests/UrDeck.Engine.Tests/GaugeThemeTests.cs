@@ -69,7 +69,7 @@ public sealed class GaugeThemeTests : IDisposable
     [Fact]
     public void AV1Theme_GivesTheEmptyGaugeTheme()
     {
-        foreach (string name in ThemeStore.BuiltInNames)
+        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper")))
         {
             using var theme = ThemeResolver.Resolve(new ThemeStore("").Load(name), 275);
 
@@ -144,6 +144,7 @@ public sealed class GaugeThemeTests : IDisposable
     public void EachDraftedTheme_ResolvesItsGaugeValues()
     {
         var store = new ThemeStore(FixtureFolder);
+        var builtIns = new ThemeStore("");
         var expected = new Dictionary<string, GaugeStyle>
         {
             ["ember"] = GaugeStyle.Tach,
@@ -158,7 +159,7 @@ public sealed class GaugeThemeTests : IDisposable
 
         foreach (var (name, style) in expected)
         {
-            using var theme = ThemeResolver.Resolve(store.Load(name), 275);
+            using var theme = ThemeResolver.Resolve((ThemeStore.BuiltInNames.Contains(name) ? builtIns : store).Load(name), 275);
 
             Assert.Equal(style, theme.GaugeStyle);
             Assert.False(theme.Gauge.IsEmpty, name);
@@ -170,7 +171,7 @@ public sealed class GaugeThemeTests : IDisposable
         Assert.Equal(GaugeMarkerShape.Needle, ember.Gauge.Marker!.Shape);
         Assert.Equal(28, ember.Gauge.Ticks!.Count);
 
-        using var carbon = ThemeResolver.Resolve(store.Load("carbon"), 275);
+        using var carbon = ThemeResolver.Resolve(builtIns.Load("carbon"), 275);
         Assert.Equal(GaugeLayout.Stacked, carbon.Gauge.Layout);
         Assert.NotNull(carbon.Gauge.Segments);
 
@@ -182,7 +183,7 @@ public sealed class GaugeThemeTests : IDisposable
         Assert.True(rigline.Gauge.ColorByRamp);
         Assert.Equal(3, rigline.Ramp.Count);
 
-        using var paper = ThemeResolver.Resolve(store.Load("paper"), 275);
+        using var paper = ThemeResolver.Resolve(builtIns.Load("paper"), 275);
         Assert.Equal(["0", "50", "100"], paper.Gauge.Scale!.Labels);
     }
 

@@ -71,3 +71,15 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## Fonts (Inter, Instrument Sans, JetBrains Mono)
+
+Three variable font families ship with the built-in themes, each under the SIL Open Font License 1.1. The licence texts
+are in `src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`) and are
+embedded with the fonts.
+
+| Family | Copyright | Version | Used by |
+|---|---|---|---|
+| Inter | Copyright (c) 2016 The Inter Project Authors (<https://github.com/rsms/inter>) | `InterVariable.ttf` | `default-dark`, `default-light`, `glass` |
+| Instrument Sans | Copyright 2022 The Instrument Sans Project Authors (<https://github.com/Instrument/instrument-sans>) | 1.000 | `carbon` (body text), `paper` (values, body text) |
+| JetBrains Mono | Copyright 2020 The JetBrains Mono Project Authors (<https://github.com/JetBrains/JetBrainsMono>) | 2.211 | `carbon` (values, units, labels), `paper` (units, labels) |

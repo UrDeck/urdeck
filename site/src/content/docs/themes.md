@@ -1,17 +1,19 @@
 ---
 title: Themes
-description: The three built-in themes and how to make your own.
+description: The five built-in themes and how to make your own.
 section: Look
 order: 20
 ---
 
-A theme decides how every card on a page looks; widgets only draw content. Three themes are built in:
+A theme decides how every card on a page looks; widgets only draw content. Five themes are built in:
 
 - `default-dark`, the default
 - `default-light`
 - `glass`, frosted translucent cards over a blue background, made to show a [background](/docs/backgrounds/) through them
+- `carbon`, near-black with hairline cards and corner marks, mono numerals and one phosphor accent. It uses Instrument Sans and JetBrains Mono and defaults to the `contour` background.
+- `paper`, the daylight option: warm off-white cards with soft shadows and one vermilion accent. It uses Instrument Sans and JetBrains Mono and defaults to the `contour` background.
 
-Choose one with the `theme` key in `urdeck-config.json`. Saving the file applies it; no restart.
+Choose one with the `theme` key in `urdeck-config.json`. For example `"theme": "carbon"` or `"theme": "paper"`. Saving the file applies it; no restart.
 
 ## Your own
 
