@@ -54,13 +54,14 @@ axis is driven. `typography.fonts.body` and `title`, `case.unit` and `tracking.b
 | Feature | Definition in the package | Why deferred | Restore when |
 |---|---|---|---|
 | `typography.valueFill.animate` (`{mode, period}`) | The gradient fill of the value digits slides (Rigline). The gradient `valueFill{colors, angle}` itself is kept, static. | S2 did not test it. The digits are drawn inside the card's own surface, so the compositor-sprite trick that makes the animated border cheap does not apply; repainting every card each frame cost 11% of a core and +26 MB for 8 cards. | A spike finds a cheap way (for example a masked sprite over the value, or a low step rate) |
-| `pattern.scroll` (`{dx, dy}`) | Pattern drifts (Rigline scanlines). | Needs the pattern surface to repaint or scroll; the pattern surface is full-size and static in the first chunk. | After motion lands and the pattern surface is measured |
+| `pattern.scroll` (`{dx, dy}`) | Pattern drifts (Rigline scanlines). | Needs the pattern to move; the pattern is static tiles (`page-pattern`). | After `motion` lands: scroll is an offset animation of the tiles' container in `motion`, with no repaint |
 
 ### Decided by the spikes (so the requirement is not lost)
 
 - Pop takes its numerals from Archivo at weight 900; the Archivo Black file is not bundled (S3: same advance, ink within 1%).
-- `pattern` draws on a page-sized surface and accepts the memory cost (about +33 MB, S1) for the three themes that use it
-  (Carbon, Blueprint, Ember); no tiling or sprite-line work for now.
+- `pattern` is drawn as tiles, not a page-sized surface (`page-pattern`): one small block of whole repeats, decoded once and laid
+  out as compositor sprites under the pages. The page-sized surface (about +33 MB, S1) was the earlier decision; it stays the
+  fallback if the tiles show a seam (`docs/perf/page-pattern.md`).
 
 ### Enum values deferred
 

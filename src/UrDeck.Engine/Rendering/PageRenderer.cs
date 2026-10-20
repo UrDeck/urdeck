@@ -44,6 +44,7 @@ public static class PageRenderer
             PaintBackground(canvas, widthPx, heightPx, background);
 
         var screen = new System.Drawing.Size(widthPx, heightPx);
+        PaintPattern(canvas, loaded, widthPx, screen);
         var indicator = loaded.Definition.Indicator!;
         bool hasDock = dock is { Count: > 0 };
         double gap = loaded.Definition.Card!.Gap!.Value;
@@ -139,6 +140,20 @@ public static class PageRenderer
         {
             UrDeckLog.Warn($"Background: painting failed, the page is drawn without it: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// The theme's pattern over the background and under everything else: one rectangle shaded with the pattern's block,
+    /// repeated from the top left, which is the host's tiling.
+    /// </summary>
+    private static void PaintPattern(SKCanvas canvas, LoadedTheme loaded, int widthPx, System.Drawing.Size screen)
+    {
+        using var pattern = PatternTile.Create(loaded, widthPx / 4f, screen);
+        if (pattern == null)
+            return;
+        using var shader = pattern.Image.ToShader(SKShaderTileMode.Repeat, SKShaderTileMode.Repeat, new SKSamplingOptions(SKFilterMode.Nearest));
+        using var paint = new SKPaint { Shader = shader };
+        canvas.DrawRect(0, 0, screen.Width, screen.Height, paint);
     }
 
     /// <summary>

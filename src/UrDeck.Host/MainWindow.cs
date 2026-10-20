@@ -44,6 +44,7 @@ public sealed class MainWindow : Window, ISettingsHost
     private BackgroundSettings _backgroundSettings;
     private readonly Grid _root = new();
     private readonly Grid _background = new();
+    private readonly PatternLayer _pattern = new();
     private readonly Canvas _surface = new();
     private readonly Canvas _overlay = new();
     private readonly PageNavigator _navigator;
@@ -112,6 +113,7 @@ public sealed class MainWindow : Window, ISettingsHost
 
         ApplyBackground();
         _root.Children.Add(_background);
+        _root.Children.Add(_pattern);
         _root.Children.Add(_surface);
         _root.Children.Add(_overlay);
         if (!WindowFocus.IsEnabled)
@@ -295,6 +297,7 @@ public sealed class MainWindow : Window, ISettingsHost
     {
         _pager.Release();
         _backgroundLayer.Release();
+        _pattern.Release();
         DisposeThemes();
         _lastLayout = default;
     }
@@ -360,7 +363,10 @@ public sealed class MainWindow : Window, ISettingsHost
         // Before the layout comparison: an unrelated reload keeps the running background, but a changed one must apply
         // even when the page itself is as it was.
         if (screen.Width >= 16 && screen.Height >= 16)
+        {
             ApplyBackgroundLayer(screen, scale);
+            _pattern.Apply(_loadedTheme, screen, scale);
+        }
 
         var config = _configStore.Config;
         var mode = config.Pager.GetIndicatorMode();
@@ -495,6 +501,7 @@ public sealed class MainWindow : Window, ISettingsHost
         _frameClock.Shutdown();
         _power?.Dispose();
         _backgroundLayer.Dispose();
+        _pattern.Dispose();
         DisposeThemes();
     }
 }
