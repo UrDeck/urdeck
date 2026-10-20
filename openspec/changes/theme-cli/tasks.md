@@ -40,11 +40,11 @@
 
 ## 6. `theme validate`
 
-- [ ] 6.1 Add the `theme` command group and `validate` with `<folder>`, `--all`, `--builtin`, `--background-dir` (repeatable), `--format` and `--fail-on-warnings`; arguments that exclude each other are exit code 2
-- [ ] 6.2 `--all`: folders directly inside, hidden ones skipped, ordinal order, empty directory is exit code 2, not recursive; `--builtin`: the built-in names in order
-- [ ] 6.3 File paths in every format: relative to the working directory with `/`; a built-in theme is `builtin:<name>/theme.json`
-- [ ] 6.4 Tests (`tests/UrDeck.Cli.Tests`): the scenarios of the `urdeck-cli` delta for validate, validate-many and output formats, using the fixtures of 4.8, on Windows and Linux
-- [ ] 6.5 Test: the `help` text of the group and of each command names the options and exit codes 0, 1 and 2
+- [x] 6.1 Add the `theme` command group and `validate` with `<folder>`, `--all`, `--builtin`, `--background-dir` (repeatable), `--format` and `--fail-on-warnings`; arguments that exclude each other are exit code 2
+- [x] 6.2 `--all`: folders directly inside, hidden ones skipped, ordinal order, empty directory is exit code 2, not recursive; `--builtin`: the built-in names in order
+- [x] 6.3 File paths in every format: relative to the working directory with `/`; a built-in theme is `builtin:<name>/theme.json`
+- [x] 6.4 Tests (`tests/UrDeck.Cli.Tests`): the scenarios of the `urdeck-cli` delta for validate, validate-many and output formats, using the fixtures of 4.8, on Windows and Linux
+- [x] 6.5 Test: the `help` text of the group and of each command names the options and exit codes 0, 1 and 2
 
 ## 7. `theme render`, `init`, `schema`
 

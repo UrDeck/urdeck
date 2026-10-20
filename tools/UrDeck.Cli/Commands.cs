@@ -11,6 +11,35 @@ namespace UrDeck.Cli;
     ShortFormAutoGenerate = CliNameAutoGenerate.None)]
 public class RootCommand
 {
+    [CliCommand(Description = "Commands about themes." + ExitCodes.HelpText)]
+    public class ThemeCommand
+    {
+        [CliCommand(Description = "Checks a theme folder, every folder in a directory, or the built-in themes with the findings the deck logs when it loads a theme and the checks only the tool makes (keys the deck does not read, fonts, backgrounds, text contrast, metadata), and prints them."
+            + ExitCodes.HelpText)]
+        public class ValidateCommand
+        {
+            [CliArgument(Description = "The theme folder. Its name is the theme's name.", Arity = CliArgumentArity.ZeroOrOne, Required = false)]
+            public string? Folder { get; set; }
+
+            [CliOption(Description = "Check every folder directly inside this directory instead of one folder.", Name = "all", Required = false)]
+            public string? All { get; set; }
+
+            [CliOption(Description = "Check the built-in themes as the product ships them, instead of a folder.", Name = "builtin")]
+            public bool Builtin { get; set; }
+
+            [CliOption(Description = "A directory of background folders a theme may name; may be repeated. The built-in backgrounds are always known.", Name = "background-dir")]
+            public List<string> BackgroundDir { get; set; } = [];
+
+            [CliOption(Description = "How the findings are printed.", Name = "format", Alias = "f", AllowedValues = ["text", "markdown", "json", "sarif"])]
+            public string Format { get; set; } = "text";
+
+            [CliOption(Description = "A warning fails the run as an error does.", Name = "fail-on-warnings")]
+            public bool FailOnWarnings { get; set; }
+
+            public int Run() => ThemeValidateRunner.Run(new ThemeValidateOptions(Folder, All, Builtin, BackgroundDir, Format, FailOnWarnings), CliApp.Out);
+        }
+    }
+
     [CliCommand(Description = "Commands about shader backgrounds." + ExitCodes.HelpText)]
     public class ShaderCommand
     {
