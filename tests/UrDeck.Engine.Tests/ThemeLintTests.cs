@@ -159,6 +159,30 @@ public sealed class ThemeLintTests : IDisposable
         Assert.Contains("leaves the theme folder", finding.Message, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("THEME010", "Set format to a number up to 2")]
+    [InlineData("THEME020-outside", "Put the font file in the theme's folder")]
+    [InlineData("THEME050", "Give card.borderWidth a value above 0")]
+    [InlineData("THEME051", "Set card.borderGradient to kind conic")]
+    [InlineData("THEME052", "Raise pattern.spacing")]
+    [InlineData("THEME053", "widen card.gap")]
+    [InlineData("THEME054", "Reduce the blur, offset or spread")]
+    [InlineData("THEME055", "at least one pixel")]
+    public void A_line_of_the_deck_that_gives_no_fix_gets_one(string fixture, string fix)
+    {
+        var finding = Assert.Single(Check(Path.Combine(FixtureRoot, fixture, "fail")));
+
+        Assert.Contains(fix, finding.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_newer_format_names_its_subject()
+    {
+        var finding = Assert.Single(Check(Path.Combine(FixtureRoot, "THEME010", "fail")));
+
+        Assert.StartsWith("the theme declares format 9;", finding.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void A_font_over_three_megabytes_is_a_finding()
     {

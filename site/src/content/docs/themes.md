@@ -65,3 +65,20 @@ still gradient, colour or picture and a scrim, is drawn today when your configur
 
 The complete list of settings, with the range of each, is the
 [theme reference on GitHub](https://github.com/UrDeck/urdeck/blob/main/docs/themes.md).
+
+## Checking a theme
+
+`urdeck-cli` checks a theme folder and draws it without a deck, on Windows and on Linux:
+
+```
+urdeck-cli theme init my-theme                  # a starter, or --from carbon for a copy of a built-in theme
+urdeck-cli theme validate my-theme              # every finding, text, markdown, json or sarif
+urdeck-cli theme render my-theme -o preview.png # the sample page drawn in the theme
+urdeck-cli theme schema                         # the JSON Schema, for an editor
+```
+
+It reads a theme by the same code the deck does, so the deck's log and the tool name the same problems in the same words, and it
+adds checks only a tool can make: keys the deck does not read (with a suggestion), font files and their licences, backgrounds that
+do not exist, text contrast on the card fill and on every tint, and the metadata. `theme validate --builtin` checks the built-in
+themes, and they check clean. Every finding has a code that never changes meaning; each code, what it means and how to fix it is in the
+[theme reference on GitHub](https://github.com/UrDeck/urdeck/blob/main/docs/themes.md#checking-a-theme).

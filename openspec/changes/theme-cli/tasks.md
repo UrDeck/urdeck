@@ -57,9 +57,9 @@
 
 ## 8. CI, docs and bookkeeping
 
-- [ ] 8.1 `.github/workflows/ci.yml`: add `theme validate --builtin --fail-on-warnings` where `shader validate --all` runs on Windows and on Linux, and an `init` then `validate` of a copy of a built-in, as there is for backgrounds
-- [ ] 8.2 Update `site/src/content/docs` (the command line tool page) and `docs/themes.md` (a "Checking a theme" section with every code, what it means and how to fix it); the docs test that lists codes passes
-- [ ] 8.3 Update `openspec/specs/urdeck-cli/spec.md`'s Purpose to mention themes (the archive does not change a Purpose)
-- [ ] 8.4 Update `docs/BACKLOG.md` and `docs/design/look-and-feel/STATUS.md` (PR 11 done; the validator findings list is built; contrast is owned here); note the "check a repository" direction in `docs/ROADMAP.md`
-- [ ] 8.5 `dotnet build urdeck.slnx -c Release` with no warnings, `dotnet format urdeck.slnx --severity warn --verify-no-changes`, `dotnet test urdeck.slnx -c Release`, the Linux test projects, and `openspec validate --all --strict`
-- [ ] 8.6 Run the tool by hand on a theme with a deliberate mistake of each kind and read the output as an author would; fix any message that does not say how to fix it
+- [x] 8.1 `.github/workflows/ci.yml`: add `theme validate --builtin --fail-on-warnings` where `shader validate --all` runs on Windows and on Linux, and an `init` then `validate` of a copy of a built-in, as there is for backgrounds
+- [x] 8.2 Update `site/src/content/docs` (the command line tool page) and `docs/themes.md` (a "Checking a theme" section with every code, what it means and how to fix it); the docs test that lists codes passes
+- [x] 8.3 Update `openspec/specs/urdeck-cli/spec.md`'s Purpose to mention themes (the archive does not change a Purpose)
+- [x] 8.4 Update `docs/BACKLOG.md` and `docs/design/look-and-feel/STATUS.md` (PR 11 done; the validator findings list is built; contrast is owned here); note the "check a repository" direction in `docs/ROADMAP.md`
+- [x] 8.5 `dotnet build urdeck.slnx -c Release` with no warnings, `dotnet format urdeck.slnx --severity warn --verify-no-changes`, `dotnet test urdeck.slnx -c Release`, the Linux test projects, and `openspec validate --all --strict`
+- [x] 8.6 Run the tool by hand on a theme with a deliberate mistake of each kind and read the output as an author would; fix any message that does not say how to fix it

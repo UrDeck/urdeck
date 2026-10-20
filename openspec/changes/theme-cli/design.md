@@ -264,3 +264,8 @@ Recorded as they came up; each says what was decided and why, so the next reader
   findings on the error stream are the whole lint (contrast and fonts included), so the author sees the same lines as
   from `validate`; a theme the loader cannot read (`THEME001`, or a wrong kind in a format 1 value) gets no picture and
   exit code 1. The golden comparison runs on Windows only (`[WindowsGlyphTheory]`, as the engine's golden tests).
+- **Task 8.6, reading the output as an author: some of the deck's own lines say what is wrong and what the deck does, not
+  what to change** (`THEME010`, `THEME020` outside the folder, `THEME050` to `THEME056`, `THEME090`). The log text is held by
+  the snapshot, so the tool appends the fix to the deck's message (and a subject, "the theme", to the one line that has none).
+  The spec's "same message" now reads "the deck's message, followed by the fix where the deck's line does not say it"; the
+  `THEME004` scenario is unchanged because that line already ends with what the deck does and the key says what to edit.

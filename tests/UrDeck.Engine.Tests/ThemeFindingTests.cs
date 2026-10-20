@@ -188,6 +188,25 @@ public sealed class ThemeFindingTests
         Assert.Equal("card.borderWidth", finding.Key);
     }
 
+    /// <summary>A code nobody can look up is no use to an author: every code is in the reference with how to fix it.</summary>
+    [Fact]
+    public void Every_code_is_in_the_theme_reference()
+    {
+        string root = AppContext.BaseDirectory;
+        while (!File.Exists(Path.Combine(root, "urdeck.slnx")))
+            root = Path.GetDirectoryName(root)!;
+        string text = File.ReadAllText(Path.Combine(root, "docs", "themes.md"));
+
+        var codes = typeof(ThemeCodes).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+            .Select(f => (string)f.GetRawConstantValue()!)
+            .ToList();
+
+        Assert.NotEmpty(codes);
+        Assert.Equal(codes.Count, codes.Distinct().Count());
+        foreach (string code in codes)
+            Assert.Contains($"| {code} |", text, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void The_deck_logs_a_finding_with_the_theme_name_in_front()
     {

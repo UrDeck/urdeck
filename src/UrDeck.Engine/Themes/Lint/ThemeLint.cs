@@ -151,7 +151,32 @@ public static partial class ThemeLint
     }
 
     private static ThemeDiagnostic From(ThemeFinding finding, string file) =>
-        new(finding.Code, finding.Severity, finding.Message, file, finding.Key);
+        new(finding.Code, finding.Severity, WithTheFix(finding), file, finding.Key);
+
+    /// <summary>
+    /// The deck's log line, which says what is wrong and what the deck does; where the line gives no fix, the tool says what to
+    /// change. The log text itself is not touched, and a finding in the deck's own words that has no subject gets one.
+    /// </summary>
+    private static string WithTheFix(ThemeFinding finding)
+    {
+        string message = finding.Form == ThemeLogForm.Space ? "the theme " + finding.Message : finding.Message;
+        string? fix = finding.Code switch
+        {
+            ThemeCodes.NewerFormat => "Set format to a number up to 2, or update UrDeck.",
+            ThemeCodes.FontFile when message.Contains("leaves the theme folder", StringComparison.Ordinal) =>
+                "Put the font file in the theme's folder and name it without a path.",
+            ThemeCodes.BorderWithoutWidth => "Give card.borderWidth a value above 0, or remove the style.",
+            ThemeCodes.SpinWithoutConic => "Set card.borderGradient to kind conic, or remove the animation.",
+            ThemeCodes.PatternDense => "Raise pattern.spacing, or lower pattern.thickness.",
+            ThemeCodes.CornerMarksReach => "Move the marks in (a smaller negative inset) or widen card.gap.",
+            ThemeCodes.EffectReach => "Reduce the blur, offset or spread, or widen card.gap.",
+            ThemeCodes.Hairline => "Raise the value so it is at least one pixel at the panel width.",
+            ThemeCodes.CompactCapsule => "Use a card that is square, or another shape, if the capsule is not wanted.",
+            ThemeCodes.Animations => "Turn one of them off to save frames.",
+            _ => null,
+        };
+        return fix == null ? message : $"{message} {fix}";
+    }
 
     internal static ThemeDiagnostic Error(string code, string message, string file, string? key) => new(code, ThemeSeverity.Error, message, file, key);
 

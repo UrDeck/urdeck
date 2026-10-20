@@ -553,6 +553,82 @@ Drawn by: the motion change.
 |---|---|---|---|
 | `motion.level` | `full`, `reduced`, `off` | `"full"` | The ceiling for theme-driven animation (borderAnimate, and what a later change adds). The effective level is the lower of this and the user/OS setting. Does not touch the shader background, which has its own control. |
 
+## Checking a theme
+
+`urdeck-cli` checks a theme folder, draws it and starts one, without a deck: no window, no GPU, no network, on Windows and on
+Linux. It reads a theme by the same code the deck does, so the deck's log and the tool's output name the same findings with the
+same words; the tool adds the checks that need a judgement (keys the deck does not read, font files, backgrounds that do not
+exist, text contrast, metadata). It never reads or writes the deck's configuration or log. Build and run it from the
+repository as [the background tool](backgrounds.md#the-command-line-tool) is, or install the package.
+
+```
+urdeck-cli theme validate <folder> [--background-dir <directory>]... [--format text|markdown|json|sarif] [--fail-on-warnings]
+urdeck-cli theme validate --all <directory> [...]
+urdeck-cli theme validate --builtin [...]
+urdeck-cli theme render <folder> | --builtin <name> -o <file.png> [--page page|dock] [--size WIDTHxHEIGHT] [--fail-on-warnings]
+urdeck-cli theme init <name> [--output <directory>] [--from <built-in theme>]
+urdeck-cli theme schema [--output <file>]
+```
+
+- **`validate`** prints every finding of a folder, of every folder directly inside a directory (`--all`, in the order of their
+  names; not recursive; no folders at all is a failure of the tool), or of the built-in themes as the product ships them
+  (`--builtin`). The folder's name is the theme's name, and a folder named like a built-in is checked as the folder it is.
+  `--background-dir` adds a directory of background folders that `background.default.name` and `meta.pairsWith` may name; the
+  built-in backgrounds are always known. The formats are those of `shader validate`; a JSON diagnostic of a value also has `key`.
+- **`render`** draws the sample page (a clock, two stats cards, a weather card and four shortcuts, with fixed readings and time)
+  in the theme, at 1100x1920 unless `--size` says otherwise, with the page renderer the deck uses. `--page dock` adds the dock and
+  the page indicator. The same input gives the same picture on one machine; pictures from different machines can differ in the
+  edge pixels of text. The findings go to the error stream and do not stop the picture; a theme that cannot be read at all gets no
+  picture.
+- **`init`** makes `<name>` (letters, digits, `-` and `_`) with a `theme.json` holding the `$schema` line, `format` 2, a `meta` for
+  you to fill in and the default dark theme's colours; with `--from` it makes a self-contained copy of a built-in theme with the
+  fonts and licence files it names. It never overwrites a folder.
+- **`schema`** prints the JSON Schema of the format, the file published as `docs/schemas/v2/theme.json`.
+
+Exit codes are those of the other commands: `0` nothing that fails the run, `1` an error (or a warning with
+`--fail-on-warnings`; an information finding never fails), `2` the tool could not do its job (bad arguments, a folder that does
+not exist). The built-in themes check clean, and CI runs `theme validate --builtin --fail-on-warnings`.
+
+### Findings
+
+Each finding says what is wrong and how to fix it, names the key by its path (`card.shadow.blur`) and the file. The codes never
+change meaning, and a retired code is not reused. **error** means the deck cannot use the theme or the file; **warning** means it
+works and could be better; **info** is a remark. The deck logs the findings it can act on at load (the codes marked "also logged");
+the rest only the tool reports.
+
+| Code | Severity | Meaning and how to fix it |
+|---|---|---|
+| THEME001 | error | `theme.json` is missing, is not valid JSON or holds no object: add it, or fix the syntax at the position given. Nothing else is checked |
+| THEME002 | warning | a key the deck does not read (a typo, or a key of a later format): fix the name, the message suggests the nearest key |
+| THEME003 | warning, error | a value of the wrong JSON type (also logged). An error for a value of format 1 (`card.gap`, `colors`...), where the deck skips the whole theme |
+| THEME004 | warning | a number outside its range, which the message gives (also logged): the deck uses the default |
+| THEME005 | warning | a value that is not one of the names allowed, which the message lists (also logged; the case does not matter) |
+| THEME006 | warning | a colour that is not `#RRGGBB` or `#AARRGGBB` (also logged) |
+| THEME007 | warning | a list outside its length limits or with an invalid element (also logged): the deck drops the list whole |
+| THEME008 | warning | a group that needs a member it does not have, such as a gradient without `colors` (also logged): the group is ignored |
+| THEME010 | warning | `format` is newer than the deck reads (also logged): the deck ignores what it does not know |
+| THEME020 | error | a font file is missing from the theme, is not a `.ttf`, `.otf` or `.ttc`, or its path leaves the theme's folder (also logged when it leaves the folder or cannot be loaded): add the file, fix the name, keep it inside the folder |
+| THEME021 | warning | a font file is over 3 MB (subset it) or has no licence file beside it (`*-OFL.txt`, `LICENSE*` or `*-LICENSE*`): add the licence so the theme can be shared |
+| THEME022 | warning | a font named by family, which is used only where it is installed: put a `.ttf` or `.otf` in the folder and name the file |
+| THEME023 | warning | a weight outside a variable font's range, or one a static font does not have, for a role (also logged): choose a weight the file has |
+| THEME040 | warning | `background.default.name` is not a background that exists: use a built-in one, or point `--background-dir` at yours |
+| THEME041 | warning | `meta.pairsWith.backgrounds` names a background that does not exist: fix the name or remove it |
+| THEME042 | warning | the default background is not in the theme's own `pairsWith` list: add it |
+| THEME043 | warning | the still background picture is missing, leaves the folder or is over 8 MB |
+| THEME044 | warning | `icons.set` names an icon set that does not exist (no icon set is built yet: remove the key) |
+| THEME050 | warning | a border style, gradient or animation with `card.borderWidth` 0 (also logged): give the border a width |
+| THEME051 | warning | `card.borderAnimate` `spin` without a conic `card.borderGradient` (also logged): the deck switches the animation off |
+| THEME052 | warning | a pattern whose marks are closer than three pixels at the panel width (also logged): raise `spacing` |
+| THEME053 | warning | outside corner marks reaching past `card.gap`, thickness included (also logged): move them in or widen the gap |
+| THEME054 | warning | a shadow or glow whose reach is more than the gap over a translucent fill (logged as information, the deck limits it): reduce the blur or offset |
+| THEME055 | warning | a line (border, highlight, accent strip, corner mark) that resolves under one pixel, which the deck draws 1 px wide (also logged) |
+| THEME056 | info | `card.compact.shape` `circle` on a card that is not square, which is a capsule (also logged) |
+| THEME060 | warning | the text colour on the card fill, or on its gradient's darkest or lightest stop, is under 4.5:1: change the colours; a translucent fill is composited over `colors.background`, and the message says so because the page behind may be a moving background |
+| THEME061 | warning | the text colour on a card tint is under 4.5:1 (a tinted card keeps `colors.text`): change the tint at the position the message names |
+| THEME062 | info | the muted text colour on the card fill is under 3:1 |
+| THEME080 | warning | `meta` lacks a `name`, a `description` or a `mode`: add them so an editor can list the theme |
+| THEME090 | info | more than one continuous animation is on (also logged): each repaints on every frame |
+
 ## Bundled font
 
 `default-dark`, `default-light` and `glass` use Inter (variable); `carbon` and `paper` use Instrument Sans and JetBrains Mono (variable). All are under the SIL Open Font License 1.1; the licence texts are in

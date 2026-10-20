@@ -10,7 +10,7 @@ The findings the deck logs when it loads a theme and the findings the command li
 from the same checks:
 
 - Every warning the deck logs about a theme's values, its rules between values and its fonts has a code, a severity and
-  the key it is about, and the tool prints it with the same message
+  the key it is about, and the tool prints it with the deck's message, followed by the fix where the deck's line does not say it
 - The deck's log text for a theme MUST NOT change because the tool exists
 - The tool MAY report more than the deck logs (the checks of "Checks Only A Tool Makes"); it MUST NOT report less
 - A code keeps its meaning in later versions; a retired code is not reused
