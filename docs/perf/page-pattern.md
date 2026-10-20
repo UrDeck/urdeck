@@ -42,4 +42,5 @@ was not injected; the layer is not part of the pager, so nothing in a swipe reac
 
 ## Panel look
 
-See "Findings during apply" in `openspec/changes/page-pattern/design.md` once the owner has looked (task 4.5).
+Carbon on the panel (2026-10-19, the owner): the dots match the design board at 100 %, and no seam shows between tiles at 125 %
+or 150 % display scaling. The whole-pixel placement needed no fix and the page-sized canvas fallback was not used.
