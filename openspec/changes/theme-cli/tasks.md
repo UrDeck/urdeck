@@ -1,9 +1,9 @@
 ## 1. Before touching anything: record what must not change
 
-- [ ] 1.1 Record `shader validate` output for the sixteen built-in backgrounds and for a folder with one finding of each severity, in `text`, `markdown`, `json` and `sarif`, as snapshot files in `tests/UrDeck.Cli.Tests`; the test compares byte for byte
-- [ ] 1.2 Record the log lines the engine writes when it loads every built-in theme, every fixture theme under `tests/UrDeck.Engine.Tests/Fixtures/themes`, and a set of themes with one failing value per kind of check (colour, number, integer, angle, enum, colour list, string list, number list, name list, wrong kind, missing member, each rule); store them as a text snapshot, taken on `main`
-- [ ] 1.3 Move `SamplePage` into the new `src/UrDeck.Preview` project (GPL header, `$(UrDeckTfm)`, references the engine and the four widget projects), add `ThemePreview.Render(theme, page, width, height)` over `PageRenderer.RenderToBitmap`, add it to `urdeck.slnx`, and repoint `GoldenTests` (this is its only edit); do it as its own commit
-- [ ] 1.4 Confirm the goldens are unchanged after 1.3 and that `Preview` builds and its test project runs on Linux
+- [x] 1.1 Record `shader validate` output for the sixteen built-in backgrounds and for a folder with one finding of each severity, in `text`, `markdown`, `json` and `sarif`, as snapshot files in `tests/UrDeck.Cli.Tests`; the test compares byte for byte
+- [x] 1.2 Record the log lines the engine writes when it loads every built-in theme, every fixture theme under `tests/UrDeck.Engine.Tests/Fixtures/themes`, and a set of themes with one failing value per kind of check (colour, number, integer, angle, enum, colour list, string list, number list, name list, wrong kind, missing member, each rule); store them as a text snapshot, taken on `main`
+- [x] 1.3 Move `SamplePage` into the new `src/UrDeck.Preview` project (GPL header, `$(UrDeckTfm)`, references the engine and the four widget projects), add `ThemePreview.Render(theme, page, width, height)` over `PageRenderer.RenderToBitmap`, add it to `urdeck.slnx`, and repoint `GoldenTests` (this is its only edit); do it as its own commit
+- [x] 1.4 Confirm the goldens are unchanged after 1.3 and that `Preview` builds and its test project runs on Linux
 
 ## 2. Structured findings in the engine
 
