@@ -215,3 +215,29 @@ Recorded as they came up; each says what was decided and why, so the next reader
   and are tested directly; the log snapshot cannot cover the line.
 - **The capsule line is not in the log snapshot.** The sample page has no one-cell card that is not square, so no theme
   rendered by the snapshot reaches it. `ThemeFindingTests` checks its code directly.
+- **Task 4.9 stopped the run: `THEME044` on Carbon and Paper.** The lint on the five built-in themes finds nothing in
+  `default-dark`, `default-light` and `glass`, and one warning in each of the two themes that came after the plan:
+  `icons.set 'outline' is not an icon set that exists`. Carbon and Paper both set `"icons": { "set": "outline" }`, and the
+  schema describes `outline` as the built-in set that missing keys fall back to, but no icon set is shipped yet, so the
+  empty list of design 4 ("`icons.set` is checked against an empty list") rejects it. There is no contrast finding.
+  Nothing was changed; this is the owner's decision (below). The probe that found it was a throwaway test and is not kept.
+  - Options: (a) the known icon sets are `outline` until `theme-icons` fills the list (one constant, `THEME044` stays for
+    any other name); (b) take `outline` out of Carbon and Paper (changes their JSON, not their pixels); (c) drop `THEME044`
+    from this change and let `theme-icons` add it. The recommendation is (a): the schema already names `outline` as built in,
+    and neither a theme nor the rule changes.
+- **Case-only differences in a key are not unknown keys.** The deck reads keys in any case (`PropertyNameCaseInsensitive`),
+  and design 3 says the walker is case-insensitive "as the serializer reads", but the spec's two scenarios used
+  `card.borderwidth` as the misspelt key. A key the deck reads is not unknown, so the scenarios now use `card.borderWith`
+  (one edit from `card.borderWidth`).
+- **A wrong kind in a format 1 value fails the deck's read of the whole theme.** `card.gap: "wide"` is not a skipped value
+  with a warning but `Theme 'x' could not be read ... is skipped`, as it always was (the lenient reader only covers the
+  format 2 keys). The lint reports it as `THEME003` with the key from the reader's path, as an **error** (the spec table says
+  warning, and that holds for format 2 keys), and stops there, because the deck has no theme to check further.
+- **`ThemeLint.Check(source, options)` has no `name`.** The source already has the name (the folder's, or the built-in's), so
+  a second argument could only disagree with it.
+- **Two codes have no lint fixture.** `THEME056` (a circle on a card that is not square) needs a card size the lint does not
+  have, and `THEME090` cannot fire yet (above); both are tested through the engine in `ThemeFindingTests`.
+- **The lint resolves the theme once, at the 1100 pixel panel width,** through `ThemeResolver.Resolve` and
+  `ResolvedCardStyle.Resolve` with a sink of its own, for `THEME023`, `THEME054` and `THEME055`. The resolver's own
+  `THEME020` ("font could not be loaded") is dropped there: the lint checks font files itself, and a font named by family
+  would otherwise give a different finding on each machine.

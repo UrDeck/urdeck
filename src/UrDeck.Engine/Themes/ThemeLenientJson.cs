@@ -94,10 +94,10 @@ internal static class ThemeLenientJson
     private static string Plural(Type item) =>
         item == typeof(double) ? "numbers" : item == typeof(string) ? "text" : "objects";
 
-    private static Type? ItemType(Type type) =>
+    internal static Type? ItemType(Type type) =>
         type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) ? type.GetGenericArguments()[0] : null;
 
-    private static bool IsGroup(Type type) =>
+    internal static bool IsGroup(Type type) =>
         type.IsClass && type != typeof(string) && !typeof(IEnumerable).IsAssignableFrom(type);
 
     private static string Shorten(string raw) => raw.Length <= 40 ? raw : raw[..37] + "...";

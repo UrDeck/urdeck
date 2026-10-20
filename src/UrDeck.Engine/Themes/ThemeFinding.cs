@@ -90,7 +90,11 @@ public static class ThemeCodes
     public const string FontFileSize = "THEME021";
     public const string FontFamily = "THEME022";
     public const string FontWeight = "THEME023";
+    public const string UnknownBackground = "THEME040";
+    public const string UnknownPairing = "THEME041";
+    public const string DefaultNotPaired = "THEME042";
     public const string StillPicture = "THEME043";
+    public const string UnknownIconSet = "THEME044";
     public const string BorderWithoutWidth = "THEME050";
     public const string SpinWithoutConic = "THEME051";
     public const string PatternDense = "THEME052";
@@ -98,5 +102,9 @@ public static class ThemeCodes
     public const string EffectReach = "THEME054";
     public const string Hairline = "THEME055";
     public const string CompactCapsule = "THEME056";
+    public const string ContrastText = "THEME060";
+    public const string ContrastTint = "THEME061";
+    public const string ContrastMuted = "THEME062";
+    public const string NoMetadata = "THEME080";
     public const string Animations = "THEME090";
 }

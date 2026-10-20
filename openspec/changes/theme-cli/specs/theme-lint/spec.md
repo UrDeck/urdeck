@@ -52,7 +52,7 @@ A theme whose file cannot be used MUST be reported, and a theme whose values are
 |---|---|---|
 | `THEME001` | error | `theme.json` is missing, is not valid JSON or holds no object. The theme cannot load |
 | `THEME002` | warning | a key the deck does not read. The message names the closest key that is read when one is within two edits |
-| `THEME003` | warning | a value of the wrong JSON type |
+| `THEME003` | warning | a value of the wrong JSON type; an error for a format 1 value, where the deck skips the whole theme |
 | `THEME004` | warning | a number outside its range; the message carries the range |
 | `THEME005` | warning | a value that is not one of an enumeration's names; the message lists the names |
 | `THEME006` | warning | a colour that is not `#RRGGBB` or `#AARRGGBB` |
@@ -76,12 +76,12 @@ A theme whose file cannot be used MUST be reported, and a theme whose values are
 - **THEN** one `THEME001` error says the file is not valid JSON and where the reader stopped
 
 #### Scenario: Misspelt key
-- **WHEN** a theme has `card.borderwidth`
+- **WHEN** a theme has `card.borderWith`
 - **THEN** a `THEME002` warning says the key is not read and suggests `card.borderWidth`
 
 #### Scenario: Wrong type
 - **WHEN** a theme sets `card.gap` to `"wide"`
-- **THEN** a `THEME003` warning names `card.gap` and says a number is expected
+- **THEN** a `THEME003` error names `card.gap` and says a number is expected (`card.gap` is a format 1 value, so the deck skips the whole theme; a format 2 value of the wrong type is a warning and costs only that value)
 
 #### Scenario: Enumeration in another case
 - **WHEN** a theme sets `card.borderStyle` to `Dashed`

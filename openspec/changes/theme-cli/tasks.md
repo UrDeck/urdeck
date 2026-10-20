@@ -22,14 +22,14 @@
 
 ## 4. `ThemeLint`
 
-- [ ] 4.1 `ThemeLint.Check(source, name, options)` returning findings with their file; `THEME001` for a missing, unparseable or empty file stops the check; comments and trailing commas are accepted
-- [ ] 4.2 The unknown-key walker (design 3): case-insensitive, `$schema` accepted, the gauge gradient and arrays of groups walked, a suggestion within two edits; run by the lint only, never by the host
-- [ ] 4.3 `THEME010` (format), and map the engine findings of section 2 into the result
-- [ ] 4.4 Fonts: `THEME020` to `THEME022` (existence, extension, containment, size over 3 MB, licence file beside it, named by family) and make the resolver's weight check usable for `THEME023` from the lint without drawing
-- [ ] 4.5 Backgrounds and pairing: `THEME040` to `THEME042` against `BackgroundCatalog` plus the directories in the options, `THEME043` for the still picture, `THEME044` against the (empty) list of icon sets
-- [ ] 4.6 Contrast: `THEME060` to `THEME062` with the card fill, its gradient stops and each card tint composited over `colors.background`; the message says what was assumed
-- [ ] 4.7 `THEME054` from the underlay's own reach routine at the 1100 pixel panel width; `THEME080` for missing `meta`
-- [ ] 4.8 Tests: a minimal failing folder and a passing one for every code in the `theme-lint` spec, under `tests/UrDeck.Engine.Tests/Fixtures/lint/` (the same folders are used by the CLI tests in section 6)
+- [x] 4.1 `ThemeLint.Check(source, name, options)` returning findings with their file; `THEME001` for a missing, unparseable or empty file stops the check; comments and trailing commas are accepted
+- [x] 4.2 The unknown-key walker (design 3): case-insensitive, `$schema` accepted, the gauge gradient and arrays of groups walked, a suggestion within two edits; run by the lint only, never by the host
+- [x] 4.3 `THEME010` (format), and map the engine findings of section 2 into the result
+- [x] 4.4 Fonts: `THEME020` to `THEME022` (existence, extension, containment, size over 3 MB, licence file beside it, named by family) and make the resolver's weight check usable for `THEME023` from the lint without drawing
+- [x] 4.5 Backgrounds and pairing: `THEME040` to `THEME042` against `BackgroundCatalog` plus the directories in the options, `THEME043` for the still picture, `THEME044` against the (empty) list of icon sets
+- [x] 4.6 Contrast: `THEME060` to `THEME062` with the card fill, its gradient stops and each card tint composited over `colors.background`; the message says what was assumed
+- [x] 4.7 `THEME054` from the underlay's own reach routine at the 1100 pixel panel width; `THEME080` for missing `meta`
+- [x] 4.8 Tests: a minimal failing folder and a passing one for every code in the `theme-lint` spec, under `tests/UrDeck.Engine.Tests/Fixtures/lint/` (the same folders are used by the CLI tests in section 6)
 - [ ] 4.9 Run the lint on all five built-in themes, with warnings counted. If any finding appears, stop and take it to the owner (design, Risks) before changing a theme or a rule; tick this only when `--builtin --fail-on-warnings` would be clean
 - [ ] 4.10 Run the lint on the six fixture themes (Prism, Obsidian, Ember, Blueprint, Pop, Rigline) and record the findings in the design's "Findings during apply"; the theme changes that follow will need them
 

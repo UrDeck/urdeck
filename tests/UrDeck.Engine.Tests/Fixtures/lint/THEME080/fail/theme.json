@@ -1,0 +1,5 @@
+{
+  "$schema": "https://urdeck.app/schemas/v2/theme.json",
+  "format": 2,
+  "colors": { "background": "#101010", "cardFill": "#202020", "text": "#f0f0f0", "textMuted": "#a0a0a0" }
+}

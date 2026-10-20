@@ -133,7 +133,7 @@ every finding:
 - The format never changes the exit code
 
 #### Scenario: Text line
-- **WHEN** a folder `mine` whose `card.borderwidth` is misspelt is validated
+- **WHEN** a folder `mine` whose `card.borderWith` is misspelt is validated
 - **THEN** the output has a line `mine/theme.json: warning THEME002: ...` that names `card.borderWidth`, and a summary line
 
 #### Scenario: JSON can be parsed
