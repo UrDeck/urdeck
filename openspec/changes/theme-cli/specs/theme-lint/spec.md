@@ -57,6 +57,7 @@ A theme whose file cannot be used MUST be reported, and a theme whose values are
 | `THEME005` | warning | a value that is not one of an enumeration's names; the message lists the names |
 | `THEME006` | warning | a colour that is not `#RRGGBB` or `#AARRGGBB` |
 | `THEME007` | warning | an array outside its length limits or with an invalid element |
+| `THEME008` | warning | a group that cannot work without a member it does not have (a gradient without `colors`); the group is ignored |
 | `THEME010` | warning | `format` is newer than the deck reads |
 
 - Every message says what is wrong and how to fix it, in one line, without a stack trace
@@ -160,6 +161,8 @@ The rules between values that the deck applies when it loads a theme MUST each b
 | `THEME052` | warning | a pattern whose marks are closer than three pixels at the panel width |
 | `THEME053` | warning | outside corner marks reaching past the gap, counting the mark's thickness |
 | `THEME054` | warning | a shadow or glow whose reach is more than the gap over a translucent card fill; the deck limits it |
+| `THEME055` | warning | a line (a border, highlight, accent strip or corner mark) that resolves under one pixel; the deck draws it 1 px wide |
+| `THEME056` | info | `card.compact.shape` `circle` on a card that is not square, which is drawn as a capsule |
 | `THEME090` | info | more than one continuous animation is on |
 
 - `THEME054` MUST use the reach the deck uses when it draws, so the tool and the picture agree

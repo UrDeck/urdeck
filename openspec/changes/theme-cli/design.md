@@ -187,3 +187,31 @@ marketplace is not known.
 - `--background` on `theme render`, drawing the theme's resolved background behind the cards. Not needed to land.
 - Whether `theme validate` should resolve the theme at several display scalings to find size-dependent findings (the
   reach is). The first version resolves once at the 1100 pixel panel width.
+
+## Findings during apply
+
+Recorded as they came up; each says what was decided and why, so the next reader does not have to rediscover it.
+
+- **Codes the plan did not list (section 2).** Mapping the ~26 call sites found three findings with no code in the spec:
+  - `THEME008` for `ThemeValueCheck.Missing` (a gradient that needs `colors`). It fits none of `THEME003` to `THEME007`
+    (`THEME007` is an array that is present and wrong), so the open question is closed with its own code, as the design
+    said it would be if a test found it.
+  - `THEME055` (warning): a line that resolves under one pixel and is drawn 1 px wide (`card.borderWidth`,
+    `card.highlight.thickness`, `card.accentStrip.thickness`, `card.cornerMarks.thickness`).
+  - `THEME056` (info): `card.compact.shape` `circle` on a card that is not square is a capsule.
+  Both of the last two are logged by the resolver today, so the spec's "every warning the deck logs has a code" needs them.
+  The `theme-lint` spec table has the three rows.
+- **Severity is the finding's, the log level is the deck's.** Two findings differ between the audiences. `THEME054` (the deck
+  limits a reach into the next card) is logged at INFO because the deck has dealt with it, but the spec makes it a
+  warning for the author; `THEME020` is an error in the spec, and the deck logs "font could not be loaded" at WARN. The
+  finding carries the spec's severity, and the log sink writes `Error` and `Warning` as WARN, and `Info` as INFO, with an
+  internal `LoggedAsInfo` flag on the finding for the reach. The log text and level are unchanged, as the snapshot shows.
+- **Log lines that do not read `Theme 'name': message`.** Four lines of the log have another shape (`Theme 'x' declares
+  format ...`, `Theme 'x' could not be read from ...`, `Font 'x' could not be read: ...`, `The default theme's font ...`).
+  A finding's message is always the part after the prefix, and an internal `ThemeLogForm` (`Colon`, `Space`, `Bare`) tells the
+  log sink how to join the name, so the log is byte-equal and the tool prints the same message.
+- **`THEME090` cannot fire yet.** `ContinuousAnimations()` counts only a spinning or pulsing border, so it is 0 or 1;
+  `NoteAnimations` with a count above 1 is unreachable until `motion` adds a second source. The code and the call exist
+  and are tested directly; the log snapshot cannot cover the line.
+- **The capsule line is not in the log snapshot.** The sample page has no one-cell card that is not square, so no theme
+  rendered by the snapshot reaches it. `ThemeFindingTests` checks its code directly.

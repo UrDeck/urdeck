@@ -21,7 +21,7 @@ internal sealed class Format2Attribute : Attribute;
 internal static class ThemeLenientJson
 {
     /// <summary>Reads <paramref name="json"/>; <paramref name="reported"/> receives the keys already reported as the wrong kind.</summary>
-    public static ThemeDefinition Read(string json, string themeName, JsonSerializerOptions options, out HashSet<string> reported)
+    public static ThemeDefinition Read(string json, IThemeFindings sink, JsonSerializerOptions options, out HashSet<string> reported)
     {
         reported = [];
         var node = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions
@@ -32,7 +32,7 @@ internal static class ThemeLenientJson
         if (node is not JsonObject root)
             throw new JsonException("the file is empty");
 
-        Clean(root, typeof(ThemeDefinition), "", classIsFormat2: false, new ThemeValueCheck(themeName, reported));
+        Clean(root, typeof(ThemeDefinition), "", classIsFormat2: false, new ThemeValueCheck(sink, reported));
         return root.Deserialize<ThemeDefinition>(options) ?? throw new JsonException("the file is empty");
     }
 

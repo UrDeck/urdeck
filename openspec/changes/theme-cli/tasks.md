@@ -7,11 +7,11 @@
 
 ## 2. Structured findings in the engine
 
-- [ ] 2.1 Add `ThemeFinding(Code, Severity, Key, Message)`, `IThemeFindings`, a log sink that writes the text of 1.2, a collecting sink, and the code constants (one place, as `ShaderCodes` is)
-- [ ] 2.2 Give `ThemeValueCheck` a sink and a code per check kind (design 1); settle `Missing` (design, open question) and keep every message as it is
-- [ ] 2.3 Give `CheckRules` its codes `THEME050` to `THEME053` and `THEME090`; make `ThemeWarnings.Once` and `InfoOnce` forward to the sink so the resolver's font, weight and reach findings keep their once-per-load rule and get `THEME023` and `THEME054`
-- [ ] 2.4 Test: the log text for all themes of 1.2 is equal to the snapshot; the goldens are unchanged
-- [ ] 2.5 Test: each check kind produces one finding with the right code, key and severity
+- [x] 2.1 Add `ThemeFinding(Code, Severity, Key, Message)`, `IThemeFindings`, a log sink that writes the text of 1.2, a collecting sink, and the code constants (one place, as `ShaderCodes` is)
+- [x] 2.2 Give `ThemeValueCheck` a sink and a code per check kind (design 1); settle `Missing` (design, open question) and keep every message as it is
+- [x] 2.3 Give `CheckRules` its codes `THEME050` to `THEME053` and `THEME090`; make `ThemeWarnings.Once` and `InfoOnce` forward to the sink so the resolver's font, weight and reach findings keep their once-per-load rule and get `THEME023` and `THEME054`
+- [x] 2.4 Test: the log text for all themes of 1.2 is equal to the snapshot; the goldens are unchanged
+- [x] 2.5 Test: each check kind produces one finding with the right code, key and severity
 
 ## 3. Sources and the shared loader
 

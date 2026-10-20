@@ -25,7 +25,12 @@ public sealed record LoadedTheme(string Name, ThemeDefinition Definition, ThemeF
     public IReadOnlyDictionary<TextRole, ThemeFont> RoleFonts { get; init; } = new Dictionary<TextRole, ThemeFont>();
 
     /// <summary>What the resolver has already warned about for this theme, so each finding is logged once per load.</summary>
-    internal ThemeWarnings Warnings { get; } = new();
+    internal ThemeWarnings Warnings => LazyInitializer.EnsureInitialized(ref _warnings, () => new ThemeWarnings(Findings))!;
+
+    private ThemeWarnings? _warnings;
+
+    /// <summary>Where this theme's findings go: the log unless the loader says otherwise (the command line tool collects them).</summary>
+    internal IThemeFindings Findings { get; init; } = new LogFindings(Name);
 
     /// <summary>The theme's <c>meta.name</c>, or its folder name when it has none.</summary>
     public string DisplayName => Definition.Meta?.Name ?? Name;
@@ -82,7 +87,7 @@ public sealed class ThemeStore(string themesDirectory)
         return baseline;
     }
 
-    private LoadedTheme? LoadUser(string name, LoadedTheme baseline)
+    private LoadedTheme? LoadUser(string name, LoadedTheme baseline, IThemeFindings? findings = null)
     {
         // A theme name is a folder name; anything that could point elsewhere is not a theme.
         if (name != Path.GetFileName(name) || name is "." or "..")
@@ -93,19 +98,20 @@ public sealed class ThemeStore(string themesDirectory)
         if (!File.Exists(settings))
             return null;
 
+        var sink = findings ?? new LogFindings(name);
         ThemeDefinition user;
         HashSet<string> reported;
         try
         {
-            user = ThemeLenientJson.Read(File.ReadAllText(settings), name, UrDeckJson.Options, out reported);
+            user = ThemeLenientJson.Read(File.ReadAllText(settings), sink, UrDeckJson.Options, out reported);
         }
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
         {
-            UrDeckLog.Warn($"Theme '{name}' could not be read from {settings} and is skipped: {ex.Message}");
+            sink.Report(new ThemeFinding(ThemeCodes.FileUnusable, ThemeSeverity.Error, null, $"could not be read from {settings} and is skipped: {ex.Message}") { Form = ThemeLogForm.Space });
             return null;
         }
 
-        user.Sanitize(name, reported);
+        user.Sanitize(sink, reported);
 
         // One open function per folder: the resolver reads a file once per resolve, keyed by the function and the name.
         Func<string, Stream?> open = file => OpenThemeFile(folder, file);
@@ -114,7 +120,7 @@ public sealed class ThemeStore(string themesDirectory)
         {
             if (IsFontFile(spec) && !IsInside(folder, ResolveIn(folder, spec)))
             {
-                UrDeckLog.Warn($"Theme '{name}': font '{spec}' leaves the theme folder and is ignored.");
+                sink.Report(new ThemeFinding(ThemeCodes.FontFile, ThemeSeverity.Error, "typography.font", $"font '{spec}' leaves the theme folder and is ignored."));
                 user.Typography.Font = null;
             }
             else
@@ -126,25 +132,25 @@ public sealed class ThemeStore(string themesDirectory)
         var roleFonts = new Dictionary<TextRole, ThemeFont>();
         if (user.Typography?.Fonts is { } fonts)
         {
-            fonts.Value = RoleFont(name, folder, open, TextRole.Value, fonts.Value, roleFonts);
-            fonts.Unit = RoleFont(name, folder, open, TextRole.Unit, fonts.Unit, roleFonts);
-            fonts.Label = RoleFont(name, folder, open, TextRole.Label, fonts.Label, roleFonts);
+            fonts.Value = RoleFont(sink, folder, open, TextRole.Value, fonts.Value, roleFonts);
+            fonts.Unit = RoleFont(sink, folder, open, TextRole.Unit, fonts.Unit, roleFonts);
+            fonts.Label = RoleFont(sink, folder, open, TextRole.Label, fonts.Label, roleFonts);
         }
 
         var merged = user.MergeOver(baseline.Definition);
-        merged.CheckRules(name);
-        return new LoadedTheme(name, merged, font ?? baseline.Font, folder) { RoleFonts = roleFonts };
+        merged.CheckRules(sink);
+        return new LoadedTheme(name, merged, font ?? baseline.Font, folder) { RoleFonts = roleFonts, Findings = sink };
     }
 
     /// <summary>Adds a role's font to <paramref name="roleFonts"/>, or refuses a path that leaves the folder; returns the spec kept.</summary>
     private static string? RoleFont(
-        string name, string folder, Func<string, Stream?> open, TextRole role, string? spec, Dictionary<TextRole, ThemeFont> roleFonts)
+        IThemeFindings sink, string folder, Func<string, Stream?> open, TextRole role, string? spec, Dictionary<TextRole, ThemeFont> roleFonts)
     {
         if (string.IsNullOrWhiteSpace(spec))
             return null;
         if (IsFontFile(spec) && !IsInside(folder, ResolveIn(folder, spec)))
         {
-            UrDeckLog.Warn($"Theme '{name}': font '{spec}' for the {RoleName(role)} role leaves the theme folder and is ignored.");
+            sink.Report(new ThemeFinding(ThemeCodes.FontFile, ThemeSeverity.Error, $"typography.fonts.{RoleName(role)}", $"font '{spec}' for the {RoleName(role)} role leaves the theme folder and is ignored."));
             return null;
         }
         roleFonts[role] = new ThemeFont(spec, open);
