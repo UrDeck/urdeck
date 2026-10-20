@@ -23,6 +23,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\UrDeck.Engine\UrDeck.Engine.csproj" />
+    <!-- The sample page every picture of a theme starts from, and the code that draws it. -->
+    <ProjectReference Include="..\..\src\UrDeck.Preview\UrDeck.Preview.csproj" />
     <!-- The first-party Clock doubles as a sample widget for rendering tests. -->
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Clock\UrDeck.Widgets.Clock.csproj" />
     <!-- The stats widget and the system provider are tested here too. -->

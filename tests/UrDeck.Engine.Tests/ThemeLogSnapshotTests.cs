@@ -3,10 +3,8 @@
 
 using System.Text;
 using UrDeck.Engine.Diagnostics;
-using UrDeck.Engine.Layout;
-using UrDeck.Engine.Rendering;
-using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
+using UrDeck.Preview;
 using Xunit;
 
 namespace UrDeck.Engine.Tests;
@@ -81,8 +79,7 @@ public sealed class ThemeLogSnapshotTests : IDisposable
     private static void Render(LoadedTheme loaded)
     {
         using var page = SamplePage.Build();
-        using var bitmap = PageRenderer.RenderToBitmap(
-            1100, 1920, page.Widgets, loaded, SamplePage.Time, new PageRenderer.Chrome(IndicatorMode.Always, 0, 2), page.Dock);
+        using var bitmap = ThemePreview.Render(loaded, page, 1100, 1920, dock: true);
     }
 
     private string Capture(string title, Action work)

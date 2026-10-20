@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The sample page and the code that draws it in a theme: shared by the command line tool (theme render) and the tests.
+       GPL-3.0-or-later (it links the engine). It sits above both the engine and the first-party widgets: the engine loads
+       plugins and never references them, and the widgets reference only the SDK. -->
+  <PropertyGroup>
+    <TargetFramework>$(UrDeckTfm)</TargetFramework>
+    <RootNamespace>UrDeck.Preview</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UrDeck.Engine\UrDeck.Engine.csproj" />
+    <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Clock\UrDeck.Widgets.Clock.csproj" />
+    <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Stats\UrDeck.Widgets.Stats.csproj" />
+    <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Weather\UrDeck.Widgets.Weather.csproj" />
+    <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Shortcut\UrDeck.Widgets.Shortcut.csproj" />
+  </ItemGroup>
+
+</Project>
