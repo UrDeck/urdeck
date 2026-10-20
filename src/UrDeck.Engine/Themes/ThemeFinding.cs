@@ -95,6 +95,13 @@ public static class ThemeCodes
     public const string DefaultNotPaired = "THEME042";
     public const string StillPicture = "THEME043";
     public const string UnknownIconSet = "THEME044";
+    public const string IconManifest = "THEME070";
+    public const string IconEntry = "THEME071";
+    public const string IconFile = "THEME072";
+    public const string IconKey = "THEME073";
+    public const string IconLicense = "THEME074";
+    public const string IconOrphan = "THEME075";
+    public const string IconMissingKeys = "THEME076";
     public const string BorderWithoutWidth = "THEME050";
     public const string SpinWithoutConic = "THEME051";
     public const string PatternDense = "THEME052";

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "name": "mine",
+  "source": "https://example.com",
+  "license": "ISC",
+  "keys": {
+    "weather/clear-day": "x.svg",
+    "weather/clear-night": "x.svg",
+    "weather/partly-cloudy-day": "x.svg",
+    "weather/partly-cloudy-night": "x.svg",
+    "weather/overcast": "x.svg",
+    "weather/fog": "x.svg",
+    "weather/drizzle": "x.svg",
+    "weather/rain": "x.svg",
+    "weather/sleet": "x.svg",
+    "weather/snow": "x.svg",
+    "weather/thunderstorms-day": "x.svg",
+    "weather/thunderstorms-night": "x.svg",
+    "weather/not-available": "x.svg"
+  }
+}

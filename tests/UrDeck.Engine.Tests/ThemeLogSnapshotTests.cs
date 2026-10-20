@@ -59,6 +59,7 @@ public sealed class ThemeLogSnapshotTests : IDisposable
         ("wrong-kind-format1", """{ "card": { "gap": "wide" } }"""),
         ("missing-member", """{ "card": { "fillGradient": { "angle": 10 }, "borderGradient": { "kind": "conic" } }, "background": { "gradient": { "angle": 1 } } }"""),
         ("icon-tint", """{ "icons": { "tint": "purple" } }"""),
+        ("icon-set-unknown", """{ "icons": { "set": "nosuch" } }"""),
         ("stroke", """{ "stroke": { "thickness": 4, "cap": "flat" }, "gauge": { "style": "dial" } }"""),
         ("newer-format", """{ "format": 9 }"""),
         ("rule-border-none", """{ "card": { "borderWidth": 0, "borderStyle": "dashed", "borderGradient": { "colors": ["#ff0000", "#00ff00"] } } }"""),

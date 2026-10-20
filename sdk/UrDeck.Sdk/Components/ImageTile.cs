@@ -33,7 +33,11 @@ public static class ImageTile
     /// <param name="placeholder">
     /// The text whose first letter or digit the placeholder shows; null or a text without one draws the square empty.
     /// </param>
-    public static SKRect Draw(SKCanvas canvas, Theme theme, SKRect rect, SKImage? image, string? label = null, string? placeholder = null)
+    /// <param name="glyphKey">
+    /// The key of a themed icon (<c>app/link</c>) drawn in place of the placeholder when there is no image and the theme's
+    /// icon lookup has it; otherwise the placeholder is drawn.
+    /// </param>
+    public static SKRect Draw(SKCanvas canvas, Theme theme, SKRect rect, SKImage? image, string? label = null, string? placeholder = null, string? glyphKey = null)
     {
         if (rect.Width <= 0 || rect.Height <= 0)
             return SKRect.Create(rect.Left, rect.Top, 0, 0);
@@ -53,7 +57,17 @@ public static class ImageTile
 
         return image != null && image.Width > 0 && image.Height > 0
             ? DrawImage(canvas, area, image)
-            : DrawPlaceholder(canvas, theme, area, placeholder);
+            : DrawGlyph(canvas, theme, area, glyphKey) ?? DrawPlaceholder(canvas, theme, area, placeholder);
+    }
+
+    /// <summary>The square the placeholder would take, with the glyph in it; null when there is no key or the lookup has none.</summary>
+    private static SKRect? DrawGlyph(SKCanvas canvas, Theme theme, SKRect area, string? glyphKey)
+    {
+        if (string.IsNullOrEmpty(glyphKey))
+            return null;
+        float side = Math.Min(area.Width, area.Height);
+        var square = SKRect.Create(area.MidX - side / 2, area.MidY - side / 2, side, side);
+        return ThemedIcon.Draw(canvas, theme, square, glyphKey) ? square : null;
     }
 
     private static SKRect DrawImage(SKCanvas canvas, SKRect area, SKImage image)

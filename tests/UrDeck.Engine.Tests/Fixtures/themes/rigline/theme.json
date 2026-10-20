@@ -168,7 +168,6 @@
     "set": "outline",
     "stroke": 0.066,
     "tint": "ramp",
-    "animated": false,
     "glow": {
       "blur": 0.055,
       "alpha": 0.7

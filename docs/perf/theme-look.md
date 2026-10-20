@@ -425,3 +425,16 @@ nothing (`Stats_AHistoryIsAtMostSixHundredFloats`).
 
 **The parts.** `Chip`, `Divider`, `Well` and `Sparkline` draw straight to the canvas and keep nothing. A v1 theme draws the same
 pixels as before: the goldens for `default-dark`, `default-light` and `glass` are unchanged.
+
+## Icon glow (`theme-icons`)
+
+Rigline's `icons.glow` blurs a copy of each glyph once and keeps it in a cache of at most 16 images that belongs to the resolved
+theme and is disposed with it. Measured on 2026-10-20 in the test harness (no panel): a weather card painted 60 times under the
+Rigline fixture (outline set, `ramp` tint, glow 0.055 of a cell at 0.7) took 1.16 ms a paint at 4x2 and 2.65 ms at 4x4, against
+0.46 ms and 0.90 ms under Carbon (no glow). The difference was not split between the icon glow and Rigline's own value glow and
+card chrome. The icon glow is blurred on the first paint and drawn from the cache after: at 4x4 that is the current icon and up
+to five forecast glyphs, each the glyph's size plus three blur widths on each side (about 0.4 MB for a forecast glyph at the panel
+width, so roughly 2 MB for the card, worked out from the sizes and not measured).
+
+Not measured here: the host's private memory with Rigline on the panel, and looking at Carbon and Paper at 100, 125 and 150 %
+(the glyph is a vector, so it scales with the card; the stroke is a fraction of the icon's size).

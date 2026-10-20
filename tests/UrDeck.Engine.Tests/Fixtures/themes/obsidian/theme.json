@@ -125,8 +125,7 @@
   "icons": {
     "set": "outline",
     "stroke": 0.05,
-    "tint": "accent",
-    "animated": false
+    "tint": "accent"
   },
   "background": {
     "default": {

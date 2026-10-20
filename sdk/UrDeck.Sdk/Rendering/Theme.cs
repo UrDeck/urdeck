@@ -85,6 +85,9 @@ public sealed class Theme : IDisposable
         init => _divider = value;
     }
 
+    /// <summary>The icon values: the resolved set, the stroke, the tint and the glow; a theme that sets none names no set and its lookup answers nothing.</summary>
+    public IconTheme Icons { get; init; } = new();
+
     /// <summary>The well drawn behind grouped content, or null when the theme sets none.</summary>
     public WellTheme? Well { get; init; }
 
@@ -113,6 +116,7 @@ public sealed class Theme : IDisposable
     {
         TextStyle.Dispose();
         Gauge.Dispose();
+        Icons.Dispose();
         foreach (var typeface in _typefaces.Values.Distinct())
             typeface.Dispose();
         _typefaces = new Dictionary<TextRole, SKTypeface>();

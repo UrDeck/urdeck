@@ -508,18 +508,19 @@ Tick numbers run 0 to 100. `labelPosition` `below` and `above` apply to arcs. Th
 
 ### `icons`
 
-Drawn by: the icons change.
+Drawn by: the weather card (its condition icons) and the shortcut card (`theme:` glyphs and the fallback glyph for an icon that cannot be found).
+A theme that names a set gets static outline icons, drawn in the theme's stroke and tint, in place of the animated colour icons.
+There is no `animated` key: icons from a set are pictures.
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
-| `icons.set` | text |  | Folder name inside the theme folder (icons/<set>/<key>.svg), or a built-in set name. Keys are in 04-widgets-and-icons.md. A missing key falls back to the built-in 'outline' set, then to the widget's own icon. |
+| `icons.set` | text |  | Name of an icon set: a folder icons/<set>/ inside the theme folder (with a manifest.json), or a built-in set (outline). A key the set lacks is answered by the built-in 'outline' set. See Icon sets in the theme reference. |
 | `icons.stroke` | 0.005 to 0.2 |  | Override stroke width for set icons, fraction of the icon size. |
-| `icons.tint` | text |  | 'accent', 'accent2', 'text', 'ramp', 'none' (keep the SVG's colours) or a #colour. |
+| `icons.tint` | text |  | 'accent', 'accent2', 'text', 'ramp' (the colour of colors.ramp for the value shown, such as the temperature), 'none' (the text colour) or a #colour. |
 | `icons.glow` | group |  | Glow behind set icons (Rigline). Colour defaults to the icon's tint. |
 | `icons.glow.blur` | 0 to 1 |  | Blur radius, fraction of a cell. |
 | `icons.glow.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
 | `icons.glow.alpha` | 0 to 1 | `0.6` | Strength. |
-| `icons.animated` | true or false | `true` | false = static icons even where the widget would use Lottie (weather). Default true. |
 
 ### `background`
 
@@ -552,6 +553,47 @@ Drawn by: the motion change.
 | Key | Value | Default | Meaning |
 |---|---|---|---|
 | `motion.level` | `full`, `reduced`, `off` | `"full"` | The ceiling for theme-driven animation (borderAnimate, and what a later change adds). The effective level is the lower of this and the user/OS setting. Does not touch the shader background, which has its own control. |
+
+## Icon sets
+
+An icon set is a folder of small SVG outline icons and a `manifest.json` that says which file shows which of the product's icon names.
+`icons.set` names one: a folder `icons/<set>/` inside the theme's folder, or a built-in set. The deck looks a key up in the theme's set
+first and then in the built-in `outline` set; a widget with an icon of its own for the case with no set (the weather card's animated
+icons) uses it only when the theme names no set.
+
+```json
+{
+  "version": 1,
+  "name": "mine",
+  "source": "https://example.com/where-the-icons-come-from",
+  "license": "ISC",
+  "upstreamVersion": "1.0.0",
+  "keys": {
+    "weather/rain": "cloud-rain.svg",
+    "weather/thunderstorms-day": "bolt-cloud.svg",
+    "weather/thunderstorms-night": "bolt-cloud.svg",
+    "app/home": "house.svg"
+  }
+}
+```
+
+- The manifest is required and is the only way a file is found; no file is picked up by its name. Several keys may name one file, and
+  a file may keep its upstream name. A folder without a manifest is not a set; the log names the file to make.
+- A path in `keys` is relative to the set's folder, ends in `.svg` and stays inside it (a `..` segment, an absolute path or a
+  backslash that leaves the folder gives that key no icon).
+- Keys: `weather/` `clear-day`, `clear-night`, `partly-cloudy-day`, `partly-cloudy-night`, `overcast`, `fog`, `drizzle`, `rain`, `sleet`,
+  `snow`, `thunderstorms-day`, `thunderstorms-night`, `not-available`; `app/` `terminal`, `folder`, `file`, `music`, `gamepad`,
+  `browser`, `mail`, `chat`, `settings`, `code`, `camera`, `image`, `video`, `calendar`, `clock`, `home`, `power`, `lock`, `link`,
+  `cloud`, `download`, `star`, `heart`, `bolt`, `chart`. A set may have fewer; the lists only grow.
+- An icon file is at most 4 KB, with a root `svg` whose `viewBox` is `0 0 24 24`, made of `path`, `circle`, `ellipse`, `line`, `polyline`,
+  `polygon` and `rect` (with `rx`/`ry`) inside `svg` and `g`. No `style`, `script`, `image`, `use`, `text`, `defs`, `transform` or links.
+  The art is outlines: the deck strokes every shape with the theme's `icons.stroke` and its stroke cap, in the theme's `icons.tint`
+  (or `glow`), and also fills a shape marked `fill="currentColor"`. Colours and widths in the file are ignored.
+- The built-in `outline` set is [Lucide](https://lucide.dev) (ISC; MIT for the icons derived from Feather), copied once; its
+  manifest names the release. The licence text is in the set; the running application draws no credit.
+- The deck reads and parses a set once when it resolves the theme; drawing an icon reads nothing.
+
+`urdeck-cli theme validate` checks a theme's sets with the findings THEME070 to THEME076 below.
 
 ## Checking a theme
 
@@ -615,7 +657,7 @@ the rest only the tool reports.
 | THEME041 | warning | `meta.pairsWith.backgrounds` names a background that does not exist: fix the name or remove it |
 | THEME042 | warning | the default background is not in the theme's own `pairsWith` list: add it |
 | THEME043 | warning | the still background picture is missing, leaves the folder or is over 8 MB |
-| THEME044 | warning | `icons.set` names an icon set that does not exist (no icon set is built yet: remove the key) |
+| THEME044 | warning | `icons.set` names an icon set that exists neither in the theme's `icons/` folder nor among the built-in sets (also logged): fix the name |
 | THEME050 | warning | a border style, gradient or animation with `card.borderWidth` 0 (also logged): give the border a width |
 | THEME051 | warning | `card.borderAnimate` `spin` without a conic `card.borderGradient` (also logged): the deck switches the animation off |
 | THEME052 | warning | a pattern whose marks are closer than three pixels at the panel width (also logged): raise `spacing` |
@@ -626,6 +668,13 @@ the rest only the tool reports.
 | THEME060 | warning | the text colour on the card fill, or on its gradient's darkest or lightest stop, is under 4.5:1: change the colours; a translucent fill is composited over `colors.background`, and the message says so because the page behind may be a moving background |
 | THEME061 | warning | the text colour on a card tint is under 4.5:1 (a tinted card keeps `colors.text`): change the tint at the position the message names |
 | THEME062 | info | the muted text colour on the card fill is under 3:1 |
+| THEME070 | error | an icon set's `manifest.json` is missing, is not valid JSON, has a `version` other than 1 or has no `keys` (also logged): add or fix it |
+| THEME071 | error | a manifest entry names a file that is missing, does not end in `.svg` or leaves the set's folder (also logged) |
+| THEME072 | error | an icon file breaks the file rules: over 4 KB, no `viewBox` of `0 0 24 24`, an element or attribute that is not allowed, a `transform`, not valid XML (also logged) |
+| THEME073 | warning | a manifest key is not one of the product's icon keys, so no widget asks for it |
+| THEME074 | warning | the manifest's `license` or `source` is empty, or the set's folder has no licence file |
+| THEME075 | warning | an `.svg` file in the set's folder that no manifest entry names (the tool alone reports it) |
+| THEME076 | info | the set has no icon for some of the product's keys; the message names them and says `outline` answers them |
 | THEME080 | warning | `meta` lacks a `name`, a `description` or a `mode`: add them so an editor can list the theme |
 | THEME090 | info | more than one continuous animation is on (also logged): each repaints on every frame |
 

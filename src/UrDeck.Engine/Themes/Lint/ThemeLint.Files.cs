@@ -3,6 +3,7 @@
 
 using System.Text.RegularExpressions;
 using UrDeck.Engine.Backgrounds;
+using UrDeck.Engine.Icons;
 
 namespace UrDeck.Engine.Themes;
 
@@ -134,10 +135,59 @@ public static partial class ThemeLint
             }
         }
 
-        if (definition.Icons?.Set is { } set && !string.IsNullOrWhiteSpace(set))
+        CheckIconSets(source, definition, found);
+    }
+
+    /// <summary>The set the theme names against what exists, and every set in its <c>icons/</c> folder (and the built-in one it names) as files.</summary>
+    private static void CheckIconSets(IThemeSource source, ThemeDefinition definition, List<ThemeDiagnostic> found)
+    {
+        string file = ThemeStore.SettingsFileName;
+        var checkedSets = new HashSet<string>(StringComparer.Ordinal);
+        string? named = definition.Icons?.Set;
+        if (!string.IsNullOrWhiteSpace(named) && !IconSetStore.Exists(named, source.Folder))
         {
             found.Add(Warning(ThemeCodes.UnknownIconSet,
-                $"icons.set '{set}' is not an icon set that exists; no icon sets are available yet, so remove it.", file, "icons.set"));
+                $"icons.set '{named}' is not an icon set that exists, neither in the theme's icons folder nor among the built-in sets; fix the name, or add icons/{named}/ with a manifest.json.", file, "icons.set"));
+        }
+
+        if (source.Folder != null)
+        {
+            string icons = Path.Combine(source.Folder, "icons");
+            if (Directory.Exists(icons))
+            {
+                foreach (string folder in Directory.EnumerateDirectories(icons).Order(StringComparer.Ordinal))
+                {
+                    string name = Path.GetFileName(folder);
+                    if (IconSetStore.IsValidName(name) && checkedSets.Add(name))
+                        CheckIconSet(IconSetStore.FilesOf(source.Folder, name), $"icons/{name}", name, found);
+                }
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(named) && IconSetStore.BuiltInNames.Contains(named) && checkedSets.Add(named))
+            CheckIconSet(IconSetStore.BuiltInFiles(named), $"built-in set '{named}'", named, found);
+    }
+
+    private static void CheckIconSet(IIconSetFiles files, string where, string name, List<ThemeDiagnostic> found)
+    {
+        var reading = IconSetReader.Read(files, thorough: true);
+        foreach (var finding in reading.Findings)
+        {
+            // A file finding names the file; the others name the manifest.
+            string at = finding.Code is ThemeCodes.IconFile or ThemeCodes.IconOrphan && finding.Key != null
+                ? $"{where}/{finding.Key}"
+                : $"{where}/{IconSetReader.ManifestFile}";
+            found.Add(new ThemeDiagnostic(finding.Code, finding.Severity, finding.Message, at, finding.Key));
+        }
+
+        if (reading.Set is { } set)
+        {
+            var missing = IconKeys.All.Where(k => !reading.Declared.Contains(k)).ToList();
+            if (missing.Count > 0 && name != IconSetStore.BuiltInName)
+            {
+                found.Add(new ThemeDiagnostic(ThemeCodes.IconMissingKeys, ThemeSeverity.Info,
+                    $"{where} has no icon for {string.Join(", ", missing)}; the built-in '{IconSetStore.BuiltInName}' set answers them.", $"{where}/{IconSetReader.ManifestFile}", null));
+            }
         }
     }
 }

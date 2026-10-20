@@ -139,8 +139,7 @@
   "icons": {
     "set": "outline",
     "stroke": 0.058,
-    "tint": "text",
-    "animated": false
+    "tint": "text"
   },
   "background": {
     "default": {

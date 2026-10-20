@@ -60,6 +60,7 @@ public static class ThemeResolver
             Divider = Divider(d.Divider, Color(c.TextMuted).WithAlpha(0x55), Px(card.Gap, cellPx), cellPx),
             Well = Well(d.Well, cellPx),
             TextStyle = Style(type, cellPx),
+            Icons = Icons(loaded, cellPx),
             Typefaces = LoadTypefaces(loaded, cellPx),
         };
     }
@@ -206,6 +207,44 @@ public static class ThemeResolver
 
     private static WellTheme? Well(ThemeWellDefinition? well, float cellPx) =>
         well == null ? null : new WellTheme(OptionalColor(well.Fill), Px(well.Radius ?? 0.09, cellPx), OptionalColor(well.Border));
+
+    /// <summary>The icon values: the lookup is shared by every size of this loaded theme, the glow cache is the new theme's own.</summary>
+    private static IconTheme Icons(LoadedTheme loaded, float cellPx)
+    {
+        var icons = loaded.Definition.Icons;
+        var resolved = loaded.ResolvedIcons;
+        var tint = IconTint.Accent;
+        SKColor fixedColor = SKColors.White;
+        switch (icons?.Tint?.Trim().ToLowerInvariant())
+        {
+            case "accent2":
+                tint = IconTint.Accent2;
+                break;
+            case "text":
+                tint = IconTint.Text;
+                break;
+            case "ramp":
+                tint = IconTint.Ramp;
+                break;
+            case "none":
+                tint = IconTint.None;
+                break;
+            case { Length: > 0 } other when other != "accent" && SKColor.TryParse(other, out var parsed):
+                tint = IconTint.Fixed;
+                fixedColor = parsed;
+                break;
+        }
+
+        return new IconTheme
+        {
+            Set = resolved.Set,
+            NamesSet = resolved.NamesSet,
+            Stroke = icons?.Stroke is { } stroke ? (float)stroke : IconTheme.DefaultStroke,
+            Tint = tint,
+            TintColor = fixedColor,
+            Glow = icons?.Glow is { Blur: > 0 } glow ? new IconGlow(Px(glow.Blur, cellPx), OptionalColor(glow.Color), (float)(glow.Alpha ?? 0.6)) : null,
+        };
+    }
 
     private static GaugeGlow? Glow(ThemeGlowDefinition? glow, float cellPx) =>
         glow is { Blur: > 0 } ? new GaugeGlow(Px(glow.Blur, cellPx), OptionalColor(glow.Color), (float)(glow.Alpha ?? 0.6)) : null;

@@ -131,3 +131,24 @@ Single runs, not a benchmark.
   expected. The owner confirmed on the panel that the forecast icons do move with the setting on, so the figures stand as
   measured: the still posters and the loaded animations cost about the same here, and the difference is within the noise of
   a single run.
+
+## Weather under an icon-set theme (`theme-icons`)
+
+A theme that names an icon set draws the weather card's icons as static vectors (`ThemedIcon`): no Lottie animation is loaded, no
+poster bitmap is cached and the widget never asks for animation frames. Measured on 2026-10-20 with the engine's test harness (no
+host, no panel): 60 paints of the card at 1100 px wide, a 4x2 (550 px high) and a 4x4 (1100 px high), `motion: full`, one thread,
+Release build. Single runs, not a benchmark.
+
+| Theme | Card | Time per paint | Allocated per paint | Asks for frames | Poster images held |
+|---|---|---|---|---|---|
+| default dark (Meteocons) | 4x2 | 0.47 ms | 6 KB | yes, 15 a second | 0 |
+| default dark (Meteocons) | 4x4 | 1.14 ms | 30 KB | yes, 15 a second | 5 (about 1 MB of pixels at 220 px) |
+| Carbon (outline) | 4x2 | 0.46 ms | 7 KB | no | 0 |
+| Carbon (outline) | 4x4 | 0.90 ms | 32 KB | no | 0 |
+
+- A paint costs about the same either way, so the saving is the paints: `full` motion repaints the whole card 15 times a second
+  (and the default `periodic` one loop a minute); a set card repaints only when the readings change.
+- The memory the posters held is gone with them (five images at the 4x4 forecast size, about 1 MB of pixels), and so is the
+  parsed Lottie composition of the main icon.
+- Not measured here: CPU and private memory of the running host on the panel. The method of the sections above (three cards, a
+  60 s window after warm-up) applies; run it with Carbon and with the default theme to put numbers beside these.

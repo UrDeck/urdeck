@@ -121,8 +121,7 @@
   "icons": {
     "set": "outline",
     "stroke": 0.05,
-    "tint": "text",
-    "animated": true
+    "tint": "text"
   },
   "background": {
     "default": {

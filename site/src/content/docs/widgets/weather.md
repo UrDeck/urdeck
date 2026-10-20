@@ -1,11 +1,11 @@
 ---
 title: Weather
-description: A weather card with animated icons and a forecast, for any place.
+description: A weather card with animated or outline icons and a forecast, for any place.
 section: Widgets
 order: 12
 ---
 
-`urdeck.widgets.weather` is a 4x2 card with an animated colour icon (day and night variants), the temperature, the
+`urdeck.widgets.weather` is a 4x2 card with an icon (an animated colour one, or an outline glyph in themes that have an icon set; day and night variants), the temperature, the
 condition in words, today's high and low, the place, and sunrise and sunset in the place's own local time. At 4x4 the same
 card sits on top of a forecast: what it feels like, the humidity and the wind, the snow expected over the days shown, and
 one column per day with the weekday, an icon, high and low, the chance of precipitation and the rain and snow expected.
@@ -23,12 +23,16 @@ It takes its data from the `weather` provider and needs no provider setting: the
 | `latitude`, `longitude` | Decimal degrees. When both are set they replace `location` and no search is made. |
 | `label` | Absent: the place's resolved name. A text: shown instead. `""`: no place is shown. |
 | `unit` | `celsius` or `fahrenheit`. Absent: the region's. It chooses the system of the whole card: Celsius is kilometres per hour, millimetres and centimetres; Fahrenheit is miles per hour and inches. |
-| `motion` | `periodic` (the default) plays the icon's loop once a minute and rests on its first frame in between; `full` loops it all the time; `off` shows only the first frame. |
-| `periodSeconds` | Seconds between loops in the `periodic` mode (default 60). |
+| `motion` | `periodic` (the default) plays the icon's loop once a minute and rests on its first frame in between; `full` loops it all the time; `off` shows only the first frame. Has no effect under a theme that names an icon set, whose icons do not move. |
+| `periodSeconds` | Seconds between loops in the `periodic` mode (default 60). Has no effect under a theme that names an icon set. |
 | `days` | 4x4 only: how many forecast days, 1 to 7 (default 5). |
-| `animateForecast` | 4x4 only: `true` lets the forecast icons move as `motion` says. Off by default: each moving icon costs about 2.7 MB of memory. |
+| `animateForecast` | 4x4 only: `true` lets the forecast icons move as `motion` says. Off by default: each moving icon costs about 2.7 MB of memory. Has no effect under a theme that names an icon set. |
 
 The card's parts follow the [theme](/docs/themes/): at 4x4 the rule between now and the forecast is the theme's `divider`, each forecast day can sit on the theme's `well`, and the condition on its `chip` (a pill, in some themes). A theme that sets none of them draws the card as before.
+
+## Icons
+
+With a theme that names an [icon set](/docs/themes/#icon-sets) (`"icons": { "set": "outline" }`, as Carbon and Paper do) the card draws outline glyphs instead of the animated colour icons, for the current condition and for each forecast day, in the theme's `icons.stroke` and `icons.tint`, with its `icons.glow` if it has one. They are pictures: nothing moves, the card is repainted only when what it shows changes, and it keeps no animation or image cache. With the tint `ramp` each glyph takes its colour from the theme's `colors.ramp` by temperature, from -10 to 40 degrees Celsius (the current temperature for the main icon, the day's high for a forecast day, whichever unit the card shows). A theme with no icon set shows the animated icons.
 
 Any number of weather cards can show different places on one page; two cards with the same place share one request.
 A new or edited place is fetched at once. The data is fetched every 15 minutes
@@ -68,5 +72,6 @@ Rain and snow are model forecasts, not measurements.
 Weather data is by [Open-Meteo.com](https://open-meteo.com/) (CC BY 4.0), and every card that shows it draws the credit
 "Weather data by Open-Meteo.com"; no setting hides it. Open-Meteo's free service is for **non-commercial use only**;
 commercial users need an Open-Meteo subscription, which UrDeck does not support yet. The place database is from
-[GeoNames](https://www.geonames.org/) (CC BY 4.0) and the icons are
-[Meteocons](https://github.com/basmilius/weather-icons) (MIT).
+[GeoNames](https://www.geonames.org/) (CC BY 4.0) and the animated icons are
+[Meteocons](https://github.com/basmilius/weather-icons) (MIT). The outline set is
+[Lucide](https://lucide.dev) (ISC); no credit is drawn for it.
