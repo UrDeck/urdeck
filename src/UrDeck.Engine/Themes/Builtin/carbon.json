@@ -115,7 +115,7 @@
   "gauge": {
     "style": "bar",
     "layout": "stacked",
-    "readoutGap": 1.1,
+    "readoutGap": 2.2,
     "segments": {
       "length": 0.073,
       "gap": 0.027

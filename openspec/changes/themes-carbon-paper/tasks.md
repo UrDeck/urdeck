@@ -49,4 +49,4 @@
 
 ## 8. Panel tuning findings
 
-- [x] 8.1 Add `gauge.readoutGap` (model, schema, resolver, `GaugeTheme.ReadoutGap`, `BarGauge`/`ThickBarGauge`), docs and spec delta; Carbon sets 1.1 and `valueScale` 0.8
+- [x] 8.1 Add `gauge.readoutGap` (model, schema, resolver, `GaugeTheme.ReadoutGap`, `BarGauge`/`ThickBarGauge`), docs and spec delta; Carbon sets 2.2 and `valueScale` 0.8
