@@ -313,7 +313,28 @@ the later card chrome change: `borderAnimate`.
 
 ### `pattern`
 
-Drawn by: the card chrome change.
+Drawn by: the `page-pattern` change. One texture over the whole window: above the background, its scrim and the theme's
+background colour, under every card, the dock and the page indicator. It does not slide with the pages, takes no input and is
+drawn whatever the configuration's `background` is (`"type": "none"` included), because it belongs to the theme.
+
+- **Kinds.** `dots` (round dots of radius `thickness`), `grid` (horizontal and vertical lines; with `majorEvery`, every
+  `majorEvery`-th line in each direction, starting with the first, takes `major`), `hatch` (parallel lines, `spacing` apart
+  across the lines) and `scanlines` (horizontal lines). `spacing` and `thickness` are fractions of one grid cell, a quarter
+  of the window's width. The first mark is half a repeat in from the top and left edges. `lines` and `scroll` are not
+  available yet.
+- **The angle** of a `hatch` is in degrees from horizontal, positive rising to the right: 45 (the default) runs from bottom
+  left to top right, 0 or 180 is horizontal and 90 or -90 vertical. `angle` is used by `hatch` only, `majorEvery` and `major`
+  by `grid` only; elsewhere they are ignored.
+- **Whole pixels.** The distance between marks is the spacing in pixels rounded to a whole pixel (at least 2), a line is a
+  whole number of pixels wide (at least 1) and a dot's radius is at least half a pixel. A hatch's angle is adjusted by under
+  one degree so that its lines meet across every repeat; within one degree of an axis it is drawn as horizontal or vertical
+  lines. On the 1100 pixel wide panel Carbon's dots are 35 pixels apart.
+- **Colour.** `pattern.color`, alpha included; without one, the theme's muted text colour at a sixteenth of its opacity.
+  `major.color` and `major.thickness` fall back to the pattern's own.
+- **Cost.** The pattern is drawn once per theme and window size into one small block of whole repeats (at least 512 pixels
+  along an axis, never more than the window) and laid out as tiles; nothing is repainted while the deck runs. A repeat wider
+  or taller than 1024 pixels (a grid with a large `majorEvery` at a wide spacing) is still drawn correctly but costs more
+  memory; `urdeck.log` has a `Pattern:` line with the block's size.
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
