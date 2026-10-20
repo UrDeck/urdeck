@@ -35,8 +35,8 @@
 
 ## 5. The report model
 
-- [ ] 5.1 Generalise `BackgroundReport`, `Counts` and `ReportWriters` over a subject kind and a CLI-owned `Diagnostic` (design 5); the JSON array is `backgrounds` or `themes`; SARIF gets a rule table per kind
-- [ ] 5.2 Confirm the snapshots of 1.1 are still byte-equal
+- [x] 5.1 Generalise `BackgroundReport`, `Counts` and `ReportWriters` over a subject kind and a CLI-owned `Diagnostic` (design 5); the JSON array is `backgrounds` or `themes`; SARIF gets a rule table per kind
+- [x] 5.2 Confirm the snapshots of 1.1 are still byte-equal
 
 ## 6. `theme validate`
 

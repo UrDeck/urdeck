@@ -86,7 +86,7 @@ internal static partial class RenderRunner
 
         var blank = result.Diagnostics.Where(d => d.Code == ShaderCodes.BlankRender).ToList();
         foreach (var diagnostic in blank)
-            output.Write(ReportWriters.TextLine(PathDisplay.Of(folder), diagnostic) + "\n");
+            output.Write(ReportWriters.TextLine(PathDisplay.Of(folder), Diagnostic.From(diagnostic)) + "\n");
 
         return blank.Count > 0 && options.FailOnWarnings ? ExitCodes.Findings : ExitCodes.Ok;
     }

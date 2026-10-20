@@ -66,7 +66,7 @@ public sealed class FormatTests : IDisposable
     [Fact]
     public void Markdown_escapes_a_bar_in_a_message()
     {
-        var report = new BackgroundReport("x", Path.Combine(_work.Root, "x"), [new ShaderDiagnostic("SHADER999", ShaderSeverity.Info, "a | b", "manifest.json")]);
+        var report = SubjectReport.Background("x", Path.Combine(_work.Root, "x"), [new ShaderDiagnostic("SHADER999", ShaderSeverity.Info, "a | b", "manifest.json")]);
         using var writer = new StringWriter();
 
         ReportWriters.Write("markdown", [report], writer);
@@ -125,7 +125,7 @@ public sealed class FormatTests : IDisposable
     [Fact]
     public void Sarif_maps_info_to_note()
     {
-        var report = new BackgroundReport("x", Path.Combine(_work.Root, "x"), [new ShaderDiagnostic("SHADER060", ShaderSeverity.Info, "remark", "manifest.json")]);
+        var report = SubjectReport.Background("x", Path.Combine(_work.Root, "x"), [new ShaderDiagnostic("SHADER060", ShaderSeverity.Info, "remark", "manifest.json")]);
         using var writer = new StringWriter();
 
         ReportWriters.Write("sarif", [report], writer);
