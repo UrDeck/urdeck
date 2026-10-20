@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using UrDeck.Engine.Backgrounds;
+using UrDeck.Engine.Themes;
 
 namespace UrDeck.Cli;
 
@@ -20,7 +21,7 @@ internal static partial class ReportWriters
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
 
-    public static void Write(string format, IReadOnlyList<BackgroundReport> reports, TextWriter output)
+    public static void Write(string format, IReadOnlyList<SubjectReport> reports, TextWriter output)
     {
         switch (format)
         {
@@ -41,18 +42,18 @@ internal static partial class ReportWriters
         }
     }
 
-    public static string Severity(ShaderSeverity severity) => severity switch
+    public static string Severity(DiagnosticSeverity severity) => severity switch
     {
-        ShaderSeverity.Error => "error",
-        ShaderSeverity.Warning => "warning",
+        DiagnosticSeverity.Error => "error",
+        DiagnosticSeverity.Warning => "warning",
         _ => "info",
     };
 
     /// <summary>One finding as the text format prints it: <c>path: severity CODE: message</c>.</summary>
-    public static string TextLine(string path, ShaderDiagnostic diagnostic) =>
+    public static string TextLine(string path, Diagnostic diagnostic) =>
         $"{path}: {Severity(diagnostic.Severity)} {diagnostic.Code}: {OneLine(diagnostic.Message)}";
 
-    private static void Text(IReadOnlyList<BackgroundReport> reports, TextWriter output)
+    private static void Text(IReadOnlyList<SubjectReport> reports, TextWriter output)
     {
         foreach (var report in reports)
             foreach (var diagnostic in report.Diagnostics)
@@ -61,7 +62,7 @@ internal static partial class ReportWriters
         output.Write(Summary(reports) + "\n");
     }
 
-    private static void Markdown(IReadOnlyList<BackgroundReport> reports, TextWriter output)
+    private static void Markdown(IReadOnlyList<SubjectReport> reports, TextWriter output)
     {
         foreach (var report in reports)
         {
@@ -84,7 +85,7 @@ internal static partial class ReportWriters
         output.Write(Summary(reports) + "\n");
     }
 
-    private static void Json(IReadOnlyList<BackgroundReport> reports, TextWriter output)
+    private static void Json(IReadOnlyList<SubjectReport> reports, TextWriter output)
     {
         using var stream = new MemoryStream();
         using (var json = new Utf8JsonWriter(stream, JsonOptions))
@@ -95,7 +96,7 @@ internal static partial class ReportWriters
             json.WriteString("name", ToolInfo.Name);
             json.WriteString("version", ToolInfo.Version);
             json.WriteEndObject();
-            json.WriteStartArray("backgrounds");
+            json.WriteStartArray(ArrayName(reports));
             foreach (var report in reports)
             {
                 json.WriteStartObject();
@@ -109,6 +110,8 @@ internal static partial class ReportWriters
                     json.WriteString("severity", Severity(diagnostic.Severity));
                     json.WriteString("message", diagnostic.Message);
                     json.WriteString("file", report.FileOf(diagnostic));
+                    if (diagnostic.Key != null)
+                        json.WriteString("key", diagnostic.Key);
                     json.WriteEndObject();
                 }
 
@@ -129,7 +132,7 @@ internal static partial class ReportWriters
         output.Write(Encoding.UTF8.GetString(stream.ToArray()) + "\n");
     }
 
-    private static void Sarif(IReadOnlyList<BackgroundReport> reports, TextWriter output)
+    private static void Sarif(IReadOnlyList<SubjectReport> reports, TextWriter output)
     {
         var codes = reports.SelectMany(r => r.Diagnostics).Select(d => d.Code).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToList();
 
@@ -169,8 +172,8 @@ internal static partial class ReportWriters
                     json.WriteString("ruleId", diagnostic.Code);
                     json.WriteString("level", diagnostic.Severity switch
                     {
-                        ShaderSeverity.Error => "error",
-                        ShaderSeverity.Warning => "warning",
+                        DiagnosticSeverity.Error => "error",
+                        DiagnosticSeverity.Warning => "warning",
                         _ => "note",
                     });
                     json.WriteStartObject("message");
@@ -198,14 +201,19 @@ internal static partial class ReportWriters
         output.Write(Encoding.UTF8.GetString(stream.ToArray()) + "\n");
     }
 
-    private static string Summary(IReadOnlyList<BackgroundReport> reports)
+    private static string Summary(IReadOnlyList<SubjectReport> reports)
     {
         var counts = Counts.Of(reports);
-        return $"{Plural(reports.Count, "background")} checked: {Plural(counts.Errors, "error")}, {Plural(counts.Warnings, "warning")}, "
+        return $"{Plural(reports.Count, Noun(reports))} checked: {Plural(counts.Errors, "error")}, {Plural(counts.Warnings, "warning")}, "
                + $"{Plural(counts.Infos, "remark")}.";
     }
 
     private static string Plural(int count, string noun) => count == 1 ? $"1 {noun}" : $"{count} {noun}s";
+
+    // A run is about one kind of subject; the first report names it.
+    private static string Noun(IReadOnlyList<SubjectReport> reports) => reports[0].Kind == SubjectKind.Theme ? "theme" : "background";
+
+    private static string ArrayName(IReadOnlyList<SubjectReport> reports) => reports[0].Kind == SubjectKind.Theme ? "themes" : "backgrounds";
 
     // A path as a SARIF uri: a relative one stays relative (escaped), an absolute one becomes a file uri.
     private static string ArtifactUri(string path) =>
@@ -253,6 +261,36 @@ internal static class RuleCatalog
         [ShaderCodes.UnknownSampleType] = "An unknown sample type.",
         [ShaderCodes.LayoutKindDisagree] = "The shader and the manifest disagree about a parameter's kind.",
         [ShaderCodes.BlankRender] = "The shader drew nothing.",
+        [ThemeCodes.FileUnusable] = "theme.json is missing, is not valid JSON or holds no object.",
+        [ThemeCodes.UnknownKey] = "A key the deck does not read.",
+        [ThemeCodes.WrongType] = "A value of the wrong JSON type.",
+        [ThemeCodes.OutOfRange] = "A number outside its range.",
+        [ThemeCodes.NotOneOf] = "A value that is not one of the names allowed.",
+        [ThemeCodes.BadColor] = "A colour that is not #RRGGBB or #AARRGGBB.",
+        [ThemeCodes.BadList] = "A list outside its length limits or with an invalid element.",
+        [ThemeCodes.MissingMember] = "A group that needs a member it does not have.",
+        [ThemeCodes.NewerFormat] = "The format is newer than the deck reads.",
+        [ThemeCodes.FontFile] = "A font file is missing, has the wrong extension or leaves the theme's folder.",
+        [ThemeCodes.FontFileSize] = "A font file is over 3 MB or has no licence file beside it.",
+        [ThemeCodes.FontFamily] = "A font is named by family, so it is used only where it is installed.",
+        [ThemeCodes.FontWeight] = "A weight the font does not have.",
+        [ThemeCodes.UnknownBackground] = "The default background does not exist.",
+        [ThemeCodes.UnknownPairing] = "A paired background does not exist.",
+        [ThemeCodes.DefaultNotPaired] = "The default background is not in the pairing list.",
+        [ThemeCodes.StillPicture] = "The still background picture is missing, leaves the folder or is too large.",
+        [ThemeCodes.UnknownIconSet] = "The icon set does not exist.",
+        [ThemeCodes.BorderWithoutWidth] = "A border style, gradient or animation with a border width of 0.",
+        [ThemeCodes.SpinWithoutConic] = "A spinning border without a conic gradient.",
+        [ThemeCodes.PatternDense] = "A pattern whose marks are closer than three pixels.",
+        [ThemeCodes.CornerMarksReach] = "Corner marks reaching past the gap.",
+        [ThemeCodes.EffectReach] = "A shadow or glow reaching further than the gap.",
+        [ThemeCodes.Hairline] = "A line that resolves under one pixel.",
+        [ThemeCodes.CompactCapsule] = "A compact circle on a card that is not square.",
+        [ThemeCodes.ContrastText] = "The text colour has too little contrast on the card fill.",
+        [ThemeCodes.ContrastTint] = "The text colour has too little contrast on a card tint.",
+        [ThemeCodes.ContrastMuted] = "The muted text colour has too little contrast on the card fill.",
+        [ThemeCodes.NoMetadata] = "The theme's meta lacks a name, a description or a mode.",
+        [ThemeCodes.Animations] = "More than one continuous animation is on.",
     };
 
     public static string Describe(string code) => Descriptions.GetValueOrDefault(code, code);

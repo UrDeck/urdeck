@@ -592,6 +592,15 @@ Three changes, in this order; the detail of (b) and (c) is in `docs/handoff/2026
   community store would run the tool in CI. **Model:** Sonnet. (c) is next.
 - **(c) generated documentation** (after (b)): `shader docs` and a CI drift check, like `dotnet format --verify-no-changes`.
   **Model:** Sonnet.
+- **(d) `theme-cli`** (implemented 2026-10-19, in review; `openspec/changes/theme-cli`): the `theme` commands of the same tool:
+  `theme validate` (a folder, `--all`, `--builtin`, `--background-dir`, the same formats and exit codes), `theme render` (the
+  sample page in a theme, from the new `src/UrDeck.Preview` project), `theme init` (a starter, or `--from` a built-in theme with
+  its fonts) and `theme schema`. The engine reports theme findings with `THEME###` codes to a sink (the deck's log is one sink,
+  its text unchanged), a shared `ThemeLoader` reads a theme folder for the deck and the tool, and `ThemeLint` adds the checks
+  only a tool makes (unknown keys, font files, backgrounds, contrast, metadata). CI runs `theme validate --builtin
+  --fail-on-warnings`. **Direction, not built:** `urdeck-cli check <repository>` for a store or marketplace, which classifies each
+  folder (theme, background, plugin), runs each validator and aggregates one report; what "valid" means for a plugin needs a trust
+  policy first (`openspec/changes/theme-cli/design.md`, decision 8). **Model:** Sonnet (Opus for the sink and loader refactor).
 - The settings UI that builds a form from manifests belongs to the editor (item 11).
 
 ## 10. Dock / quick launch

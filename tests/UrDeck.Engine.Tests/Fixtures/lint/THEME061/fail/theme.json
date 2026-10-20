@@ -1,0 +1,6 @@
+{
+  "$schema": "https://urdeck.app/schemas/v2/theme.json",
+  "format": 2,
+  "meta": { "name": "Probe", "description": "A theme for the lint tests.", "mode": "dark" },
+  "colors": { "cardTints": ["#f0f0f0"] }
+}

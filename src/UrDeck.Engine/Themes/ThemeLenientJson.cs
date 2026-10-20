@@ -21,7 +21,7 @@ internal sealed class Format2Attribute : Attribute;
 internal static class ThemeLenientJson
 {
     /// <summary>Reads <paramref name="json"/>; <paramref name="reported"/> receives the keys already reported as the wrong kind.</summary>
-    public static ThemeDefinition Read(string json, string themeName, JsonSerializerOptions options, out HashSet<string> reported)
+    public static ThemeDefinition Read(string json, IThemeFindings sink, JsonSerializerOptions options, out HashSet<string> reported)
     {
         reported = [];
         var node = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions
@@ -32,7 +32,7 @@ internal static class ThemeLenientJson
         if (node is not JsonObject root)
             throw new JsonException("the file is empty");
 
-        Clean(root, typeof(ThemeDefinition), "", classIsFormat2: false, new ThemeValueCheck(themeName, reported));
+        Clean(root, typeof(ThemeDefinition), "", classIsFormat2: false, new ThemeValueCheck(sink, reported));
         return root.Deserialize<ThemeDefinition>(options) ?? throw new JsonException("the file is empty");
     }
 
@@ -94,10 +94,10 @@ internal static class ThemeLenientJson
     private static string Plural(Type item) =>
         item == typeof(double) ? "numbers" : item == typeof(string) ? "text" : "objects";
 
-    private static Type? ItemType(Type type) =>
+    internal static Type? ItemType(Type type) =>
         type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>) ? type.GetGenericArguments()[0] : null;
 
-    private static bool IsGroup(Type type) =>
+    internal static bool IsGroup(Type type) =>
         type.IsClass && type != typeof(string) && !typeof(IEnumerable).IsAssignableFrom(type);
 
     private static string Shorten(string raw) => raw.Length <= 40 ? raw : raw[..37] + "...";

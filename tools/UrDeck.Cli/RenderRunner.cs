@@ -86,7 +86,7 @@ internal static partial class RenderRunner
 
         var blank = result.Diagnostics.Where(d => d.Code == ShaderCodes.BlankRender).ToList();
         foreach (var diagnostic in blank)
-            output.Write(ReportWriters.TextLine(PathDisplay.Of(folder), diagnostic) + "\n");
+            output.Write(ReportWriters.TextLine(PathDisplay.Of(folder), Diagnostic.From(diagnostic)) + "\n");
 
         return blank.Count > 0 && options.FailOnWarnings ? ExitCodes.Findings : ExitCodes.Ok;
     }
@@ -97,7 +97,7 @@ internal static partial class RenderRunner
             error.Write($"warning: {warning}\n");
     }
 
-    private static (int Width, int Height) ParseSize(string size)
+    internal static (int Width, int Height) ParseSize(string size, string example = "270x480")
     {
         var match = SizePattern().Match(size);
         if (!match.Success
@@ -105,7 +105,7 @@ internal static partial class RenderRunner
             || !int.TryParse(match.Groups[2].Value, NumberStyles.None, CultureInfo.InvariantCulture, out int height)
             || width is < 1 or > MaxSide || height is < 1 or > MaxSide)
         {
-            throw new ToolFailureException($"--size '{size}' must be WIDTHxHEIGHT in pixels, each from 1 to {MaxSide} (for example 270x480).");
+            throw new ToolFailureException($"--size '{size}' must be WIDTHxHEIGHT in pixels, each from 1 to {MaxSide} (for example {example}).");
         }
 
         return (width, height);

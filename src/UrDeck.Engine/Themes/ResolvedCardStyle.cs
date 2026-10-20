@@ -291,9 +291,10 @@ public sealed class ResolvedCardStyle : IDisposable
         }
         if (glow is { } g && g.Reach > gap)
             glow = g with { Blur = g.Blur * gap / g.Reach };
-        loaded.Warnings.InfoOnce("reach",
-            $"Theme '{loaded.Name}': the cards are translucent, so the shadow and glow reach no further than the gap: " +
-            $"{before:0} px limited to {gap:0} px.");
+        loaded.Warnings.Once("reach", new ThemeFinding(ThemeCodes.EffectReach, ThemeSeverity.Warning, "card.shadow",
+            $"the cards are translucent, so the shadow and glow reach no further than the gap: " +
+            $"{before:0} px limited to {gap:0} px.")
+        { LoggedAsInfo = true });
     }
 
     private static int UnderlayBleed(CardShadow? shadow, CardGlow? glow, CardMarks? outsideMarks)
@@ -411,8 +412,8 @@ public sealed class ResolvedCardStyle : IDisposable
             if (!_sized.TryGetValue(key, out var chrome))
             {
                 if (_circle && Math.Abs(size.Width - size.Height) > 1)
-                    _loaded.Warnings.InfoOnce("capsule",
-                        $"Theme '{_loaded.Name}': card.compact.shape circle on a card of {size.Width}x{size.Height} px is a capsule; " +
+                    _loaded.Warnings.InfoOnce("capsule", ThemeCodes.CompactCapsule, "card.compact.shape",
+                        $"card.compact.shape circle on a card of {size.Width}x{size.Height} px is a capsule; " +
                         "it has room for one information line.");
                 _sized[key] = chrome = new SizedCardChrome(this, tint, strip, size);
                 if (chrome.HasBackImage)
@@ -474,8 +475,8 @@ public sealed class ResolvedCardStyle : IDisposable
         if (px <= 0 || px > 2)
             return px;
         if (px < 1)
-            loaded.Warnings.Once($"hairline:{key}",
-                $"Theme '{loaded.Name}': {key} resolves to {px:0.##} px, under one pixel; it is drawn 1 px wide.");
+            loaded.Warnings.Once($"hairline:{key}", ThemeCodes.Hairline, key,
+                $"{key} resolves to {px:0.##} px, under one pixel; it is drawn 1 px wide.");
         return Math.Max(1, MathF.Round(px, MidpointRounding.AwayFromZero));
     }
 

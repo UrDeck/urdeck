@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
-using UrDeck.Engine.Diagnostics;
-
 namespace UrDeck.Engine.Themes;
 
 public sealed partial class ThemeDefinition
 {
-    private void SanitizeStroke(ThemeValueCheck check, string themeName)
+    private void SanitizeStroke(ThemeValueCheck check)
     {
         if (Stroke is not { } s)
             return;
@@ -15,7 +13,7 @@ public sealed partial class ThemeDefinition
         if (s.Cap is { } cap && !cap.Equals("round", StringComparison.OrdinalIgnoreCase)
             && !cap.Equals("square", StringComparison.OrdinalIgnoreCase))
         {
-            UrDeckLog.Warn($"Theme '{themeName}': stroke.cap '{cap}' must be 'round' or 'square'; using the default.");
+            check.Warn(ThemeCodes.NotOneOf, "stroke.cap", $"stroke.cap '{cap}' must be 'round' or 'square'; using the default.");
             s.Cap = null;
         }
     }

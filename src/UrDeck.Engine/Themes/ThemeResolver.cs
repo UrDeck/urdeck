@@ -281,19 +281,19 @@ public static class ThemeResolver
                 if (TryCreate(roleFont, role, weight, sizePx) is { } own)
                     return own;
                 string name = ThemeStore.RoleName(role);
-                loaded.Warnings.Once($"font:{name}:{roleFont.Spec}",
-                    $"Theme '{loaded.Name}': font '{roleFont.Spec}' for the {name} role (typography.fonts.{name}) could not be loaded; using typography.font.");
+                loaded.Warnings.Once($"font:{name}:{roleFont.Spec}", ThemeCodes.FontFile, ThemeSeverity.Error, $"typography.fonts.{name}",
+                    $"font '{roleFont.Spec}' for the {name} role (typography.fonts.{name}) could not be loaded; using typography.font.");
             }
 
             if (TryCreate(loaded.Font, role, weight, sizePx) is { } typeface)
                 return typeface;
 
-            loaded.Warnings.Once($"font::{loaded.Font.Spec}",
-                $"Theme '{loaded.Name}': font '{loaded.Font.Spec}' could not be loaded; using the default theme's font.");
+            loaded.Warnings.Once($"font::{loaded.Font.Spec}", ThemeCodes.FontFile, ThemeSeverity.Error, "typography.font",
+                $"font '{loaded.Font.Spec}' could not be loaded; using the default theme's font.");
             if (TryCreate(ThemeStore.BuiltInDefaultFont, role, weight, sizePx) is { } fallback)
                 return fallback;
 
-            loaded.Warnings.Once("font:default", "The default theme's font could not be loaded; using the system default font.");
+            loaded.Warnings.Once("font:default", new ThemeFinding(ThemeCodes.FontFile, ThemeSeverity.Error, null, "The default theme's font could not be loaded; using the system default font.") { Form = ThemeLogForm.Bare });
             var key = ("system:", weight, (float?)null);
             if (!_made.TryGetValue(key, out var system))
                 _made[key] = system = Created(SKTypeface.FromFamilyName(null, ToSkWeight(weight), SKFontStyleWidth.Normal, SKFontStyleSlant.Upright))
@@ -332,7 +332,7 @@ public static class ThemeResolver
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
             {
-                loaded.Warnings.Once($"read:{font.Spec}", $"Font '{font.Spec}' could not be read: {ex.Message}");
+                loaded.Warnings.Once($"read:{font.Spec}", new ThemeFinding(ThemeCodes.FontFile, ThemeSeverity.Error, null, $"Font '{font.Spec}' could not be read: {ex.Message}") { Form = ThemeLogForm.Bare });
                 return null;
             }
         }
@@ -368,16 +368,16 @@ public static class ThemeResolver
             if (Axis(baseFace, WeightAxis) is { } axis)
             {
                 if (weight < axis.Min || weight > axis.Max)
-                    loaded.Warnings.Once($"weight:{name}",
-                        $"Theme '{loaded.Name}': the {name} weight {weight} is outside the weight range {axis.Min:0}..{axis.Max:0} of font '{font.Spec}'; " +
+                    loaded.Warnings.Once($"weight:{name}", ThemeCodes.FontWeight, $"typography.weights.{name}",
+                        $"the {name} weight {weight} is outside the weight range {axis.Min:0}..{axis.Max:0} of font '{font.Spec}'; " +
                         $"it is drawn at {Math.Clamp(weight, axis.Min, axis.Max):0}.");
                 return;
             }
 
             int own = (int)Math.Round(baseFace.FontStyle.Weight / 100.0) * 100;
             if (weight != own)
-                loaded.Warnings.Once($"weight:{name}",
-                    $"Theme '{loaded.Name}': the {name} weight {weight} has no effect: font '{font.Spec}' has one weight ({own}).");
+                loaded.Warnings.Once($"weight:{name}", ThemeCodes.FontWeight, $"typography.weights.{name}",
+                    $"the {name} weight {weight} has no effect: font '{font.Spec}' has one weight ({own}).");
         }
     }
 

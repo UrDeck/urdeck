@@ -96,6 +96,7 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 | `sdk/UrDeck.Analyzer` | Roslyn analyzer (`netstandard2.0`, MIT) reporting URDECK001-005 |
 | `src/UrDeck.Engine` | Plugin loader, config store, grid and dock layout, gesture recognition and hit testing, `PageRenderer`, the reading hub that runs the data providers, the launcher and the icon service |
 | `src/UrDeck.Host` | WinUI 3 application (`net10.0-windows10.0.19041.0`): window and monitor placement, one `SKXamlCanvas` layer per widget |
+| `src/UrDeck.Preview` | the sample page and the code that draws it in a theme (`urdeck-cli theme render`, the golden tests); above the engine and the first-party widgets |
 | `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather` | First-party data providers: `system` (CPU, memory and GPU readings) and `weather` (Open-Meteo, any number of places) |
 | `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather`, `widgets/UrDeck.Widgets.Shortcut` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`), Weather (`urdeck.widgets.weather`) and Shortcut (`urdeck.widgets.shortcut`) |
 | `tests/UrDeck.Engine.Tests`, `tests/UrDeck.Analyzer.Tests` | xUnit tests |
@@ -109,7 +110,7 @@ The Windows SDK suffix on the host and test target frameworks is required: the W
 
 | Path | License |
 |---|---|
-| `src/UrDeck.Host`, `src/UrDeck.Engine`, `tools/` (`urdeck-cli`, which links the engine), `providers/`, `widgets/`, `tests/` | [GPL-3.0-or-later](LICENSE) with the [plugin exception](PLUGIN-EXCEPTION.md) |
+| `src/UrDeck.Host`, `src/UrDeck.Engine`, `src/UrDeck.Preview`, `tools/` (`urdeck-cli`, which links the engine), `providers/`, `widgets/`, `tests/` | [GPL-3.0-or-later](LICENSE) with the [plugin exception](PLUGIN-EXCEPTION.md) |
 | `site/` (the website: text, pictures and code) | [GPL-3.0-or-later](LICENSE), except the website fonts below; code samples in the pages are MIT |
 | `sdk/` (`UrDeck.Sdk`, `UrDeck.Analyzer`) | [MIT](sdk/LICENSE) |
 | Community widgets and data providers | The author's choice |

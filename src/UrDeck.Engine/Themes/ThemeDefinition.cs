@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
-using UrDeck.Engine.Diagnostics;
-
 namespace UrDeck.Engine.Themes;
 
 /// <summary>
@@ -83,17 +81,17 @@ public sealed partial class ThemeDefinition
     };
 
     /// <summary>Clears every invalid value (so a merge replaces it with the default's) and logs a warning for each.</summary>
-    internal void Sanitize(string themeName, HashSet<string>? reported = null)
+    internal void Sanitize(IThemeFindings sink, HashSet<string>? reported = null)
     {
-        var check = new ThemeValueCheck(themeName, reported);
-        SanitizeFormat(check, themeName);
+        var check = new ThemeValueCheck(sink, reported);
+        SanitizeFormat(check);
         SanitizeColors(check);
         SanitizeCard(check);
         SanitizeTypography(check);
-        SanitizeStroke(check, themeName);
+        SanitizeStroke(check);
         SanitizeIndicator(check);
         SanitizePressAndDock(check);
-        SanitizeGauge(check, themeName);
+        SanitizeGauge(check);
         Meta?.Sanitize(check, "meta");
         Pattern?.Sanitize(check, "pattern");
         Divider?.Sanitize(check, "divider");
@@ -104,10 +102,10 @@ public sealed partial class ThemeDefinition
         Motion?.Sanitize(check, "motion");
     }
 
-    private void SanitizeFormat(ThemeValueCheck check, string themeName)
+    private void SanitizeFormat(ThemeValueCheck check)
     {
         Format = check.Integer("format", Format, 1, int.MaxValue);
         if (Format > SupportedFormat)
-            UrDeckLog.Warn($"Theme '{themeName}' declares format {Format}; this host supports {SupportedFormat}; values it does not know are ignored.");
+            check.Report(new ThemeFinding(ThemeCodes.NewerFormat, ThemeSeverity.Warning, "format", $"declares format {Format}; this host supports {SupportedFormat}; values it does not know are ignored.") { Form = ThemeLogForm.Space });
     }
 }

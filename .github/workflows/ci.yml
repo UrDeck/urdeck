@@ -115,6 +115,12 @@ jobs:
           $cli shader init "$work/mine.sksl"
           $cli shader render "$work/mine" -o "$work/mine/sample.png" --update-manifest
           $cli shader validate "$work/mine"
+          # the built-in themes check clean, and a copy of one made by init checks clean too.
+          $cli theme validate --builtin --fail-on-warnings
+          $cli theme init mine-theme --output "$work" --from carbon
+          $cli theme validate "$work/mine-theme" --fail-on-warnings
+          $cli theme render --builtin carbon -o "$out/carbon.png"
+          test -s "$out/carbon.png"
 
       - name: Pack (urdeck-cli)
         run: dotnet pack tools/UrDeck.Cli -c Release --no-build
@@ -168,6 +174,12 @@ jobs:
           $cli shader init "$work/mine.sksl"
           $cli shader render "$work/mine" -o "$work/mine/sample.png" --update-manifest
           $cli shader validate "$work/mine"
+          # the built-in themes check clean, and a copy of one made by init checks clean too.
+          $cli theme validate --builtin --fail-on-warnings
+          $cli theme init mine-theme --output "$work" --from carbon
+          $cli theme validate "$work/mine-theme" --fail-on-warnings
+          $cli theme render --builtin carbon -o "$out/carbon.png"
+          test -s "$out/carbon.png"
 
   openspec:
     needs: changes

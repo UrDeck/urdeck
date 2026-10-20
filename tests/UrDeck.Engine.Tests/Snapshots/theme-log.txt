@@ -1,0 +1,102 @@
+== built-in default-dark
+== built-in default-light
+== built-in glass
+== built-in carbon
+== built-in paper
+== fixture blueprint
+WARN Theme 'blueprint': font 'IBMPlexMono-Regular.ttf' could not be loaded; using the default theme's font.
+== fixture ember
+WARN Theme 'ember': font 'BarlowCondensed-Bold.ttf' could not be loaded; using the default theme's font.
+== fixture obsidian
+WARN Theme 'obsidian': font 'BodoniModa-Variable.ttf' for the value role (typography.fonts.value) could not be loaded; using typography.font.
+WARN Theme 'obsidian': font 'Jost-Variable.ttf' could not be loaded; using the default theme's font.
+WARN Theme 'obsidian': font 'Jost-Variable.ttf' for the unit role (typography.fonts.unit) could not be loaded; using typography.font.
+WARN Theme 'obsidian': font 'Jost-Variable.ttf' for the label role (typography.fonts.label) could not be loaded; using typography.font.
+== fixture pop
+WARN Theme 'pop': font 'Archivo-Variable.ttf' for the value role (typography.fonts.value) could not be loaded; using typography.font.
+WARN Theme 'pop': font 'Archivo-Variable.ttf' could not be loaded; using the default theme's font.
+WARN Theme 'pop': font 'Archivo-Variable.ttf' for the unit role (typography.fonts.unit) could not be loaded; using typography.font.
+== fixture prism
+WARN Theme 'prism': font 'BricolageGrotesque-Variable.ttf' could not be loaded; using the default theme's font.
+INFO Theme 'prism': the cards are translucent, so the shadow and glow reach no further than the gap: 193 px limited to 25 px.
+== fixture rigline
+WARN Theme 'rigline': font 'ChakraPetch-Bold.ttf' could not be loaded; using the default theme's font.
+== failing colour
+WARN Theme 'colour': colors.background 'red' is not #RRGGBB or #AARRGGBB; using the default.
+WARN Theme 'colour': colors.text '#12345' is not #RRGGBB or #AARRGGBB; using the default.
+== failing palette
+WARN Theme 'palette': colors.backgroundPalette must be one to four colours (#RRGGBB or #AARRGGBB); the palette is derived from the theme's colours.
+== failing palette-long
+WARN Theme 'palette-long': colors.backgroundPalette must be one to four colours (#RRGGBB or #AARRGGBB); the palette is derived from the theme's colours.
+== failing number
+WARN Theme 'number': card.radius 7 is outside 0..1; using the default.
+WARN Theme 'number': card.shadow.blur 5 is outside 0..1; using the default.
+== failing integer
+WARN Theme 'integer': format 0 is outside 1..2147483647; using the default.
+WARN Theme 'integer': gauge.ticks.count 1 is outside 2..60; using the default.
+== failing angle
+WARN Theme 'angle': card.borderGradient.angle 900 is outside -360..360; using the default.
+WARN Theme 'angle': card.borderGradient has no effect with card.borderWidth 0.
+== failing enum
+WARN Theme 'enum': card.shape 'blob' must be one of 'round', 'chamfer'; using the default.
+WARN Theme 'enum': card.borderStyle 'zigzag' must be one of 'solid', 'dashed', 'none'; using the default.
+WARN Theme 'enum': meta.mode 'grey' must be one of 'dark', 'light'; using the default.
+== failing enum-case
+== failing colour-list
+WARN Theme 'colour-list': colors.ramp must be 2 to 5 colours (#RRGGBB or #AARRGGBB); using the default.
+WARN Theme 'colour-list': colors.cardTints must be 1 to 8 colours (#RRGGBB or #AARRGGBB); using the default.
+== failing string-list
+WARN Theme 'string-list': meta.tags [1,2] must be a list of text; using the default.
+WARN Theme 'string-list': gauge.scale.labels must be 2 to 11 strings; using the default.
+WARN Theme 'string-list': gauge.status.labels must be exactly 3 strings; using the default.
+== failing number-list
+WARN Theme 'number-list': gauge.status.thresholds must be 2 numbers between 0 and 1; using the default.
+== failing name-list
+WARN Theme 'name-list': card.cutCorners has 'up', not one of 'tl', 'tr', 'br', 'bl'; dropped.
+== failing wrong-kind
+WARN Theme 'wrong-kind': card.shadow.blur "big" must be a number; using the default.
+WARN Theme 'wrong-kind': card.cutCorners "tl" must be a list; using the default.
+== failing wrong-kind-format1
+WARN Theme 'wrong-kind-format1' could not be read from <tmp>/themes/wrong-kind-format1/theme.json and is skipped: The JSON value could not be converted to System.Nullable`1[System.Double]. Path: $.card.gap | LineNumber: 2 | BytePositionInLine: 17.
+WARN Theme 'wrong-kind-format1' was not found; using 'default-dark'.
+== failing missing-member
+WARN Theme 'missing-member': card.fillGradient needs 'colors'; ignoring it.
+WARN Theme 'missing-member': card.borderGradient needs 'colors'; ignoring it.
+== failing icon-tint
+WARN Theme 'icon-tint': icons.tint 'purple' must be 'accent', 'accent2', 'text', 'ramp', 'none' or a colour (#RRGGBB or #AARRGGBB); using the default.
+== failing stroke
+WARN Theme 'stroke': stroke.thickness 4 is outside 0.001..1; using the default.
+WARN Theme 'stroke': stroke.cap 'flat' must be 'round' or 'square'; using the default.
+WARN Theme 'stroke': gauge.style 'dial' must be 'ring', 'bar', 'verticalBar', 'meter', 'tach', 'marker' or 'thickbar'; using the default.
+== failing newer-format
+WARN Theme 'newer-format' declares format 9; this host supports 2; values it does not know are ignored.
+== failing rule-border-none
+WARN Theme 'rule-border-none': card.borderStyle, card.borderGradient has no effect with card.borderWidth 0.
+== failing rule-spin
+WARN Theme 'rule-spin': card.borderAnimate 'spin' needs card.borderGradient of kind 'conic'; the animation is switched off.
+== failing rule-pattern
+WARN Theme 'rule-pattern': pattern is too dense: spacing 0.02 is less than 3 times thickness 0.01, so its marks run together.
+== failing rule-corner-marks
+WARN Theme 'rule-corner-marks': card.cornerMarks.inset -0.1 reaches past card.gap 0.02; the marks would overlap the next card.
+== failing rule-animations
+== failing reach
+INFO Theme 'reach': the cards are translucent, so the shadow and glow reach no further than the gap: 151 px limited to 6 px.
+== failing hairline
+WARN Theme 'hairline': card.borderWidth resolves to 0.11 px, under one pixel; it is drawn 1 px wide.
+== failing font-missing
+WARN Theme 'font-missing': font 'Nothing.ttf' could not be loaded; using the default theme's font.
+== failing font-leaves
+WARN Theme 'font-leaves': font '../Other.ttf' leaves the theme folder and is ignored.
+WARN Theme 'font-leaves': font '../Other.ttf' for the value role leaves the theme folder and is ignored.
+WARN Theme 'font-leaves': font '/x/Abs.ttf' for the unit role leaves the theme folder and is ignored.
+== failing font-role-missing
+WARN Theme 'font-role-missing': font 'Gone.ttf' for the value role (typography.fonts.value) could not be loaded; using typography.font.
+WARN Theme 'font-role-missing': font 'Gone2.otf' for the label role (typography.fonts.label) could not be loaded; using typography.font.
+== failing weight-range
+WARN Theme 'weight-range': the value weight 900 is outside the weight range 100..800 of font 'JetBrainsMono-Variable.ttf'; it is drawn at 800.
+WARN Theme 'weight-range': the label weight 50 is outside the weight range 100..800 of font 'JetBrainsMono-Variable.ttf'; it is drawn at 100.
+== failing weight-family
+WARN Theme 'weight-family': font 'No Such Family' could not be loaded; using the default theme's font.
+== failing compact-capsule
+== unknown
+WARN Theme 'no-such-theme' was not found; using 'default-dark'.

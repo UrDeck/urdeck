@@ -3,9 +3,9 @@
 
 using SkiaSharp;
 using UrDeck.Engine.Layout;
-using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
+using UrDeck.Preview;
 using Xunit;
 using Xunit.Sdk;
 
@@ -27,10 +27,7 @@ public sealed class GoldenTests
     {
         using var page = SamplePage.Build();
         var loaded = new ThemeStore(draft && !ThemeStore.BuiltInNames.Contains(theme) ? FixtureFolder : "").Load(theme);
-        return PageRenderer.RenderToBitmap(
-            Width, Height, page.Widgets, loaded, SamplePage.Time,
-            dock ? new PageRenderer.Chrome(IndicatorMode.Always, 0, 2) : null,
-            dock ? page.Dock : null);
+        return ThemePreview.Render(loaded, page, Width, Height, dock);
     }
 
     private static List<WidgetLayoutItem> Layout(SamplePage page)

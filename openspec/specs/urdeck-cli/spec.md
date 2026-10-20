@@ -1,7 +1,8 @@
 # urdeck-cli Specification
 
 ## Purpose
-Defines the `urdeck-cli` command line tool: checking a background folder and rendering it to a picture without a deck,
+Defines the `urdeck-cli` command line tool: checking a background folder or a theme folder, rendering either to a picture and
+starting a new one without a deck (`shader` and `theme` commands),
 the formats its findings are printed in, and the exit codes a script or a store's CI relies on.
 ## Requirements
 ### Requirement: A Portable Tool

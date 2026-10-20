@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "urdeck-cli",
+          "version": "<version>",
+          "informationUri": "https://github.com/UrDeck/urdeck",
+          "rules": [
+            {
+              "id": "SHADER041",
+              "shortDescription": {
+                "text": "The manifest has no description."
+              }
+            },
+            {
+              "id": "SHADER051",
+              "shortDescription": {
+                "text": "A sample file does not exist."
+              }
+            },
+            {
+              "id": "SHADER060",
+              "shortDescription": {
+                "text": "The shader and the manifest disagree about a parameter's kind."
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "SHADER060",
+          "level": "note",
+          "message": {
+            "text": "'tint' is layout(color) in the shader and kind number in the manifest; the manifest wins."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mixed/manifest.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SHADER041",
+          "level": "warning",
+          "message": {
+            "text": "the manifest has no description."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mixed/manifest.json"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SHADER051",
+          "level": "error",
+          "message": {
+            "text": "the sample file 'sample.png' does not exist."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mixed/sample.png"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

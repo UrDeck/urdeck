@@ -18,7 +18,21 @@ internal static class ColorContrast
 
     private static double Ratio(double a, double b) => (Math.Max(a, b) + 0.05) / (Math.Min(a, b) + 0.05);
 
-    private static double Luminance(SKColor c) =>
+    /// <summary>The WCAG contrast ratio of two colours, from 1 to 21, both taken as opaque.</summary>
+    public static double Ratio(SKColor a, SKColor b) => Ratio(Luminance(a), Luminance(b));
+
+    /// <summary>
+    /// <paramref name="top"/> drawn over <paramref name="under"/>, opaque: what a translucent colour looks like on the colour
+    /// beneath it.
+    /// </summary>
+    public static SKColor Over(SKColor top, SKColor under)
+    {
+        double alpha = top.Alpha / 255.0;
+        byte Mix(byte over, byte below) => (byte)Math.Round((over * alpha) + (below * (1 - alpha)));
+        return new SKColor(Mix(top.Red, under.Red), Mix(top.Green, under.Green), Mix(top.Blue, under.Blue));
+    }
+
+    public static double Luminance(SKColor c) =>
         0.2126 * Linear(c.Red) + 0.7152 * Linear(c.Green) + 0.0722 * Linear(c.Blue);
 
     private static double Linear(byte channel)

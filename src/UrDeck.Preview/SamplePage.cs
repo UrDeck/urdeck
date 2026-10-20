@@ -11,14 +11,14 @@ using UrDeck.Widgets.Shortcut;
 using UrDeck.Widgets.Stats;
 using UrDeck.Widgets.Weather;
 
-namespace UrDeck.Engine.Tests.Support;
+namespace UrDeck.Preview;
 
 /// <summary>
 /// The page every picture of a theme starts from: a clock (4x1), two stats cards (2x1: CPU, GPU), a weather card (4x2) and
 /// four shortcuts, with fixed readings and a fixed time, so rendering it twice gives the same bytes. The shortcuts have no
 /// icon yet, so they draw their letter tile.
 /// </summary>
-internal sealed class SamplePage : IDisposable
+public sealed class SamplePage : IDisposable
 {
     /// <summary>13 October 2026, 21:47:32.</summary>
     public static readonly DateTime Time = new(2026, 10, 13, 21, 47, 32, DateTimeKind.Local);

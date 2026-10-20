@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- urdeck-cli: checks and renders a background folder without a deck. GPL-3.0-or-later (it links the engine); running it
+  <!-- urdeck-cli: checks and renders a background or a theme folder without a deck. GPL-3.0-or-later (it links the engine); running it
        on a shader does not change the shader's licence (docs/backgrounds.md). Uses only the engine's public API: it is
        deliberately not in the engine's InternalsVisibleTo. -->
   <PropertyGroup>
@@ -11,7 +11,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>urdeck-cli</ToolCommandName>
     <PackageId>urdeck-cli</PackageId>
-    <Description>Checks and renders UrDeck background folders (shader validate, shader render) without a deck.</Description>
+    <Description>Checks, renders and starts UrDeck background and theme folders (shader validate|render|init, theme validate|render|init|schema) without a deck.</Description>
     <Version>0.1.0</Version>
   </PropertyGroup>
 
@@ -23,6 +23,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\UrDeck.Engine\UrDeck.Engine.csproj" />
+    <!-- The sample page and its renderer, for theme render; brings the four first-party widgets into the tool. -->
+    <ProjectReference Include="..\..\src\UrDeck.Preview\UrDeck.Preview.csproj" />
+  </ItemGroup>
+
+  <!-- The published theme schema, so that `theme schema` prints the file the product publishes and not a copy. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\docs\schemas\v2\theme.json" LogicalName="UrDeck.Cli.theme.schema.json" Link="theme.schema.json" />
   </ItemGroup>
 
   <ItemGroup>

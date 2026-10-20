@@ -71,6 +71,7 @@ measurement so far is from one panel and one NVIDIA GPU, and that is the largest
 - Backgrounds: image, video, painted visualization (item 9). Image and painted (shader) backgrounds are implemented in
   `backgrounds`; a video file, per-page backgrounds and a guard for heavy shaders are still open.
   Backgrounds as folders with a manifest, a lint and the `urdeck-cli` tool are planned next (item 9).
+  The tool also checks themes (`theme validate`, `render`, `init`, `schema`); a later `urdeck-cli check <repository>` that classifies and checks a whole repository of themes, backgrounds and plugins is a direction, not planned work (`openspec/changes/theme-cli/design.md`).
 - The web page widget, a hosted widget kind (item 7). Also public SDK API.
 - Media / now playing (item 7).
 - The motion level as a theme or page setting, and the later theme knobs (items 5 and 14).

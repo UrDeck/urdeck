@@ -79,6 +79,24 @@ internal sealed class Workspace : IDisposable
         return folder;
     }
 
+    /// <summary>
+    /// A copy of a theme folder of the engine's lint fixtures (<c>tests/UrDeck.Engine.Tests/Fixtures/lint/&lt;case&gt;/&lt;side&gt;</c>) in this
+    /// workspace, named <paramref name="name"/> (the theme's name is its folder's), under <paramref name="parent"/>.
+    /// </summary>
+    public string Theme(string fixture, string name, string side = "fail", string parent = "")
+    {
+        string? directory = AppContext.BaseDirectory;
+        while (directory != null && !File.Exists(Path.Combine(directory, "urdeck.slnx")))
+            directory = Path.GetDirectoryName(directory);
+        string from = Path.Combine(directory ?? throw new InvalidOperationException("urdeck.slnx was not found above the tests."),
+            "tests", "UrDeck.Engine.Tests", "Fixtures", "lint", fixture, side);
+        string to = Path.Combine(Root, parent, name);
+        Directory.CreateDirectory(to);
+        foreach (string file in Directory.EnumerateFiles(from))
+            File.Copy(file, Path.Combine(to, Path.GetFileName(file)), overwrite: true);
+        return to;
+    }
+
     public static SKBitmap Decode(string path) => SKBitmap.Decode(path);
 
     /// <summary>The repository's <c>src/UrDeck.Engine/Backgrounds/Builtin</c> directory, found from the test's own location.</summary>

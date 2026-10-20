@@ -30,12 +30,12 @@ internal static class ValidateRunner
         return fails ? ExitCodes.Findings : ExitCodes.Ok;
     }
 
-    private static BackgroundReport Check(string folder)
+    private static SubjectReport Check(string folder)
     {
         string name = Path.GetFileName(folder);
         try
         {
-            return new BackgroundReport(name, folder, ShaderLint.Check(new DirectoryBackgroundSource(folder), name));
+            return SubjectReport.Background(name, folder, ShaderLint.Check(new DirectoryBackgroundSource(folder), name));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

@@ -2,30 +2,38 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using System.Text.RegularExpressions;
-using UrDeck.Engine.Diagnostics;
 
 namespace UrDeck.Engine.Themes;
 
 /// <summary>
 /// The checks <see cref="ThemeDefinition.Sanitize"/> runs on a theme's values. Each one returns the value when it is
-/// valid, and otherwise null (a list may come back shortened) after one warning naming the theme and the key, so that the
-/// merge takes the default's.
+/// valid, and otherwise null (a list may come back shortened) after one finding naming the key, so that the merge takes the
+/// default's. The findings go to the sink: the log in the deck, a list in the tool.
 /// </summary>
-internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>? reported = null)
+internal sealed partial class ThemeValueCheck(IThemeFindings sink, HashSet<string>? reported = null)
 {
     /// <summary>Keys that were already reported before the check ran (a value of the wrong kind), so that nothing reports them twice.</summary>
     private readonly HashSet<string> _reported = reported ?? [];
 
     private static readonly string[] IconTints = ["accent", "accent2", "text", "ramp", "none"];
 
+    /// <summary>Checks that log to the deck's log for the theme of that name.</summary>
+    public ThemeValueCheck(string themeName, HashSet<string>? reported = null)
+        : this(new LogFindings(themeName), reported)
+    {
+    }
+
     [GeneratedRegex("^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")]
     private static partial Regex ColorPattern();
+
+    /// <summary>A warning about <paramref name="key"/> for a value that needs a check of its own.</summary>
+    public void Warn(string code, string? key, string message) => sink.Report(new ThemeFinding(code, ThemeSeverity.Warning, key, message));
 
     public string? Color(string path, string? value)
     {
         if (value == null || ColorPattern().IsMatch(value))
             return value;
-        UrDeckLog.Warn($"Theme '{themeName}': {path} '{value}' is not #RRGGBB or #AARRGGBB; using the default.");
+        Warn(ThemeCodes.BadColor, path, $"{path} '{value}' is not #RRGGBB or #AARRGGBB; using the default.");
         return null;
     }
 
@@ -36,11 +44,9 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
             return null;
         if (value.Count is >= 1 and <= 4 && value.All(c => c != null && ColorPattern().IsMatch(c)))
             return value;
-        Warn($"Theme '{themeName}': {path} must be one to four colours (#RRGGBB or #AARRGGBB); the palette is derived from the theme's colours.");
+        Warn(ThemeCodes.BadList, path, $"{path} must be one to four colours (#RRGGBB or #AARRGGBB); the palette is derived from the theme's colours.");
         return null;
     }
-
-    private static void Warn(string message) => UrDeckLog.Warn(message);
 
     public double? Number(string path, double? value, double min, double max)
     {
@@ -48,7 +54,7 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
             return null;
         if (double.IsFinite(value.Value) && value >= min && value <= max)
             return value;
-        UrDeckLog.Warn($"Theme '{themeName}': {path} {value} is outside {min}..{max}; using the default.");
+        Warn(ThemeCodes.OutOfRange, path, $"{path} {value} is outside {min}..{max}; using the default.");
         return null;
     }
 
@@ -61,7 +67,7 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
             return null;
         if (value >= min && value <= max)
             return value;
-        UrDeckLog.Warn($"Theme '{themeName}': {path} {value} is outside {min}..{max}; using the default.");
+        Warn(ThemeCodes.OutOfRange, path, $"{path} {value} is outside {min}..{max}; using the default.");
         return null;
     }
 
@@ -73,7 +79,7 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
         foreach (string name in names)
             if (name.Equals(value.Trim(), StringComparison.OrdinalIgnoreCase))
                 return name;
-        UrDeckLog.Warn($"Theme '{themeName}': {path} '{value}' must be one of {string.Join(", ", names.Select(n => $"'{n}'"))}; using the default.");
+        Warn(ThemeCodes.NotOneOf, path, $"{path} '{value}' must be one of {string.Join(", ", names.Select(n => $"'{n}'"))}; using the default.");
         return null;
     }
 
@@ -84,7 +90,7 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
             return null;
         if (value.Count >= min && value.Count <= max && value.All(c => c != null && ColorPattern().IsMatch(c)))
             return value;
-        UrDeckLog.Warn($"Theme '{themeName}': {path} must be {Range(min, max)} colours (#RRGGBB or #AARRGGBB); using the default.");
+        Warn(ThemeCodes.BadList, path, $"{path} must be {Range(min, max)} colours (#RRGGBB or #AARRGGBB); using the default.");
         return null;
     }
 
@@ -95,7 +101,7 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
             return null;
         if (value.Count >= min && value.Count <= max && value.All(s => s != null))
             return value;
-        UrDeckLog.Warn($"Theme '{themeName}': {path} must be {Range(min, max)} strings; using the default.");
+        Warn(ThemeCodes.BadList, path, $"{path} must be {Range(min, max)} strings; using the default.");
         return null;
     }
 
@@ -106,7 +112,7 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
             return null;
         if (value.Count == count && value.All(n => double.IsFinite(n) && n >= min && n <= max))
             return value;
-        UrDeckLog.Warn($"Theme '{themeName}': {path} must be {count} numbers between {min} and {max}; using the default.");
+        Warn(ThemeCodes.BadList, path, $"{path} must be {count} numbers between {min} and {max}; using the default.");
         return null;
     }
 
@@ -129,7 +135,7 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
                 kept.Add(name);
         }
         if (unknown.Count > 0)
-            UrDeckLog.Warn($"Theme '{themeName}': {path} has {string.Join(", ", unknown.Select(u => $"'{u}'"))}, not one of {string.Join(", ", names.Select(n => $"'{n}'"))}; dropped.");
+            Warn(ThemeCodes.NotOneOf, path, $"{path} has {string.Join(", ", unknown.Select(u => $"'{u}'"))}, not one of {string.Join(", ", names.Select(n => $"'{n}'"))}; dropped.");
         return kept;
     }
 
@@ -143,7 +149,7 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
             return trimmed.ToLowerInvariant();
         if (ColorPattern().IsMatch(trimmed))
             return trimmed;
-        UrDeckLog.Warn($"Theme '{themeName}': {path} '{value}' must be 'accent', 'accent2', 'text', 'ramp', 'none' or a colour (#RRGGBB or #AARRGGBB); using the default.");
+        Warn(ThemeCodes.NotOneOf, path, $"{path} '{value}' must be 'accent', 'accent2', 'text', 'ramp', 'none' or a colour (#RRGGBB or #AARRGGBB); using the default.");
         return null;
     }
 
@@ -151,20 +157,23 @@ internal sealed partial class ThemeValueCheck(string themeName, HashSet<string>?
     public void Missing(string path, string member)
     {
         if (!_reported.Contains($"{path}.{member}"))
-            UrDeckLog.Warn($"Theme '{themeName}': {path} needs '{member}'; ignoring it.");
+            Warn(ThemeCodes.MissingMember, path, $"{path} needs '{member}'; ignoring it.");
     }
 
     /// <summary>A value that has the wrong kind of JSON, found before it could be read.</summary>
     public void WrongKind(string path, string raw, string expected)
     {
         _reported.Add(path);
-        UrDeckLog.Warn($"Theme '{themeName}': {path} {raw} must be {expected}; using the default.");
+        Warn(ThemeCodes.WrongType, path, $"{path} {raw} must be {expected}; using the default.");
     }
 
-    /// <summary>A rule between values that the file alone decides.</summary>
-    public void Rule(string message) => UrDeckLog.Warn($"Theme '{themeName}': {message}");
+    /// <summary>A rule between values that the file alone decides: <paramref name="code"/> is the rule's, <paramref name="key"/> the value it is about.</summary>
+    public void Rule(string code, string? key, string message) => Warn(code, key, message);
 
-    public void Note(string message) => UrDeckLog.Info($"Theme '{themeName}': {message}");
+    public void Note(string code, string? key, string message) => sink.Report(new ThemeFinding(code, ThemeSeverity.Info, key, message));
+
+    /// <summary>A finding the deck logs in its own words, not in the <c>Theme 'name': </c> form (see <see cref="ThemeLogForm"/>).</summary>
+    internal void Report(ThemeFinding finding) => sink.Report(finding);
 
     private static string Range(int min, int max) =>
         max == int.MaxValue ? $"at least {min}" : min == max ? $"exactly {min}" : $"{min} to {max}";

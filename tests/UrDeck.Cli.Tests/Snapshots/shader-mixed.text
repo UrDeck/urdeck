@@ -1,0 +1,4 @@
+mixed/manifest.json: info SHADER060: 'tint' is layout(color) in the shader and kind number in the manifest; the manifest wins.
+mixed/manifest.json: warning SHADER041: the manifest has no description.
+mixed/sample.png: error SHADER051: the sample file 'sample.png' does not exist.
+1 background checked: 1 error, 1 warning, 1 remark.

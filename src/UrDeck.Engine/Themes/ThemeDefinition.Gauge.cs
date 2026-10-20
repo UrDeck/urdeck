@@ -1,20 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
-using UrDeck.Engine.Diagnostics;
 using UrDeck.Sdk.Components;
 
 namespace UrDeck.Engine.Themes;
 
 public sealed partial class ThemeDefinition
 {
-    private void SanitizeGauge(ThemeValueCheck check, string themeName)
+    private void SanitizeGauge(ThemeValueCheck check)
     {
         if (Gauge is not { } gauge)
             return;
         if (gauge.Style is { } style && !ThemeGaugeDefinition.IsStyle(style))
         {
-            UrDeckLog.Warn($"Theme '{themeName}': gauge.style '{style}' must be {ThemeGaugeDefinition.StyleNames}; using the default.");
+            check.Warn(ThemeCodes.NotOneOf, "gauge.style", $"gauge.style '{style}' must be {ThemeGaugeDefinition.StyleNames}; using the default.");
             gauge.Style = null;
         }
         gauge.SanitizeFormat2(check, "gauge");
