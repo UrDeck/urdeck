@@ -15,10 +15,10 @@
 
 ## 3. Sources and the shared loader
 
-- [ ] 3.1 Add `IThemeSource`, `DirectoryThemeSource` and `EmbeddedThemeSource`, with the containment test `ThemeStore` uses (a backslash is a separator on every platform)
-- [ ] 3.2 Move the body of `ThemeStore.LoadUser` into `ThemeLoader.Load(source, baseline, sink)` and call it from `LoadUser`; the existing `ThemeStore` tests stay as they are and pass before anything else is added
-- [ ] 3.3 Test: for each built-in theme the fast path of `LoadBuiltIn` and the loader over `EmbeddedThemeSource` give the same definition
-- [ ] 3.4 Test: a folder named like a built-in is read as the folder; a font path with `..\` or an absolute path is refused on Windows and on Linux and no file outside the folder is opened
+- [x] 3.1 Add `IThemeSource`, `DirectoryThemeSource` and `EmbeddedThemeSource`, with the containment test `ThemeStore` uses (a backslash is a separator on every platform)
+- [x] 3.2 Move the body of `ThemeStore.LoadUser` into `ThemeLoader.Load(source, baseline, sink)` and call it from `LoadUser`; the existing `ThemeStore` tests stay as they are and pass before anything else is added
+- [x] 3.3 Test: for each built-in theme the fast path of `LoadBuiltIn` and the loader over `EmbeddedThemeSource` give the same definition
+- [x] 3.4 Test: a folder named like a built-in is read as the folder; a font path with `..\` or an absolute path is refused on Windows and on Linux and no file outside the folder is opened
 
 ## 4. `ThemeLint`
 

@@ -94,67 +94,7 @@ public sealed class ThemeStore(string themesDirectory)
             return null;
 
         string folder = Path.GetFullPath(Path.Combine(themesDirectory, name));
-        string settings = Path.Combine(folder, SettingsFileName);
-        if (!File.Exists(settings))
-            return null;
-
-        var sink = findings ?? new LogFindings(name);
-        ThemeDefinition user;
-        HashSet<string> reported;
-        try
-        {
-            user = ThemeLenientJson.Read(File.ReadAllText(settings), sink, UrDeckJson.Options, out reported);
-        }
-        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
-        {
-            sink.Report(new ThemeFinding(ThemeCodes.FileUnusable, ThemeSeverity.Error, null, $"could not be read from {settings} and is skipped: {ex.Message}") { Form = ThemeLogForm.Space });
-            return null;
-        }
-
-        user.Sanitize(sink, reported);
-
-        // One open function per folder: the resolver reads a file once per resolve, keyed by the function and the name.
-        Func<string, Stream?> open = file => OpenThemeFile(folder, file);
-        ThemeFont? font = null;
-        if (user.Typography?.Font is { } spec)
-        {
-            if (IsFontFile(spec) && !IsInside(folder, ResolveIn(folder, spec)))
-            {
-                sink.Report(new ThemeFinding(ThemeCodes.FontFile, ThemeSeverity.Error, "typography.font", $"font '{spec}' leaves the theme folder and is ignored."));
-                user.Typography.Font = null;
-            }
-            else
-            {
-                font = new ThemeFont(spec, open);
-            }
-        }
-
-        var roleFonts = new Dictionary<TextRole, ThemeFont>();
-        if (user.Typography?.Fonts is { } fonts)
-        {
-            fonts.Value = RoleFont(sink, folder, open, TextRole.Value, fonts.Value, roleFonts);
-            fonts.Unit = RoleFont(sink, folder, open, TextRole.Unit, fonts.Unit, roleFonts);
-            fonts.Label = RoleFont(sink, folder, open, TextRole.Label, fonts.Label, roleFonts);
-        }
-
-        var merged = user.MergeOver(baseline.Definition);
-        merged.CheckRules(sink);
-        return new LoadedTheme(name, merged, font ?? baseline.Font, folder) { RoleFonts = roleFonts, Findings = sink };
-    }
-
-    /// <summary>Adds a role's font to <paramref name="roleFonts"/>, or refuses a path that leaves the folder; returns the spec kept.</summary>
-    private static string? RoleFont(
-        IThemeFindings sink, string folder, Func<string, Stream?> open, TextRole role, string? spec, Dictionary<TextRole, ThemeFont> roleFonts)
-    {
-        if (string.IsNullOrWhiteSpace(spec))
-            return null;
-        if (IsFontFile(spec) && !IsInside(folder, ResolveIn(folder, spec)))
-        {
-            sink.Report(new ThemeFinding(ThemeCodes.FontFile, ThemeSeverity.Error, $"typography.fonts.{RoleName(role)}", $"font '{spec}' for the {RoleName(role)} role leaves the theme folder and is ignored."));
-            return null;
-        }
-        roleFonts[role] = new ThemeFont(spec, open);
-        return spec;
+        return ThemeLoader.Load(new DirectoryThemeSource(folder, name), baseline, findings ?? new LogFindings(name));
     }
 
     internal static string RoleName(TextRole role) => role.ToString().ToLowerInvariant();
@@ -186,12 +126,6 @@ public sealed class ThemeStore(string themesDirectory)
         spec.EndsWith(".ttf", StringComparison.OrdinalIgnoreCase)
         || spec.EndsWith(".otf", StringComparison.OrdinalIgnoreCase)
         || spec.EndsWith(".ttc", StringComparison.OrdinalIgnoreCase);
-
-    private static FileStream? OpenThemeFile(string folder, string fileName)
-    {
-        string path = ResolveIn(folder, fileName);
-        return IsInside(folder, path) && File.Exists(path) ? File.OpenRead(path) : null;
-    }
 
     // A backslash is a separator in a theme file on every platform, so ..\x cannot slip past the check where it is not one.
     internal static string ResolveIn(string folder, string relative) =>
