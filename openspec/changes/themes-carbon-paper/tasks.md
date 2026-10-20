@@ -26,7 +26,7 @@
 - [x] 4.3 Apply the owner's adjustments to `carbon.json` and `paper.json`; keep a table of key, draft value, final value and reason for the pull request; update any test assertion a changed value moves, with the reason
 - [x] 4.4 Decide Carbon's `meta.description` wording about load colour (design 4); confirm `gauge.colorBy` stays `accent` or record why not
 - [x] 4.5 Check whether Paper draws accent-coloured text anywhere a user must read it; if so darken the accent to at least 4.5:1 on the card fill and record it
-- [ ] 4.6 Redraw the goldens after tuning (repeat 3.1) and get the owner's approval of the panel look
+- [x] 4.6 Redraw the goldens after tuning (repeat 3.1) and get the owner's approval of the panel look
 
 ## 5. Contrast record
 
@@ -45,7 +45,7 @@
 - [x] 7.1 `dotnet build urdeck.slnx -c Release` with 0 warnings; `dotnet test urdeck.slnx -c Release`; `dotnet format urdeck.slnx --severity warn --verify-no-changes`; the Linux test projects on WSL
 - [x] 7.2 `openspec validate themes-carbon-paper --strict`
 - [x] 7.3 Update `docs/design/look-and-feel/STATUS.md`: the PR 12 row done; Carbon's pattern waits for `page-pattern` (which redraws Carbon's goldens and gets a second panel look); follow-ups found while tuning (for example a fill colour that follows the status level)
-- [ ] 7.4 Pull request `feat(theme): Carbon and Paper built-in themes` with the tuning table, the contrast table and side-by-side pictures with the board
+- [x] 7.4 Pull request `feat(theme): Carbon and Paper built-in themes` with the tuning table, the contrast table and side-by-side pictures with the board
 
 ## 8. Panel tuning findings
 
