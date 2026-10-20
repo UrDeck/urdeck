@@ -256,3 +256,11 @@ Recorded as they came up; each says what was decided and why, so the next reader
   What each theme change needs: ship the font file and its licence with the theme (all six); drop `icons.set` or wait for
   `theme-icons` (all six set `outline`, the same as Carbon and Paper did); Pop has to lighten or darken tint 4, or change its
   text colour on that tint; Prism's reach is a warning for the author and an information line in the deck, to be kept or fixed.
+- **The starter from `theme init` has one `THEME080` warning.** The spec asks for an empty `description` "for the author to
+  fill in", and the lint asks for a description, so `init` then `validate` gives exit code 0 (no error) and one warning that
+  says what to write. Task 7.4's "clean for the starter" reads as "no error"; `--from` of every built-in is clean, which
+  the test checks with warnings counted. Kept as the spec says: the warning is the reminder.
+- **`theme render` prints the lint's findings, not only the loader's.** The picture is drawn from the loader's theme, but the
+  findings on the error stream are the whole lint (contrast and fonts included), so the author sees the same lines as
+  from `validate`; a theme the loader cannot read (`THEME001`, or a wrong kind in a format 1 value) gets no picture and
+  exit code 1. The golden comparison runs on Windows only (`[WindowsGlyphTheory]`, as the engine's golden tests).

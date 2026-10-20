@@ -65,7 +65,7 @@ internal sealed class LogFindings(string themeName) : IThemeFindings
 }
 
 /// <summary>A sink that keeps every finding, in the order they were reported.</summary>
-internal sealed class CollectedFindings : IThemeFindings
+public sealed class CollectedFindings : IThemeFindings
 {
     private readonly List<ThemeFinding> _found = [];
 

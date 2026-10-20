@@ -10,4 +10,11 @@
     <ProjectReference Include="..\..\tools\UrDeck.Cli\UrDeck.Cli.csproj" />
   </ItemGroup>
 
+  <!-- theme render is compared with the pictures the engine's golden tests keep, by the same comparer. -->
+  <ItemGroup>
+    <Compile Include="..\UrDeck.Engine.Tests\Support\GoldenImage.cs" Link="Support\GoldenImage.cs" />
+    <Compile Include="..\UrDeck.Engine.Tests\Support\WindowsOnlyAttributes.cs" Link="Support\WindowsOnlyAttributes.cs" />
+    <Content Include="..\UrDeck.Engine.Tests\Goldens\**\*" Link="Goldens\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

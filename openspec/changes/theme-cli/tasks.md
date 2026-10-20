@@ -48,12 +48,12 @@
 
 ## 7. `theme render`, `init`, `schema`
 
-- [ ] 7.1 `theme render <folder>|--builtin <name> -o <file>` with `--page`, `--size`, `--fail-on-warnings`; findings to the error stream; no file when the theme cannot be read
-- [ ] 7.2 Test: a built-in rendered with the golden size and page equals the golden picture where the platform draws text the same way (`[WindowsGlyphFact]`), and renders to the same bytes twice on both platforms
-- [ ] 7.3 `theme init <name>` with `--output` and `--from`: starter content, the self-contained copy of a built-in with its fonts and licences, no overwrite, the name rule
-- [ ] 7.4 Test: `init` then `validate` is clean for the starter and for `--from` of every built-in; an existing folder is left as it is
-- [ ] 7.5 `theme schema` and `--output`: embed `docs/schemas/v2/theme.json` as a linked resource; test that the printed text equals the file on disk
-- [ ] 7.6 Update the tool's `Description` in the project file and the root command's help
+- [x] 7.1 `theme render <folder>|--builtin <name> -o <file>` with `--page`, `--size`, `--fail-on-warnings`; findings to the error stream; no file when the theme cannot be read
+- [x] 7.2 Test: a built-in rendered with the golden size and page equals the golden picture where the platform draws text the same way (`[WindowsGlyphFact]`), and renders to the same bytes twice on both platforms
+- [x] 7.3 `theme init <name>` with `--output` and `--from`: starter content, the self-contained copy of a built-in with its fonts and licences, no overwrite, the name rule
+- [x] 7.4 Test: `init` then `validate` is clean for the starter and for `--from` of every built-in; an existing folder is left as it is
+- [x] 7.5 `theme schema` and `--output`: embed `docs/schemas/v2/theme.json` as a linked resource; test that the printed text equals the file on disk
+- [x] 7.6 Update the tool's `Description` in the project file and the root command's help
 
 ## 8. CI, docs and bookkeeping
 
