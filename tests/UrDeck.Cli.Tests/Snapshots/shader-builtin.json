@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "tool": {
+    "name": "urdeck-cli",
+    "version": "<version>"
+  },
+  "backgrounds": [
+    {
+      "name": "aurora",
+      "folder": "builtin/aurora",
+      "diagnostics": []
+    },
+    {
+      "name": "contour",
+      "folder": "builtin/contour",
+      "diagnostics": []
+    },
+    {
+      "name": "embers",
+      "folder": "builtin/embers",
+      "diagnostics": []
+    },
+    {
+      "name": "equalizer",
+      "folder": "builtin/equalizer",
+      "diagnostics": []
+    },
+    {
+      "name": "gradient",
+      "folder": "builtin/gradient",
+      "diagnostics": []
+    },
+    {
+      "name": "horizon",
+      "folder": "builtin/horizon",
+      "diagnostics": []
+    },
+    {
+      "name": "julia",
+      "folder": "builtin/julia",
+      "diagnostics": []
+    },
+    {
+      "name": "nebula",
+      "folder": "builtin/nebula",
+      "diagnostics": []
+    },
+    {
+      "name": "plasma",
+      "folder": "builtin/plasma",
+      "diagnostics": []
+    },
+    {
+      "name": "plotter",
+      "folder": "builtin/plotter",
+      "diagnostics": []
+    },
+    {
+      "name": "ripple",
+      "folder": "builtin/ripple",
+      "diagnostics": []
+    },
+    {
+      "name": "shapes",
+      "folder": "builtin/shapes",
+      "diagnostics": []
+    },
+    {
+      "name": "spectrum",
+      "folder": "builtin/spectrum",
+      "diagnostics": []
+    },
+    {
+      "name": "streams",
+      "folder": "builtin/streams",
+      "diagnostics": []
+    },
+    {
+      "name": "vortex",
+      "folder": "builtin/vortex",
+      "diagnostics": []
+    },
+    {
+      "name": "warpgate",
+      "folder": "builtin/warpgate",
+      "diagnostics": []
+    }
+  ],
+  "summary": {
+    "errors": 0,
+    "warnings": 0,
+    "infos": 0
+  }
+}

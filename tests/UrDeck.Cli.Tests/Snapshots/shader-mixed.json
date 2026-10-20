@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "tool": {
+    "name": "urdeck-cli",
+    "version": "<version>"
+  },
+  "backgrounds": [
+    {
+      "name": "mixed",
+      "folder": "mixed",
+      "diagnostics": [
+        {
+          "code": "SHADER060",
+          "severity": "info",
+          "message": "'tint' is layout(color) in the shader and kind number in the manifest; the manifest wins.",
+          "file": "mixed/manifest.json"
+        },
+        {
+          "code": "SHADER041",
+          "severity": "warning",
+          "message": "the manifest has no description.",
+          "file": "mixed/manifest.json"
+        },
+        {
+          "code": "SHADER051",
+          "severity": "error",
+          "message": "the sample file 'sample.png' does not exist.",
+          "file": "mixed/sample.png"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "errors": 1,
+    "warnings": 1,
+    "infos": 1
+  }
+}
