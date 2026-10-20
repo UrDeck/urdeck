@@ -30,8 +30,8 @@
 - [x] 4.6 Contrast: `THEME060` to `THEME062` with the card fill, its gradient stops and each card tint composited over `colors.background`; the message says what was assumed
 - [x] 4.7 `THEME054` from the underlay's own reach routine at the 1100 pixel panel width; `THEME080` for missing `meta`
 - [x] 4.8 Tests: a minimal failing folder and a passing one for every code in the `theme-lint` spec, under `tests/UrDeck.Engine.Tests/Fixtures/lint/` (the same folders are used by the CLI tests in section 6)
-- [ ] 4.9 Run the lint on all five built-in themes, with warnings counted. If any finding appears, stop and take it to the owner (design, Risks) before changing a theme or a rule; tick this only when `--builtin --fail-on-warnings` would be clean
-- [ ] 4.10 Run the lint on the six fixture themes (Prism, Obsidian, Ember, Blueprint, Pop, Rigline) and record the findings in the design's "Findings during apply"; the theme changes that follow will need them
+- [x] 4.9 Run the lint on all five built-in themes, with warnings counted. If any finding appears, stop and take it to the owner (design, Risks) before changing a theme or a rule; tick this only when `--builtin --fail-on-warnings` would be clean
+- [x] 4.10 Run the lint on the six fixture themes (Prism, Obsidian, Ember, Blueprint, Pop, Rigline) and record the findings in the design's "Findings during apply"; the theme changes that follow will need them
 
 ## 5. The report model
 

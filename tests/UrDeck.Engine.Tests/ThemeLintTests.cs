@@ -314,6 +314,21 @@ public sealed class ThemeLintTests : IDisposable
         Assert.Contains("description, mode", finding.Message, StringComparison.Ordinal);
     }
 
+    public static TheoryData<string> BuiltIns()
+    {
+        var data = new TheoryData<string>();
+        foreach (string name in ThemeStore.BuiltInNames)
+            data.Add(name);
+        return data;
+    }
+
+    [Theory]
+    [MemberData(nameof(BuiltIns))]
+    public void A_built_in_theme_checks_clean_as_the_product_ships_it(string name)
+    {
+        Assert.Empty(ThemeLint.Check(new EmbeddedThemeSource(name)));
+    }
+
     [Fact]
     public void The_same_content_gives_the_same_findings_from_a_folder_and_from_the_product()
     {

@@ -215,7 +215,7 @@ Recorded as they came up; each says what was decided and why, so the next reader
   and are tested directly; the log snapshot cannot cover the line.
 - **The capsule line is not in the log snapshot.** The sample page has no one-cell card that is not square, so no theme
   rendered by the snapshot reaches it. `ThemeFindingTests` checks its code directly.
-- **Task 4.9 stopped the run: `THEME044` on Carbon and Paper.** The lint on the five built-in themes finds nothing in
+- **Task 4.9 stopped the run: `THEME044` on Carbon and Paper (resolved by option (b): `"set": "outline"` removed from both; `theme-icons` re-adds it, see `STATUS.md` PR 10).** The lint on the five built-in themes finds nothing in
   `default-dark`, `default-light` and `glass`, and one warning in each of the two themes that came after the plan:
   `icons.set 'outline' is not an icon set that exists`. Carbon and Paper both set `"icons": { "set": "outline" }`, and the
   schema describes `outline` as the built-in set that missing keys fall back to, but no icon set is shipped yet, so the
@@ -241,3 +241,18 @@ Recorded as they came up; each says what was decided and why, so the next reader
   `ResolvedCardStyle.Resolve` with a sink of its own, for `THEME023`, `THEME054` and `THEME055`. The resolver's own
   `THEME020` ("font could not be loaded") is dropped there: the lint checks font files itself, and a font named by family
   would otherwise give a different finding on each machine.
+- **Task 4.10: the lint on the six fixture themes** (they are drafts in `tests/UrDeck.Engine.Tests/Fixtures/themes`, so findings
+  are expected; the theme changes that follow must clear them before their theme ships):
+
+  | Theme | Findings |
+  |---|---|
+  | Blueprint | `THEME020` font `IBMPlexMono-Regular.ttf` not in the folder; `THEME044` `icons.set` |
+  | Ember | `THEME020` font `BarlowCondensed-Bold.ttf` not in the folder; `THEME044` |
+  | Obsidian | `THEME020` for `Jost-Variable.ttf` (font, unit, label roles) and `BodoniModa-Variable.ttf` (value role); `THEME044` |
+  | Pop | `THEME020` for `Archivo-Variable.ttf` (font, value, unit); `THEME044`; **`THEME061` `colors.cardTints[4]` `#3b5bff` under text `#111111` is 3.7:1** |
+  | Prism | `THEME020` font `BricolageGrotesque-Variable.ttf`; `THEME044`; `THEME054` shadow reach 193 px limited to 25 px (the owner accepted this one in `card-chrome-front`) |
+  | Rigline | `THEME020` font `ChakraPetch-Bold.ttf`; `THEME044` |
+
+  What each theme change needs: ship the font file and its licence with the theme (all six); drop `icons.set` or wait for
+  `theme-icons` (all six set `outline`, the same as Carbon and Paper did); Pop has to lighten or darken tint 4, or change its
+  text colour on that tint; Prism's reach is a warning for the author and an information line in the deck, to be kept or fixed.
