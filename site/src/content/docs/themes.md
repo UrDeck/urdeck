@@ -1,17 +1,19 @@
 ---
 title: Themes
-description: The three built-in themes and how to make your own.
+description: The five built-in themes and how to make your own.
 section: Look
 order: 20
 ---
 
-A theme decides how every card on a page looks; widgets only draw content. Three themes are built in:
+A theme decides how every card on a page looks; widgets only draw content. Five themes are built in:
 
 - `default-dark`, the default
 - `default-light`
 - `glass`, frosted translucent cards over a blue background, made to show a [background](/docs/backgrounds/) through them
+- `carbon`, near-black with hairline cards and corner marks, mono numerals and one phosphor accent. It uses Instrument Sans and JetBrains Mono and defaults to the `contour` background.
+- `paper`, the daylight option: warm off-white cards with soft shadows and one vermilion accent. It uses Instrument Sans and JetBrains Mono and defaults to the `contour` background.
 
-Choose one with the `theme` key in `urdeck-config.json`. Saving the file applies it; no restart.
+Choose one with the `theme` key in `urdeck-config.json`. For example `"theme": "carbon"` or `"theme": "paper"`. Saving the file applies it; no restart.
 
 ## Your own
 
@@ -45,7 +47,7 @@ Format 2 adds optional values for card chrome (chamfered corners, shadows, dashe
 fonts, more gauge styles, icons and a background of its own. The typography values are drawn today: a font per role (values,
 units, labels) with a fallback to the theme's font, the optical size of fonts that have one (`"opticalSize": "auto"`), upper- or
 lower-case labels and titles, letter spacing, slanted values, a gradient fill and a glow behind values. A weight the font
-cannot make is written to `urdeck.log` once. The gauge styles `meter`, `tach`, `marker` and `thickbar` and the gauge values (`sweep`, `segments`, `ticks`, `scale`, `redline`, `marker`, `gradient`, `glow`, `track`, `outline`, `layout`, `labelPosition`) are drawn too. The card's shape, fill and border are drawn today too: chamfered corners
+cannot make is written to `urdeck.log` once. The gauge styles `meter`, `tach`, `marker` and `thickbar` and the gauge values (`sweep`, `segments`, `ticks`, `scale`, `redline`, `marker`, `gradient`, `glow`, `track`, `outline`, `layout`, `readoutGap`, `labelPosition`) are drawn too. The card's shape, fill and border are drawn today too: chamfered corners
 (`card.shape`, `cut`, `cutCorners`), a gradient fill (`card.fillGradient`), a colour per card from `colors.cardTints`
 (`card.tint: "cycle"`, row by row on each page, by position in the dock), and dashed or gradient borders (`card.borderStyle`,
 `borderDash`, `borderGradient`, linear or conic); a dashed border has a dash on every corner. So is the light and the marks on

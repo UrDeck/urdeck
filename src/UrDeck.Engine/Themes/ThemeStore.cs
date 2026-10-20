@@ -45,7 +45,7 @@ public sealed class ThemeStore(string themesDirectory)
 
     private static readonly Assembly Self = typeof(ThemeStore).Assembly;
 
-    public static IReadOnlyList<string> BuiltInNames { get; } = [DefaultName, "default-light", "glass"];
+    public static IReadOnlyList<string> BuiltInNames { get; } = [DefaultName, "default-light", "glass", "carbon", "paper"];
 
     /// <summary>The folder user themes are read from.</summary>
     public string ThemesDirectory => themesDirectory;

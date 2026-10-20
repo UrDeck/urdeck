@@ -77,7 +77,6 @@
     "bodySize": 0.118,
     "titleSize": 0.13,
     "unitRatio": 0.35,
-    "valueScale": 1.1,
     "case": {
       "label": "upper"
     },

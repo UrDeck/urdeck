@@ -2,7 +2,7 @@
   "format": 2,
   "meta": {
     "name": "Carbon",
-    "description": "IT and business. Near-black, hairline cards with registration corners, mono numerals, segmented bars, one phosphor accent that turns amber under load.",
+    "description": "IT and business. Near-black, hairline cards with registration corners, mono numerals, segmented bars, one phosphor accent, with the status word turning amber and red under load.",
     "mode": "dark",
     "tags": [
       "technical",
@@ -98,7 +98,7 @@
     "bodySize": 0.11,
     "titleSize": 0.12,
     "unitRatio": 0.38,
-    "valueScale": 1.0,
+    "valueScale": 0.8,
     "case": {
       "label": "upper",
       "title": "upper"
@@ -115,6 +115,7 @@
   "gauge": {
     "style": "bar",
     "layout": "stacked",
+    "readoutGap": 2.2,
     "segments": {
       "length": 0.073,
       "gap": 0.027

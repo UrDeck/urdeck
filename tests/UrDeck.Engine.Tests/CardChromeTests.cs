@@ -118,7 +118,7 @@ public sealed class CardChromeTests
     [InlineData("rigline")]
     public void EveryDraft_IsNotPlain(string name)
     {
-        using var style = ResolvedCardStyle.Resolve(new ThemeStore(FixtureFolder).Load(name), 275);
+        using var style = ResolvedCardStyle.Resolve(new ThemeStore(ThemeStore.BuiltInNames.Contains(name) ? "" : FixtureFolder).Load(name), 275);
 
         Assert.False(style.IsPlain);
     }

@@ -71,6 +71,10 @@ public sealed record GaugeGradient(IReadOnlyList<SKColor> Colors, float AngleDeg
 public sealed class GaugeTheme : IDisposable
 {
     public GaugeLayout Layout { get; init; }
+
+    /// <summary>The space between a bar's track and its readout in thicknesses of the track, or null for the default (<see cref="GaugePaint.ReadoutGap"/>).</summary>
+    public float? ReadoutGap { get; init; }
+
     public GaugeLabelPosition LabelPosition { get; init; }
     public GaugeSweep? Sweep { get; init; }
     public GaugeSegments? Segments { get; init; }
@@ -101,7 +105,7 @@ public sealed class GaugeTheme : IDisposable
 
     /// <summary>True when the theme sets none of the values, so the v1 drawing applies.</summary>
     public bool IsEmpty =>
-        Layout == GaugeLayout.Auto && LabelPosition == GaugeLabelPosition.Auto && Sweep == null && Segments == null &&
+        Layout == GaugeLayout.Auto && ReadoutGap == null && LabelPosition == GaugeLabelPosition.Auto && Sweep == null && Segments == null &&
         Track == null && Outline == null && Ticks == null && Scale == null && Redline == null && Marker == null &&
         !Crosshair && Gradient == null && Glow == null && !ColorByRamp && !ValueTint;
 

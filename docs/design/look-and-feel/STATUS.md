@@ -1,6 +1,6 @@
 # Look-and-feel work: status and how to pick it up
 
-**Updated 2026-10-18** (after the apply of `theme-widget-parts`). The other files in this folder are a snapshot of the original design handoff and are not edited.
+**Updated 2026-10-19** (`themes-carbon-paper` proposed; the order of the remaining work is in "Plan from here"). The other files in this folder are a snapshot of the original design handoff and are not edited.
 This file says what has been built, what changed on the way, and what is next. Where it disagrees with them, this file
 and the OpenSpec specs (`openspec/specs/`) win.
 
@@ -26,15 +26,40 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 2: card chrome, 2 of 4: highlight, sheen, accent strip, corner marks on the card | `card-chrome-front` | **Done**, archived. Highlight as a path per size drawn after the clip; sheen and strip in the cached back. Goldens for Carbon, Paper, Prism, Rigline; Obsidian redrawn. Prism paints at 1.83x `default-dark` (budget 1.5x, its back alone 1.39x): **accepted by the owner** (`docs/perf/card-chrome.md`, "As built (card-chrome-front)"). Looked at on the panel with Obsidian and Carbon: approved. Findings in its design (`openspec/changes/archive/2026-10-18-card-chrome-front/design.md`) |
 | PR 2: card chrome, 3 of 4: shadow, glow and outside marks as sprites, reach limit, press, dock | `card-underlay` | **Done**, archived. `CardUnderlay` (one routine for the window and the snapshot), `UnderlayPicture` (nine-grid or exact size, half size when all blurred, kept on the style), the host's `UnderlayView` (one sprite per card, a PNG decoded into a `LoadedImageSurface`). Goldens for Paper, Pop, Prism, Rigline (page and dock), Blueprint and Carbon. **Memory budget changed by the owner from 2 MB to 10 MB** for a theme's pictures: Paper measures +7.7 MB, mostly the decoding path; a `CompositionDrawingSurface` with a Direct3D device of the host's own cost +30 MB and was dropped (`docs/perf/card-chrome.md`, "As built (card-underlay)"). Warm build 1.3 to 12.6 ms. Looked at on the panel by the owner (press, slide, Prism's limited shadow, 150 %): approved. Findings in its design (`openspec/changes/archive/2026-10-18-card-underlay/design.md`) |
 | PR 2: card chrome, 4 of 4: compact cards (dock slots, 1x1), circle, partial overrides | `card-compact` | **Done**, archived. `ResolvedCardStyle.Compact` (the compact values merged key by key, a style of its own with its own pictures and caches; the style itself when the theme sets none), `ForCard(item)` picks it for a 1x1 card, the dock uses it for every slot; `ThemeResolver.Resolve(..., compact: true)` gives the dock widgets the compact radius and border width, a 1x1 widget on a page keeps the page theme. Goldens for Obsidian, Blueprint, Prism and Rigline redrawn (the sample page has four 1x1 shortcuts), docks for Obsidian and Blueprint added. Looked at on the panel by the owner (Obsidian's circular dock, Rigline's tile strips): approved. Memory and cost: no new pictures beyond a compact style's own, made only for a theme that sets `card.compact` and draws outside its cards; the compact style is dropped with its parent. Not built: a compact padding (`docs/design/theme-format-2-deferred-keys.md`) |
-| PR 8: pattern layer and motion policy | `page-pattern`, later `motion` | After card chrome. Pattern uses a page-sized surface; the memory cost is accepted |
+| PR 8: pattern layer and motion policy | `page-pattern`, later `motion` | **Next after Carbon and Paper.** Pattern uses a page-sized surface; the memory cost is accepted. Carries the redraw of Carbon's goldens (its dots start drawing) and a second panel look at Carbon |
 | PR 4: gauge styles and modifiers | `theme-gauges` | **Built.** `GaugeStyle` Meter, Tach, Marker, ThickBar; `GaugeTheme` on `Theme.Gauge` (SDK 0.10.0), `Accent2`, `Ink`, `Ramp`; `gauge.layout`. v1 draws via `LegacyGauge`, byte-identical. A tach has default ticks and a redline. Findings: an arc with ticks and an inside label needs extra readout room below the middle (Ember, Blueprint); the drafts' hex colours such as Ember's tick `#ffffff1c` read as AARRGGBB (yellow), check in the theme change; the track is segmented as well as the fill. Cost: inside 2x without a glow, 3.5x to 5.1x with one (`docs/perf/theme-look.md`); on the panel a tach is +3 MB over a ring |
 | PR 4: sparkline, status chip, divider, well, clock options, weather sections | `theme-widget-parts` | **Done**, archived. SDK 0.11.0: `Chip`, `Divider`, `Well`, `Sparkline`; `Theme.Chip`, `Divider` (default is Weather's old rule, byte-identical), `Well`; `GaugeTheme.Sparkline` and `Status`; `GaugeOptions.History` and `Status`. The gauge carves a status row (label left, chip right) and a sparkline strip out of its rectangle. Stats keeps a per-position history ring (at most 600 floats, only while the sparkline is on and the position is 0.9 of a cell tall) and chooses the status; the Clock has `header`, `subtitle`, `showWeek`, `showSeconds`, `blinkSeparator` (opt-in; a per-second repaint costs about 10 ms of CPU a minute); Weather's 4x4 rule, forecast wells and condition chip use the parts. Pop's goldens redrawn (pill); the rest unchanged. Carbon and Paper rendered beside the board. Findings in its design (`openspec/changes/archive/2026-10-18-theme-widget-parts/design.md`): Rigline's fixture has no `well`; the status works at single positions; the blink draws a space; the dimension label is not printed yet |
 | PR 10: icon sets, themed weather and glyph shortcuts | `theme-icons` | After gauges. About 30 icons still to draw (`04`) |
-| PR 11: `urdeck-cli theme validate`, `render`, `init` | `theme-cli` | Independent; can start any time. Carries the validator findings listed below. The sample page is in the engine tests (`Support/SamplePage.cs`); the CLI has to move or share it |
+| PR 11: `urdeck-cli theme validate`, `render`, `init` | `theme-cli` | **To run in parallel** (another worktree). Independent. Carries the validator findings listed below and owns the contrast rule (`themes-carbon-paper` checks contrast by hand and does not edit `ThemeDefinition.Rules.cs`). The sample page is in the engine tests (`Support/SamplePage.cs`); the CLI has to move or share it, and `GoldenTests.cs` is the only overlap with the theme change. Whichever lands second must validate Carbon and Paper clean |
 | PR 9: animated border, value fill, pattern scroll, `reduceMotion` | `motion` | After card chrome and pattern; **Opus**. Spike S2 decided the mechanism |
-| PR 12 to 16: the eight themes | one change per pair | After the knobs they use. Order: Carbon and Paper; Prism and Obsidian; Ember and Blueprint; Pop; Rigline last |
+| PR 12: Carbon and Paper | `themes-carbon-paper` | **Done**, archived (#66). Carbon and Paper are built in with Instrument Sans and JetBrains Mono; the fixture copies are gone and their goldens redrawn in the real fonts (`carbon-dock.png` added). Carbon's dot grid waits for `page-pattern`, which redraws Carbon's goldens and gets a second panel look. Compared on the panel with the board; the differences that only the engine can fix are the follow-ups below |
+| PR 13 to 16: the other six themes | one change per pair | After the knobs they use. Order: Prism and Obsidian; Ember and Blueprint; Pop; Rigline last |
 | PR 17: docs, site gallery, media | with each theme, rest at the end | The site needs a deck and pictures per theme (`site/MEDIA-CHECKLIST.md`) |
 | PR 18: preview renderer and catalog seams | `theme-preview` | `ThemeCatalog`, `BackgroundCatalog` and `PairingIndex` exist; `PreviewRenderer` does not |
+
+## Plan from here (decided 2026-10-19)
+
+```
+now        themes-carbon-paper          Carbon and Paper built in, Carbon without its dots
+parallel   theme-cli                    another worktree; owns the contrast rule
+next       page-pattern                 Carbon's dots appear (goldens redrawn), then Ember and Blueprint can ship
+           theme-icons                  every theme gets themed icons; art-heavy
+any time   Prism + Obsidian, Pop        need nothing unbuilt (icons fall back to the widgets' own), slot in between
+last       motion (Opus), then Rigline  Rigline needs the animated border
+```
+
+- **No theme picker for now.** The approach for the configuration editor is not decided, and a one-off theme or background
+  picker would be thrown away by it. Themes are chosen with `theme` in `urdeck-config.json`; each theme's site page shows the
+  snippet. Anything that describes themes stays in the engine (`ThemeCatalog`, `BackgroundCatalog`, `PairingIndex`), where a
+  future editor can use it. The editor's approach deserves its own explore.
+- **Follow-ups found on the panel (`themes-carbon-paper`, against the design board):**
+  - Stats: the board's card order is label (top left), value, sparkline, bar; the engine's stacked layout puts the value above the bar and the sparkline only when the card is tall enough and has history.
+  - Stats: the value is too large in a 2x2 Stats card; a value is limited to its fitted size, so `valueScale` only shrinks (and would shrink every widget).
+  - Clock: the board pins the time bottom left, with a header row above; the engine centres the time. There is no alignment key.
+  - Clock: Paper's colon is the accent colour on the board; no theme key colours the separator.
+- **Follow-ups found in the explore:** a gauge fill that follows the status level (Carbon's bar would turn amber at `WARM`;
+  `colorBy` has only `accent` and `ramp` today). `valueScale` above 1 has no effect (a value is limited to its fitted size), so
+  the drafts that set it should drop it in their theme changes.
 
 ## What changed on the way (read these before relying on the package)
 
