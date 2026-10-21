@@ -152,3 +152,27 @@ Release build. Single runs, not a benchmark.
   parsed Lottie composition of the main icon.
 - Not measured here: CPU and private memory of the running host on the panel. The method of the sections above (three cards, a
   60 s window after warm-up) applies; run it with Carbon and with the default theme to put numbers beside these.
+
+### On the panel (`theme-icons`, 100 %)
+
+Measured on 2026-10-21 on the owner's Y70 panel at 100 % scaling, Release build of the host copied to its own folder, one weather
+card alone on the page (Portland, OR, imperial, 5 days), `motion: full`, the background switched off, 15 s of warm-up and a 60 s
+window (ten GPU samples, 6 s apart). Carbon was run twice from copies of the built-in theme in the same folder: `carbon-anim`
+without `icons.set` (Meteocons) and `carbon-set` as shipped (outline). Single runs, not a benchmark. A first batch with Carbon's
+own contour background on is not used: the shader's cost hid the icons'.
+
+| Theme | Card | CPU, % of one core | GPU | Private bytes | Working set |
+|---|---|---|---|---|---|
+| default dark | 4x2 | 1.93% | 1.3% | 119 MB | 168 MB |
+| Carbon, Meteocons | 4x2 | 2.00% | 1.3% | 130 MB | 182 MB |
+| Carbon, outline | 4x2 | 0.07% | 0.0% | 114 MB | 163 MB |
+| default dark | 4x4 | 2.56% | 2.4% | 134 MB | 184 MB |
+| Carbon, Meteocons | 4x4 | 2.94% | 2.1% | 142 MB | 193 MB |
+| Carbon, outline | 4x4 | 0.02% | 0.0% | 122 MB | 170 MB |
+
+- With `motion: full`, the same theme with the outline set costs about 0% of a core and 0% GPU, against 2.0% and 1.3% (4x2) or
+  2.9% and 2.1% (4x4) with the animated icons: the card repaints only when its readings change.
+- Private memory is 16 MB lower at 4x2 and 20 MB lower at 4x4 with the outline set (Lottie state, the poster images and the paint
+  garbage of 15 frames a second).
+- The default `periodic` motion already rested at about 0.4% in the earlier measurements; the saving there is the loop once a
+  minute and the poster images, not a continuous cost.
