@@ -6,20 +6,17 @@ namespace UrDeck.Engine.Themes;
 [Format2]
 public sealed partial class ThemeIconsDefinition
 {
-    /// <summary>Folder name inside the theme folder (icons/&lt;set&gt;/&lt;key&gt;.svg), or a built-in set name. Keys are in 04-widgets-and-icons.md. A missing key falls back to the built-in 'outline' set, then to the widget's own icon.</summary>
+    /// <summary>Name of an icon set: a folder icons/&lt;set&gt;/ inside the theme folder (with a manifest.json), or a built-in set (outline). A key the set lacks is answered by the built-in 'outline' set. See Icon sets in the theme reference.</summary>
     public string? Set { get; set; }
 
     /// <summary>Override stroke width for set icons, fraction of the icon size.</summary>
     public double? Stroke { get; set; }
 
-    /// <summary>'accent', 'accent2', 'text', 'ramp', 'none' (keep the SVG's colours) or a #colour.</summary>
+    /// <summary>'accent', 'accent2', 'text', 'ramp' (the colour of colors.ramp for the value shown, such as the temperature), 'none' (the text colour) or a #colour.</summary>
     public string? Tint { get; set; }
 
     /// <summary>Glow behind set icons (Rigline). Colour defaults to the icon's tint.</summary>
     public ThemeGlowDefinition? Glow { get; set; }
-
-    /// <summary>false = static icons even where the widget would use Lottie (weather). Default true.</summary>
-    public bool? Animated { get; set; }
 
     internal void Sanitize(ThemeValueCheck check, string path)
     {

@@ -141,9 +141,9 @@
     }
   },
   "icons": {
+    "set": "outline",
     "stroke": 0.066,
-    "tint": "accent",
-    "animated": false
+    "tint": "accent"
   },
   "background": {
     "default": {

@@ -28,6 +28,12 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
     /// <summary>A forecast icon's side as a share of its column's width, at most.</summary>
     private const float ForecastIconShare = 1.0f;
 
+    /// <summary>The least a forecast icon's side may be, as a share of its column's width, before the text rows are tightened.</summary>
+    private const float ForecastIconMinShare = 0.6f;
+
+    /// <summary>The tightest row pitch of a forecast column, as a multiple of the title text size (the usual one is 1.5).</summary>
+    private const float ForecastTightLine = 1.2f;
+
     /// <summary>What a paint puts on the card; two equal values draw the same pixels (apart from the moving icon).</summary>
     private sealed record Shown(
         ReadingText Temperature,
@@ -43,6 +49,7 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
         string SunsetLabel,
         ReadingText Sunset,
         string IconKey,
+        double? TemperatureC,
         string Credit,
         ForecastShown? Forecast);
 
@@ -72,6 +79,7 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
     private readonly record struct DayShown(
         ReadingText Weekday,
         string IconKey,
+        double? HighC,
         ReadingText High,
         ReadingText Low,
         ReadingText Chance,
@@ -202,8 +210,20 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
         SKCanvas canvas = context.Canvas;
         Shown shown = Current();
         _drawn = shown;
-        SelectIcon(shown.IconKey);
-        SyncForecastIcons(shown.Forecast);
+
+        // A theme that names an icon set gets pictures: nothing is loaded, kept as a poster or animated.
+        bool glyphs = theme.Icons.NamesSet;
+        if (glyphs)
+        {
+            ReleaseIcon();
+            ReleaseForecastIcons();
+            _animating = false;
+        }
+        else
+        {
+            SelectIcon(shown.IconKey);
+            SyncForecastIcons(shown.Forecast);
+        }
 
         // The credit strip is measured first and taken off the bottom, so the content never runs into it.
         SKRect content = context.ContentRect;
@@ -228,9 +248,12 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
             Divider.Draw(canvas, theme, SKRect.Create(body.Left, top.Bottom + room, body.Width, 0));
         }
 
-        double seconds = Advance(context.Time);
+        double seconds = glyphs ? 0 : Advance(context.Time);
         float iconSize = top.Height * IconShare;
-        DrawIcon(canvas, SKRect.Create(top.Left, top.Top, iconSize, iconSize), seconds);
+        if (glyphs)
+            DrawGlyph(canvas, theme, SKRect.Create(top.Left, top.Top, iconSize, iconSize), shown.IconKey, shown.TemperatureC);
+        else
+            DrawIcon(canvas, SKRect.Create(top.Left, top.Top, iconSize, iconSize), seconds);
         DrawCard(canvas, theme, top, iconSize, shown, shown.Forecast != null ? TextStep.Title : TextStep.Body);
         if (shown.Forecast != null)
             DrawForecast(canvas, theme, lower, shown.Forecast, seconds);
@@ -336,8 +359,14 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
 
         int days = forecast.Days.Length;
         float column = area.Width / days;
-        float rows = 5 * titleLine;
-        float room = area.Bottom - y - rows;
+
+        // The five text rows of a column keep their full pitch while the icon still gets a readable share of the column; when
+        // they would leave it less (a large title size, a short card) the rows are tightened, down to a line and a fifth.
+        float available = area.Bottom - y;
+        float rowLine = titleLine;
+        if (available - (5 * rowLine) < column * ForecastIconMinShare)
+            rowLine = Math.Max(theme.GetTextSize(TextStep.Title) * ForecastTightLine, (available - (column * ForecastIconMinShare)) / 5);
+        float room = available - (5 * rowLine);
         float icon = Math.Max(0, Math.Min(column * ForecastIconShare, room));
 
         // What is left over is split above and below the columns, so the block sits in the middle of the space.
@@ -353,35 +382,38 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
             float x = y;
 
             // A well, when the theme has one, behind the whole column; the column itself is laid out as without it.
-            Well.Draw(canvas, theme, SKRect.Create(left + (inset / 2), y - inset, column - inset, (5 * titleLine) + icon + (2 * inset)));
+            Well.Draw(canvas, theme, SKRect.Create(left + (inset / 2), y - inset, column - inset, (5 * rowLine) + icon + (2 * inset)));
 
-            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), day.Weekday.Value, TextStep.Title,
+            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), day.Weekday.Value, TextStep.Title,
                 day.Weekday.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
-            x += titleLine;
+            x += rowLine;
 
             var iconRect = SKRect.Create(left + ((column - icon) / 2), x, icon, icon);
-            DrawForecastIcon(canvas, iconRect, day.IconKey, animate, seconds);
+            if (theme.Icons.NamesSet)
+                DrawGlyph(canvas, theme, iconRect, day.IconKey, day.HighC);
+            else
+                DrawForecastIcon(canvas, iconRect, day.IconKey, animate, seconds);
             x += icon;
 
-            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), HighLow(day), TextStep.Title,
+            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), HighLow(day), TextStep.Title,
                 day.High.IsCurrent && day.Low.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
-            x += titleLine;
+            x += rowLine;
 
-            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), WithUnit(day.Chance), TextStep.Title,
+            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), WithUnit(day.Chance), TextStep.Title,
                 day.Chance.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
-            x += titleLine;
+            x += rowLine;
 
             // The space of an amount that is not drawn stays empty, so the rows line up across the columns.
             if (day.HasRain)
             {
-                TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), RainText(day), TextStep.Title,
+                TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), RainText(day), TextStep.Title,
                     day.Rain.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
             }
 
-            x += titleLine;
+            x += rowLine;
             if (day.HasSnow)
             {
-                TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), SnowText(day), TextStep.Title,
+                TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), SnowText(day), TextStep.Title,
                     day.Snow.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
             }
         }
@@ -493,6 +525,18 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
 
         _posters[(key, size)] = poster;
         return poster;
+    }
+
+    /// <summary>The glyph of the theme's icon set for an icon name, tinted along the ramp by a Celsius temperature; logged once when the set has none.</summary>
+    private void DrawGlyph(SKCanvas canvas, Theme theme, SKRect rect, string key, double? celsius)
+    {
+        if (rect.Width < 1 || rect.Height < 1)
+            return;
+
+        float position = celsius is { } degrees ? (float)Math.Clamp((degrees + 10) / 50, 0, 1) : 0.5f;
+        string glyph = "weather/" + key;
+        if (!ThemedIcon.Draw(canvas, theme, rect, glyph, null, position) && _logged.Add(glyph))
+            Log($"Weather icon '{glyph}' is not in the theme's icon set; the card is drawn without it");
     }
 
     private void DrawForecastIcon(SKCanvas canvas, SKRect rect, string key, bool animate, double seconds)
@@ -641,6 +685,7 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
             Label("daily/0/sunset", "Sunset"),
             Text("daily/0/sunset"),
             WeatherIcons.Key(conditionClass, isDay),
+            Celsius(ReadingOf("current/temperature")),
             string.Join('\n', Credits().Select(c => c.Text)),
             Four ? CurrentForecast(segment, Text, Label, ReadingOf, unit) : null);
     }
@@ -680,6 +725,7 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
             days[i] = new DayShown(
                 text(at + "date", DateStyle.Weekday),
                 WeatherIcons.Key(conditionClass, isDay: true),
+                Celsius(read(at + "high")),
                 text(at + "high", null),
                 text(at + "low", null),
                 text(at + "precip-chance", null),
@@ -729,6 +775,12 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
 
         return credits;
     }
+
+    /// <summary>
+    /// A temperature reading's value in whole degrees Celsius, which is what readings hold whatever unit the card shows; null
+    /// without one. Whole degrees, because the colour along the ramp does not show less and a repaint should not be asked for it.
+    /// </summary>
+    private static double? Celsius(Reading reading) => reading.Value is { Type: ReadingValueType.Number } number ? Math.Round(number.Number) : null;
 
     private static DisplayUnit? ParseUnit(string? unit) => unit?.Trim().ToLowerInvariant() switch
     {

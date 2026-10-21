@@ -63,6 +63,12 @@ still gradient, colour or picture and a scrim, is drawn today when your configur
 `meta.pairsWith.backgrounds` lists the backgrounds that suit the theme, for a settings page to recommend. The
 [JSON Schema](/schemas/v2/theme.json) lists them for editor completion.
 
+## Icon sets
+
+A theme can name an icon set with `"icons": { "set": "outline" }`. The [weather](/docs/widgets/weather/) card then draws static outline glyphs for its conditions, and a [shortcut](/docs/widgets/shortcut/) can show a glyph with `"icon": "theme:app/terminal"`. `icons.stroke` sets the line width as a fraction of the icon's size, `icons.tint` the colour (`accent`, `accent2`, `text`, `ramp` for the colour of `colors.ramp` that suits the value shown, or a `#colour`) and `icons.glow` a blurred copy behind the glyph. There is no `icons.animated`: icons from a set are pictures.
+
+`outline` is built in ([Lucide](https://lucide.dev), ISC). A theme can carry its own set in a folder `icons/<set>/` next to `theme.json`: SVG files (at most 4 KB, `viewBox="0 0 24 24"`, `path`, `circle`, `ellipse`, `line`, `polyline`, `polygon` and `rect` only, no transform) and a `manifest.json` that maps the product's icon keys to them and names the source and licence. A key the set lacks is answered by `outline`. The format and the keys are in the [theme reference on GitHub](https://github.com/UrDeck/urdeck/blob/main/docs/themes.md#icon-sets), and `urdeck-cli theme validate` checks a set.
+
 The complete list of settings, with the range of each, is the
 [theme reference on GitHub](https://github.com/UrDeck/urdeck/blob/main/docs/themes.md).
 

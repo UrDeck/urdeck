@@ -64,6 +64,8 @@ WARN Theme 'missing-member': card.fillGradient needs 'colors'; ignoring it.
 WARN Theme 'missing-member': card.borderGradient needs 'colors'; ignoring it.
 == failing icon-tint
 WARN Theme 'icon-tint': icons.tint 'purple' must be 'accent', 'accent2', 'text', 'ramp', 'none' or a colour (#RRGGBB or #AARRGGBB); using the default.
+== failing icon-set-unknown
+WARN Theme 'icon-set-unknown': icons.set 'nosuch' is not an icon set that exists; the built-in 'outline' set draws the icons.
 == failing stroke
 WARN Theme 'stroke': stroke.thickness 4 is outside 0.001..1; using the default.
 WARN Theme 'stroke': stroke.cap 'flat' must be 'round' or 'square'; using the default.

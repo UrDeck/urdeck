@@ -117,6 +117,7 @@ The Windows SDK suffix on the host and test target frameworks is required: the W
 | Windows App SDK (self-contained runtime shipped with the host) | Microsoft; see the licence files in the `Microsoft.WindowsAppSDK` NuGet package |
 | Inter variable font (`src/UrDeck.Engine/Themes/Builtin/`) | [SIL Open Font License 1.1](src/UrDeck.Engine/Themes/Builtin/Inter-OFL.txt); the licence text ships with the font |
 | Bricolage Grotesque, Instrument Sans and JetBrains Mono variable fonts (`site/public/fonts/`, the website only) | [SIL Open Font License 1.1](site/public/fonts/); each licence text ships with its font |
+| Lucide icons (the built-in `outline` icon set, `src/UrDeck.Engine/Icons/Builtin/outline/`) | [ISC, and MIT for the icons derived from Feather](THIRD-PARTY-NOTICES.md#lucide-icons-the-built-in-outline-set), Copyright (c) 2026 Lucide Icons and Contributors; the licence text ships with the set |
 | Meteocons weather icons (embedded in `widgets/UrDeck.Widgets.Weather`) | [MIT](THIRD-PARTY-NOTICES.md#meteocons-weather-icons), Copyright (c) 2020-present Bas Milius; the licence text ships with the icons |
 
 **Data services.** The weather provider uses [Open-Meteo](https://open-meteo.com/) (CC BY 4.0; the card credits it) and its

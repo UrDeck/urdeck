@@ -6,6 +6,7 @@ using SkiaSharp;
 using UrDeck.Engine.Config;
 using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Rendering;
+using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Data;
@@ -216,7 +217,7 @@ public sealed class ShortcutWidgetTests : IDisposable
     }
 
     [Fact]
-    public void WhenThereIsNoIcon_ThePlaceholderStays()
+    public void WhenThereIsNoIcon_AGlyphReplacesThePlaceholder()
     {
         var widget = Create("""{ "target": "C:\\Apps\\steam.exe" }""");
         using var loading = Paint(widget);
@@ -224,7 +225,100 @@ public sealed class ShortcutWidgetTests : IDisposable
 
         using var none = Paint(widget);
 
-        Assert.Equal(loading.Bytes, none.Bytes);
+        Assert.NotEqual(loading.Bytes, none.Bytes);
+        Assert.Equal(0, Count(none, IsText));
+        Assert.True(Count(none, IsAccent) > 0);
+    }
+
+    private bool IsAccent(SKColor c) => c == _theme.Accent;
+
+    // Shortcut theme glyphs
+
+    [Fact]
+    public void ATheme_Glyph_IsDrawnInTheTint_AndTheIconServiceIsNotAsked()
+    {
+        var widget = Create("""{ "target": "C:\\Apps\\steam.exe", "icon": "theme:app/terminal" }""");
+        _host.Icon = new IconResult(_icon, false);
+
+        using var bitmap = Paint(widget);
+        ((ITapTarget)widget).OnTap(Middle);
+
+        Assert.Empty(_host.IconRequests);
+        Assert.True(Count(bitmap, IsAccent) > 0);
+        Assert.Equal(0, Count(bitmap, IsInk));
+        Assert.Equal(0, Count(bitmap, IsText));
+        Assert.Equal([(@"C:\Apps\steam.exe", null)], _host.Launches);
+    }
+
+    [Fact]
+    public void AnUnknownThemeGlyph_DrawsThePlaceholder()
+    {
+        var widget = Create("""{ "target": "https://homeassistant.example.com", "icon": "theme:app/nosuch" }""");
+
+        using var bitmap = Paint(widget);
+
+        Assert.Empty(_host.IconRequests);
+        Assert.True(Count(bitmap, IsText) > 0);
+        Assert.Equal(0, Count(bitmap, IsAccent));
+    }
+
+    [Theory]
+    [InlineData("https://example.com", "app/link")]
+    [InlineData(@"C:\Games\", "app/folder")]
+    [InlineData(@"C:\Apps\steam.exe", "app/file")]
+    [InlineData(@"shell:AppsFolder\Some.App_8wekyb3d8bbwe!App", "app/file")]
+    public void WhenTheServiceHasGivenUp_TheTargetsKindPicksTheGlyph(string target, string key)
+    {
+        _host.Icon = IconResult.None;
+        var fallback = Create("{ \"target\": " + JsonSerializer.Serialize(target) + " }");
+        var explicitGlyph = Create("{ \"target\": " + JsonSerializer.Serialize(target) + ", \"icon\": \"theme:" + key + "\" }");
+
+        using var given = Paint(fallback);
+        using var wanted = Paint(explicitGlyph);
+
+        Assert.Equal(wanted.Bytes, given.Bytes);
+        Assert.True(Count(given, IsAccent) > 0);
+    }
+
+    // A rooted path is a drive or UNC path to the launch target parser, so a temp folder on Linux is no target at all.
+    [WindowsFact]
+    public void AFolderTarget_IsRecognisedOnDisk()
+    {
+        _host.Icon = IconResult.None;
+        string folder = Directory.CreateDirectory(Path.Combine(_root, "Games")).FullName;
+        var widget = Create("{ \"target\": " + JsonSerializer.Serialize(folder) + " }");
+        var asFolder = Create("{ \"target\": " + JsonSerializer.Serialize(folder) + ", \"icon\": \"theme:app/folder\" }");
+
+        using var given = Paint(widget);
+        using var wanted = Paint(asFolder);
+
+        Assert.Equal(wanted.Bytes, given.Bytes);
+    }
+
+    [Fact]
+    public void AShortcutWithNoTarget_KeepsThePlaceholder()
+    {
+        _host.Icon = IconResult.None;
+
+        using var bitmap = Paint(Create("""{ "label": "Games" }"""));
+
+        Assert.True(Count(bitmap, IsText) > 0);
+        Assert.Equal(0, Count(bitmap, IsAccent));
+    }
+
+    [Fact]
+    public void WhileTheIconLoads_ThereIsNoGlyph_AndARealIconIsNeverTinted()
+    {
+        var widget = Create("""{ "target": "https://example.com" }""");
+
+        using var loading = Paint(widget);
+        Assert.True(Count(loading, IsText) > 0);
+        Assert.Equal(0, Count(loading, IsAccent));
+
+        _host.Icon = new IconResult(_icon, false);
+        using var ready = Paint(widget);
+        Assert.True(IsInk(ready.GetPixel(130, 130)));
+        Assert.Equal(0, Count(ready, IsAccent));
     }
 
     [Fact]
@@ -342,14 +436,14 @@ public sealed class ShortcutWidgetTests : IDisposable
     }
 
     [Fact]
-    public void AnUnattachedShortcut_PaintsItsPlaceholder_AndATapDoesNothing()
+    public void AnUnattachedShortcut_PaintsAGlyph_AndATapDoesNothing()
     {
         var widget = Create("""{ "target": "notepad" }""", attach: false);
 
         using var bitmap = Paint(widget);
         ((ITapTarget)widget).OnTap(Middle);
 
-        Assert.True(Count(bitmap, IsText) > 0);
+        Assert.True(Count(bitmap, IsAccent) > 0);
     }
 
     [Fact]

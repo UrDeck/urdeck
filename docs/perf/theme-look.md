@@ -425,3 +425,29 @@ nothing (`Stats_AHistoryIsAtMostSixHundredFloats`).
 
 **The parts.** `Chip`, `Divider`, `Well` and `Sparkline` draw straight to the canvas and keep nothing. A v1 theme draws the same
 pixels as before: the goldens for `default-dark`, `default-light` and `glass` are unchanged.
+
+## Icon glow (`theme-icons`)
+
+Rigline's `icons.glow` blurs a copy of each glyph once and keeps it in a cache of at most 16 images that belongs to the resolved
+theme and is disposed with it. Measured on 2026-10-20 in the test harness (no panel): a weather card painted 60 times under the
+Rigline fixture (outline set, `ramp` tint, glow 0.055 of a cell at 0.7) took 1.16 ms a paint at 4x2 and 2.65 ms at 4x4, against
+0.46 ms and 0.90 ms under Carbon (no glow). The difference was not split between the icon glow and Rigline's own value glow and
+card chrome. The icon glow is blurred on the first paint and drawn from the cache after: at 4x4 that is the current icon and up
+to five forecast glyphs, each the glyph's size plus three blur widths on each side (about 0.4 MB for a forecast glyph at the panel
+width, so roughly 2 MB for the card, worked out from the sizes and not measured).
+
+Not measured here: the host's private memory with Rigline on the panel, and looking at Carbon and Paper at 100, 125 and 150 %
+(the glyph is a vector, so it scales with the card; the stroke is a fraction of the icon's size).
+
+### Looked at on the panel (`theme-icons`)
+
+On 2026-10-21 the Y70 panel was captured with Carbon and Paper at 125 % and 150 % (a 4x4 and a 4x2 weather card and four
+shortcuts, one with `theme:app/terminal`, one with a site that has no icon). The two scalings draw the same page, as they should:
+the glyphs, their stroke and the tint (accent; Paper's is orange) are right, and the shortcut glyph replaces the letter. 100 %
+was not captured; the layout does not depend on the scaling.
+
+One thing is off and is not caused by the icons: **the 4x4 card's forecast icons are small** (about 30 px in Carbon, a dot in
+Paper). The forecast gives each icon only what is left after five text rows (`room` in `DrawForecast`), and Paper's larger
+title size leaves almost nothing; the animated icons are sized the same way. Fixed in the same change: the five text rows are
+tightened (down to 1.2 times the title size) so the icon keeps at least 0.6 of its column, and the panel capture after the fix shows
+readable icons in both themes (roughly 50 px in Carbon and 40 px in Paper, read off the capture).

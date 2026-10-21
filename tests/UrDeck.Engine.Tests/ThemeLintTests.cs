@@ -31,6 +31,10 @@ public sealed class ThemeLintTests : IDisposable
         ["THEME020-extension"] = ThemeSeverity.Error,
         ["THEME020-outside"] = ThemeSeverity.Error,
         ["THEME062"] = ThemeSeverity.Info,
+        ["THEME070"] = ThemeSeverity.Error,
+        ["THEME071"] = ThemeSeverity.Error,
+        ["THEME072"] = ThemeSeverity.Error,
+        ["THEME076"] = ThemeSeverity.Info,
     };
 
     public static TheoryData<string> Cases()

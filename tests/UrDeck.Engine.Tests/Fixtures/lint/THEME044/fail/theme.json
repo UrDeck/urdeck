@@ -3,5 +3,5 @@
   "format": 2,
   "meta": { "name": "Probe", "description": "A theme for the lint tests.", "mode": "dark" },
   "colors": { "background": "#101010", "cardFill": "#202020", "text": "#f0f0f0", "textMuted": "#a0a0a0" },
-  "icons": { "set": "outline" }
+  "icons": { "set": "nosuch" }
 }

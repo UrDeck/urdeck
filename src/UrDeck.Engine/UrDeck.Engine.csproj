@@ -29,4 +29,10 @@
                       LogicalName="UrDeck.Backgrounds.$([System.String]::Copy('%(RecursiveDir)').Replace('\', '/'))%(Filename)%(Extension)" />
   </ItemGroup>
 
+  <!-- Built-in icon sets: one folder each (manifest.json, the .svg files, the licence). Logical name UrDeck.Icons.<set>/<file>. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\Builtin\**\*.svg;Icons\Builtin\**\manifest.json;Icons\Builtin\**\LICENSE*.txt"
+                      LogicalName="UrDeck.Icons.$([System.String]::Copy('%(RecursiveDir)').Replace('\', '/'))%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

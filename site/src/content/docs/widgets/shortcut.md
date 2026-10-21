@@ -21,7 +21,7 @@ so does a long hold.
 |---|---|
 | `target` | What to open. A rooted path to an executable, a `.lnk`, a document or a folder (`%NAME%` environment variables are expanded); a bare name Windows resolves itself (`notepad`); a `shell:` item; a web address (`http` or `https`); or any other address Windows has an application for (`steam://open/main`, `ms-settings:display`). A relative path is refused. With no target the card shows an empty placeholder and does not react. |
 | `arguments` | Arguments for a file target. Ignored, with a warning in the log, for an address. They are never written to the log. |
-| `icon` | Where the icon comes from instead of `target`: a local image file (PNG, JPEG, WebP, BMP, GIF or ICO), or anything else that could be a target. |
+| `icon` | Where the icon comes from instead of `target`: a local image file (PNG, JPEG, WebP, BMP, GIF or ICO), anything else that could be a target, or `theme:<key>` for a glyph of the theme's [icon set](/docs/themes/#icon-sets) (`theme:app/terminal`). |
 | `label` | A text under the icon. Absent or `""`: no label, and the icon takes the whole card. |
 
 A packaged (Store) application has no path; its target is `shell:AppsFolder\` followed by its id, which `Get-StartApps`
@@ -46,8 +46,11 @@ from somebody else without reading its targets.
 
 A local image file is shown as it is. For any other file, a folder or a `shell:` item the card shows the icon Windows shows
 for it. For a web address it shows the site's own icon, and the default browser's icon when the site offers none. Until
-the icon is there, and when there is none, the card shows a placeholder with the first letter of the label or of the
-target's name.
+the icon is there the card shows a placeholder with the first letter of the label or of the target's name. When there is
+none (a site with no icon, a file Windows has none for) the card shows a glyph chosen by what the target is: a link for a web
+address, a folder, or a file.
+
+`"icon": "theme:app/terminal"` draws a glyph of the theme's icon set in the theme's stroke and tint instead of the icon of the target, and asks Windows for no icon; the target still opens on tap. The keys are `app/terminal`, `app/folder`, `app/file`, `app/music`, `app/gamepad`, `app/browser`, `app/mail`, `app/chat`, `app/settings`, `app/code`, `app/camera`, `app/image`, `app/video`, `app/calendar`, `app/clock`, `app/home`, `app/power`, `app/lock`, `app/link`, `app/cloud`, `app/download`, `app/star`, `app/heart`, `app/bolt` and `app/chart`; a key the theme's set lacks is drawn from the built-in `outline` set, and an unknown key shows the placeholder. A real icon is never tinted.
 
 ## Network
 

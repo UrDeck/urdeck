@@ -125,8 +125,8 @@ public static partial class ThemeLint
         }
 
         // A font that cannot be loaded is a file finding the lint makes itself, and one named by family depends on the
-        // machine; neither may differ from one platform to the next.
-        foreach (var finding in resolved.Found.Where(f => f.Code != ThemeCodes.FontFile))
+        // machine; neither may differ from one platform to the next. The icon sets are files the lint reads itself, thoroughly.
+        foreach (var finding in resolved.Found.Where(f => f.Code is not (ThemeCodes.FontFile or ThemeCodes.UnknownIconSet or ThemeCodes.IconManifest or ThemeCodes.IconEntry or ThemeCodes.IconFile)))
             found.Add(From(finding, ThemeStore.SettingsFileName));
     }
 

@@ -29,6 +29,11 @@ public sealed record LoadedTheme(string Name, ThemeDefinition Definition, ThemeF
 
     private ThemeWarnings? _warnings;
 
+    /// <summary>The icons this theme draws with (its set, then <c>outline</c>), read once for every surface size.</summary>
+    internal Icons.ResolvedIcons ResolvedIcons => LazyInitializer.EnsureInitialized(ref _icons, () => Icons.IconSetStore.Resolve(this))!;
+
+    private Icons.ResolvedIcons? _icons;
+
     /// <summary>Where this theme's findings go: the log unless the loader says otherwise (the command line tool collects them).</summary>
     internal IThemeFindings Findings { get; init; } = new LogFindings(Name);
 
