@@ -43,6 +43,20 @@ of "Weather Icon" for any of them.
 - **WHEN** the condition is unavailable
 - **THEN** the `weather/not-available` glyph is drawn
 
+### Requirement: Weather Forecast Icon Size
+The icon of a forecast day MUST keep a readable size: at least 0.6 of its column's width, or all the card leaves it. The five
+text rows of a column keep their usual pitch (1.5 times the title text size) while the icon still gets that much, and are
+tightened, to no less than 1.2 times the title text size, when they would leave it less. This applies to every icon, animated or
+themed.
+
+#### Scenario: A large title size
+- **WHEN** the theme's title size leaves less than 0.6 of a column for the icon at the usual row pitch
+- **THEN** the rows are tightened and the icon is drawn larger than it would be at the usual pitch
+
+#### Scenario: Room to spare
+- **WHEN** the usual row pitch leaves the icon 0.6 of a column or more
+- **THEN** the rows keep their usual pitch and the icon is as before
+
 ## MODIFIED Requirements
 
 ### Requirement: Weather Icon

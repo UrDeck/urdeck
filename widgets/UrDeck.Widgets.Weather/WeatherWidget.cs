@@ -28,6 +28,12 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
     /// <summary>A forecast icon's side as a share of its column's width, at most.</summary>
     private const float ForecastIconShare = 1.0f;
 
+    /// <summary>The least a forecast icon's side may be, as a share of its column's width, before the text rows are tightened.</summary>
+    private const float ForecastIconMinShare = 0.6f;
+
+    /// <summary>The tightest row pitch of a forecast column, as a multiple of the title text size (the usual one is 1.5).</summary>
+    private const float ForecastTightLine = 1.2f;
+
     /// <summary>What a paint puts on the card; two equal values draw the same pixels (apart from the moving icon).</summary>
     private sealed record Shown(
         ReadingText Temperature,
@@ -353,8 +359,14 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
 
         int days = forecast.Days.Length;
         float column = area.Width / days;
-        float rows = 5 * titleLine;
-        float room = area.Bottom - y - rows;
+
+        // The five text rows of a column keep their full pitch while the icon still gets a readable share of the column; when
+        // they would leave it less (a large title size, a short card) the rows are tightened, down to a line and a fifth.
+        float available = area.Bottom - y;
+        float rowLine = titleLine;
+        if (available - (5 * rowLine) < column * ForecastIconMinShare)
+            rowLine = Math.Max(theme.GetTextSize(TextStep.Title) * ForecastTightLine, (available - (column * ForecastIconMinShare)) / 5);
+        float room = available - (5 * rowLine);
         float icon = Math.Max(0, Math.Min(column * ForecastIconShare, room));
 
         // What is left over is split above and below the columns, so the block sits in the middle of the space.
@@ -370,11 +382,11 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
             float x = y;
 
             // A well, when the theme has one, behind the whole column; the column itself is laid out as without it.
-            Well.Draw(canvas, theme, SKRect.Create(left + (inset / 2), y - inset, column - inset, (5 * titleLine) + icon + (2 * inset)));
+            Well.Draw(canvas, theme, SKRect.Create(left + (inset / 2), y - inset, column - inset, (5 * rowLine) + icon + (2 * inset)));
 
-            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), day.Weekday.Value, TextStep.Title,
+            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), day.Weekday.Value, TextStep.Title,
                 day.Weekday.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
-            x += titleLine;
+            x += rowLine;
 
             var iconRect = SKRect.Create(left + ((column - icon) / 2), x, icon, icon);
             if (theme.Icons.NamesSet)
@@ -383,25 +395,25 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
                 DrawForecastIcon(canvas, iconRect, day.IconKey, animate, seconds);
             x += icon;
 
-            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), HighLow(day), TextStep.Title,
+            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), HighLow(day), TextStep.Title,
                 day.High.IsCurrent && day.Low.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
-            x += titleLine;
+            x += rowLine;
 
-            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), WithUnit(day.Chance), TextStep.Title,
+            TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), WithUnit(day.Chance), TextStep.Title,
                 day.Chance.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
-            x += titleLine;
+            x += rowLine;
 
             // The space of an amount that is not drawn stays empty, so the rows line up across the columns.
             if (day.HasRain)
             {
-                TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), RainText(day), TextStep.Title,
+                TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), RainText(day), TextStep.Title,
                     day.Rain.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
             }
 
-            x += titleLine;
+            x += rowLine;
             if (day.HasSnow)
             {
-                TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), titleLine), SnowText(day), TextStep.Title,
+                TextLine.Draw(canvas, theme, SKRect.Create(left + inset, x, column - (2 * inset), rowLine), SnowText(day), TextStep.Title,
                     day.Snow.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Center, VerticalAlign.Middle);
             }
         }

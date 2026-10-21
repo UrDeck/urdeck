@@ -448,4 +448,6 @@ was not captured; the layout does not depend on the scaling.
 
 One thing is off and is not caused by the icons: **the 4x4 card's forecast icons are small** (about 30 px in Carbon, a dot in
 Paper). The forecast gives each icon only what is left after five text rows (`room` in `DrawForecast`), and Paper's larger
-title size leaves almost nothing; the animated icons are sized the same way. Left for a change to the forecast layout.
+title size leaves almost nothing; the animated icons are sized the same way. Fixed in the same change: the five text rows are
+tightened (down to 1.2 times the title size) so the icon keeps at least 0.6 of its column, and the panel capture after the fix shows
+readable icons in both themes (roughly 50 px in Carbon and 40 px in Paper, read off the capture).

@@ -154,7 +154,7 @@ public sealed class WeatherThemedIconTests : IDisposable
     }
 
     /// <summary>A theme with the recording set (named or not), built on the default theme's typefaces.</summary>
-    private Theme SetTheme(IconTint tint = IconTint.Accent, bool namesSet = true)
+    private Theme SetTheme(IconTint tint = IconTint.Accent, bool namesSet = true, float? titleSize = null)
     {
         var theme = new Theme
         {
@@ -164,7 +164,7 @@ public sealed class WeatherThemedIconTests : IDisposable
             Gap = _base.Gap,
             LabelSize = _base.LabelSize,
             BodySize = _base.BodySize,
-            TitleSize = _base.TitleSize,
+            TitleSize = titleSize ?? _base.TitleSize,
             Ramp = [Cold, Hot],
             Icons = new IconTheme { Set = _set, NamesSet = namesSet, Tint = tint },
         };
@@ -362,4 +362,16 @@ public sealed class WeatherThemedIconTests : IDisposable
         Assert.True(widget.PosterCount > 0);
     }
 
+    [Fact]
+    public void ALargeTitleSize_TightensTheForecastRows_SoTheIconsStayReadable()
+    {
+        Fill("rain");
+        using var theme = SetTheme(titleSize: 40);
+
+        using SKBitmap bitmap = Paint(Widget(4), theme, 1100);
+
+        // Five columns of about 190 px: an icon of at least 0.6 of a column is over 10 000 pixels each, so over 40 000 in all.
+        int filled = Near(bitmap, theme.Accent, new SKRectI(0, 550, CardWidth, 1100));
+        Assert.True(filled > 40000, $"filled {filled}");
+    }
 }
