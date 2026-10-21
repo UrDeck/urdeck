@@ -438,3 +438,14 @@ width, so roughly 2 MB for the card, worked out from the sizes and not measured)
 
 Not measured here: the host's private memory with Rigline on the panel, and looking at Carbon and Paper at 100, 125 and 150 %
 (the glyph is a vector, so it scales with the card; the stroke is a fraction of the icon's size).
+
+### Looked at on the panel (`theme-icons`)
+
+On 2026-10-21 the Y70 panel was captured with Carbon and Paper at 125 % and 150 % (a 4x4 and a 4x2 weather card and four
+shortcuts, one with `theme:app/terminal`, one with a site that has no icon). The two scalings draw the same page, as they should:
+the glyphs, their stroke and the tint (accent; Paper's is orange) are right, and the shortcut glyph replaces the letter. 100 %
+was not captured; the layout does not depend on the scaling.
+
+One thing is off and is not caused by the icons: **the 4x4 card's forecast icons are small** (about 30 px in Carbon, a dot in
+Paper). The forecast gives each icon only what is left after five text rows (`room` in `DrawForecast`), and Paper's larger
+title size leaves almost nothing; the animated icons are sized the same way. Left for a change to the forecast layout.

@@ -35,6 +35,6 @@
 
 - [x] 6.1 Run the golden tests before redrawing anything; if a v1 golden changes because of the shortcut fallback, stop and decide; redraw Carbon and Paper (page and dock) and confirm the other themes are unchanged
 - [x] 6.2 Render Carbon and Paper with `urdeck-cli theme render` and compare weather and shortcut cards with the design board; adjust keys or the weather glyph scale where a glyph or its size is off
-- [ ] 6.3 Measure weather before and after (CPU with a card on the panel, private memory with the poster cache gone) and a glow render for the Rigline fixture; write `docs/perf/weather.md` and `docs/perf/theme-look.md` notes; look at the panel with Carbon and Paper at 100, 125 and 150 %
+- [x] 6.3 Measure weather before and after (CPU with a card on the panel, private memory with the poster cache gone) and a glow render for the Rigline fixture; write `docs/perf/weather.md` and `docs/perf/theme-look.md` notes; look at the panel with Carbon and Paper at 100, 125 and 150 %
 - [x] 6.4 Update `README`/`docs` and the site pages (`site/src/content/docs/`) for icon sets, `theme:` glyphs, the removed `animated` key and the Lucide notice (README and the licence file; no on-screen credit); update `STATUS.md` (PR 10, the Carbon and Paper follow-up, Prism's open icon question)
 - [x] 6.5 Run `dotnet build urdeck.slnx -c Release`, `dotnet test urdeck.slnx -c Release`, `dotnet format urdeck.slnx --severity warn` and `openspec validate --all --strict`; tick these tasks only when verified
