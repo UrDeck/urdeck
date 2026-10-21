@@ -367,7 +367,8 @@ capability; what is drawn with it is specified by the capabilities that draw it.
 - Gauge: the styles `meter`, `tach`, `marker` and `thickbar`, `sweep`, `segments`, `outline`, `ticks`, `scale`,
   `redline`, `gradient`, `glow`, `marker`, `crosshair`, `track`, `labelPosition`, `layout` (`auto` or `stacked`),
   `colorBy`, `valueTint`, `sparkline` and `status`
-- Icons: `set`, `stroke`, `tint`, `animated`, `glow`
+- Icons: `set`, `stroke`, `tint` (`accent`, `accent2`, `text`, `ramp`, `none` or a colour) and `glow`; there is no
+  `animated` value, icons from a set are still pictures
 - Background: `default` (a background's name), `static` (a gradient, a colour or a picture file) and `scrim`
 - Motion: `level`, the ceiling for animation a theme drives
 
@@ -382,8 +383,17 @@ The product has set some values aside for a later change; they are listed with t
 - **WHEN** a theme sets `card.compact.shape` to `circle`
 - **THEN** the loaded theme has a compact override with that shape and the other compact values absent
 
+#### Scenario: Icon values
+- **WHEN** a theme sets `icons.set` to `outline`, `icons.stroke` to 0.066 and `icons.tint` to `accent`
+- **THEN** the loaded theme has those values and the weather and shortcut cards draw with them as `icon-sets` and
+  `widget-weather` specify
+
+#### Scenario: A value that was removed
+- **WHEN** a theme sets `icons.animated`
+- **THEN** the key is reported as an unknown key, as any other unknown key is, and nothing else changes
+
 #### Scenario: Value from a group the product does not draw yet
-- **WHEN** a theme sets `icons.set` to `outline`
+- **WHEN** a theme sets `motion.level` to `reduced`
 - **THEN** the value is kept and no warning is logged
 
 ### Requirement: Format 2 Validation
