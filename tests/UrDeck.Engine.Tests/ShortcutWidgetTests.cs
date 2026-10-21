@@ -6,6 +6,7 @@ using SkiaSharp;
 using UrDeck.Engine.Config;
 using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Rendering;
+using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Data;
@@ -279,7 +280,8 @@ public sealed class ShortcutWidgetTests : IDisposable
         Assert.True(Count(given, IsAccent) > 0);
     }
 
-    [Fact]
+    // A rooted path is a drive or UNC path to the launch target parser, so a temp folder on Linux is no target at all.
+    [WindowsFact]
     public void AFolderTarget_IsRecognisedOnDisk()
     {
         _host.Icon = IconResult.None;
