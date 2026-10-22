@@ -43,7 +43,7 @@ public sealed class BuiltInShaderTests : IDisposable
     private static Dictionary<string, string[]> ThemePairs()
     {
         var texts = Directory.GetDirectories(ThemeFixtures).Where(f => File.Exists(Path.Combine(f, "theme.json"))).ToDictionary(folder => Path.GetFileName(folder), folder => File.ReadAllText(Path.Combine(folder, "theme.json")));
-        foreach (string name in new[] { "carbon", "paper", "prism", "obsidian" })
+        foreach (string name in new[] { "carbon", "paper", "prism", "obsidian", "ember", "blueprint" })
             texts[name] = EmbeddedThemeText(name);
 
         return texts.ToDictionary(t => t.Key, t =>

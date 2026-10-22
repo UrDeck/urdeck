@@ -11,8 +11,8 @@ shipping it measures that cost on the panel.
 - Ember (dark) and Blueprint (dark) become built-in themes: `src/UrDeck.Engine/Themes/Builtin/ember.json` and
   `blueprint.json` (flat layout), listed in `ThemeStore.BuiltInNames`, selectable with `"theme": "ember"` or
   `"theme": "blueprint"`.
-- Three font files are bundled: Barlow Condensed Bold (Ember), IBM Plex Mono Regular and Medium (Blueprint), with their OFL
-  texts and entries in `THIRD-PARTY-NOTICES.md`. Medium makes Blueprint's title weight 500 real.
+- Two font files are bundled: Barlow Condensed Bold (Ember) and IBM Plex Mono Regular (Blueprint), with their OFL
+  texts and entries in `THIRD-PARTY-NOTICES.md`. Blueprint's title is weight 400: `typography.fonts` has no title role, so a Medium file could not be named.
 - The drafts are corrected where they are known to be wrong: Ember's tick colour `#ffffff1c` (read as AARRGGBB, so opaque
   yellow) becomes `#1cffffff`; `valueScale` above 1 is dropped (no effect); Ember's body weight 500 (a Bold-only file, one
   warning on load) is set to the weight the file has; extra readout room below the middle for an arc with ticks and an

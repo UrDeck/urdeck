@@ -10,12 +10,12 @@ using Xunit;
 namespace UrDeck.Engine.Tests;
 
 /// <summary>
-/// The four themes the design pass drafted that are not built in (Fixtures/themes), kept as fixtures: they are not built in, but each must satisfy
+/// The two themes the design pass drafted that are not built in (Fixtures/themes), kept as fixtures: they are not built in, but each must satisfy
 /// the published schema and load without a warning.
 /// </summary>
 public sealed class ThemeDraftTests : IDisposable
 {
-    private static readonly string[] Drafts = ["rigline", "ember", "blueprint", "pop"];
+    private static readonly string[] Drafts = ["rigline", "pop"];
 
     private readonly string _root = Path.Combine(Path.GetTempPath(), "urdeck-draft-tests-" + Guid.NewGuid().ToString("N"));
     private readonly string _logBefore = UrDeckLog.LogPath;
@@ -87,7 +87,7 @@ public sealed class ThemeDraftTests : IDisposable
     [Fact]
     public void TheDrafts_AreNotBuiltIn()
     {
-        Assert.Equal(["default-dark", "default-light", "glass", "carbon", "paper", "prism", "obsidian"], ThemeStore.BuiltInNames);
+        Assert.Equal(["default-dark", "default-light", "glass", "carbon", "paper", "prism", "obsidian", "ember", "blueprint"], ThemeStore.BuiltInNames);
 
         var loaded = new ThemeStore(Path.Combine(_root, "themes")).Load("rigline");
 

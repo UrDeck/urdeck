@@ -40,6 +40,7 @@ internal static class ArcGauge
     private const float TachRedlineFrom = 0.85f;
     private const float CrosshairRatio = 0.12f;
     private const float MarkerMinimum = 8f;
+    private const float NeedleInnerRatio = 0.55f;
 
     internal readonly record struct ArcLayout(
         SKPoint Center,
@@ -262,10 +263,10 @@ internal static class ArcGauge
 
         if (shape == GaugeMarkerShape.Needle)
         {
+            // From inside the ring to the rim, not from the centre: the readout sits at the centre and the needle must not cross it.
+            var tail = new SKPoint(layout.Center.X + cos * layout.Radius * NeedleInnerRatio, layout.Center.Y + sin * layout.Radius * NeedleInnerRatio);
             using var line = GaugePaint.Stroke(Math.Max(2f, size * 0.25f), SKStrokeCap.Round, color);
-            c.Canvas.DrawLine(layout.Center, tip, line);
-            using var hub = new SKPaint { IsAntialias = true, Color = color };
-            c.Canvas.DrawCircle(layout.Center, size * 0.4f, hub);
+            c.Canvas.DrawLine(tail, tip, line);
             return;
         }
 

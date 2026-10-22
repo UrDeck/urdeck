@@ -454,3 +454,16 @@ Paper). The forecast gives each icon only what is left after five text rows (`ro
 title size leaves almost nothing; the animated icons are sized the same way. Fixed in the same change: the five text rows are
 tightened (down to 1.2 times the title size) so the icon keeps at least 0.6 of its column, and the panel capture after the fix shows
 readable icons in both themes (roughly 50 px in Carbon and 40 px in Paper, read off the capture).
+
+## Ember and Blueprint as built-in themes
+
+Measured 2026-10-21 on the 1100x3840 panel (installed copy, `scripts/Install-Local.ps1`, the owner's deck: a clock, the
+weather and seven stats gauges), private bytes and working set 25 s after start, CPU as a share of one core over the next 20 s.
+
+| Theme, background | Private bytes | Working set | CPU |
+|---|---|---|---|
+| Ember (`motion: full`), `embers` | 195 MB | 237 MB | 5.1 % |
+| Blueprint (`motion: reduced`), `plotter` | 194 MB | 240 MB | 4.5 % |
+
+Ember's glow (value glow, gauge glow, redline glow) stayed in line with the earlier Ember figure (180 MB, 5.9 %): CPU is lower,
+memory about 8 % higher on a heavier deck. Accepted; `gauge.glow.blur` and `valueGlow.alpha` are unchanged.

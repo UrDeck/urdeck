@@ -533,7 +533,7 @@ public sealed class CardChromeTests
     [Fact]
     public void TheGradientBack_IsMadeOnce_ForAHundredPaints()
     {
-        var loaded = new ThemeStore(FixtureFolder).Load("ember");
+        var loaded = new ThemeStore("").Load("ember");
         using var style = ResolvedCardStyle.Resolve(loaded, 275);
         using var theme = ThemeResolver.Resolve(loaded, 275);
         using var bitmap = new SKBitmap(550, 275);
@@ -549,7 +549,7 @@ public sealed class CardChromeTests
     [Fact]
     public void ASolidBack_IsNotAnImage()
     {
-        var loaded = new ThemeStore(FixtureFolder).Load("blueprint");
+        var loaded = new ThemeStore("").Load("blueprint");
         using var style = ResolvedCardStyle.Resolve(loaded, 275);
         using var bitmap = Paint(Empty, loaded, 550, 275, style);
 
@@ -559,7 +559,7 @@ public sealed class CardChromeTests
     [Fact]
     public void ADisposedStyle_ReleasesItsSizes()
     {
-        var loaded = new ThemeStore(FixtureFolder).Load("ember");
+        var loaded = new ThemeStore("").Load("ember");
         var style = ResolvedCardStyle.Resolve(loaded, 275);
         style.For(0, new System.Drawing.Size(100, 100));
         style.Dispose();

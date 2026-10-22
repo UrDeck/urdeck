@@ -36,8 +36,8 @@ themes folder.
 
 #### Scenario: Blueprint in its own fonts
 - **WHEN** `blueprint` is selected on a machine without IBM Plex Mono installed
-- **THEN** values, units, labels and body text are drawn in IBM Plex Mono Regular, titles in IBM Plex Mono Medium, and
-  nothing is logged about fonts or weights
+- **THEN** values, units, labels, body text and titles are drawn in IBM Plex Mono Regular (title weight 400: titles have no
+  font of their own), and nothing is logged about fonts or weights
 
 #### Scenario: Ember's tick colour
 - **WHEN** `ember` is loaded

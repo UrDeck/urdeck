@@ -1,7 +1,7 @@
 # Themes
 
 A theme is a folder holding one settings file and, optionally, font files. The theme decides how every card on a page
-looks; widgets only draw content. Seven themes are built in (`default-dark`, `default-light`, `glass` (frosted translucent cards on a blue background), `carbon` (near-black, hairline cards with corner marks, mono numerals, a phosphor accent) and `paper` (warm off-white, soft shadows, one vermilion accent)). `carbon` and `paper` use Instrument Sans and JetBrains Mono and default to the `contour` background, over their own still colour where shaders are unavailable; select one with `"theme": "carbon"` or `"theme": "paper"`. `prism` (thick frosted glass: a specular top edge, a sheen, light wide numerals, full-circle rings) uses Bricolage Grotesque, and `obsidian` (warm black, champagne hairlines, Didone numerals, a diamond-marker gauge, circular dock buttons) uses Bodoni Moda for values and Jost for the rest; both default to the `nebula` background over their own still gradient where shaders are unavailable and are selected with `"theme": "prism"` or `"theme": "obsidian"`. Your own go in a `themes`
+looks; widgets only draw content. Nine themes are built in (`default-dark`, `default-light`, `glass` (frosted translucent cards on a blue background), `carbon` (near-black, hairline cards with corner marks, mono numerals, a phosphor accent) and `paper` (warm off-white, soft shadows, one vermilion accent)). `carbon` and `paper` use Instrument Sans and JetBrains Mono and default to the `contour` background, over their own still colour where shaders are unavailable; select one with `"theme": "carbon"` or `"theme": "paper"`. `prism` (thick frosted glass: a specular top edge, a sheen, light wide numerals, full-circle rings) uses Bricolage Grotesque, and `obsidian` (warm black, champagne hairlines, Didone numerals, a diamond-marker gauge, circular dock buttons) uses Bodoni Moda for values and Jost for the rest; both default to the `nebula` background over their own still gradient where shaders are unavailable and are selected with `"theme": "prism"` or `"theme": "obsidian"`. `ember` (chamfered amber cards over a hatch, glowing condensed italic numerals, tach gauges with a red-line zone) uses Barlow Condensed Bold and defaults to the `embers` background over its own still gradient; `blueprint` (cyanotype ground with a drafting grid, dashed outlines, yellow corner marks, dimension-line dividers, a needle gauge) uses IBM Plex Mono and defaults to the `plotter` background over its own still colour; select them with `"theme": "ember"` or `"theme": "blueprint"`. Your own go in a `themes`
 folder next to `UrDeck.Host.exe`:
 
 ```
@@ -107,6 +107,8 @@ The built-in background shaders (`plasma`, `aurora`, `gradient`, `julia` and the
 | `paper` | `#e9e7e0`, `#dcd8cc`, `#e6c9b8`, `#e5502b` |
 | `prism` | `#10163a`, `#7b5cff`, `#19c6c0`, `#ff6aa8` |
 | `obsidian` | `#0a0908`, `#2a2114`, `#6b5528`, `#d9b86c` |
+| `ember` | `#0b0604`, `#5a1a07`, `#ff7a1a`, `#ffd9a0` |
+| `blueprint` | `#0c2d52`, `#123c6b`, `#9fd0ff`, `#ffd34d` |
 
 **It is the one value that is not taken from `default-dark`.** Every other value you leave out falls back to the default
 theme's, but a light theme written before backgrounds existed would then get the dark palette. A theme without
@@ -501,7 +503,7 @@ Tick numbers run 0 to 100. `labelPosition` `below` and `above` apply to arcs. Th
 | `gauge.marker.size` | 0.005 to 0.5 |  |  |
 | `gauge.marker.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
 | `gauge.marker.halo` | true or false |  | Dark ring round the marker. |
-| `gauge.crosshair` | true or false |  | Centre cross on dials (Blueprint). |
+| `gauge.crosshair` | true or false |  | Centre cross on dials. |
 | `gauge.track` | group |  | Overrides the default accentDim track. |
 | `gauge.track.color` | colour |  | #RRGGBB or #AARRGGBB (alpha first, as in v1). |
 | `gauge.track.widthRatio` | 0.1 to 2 | `1` | Track width relative to stroke.thickness. |
@@ -696,5 +698,5 @@ the rest only the tool reports.
 
 ## Bundled font
 
-`default-dark`, `default-light` and `glass` use Inter (variable); `carbon` and `paper` use Instrument Sans and JetBrains Mono, `prism` uses Bricolage Grotesque, `obsidian` uses Bodoni Moda and Jost (all variable). All are under the SIL Open Font License 1.1; the licence texts are in
-`src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`, `BricolageGrotesque-OFL.txt`, `BodoniModa-OFL.txt`, `Jost-OFL.txt`) and `THIRD-PARTY-NOTICES.md` lists them.
+`default-dark`, `default-light` and `glass` use Inter (variable); `carbon` and `paper` use Instrument Sans and JetBrains Mono, `prism` uses Bricolage Grotesque, `obsidian` uses Bodoni Moda and Jost (all variable), `ember` uses Barlow Condensed Bold and `blueprint` IBM Plex Mono Regular (static files). All are under the SIL Open Font License 1.1; the licence texts are in
+`src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`, `BricolageGrotesque-OFL.txt`, `BodoniModa-OFL.txt`, `Jost-OFL.txt`, `BarlowCondensed-OFL.txt`, `IBMPlexMono-OFL.txt`) and `THIRD-PARTY-NOTICES.md` lists them.
