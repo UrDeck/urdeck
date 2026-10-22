@@ -84,6 +84,41 @@ public class ConfigStoreTests : IDisposable
     }
 
     [Fact]
+    public void Motion_IsAbsentByDefault()
+    {
+        string path = Path.Combine(_dir, "urdeck-config.json");
+        using var store = new ConfigStore(path);
+
+        Assert.Null(store.Config.Motion);
+        Assert.DoesNotContain("motion", File.ReadAllText(path));
+    }
+
+    [Fact]
+    public void Motion_RoundTrips()
+    {
+        string path = Path.Combine(_dir, "urdeck-config.json");
+        File.WriteAllText(path, "{\"motion\":\"reduced\"}");
+        using var store = new ConfigStore(path);
+
+        Assert.Equal("reduced", store.Config.Motion);
+        store.Save();
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+        Assert.Equal("reduced", doc.RootElement.GetProperty("motion").GetString());
+    }
+
+    [Fact]
+    public void Motion_UnknownValueLoadsAndIsTreatedAsAbsent()
+    {
+        string path = Path.Combine(_dir, "urdeck-config.json");
+        File.WriteAllText(path, "{\"motion\":\"sideways\"}");
+        using var store = new ConfigStore(path);
+
+        Assert.Equal("sideways", store.Config.Motion);
+        Assert.Null(Motion.MotionPolicy.Parse(store.Config.Motion));
+    }
+
+    [Fact]
     public void Dock_IsAnEmptyList_WhenAbsentOrNull()
     {
         string path = Path.Combine(_dir, "urdeck-config.json");

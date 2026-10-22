@@ -286,15 +286,18 @@ internal sealed class SizedCardChrome : IDisposable
     /// <summary>A linear gradient across <paramref name="r"/> at an angle (0 left to right, 90 top to bottom), evenly spaced.</summary>
     internal static SKShader Linear(SKRect r, SKColor[] colors, float angleDegrees)
     {
+        var (start, end) = LinearPoints(r, angleDegrees);
+        return SKShader.CreateLinearGradient(start, end, colors, SKShaderTileMode.Clamp);
+    }
+
+    /// <summary>The end points <see cref="Linear"/> draws between; the host's moving border places its gradient with them too.</summary>
+    internal static (SKPoint Start, SKPoint End) LinearPoints(SKRect r, float angleDegrees)
+    {
         float a = angleDegrees * MathF.PI / 180;
         float dx = MathF.Cos(a), dy = MathF.Sin(a);
         float half = (MathF.Abs(dx) * r.Width + MathF.Abs(dy) * r.Height) / 2;
         var centre = new SKPoint(r.MidX, r.MidY);
-        return SKShader.CreateLinearGradient(
-            new SKPoint(centre.X - dx * half, centre.Y - dy * half),
-            new SKPoint(centre.X + dx * half, centre.Y + dy * half),
-            colors,
-            SKShaderTileMode.Clamp);
+        return (new SKPoint(centre.X - dx * half, centre.Y - dy * half), new SKPoint(centre.X + dx * half, centre.Y + dy * half));
     }
 
     public void Dispose()

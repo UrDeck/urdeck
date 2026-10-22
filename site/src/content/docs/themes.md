@@ -63,6 +63,18 @@ still gradient, colour or picture and a scrim, is drawn today when your configur
 `meta.pairsWith.backgrounds` lists the backgrounds that suit the theme, for a settings page to recommend. The
 [JSON Schema](/schemas/v2/theme.json) lists them for editor completion.
 
+## Motion
+
+`card.borderAnimate` moves a card's border: `"mode": "spin"` turns a conic `borderGradient` once round the card every `period`
+seconds, `"mode": "pulse"` breathes its opacity. The compositor draws it in 15 steps a second over a card that is never repainted
+for it, and it moves only while the display is on and the deck is shown. A `dashed` border stays still (finding `THEME057`).
+
+How much moves is the deck's *motion level*: `full`, `reduced` or `off`. You set it with `"motion"` in `urdeck-config.json`; without
+it the deck follows Windows' Animation effects setting (Settings, Accessibility, Visual effects), and a change of that setting applies
+at once. A theme's `motion.level` is a ceiling: the level is the lower of the two. Below `full` the border is drawn still, like a
+border without `borderAnimate`, and a moving [background](/docs/backgrounds/#theme-backgrounds) shader is drawn still too (the theme's
+ceiling does not touch the background; yours does). `"motion": "full"` overrides Windows: the deck moves even with its animations off.
+
 ## Icon sets
 
 A theme can name an icon set with `"icons": { "set": "outline" }`. The [weather](/docs/widgets/weather/) card then draws static outline glyphs for its conditions, and a [shortcut](/docs/widgets/shortcut/) can show a glyph with `"icon": "theme:app/terminal"`. `icons.stroke` sets the line width as a fraction of the icon's size, `icons.tint` the colour (`accent`, `accent2`, `text`, `ramp` for the colour of `colors.ramp` that suits the value shown, or a `#colour`) and `icons.glow` a blurred copy behind the glyph. There is no `icons.animated`: icons from a set are pictures.
@@ -87,4 +99,5 @@ It reads a theme by the same code the deck does, so the deck's log and the tool 
 adds checks only a tool can make: keys the deck does not read (with a suggestion), font files and their licences, backgrounds that
 do not exist, text contrast on the card fill and on every tint, and the metadata. `theme validate --builtin` checks the built-in
 themes, and they check clean. Every finding has a code that never changes meaning; each code, what it means and how to fix it is in the
-[theme reference on GitHub](https://github.com/UrDeck/urdeck/blob/main/docs/themes.md#checking-a-theme).
+[theme reference on GitHub](https://github.com/UrDeck/urdeck/blob/main/docs/themes.md#checking-a-theme). `THEME057` is `borderAnimate` on a
+dashed border, which the deck draws still.

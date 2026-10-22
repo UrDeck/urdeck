@@ -221,6 +221,9 @@ is the baseline's memory cost again.
 1. `borderAnimate: spin` is a compositor sprite with a **stepped** animation; the step rate is a host constant (15 per
    second), not a theme key. At 7 s per turn a step is 3.4 degrees. Whether the steps are visible was **not judged by
    eye**: one still capture was taken (`border-compositor.png`), nobody watched the panel.
+   **Eye check, 2026-10-21:** the owner watched the spike on the panel (150 %, Rigline's colours, 7 s per turn) at 15 and at
+   30 steps per second. 30 looks slightly better; 15 is fine ("it just doesn't change quite as quickly so it's not as
+   noticeable"). **15 is accepted** and is the host's constant. The border as built, with its numbers: `docs/perf/motion.md`.
 2. **The animation does not stop by itself.** `motion.level`, `reduceMotion`, display off and a hidden deck must each stop
    it (`StopAnimation`), as the background layer does for its frames. Not prototyped and not measured.
 3. The border is then drawn by the compositor, not by `WidgetPainter`, so a snapshot has to draw the same ring with Skia

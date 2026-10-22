@@ -38,6 +38,19 @@ internal sealed class CardShape : IDisposable
     }
 
     /// <summary>
+    /// The shape of <paramref name="style"/> on a card of <paramref name="size"/> whose corners reach <paramref name="reach"/>
+    /// pixels (the radius, or the chamfer's cut, already limited to half of the real card's smaller side), as the ring
+    /// picture of a moving border draws it.
+    /// </summary>
+    public static CardShape ForReach(ResolvedCardStyle style, float reach, System.Drawing.Size size)
+    {
+        var bounds = SKRect.Create(size.Width, size.Height);
+        if (style.Chamfer)
+            return new CardShape(bounds, null, Chamfer(bounds, reach, style.CutCorners));
+        return new CardShape(bounds, new SKRoundRect(bounds, reach, reach), null);
+    }
+
+    /// <summary>
     /// A rectangle with the <paramref name="corners"/> cut by <paramref name="cut"/> along each side. The path starts in the
     /// middle of the top edge, so a dash's joint falls on an edge and not on a corner.
     /// </summary>

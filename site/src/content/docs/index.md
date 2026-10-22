@@ -42,6 +42,7 @@ written to `urdeck.log`, next to the file. A missing file is created with defaul
 | `monitorName` | Which monitor to choose when none is remembered yet. See [The monitor](#the-monitor). |
 | `providers` | Optional settings per data provider, for example `"providers": { "system": { "intervalMs": 500 } }` reads the `system` provider every 500 ms instead of every 2000 ms. A value below the provider's minimum is raised to it. |
 | `pager` | How the page indicator shows, see [Pages](#pages). |
+| `motion` | How much the deck may move: `"full"`, `"reduced"` or `"off"`. Without it the deck follows Windows' Animation effects setting (off means `off`, on means `full`) and a change of that setting applies without a restart. `"full"` overrides Windows: the deck moves even with its animations off. A theme can lower the level further. Below `full`, a theme's animated border and a moving background shader are drawn still; the page slide and the press feedback are not affected. The log says `Motion: <level> (<what decided it>)`. |
 
 ## The grid
 

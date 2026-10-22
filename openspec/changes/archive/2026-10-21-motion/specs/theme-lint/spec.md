@@ -28,7 +28,7 @@ The rules between values that the deck applies when it loads a theme MUST each b
 
 #### Scenario: Several animations
 - **WHEN** a theme turns on two continuous animations
-- **THEN** a `THEME090` information finding says each repaints on every frame, and no warning is made
+- **THEN** a `THEME090` information finding says each costs CPU while it runs, and no warning is made
 
 #### Scenario: Animated dashed border
 - **WHEN** `card.borderStyle` is `dashed` and `card.borderAnimate.mode` is `pulse`

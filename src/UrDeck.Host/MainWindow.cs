@@ -14,6 +14,7 @@ using UrDeck.Engine.Config;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
 using UrDeck.Engine.Layout;
+using UrDeck.Engine.Motion;
 using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Themes;
@@ -40,6 +41,11 @@ public sealed class MainWindow : Window, ISettingsHost
     private readonly nint _hwnd;
     private readonly WindowFocus? _focus;
     private readonly DisplayPowerWatcher? _power;
+    private readonly WindowsAnimationWatcher? _animations;
+    private readonly MotionGate _gate;
+    private bool _windowsAnimations;
+    private MotionDecision _motion;
+    private bool _motionDecided;
     private readonly BackgroundLayer _backgroundLayer;
     private BackgroundSettings _backgroundSettings;
     private readonly Grid _root = new();
@@ -67,7 +73,7 @@ public sealed class MainWindow : Window, ISettingsHost
 
     /// <summary>What a built page depends on: the window size, the display scaling, the active theme and the dock's size.</summary>
     private readonly record struct LayoutKey(
-        System.Drawing.Size Screen, double Scale, LoadedTheme? Theme, IndicatorMode Mode, int PageCount, int DockCount);
+        System.Drawing.Size Screen, double Scale, LoadedTheme? Theme, IndicatorMode Mode, int PageCount, int DockCount, bool AnimateBorders);
 
     /// <summary>The placement state changed (UI thread); the name is the remembered display's, if there is one.</summary>
     internal event Action<PlacementState, string?>? PlacementChanged;
@@ -96,6 +102,9 @@ public sealed class MainWindow : Window, ISettingsHost
         _navigator = new PageNavigator(PageNames(), _configStore.Config.ActivePage);
         _pager = new PagerController(_root, _surface, _overlay, _frameClock, _navigator);
         _loadedTheme = LoadTheme();
+        _windowsAnimations = WindowsAnimationWatcher.Read();
+        _gate = new MotionGate(MotionLevel.Off);
+        UpdateMotion();
         _hwnd = WindowNative.GetWindowHandle(this);
         _plugins.Readings.ApplySettings(_configStore.Config.Providers);
         _plugins.Readings.ReadingsChanged += OnReadingsChanged;
@@ -132,7 +141,20 @@ public sealed class MainWindow : Window, ISettingsHost
         WindowCorners.Square(_hwnd);
         _power = DisplayPowerWatcher.Start(_hwnd);
         if (_power != null)
+        {
             _power.DisplayStateChanged += _backgroundLayer.SetDisplayOn;
+            _power.DisplayStateChanged += _gate.SetDisplayOn;
+        }
+
+        _animations = WindowsAnimationWatcher.Start(_hwnd);
+        if (_animations != null)
+        {
+            _animations.Changed += on =>
+            {
+                _windowsAnimations = on;
+                UpdateMotion();
+            };
+        }
 
         // One timer drives placement: the controller says after each call when it wants the next one.
         var seam = new PlacementSeam(this);
@@ -151,6 +173,7 @@ public sealed class MainWindow : Window, ISettingsHost
             // Themes are re-read on every config reload, so editing a theme and saving the config applies it.
             _loadedTheme = LoadTheme();
             _backgroundSettings = BackgroundSettings.Parse(_configStore.Config.Background);
+            UpdateMotion();
             _navigator.Reload(PageNames());
             _plugins.Readings.ApplySettings(_configStore.Config.Providers);
             ApplyBackground();
@@ -194,6 +217,27 @@ public sealed class MainWindow : Window, ISettingsHost
         _root.Background = brush;
         _background.Background = brush;
     }
+
+    /// <summary>
+    /// Decides the motion level again from the configuration, Windows' setting and the theme's ceiling. Logs only when the
+    /// effective level changes; a change that matters (the level the borders obey, or the one the background obeys) asks for a
+    /// rebuild, which rebuilds the page only when its animated borders change and the background only when its key does.
+    /// </summary>
+    private void UpdateMotion()
+    {
+        var before = _motion;
+        var decision = MotionPolicy.Decide(_configStore.Config.Motion, _windowsAnimations, _loadedTheme.Definition.Motion?.Level);
+        bool first = !_motionDecided;
+        _motion = decision;
+        _motionDecided = true;
+        if (first || decision.Effective != before.Effective)
+            UrDeckLog.Info($"Motion: {decision}");
+        _gate.SetLevel(decision.Effective);
+        if (!first && (decision.Effective != before.Effective || decision.User != before.User))
+            ScheduleRebuild();
+    }
+
+    private bool ThemeAnimatesBorders => _loadedTheme.Definition.Card?.BorderAnimate is { Mode: "spin" or "pulse" };
 
     private double Scale => _root.XamlRoot?.RasterizationScale ?? 1;
 
@@ -283,12 +327,14 @@ public sealed class MainWindow : Window, ISettingsHost
         else
             Activate();
         _backgroundLayer.SetVisible(true);
+        _gate.SetDeckShown(true);
     }
 
     private void HideDeck()
     {
         _pageHeld = true;
         _backgroundLayer.SetVisible(false);
+        _gate.SetDeckShown(false);
         AppWindow.Hide();
     }
 
@@ -370,7 +416,8 @@ public sealed class MainWindow : Window, ISettingsHost
 
         var config = _configStore.Config;
         var mode = config.Pager.GetIndicatorMode();
-        var key = new LayoutKey(screen, scale, _loadedTheme, mode, config.Pages.Count, config.Dock.Count);
+        var key = new LayoutKey(screen, scale, _loadedTheme, mode, config.Pages.Count, config.Dock.Count,
+            _motion.Effective == MotionLevel.Full && ThemeAnimatesBorders);
         if (key == _lastLayout)
             return;
         _lastLayout = key;
@@ -392,6 +439,8 @@ public sealed class MainWindow : Window, ISettingsHost
             config.Dock.Count > 0 ? _loadedTheme.Definition.Dock!.Height!.Value : 0);
         var theme = _theme;
         var press = PressStyle.Resolve(_loadedTheme);
+        // Below the full level a theme's moving border is drawn still, with the card, exactly as without borderAnimate.
+        var borderMotion = key.AnimateBorders ? _gate : null;
         double gap = _loadedTheme.Definition.Card!.Gap!.Value;
         UrDeckLog.Info($"Pages: {config.Pages.Count}, showing '{_navigator.Name}'; indicator {chrome.Mode}, {chrome.Rows} grid rows");
 
@@ -407,7 +456,7 @@ public sealed class MainWindow : Window, ISettingsHost
                 var entries = DockLayout.Select(config.Dock, _plugins.GetDescriptor);
                 var page = new PageConfig { Name = "Dock", Widgets = entries.Select(e => e.Config).ToList() };
                 var slots = DockLayout.Compute(chrome.Dock, entries, gap);
-                return new PageHost(page, slots, _plugins, dockTheme, dockCardStyle, CardOrder.Dock(slots.Count), press, _frameClock, scale, chrome.Dock);
+                return new PageHost(page, slots, _plugins, dockTheme, dockCardStyle, CardOrder.Dock(slots.Count), press, _frameClock, scale, borderMotion, chrome.Dock);
             };
         }
 
@@ -421,7 +470,7 @@ public sealed class MainWindow : Window, ISettingsHost
                 var page = config.Pages[index];
                 var layout = new GridLayoutManager(screen.Width, screen.Height, gap, chrome.Grid.Height)
                     .RenderWidgetLayout(page.Widgets, screen);
-                return new PageHost(page, layout, _plugins, theme, cardStyle, CardOrder.Assign(layout), press, _frameClock, scale);
+                return new PageHost(page, layout, _plugins, theme, cardStyle, CardOrder.Assign(layout), press, _frameClock, scale, borderMotion);
             },
             buildDock));
     }
@@ -430,7 +479,7 @@ public sealed class MainWindow : Window, ISettingsHost
     {
         var settings = _backgroundSettings;
         var theme = _loadedTheme;
-        var plan = BackgroundPlan.Resolve(settings, theme);
+        var plan = BackgroundPlan.Resolve(settings, theme, _motion.User);
         _backgroundLayer.Apply(
             plan.RequestKey(_shaders, _appDirectory),
             first => plan.Build(_shaders, _appDirectory, first),
@@ -500,6 +549,7 @@ public sealed class MainWindow : Window, ISettingsHost
         _pager.Shutdown();
         _frameClock.Shutdown();
         _power?.Dispose();
+        _animations?.Dispose();
         _backgroundLayer.Dispose();
         _pattern.Dispose();
         DisposeThemes();

@@ -141,3 +141,30 @@ border. Change it to "each costs CPU while it runs".
 None. A configuration without `motion` follows Windows, which on a default Windows install is `full`, so nothing changes
 for an existing user unless they turned animations off in Windows, in which case a moving background now stands still.
 That is intended; the release notes and the configuration docs say how to get it back (`"motion": "full"`).
+
+## Findings during apply
+
+- **Compact cards take the page card's `borderAnimate`.** The format has no `card.compact.borderAnimate` key (`ThemeCardCompactDefinition`
+  holds radius, border width, shape, strip and marks), so the compact style inherits the page card's animation and resolves only
+  what it overrides (its own border width, radius, shape). A compact card with `card.compact.borderWidth` 0 has no animation. Adding the key is a
+  format change; left out.
+- **A ring too big for its card is drawn at the card's size.** The nine-grid needs a card of two insets (corner reach + border
+  width + 1) on each side; a circle (compact dock slot) or a card as small as its corners is not, so `BorderRing` draws the ring
+  at that card's exact size and the host stretches it whole (the same split as the underlay's nine-grid and exact pictures).
+- **A conic `pulse` uses the conic picture, not a brush.** `BorderConicSource()` is made for any animated conic border; the
+  gradient brush is for solid and linear ones only.
+- **An unrelated configuration save rebuilds the page** (existing behaviour: a reload forces a rebuild), so the border sprites are
+  made again and the log has one more `Border animation started (page rebuilt)`; no `Motion:` or `Background` line, and the
+  background does not restart. Not changed here.
+- **Measured** (`docs/perf/motion.md`): inside the budget in every case; the first batch of the cost runs compared against the
+  shader-backed page, so the border's own cost was also measured with `"background": { "type": "none" }`, as S2 did.
+- **Windows' setting (3.1, 5.2), checked by the owner 2026-10-21:** toggling Settings, Accessibility, Visual effects, Animation effects
+  off and on delivers `WM_SETTINGCHANGE` to the deck window, `SPI_GETCLIENTAREAANIMATION` follows it, and the border stops and
+  resumes (`Windows: animation effects off`, `Motion: off (Windows animation setting)`, then back). No fallback needed.
+- **Display off and on (5.1):** a monitor-off timeout of one minute logged `Border animation stopped (display off)` and
+  `started (display on)`. The tray menu has no hide/show entry, so the hidden-deck path was not driven by hand; it goes through
+  the same gate as placement's `HideDeck`/`ShowDeck`. That run had `"background": none` in the scratch config, so the background's
+  own display-off lines were seen in the earlier run only.
+- **Panel look (5.5), owner, 2026-10-21:** swipes and presses at 100, 125 and 150 % looked right. With `"motion": "reduced"` set in the
+  configuration the border stands still, and removing it brings the motion back without a restart. The dock was not looked at
+  separately, and no corner difference between the still and the turning ring was reported.

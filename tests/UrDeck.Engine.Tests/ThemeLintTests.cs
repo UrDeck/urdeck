@@ -172,6 +172,7 @@ public sealed class ThemeLintTests : IDisposable
     [InlineData("THEME053", "widen card.gap")]
     [InlineData("THEME054", "Reduce the blur, offset or spread")]
     [InlineData("THEME055", "at least one pixel")]
+    [InlineData("THEME057", "Use a solid card.borderStyle")]
     public void A_line_of_the_deck_that_gives_no_fix_gets_one(string fixture, string fix)
     {
         var finding = Assert.Single(Check(Path.Combine(FixtureRoot, fixture, "fail")));

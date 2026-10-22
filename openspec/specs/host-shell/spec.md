@@ -207,6 +207,8 @@ The host MUST manage configuration via `urdeck-config.json`:
   matching), `model`, `path` and `selector` (the selector it was chosen with; absent when it was not chosen by a
   selector). The host writes it; it is absent from a default configuration until a display has been chosen. A user
   removes it to make the host choose again. Properties of it the host does not know are preserved across load and save
+- `motion` is the user's motion level: `full`, `reduced` or `off` (see motion). Absent means "follow Windows' animation
+  setting"; it is absent from a default configuration. Another value logs a warning and is treated as absent
 
 #### Scenario: Config file does not exist
 - **WHEN** the host starts with no `urdeck-config.json`
@@ -245,6 +247,14 @@ The host MUST manage configuration via `urdeck-config.json`:
 #### Scenario: Older configuration
 - **WHEN** a configuration written before this change, with `monitorName` and no `display`, is loaded
 - **THEN** it loads without a warning and the deck is on the display the selector chooses
+
+#### Scenario: Motion value
+- **WHEN** the file has `"motion": "off"`
+- **THEN** the effective motion level is `off` and the value is still in the file after a save
+
+#### Scenario: Unknown motion value
+- **WHEN** the file has `"motion": "slow"`
+- **THEN** a warning is logged and the deck follows Windows' animation setting
 
 ### Requirement: Application Entry Point
 The host MUST provide the application entry point with:

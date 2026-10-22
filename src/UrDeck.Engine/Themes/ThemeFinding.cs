@@ -109,6 +109,7 @@ public static class ThemeCodes
     public const string EffectReach = "THEME054";
     public const string Hairline = "THEME055";
     public const string CompactCapsule = "THEME056";
+    public const string AnimatedDashedBorder = "THEME057";
     public const string ContrastText = "THEME060";
     public const string ContrastTint = "THEME061";
     public const string ContrastMuted = "THEME062";

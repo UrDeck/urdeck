@@ -93,6 +93,9 @@ public sealed partial class ThemeCardDefinition
     /// The card values of a compact card: a copy of this card with the compact radius, border width and (round or chamfer)
     /// shape, and the compact strip and marks merged key by key over this card's.
     /// </summary>
+    /// <summary>A copy to change a value on (<see cref="ResolvedCardStyle.WithoutBorder"/>).</summary>
+    internal ThemeCardDefinition MemberwiseCloneForBorder() => (ThemeCardDefinition)MemberwiseClone();
+
     internal ThemeCardDefinition ForCompact(ThemeCardCompactDefinition compact)
     {
         var result = (ThemeCardDefinition)MemberwiseClone();

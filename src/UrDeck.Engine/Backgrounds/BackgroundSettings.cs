@@ -58,6 +58,25 @@ public sealed partial class BackgroundSettings
     {
     }
 
+    /// <summary>
+    /// The same setting with another speed: a shader at 0 is drawn still (the user's reduced motion, <see cref="BackgroundPlan.Resolve"/>).
+    /// A picture has no speed, so it is returned as it is.
+    /// </summary>
+    internal BackgroundSettings WithSpeed(double speed) => Kind != BackgroundKind.Shader || Speed == speed
+        ? this
+        : new()
+        {
+            Kind = Kind,
+            IsExplicit = IsExplicit,
+            IsInvalid = IsInvalid,
+            Name = Name,
+            Path = Path,
+            Speed = speed,
+            Scale = Scale,
+            Colors = Colors,
+            Parameters = Parameters,
+        };
+
     public BackgroundKind Kind { get; private init; }
 
     /// <summary>True when the configuration said something (a shader, an image, <c>none</c>, or a value that failed); false for no choice.</summary>
