@@ -57,4 +57,4 @@
 - [x] 8.1 `dotnet build urdeck.slnx -c Release` with 0 warnings; `dotnet test urdeck.slnx -c Release`; `dotnet format urdeck.slnx --severity warn --verify-no-changes`; Linux test projects on WSL
 - [x] 8.2 `openspec validate themes-ember-blueprint --strict`
 - [x] 8.3 Update `docs/design/look-and-feel/STATUS.md`: PR 14 row done, follow-ups (lean in the fit, readout room key if missing)
-- [ ] 8.4 Pull request `feat(theme): Ember and Blueprint built-in themes` with the tuning table, contrast table, perf numbers and pictures
+- [x] 8.4 Pull request `feat(theme): Ember and Blueprint built-in themes` with the tuning table, contrast table, perf numbers and pictures
