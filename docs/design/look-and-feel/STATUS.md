@@ -1,6 +1,6 @@
 # Look-and-feel work: status and how to pick it up
 
-**Updated 2026-10-19** (`themes-carbon-paper` proposed; the order of the remaining work is in "Plan from here"). The other files in this folder are a snapshot of the original design handoff and are not edited.
+**Updated 2026-10-22** (`themes-pop` archived; Rigline is the last theme; the order of the remaining work is in "Plan from here"). The other files in this folder are a snapshot of the original design handoff and are not edited.
 This file says what has been built, what changed on the way, and what is next. Where it disagrees with them, this file
 and the OpenSpec specs (`openspec/specs/`) win.
 
@@ -35,7 +35,8 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 12: Carbon and Paper | `themes-carbon-paper` | **Done**, archived (#66). Carbon and Paper are built in with Instrument Sans and JetBrains Mono; the fixture copies are gone and their goldens redrawn in the real fonts (`carbon-dock.png` added). Carbon's dot grid waits for `page-pattern`, which redraws Carbon's goldens and gets a second panel look. Compared on the panel with the board; the differences that only the engine can fix are the follow-ups below |
 | PR 13: Prism and Obsidian | `themes-prism-obsidian` | **Done** (pending the pull request). Both are built in with Bricolage Grotesque, Bodoni Moda and Jost; the fixture copies are gone, their goldens redrawn in the real fonts, `valueScale` dropped (no effect above 1). Both validate clean (no contrast finding; Prism's shadow was scaled to the gap to clear `THEME054`, the drawn look is the limited one the owner approved). **Prism keeps the `outline` icons** (about 0 % CPU; Meteocons stays an option). Prism paints at 1.88x `default-dark` (accepted 1.83x, within the 0.05 noise; `docs/perf/card-chrome.md`). Looked at on the panel at 100 % and 150 %: approved, no value tuned. Follow-up found: Prism over a bright background (teal, pink) has low text contrast, as any glass card does |
 | PR 14: Ember and Blueprint | `themes-ember-blueprint` | **Done** (pending the pull request). Looked at on the panel: approved. The tach and marker needle now runs from 55 % of the radius to the rim, with no hub (it crossed the readout), and Blueprint's `gauge.crosshair` is off. Both built in with Barlow Condensed Bold and IBM Plex Mono Regular; fixtures gone, goldens redrawn (`ember-dock` added); `valueScale` dropped, Ember tick colour fixed to `#1cffffff`, Ember body weight 700; both validate clean. Follow-ups: `typography.fonts` has no title or body role, so Blueprint's title is weight 400, not Medium; whether the fit counts a slanted value's lean (Ember's clock numerals nearly touch the card edge at 4x2) |
-| PR 15 to 16: the other two themes | one change per pair | After the knobs they use. Order: Pop; Rigline last |
+| PR 15: Pop | `themes-pop` | **Done**, archived (#78, `openspec/changes/archive/2026-10-22-themes-pop`). Looked at on the panel at 100 % and 150 %: approved, no value tuned beyond the contrast fixes. Built in with Archivo (variable, weight 900 for values; Archivo Black not bundled); fixture gone, `pop-page` and `pop-dock` redrawn in the real font; `valueScale` dropped; blue tint lightened `#3b5bff` to `#5b7bff` (`THEME061`, ink was 3.7:1, now 5.15:1) and `warning` changed from the yellow card fill to orange `#ff9f1c`; validates clean. Stats at 2x1 shows a number with no bar (single position), so the site deck shows no thick bar. The `theme` spec's Ember and Blueprint scenarios had empty bodies after an earlier sync; filled in here |
+| PR 16: Rigline | one change | **Next, and last.** The only drafted theme still a fixture |
 | PR 17: docs, site gallery, media | with each theme, rest at the end | The site needs a deck and pictures per theme (`site/MEDIA-CHECKLIST.md`) |
 | PR 18: preview renderer and catalog seams | `theme-preview` | `ThemeCatalog`, `BackgroundCatalog` and `PairingIndex` exist; `PreviewRenderer` does not |
 
@@ -46,7 +47,7 @@ now        themes-carbon-paper          Carbon and Paper built in, Carbon withou
 parallel   theme-cli                    another worktree; owns the contrast rule
 done       page-pattern                 Carbon's dots are drawn (goldens redrawn); Ember and Blueprint are unblocked
            theme-icons                  every theme gets themed icons (done, see PR 10)
-any time   Prism + Obsidian, Pop        need nothing unbuilt (icons fall back to the widgets' own), slot in between
+done       Prism + Obsidian, Pop        built in (see PR 13 and PR 15)
 done       motion                       the border turns, `motion` is a setting; Rigline is unblocked
 next       Rigline                      its own theme change
 ```
@@ -68,7 +69,7 @@ next       Rigline                      its own theme change
 
 - **Keys:** only the keys the eight drafts use were built. The rest, with definitions, are in the deferred-keys document.
   `card.accentStrip.glow` and `card.compact.cornerMarks` were added back (Rigline needs the former; the latter was missing).
-- **Drafted themes are test fixtures** (`tests/UrDeck.Engine.Tests/Fixtures/themes/`), not built-ins. Each moves to
+- **Drafted themes are test fixtures** (`tests/UrDeck.Engine.Tests/Fixtures/themes/`), not built-ins; only Rigline is left. Each moved to
   `src/UrDeck.Engine/Themes/Builtin/<name>.json` (flat layout) in its theme change. Four edits were made to the drafts: Prism lost
   `card.blur`, Rigline lost `valueFill.animate` and `pattern.scroll`, and Pop takes its numerals from Archivo at weight 900.
 - **Gauge styles** `meter`, `tach`, `marker`, `thickbar` are accepted in a theme and draw as `ring` until the gauge change.

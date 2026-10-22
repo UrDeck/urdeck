@@ -7,10 +7,7 @@
 == built-in obsidian
 == built-in ember
 == built-in blueprint
-== fixture pop
-WARN Theme 'pop': font 'Archivo-Variable.ttf' for the value role (typography.fonts.value) could not be loaded; using typography.font.
-WARN Theme 'pop': font 'Archivo-Variable.ttf' could not be loaded; using the default theme's font.
-WARN Theme 'pop': font 'Archivo-Variable.ttf' for the unit role (typography.fonts.unit) could not be loaded; using typography.font.
+== built-in pop
 == fixture rigline
 WARN Theme 'rigline': font 'ChakraPetch-Bold.ttf' could not be loaded; using the default theme's font.
 == failing colour

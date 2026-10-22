@@ -88,7 +88,7 @@ public sealed class GaugeThemeTests : IDisposable
     [Fact]
     public void AV1Theme_GivesTheEmptyGaugeTheme()
     {
-        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper" or "prism" or "obsidian" or "ember" or "blueprint")))
+        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper" or "prism" or "obsidian" or "ember" or "blueprint" or "pop")))
         {
             using var theme = ThemeResolver.Resolve(new ThemeStore("").Load(name), 275);
 
