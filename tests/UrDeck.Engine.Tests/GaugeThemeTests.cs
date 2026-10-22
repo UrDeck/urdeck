@@ -28,8 +28,6 @@ public sealed class GaugeThemeTests : IDisposable
         Directory.Delete(_root, recursive: true);
     }
 
-    private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
-
     private static string Log => File.Exists(UrDeckLog.LogPath) ? File.ReadAllText(UrDeckLog.LogPath) : "";
 
     private Theme Resolve(string json, float cellPx = 275)
@@ -88,7 +86,7 @@ public sealed class GaugeThemeTests : IDisposable
     [Fact]
     public void AV1Theme_GivesTheEmptyGaugeTheme()
     {
-        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper" or "prism" or "obsidian" or "ember" or "blueprint" or "pop")))
+        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper" or "prism" or "obsidian" or "ember" or "blueprint" or "pop" or "rigline")))
         {
             using var theme = ThemeResolver.Resolve(new ThemeStore("").Load(name), 275);
 
@@ -162,7 +160,6 @@ public sealed class GaugeThemeTests : IDisposable
     [Fact]
     public void EachDraftedTheme_ResolvesItsGaugeValues()
     {
-        var store = new ThemeStore(FixtureFolder);
         var builtIns = new ThemeStore("");
         var expected = new Dictionary<string, GaugeStyle>
         {
@@ -178,7 +175,7 @@ public sealed class GaugeThemeTests : IDisposable
 
         foreach (var (name, style) in expected)
         {
-            using var theme = ThemeResolver.Resolve((ThemeStore.BuiltInNames.Contains(name) ? builtIns : store).Load(name), 275);
+            using var theme = ThemeResolver.Resolve(builtIns.Load(name), 275);
 
             Assert.Equal(style, theme.GaugeStyle);
             Assert.False(theme.Gauge.IsEmpty, name);
@@ -198,7 +195,7 @@ public sealed class GaugeThemeTests : IDisposable
         Assert.Equal(GaugeLabelPosition.Below, prism.Gauge.LabelPosition);
         Assert.Equal(new GaugeSweep(-90, 360), prism.Gauge.Sweep);
 
-        using var rigline = ThemeResolver.Resolve(store.Load("rigline"), 275);
+        using var rigline = ThemeResolver.Resolve(builtIns.Load("rigline"), 275);
         Assert.True(rigline.Gauge.ColorByRamp);
         Assert.Equal(3, rigline.Ramp.Count);
 

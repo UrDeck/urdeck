@@ -19,10 +19,8 @@ public sealed class PatternTileTests
 
     private static readonly System.Drawing.Size Window = new(Width, Height);
 
-    private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
-
     private static LoadedTheme Load(string name) =>
-        ThemeStore.BuiltInNames.Contains(name) ? new ThemeStore("").Load(name) : new ThemeStore(FixtureFolder).Load(name);
+        new ThemeStore("").Load(name);
 
     private static LoadedTheme With(string kind, double spacing, double thickness, Action<ThemePatternDefinition>? more = null)
     {

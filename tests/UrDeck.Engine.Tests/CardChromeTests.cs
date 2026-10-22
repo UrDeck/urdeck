@@ -19,8 +19,6 @@ public sealed class CardChromeTests
 {
     private static readonly LoadedTheme Dark = new ThemeStore("").Load(ThemeStore.DefaultName);
 
-    private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
-
     private static readonly SKColor[] Tints = [SKColor.Parse("#ff0000"), SKColor.Parse("#00ff00"), SKColor.Parse("#0000ff")];
 
     /// <summary>The default theme with <paramref name="card"/> and <paramref name="colors"/> over it, as a theme of its own (its own warnings).</summary>
@@ -118,7 +116,7 @@ public sealed class CardChromeTests
     [InlineData("rigline")]
     public void EveryDraft_IsNotPlain(string name)
     {
-        using var style = ResolvedCardStyle.Resolve(new ThemeStore(ThemeStore.BuiltInNames.Contains(name) ? "" : FixtureFolder).Load(name), 275);
+        using var style = ResolvedCardStyle.Resolve(new ThemeStore("").Load(name), 275);
 
         Assert.False(style.IsPlain);
     }
@@ -520,7 +518,7 @@ public sealed class CardChromeTests
     [Fact]
     public void AConicBorder_StartsAtTheRight_AndDoesNotChangeBetweenPaints()
     {
-        var loaded = new ThemeStore(FixtureFolder).Load("rigline");
+        var loaded = new ThemeStore("").Load("rigline");
         using var style = ResolvedCardStyle.Resolve(loaded, 275);
         using var first = Paint(Empty, loaded, 550, 275, style);
         using var second = Paint(Empty, loaded, 550, 275, style);

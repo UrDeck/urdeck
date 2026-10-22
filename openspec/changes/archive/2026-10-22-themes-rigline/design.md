@@ -18,7 +18,8 @@ exist in `src/UrDeck.Engine/Backgrounds/Builtin` and each lists `rigline` in its
 **Goals:**
 - Rigline loads from the engine alone, in its own font, with no warning, and `urdeck-cli theme validate` is clean.
 - The whole theme (not only its border) is measured on the panel and accepted before it ships.
-- The engine, host and SDK are not changed; anything only they can fix is recorded as a follow-up.
+- The engine and host are not changed; anything only they can fix is recorded as a follow-up. One exception, found on
+  the panel: the Clock's seconds moved the time (decision 12), which only the SDK's `Readout` can fix.
 
 **Non-Goals:**
 - `card.compact.borderAnimate`, `valueFill.animate`, `pattern.scroll`, widget-level motion; a theme picker.
@@ -105,12 +106,39 @@ the site deck. Each changed value is recorded (key, draft, final, reason). The s
 `STATUS.md` lists a moving shader on the GPU past the 4-hour time wrap as never verified. Rigline pairs with moving
 shaders, so an optional task runs `horizon` for more than four hours and checks for a jump or a stall.
 
+### 12. The Clock's seconds moved the time
+
+With `showSeconds` the value is fitted to the width that is left after the unit, and the unit's width was measured with
+the font's own digit widths. In Chakra Petch the 0 is wider than the 8, so the fit (and so the size of the time) changed
+from second to second (a height of 218 at `:41`, 213 at `:44`, 209 at `:00`). The Clock's `KeepSize` assumed `88` is the
+widest and was not enough. `Readout` now measures and draws a unit that contains digits with the widest digit advance for
+every digit (as it always did for the value) and has `ReadoutOptions.WidestUnit` for units that differ in more than
+digits (`AM` and `PM`). The Clock passes its widest suffix and `KeepSize` is removed. Chosen over a Rigline-only
+workaround (`showSeconds: false`) because any proportional font shows it. The change is to the MIT SDK; no theme golden
+other than Rigline's moves.
+
+### 13. Tuning record (owner, on the 1100x3840 panel)
+
+| Key | Draft | Final | Reason |
+|---|---|---|---|
+| `typography.weights.body` | 500 | 700 | the file has only Bold; no weight warning |
+| `card.fillGradient.colors` | `#141026`, `#0b0916` | `#73141026`, `#730b0916` (about 45 % opaque) | the animated background is mostly covered by cards; the owner asked for much more translucency |
+| `colors.backgroundPalette[1]` | `#2a1a5e` | `#5a1a5e` | a warmer horizon glow under the sun |
+| `colors.backgroundPalette[2]` | `#7a5cff` | `#ff6a3d` | the sun is this slot; violet read as a purple sun, the owner wanted an orange-red glow |
+| `card.glow.blur` | 0.24 | 0.06 | translucent cards limit the glow to the gap (`THEME054`: 99 px limited to 25 px); fitted to the gap |
+| `card.glow.alpha` | 0.35 | 0.45 | the tighter halo needs a little more strength |
+
+Looked at and approved as is: the font, the conic seam at the start angle, the glow colour `#aa7a5c`, the body weight
+(no real 500 file needed), the compact tile strips with the turning border (`card.compact.borderAnimate` is not needed),
+and no clipping of the slant on the Clock (the slant stays 10). The contrast table (task 6.1) is against the card's
+base colour; the cards are translucent, so the contrast over the background depends on the background (the same as
+Prism).
+
 ## Risks / Trade-offs
 
 - [The sum of effects costs more than the border alone] -> Decision 4 measures it; levers are named.
 - [Ramp or conic colours fail contrast on the fill] -> Lighten and record (decision 7).
 - [Slant clips on small cards or at 150 %] -> Decision 6.
-- [Four theme changes edit the same lists and files] -> Rebase on whichever lands first; this one lands last.
 - [A conic seam is visible at the start angle] -> The first and last stops are equal (`#ff3ea5`); verify on the panel.
 
 ## Migration Plan

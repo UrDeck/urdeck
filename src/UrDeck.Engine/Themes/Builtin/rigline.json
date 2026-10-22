@@ -41,8 +41,8 @@
     ],
     "backgroundPalette": [
       "#07060d",
-      "#2a1a5e",
-      "#7a5cff",
+      "#5a1a5e",
+      "#ff6a3d",
       "#19e6ff"
     ]
   },
@@ -53,8 +53,8 @@
     "padding": 0.127,
     "fillGradient": {
       "colors": [
-        "#141026",
-        "#0b0916"
+        "#73141026",
+        "#730b0916"
       ],
       "angle": 70
     },
@@ -74,9 +74,9 @@
       "period": 7
     },
     "glow": {
-      "blur": 0.24,
+      "blur": 0.06,
       "color": "#aa7a5c",
-      "alpha": 0.35
+      "alpha": 0.45
     },
     "compact": {
       "accentStrip": {
@@ -111,7 +111,7 @@
       "value": 700,
       "unit": 700,
       "label": 700,
-      "body": 500,
+      "body": 700,
       "title": 700
     },
     "labelSize": 0.1,

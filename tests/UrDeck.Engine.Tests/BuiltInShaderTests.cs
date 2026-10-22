@@ -24,8 +24,6 @@ public sealed class BuiltInShaderTests : IDisposable
     // added later are periodic.
     public static TheoryData<string> PeriodicNames() => [.. ShaderStore.BuiltInNames.Except(["plasma", "aurora", "gradient", "julia"])];
 
-    private static string ThemeFixtures => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
-
     private static string[] ReadNames(JsonElement list) => [.. list.EnumerateArray().Select(e => e.GetString()!)];
 
     // Background name -> the themes its manifest names.
@@ -38,12 +36,11 @@ public sealed class BuiltInShaderTests : IDisposable
                 : [];
         });
 
-    // Theme name -> the backgrounds its meta names: the built-in themes that have a pairing list, and the drafted themes
-    // (fixtures) until they ship.
+    // Theme name -> the backgrounds its meta names: the built-in themes that have a pairing list.
     private static Dictionary<string, string[]> ThemePairs()
     {
-        var texts = Directory.GetDirectories(ThemeFixtures).Where(f => File.Exists(Path.Combine(f, "theme.json"))).ToDictionary(folder => Path.GetFileName(folder), folder => File.ReadAllText(Path.Combine(folder, "theme.json")));
-        foreach (string name in new[] { "carbon", "paper", "prism", "obsidian", "ember", "blueprint", "pop" })
+        var texts = new Dictionary<string, string>();
+        foreach (string name in new[] { "carbon", "paper", "prism", "obsidian", "ember", "blueprint", "pop", "rigline" })
             texts[name] = EmbeddedThemeText(name);
 
         return texts.ToDictionary(t => t.Key, t =>

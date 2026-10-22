@@ -10,12 +10,11 @@ using Xunit;
 namespace UrDeck.Engine.Tests;
 
 /// <summary>
-/// The theme the design pass drafted that are not built in (Fixtures/themes), kept as fixtures: they are not built in, but each must satisfy
-/// the published schema and load without a warning.
+/// The built-in format 2 themes against the published schema: each must satisfy it and load without a warning.
 /// </summary>
 public sealed class ThemeDraftTests : IDisposable
 {
-    private static readonly string[] Drafts = ["rigline"];
+    private static readonly string[] Drafts = ["carbon", "paper", "prism", "obsidian", "ember", "blueprint", "pop", "rigline"];
 
     private readonly string _root = Path.Combine(Path.GetTempPath(), "urdeck-draft-tests-" + Guid.NewGuid().ToString("N"));
     private readonly string _logBefore = UrDeckLog.LogPath;
@@ -34,8 +33,6 @@ public sealed class ThemeDraftTests : IDisposable
 
     public static TheoryData<string> DraftNames() => [.. Drafts];
 
-    private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
-
     private static string Log => File.Exists(UrDeckLog.LogPath) ? File.ReadAllText(UrDeckLog.LogPath) : "";
 
     // Built once: the library registers a schema under its $id, and a second copy is refused.
@@ -49,6 +46,13 @@ public sealed class ThemeDraftTests : IDisposable
         return JsonSchema.FromText(File.ReadAllText(Path.Combine(root, "docs", "schemas", "v2", "theme.json")));
     }
 
+    private static string BuiltInText(string name)
+    {
+        using var stream = ThemeStore.OpenBuiltInFile(name + ".json")!;
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
+    }
+
     private static bool IsValid(string json)
     {
         using var document = JsonDocument.Parse(json);
@@ -57,9 +61,9 @@ public sealed class ThemeDraftTests : IDisposable
 
     [Theory]
     [MemberData(nameof(DraftNames))]
-    public void ADraft_SatisfiesTheSchema(string name)
+    public void ABuiltIn_SatisfiesTheSchema(string name)
     {
-        Assert.True(IsValid(File.ReadAllText(Path.Combine(FixtureFolder, name, ThemeStore.SettingsFileName))));
+        Assert.True(IsValid(BuiltInText(name)));
     }
 
     [Fact]
@@ -74,26 +78,13 @@ public sealed class ThemeDraftTests : IDisposable
 
     [Theory]
     [MemberData(nameof(DraftNames))]
-    public void ADraft_LoadsWithNoWarning(string name)
+    public void ABuiltIn_LoadsWithNoWarning(string name)
     {
-        var loaded = new ThemeStore(FixtureFolder).Load(name);
+        var loaded = new ThemeStore("").Load(name);
 
         Assert.Equal(name, loaded.Name);
         Assert.Equal(2, loaded.Definition.Format);
         Assert.NotNull(loaded.Definition.Meta?.Name);
         Assert.Empty(Log);
-    }
-
-    [Fact]
-    public void TheDrafts_AreNotBuiltIn()
-    {
-        Assert.Equal(["default-dark", "default-light", "glass", "carbon", "paper", "prism", "obsidian", "ember", "blueprint", "pop"], ThemeStore.BuiltInNames);
-
-        var loaded = new ThemeStore(Path.Combine(_root, "themes")).Load("rigline");
-
-        Assert.Equal(ThemeStore.DefaultName, loaded.Name);
-        Assert.Contains("Theme 'rigline' was not found", Log, StringComparison.Ordinal);
-        foreach (string name in Drafts)
-            Assert.Null(ThemeStore.LoadBuiltIn(name));
     }
 }
