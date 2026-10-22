@@ -72,6 +72,7 @@ public class ClockWidget : Widget<ClockConfig>
             Unit = Suffix(context.Time, is12h),
             UnitPlacement = UnitPlacement.Baseline,
             WidestValue = WidestTime,
+            WidestUnit = WidestSuffix(is12h),
             Vertical = VerticalAlign.Bottom,
             ValueColor = Config.TextColor != null && SKColor.TryParse(Config.TextColor, out var custom) ? custom : null,
             Scale = (float)Config.FontSize,
@@ -88,7 +89,6 @@ public class ClockWidget : Widget<ClockConfig>
         }
 
         var timeSlot = new SKRect(content.Left, content.Top, content.Right, Math.Max(content.Top + 1, content.Bottom - dateHeight - gap));
-        options = KeepSize(theme, timeSlot, timeText, options, is12h);
         var timeRect = Readout.Measure(theme, timeSlot, timeText, options);
         float blockHeight = timeRect.Height + gap + dateHeight;
         float shift = (content.Height - blockHeight) / 2f;
@@ -242,36 +242,6 @@ public class ClockWidget : Widget<ClockConfig>
 
     /// <summary>The widest the small text gets, so the size does not change from second to second; null for the usual AM or PM.</summary>
     private string? WidestSuffix(bool is12h) => Config.ShowSeconds ? (is12h ? "88 AM" : "88") : null;
-
-    /// <summary>With seconds the unit's width changes with the digits; the time is drawn at the size the widest unit gives.</summary>
-    private ReadoutOptions KeepSize(Theme theme, SKRect slot, string timeText, ReadoutOptions options, bool is12h)
-    {
-        if (!Config.ShowSeconds)
-            return options;
-
-        var widest = new ReadoutOptions
-        {
-            Unit = WidestSuffix(is12h),
-            UnitPlacement = options.UnitPlacement,
-            WidestValue = options.WidestValue,
-            Vertical = options.Vertical,
-            Scale = options.Scale,
-        };
-        float wide = Readout.Measure(theme, slot, timeText, widest).Height;
-        float actual = Readout.Measure(theme, slot, timeText, options).Height;
-        if (actual <= 0 || wide <= 0 || wide >= actual)
-            return options;
-
-        return new ReadoutOptions
-        {
-            Unit = options.Unit,
-            UnitPlacement = options.UnitPlacement,
-            WidestValue = options.WidestValue,
-            Vertical = options.Vertical,
-            ValueColor = options.ValueColor,
-            Scale = options.Scale * wide / actual,
-        };
-    }
 
     private static DateTime TruncateToSecond(DateTime time) =>
         new(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second, time.Kind);

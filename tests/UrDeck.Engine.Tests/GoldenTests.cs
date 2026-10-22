@@ -21,12 +21,10 @@ public sealed class GoldenTests
     private const int Width = 1100;
     private const int Height = 1920;
 
-    private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
-
-    private static SKBitmap Render(string theme, bool dock = false, bool draft = false)
+    private static SKBitmap Render(string theme, bool dock = false)
     {
         using var page = SamplePage.Build();
-        var loaded = new ThemeStore(draft && !ThemeStore.BuiltInNames.Contains(theme) ? FixtureFolder : "").Load(theme);
+        var loaded = new ThemeStore("").Load(theme);
         return ThemePreview.Render(loaded, page, Width, Height, dock);
     }
 
@@ -65,19 +63,7 @@ public sealed class GoldenTests
         GoldenImage.Compare(bitmap, "default-dark-dock");
     }
 
-    /// <summary>
-    /// The draft themes (test fixtures) with what card chrome draws of them so far: each later chrome change that draws
-    /// more of a draft rewrites its picture, and says so.
-    /// </summary>
-    [WindowsGlyphTheory]
-    [InlineData("rigline")]
-    public void Draft_Page(string theme)
-    {
-        using var bitmap = Render(theme, draft: true);
-        GoldenImage.Compare(bitmap, $"{theme}-page");
-    }
-
-    /// <summary>Carbon, Paper, Prism, Obsidian, Ember, Blueprint and Pop, the built-in format 2 themes, in their own fonts.</summary>
+    /// <summary>Carbon, Paper, Prism, Obsidian, Ember, Blueprint, Pop and Rigline, the built-in format 2 themes, in their own fonts.</summary>
     [WindowsGlyphTheory]
     [InlineData("carbon")]
     [InlineData("paper")]
@@ -86,6 +72,7 @@ public sealed class GoldenTests
     [InlineData("ember")]
     [InlineData("blueprint")]
     [InlineData("pop")]
+    [InlineData("rigline")]
     public void BuiltIn_Page(string theme)
     {
         using var bitmap = Render(theme);
@@ -101,18 +88,10 @@ public sealed class GoldenTests
     [InlineData("ember")]
     [InlineData("blueprint")]
     [InlineData("pop")]
+    [InlineData("rigline")]
     public void BuiltIn_PageWithDock(string theme)
     {
         using var bitmap = Render(theme, dock: true);
-        GoldenImage.Compare(bitmap, $"{theme}-dock");
-    }
-
-    /// <summary>The drafts that draw outside their cards or have compact cards, with the dock: the dock's underlay stays inside its band.</summary>
-    [WindowsGlyphTheory]
-    [InlineData("rigline")]
-    public void Draft_PageWithDock(string theme)
-    {
-        using var bitmap = Render(theme, dock: true, draft: true);
         GoldenImage.Compare(bitmap, $"{theme}-dock");
     }
 

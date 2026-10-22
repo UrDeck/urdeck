@@ -19,6 +19,12 @@ public sealed class ReadoutOptions
     /// </summary>
     public string? WidestValue { get; init; }
 
+    /// <summary>
+    /// The widest unit the widget expects (for example <c>88</c> for seconds). Its width is reserved, so the block does not
+    /// grow and shrink, and shift the value, as the unit changes. Defaults to the unit itself.
+    /// </summary>
+    public string? WidestUnit { get; init; }
+
     public HorizontalAlign Horizontal { get; init; } = HorizontalAlign.Center;
     public VerticalAlign Vertical { get; init; } = VerticalAlign.Middle;
 
@@ -34,7 +40,8 @@ public sealed class ReadoutOptions
 
 /// <summary>
 /// A large value with an optional unit and label. The value is as large as fits the rectangle and does not change size
-/// as the number changes; digits have equal widths so a changing number does not move the characters around it. The theme's
+/// as the number changes; digits have equal widths so a changing number does not move the characters around it, and a
+/// widget can reserve the width of its widest unit too. The theme's
 /// text style (<see cref="Theme.TextStyle"/>) adds letter case and spacing to the label, and spacing, slant, size, a gradient
 /// fill and a glow to the value.
 /// </summary>
@@ -94,7 +101,7 @@ public static class Readout
         using var labelFont = TextMetrics.CreateFont(theme.GetTypeface(TextRole.Label), theme.LabelSize);
 
         float digit = TextMetrics.DigitAdvance(valueFont);
-        float unitWidth = hasUnit ? unitFont.MeasureText(options.Unit!) : 0f;
+        float unitWidth = hasUnit ? UnitWidth(unitFont, options) : 0f;
         float valueCap = TextMetrics.CapHeight(valueFont);
         float labelBlock = hasLabel ? TextMetrics.CapHeight(labelFont) + theme.LabelSize * LabelGapRatio : 0f;
 
@@ -135,7 +142,10 @@ public static class Readout
             float unitBaseline = options.UnitPlacement == UnitPlacement.Raised
                 ? top + TextMetrics.CapHeight(unitFont)
                 : baseline;
-            canvas.DrawText(options.Unit!, unitX, unitBaseline, SKTextAlign.Left, unitFont, valuePaint);
+            if (options.Unit!.Any(char.IsAsciiDigit))
+                DrawValue(canvas, unitFont, valuePaint, options.Unit!, unitX, unitBaseline, TextMetrics.DigitAdvance(unitFont), 0f);
+            else
+                canvas.DrawText(options.Unit!, unitX, unitBaseline, SKTextAlign.Left, unitFont, valuePaint);
         }
 
         if (hasLabel)
@@ -183,7 +193,7 @@ public static class Readout
         float digit = TextMetrics.DigitAdvance(valueFont);
         float tracking = theme.TextStyle.ValueTracking * TextMetrics.ReferenceSize;
         float sampleWidth = Advance(valueFont, options.WidestValue ?? value, digit, tracking);
-        float unitWidth = hasUnit ? unitFont.MeasureText(options.Unit!) : 0f;
+        float unitWidth = hasUnit ? UnitWidth(unitFont, options) : 0f;
 
         // Everything is measured at the reference size and scales linearly with the value's size.
         float widthPerSize = (sampleWidth + (hasUnit ? unitWidth * theme.UnitRatio + UnitGapRatio * TextMetrics.ReferenceSize : 0f))
@@ -192,6 +202,19 @@ public static class Readout
         float capPerSize = TextMetrics.CapHeight(valueFont) / TextMetrics.ReferenceSize;
         return Math.Min(rect.Width / widthPerSize, Math.Max(1f, rect.Height - labelBlock) / capPerSize);
     }
+
+    /// <summary>
+    /// The unit's width, or the width of the widest unit the widget declared when that is more. A unit with digits (seconds)
+    /// gives them equal advances, as the value does, so its width does not change with the digits.
+    /// </summary>
+    private static float UnitWidth(SKFont unitFont, ReadoutOptions options)
+    {
+        float width = MeasureUnit(unitFont, options.Unit!);
+        return string.IsNullOrEmpty(options.WidestUnit) ? width : Math.Max(width, MeasureUnit(unitFont, options.WidestUnit));
+    }
+
+    private static float MeasureUnit(SKFont unitFont, string unit) =>
+        unit.Any(char.IsAsciiDigit) ? Advance(unitFont, unit, TextMetrics.DigitAdvance(unitFont), 0f) : unitFont.MeasureText(unit);
 
     private static float Align(HorizontalAlign align, float left, float right, float width) => align switch
     {

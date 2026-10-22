@@ -129,6 +129,34 @@ public sealed class ComponentTests : IDisposable
         Assert.Equal(r1.Left, r2.Left, 2);
     }
 
+    [Theory]
+    [InlineData("11")]
+    [InlineData("41")]
+    [InlineData("44")]
+    [InlineData("00")]
+    [InlineData("07")]
+    public void Readout_DigitsOfTheUnit_HaveEqualWidths_SoTheSizeDoesNotChangeWithThem(string seconds)
+    {
+        // Chakra Petch's digits differ in width (its 0 is wider than its 8); the value is fitted to the slot's width.
+        using var rigline = ThemeResolver.Resolve(new ThemeStore("").Load("rigline"), 275);
+        var reference = Readout.Measure(rigline, Slot, "21:47", new ReadoutOptions { Unit = "88", UnitPlacement = UnitPlacement.Baseline, WidestValue = "88:88" });
+        var actual = Readout.Measure(rigline, Slot, "21:47", new ReadoutOptions { Unit = seconds, UnitPlacement = UnitPlacement.Baseline, WidestValue = "88:88" });
+
+        Assert.Equal(reference.Height, actual.Height, 3);
+        Assert.Equal(reference.Width, actual.Width, 2);
+    }
+
+    [Fact]
+    public void Readout_WidestUnit_ReservesItsWidth_WhenTheUnitIsNarrower()
+    {
+        var narrow = new ReadoutOptions { Unit = "ii", UnitPlacement = UnitPlacement.Baseline, WidestValue = "88:88", WidestUnit = "MM" };
+        var wide = new ReadoutOptions { Unit = "MM", UnitPlacement = UnitPlacement.Baseline, WidestValue = "88:88", WidestUnit = "MM" };
+        var narrowAlone = new ReadoutOptions { Unit = "ii", UnitPlacement = UnitPlacement.Baseline, WidestValue = "88:88" };
+
+        Assert.Equal(Draw("9:05", wide).Width, Draw("9:05", narrow).Width, 2);
+        Assert.True(Draw("9:05", narrowAlone).Width < Draw("9:05", narrow).Width);
+    }
+
     [Fact]
     public void Readout_FitsItsRectangle()
     {

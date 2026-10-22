@@ -26,8 +26,6 @@ public sealed class ThemeLogSnapshotTests : IDisposable
 
     public void Dispose() => Directory.Delete(_root, recursive: true);
 
-    private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
-
     private static string SnapshotPath
     {
         get
@@ -106,12 +104,6 @@ public sealed class ThemeLogSnapshotTests : IDisposable
 
         foreach (string name in ThemeStore.BuiltInNames)
             all.Append(Capture($"built-in {name}", () => Render(new ThemeStore("").Load(name))));
-
-        foreach (string path in Directory.GetDirectories(FixtureFolder).OrderBy(p => p, StringComparer.Ordinal))
-        {
-            string name = Path.GetFileName(path);
-            all.Append(Capture($"fixture {name}", () => Render(new ThemeStore(FixtureFolder).Load(name))));
-        }
 
         string themes = Path.Combine(_root, "themes");
         foreach (var (name, json) in Failing)

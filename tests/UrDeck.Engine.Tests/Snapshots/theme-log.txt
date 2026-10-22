@@ -8,8 +8,7 @@
 == built-in ember
 == built-in blueprint
 == built-in pop
-== fixture rigline
-WARN Theme 'rigline': font 'ChakraPetch-Bold.ttf' could not be loaded; using the default theme's font.
+== built-in rigline
 == failing colour
 WARN Theme 'colour': colors.background 'red' is not #RRGGBB or #AARRGGBB; using the default.
 WARN Theme 'colour': colors.text '#12345' is not #RRGGBB or #AARRGGBB; using the default.

@@ -832,6 +832,26 @@ public sealed class WidgetPartsTests : IDisposable
     }
 
     [Fact]
+    public void Clock_ShowSeconds_DoesNotMoveTheTimeWhenTheSecondsChangeWidth()
+    {
+        var clock = ClockWith(c => c.ShowSeconds = true);
+        var at41 = new DateTime(2026, 10, 13, 21, 47, 41, DateTimeKind.Local);
+        using var narrow = PaintClock(clock, at41, "rigline");
+        using var wide = PaintClock(clock, at41.AddSeconds(3), "rigline");
+
+        Assert.Equal(LeftmostInk(narrow), LeftmostInk(wide));
+    }
+
+    private static int LeftmostInk(SKBitmap bitmap)
+    {
+        for (int x = 0; x < bitmap.Width; x++)
+            for (int y = 0; y < bitmap.Height; y++)
+                if (bitmap.GetPixel(x, y).Alpha > 0)
+                    return x;
+        return -1;
+    }
+
+    [Fact]
     public void Clock_BlinkSeparator_AlternatesEverySecondAndDrawsOnceASecond()
     {
         var clock = ClockWith(c => c.BlinkSeparator = true);

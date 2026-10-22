@@ -119,10 +119,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-## Fonts (Inter, Instrument Sans, JetBrains Mono, Bricolage Grotesque, Bodoni Moda, Jost, Barlow Condensed, IBM Plex Mono, Archivo)
+## Fonts (Inter, Instrument Sans, JetBrains Mono, Bricolage Grotesque, Bodoni Moda, Jost, Barlow Condensed, IBM Plex Mono, Archivo, Chakra Petch)
 
-Nine font families ship with the built-in themes (seven variable, two static), each under the SIL Open Font License 1.1. The licence texts
-are in `src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`, `BricolageGrotesque-OFL.txt`, `BodoniModa-OFL.txt`, `Jost-OFL.txt`, `BarlowCondensed-OFL.txt`, `IBMPlexMono-OFL.txt`, `Archivo-OFL.txt`) and are
+Ten font families ship with the built-in themes (seven variable, three static), each under the SIL Open Font License 1.1. The licence texts
+are in `src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`, `BricolageGrotesque-OFL.txt`, `BodoniModa-OFL.txt`, `Jost-OFL.txt`, `BarlowCondensed-OFL.txt`, `IBMPlexMono-OFL.txt`, `Archivo-OFL.txt`, `ChakraPetch-OFL.txt`) and are
 embedded with the fonts.
 
 | Family | Copyright | Version | Used by |
@@ -136,3 +136,4 @@ embedded with the fonts.
 | Barlow Condensed | Copyright 2017 The Barlow Project Authors (<https://github.com/jpt/barlow>) | 1.408, Bold only (Google Fonts release) | `ember` (all text) |
 | IBM Plex Mono | Copyright (c) 2017 IBM Corp. with Reserved Font Name "Plex" (<https://github.com/IBM/plex>) | 2.3, Regular only (Google Fonts release) | `blueprint` (all text) |
 | Archivo | Copyright 2020 The Archivo Project Authors (<https://github.com/Omnibus-Type/Archivo>) | 2.001, variable weight and width (Google Fonts release) | `pop` (all text, values at weight 900) |
+| Chakra Petch | Copyright 2018 The Chakra Petch Project Authors (<https://github.com/m4rc1e/Chakra-Petch.git>) | 1.000, Bold only (Google Fonts release) | `rigline` (all text, slanted by the theme) |

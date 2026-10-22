@@ -1,6 +1,6 @@
 # Look-and-feel work: status and how to pick it up
 
-**Updated 2026-10-22** (`themes-pop` archived; Rigline is the last theme; the order of the remaining work is in "Plan from here"). The other files in this folder are a snapshot of the original design handoff and are not edited.
+**Updated 2026-10-22** (`themes-rigline` archived: the last of the eight themes; the order of the remaining work is in "Plan from here"). The other files in this folder are a snapshot of the original design handoff and are not edited.
 This file says what has been built, what changed on the way, and what is next. Where it disagrees with them, this file
 and the OpenSpec specs (`openspec/specs/`) win.
 
@@ -36,8 +36,8 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 13: Prism and Obsidian | `themes-prism-obsidian` | **Done** (pending the pull request). Both are built in with Bricolage Grotesque, Bodoni Moda and Jost; the fixture copies are gone, their goldens redrawn in the real fonts, `valueScale` dropped (no effect above 1). Both validate clean (no contrast finding; Prism's shadow was scaled to the gap to clear `THEME054`, the drawn look is the limited one the owner approved). **Prism keeps the `outline` icons** (about 0 % CPU; Meteocons stays an option). Prism paints at 1.88x `default-dark` (accepted 1.83x, within the 0.05 noise; `docs/perf/card-chrome.md`). Looked at on the panel at 100 % and 150 %: approved, no value tuned. Follow-up found: Prism over a bright background (teal, pink) has low text contrast, as any glass card does |
 | PR 14: Ember and Blueprint | `themes-ember-blueprint` | **Done** (pending the pull request). Looked at on the panel: approved. The tach and marker needle now runs from 55 % of the radius to the rim, with no hub (it crossed the readout), and Blueprint's `gauge.crosshair` is off. Both built in with Barlow Condensed Bold and IBM Plex Mono Regular; fixtures gone, goldens redrawn (`ember-dock` added); `valueScale` dropped, Ember tick colour fixed to `#1cffffff`, Ember body weight 700; both validate clean. Follow-ups: `typography.fonts` has no title or body role, so Blueprint's title is weight 400, not Medium; whether the fit counts a slanted value's lean (Ember's clock numerals nearly touch the card edge at 4x2) |
 | PR 15: Pop | `themes-pop` | **Done**, archived (#78, `openspec/changes/archive/2026-10-22-themes-pop`). Looked at on the panel at 100 % and 150 %: approved, no value tuned beyond the contrast fixes. Built in with Archivo (variable, weight 900 for values; Archivo Black not bundled); fixture gone, `pop-page` and `pop-dock` redrawn in the real font; `valueScale` dropped; blue tint lightened `#3b5bff` to `#5b7bff` (`THEME061`, ink was 3.7:1, now 5.15:1) and `warning` changed from the yellow card fill to orange `#ff9f1c`; validates clean. Stats at 2x1 shows a number with no bar (single position), so the site deck shows no thick bar. The `theme` spec's Ember and Blueprint scenarios had empty bodies after an earlier sync; filled in here |
-| PR 16: Rigline | one change | **Next, and last.** The only drafted theme still a fixture |
-| PR 17: docs, site gallery, media | with each theme, rest at the end | The site needs a deck and pictures per theme (`site/MEDIA-CHECKLIST.md`) |
+| PR 16: Rigline | `themes-rigline` | **Done** (pending the pull request). Built in with Chakra Petch Bold (static; the italic look is `slant: 10`); fixture gone, `rigline-page` and `rigline-dock` redrawn in the real font, every weight 700 (the draft's body 500 had no file); validates clean, contrast passes (lowest: ramp mid `#7a5cff` 4.24:1). Looked at on the panel at 100 % and 150 %: approved. Tuned: cards made translucent (about 45 %), the sun orange-red (palette slots 1 and 2), the glow tightened to fit the gap (`THEME054`); the table is in the change's design (decision 13). The Clock's seconds moved the time in Chakra Petch (the unit's digits differ in width, so the fit changed every second); fixed in the SDK `Readout` (`WidestUnit`, equal unit digits) and the Clock's `KeepSize` removed; every other golden is unchanged. Measured on the panel with the whole theme (`docs/perf/motion.md`, "Rigline as a whole theme"): the border alone +2.9 % of a core and +3.0 MB private for eight cards, within the budget; `reduced` and `off` cost what the still theme costs; the border and the background pause with the display off and with the deck hidden. Follow-ups: the site has no loop of the turning border (the media tool has no theme loops; PR 17), `card.compact.borderAnimate` was not needed, slant in the fit was not needed (no clipping), a real weight 500 was not needed |
+| PR 17: docs, site gallery, media | with each theme, rest at the end | The site needs a deck and pictures per theme (`site/MEDIA-CHECKLIST.md`). A loop of Rigline's turning border (and of Ember's glow) needs the media tool to render theme loops and the gallery to show a video; not built |
 | PR 18: preview renderer and catalog seams | `theme-preview` | `ThemeCatalog`, `BackgroundCatalog` and `PairingIndex` exist; `PreviewRenderer` does not |
 
 ## Plan from here (decided 2026-10-19)
@@ -49,7 +49,7 @@ done       page-pattern                 Carbon's dots are drawn (goldens redrawn
            theme-icons                  every theme gets themed icons (done, see PR 10)
 done       Prism + Obsidian, Pop        built in (see PR 13 and PR 15)
 done       motion                       the border turns, `motion` is a setting; Rigline is unblocked
-next       Rigline                      its own theme change
+done       Rigline                      built in (see PR 16)
 ```
 
 - **No theme picker for now.** The approach for the configuration editor is not decided, and a one-off theme or background
@@ -126,7 +126,7 @@ translucent fill (the engine limits it, `docs/design/card-chrome.md`); text cont
 
 - The underlay's page slide was looked at on the panel (`card-underlay`). The border's 15-step rotation was looked at on 2026-10-21
   (150 %, 7 s per turn, 15 and 30 steps): 15 accepted.
-- A shader run on the GPU past the 4-hour wrap; only CPU renders at 14,399 s were made.
+- A shader run on the GPU past the 4-hour wrap; only CPU renders at 14,399 s were made. Rigline pairs with moving shaders (`horizon`); the check was skipped in `themes-rigline`.
 - Value fill animation and pattern scroll were never tested (deferred).
 
 ## Separate backlog items found on the way

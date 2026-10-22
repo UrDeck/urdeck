@@ -70,3 +70,57 @@ their style and page.
 ## On the panel
 
 See `docs/design/look-and-feel/STATUS.md` (PR 9) for what the owner looked at.
+
+## Rigline as a whole theme
+
+Measured 2026-10-22 on the owner's panel (1100x3840), at 150 % (the first set) and at 100 % (the second), Release build of branch `feat/theme-rigline` copied to a fresh
+scratch folder for each run, the method above (15 s of warm-up, 60 one-second samples; CPU as a share of one core, memory the
+median). The theme is the built-in `rigline` as it ships: the conic border turning in 7 s, `card.glow`, `valueGlow` and
+`valueFill` on every number, ring gauge glow, scanlines, tile strips with glow, outline icons with glow. The page is the site deck:
+Clock 4x2, two Stats 2x1, Weather 4x2 and four shortcuts in the dock, eight cards in all (the page's four and the dock's four
+all carry a border sprite). Each case ran twice; `motion` was set in the configuration, and the shader is `horizon`, moving.
+
+At 150 % (two runs each):
+
+| Case | CPU, share of one core | Working set | Private bytes |
+|---|---|---|---|
+| `full`, `horizon` moving | 7.60, 7.68 % | 233.6, 229.9 MB | 194.1, 191.3 MB |
+| `reduced` | 1.02, 1.17 % | 210.5, 208.4 MB | 151.2, 152.6 MB |
+| `off` | 1.28, 0.99 % | 209.5, 207.5 MB | 151.2, 152.2 MB |
+| `full`, no background | 4.51, 3.88 % | 205.1, 204.2 MB | 146.7, 147.3 MB |
+| `reduced`, no background | 1.35, 1.20 % | 197.3, 201.1 MB | 143.0, 145.0 MB |
+
+At 100 % (two runs each):
+
+| Case | CPU, share of one core | Working set | Private bytes |
+|---|---|---|---|
+| `full`, `horizon` moving | 7.66, 7.06 % | 234.2, 230.8 MB | 190.0, 188.9 MB |
+| `reduced` | 1.43, 1.07 % | 210.5, 211.3 MB | 152.6, 152.2 MB |
+| `off` | 1.25, 1.41 % | 209.9, 211.2 MB | 152.8, 152.9 MB |
+| `full`, no background | 4.45, 3.31 % | 202.7, 205.2 MB | 147.0, 146.9 MB |
+| `reduced`, no background | 1.09, 1.56 % | 200.2, 199.8 MB | 142.3, 144.8 MB |
+
+The two scalings come to the same within the noise, so the figures below are given for both.
+
+- **The border, on its own** (`full` against `reduced`, both with no background): **+2.9 % of a core and +3.0 MB private** at 150 %, **+2.6 % and +3.4 MB**
+  at 100 %, for eight cards, inside the budget (`widget-card`, "Animated Border Cost": 5 % and 8 MB) and at the level the motion change measured
+  (+3.2 to +3.6 %, +3.4 to +5.3 MB).
+- **The moving shader** (`full` against `full` with no background): +3.4 % of a core and +45 MB private at 150 %, +3.5 % and +42 MB at 100 %. It is the shader's surface
+  and 30 frames a second, not the theme; it is the cost of any moving background and the owner can switch it off.
+- **Everything at `full`** is 7.6 % of a core and 192.7 MB private at 150 %, 7.4 % and 189.5 MB at 100 %. Not a budget in itself (the budget is for the border).
+- **`reduced` and `off` cost what the still theme costs**: 1.0 to 1.4 % of a core and 151 to 153 MB private with the shader (drawn
+  once, still), the same in both, and no sprite or animation is made (`Border animation started` is not in their logs). The glow,
+  the value effects and the scanlines are cached pictures that are drawn once.
+- Noise: runs of the same case differ by up to 0.4 % of a core and 3 MB; the figures above are two runs each, not a long series.
+
+**Pausing**, from the live deck's log (`urdeck.log`), with the monitor turned off by Windows' power setting after a minute idle: at
+`Windows: display off` the background logged `Background frames stopped (display off): 2712 frames in 91.1 s` (29.8 a second) and
+the border `Border animation stopped (display off)` for both pages (the page's four cards and the dock's four); ten seconds later
+`Windows: display on` restarted both (`Background frames started (display on)`, `Border animation started (display on)`).
+
+**Hidden deck**: with the deck running, the configuration's `display` was changed to a monitor that is not connected. The host
+logged `Background frames stopped (deck hidden): 358 frames in 12.1 s`, `Border animation stopped (deck hidden)` for both pages and
+`Deck hidden: waiting for 'Nonexistent display', which is not connected`; with the configuration put back, `Placement: Absent ->
+Settling -> Placed` started the background and both pages' borders again.
+
+Not measured here: GPU load (the Task Manager figure was not recorded).

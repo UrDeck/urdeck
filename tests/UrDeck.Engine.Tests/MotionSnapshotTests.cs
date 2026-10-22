@@ -18,8 +18,6 @@ public sealed class MotionSnapshotTests : IDisposable
 
     public void Dispose() => _fixture.Dispose();
 
-    private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
-
     [Theory]
     [InlineData(null, null, MotionLevel.Full)]
     [InlineData("off", null, MotionLevel.Off)]
@@ -70,7 +68,7 @@ public sealed class MotionSnapshotTests : IDisposable
     private static SKBitmap Render(bool removeAnimation)
     {
         using var page = SamplePage.Build();
-        var loaded = new ThemeStore(FixtureFolder).Load("rigline");
+        var loaded = new ThemeStore("").Load("rigline");
         Assert.NotNull(loaded.Definition.Card!.BorderAnimate);
         if (removeAnimation)
             loaded.Definition.Card.BorderAnimate = null;

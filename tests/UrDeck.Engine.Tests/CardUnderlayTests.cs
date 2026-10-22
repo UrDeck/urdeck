@@ -23,9 +23,7 @@ public sealed class CardUnderlayTests
 
     private static readonly SKColor Red = SKColor.Parse("#ff0000");
 
-    private static string FixtureFolder => Path.Combine(AppContext.BaseDirectory, "Fixtures", "themes");
-
-    private static LoadedTheme Draft(string name) => new ThemeStore(ThemeStore.BuiltInNames.Contains(name) ? "" : FixtureFolder).Load(name);
+    private static LoadedTheme Draft(string name) => new ThemeStore("").Load(name);
 
     /// <summary>The default theme with <paramref name="card"/> and <paramref name="colors"/> over it, as a theme of its own.</summary>
     private static LoadedTheme With(ThemeCardDefinition card, ThemeColorsDefinition? colors = null, string name = "underlay-test")
@@ -80,7 +78,7 @@ public sealed class CardUnderlayTests
     [InlineData("paper", 95, 163)]
     [InlineData("pop", 16, 51)]
     [InlineData("prism", 25, 99)]
-    [InlineData("rigline", 99, 139)]
+    [InlineData("rigline", 25, 65)]
     [InlineData("ember", 0, 0)]
     [InlineData("obsidian", 0, 0)]
     public void EachDraft_HasTheBleedAndZoneOfThePerfNotes(string name, int bleed, int zone)
