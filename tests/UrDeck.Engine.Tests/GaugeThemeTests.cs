@@ -88,7 +88,7 @@ public sealed class GaugeThemeTests : IDisposable
     [Fact]
     public void AV1Theme_GivesTheEmptyGaugeTheme()
     {
-        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper")))
+        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper" or "prism" or "obsidian")))
         {
             using var theme = ThemeResolver.Resolve(new ThemeStore("").Load(name), 275);
 
@@ -194,7 +194,7 @@ public sealed class GaugeThemeTests : IDisposable
         Assert.Equal(GaugeLayout.Stacked, carbon.Gauge.Layout);
         Assert.NotNull(carbon.Gauge.Segments);
 
-        using var prism = ThemeResolver.Resolve(store.Load("prism"), 275);
+        using var prism = ThemeResolver.Resolve(builtIns.Load("prism"), 275);
         Assert.Equal(GaugeLabelPosition.Below, prism.Gauge.LabelPosition);
         Assert.Equal(new GaugeSweep(-90, 360), prism.Gauge.Sweep);
 

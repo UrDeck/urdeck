@@ -234,7 +234,7 @@ public sealed class ThemeValidateTests : IDisposable
         var run = Workspace.Invoke("theme", "validate", "--builtin", "--fail-on-warnings");
 
         Assert.Equal(0, run.Code);
-        Assert.Equal("5 themes checked: 0 errors, 0 warnings, 0 remarks.\n", run.Out);
+        Assert.Equal("7 themes checked: 0 errors, 0 warnings, 0 remarks.\n", run.Out);
     }
 
     [Theory]
@@ -259,7 +259,7 @@ public sealed class ThemeValidateTests : IDisposable
 
         using var json = JsonDocument.Parse(run.Out);
         var names = json.RootElement.GetProperty("themes").EnumerateArray().Select(t => t.GetProperty("folder").GetString()).ToList();
-        Assert.Equal(["builtin:carbon", "builtin:default-dark", "builtin:default-light", "builtin:glass", "builtin:paper"], names);
+        Assert.Equal(["builtin:carbon", "builtin:default-dark", "builtin:default-light", "builtin:glass", "builtin:obsidian", "builtin:paper", "builtin:prism"], names);
     }
 
     [Fact]

@@ -185,7 +185,7 @@ public sealed class PairingTests : IDisposable
 
         var list = ThemeCatalog.List(_fixture.Themes);
 
-        Assert.Equal(["default-dark", "default-light", "glass", "carbon", "paper", "mine"], list.Select(e => e.Name));
+        Assert.Equal(["default-dark", "default-light", "glass", "carbon", "paper", "prism", "obsidian", "mine"], list.Select(e => e.Name));
         var mine = list.Single(e => e.Name == "mine");
         Assert.Equal("Mine", mine.DisplayName);
         Assert.Equal("light", mine.Mode);
@@ -208,7 +208,7 @@ public sealed class PairingTests : IDisposable
         Assert.Equal(1, list.Count(e => e.Name == "glass"));
         Assert.Equal("My Glass", list.Single(e => e.Name == "glass").DisplayName);
         Assert.False(list.Single(e => e.Name == "glass").IsBuiltIn);
-        Assert.Equal(5, list.Count);
+        Assert.Equal(7, list.Count);
     }
 
     [Fact]
@@ -235,8 +235,11 @@ public sealed class PairingTests : IDisposable
         Assert.All(list, e => Assert.False(string.IsNullOrWhiteSpace(e.Description)));
         Assert.Equal(("Carbon", "dark"), (list[3].DisplayName, list[3].Mode));
         Assert.Equal(("Paper", "light"), (list[4].DisplayName, list[4].Mode));
+        Assert.Equal(("Prism", "dark"), (list[5].DisplayName, list[5].Mode));
+        Assert.Equal(("Obsidian", "dark"), (list[6].DisplayName, list[6].Mode));
         Assert.All(list.Take(3), e => Assert.Null(e.DefaultBackground));
-        Assert.All(list.Skip(3), e => Assert.Equal("contour", e.DefaultBackground));
+        Assert.All(list.Skip(3).Take(2), e => Assert.Equal("contour", e.DefaultBackground));
+        Assert.All(list.Skip(5), e => Assert.Equal("nebula", e.DefaultBackground));
     }
 
     // 4.2 The background catalog

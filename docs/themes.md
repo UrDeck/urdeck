@@ -1,7 +1,7 @@
 # Themes
 
 A theme is a folder holding one settings file and, optionally, font files. The theme decides how every card on a page
-looks; widgets only draw content. Five themes are built in (`default-dark`, `default-light`, `glass` (frosted translucent cards on a blue background), `carbon` (near-black, hairline cards with corner marks, mono numerals, a phosphor accent) and `paper` (warm off-white, soft shadows, one vermilion accent)). `carbon` and `paper` use Instrument Sans and JetBrains Mono and default to the `contour` background, over their own still colour where shaders are unavailable; select one with `"theme": "carbon"` or `"theme": "paper"`. Your own go in a `themes`
+looks; widgets only draw content. Seven themes are built in (`default-dark`, `default-light`, `glass` (frosted translucent cards on a blue background), `carbon` (near-black, hairline cards with corner marks, mono numerals, a phosphor accent) and `paper` (warm off-white, soft shadows, one vermilion accent)). `carbon` and `paper` use Instrument Sans and JetBrains Mono and default to the `contour` background, over their own still colour where shaders are unavailable; select one with `"theme": "carbon"` or `"theme": "paper"`. `prism` (thick frosted glass: a specular top edge, a sheen, light wide numerals, full-circle rings) uses Bricolage Grotesque, and `obsidian` (warm black, champagne hairlines, Didone numerals, a diamond-marker gauge, circular dock buttons) uses Bodoni Moda for values and Jost for the rest; both default to the `nebula` background over their own still gradient where shaders are unavailable and are selected with `"theme": "prism"` or `"theme": "obsidian"`. Your own go in a `themes`
 folder next to `UrDeck.Host.exe`:
 
 ```
@@ -105,6 +105,8 @@ The built-in background shaders (`plasma`, `aurora`, `gradient`, `julia` and the
 | `glass` | `#131c4f`, `#1b2760`, `#3a3f9c`, `#6b3fa0` |
 | `carbon` | `#090b0e`, `#10161b`, `#1f6f61`, `#4ff0c8` |
 | `paper` | `#e9e7e0`, `#dcd8cc`, `#e6c9b8`, `#e5502b` |
+| `prism` | `#10163a`, `#7b5cff`, `#19c6c0`, `#ff6aa8` |
+| `obsidian` | `#0a0908`, `#2a2114`, `#6b5528`, `#d9b86c` |
 
 **It is the one value that is not taken from `default-dark`.** Every other value you leave out falls back to the default
 theme's, but a light theme written before backgrounds existed would then get the dark palette. A theme without
@@ -694,5 +696,5 @@ the rest only the tool reports.
 
 ## Bundled font
 
-`default-dark`, `default-light` and `glass` use Inter (variable); `carbon` and `paper` use Instrument Sans and JetBrains Mono (variable). All are under the SIL Open Font License 1.1; the licence texts are in
-`src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`) and `THIRD-PARTY-NOTICES.md` lists them.
+`default-dark`, `default-light` and `glass` use Inter (variable); `carbon` and `paper` use Instrument Sans and JetBrains Mono, `prism` uses Bricolage Grotesque, `obsidian` uses Bodoni Moda and Jost (all variable). All are under the SIL Open Font License 1.1; the licence texts are in
+`src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`, `BricolageGrotesque-OFL.txt`, `BodoniModa-OFL.txt`, `Jost-OFL.txt`) and `THIRD-PARTY-NOTICES.md` lists them.

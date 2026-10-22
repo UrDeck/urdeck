@@ -93,7 +93,7 @@ public sealed class CardUnderlayTests
     }
 
     [Fact]
-    public void PrismWithOpaqueCards_KeepsTheReachOfThePerfNotes()
+    public void PrismWithOpaqueCards_KeepsItsOwnShadow_BecauseItAlreadyFitsTheGap()
     {
         var loaded = Draft("prism");
         loaded.Definition.Card!.FillGradient = null;
@@ -101,32 +101,25 @@ public sealed class CardUnderlayTests
 
         using var style = ResolvedCardStyle.Resolve(loaded, Cell);
 
-        Assert.Equal(193, style.Bleed);
-        Assert.Equal(267, style.CornerZone);
+        Assert.Equal(25, style.Bleed);
+        Assert.Equal(99, style.CornerZone);
     }
 
     [Fact]
-    public void PrismsShadow_IsLimitedToTheGap_OffsetAndBlurTogether_WithOneInformationLine()
+    public void PrismsShadow_FitsTheGapOnItsOwn_SoNothingIsLimitedAndNothingIsLogged()
     {
         var loaded = Draft("prism");
         ResolvedCardStyle? style = null;
 
-        var lines = Lines("INFO", () =>
-        {
-            style = ResolvedCardStyle.Resolve(loaded, Cell);
-            ResolvedCardStyle.Resolve(loaded, 180).Dispose();
-        });
+        var lines = Lines("INFO", () => style = ResolvedCardStyle.Resolve(loaded, Cell));
 
         using (style)
         {
             var shadow = style!.Shadow!;
-            Assert.Equal(0.09f * Cell, shadow.Reach, 2);
-            // Offset and blur keep their proportion (0.16 to 0.36).
-            Assert.Equal(0.16f / 0.36f, shadow.Y / shadow.Blur, 3);
+            Assert.True(shadow.Reach <= 0.09f * Cell, "the shadow reaches no further than the gap");
+            Assert.Equal(0.02f / 0.046f, shadow.Y / shadow.Blur, 3);
         }
-        string line = Assert.Single(lines, l => l.Contains("translucent"));
-        Assert.Contains("'prism'", line);
-        Assert.Contains("193 px limited to 25 px", line);
+        Assert.DoesNotContain(lines, l => l.Contains("translucent"));
     }
 
     [Fact]

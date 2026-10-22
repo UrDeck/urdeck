@@ -1,19 +1,21 @@
 ---
 title: Themes
-description: The five built-in themes and how to make your own.
+description: The seven built-in themes and how to make your own.
 section: Look
 order: 20
 ---
 
-A theme decides how every card on a page looks; widgets only draw content. Five themes are built in:
+A theme decides how every card on a page looks; widgets only draw content. Seven themes are built in:
 
 - `default-dark`, the default
 - `default-light`
 - `glass`, frosted translucent cards over a blue background, made to show a [background](/docs/backgrounds/) through them
 - `carbon`, near-black with hairline cards and corner marks, mono numerals and one phosphor accent. It uses Instrument Sans and JetBrains Mono and defaults to the `contour` background.
 - `paper`, the daylight option: warm off-white cards with soft shadows and one vermilion accent. It uses Instrument Sans and JetBrains Mono and defaults to the `contour` background.
+- `prism`, thick frosted glass: a bright specular top edge, a soft sheen, light wide numerals and full-circle ring gauges. It uses Bricolage Grotesque and defaults to the `nebula` background, over a blue-violet gradient where shaders are unavailable.
+- `obsidian`, executive calm: warm black cards with champagne hairlines, Didone numerals, a thin gauge ring with one diamond marker and circular dock buttons. It uses Bodoni Moda for values and Jost for labels and text, and defaults to the `nebula` background, over a warm dark gradient where shaders are unavailable.
 
-Choose one with the `theme` key in `urdeck-config.json`. For example `"theme": "carbon"` or `"theme": "paper"`. Saving the file applies it; no restart.
+Choose one with the `theme` key in `urdeck-config.json`. For example `"theme": "carbon"`, `"theme": "paper"`, `"theme": "prism"` or `"theme": "obsidian"`. Saving the file applies it; no restart.
 
 ## Your own
 
