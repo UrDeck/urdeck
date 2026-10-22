@@ -1,11 +1,11 @@
 ---
 title: Themes
-description: The nine built-in themes and how to make your own.
+description: The ten built-in themes and how to make your own.
 section: Look
 order: 20
 ---
 
-A theme decides how every card on a page looks; widgets only draw content. Nine themes are built in:
+A theme decides how every card on a page looks; widgets only draw content. Ten themes are built in:
 
 - `default-dark`, the default
 - `default-light`
@@ -16,8 +16,9 @@ A theme decides how every card on a page looks; widgets only draw content. Nine 
 - `obsidian`, executive calm: warm black cards with champagne hairlines, Didone numerals, a thin gauge ring with one diamond marker and circular dock buttons. It uses Bodoni Moda for values and Jost for labels and text, and defaults to the `nebula` background, over a warm dark gradient where shaders are unavailable.
 - `ember`, an instrument cluster: chamfered cards with an amber border over a faint diagonal hatch, condensed italic numerals that glow orange, and tachometer gauges with a red-line zone. It uses Barlow Condensed Bold and defaults to the `embers` background, over a dark amber gradient where shaders are unavailable.
 - `blueprint`, a technical drawing: a cyanotype ground with a drafting grid, dashed card outlines with yellow corner marks, dimension-line dividers and protractor-style gauges with one needle. It uses IBM Plex Mono and defaults to the `plotter` background, over the plain blue ground where shaders are unavailable.
+- `pop`, the loud one: flat saturated yellow, sky, pink, lime and blue cards with thick black outlines and hard offset shadows, huge heavy numerals and a pill status chip. It uses Archivo (weight 900 for numbers) and defaults to the `shapes` background, over a warm cream where shaders are unavailable.
 
-Choose one with the `theme` key in `urdeck-config.json`. For example `"theme": "carbon"`, `"theme": "paper"`, `"theme": "prism"`, `"theme": "obsidian"`, `"theme": "ember"` or `"theme": "blueprint"`. Saving the file applies it; no restart.
+Choose one with the `theme` key in `urdeck-config.json`. For example `"theme": "carbon"`, `"theme": "paper"`, `"theme": "prism"`, `"theme": "obsidian"`, `"theme": "ember"`, `"theme": "blueprint"` or `"theme": "pop"`. Saving the file applies it; no restart.
 
 ## Your own
 

@@ -70,8 +70,6 @@ public sealed class GoldenTests
     /// more of a draft rewrites its picture, and says so.
     /// </summary>
     [WindowsGlyphTheory]
-
-    [InlineData("pop")]
     [InlineData("rigline")]
     public void Draft_Page(string theme)
     {
@@ -79,7 +77,7 @@ public sealed class GoldenTests
         GoldenImage.Compare(bitmap, $"{theme}-page");
     }
 
-    /// <summary>Carbon, Paper, Prism, Obsidian, Ember and Blueprint, the built-in format 2 themes, in their own fonts.</summary>
+    /// <summary>Carbon, Paper, Prism, Obsidian, Ember, Blueprint and Pop, the built-in format 2 themes, in their own fonts.</summary>
     [WindowsGlyphTheory]
     [InlineData("carbon")]
     [InlineData("paper")]
@@ -87,6 +85,7 @@ public sealed class GoldenTests
     [InlineData("obsidian")]
     [InlineData("ember")]
     [InlineData("blueprint")]
+    [InlineData("pop")]
     public void BuiltIn_Page(string theme)
     {
         using var bitmap = Render(theme);
@@ -101,17 +100,11 @@ public sealed class GoldenTests
     [InlineData("obsidian")]
     [InlineData("ember")]
     [InlineData("blueprint")]
+    [InlineData("pop")]
     public void BuiltIn_PageWithDock(string theme)
     {
         using var bitmap = Render(theme, dock: true);
         GoldenImage.Compare(bitmap, $"{theme}-dock");
-    }
-
-    [WindowsGlyphFact]
-    public void Pop_PageWithDock_TintsTheSlotsByPosition()
-    {
-        using var bitmap = Render("pop", dock: true, draft: true);
-        GoldenImage.Compare(bitmap, "pop-dock");
     }
 
     /// <summary>The drafts that draw outside their cards or have compact cards, with the dock: the dock's underlay stays inside its band.</summary>
