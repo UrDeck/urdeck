@@ -72,9 +72,7 @@ public sealed class GoldenTests
     [WindowsGlyphTheory]
     [InlineData("ember")]
     [InlineData("blueprint")]
-    [InlineData("obsidian")]
     [InlineData("pop")]
-    [InlineData("prism")]
     [InlineData("rigline")]
     public void Draft_Page(string theme)
     {
@@ -82,10 +80,12 @@ public sealed class GoldenTests
         GoldenImage.Compare(bitmap, $"{theme}-page");
     }
 
-    /// <summary>Carbon and Paper, the built-in format 2 themes, in their own fonts.</summary>
+    /// <summary>Carbon, Paper, Prism and Obsidian, the built-in format 2 themes, in their own fonts.</summary>
     [WindowsGlyphTheory]
     [InlineData("carbon")]
     [InlineData("paper")]
+    [InlineData("prism")]
+    [InlineData("obsidian")]
     public void BuiltIn_Page(string theme)
     {
         using var bitmap = Render(theme);
@@ -96,6 +96,8 @@ public sealed class GoldenTests
     [WindowsGlyphTheory]
     [InlineData("carbon")]
     [InlineData("paper")]
+    [InlineData("prism")]
+    [InlineData("obsidian")]
     public void BuiltIn_PageWithDock(string theme)
     {
         using var bitmap = Render(theme, dock: true);
@@ -111,9 +113,7 @@ public sealed class GoldenTests
 
     /// <summary>The drafts that draw outside their cards or have compact cards, with the dock: the dock's underlay stays inside its band.</summary>
     [WindowsGlyphTheory]
-    [InlineData("prism")]
     [InlineData("rigline")]
-    [InlineData("obsidian")]
     [InlineData("blueprint")]
     public void Draft_PageWithDock(string theme)
     {

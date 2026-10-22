@@ -182,3 +182,23 @@ private memory 20 s after start, five runs of each, interleaved.
 - **Idle:** with Paper and two ticking clocks for 75 s, the log has one `Underlay (One)` and one `Underlay (Dock)` line.
 - The cards smaller than twice the corner zone (Paper's and Rigline's 4x1, 2x1 and 1x1 cards) take exact pictures, as the
   explore found; a picture per row height stretched only sideways would roughly halve Paper's pixels, not the decoding cost.
+
+## As built (themes-prism-obsidian)
+
+Measured 2026-10-21 with the engine's `WidgetPainter` and `ResolvedCardStyle`, the content and surface as in "card-chrome-front"
+(1100 x 550, `21:47` at 300 px) but in each built-in theme's own font, Windows 11, Release, software raster; the themes were
+interleaved, nine runs of 300 paints after 50 each, the table gives the fastest run.
+
+| Style | Paint (ms) | Against default-dark |
+|---|---|---|
+| default-dark | 0.209 | 1.00 |
+| glass | 0.258 | 1.24 |
+| Carbon | 0.246 | 1.18 |
+| Paper | 0.212 | 1.02 |
+| **Prism** (real Bricolage Grotesque) | **0.393** | **1.88** |
+| Obsidian | 0.299 | 1.43 |
+
+- Prism is 1.88 times, against the 1.83 times the owner accepted; the earlier table notes its ratios agree within 0.05, so the
+  real font and the smaller shadow have not moved it. Obsidian is within the 1.5 times budget.
+- Prism's shadow was scaled to fit the gap (`y 0.02`, `blur 0.046`, was `0.16` and `0.36`), which is what the reach limit drew
+  already; the page's underlay is the same size (bleed 25 px).

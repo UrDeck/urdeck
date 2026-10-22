@@ -65,8 +65,8 @@
     },
     "shadow": {
       "x": 0,
-      "y": 0.16,
-      "blur": 0.36,
+      "y": 0.02,
+      "blur": 0.046,
       "color": "#990a0a3a"
     },
     "compact": {
@@ -86,7 +86,6 @@
     "bodySize": 0.127,
     "titleSize": 0.14,
     "unitRatio": 0.4,
-    "valueScale": 1.15,
     "tracking": {
       "value": -0.05
     }
