@@ -24,14 +24,13 @@ The decisions below are defaults; the panel look may overrule them.
 
 ## Decisions
 
-### 1. Flat files, three fonts
+### 1. Flat files, two fonts
 
 `ember.json` and `blueprint.json` sit beside the other built-ins, with `BarlowCondensed-Bold.ttf`,
-`IBMPlexMono-Regular.ttf`, `IBMPlexMono-Medium.ttf`, `BarlowCondensed-OFL.txt` and `IBMPlexMono-OFL.txt`. The files come
+`IBMPlexMono-Regular.ttf`, `BarlowCondensed-OFL.txt` and `IBMPlexMono-OFL.txt`. The files come
 from `spikes/theme-look-s3/fonts/` (untracked): compare each with its upstream release, confirm OFL 1.1, record version and
-copyright in `THIRD-PARTY-NOTICES.md`. Not subset. Blueprint names Medium for the `title` role through the per-role font
-mechanism that `fonts.md` describes; if the typography model has no per-role file, the gap is recorded as a follow-up
-(task 1.4).
+copyright in `THIRD-PARTY-NOTICES.md`. Not subset. Blueprint's title would take Medium through the per-role font keys, but those cover only value, unit and label; the
+title is therefore weight 400 and no Medium file ships (follow-up recorded, task 1.4).
 
 ### 2. Corrections to the drafts
 

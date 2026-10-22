@@ -117,8 +117,8 @@ rejected. Built-in themes and user themes MUST use the same format.
 - **THEN** the reference is ignored, a warning is logged and the default theme's font is used
 
 ### Requirement: Built-in Themes
-The product MUST ship the built-in themes that exist at this point: `default-dark`, `default-light`, `glass`, `carbon`,
-`paper`, `prism` and `obsidian` (plus any whose change has landed). `default-dark` is the default theme. Built-in themes
+The product MUST ship these built-in themes: `default-dark`, `default-light`, `glass`, `carbon`, `paper`, `prism`,
+`obsidian`, `ember` and `blueprint`. `default-dark` is the default theme. Built-in themes
 MUST be available regardless of the contents of the user themes folder.
 
 - A built-in theme MAY name font files that ship with the product; they are found as a user theme's files are found in
@@ -171,6 +171,18 @@ MUST be available regardless of the contents of the user themes folder.
 #### Scenario: New built-ins validate clean
 - **WHEN** `prism` and `obsidian` are validated
 - **THEN** no error and no warning is reported
+
+#### Scenario: Ember in its own font
+
+#### Scenario: Blueprint in its own fonts
+
+#### Scenario: Ember's tick colour
+
+#### Scenario: Motion levels
+
+#### Scenario: A user theme named like Ember
+- **WHEN** the themes folder holds a theme folder named `ember`
+- **THEN** selecting `ember` loads the user's theme, as for any built-in name
 
 ### Requirement: User Themes
 The host MUST discover user themes in a `themes` folder next to the executable.
@@ -495,6 +507,10 @@ catalog can list it without drawing it.
   pairs with, best first, names one of them as its default background, and has a still gradient as its static background
 - Prism pairs with `nebula`, `vortex`, `horizon`, `spectrum` and `ripple`; Obsidian with `nebula`, `vortex` and
   `warpgate` (the panel look may reorder or change these)
+- `ember` is named "Ember" with mode `dark`, pairs with `embers`, `warpgate` and `equalizer` (best first), names `embers`
+  as its default background and a gradient as its static background; `blueprint` is named "Blueprint" with mode `dark`,
+  pairs with `plotter`, `contour` and `streams`, names `plotter` as its default background and a colour as its static
+  background
 - A built-in theme may carry pairings and tags; the three that exist before the format 2 themes define no background and
   no default, so adding `meta` changes nothing that is drawn
 
@@ -526,6 +542,12 @@ catalog can list it without drawing it.
 - **WHEN** `prism` is selected and the configuration sets no `background`
 - **THEN** the page draws the theme's default background in Prism's palette, and with shaders unavailable it draws
   Prism's static gradient
+
+#### Scenario: Ember and Blueprint pair with backgrounds
+
+#### Scenario: Default background of Ember
+
+#### Scenario: Default background of Blueprint
 
 ### Requirement: Optical Size
 A theme MAY set `typography.opticalSize` to `off` or `auto`; absent means `off`. The host MUST leave a font's optical size alone with `off`: a font's optical size axis

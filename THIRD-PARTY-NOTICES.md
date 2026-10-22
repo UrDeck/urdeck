@@ -119,10 +119,10 @@ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-## Fonts (Inter, Instrument Sans, JetBrains Mono, Bricolage Grotesque, Bodoni Moda, Jost)
+## Fonts (Inter, Instrument Sans, JetBrains Mono, Bricolage Grotesque, Bodoni Moda, Jost, Barlow Condensed, IBM Plex Mono)
 
-Six variable font families ship with the built-in themes, each under the SIL Open Font License 1.1. The licence texts
-are in `src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`, `BricolageGrotesque-OFL.txt`, `BodoniModa-OFL.txt`, `Jost-OFL.txt`) and are
+Eight font families ship with the built-in themes (six variable, two static), each under the SIL Open Font License 1.1. The licence texts
+are in `src/UrDeck.Engine/Themes/Builtin/` (`Inter-OFL.txt`, `InstrumentSans-OFL.txt`, `JetBrainsMono-OFL.txt`, `BricolageGrotesque-OFL.txt`, `BodoniModa-OFL.txt`, `Jost-OFL.txt`, `BarlowCondensed-OFL.txt`, `IBMPlexMono-OFL.txt`) and are
 embedded with the fonts.
 
 | Family | Copyright | Version | Used by |
@@ -133,3 +133,5 @@ embedded with the fonts.
 | Bricolage Grotesque | Copyright 2022 The Bricolage Grotesque Project Authors (<https://github.com/ateliertriay/bricolage>) | 1.001 (Google Fonts release) | `prism` (all text) |
 | Bodoni Moda | Copyright 2020 The Bodoni Moda Project Authors (<https://github.com/indestructible-type/Bodoni>) | 2.005 (Google Fonts release) | `obsidian` (values) |
 | Jost | Copyright 2020 The Jost Project Authors (<https://github.com/indestructible-type/Jost>) | 3.710 (Google Fonts release) | `obsidian` (units, labels, body text) |
+| Barlow Condensed | Copyright 2017 The Barlow Project Authors (<https://github.com/jpt/barlow>) | 1.408, Bold only (Google Fonts release) | `ember` (all text) |
+| IBM Plex Mono | Copyright (c) 2017 IBM Corp. with Reserved Font Name "Plex" (<https://github.com/IBM/plex>) | 2.3, Regular only (Google Fonts release) | `blueprint` (all text) |

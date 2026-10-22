@@ -5,10 +5,8 @@
 == built-in paper
 == built-in prism
 == built-in obsidian
-== fixture blueprint
-WARN Theme 'blueprint': font 'IBMPlexMono-Regular.ttf' could not be loaded; using the default theme's font.
-== fixture ember
-WARN Theme 'ember': font 'BarlowCondensed-Bold.ttf' could not be loaded; using the default theme's font.
+== built-in ember
+== built-in blueprint
 == fixture pop
 WARN Theme 'pop': font 'Archivo-Variable.ttf' for the value role (typography.fonts.value) could not be loaded; using typography.font.
 WARN Theme 'pop': font 'Archivo-Variable.ttf' could not be loaded; using the default theme's font.

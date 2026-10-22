@@ -92,13 +92,12 @@
       "unit": 400,
       "label": 400,
       "body": 400,
-      "title": 500
+      "title": 400
     },
     "labelSize": 0.095,
     "bodySize": 0.11,
     "titleSize": 0.12,
     "unitRatio": 0.35,
-    "valueScale": 1.05,
     "case": {
       "label": "upper",
       "title": "upper"
@@ -131,7 +130,6 @@
       "size": 0.06,
       "color": "#ffd34d"
     },
-    "crosshair": true,
     "track": {
       "color": "#559fd0ff"
     }

@@ -88,7 +88,7 @@ public sealed class GaugeThemeTests : IDisposable
     [Fact]
     public void AV1Theme_GivesTheEmptyGaugeTheme()
     {
-        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper" or "prism" or "obsidian")))
+        foreach (string name in ThemeStore.BuiltInNames.Where(n => n is not ("carbon" or "paper" or "prism" or "obsidian" or "ember" or "blueprint")))
         {
             using var theme = ThemeResolver.Resolve(new ThemeStore("").Load(name), 275);
 
@@ -184,7 +184,7 @@ public sealed class GaugeThemeTests : IDisposable
             Assert.False(theme.Gauge.IsEmpty, name);
         }
 
-        using var ember = ThemeResolver.Resolve(store.Load("ember"), 275);
+        using var ember = ThemeResolver.Resolve(builtIns.Load("ember"), 275);
         Assert.Equal(0.8f, ember.Gauge.Redline!.From);
         Assert.True(ember.Gauge.Redline.LightsAbove);
         Assert.Equal(GaugeMarkerShape.Needle, ember.Gauge.Marker!.Shape);
