@@ -167,6 +167,7 @@ public static partial class ThemeLint
                 "Put the font file in the theme's folder and name it without a path.",
             ThemeCodes.BorderWithoutWidth => "Give card.borderWidth a value above 0, or remove the style.",
             ThemeCodes.SpinWithoutConic => "Set card.borderGradient to kind conic, or remove the animation.",
+            ThemeCodes.AnimatedDashedBorder => "Use a solid card.borderStyle, or remove the animation.",
             ThemeCodes.PatternDense => "Raise pattern.spacing, or lower pattern.thickness.",
             ThemeCodes.CornerMarksReach => "Move the marks in (a smaller negative inset) or widen card.gap.",
             ThemeCodes.EffectReach => "Reduce the blur, offset or spread, or widen card.gap.",

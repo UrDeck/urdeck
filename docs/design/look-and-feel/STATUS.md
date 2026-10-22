@@ -31,7 +31,7 @@ and the OpenSpec specs (`openspec/specs/`) win.
 | PR 4: sparkline, status chip, divider, well, clock options, weather sections | `theme-widget-parts` | **Done**, archived. SDK 0.11.0: `Chip`, `Divider`, `Well`, `Sparkline`; `Theme.Chip`, `Divider` (default is Weather's old rule, byte-identical), `Well`; `GaugeTheme.Sparkline` and `Status`; `GaugeOptions.History` and `Status`. The gauge carves a status row (label left, chip right) and a sparkline strip out of its rectangle. Stats keeps a per-position history ring (at most 600 floats, only while the sparkline is on and the position is 0.9 of a cell tall) and chooses the status; the Clock has `header`, `subtitle`, `showWeek`, `showSeconds`, `blinkSeparator` (opt-in; a per-second repaint costs about 10 ms of CPU a minute); Weather's 4x4 rule, forecast wells and condition chip use the parts. Pop's goldens redrawn (pill); the rest unchanged. Carbon and Paper rendered beside the board. Findings in its design (`openspec/changes/archive/2026-10-18-theme-widget-parts/design.md`): Rigline's fixture has no `well`; the status works at single positions; the blink draws a space; the dimension label is not printed yet |
 | PR 10: icon sets, themed weather and glyph shortcuts | `theme-icons` | **Done**, archived (#73). SDK 0.13.0: `IIconSet`, `IconGlyph`, `IconTheme` on `Theme.Icons`, `ThemedIcon`, `ImageTile`'s glyph key. The engine parses a whitelist of SVG (`IconSvgParser`), reads sets through a manifest (`IconSetReader`, `IconSetStore`) and ships `outline` (Lucide 1.60.0, copied once). Weather draws static glyphs under a theme that names a set (no Lottie, no posters, no frames; the `ramp` tint maps -10 to 40 C); Shortcut has `theme:<key>` and a glyph by target kind when the icon service gives up. `icons.animated` is gone. Lint: `THEME044` is real, `THEME070` to `THEME076` are new. The 4x2 and 4x4 weather cards and the shortcut glyphs were captured on the panel at 125 % and 150 %, not at 100 %. Carbon and Paper name `outline` again; the draft themes whose fixtures name it (Obsidian, Ember, Blueprint, Pop, Prism, Rigline) were redrawn as well, the v1 themes are byte-identical. **Measured and looked at on the panel** (`docs/perf/weather.md`, `docs/perf/theme-look.md`): with `motion: full` the outline set costs about 0 % CPU and GPU against 2 to 3 % with Meteocons, and 16 to 20 MB less. The 4x4 forecast icons were small (Paper nearly invisible); the forecast now tightens its text rows to keep them at least 0.6 of a column. **Prism's open icon question:** its draft sets `animated: true` with `set: "outline"`, now outline glyphs in the text tint; its own theme change decides whether it wants Meteocons (drop `set`). The design copies under `docs/design/look-and-feel/assets/themes` still carry `animated`, as the handoff snapshot |
 | PR 11: `urdeck-cli theme validate`, `render`, `init` | `theme-cli` | **Implemented** (pending the pull request), `theme validate`, `render`, `init` and `schema`; the validator findings below are built (`THEME001` to `THEME090`, `docs/themes.md`, "Checking a theme"), contrast is owned here (`THEME060` to `THEME062`) and the built-in themes check clean. `SamplePage` moved to `src/UrDeck.Preview`. Was: to run in parallel (another worktree). Independent. Carries the validator findings listed below and owns the contrast rule (`themes-carbon-paper` checks contrast by hand and does not edit `ThemeDefinition.Rules.cs`). The sample page is in the engine tests (`Support/SamplePage.cs`); the CLI has to move or share it, and `GoldenTests.cs` is the only overlap with the theme change. Whichever lands second must validate Carbon and Paper clean |
-| PR 9: animated border, value fill, pattern scroll, `reduceMotion` | `motion` | After card chrome and pattern; **Opus**. Spike S2 decided the mechanism |
+| PR 9: animated border, `reduceMotion` | `motion` | **Done**, archived (`openspec/changes/archive/2026-10-21-motion`). The owner looked at it on the panel at 100, 125 and 150 %: swipes, presses, reduced motion; and toggled Windows' Animation effects. `MotionPolicy` (the user's `motion` in the configuration, else Windows' Animation effects setting, capped by the theme's `motion.level`), `ResolvedCardStyle.BorderAnimation` and `WithoutBorder()`, `BorderPicture` (the conic source and the ring, drawn with the still border's own shape and stroke), the host's `BorderMotion` (one compositor sprite per card as the view's child visual, 15 steps a second), `MotionGate` (display off, hidden deck, level), `WindowsAnimationWatcher`, `THEME057`. A moving shader background is drawn still below the user's `full`. Snapshots and every golden unchanged. Measured: `spin` +3.2 to +3.6 % of a core and +3.4 to +5.3 MB private for eight cards, `pulse` +1.4 to +2.0 % and +3.4 to +3.6 MB; at `motion: off` equal to no animation; no growth beyond the host's own over 40 theme switches (`docs/perf/motion.md`). `typography.valueFill.animate` and `pattern.scroll` stay deferred; the SDK `Theme.Motion`, widgets honouring the level, and `card.compact.borderAnimate` (compact cards take the page card's) are follow-ups |
 | PR 12: Carbon and Paper | `themes-carbon-paper` | **Done**, archived (#66). Carbon and Paper are built in with Instrument Sans and JetBrains Mono; the fixture copies are gone and their goldens redrawn in the real fonts (`carbon-dock.png` added). Carbon's dot grid waits for `page-pattern`, which redraws Carbon's goldens and gets a second panel look. Compared on the panel with the board; the differences that only the engine can fix are the follow-ups below |
 | PR 13 to 16: the other six themes | one change per pair | After the knobs they use. Order: Prism and Obsidian; Ember and Blueprint; Pop; Rigline last |
 | PR 17: docs, site gallery, media | with each theme, rest at the end | The site needs a deck and pictures per theme (`site/MEDIA-CHECKLIST.md`) |
@@ -45,7 +45,8 @@ parallel   theme-cli                    another worktree; owns the contrast rule
 done       page-pattern                 Carbon's dots are drawn (goldens redrawn); Ember and Blueprint are unblocked
            theme-icons                  every theme gets themed icons (done, see PR 10)
 any time   Prism + Obsidian, Pop        need nothing unbuilt (icons fall back to the widgets' own), slot in between
-last       motion (Opus), then Rigline  Rigline needs the animated border
+done       motion                       the border turns, `motion` is a setting; Rigline is unblocked
+next       Rigline                      its own theme change
 ```
 
 - **No theme picker for now.** The approach for the configuration editor is not decided, and a one-off theme or background
@@ -105,8 +106,10 @@ last       motion (Opus), then Rigline  Rigline needs the animated border
 - **Typography:** `opsz` was decided in `theme-typography` (`opticalSize: auto`: the display cut for values, the pixel size for the
   rest). Still open: sharing the base typeface between page and dock (a second family measured 2.3 MB on the panel; optional), and
   whether a slanted value should count its lean in the fit and the unit gap (Ember, Rigline; see that change's design).
-- **Motion:** each of `motion.level`, a user `reduceMotion`, display off and a hidden deck must stop the border animation.
-  Whether a reduced-motion setting should swap a shader for the theme's still background (the package said both yes and no).
+- **Motion:** decided in `motion`: the effective level is the user's `motion` value (else Windows' Animation effects setting)
+  capped by the theme's `motion.level`; display off and a hidden deck pause the border through one gate; a moving shader is
+  drawn still (speed 0) at the user's reduced motion, not swapped for the theme's still background (that would change what the
+  user chose, and many themes have none).
 
 ## Validator findings the theme CLI must carry
 
@@ -118,8 +121,8 @@ translucent fill (the engine limits it, `docs/design/card-chrome.md`); text cont
 
 ## Not verified, in case it matters later
 
-- Whether the border's 15-step rotation looks smooth: only still captures were taken (S2). The underlay's page slide was looked at on
-  the panel (`card-underlay`).
+- The underlay's page slide was looked at on the panel (`card-underlay`). The border's 15-step rotation was looked at on 2026-10-21
+  (150 %, 7 s per turn, 15 and 30 steps): 15 accepted.
 - A shader run on the GPU past the 4-hour wrap; only CPU renders at 14,399 s were made.
 - Value fill animation and pattern scroll were never tested (deferred).
 

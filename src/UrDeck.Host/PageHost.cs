@@ -24,6 +24,7 @@ internal sealed class PageHost : Canvas, IDisposable
     private readonly Dictionary<int, WidgetView> _viewsByIndex = new();
     private readonly IReadOnlyList<WidgetLayoutItem> _layout;
     private readonly UnderlayView? _underlay;
+    private readonly BorderMotion? _borders;
 
     public PageHost(
         PageConfig page,
@@ -35,6 +36,7 @@ internal sealed class PageHost : Canvas, IDisposable
         PressStyle press,
         FrameClock frameClock,
         double scale,
+        MotionGate? borderMotion = null,
         System.Drawing.Rectangle? underlayClip = null)
     {
         _layout = layout;
@@ -50,6 +52,9 @@ internal sealed class PageHost : Canvas, IDisposable
                 continue;
 
             var style = cardStyle.ForCard(item);
+            // A moving border is a sprite over the card, so its back is painted without the ring. Below the full motion
+            // level there is no gate and the card is drawn as it is for a theme without borderAnimate.
+            bool animated = borderMotion != null && style.BorderAnimation != null;
             var descriptor = plugins.GetDescriptor(config.WidgetTypeId);
             if (descriptor == null)
             {
@@ -61,7 +66,7 @@ internal sealed class PageHost : Canvas, IDisposable
             try
             {
                 var widget = plugins.CreateWidget(config, out var services)!;
-                var view = new WidgetView(widget, services, descriptor, theme, new CardLook(style, cardIndex[i]), press, frameClock, plugins.Readings)
+                var view = new WidgetView(widget, services, descriptor, theme, new CardLook(animated ? style.WithoutBorder() : style, cardIndex[i]), press, frameClock, plugins.Readings)
                 {
                     Width = item.Size.Width,
                     Height = item.Size.Height,
@@ -69,6 +74,12 @@ internal sealed class PageHost : Canvas, IDisposable
                 SetLeft(view, item.Position.X);
                 SetTop(view, item.Position.Y);
                 Children.Add(view);
+                if (animated)
+                {
+                    _borders ??= new BorderMotion(borderMotion!, page.Name);
+                    _borders.Attach(view, style, item.Size, scale);
+                }
+
                 _views.Add(view);
                 _viewsByIndex[i] = view;
                 placed.Add((item, view, style));
@@ -92,6 +103,8 @@ internal sealed class PageHost : Canvas, IDisposable
         _underlay = UnderlayView.Create(placed, scale, underlayClip, page.Name);
         if (_underlay != null)
             Children.Insert(0, _underlay);
+
+        _borders?.Begin();
     }
 
     /// <summary>How many widgets are shown.</summary>
@@ -121,6 +134,7 @@ internal sealed class PageHost : Canvas, IDisposable
         _views.Clear();
         _viewsByIndex.Clear();
         _viewsByReading.Clear();
+        _borders?.Dispose();
         _underlay?.Dispose();
         Children.Clear();
     }

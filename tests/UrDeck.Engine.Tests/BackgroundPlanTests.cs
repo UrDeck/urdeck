@@ -3,6 +3,7 @@
 
 using SkiaSharp;
 using UrDeck.Engine.Backgrounds;
+using UrDeck.Engine.Motion;
 using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
@@ -478,6 +479,68 @@ public sealed class BackgroundPlanTests : IDisposable
         var theme = _fixture.WriteTheme("calm2", """{ "format": 2, "motion": { "level": "off" }, "background": { "default": { "name": "drift" } } }""");
         using var background = BackgroundPlan.Resolve(BackgroundSettings.None, theme).Build(_fixture.Store, _fixture.Root);
 
+        Assert.True(background!.IsMoving);
+    }
+
+    // The user's motion level (motion)
+
+    private LoadedTheme DriftTheme(string name, string extra = "")
+    {
+        _fixture.WriteShader("drift", "uniform float iTime;\nhalf4 main(float2 p) { return half4(fract(iTime), 0, 0, 1); }");
+        return _fixture.WriteTheme(name, $$"""{ "format": 2 {{extra}}, "background": { "default": { "name": "drift" } } }""");
+    }
+
+    [Theory]
+    [InlineData(MotionLevel.Reduced)]
+    [InlineData(MotionLevel.Off)]
+    public void A_moving_shader_is_still_below_the_users_full_level_and_its_key_differs(MotionLevel level)
+    {
+        var theme = DriftTheme("userless" + level);
+        var full = BackgroundPlan.Resolve(BackgroundSettings.None, theme, MotionLevel.Full);
+        var less = BackgroundPlan.Resolve(BackgroundSettings.None, theme, level);
+
+        Assert.NotEqual(full.RequestKey(_fixture.Store, _fixture.Root), less.RequestKey(_fixture.Store, _fixture.Root));
+        using var moving = full.Build(_fixture.Store, _fixture.Root);
+        using var still = less.Build(_fixture.Store, _fixture.Root);
+        Assert.True(moving!.IsMoving);
+        Assert.False(still!.IsMoving);
+        Assert.Equal(BackgroundKind.Shader, still.Kind);
+    }
+
+    [Fact]
+    public void A_configured_shader_is_slowed_too_and_keeps_its_other_values()
+    {
+        var settings = BackgroundFixture.Parse("""{ "type": "shader", "name": "drift", "speed": 2, "scale": 0.7 }""");
+        var theme = DriftTheme("userconf");
+        var plan = BackgroundPlan.Resolve(settings, theme, MotionLevel.Off);
+
+        using var background = plan.Build(_fixture.Store, _fixture.Root);
+
+        Assert.False(background!.IsMoving);
+        Assert.Equal(0, background.Speed);
+        Assert.Equal(BackgroundOrigin.Configuration, background.Origin);
+    }
+
+    [Fact]
+    public void A_still_background_has_the_same_key_at_every_level()
+    {
+        var theme = Theme(false, true);
+
+        Assert.Equal(
+            BackgroundPlan.Resolve(BackgroundSettings.None, theme, MotionLevel.Full).RequestKey(_fixture.Store, _fixture.Root),
+            BackgroundPlan.Resolve(BackgroundSettings.None, theme, MotionLevel.Off).RequestKey(_fixture.Store, _fixture.Root));
+    }
+
+    [Fact]
+    public void The_themes_ceiling_does_not_slow_the_background_but_the_users_level_does()
+    {
+        var theme = DriftTheme("ceiling", ", \"motion\": { \"level\": \"off\" }");
+        // Windows animations on, the theme caps at off: the user's level is still full, so the shader moves.
+        var decision = MotionPolicy.Decide(null, true, "off");
+
+        using var background = BackgroundPlan.Resolve(BackgroundSettings.None, theme, decision.User).Build(_fixture.Store, _fixture.Root);
+
+        Assert.Equal(MotionLevel.Off, decision.Effective);
         Assert.True(background!.IsMoving);
     }
 }

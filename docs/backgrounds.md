@@ -61,8 +61,11 @@ The **scrim** (`background.scrim`, a colour and an alpha from 0 to 1) is a veil 
 still background, whoever chose it, so text keeps its contrast over a bright or busy one. The colour's own transparency
 multiplies the alpha. It is not drawn over the plain background colour, and not when the background is `none`.
 
-The theme's `motion.level` does not change the background: a moving default moves. A shader has its own `speed`, and the
-deck stops its frames while it is hidden or the display is off. A still background is drawn once, with no frames.
+The theme's `motion.level` does not change the background: a moving default moves. The user's motion level does: when the
+configuration's `motion` is `reduced` or `off`, or the configuration has none and Windows' "Animation effects" setting is off, a
+moving shader (the configuration's or the theme's default) is drawn still, as `speed` 0 draws it, at its first frame. `"motion":
+"full"` in the configuration brings the motion back whatever Windows says. A shader has its own `speed`, and the deck stops its
+frames while it is hidden or the display is off. A still background is drawn once, with no frames.
 
 The log says what was chosen, once per change: `Background: shader 'horizon' (built-in) from theme default, surface ...`
 (or `configuration`, `theme still background`), and `Background: colour (theme colour)` when only the colour is left.

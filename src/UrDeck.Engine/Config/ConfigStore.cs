@@ -95,6 +95,13 @@ public class UrDeckConfig
     [JsonPropertyName("background")]
     public JsonElement? Background { get; set; }
 
+    /// <summary>
+    /// How much the deck may move: <c>full</c>, <c>reduced</c> or <c>off</c>. Absent (the default) follows Windows' "Animation
+    /// effects" setting; <see cref="Motion.MotionPolicy"/> reads it and treats an unknown value as absent.
+    /// </summary>
+    [JsonPropertyName("motion")]
+    public string? Motion { get; set; }
+
     /// <summary>1-based monitor index, used when <see cref="MonitorName"/> doesn't match anything.</summary>
     [JsonPropertyName("monitor")]
     public int Monitor { get; set; } = 1;
@@ -154,6 +161,7 @@ public sealed class ConfigStore : IDisposable
         Config.Pager ??= new PagerConfig();
         Config.Dock ??= new List<WidgetConfig>();
         Config.Pager.GetIndicatorMode(warn: true);
+        Motion.MotionPolicy.Parse(Config.Motion, warn: true);
         Backgrounds.BackgroundSettings.NotePageBackgrounds(Config);
         if (Config.Pages.Count == 0)
             Config.Pages.Add(new PageConfig());

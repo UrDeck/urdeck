@@ -130,6 +130,7 @@ Rules between values, checked after each value on its own (each warns once and c
 
 - `card.borderStyle`, `borderGradient` or `borderAnimate` with a border width of 0 has no effect: warned.
 - `card.borderAnimate` with `mode` `spin` needs a `borderGradient` of kind `conic`; without one the animation is switched off.
+- `card.borderAnimate` on a `dashed` `card.borderStyle` is not drawn (`THEME057`): the deck moves the border as a ring stretched round the card, which a dash pattern fitted to each side does not survive. The border stays still.
 - `pattern.spacing` less than three times `pattern.thickness` makes the marks run together: warned.
 - `card.cornerMarks.inset` below 0 reaches outside the card; with `card.gap` smaller than that the marks would overlap the next card: warned.
 - `card.shape` `chamfer` with `card.compact.shape` `circle` is allowed; the circle applies to compact cards only.
@@ -169,8 +170,8 @@ Drawn by: the changes that use them.
 
 Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`, `tint`), the border (`borderStyle`,
 `borderDash`, `borderGradient`), the light inside the card (`highlight`, `sheen`), the `accentStrip` and the part of the
-`cornerMarks` on and outside the card, the `shadow` and the `glow`, and the `compact` override for small cards. Kept and drawn by
-the later card chrome change: `borderAnimate`.
+`cornerMarks` on and outside the card, the `shadow` and the `glow`, the `compact` override for small cards, and the
+`borderAnimate` (below).
 
 - **Shape.** `round` is the rounded rectangle of `card.radius`, limited to half the card's smaller side. `chamfer` cuts the
   corners in `cutCorners` with a straight line `cut` along each side, limited to half the smaller side; the other corners are
@@ -185,6 +186,14 @@ the later card chrome change: `borderAnimate`.
   `off`; three and two border widths when absent). A dashed border has a dash centred on every corner: on each side the dash
   and the gap are scaled together so that a whole number of them fits. `borderGradient` colours the border, solid or dashed:
   `linear` at its angle, `conic` once round the card's centre, starting at the right. A border width of 0 draws nothing.
+- **Animated border.** `borderAnimate` moves the border. `spin` turns the conic `borderGradient` once round the card every
+  `period` seconds (7 when absent); `pulse` breathes the border's opacity between full and 0.55 and back every `period`, for a solid,
+  linear or conic border. Both move in 15 steps per second, not smoothly: the compositor draws them over the card, which is
+  never repainted for them, at about 3 % of one CPU core for eight cards. The border moves only at the effective motion level
+  `full` (see [`motion`](#motion)), while the display is on and the deck is shown; at `reduced` or `off`, with the display off or
+  with the deck hidden it is the still border, drawn exactly as a border without `borderAnimate`. A snapshot (`--snapshot`,
+  `urdeck-cli theme render`) always draws it still, at its starting angle and full opacity. It does not apply to a `dashed`
+  border (`THEME057`), to a border width of 0, or to `spin` without a conic gradient (`THEME051`).
 - **Hairlines.** In a theme that sets any card value of format 2, a border of 2 pixels or less is drawn at a whole number of
   pixels, never under 1; under one pixel it is written to `urdeck.log` once. A theme with no such value draws its cards
   exactly as before, unrounded.
@@ -548,11 +557,15 @@ for what happens when one fails. The built-in themes define none.
 
 ### `motion`
 
-Drawn by: the motion change.
+Drawn today: it caps `card.borderAnimate`.
 
 | Key | Value | Default | Meaning |
 |---|---|---|---|
-| `motion.level` | `full`, `reduced`, `off` | `"full"` | The ceiling for theme-driven animation (borderAnimate, and what a later change adds). The effective level is the lower of this and the user/OS setting. Does not touch the shader background, which has its own control. |
+| `motion.level` | `full`, `reduced`, `off` | `"full"` | The ceiling for theme-driven animation (borderAnimate, and what a later change adds). The effective level is the lower of this and the user's: the configuration's `motion`, or Windows' "Animation effects" setting when the configuration has none. Does not touch the shader background: the user's level does (a moving shader is drawn still below `full`), the theme's ceiling does not. |
+
+At `full` the theme's continuous animations run; at `reduced` and `off` none does, and each is drawn as it is when still (the
+two levels behave alike in this version). The page slide and the press feedback are not governed by the level. `urdeck.log`
+says `Motion: <level> (<what decided it>)` at startup and whenever the level changes.
 
 ## Icon sets
 
@@ -665,6 +678,7 @@ the rest only the tool reports.
 | THEME054 | warning | a shadow or glow whose reach is more than the gap over a translucent fill (logged as information, the deck limits it): reduce the blur or offset |
 | THEME055 | warning | a line (border, highlight, accent strip, corner mark) that resolves under one pixel, which the deck draws 1 px wide (also logged) |
 | THEME056 | info | `card.compact.shape` `circle` on a card that is not square, which is a capsule (also logged) |
+| THEME057 | warning | `card.borderAnimate` on a `dashed` `card.borderStyle` (also logged): the border is drawn still, because the moving ring is stretched round the card and a dash pattern fitted to each side does not survive that |
 | THEME060 | warning | the text colour on the card fill, or on its gradient's darkest or lightest stop, is under 4.5:1: change the colours; a translucent fill is composited over `colors.background`, and the message says so because the page behind may be a moving background |
 | THEME061 | warning | the text colour on a card tint is under 4.5:1 (a tinted card keeps `colors.text`): change the tint at the position the message names |
 | THEME062 | info | the muted text colour on the card fill is under 3:1 |
@@ -676,7 +690,7 @@ the rest only the tool reports.
 | THEME075 | warning | an `.svg` file in the set's folder that no manifest entry names (the tool alone reports it) |
 | THEME076 | info | the set has no icon for some of the product's keys; the message names them and says `outline` answers them |
 | THEME080 | warning | `meta` lacks a `name`, a `description` or a `mode`: add them so an editor can list the theme |
-| THEME090 | info | more than one continuous animation is on (also logged): each repaints on every frame |
+| THEME090 | info | more than one continuous animation is on (also logged): each costs CPU while it runs |
 
 ## Bundled font
 

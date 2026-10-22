@@ -162,6 +162,7 @@ The rules between values that the deck applies when it loads a theme MUST each b
 | `THEME054` | warning | a shadow or glow whose reach is more than the gap over a translucent card fill; the deck limits it |
 | `THEME055` | warning | a line (a border, highlight, accent strip or corner mark) that resolves under one pixel; the deck draws it 1 px wide |
 | `THEME056` | info | `card.compact.shape` `circle` on a card that is not square, which is drawn as a capsule |
+| `THEME057` | warning | `borderAnimate` (`spin` or `pulse`) on a `dashed` border; the deck draws the border still |
 | `THEME090` | info | more than one continuous animation is on |
 
 - `THEME054` MUST use the reach the deck uses when it draws, so the tool and the picture agree
@@ -177,7 +178,11 @@ The rules between values that the deck applies when it loads a theme MUST each b
 
 #### Scenario: Several animations
 - **WHEN** a theme turns on two continuous animations
-- **THEN** a `THEME090` information finding says each repaints on every frame, and no warning is made
+- **THEN** a `THEME090` information finding says each costs CPU while it runs, and no warning is made
+
+#### Scenario: Animated dashed border
+- **WHEN** `card.borderStyle` is `dashed` and `card.borderAnimate.mode` is `pulse`
+- **THEN** a `THEME057` warning says the border is drawn still
 
 ### Requirement: Checks Only A Tool Makes
 The tool MUST report findings that need a judgement and not only a parse:

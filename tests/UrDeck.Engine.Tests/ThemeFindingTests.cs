@@ -84,6 +84,7 @@ public sealed class ThemeFindingTests
     [Theory]
     [InlineData("""{ "card": { "borderWidth": 0, "borderStyle": "dashed" } }""", ThemeCodes.BorderWithoutWidth, "card.borderWidth", ThemeSeverity.Warning)]
     [InlineData("""{ "card": { "borderWidth": 0.01, "borderAnimate": { "mode": "spin" } } }""", ThemeCodes.SpinWithoutConic, "card.borderAnimate.mode", ThemeSeverity.Warning)]
+    [InlineData("""{ "card": { "borderWidth": 0.01, "borderStyle": "dashed", "borderAnimate": { "mode": "pulse" } } }""", ThemeCodes.AnimatedDashedBorder, "card.borderAnimate.mode", ThemeSeverity.Warning)]
     [InlineData("""{ "pattern": { "kind": "dots", "spacing": 0.02, "thickness": 0.01 } }""", ThemeCodes.PatternDense, "pattern.spacing", ThemeSeverity.Warning)]
     [InlineData("""{ "card": { "gap": 0.02, "cornerMarks": { "style": "bracket", "inset": -0.1 } } }""", ThemeCodes.CornerMarksReach, "card.cornerMarks.inset", ThemeSeverity.Warning)]
     public void A_rule_between_values_is_one_finding_with_its_own_code(string json, string code, string key, ThemeSeverity severity)

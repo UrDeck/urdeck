@@ -370,7 +370,7 @@ capability; what is drawn with it is specified by the capabilities that draw it.
 - Icons: `set`, `stroke`, `tint` (`accent`, `accent2`, `text`, `ramp`, `none` or a colour) and `glow`; there is no
   `animated` value, icons from a set are still pictures
 - Background: `default` (a background's name), `static` (a gradient, a colour or a picture file) and `scrim`
-- Motion: `level`, the ceiling for animation a theme drives
+- Motion: `level`, the ceiling for animation a theme drives (see `motion`)
 
 The product has set some values aside for a later change; they are listed with their definitions in
 `docs/design/theme-format-2-deferred-keys.md` and are not part of this requirement.
@@ -392,9 +392,9 @@ The product has set some values aside for a later change; they are listed with t
 - **WHEN** a theme sets `icons.animated`
 - **THEN** the key is reported as an unknown key, as any other unknown key is, and nothing else changes
 
-#### Scenario: Value from a group the product does not draw yet
+#### Scenario: Motion ceiling
 - **WHEN** a theme sets `motion.level` to `reduced`
-- **THEN** the value is kept and no warning is logged
+- **THEN** the value is kept, no warning is logged, and it caps the deck's motion as `motion` specifies
 
 ### Requirement: Format 2 Validation
 An invalid format 2 value MUST be handled as a format 1 value is: it is cleared, the loaded theme takes the default

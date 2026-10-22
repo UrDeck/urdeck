@@ -41,7 +41,9 @@ scrim, a veil that keeps text readable over a busy background. The deck shows th
 A background that fails is logged once and the next one is tried, so a theme with a still gradient shows the gradient
 when its shader cannot run. Choosing a shader or an image yourself shows that one, not the theme's. To switch a theme's
 background off, set `"background": { "type": "none" }`; delete the key to get the theme's choice back. The three built-in
-themes choose no background, so nothing changes for them. A theme's `motion.level` does not affect the background.
+themes choose no background, so nothing changes for them. A theme's `motion.level` does not affect the background, but your
+own motion setting does: with `"motion": "reduced"` or `"off"` in the configuration, or with Windows' Animation effects switched
+off and no `motion` in the configuration, a moving shader is drawn still. `"motion": "full"` brings it back.
 
 ## Built-in shaders
 

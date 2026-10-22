@@ -45,6 +45,13 @@ public sealed partial class ThemeDefinition
             check.Rule(ThemeCodes.SpinWithoutConic, "card.borderAnimate.mode", "card.borderAnimate 'spin' needs card.borderGradient of kind 'conic'; the animation is switched off.");
             card.BorderAnimate = null;
         }
+
+        // The deck moves a border as a ring stretched round the card; a dash pattern fitted to each side does not survive that.
+        if (card.BorderAnimate is { Mode: "spin" or "pulse" } && card.BorderStyle == "dashed")
+        {
+            check.Rule(ThemeCodes.AnimatedDashedBorder, "card.borderAnimate.mode", "card.borderAnimate on a dashed card.borderStyle is not drawn; the border stays still.");
+            card.BorderAnimate = null;
+        }
     }
 
     private void CheckPattern(ThemeValueCheck check)
@@ -72,6 +79,6 @@ public sealed partial class ThemeDefinition
     internal static void NoteAnimations(ThemeValueCheck check, int count)
     {
         if (count > 1)
-            check.Note(ThemeCodes.Animations, null, $"{count} continuous animations are on; each repaints on every frame.");
+            check.Note(ThemeCodes.Animations, null, $"{count} continuous animations are on; each costs CPU while it runs.");
     }
 }

@@ -35,6 +35,7 @@ public sealed class ResolvedCardStyle : IDisposable
     private const double DefaultCut = 0.14;
     private const double DefaultFillAngle = 90;
     private const double DefaultBorderAngle = 135;
+    private const double DefaultBorderPeriod = 7;
     private const double DefaultHighlightThickness = 0.01;
     private const double DefaultSheenX = 0.1;
     private const double DefaultSheenY = 0;
@@ -59,6 +60,16 @@ public sealed class ResolvedCardStyle : IDisposable
     private ResolvedCardStyle? _compact;
     private LoadedTheme _loaded = null!;
     private bool _circle;
+
+    // What Build was given, so that WithoutBorder can build the same style again with no border.
+    private ThemeCardDefinition _card = null!;
+    private float _cellPx;
+    private bool _isCompactBuild;
+    private ResolvedCardStyle? _withoutBorder;
+
+    // The pictures of a moving border: the conic source (one per style) and a ring per corner reach, cut and width.
+    private BorderPicture? _conicSource;
+    private readonly Dictionary<(bool Chamfer, int Reach, CardCorners Cut, int Width, int CardWidth, int CardHeight), BorderPicture> _rings = [];
 
     // The underlay pictures: the nine-grid one under (0, 0), an exact one under its card's size.
     private readonly Dictionary<(int Width, int Height), UnderlayPicture> _underlays = [];
@@ -109,6 +120,12 @@ public sealed class ResolvedCardStyle : IDisposable
     internal bool BorderConic { get; private init; }
 
     internal float BorderAngle { get; private init; }
+
+    /// <summary>
+    /// How the host moves the border (<c>card.borderAnimate</c>); null for none: mode <c>none</c>, <c>spin</c> without a conic
+    /// gradient, a dashed border, no border at all. The snapshot and the page renderer ignore it and draw the still border.
+    /// </summary>
+    public BorderAnimation? BorderAnimation { get; private init; }
 
     /// <summary>The colours of <c>tint: cycle</c>, or null when cards are not tinted.</summary>
     internal SKColor[]? Tints { get; private init; }
@@ -178,6 +195,82 @@ public sealed class ResolvedCardStyle : IDisposable
     public ResolvedCardStyle ForCard(Layout.WidgetLayoutItem item) =>
         item.GridSize.Width <= 1 && item.GridSize.Height <= 1 ? Compact : this;
 
+    /// <summary>
+    /// The same style with no border, for cards whose border the host draws as a moving sprite: its backs hold everything
+    /// but the ring. Made on first use and owned by this style (the compact variant has its own). Never used by the snapshot
+    /// or <see cref="Rendering.PageRenderer"/>, which draw the still border, so the goldens do not depend on it.
+    /// </summary>
+    public ResolvedCardStyle WithoutBorder()
+    {
+        if (BorderWidth <= 0)
+            return this;
+        lock (_sized)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (_withoutBorder == null)
+            {
+                var card = _card.MemberwiseCloneForBorder();
+                card.BorderWidth = 0;
+                _withoutBorder = Build(_loaded, _cellPx, card, _circle, _isCompactBuild);
+            }
+            return _withoutBorder;
+        }
+    }
+
+    /// <summary>
+    /// The conic gradient of an animated border, drawn once on a square for the compositor to turn (a spin) or to fade (a pulse);
+    /// null unless this style's animated border is conic. Kept until the style is disposed, so every card and page shares it.
+    /// </summary>
+    public BorderPicture? BorderConicSource()
+    {
+        if (BorderAnimation == null || !BorderConic || BorderGradient == null)
+            return null;
+        lock (_sized)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            return _conicSource ??= BorderPicture.MakeConicSource(this);
+        }
+    }
+
+    /// <summary>
+    /// The ring a moving border is masked to for a card of <paramref name="cardPx"/> physical pixels: the border's shape
+    /// drawn the way the still border draws it, to be stretched round the card as a nine-grid (<see cref="BorderPicture.Inset"/>).
+    /// Cards whose corners reach the same distance share one; a card too small for its two insets (a circle, a card as small as
+    /// its corners) has a ring drawn at its exact size. Null unless this style's border animates.
+    /// </summary>
+    public BorderPicture? BorderRing(System.Drawing.Size cardPx)
+    {
+        if (BorderAnimation == null || cardPx.Width <= 0 || cardPx.Height <= 0)
+            return null;
+        float reach = Math.Min(Chamfer ? Cut : Radius, Math.Min(cardPx.Width, cardPx.Height) / 2f);
+        int inset = BorderPicture.InsetFor(this, reach);
+        bool exact = cardPx.Width < 2 * inset || cardPx.Height < 2 * inset;
+        var key = (Chamfer, (int)MathF.Round(reach * 100), Chamfer ? CutCorners : CardCorners.None, (int)MathF.Round(BorderWidth * 100),
+            exact ? cardPx.Width : 0, exact ? cardPx.Height : 0);
+        lock (_sized)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (!_rings.TryGetValue(key, out var ring))
+                _rings[key] = ring = BorderPicture.MakeRing(this, reach, exact ? cardPx : null);
+            return ring;
+        }
+    }
+
+    /// <summary>
+    /// The paint of a pulsing border's ring on a card of <paramref name="cardPx"/>: its colour, or the gradient between the
+    /// points the still border places it with. Null for a style without an animated border, and for a conic one, which is
+    /// <see cref="BorderConicSource"/>'s picture.
+    /// </summary>
+    public BorderBrushSpec? BorderBrush(System.Drawing.Size cardPx)
+    {
+        if (BorderAnimation == null || BorderConic)
+            return null;
+        if (BorderGradient is not { } colors)
+            return new BorderBrushSpec([Border], default, default);
+        var (start, end) = SizedCardChrome.LinearPoints(SKRect.Create(cardPx.Width, cardPx.Height), BorderAngle);
+        return new BorderBrushSpec(colors, start, end);
+    }
+
     private static ResolvedCardStyle Build(LoadedTheme loaded, float cellPx, ThemeCardDefinition card, bool circle, bool compact)
     {
         var d = loaded.Definition;
@@ -213,6 +306,9 @@ public sealed class ResolvedCardStyle : IDisposable
         {
             IsPlain = plain,
             _loaded = loaded,
+            _card = card,
+            _cellPx = cellPx,
+            _isCompactBuild = compact,
             _circle = circle,
             Fill = fill,
             Border = border,
@@ -231,6 +327,7 @@ public sealed class ResolvedCardStyle : IDisposable
             BorderGradient = Parse(card.BorderGradient?.Colors),
             BorderConic = card.BorderGradient?.Kind == "conic",
             BorderAngle = (float)(card.BorderGradient?.Angle ?? DefaultBorderAngle),
+            BorderAnimation = ResolveBorderAnimation(card, borderWidth),
             Tints = tints,
             Highlight = ResolveHighlight(loaded, card.Highlight, cellPx),
             Sheen = card.Sheen is { Color: { } sheen } s
@@ -244,6 +341,19 @@ public sealed class ResolvedCardStyle : IDisposable
             CornerZone = UnderlayCornerZone(chamfer ? cut : radius, shadow, glow, outsideMarks),
             UnderlayIsSoft = (shadow != null || glow != null) && shadow is not { Blur: <= 0 } && outsideMarks == null,
         };
+    }
+
+    /// <summary>The animation of a border the host can move: a solid ring of some width (a nine-grid stretches a dash pattern).</summary>
+    private static BorderAnimation? ResolveBorderAnimation(ThemeCardDefinition card, float borderWidth)
+    {
+        if (card.BorderAnimate is not { Mode: "spin" or "pulse" } animate || borderWidth <= 0 || card.BorderStyle is "none" or "dashed")
+            return null;
+        bool conic = card.BorderGradient?.Kind == "conic";
+        if (animate.Mode == "spin" && !conic)
+            return null;
+        return new BorderAnimation(
+            animate.Mode == "spin" ? BorderAnimationMode.Spin : BorderAnimationMode.Pulse,
+            animate.Period ?? DefaultBorderPeriod);
     }
 
     private static CardShadow? ResolveShadow(ThemeCardShadowDefinition? shadow, float cellPx)
@@ -461,6 +571,11 @@ public sealed class ResolvedCardStyle : IDisposable
                 picture.Dispose();
             _underlays.Clear();
         }
+        _conicSource?.Dispose();
+        foreach (var ring in _rings.Values)
+            ring.Dispose();
+        _rings.Clear();
+        _withoutBorder?.Dispose();
         _compact?.Dispose();
     }
 

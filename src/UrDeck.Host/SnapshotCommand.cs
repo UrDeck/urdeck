@@ -6,6 +6,7 @@ using SkiaSharp;
 using UrDeck.Engine.Backgrounds;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Layout;
+using UrDeck.Engine.Motion;
 using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
@@ -28,7 +29,9 @@ internal static class SnapshotCommand
     private static DeckBackground? BuildBackground(HostContext host, LoadedTheme theme, int width, int height)
     {
         var settings = BackgroundSettings.Parse(host.Config.Config.Background);
-        var plan = BackgroundPlan.Resolve(settings, theme);
+        // The configuration's motion alone decides; Windows' setting is not read, so a snapshot is the same on every machine.
+        var motion = MotionPolicy.ForSnapshot(host.Config.Config.Motion, theme.Definition.Motion?.Level);
+        var plan = BackgroundPlan.Resolve(settings, theme, motion.User);
 
         // As the live layer does: a picture that cannot be decoded goes on to the plan's next candidate.
         int first = 0;

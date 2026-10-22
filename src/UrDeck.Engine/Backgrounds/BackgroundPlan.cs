@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Motion;
 using UrDeck.Engine.Themes;
 
 namespace UrDeck.Engine.Backgrounds;
@@ -55,6 +56,8 @@ public sealed record BackgroundCandidate(BackgroundOrigin Origin, BackgroundSett
 /// <item><c>none</c>: the background colour alone.</item>
 /// <item>A <c>background</c> that could not be read: the theme's still background, then the colour.</item>
 /// </list>
+/// Below the user's motion level <see cref="MotionLevel.Full"/> a shader candidate has speed 0, which the background draws
+/// still: the user's or Windows' wish for less motion, not the theme's ceiling.
 /// </summary>
 public sealed class BackgroundPlan
 {
@@ -69,19 +72,23 @@ public sealed class BackgroundPlan
     /// <summary>In the order they are tried; the last is always the background colour.</summary>
     public IReadOnlyList<BackgroundCandidate> Candidates { get; }
 
-    public static BackgroundPlan Resolve(BackgroundSettings settings, LoadedTheme theme)
+    /// <param name="settings">The configuration's <c>background</c>.</param>
+    /// <param name="theme">The loaded theme.</param>
+    /// <param name="userMotion">The user's motion level (<see cref="MotionDecision.User"/>), before the theme's ceiling.</param>
+    public static BackgroundPlan Resolve(BackgroundSettings settings, LoadedTheme theme, MotionLevel userMotion = MotionLevel.Full)
     {
+        double? speed = userMotion < MotionLevel.Full ? 0 : null;
         var candidates = new List<BackgroundCandidate>();
         var themeBackground = theme.Definition.Background;
 
         bool userChose = settings.Kind is BackgroundKind.Shader or BackgroundKind.Image;
         if (userChose)
-            candidates.Add(new BackgroundCandidate(BackgroundOrigin.Configuration, settings, null));
+            candidates.Add(new BackgroundCandidate(BackgroundOrigin.Configuration, Slowed(settings, speed), null));
 
         if (!settings.IsDisabled)
         {
             if (!settings.IsExplicit && !string.IsNullOrWhiteSpace(themeBackground?.Default?.Name))
-                candidates.Add(new BackgroundCandidate(BackgroundOrigin.ThemeDefault, BackgroundSettings.ForThemeShader(themeBackground!.Default!.Name!), null));
+                candidates.Add(new BackgroundCandidate(BackgroundOrigin.ThemeDefault, Slowed(BackgroundSettings.ForThemeShader(themeBackground!.Default!.Name!), speed), null));
 
             if (DeckBackground.HasStill(themeBackground?.Static))
                 candidates.Add(new BackgroundCandidate(BackgroundOrigin.ThemeStill, null, themeBackground!.Static));
@@ -90,6 +97,8 @@ public sealed class BackgroundPlan
         candidates.Add(new BackgroundCandidate(BackgroundOrigin.ThemeColour, null, null));
         return new BackgroundPlan(theme, candidates);
     }
+
+    private static BackgroundSettings Slowed(BackgroundSettings settings, double? speed) => speed is { } s ? settings.WithSpeed(s) : settings;
 
     /// <summary>
     /// A text that is equal while the same candidates would be built the same way: each candidate's own key, where it came

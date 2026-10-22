@@ -364,6 +364,8 @@ internal sealed class WidgetView : SKXamlCanvas, IFrameClient, IDisposable
         _cts.Cancel();
         _cts.Dispose();
         PaintSurface -= OnPaintSurface;
+        // The border sprite, if the page gave this card one: a removed canvas can stay alive for a while.
+        ElementCompositionPreview.SetElementChildVisual(this, null);
         if (_services != null)
         {
             // Releases the widget's icons and drops the engine's reference to this view.
