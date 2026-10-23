@@ -5,9 +5,7 @@
 Makes every picture and loop the website shows from the repository itself: what is needed follows from what the product
 ships, the files are rendered with sample data by the product's own preview tool, and a manual workflow proposes them in
 a pull request.
-
 ## Requirements
-
 ### Requirement: The Media Matrix
 The set of media files the site needs MUST be computed from the product's catalog (`urdeck-cli catalog export`) and the
 site's overrides, never listed by hand:
@@ -120,3 +118,18 @@ MUST open nothing and say so. It MAY be asked to render everything.
 #### Scenario: Nothing to do
 - **WHEN** the workflow is started and no file is stale
 - **THEN** no branch or pull request is created and the run's summary says the media are current
+
+### Requirement: Cookbook Pictures
+The media matrix MUST include one picture per cookbook recipe (`site/cookbook/<recipe>/`), rendered from the recipe's
+theme folder with what its `recipe.json` asks to show (the sample page, the dock, or one widget at a size), over the
+background it names or none. A recipe added or removed adds or removes its picture, and a change to a recipe's folder
+makes only its picture stale.
+
+#### Scenario: A new recipe
+- **WHEN** a folder `site/cookbook/hard-shadow/` with a theme and a `recipe.json` is added and the media are generated
+- **THEN** its picture exists and the media manifest names it as the recipe's picture
+
+#### Scenario: One recipe changed
+- **WHEN** only the circular dock recipe's theme changes
+- **THEN** only its picture is stale
+
