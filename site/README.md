@@ -20,6 +20,9 @@ the `site` job of a pull request:
 - Every internal `href` and `src` leads to a file of the output.
 - No page makes a request to another host: no `src`, stylesheet, script, `url()` or `@import` pointing at anything but
   `urdeck.app`. A plain link (`<a href>`) to another site is allowed, it is the visitor's choice to follow.
+- The theme picker: every theme of `catalog.json` that has a deck in `media.json` is in the picker and has an accent rule
+  (a theme without a deck is named in the build log as left out, a warning, since a theme may land before its media
+  refresh), and every file a media slot lists for any theme is in the output.
 
 ## Where things are
 
@@ -31,11 +34,35 @@ Content and layout are kept apart, so a new design replaces the second without t
 | `src/data/tested-on.json` | The hardware list; the "Tested on" page is made from it. |
 | `src/pages/` | The landing page, "Tested on", and the route for the documentation. The landing copy is in `index.astro`. |
 | `src/layouts/`, `src/components/`, `src/styles/` | Layout and style. `home.css` is the landing page's, `global.css` is shared with the documentation. |
-| `src/data/widgets.json`, `themes.json`, `backgrounds.json` | What the landing page's showcases list: the widgets with their sizes, the sample decks, the backgrounds. |
+| `src/lib/catalog.ts` | The themes, backgrounds and widgets the pages list, read from `src/generated/catalog.json` and `media.json`: one with media appears, one without is left out. Nothing about the product is typed into the site. |
+| `src/data/site-copy.json` | The only words kept by hand: a theme's `alt`, a widget's `description` and, per size, a `note` and `alt`. All optional; an entry without them gets text made from the catalog (widget id, then size). |
+| `src/scripts/theme-head.js` | The visitor's theme, inlined in `<head>` by `Base.astro`. |
 | `src/generated/`, `public/generated/` | The site's pictures (`.webp`), loops (`.mp4`), `media.json` and `catalog.json`. **Generated** by `npm run media`; never edited by hand. See "Media" below. |
 | `showcase/` | The page every theme is shown with (`urdeck-config.json`) and the site's widget settings (`widgets.json`). |
 | `decks/<theme>/urdeck-config.json` | Optional: a page for one theme instead of the showcase page. None ships. |
 | `public/` | Served as they are: `CNAME`, the favicon, the fonts with their licences, and the generated loops. |
+
+## The theme picker
+
+A floating picker on every page chooses the theme the product's pictures are shown in (`site-theme-picker` spec). How it fits
+together:
+
+- **Slots.** `ProductMedia.astro` renders one deck, widget or size picture or loop in glass (the page without script) and lists
+  every theme's file in `data-variants` (`{theme: {src, srcset}}` for a picture, `{theme: {src, poster}}` for a loop). The slot
+  name is `deck` or `widget:<id>:<WxH>`. Background pictures are not slots: each is drawn once, in its pairing's palette.
+- **The choice** is made in `src/scripts/theme-head.js`, inlined in `<head>`: `?theme=<name>` (stored), else local storage
+  (every access in `try`/`catch`), checked against the catalog's names, then `data-theme` on `<html>`. The hero swaps itself
+  with an inline call right after its element; the other slots on `DOMContentLoaded`. `window.urdeckTheme` has `set(name)`
+  (stores, swaps every slot, fires `urdeck:theme` on `document`), `on(callback)` and `titles`. Components that follow the
+  choice (picker, gallery cards, the widgets' theme label, the backgrounds' "Pairs with" badges and order) use `on`.
+- **A loop** that was playing plays on in the new theme, a paused one stays paused, and with reduced motion none is ever
+  started. Where glass has a picture and a theme a loop (or the other way round), the element is replaced.
+- **The accent rule.** For each theme, `src/lib/accent.mjs` takes the swatch's accent as `--accent`; when it reads under 4.5:1
+  on `--ink` it keeps the hue and raises the OKLCH lightness in steps of 0.01 until it does (today only Pop's near-black one).
+  `--accent-hover` is 0.08 lighter, `--accent-rgb` and `--glow-rgb` (the glow behind the aurora art) are the accent as a
+  triplet. The rules are written into every page's head as `:root[data-theme="<name>"]` (glass has none: it is the site's own
+  look); `--ink`, `--text` and the fonts never change. `npm test` has the test of the lift.
+- Without JavaScript the picker is not shown and the page is glass.
 
 ## Media
 

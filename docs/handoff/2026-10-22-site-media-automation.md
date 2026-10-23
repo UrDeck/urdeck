@@ -1,7 +1,8 @@
 # Handoff: site media automation, theme picker on the site, docs (PR 17 and PR 18)
 
 **For:** fresh sessions that build the four OpenSpec changes listed under "The changes", in order, one per session, with
-`/opsx:apply <change>`. All four are proposed (proposal, specs, design and tasks in `openspec/changes/<change>/`). The
+`/opsx:apply <change>`. **Status (2026-10-23): `preview-renderer`, `site-media-pipeline` and `site-gallery` are done and
+archived; `docs-rewrite` is the one left** (proposal, specs, design and tasks in `openspec/changes/docs-rewrite/`). The
 decisions below were settled in an explore on 2026-10-22 and are recorded in those changes; this file is the index.
 **Date:** 2026-10-22. **Read first:** `AGENTS.md`, `docs/design/look-and-feel/STATUS.md` (rows PR 17 and PR 18),
 `docs/design/look-and-feel/07-pairing-and-editor.md` §3, `08-cli-validation-docs-site.md` §3 and §4, `site/README.md`,
@@ -13,7 +14,7 @@ Creating, changing or deleting a widget, theme or background regenerates every p
 site follows, from CI jobs, with no file ticked by hand and no picture that needs a human to check it for personal data.
 The site gets a floating theme picker: choose a theme and every picture on the page shows that theme.
 
-## Where it stands today
+## Where it stood on 2026-10-22 (before the changes)
 
 | Media | Made by | Data | Runs on | Coverage |
 |---|---|---|---|---|
@@ -102,14 +103,14 @@ shows, not byte for byte the compositor. The underlay and the pattern already sh
 Apply one per session, in this order; each change's first task checks that the one before it is archived. Every change
 has "owner's look" tasks that stop and ask; do not tick them without the owner.
 
-| # | Change | Tasks | Delivers | Model for `/opsx:apply` |
-|---|---|---|---|---|
-| 1 | `preview-renderer` (done, pending the pull request) | 31 | Provider sample data (`sample.json`, `SampleProvider`), the hub's manual sampling mode, the preview renderer with frames (widgets, background and animated border move), the sample page as `urdeck-config.json`, host `--demo`, meaningful `DefaultConfig`s with tests, `[WidgetSize(Preview = false)]`, `urdeck-cli preview render` and `catalog export` (with widget settings and finding codes) | **Opus**: cross-cutting engine work (reading hub, page renderer, border composition matching the compositor, goldens that must stay byte-identical) |
-| 2 | `site-media-pipeline` | 21 | The media matrix from the catalog, rendering on Linux with input hashes, the generated folders and manifest, `site-media.yml` (manual, GitHub App token, refresh PR), the non-blocking staleness report, the first full generation | **Sonnet**: well specified scripting and workflow; Opus only if the input-key design needs rework |
-| 3 | `site-gallery` | 17 | The floating theme picker (pictures and accents), the theme gallery, all sixteen backgrounds with pairing, pages built from the catalog | **Sonnet**: front-end work against a precise design |
-| 4 | `docs-rewrite` | 22 | User docs only on the site, reference tables generated from the schemas and the catalog, a build that fails on gaps, the eight-recipe cookbook | **Sonnet**: mostly moving and rewriting prose; the table components are small |
+| # | Change | Tasks | Status | Delivers | Model for `/opsx:apply` |
+|---|---|---|---|---|---|
+| 1 | `preview-renderer` | 31 | **Done**, archived 2026-10-22 (#81) | Provider sample data (`sample.json`, `SampleProvider`), the hub's manual sampling mode, the preview renderer with frames (widgets, background and animated border move), the sample page as `urdeck-config.json`, host `--demo`, meaningful `DefaultConfig`s with tests, `[WidgetSize(Preview = false)]`, `urdeck-cli preview render` and `catalog export` (with widget settings and finding codes) | **Opus**: cross-cutting engine work (reading hub, page renderer, border composition matching the compositor, goldens that must stay byte-identical) |
+| 2 | `site-media-pipeline` | 21 | **Done**, archived 2026-10-23 (#82, #84); first generation made on Linux, the `site-media.yml` workflow run for real | The media matrix from the catalog, rendering on Linux with input hashes, the generated folders and manifest, `site-media.yml` (manual, GitHub App token, refresh PR), the non-blocking staleness report, the first full generation | **Sonnet**: well specified scripting and workflow; Opus only if the input-key design needs rework |
+| 3 | `site-gallery` | 17 | **Done**, archived 2026-10-23: the picker (pictures, loops, accents), the gallery, all sixteen backgrounds with pairing, pages from the catalog | The floating theme picker (pictures and accents), the theme gallery, all sixteen backgrounds with pairing, pages built from the catalog | **Sonnet**: front-end work against a precise design |
+| 4 | `docs-rewrite` | 22 | Proposed, **next** | User docs only on the site, reference tables generated from the schemas and the catalog, a build that fails on gaps, the eight-recipe cookbook | **Sonnet**: mostly moving and rewriting prose; the table components are small |
 
-Owner setup before change 2's workflow can run: a GitHub App with contents and pull request write on the repository, its
+Owner setup (done) before change 2's workflow could run: a GitHub App with contents and pull request write on the repository, its
 id and private key as the secrets `URDECK_MEDIA_APP_ID` and `URDECK_MEDIA_APP_KEY` (`CONTRIBUTING.md` after change 2).
 
 The open questions of the explore were all decided in the changes' designs: `--demo` is a command-line switch only, the

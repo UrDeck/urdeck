@@ -1,16 +1,15 @@
 ---
-import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import WidgetShowcase from '../components/WidgetShowcase.astro';
 import BackgroundShowcase from '../components/BackgroundShowcase.astro';
-import themes from '../data/themes.json';
-import { deckImage } from '../lib/media';
+import ThemeGallery from '../components/ThemeGallery.astro';
+import ProductMedia from '../components/ProductMedia.astro';
+import { themeByName } from '../lib/catalog';
+import { deckMedia } from '../lib/media';
 import '../styles/home.css';
 
 const repo = 'https://github.com/UrDeck/urdeck';
-const glass = deckImage('glass')!;
-const decks = themes.themes.map((t) => ({ ...t, src: deckImage(t.id) })).filter((t) => t.src);
-const heroAlt = themes.themes.find((t) => t.id === 'glass')!.alt;
+const heroAlt = themeByName('glass')!.alt;
 ---
 <Base title="UrDeck" description="A lightweight widget dashboard for a secondary or case display on Windows. No account, no telemetry, free software." bleed>
 
@@ -45,10 +44,11 @@ const heroAlt = themes.themes.find((t) => t.id === 'glass')!.alt;
         <div class="device-glow" aria-hidden="true"></div>
         <div class="bezel">
           <div class="bezel-screen">
-            <Image src={glass} alt={heroAlt} widths={[300, 600, 720]} sizes="19rem" loading="eager" />
+            <ProductMedia slot="deck" media={deckMedia} alt={heroAlt} widths={[300, 600, 720]} sizes="19rem" loading="eager" autoplay />
+            <script is:inline>window.urdeckTheme && urdeckTheme.swap(document.querySelector('[data-slot="deck"]'));</script>
           </div>
         </div>
-        <figcaption>Drawn by UrDeck itself · 1100 × 3840</figcaption>
+        <figcaption>The <span data-theme-name>Glass</span> theme, drawn by UrDeck itself · 1100 × 3840</figcaption>
       </figure>
     </div>
   </section>
@@ -118,30 +118,7 @@ const heroAlt = themes.themes.find((t) => t.id === 'glass')!.alt;
     </div>
   </section>
 
-  <section class="section" id="themes">
-    <div class="section-head">
-      <div>
-        <p class="eyebrow">Sample decks</p>
-        <h2 class="h2">The same deck in different themes.</h2>
-      </div>
-      <p>
-        These are pictures made by UrDeck itself, from config files kept in the repository, at the size of the panel it was
-        made for. The readings and the time are those of the machine that drew them.
-      </p>
-    </div>
-    <div class="themes">
-      {decks.map((d) => (
-        <figure>
-          <div class="bezel">
-            <div class="bezel-screen">
-              <Image src={d.src!} alt={d.alt} widths={[240, 360, 480]} sizes="(min-width: 60rem) 22rem, 90vw" />
-            </div>
-          </div>
-          <figcaption><b>{d.id}</b><span>{d.caption}</span></figcaption>
-        </figure>
-      ))}
-    </div>
-  </section>
+  <ThemeGallery />
 
   <section class="section" id="widgets">
     <div class="section-head">

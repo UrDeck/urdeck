@@ -1,66 +1,49 @@
 {
-  "widgets": [
-    {
-      "id": "clock",
-      "name": "Clock",
-      "typeId": "urdeck.widgets.clock",
+  "themes": {},
+  "widgets": {
+    "clock": {
       "description": "Plain digits, or a split-flap display whose digits flip when the minute changes. With the date, if you want it.",
-      "sizes": [
-        {
-          "size": "4x2",
+      "sizes": {
+        "4x2": {
           "note": "Four cells wide and two tall.",
           "alt": "The clock widget in its split-flap style, showing the time and the date."
         }
-      ]
+      }
     },
-    {
-      "id": "stats",
-      "name": "Stats",
-      "typeId": "urdeck.widgets.stats",
+    "stats": {
       "description": "Any reading as a number or a gauge: CPU, memory and GPU load, temperature, power and clock.",
-      "sizes": [
-        {
-          "size": "4x4",
+      "sizes": {
+        "4x4": {
           "note": "Four gauges above three text readings.",
           "alt": "The stats widget at 4x4: four gauges for CPU load, GPU temperature, GPU load and memory, above three text readings."
         },
-        {
-          "size": "4x2",
+        "4x2": {
           "note": "Two readings on top, three text readings below.",
           "alt": "The stats widget at 4x2: a bar for CPU load and a memory gauge above three text readings."
         }
-      ]
+      }
     },
-    {
-      "id": "weather",
-      "name": "Weather",
-      "typeId": "urdeck.widgets.weather",
+    "weather": {
       "description": "Animated icons and the forecast for any number of places, from Open-Meteo.",
-      "sizes": [
-        {
-          "size": "4x4",
+      "sizes": {
+        "4x4": {
           "note": "Current conditions with the forecast for the days ahead.",
           "alt": "The weather widget at 4x4: current conditions and a five-day forecast."
         },
-        {
-          "size": "4x2",
+        "4x2": {
           "note": "Current conditions on a shorter card.",
           "alt": "The weather widget at 4x2: current conditions."
         }
-      ]
+      }
     },
-    {
-      "id": "shortcut",
-      "name": "Shortcut",
-      "typeId": "urdeck.widgets.shortcut",
+    "shortcut": {
       "description": "The icon of an application, a folder or a web address. Tap it and it opens. A dock keeps up to four of them in the same place on every page.",
-      "sizes": [
-        {
-          "size": "1x1",
+      "sizes": {
+        "1x1": {
           "note": "One cell each, on a page or in the dock.",
           "alt": "The dock with four shortcuts: GitHub, Wikipedia, Steam and VS Code."
         }
-      ]
+      }
     }
-  ]
+  }
 }

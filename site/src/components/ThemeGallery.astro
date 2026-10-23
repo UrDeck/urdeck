@@ -1,0 +1,61 @@
+---
+// One card per built-in theme (from the catalog): its deck, name, description, tags, swatch and the backgrounds it pairs with.
+// Choosing a card sets the theme of the whole page, as the picker does.
+import { Image } from 'astro:assets';
+import { themes } from '../lib/catalog';
+import { backgrounds } from '../lib/catalog';
+import { deckMedia } from '../lib/media';
+import Swatch from './Swatch.astro';
+
+const title = (name: string) => backgrounds.find((b) => b.name === name)?.title ?? name;
+---
+<section class="section" id="themes">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Themes</p>
+      <h2 class="h2">The same deck in every theme.</h2>
+    </div>
+    <p>
+      One page, drawn by UrDeck itself from sample readings and a fixed time, at the size of the panel it was made for.
+      Choose a card, or use the picker in the corner, and every picture on this page follows.
+    </p>
+  </div>
+  <div class="themes">
+    {themes.map((t) => (
+      <article class="theme-card" data-theme-card={t.name}>
+        <div class="bezel">
+          <div class="bezel-screen">
+            <Image src={deckMedia(t.name).image!} alt={t.alt} widths={[240, 360, 480]} sizes="(min-width: 60rem) 22rem, 90vw" />
+          </div>
+        </div>
+        <div class="theme-copy">
+          <h3><Swatch swatch={t.swatch} /> <button type="button" class="card-pick" data-pick-theme={t.name} aria-pressed="false">{t.title}</button></h3>
+          <p>{t.description}</p>
+          <p class="tags">{t.tags.join(' · ')}</p>
+          {t.pairsWith.length > 0 && (
+            <p class="chips"><span>Pairs with</span> {t.pairsWith.slice(0, 3).map((n) => <b>{title(n)}</b>)}</p>
+          )}
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  type Theme = { set(name: string): void; on(cb: (name: string) => void): void };
+  const api = (window as unknown as { urdeckTheme?: Theme }).urdeckTheme;
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-theme-card]')];
+  if (api && cards.length > 0) {
+    for (const card of cards) {
+      card.classList.add('live');
+      card.querySelector('.card-pick')!.addEventListener('click', () => api.set(card.dataset.themeCard!));
+    }
+    api.on((name) => {
+      for (const card of cards) {
+        const chosen = card.dataset.themeCard === name;
+        card.classList.toggle('chosen', chosen);
+        card.querySelector('.card-pick')!.setAttribute('aria-pressed', String(chosen));
+      }
+    });
+  }
+</script>

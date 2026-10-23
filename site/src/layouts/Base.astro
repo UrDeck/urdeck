@@ -1,6 +1,10 @@
 ---
 import '../styles/global.css';
 import { hasSocialImage } from '../lib/media';
+import { themes } from '../lib/catalog';
+import { accentCss } from '../lib/accent.mjs';
+import headScript from '../scripts/theme-head.js?raw';
+import ThemePicker from '../components/ThemePicker.astro';
 
 interface Props {
   title: string;
@@ -19,12 +23,19 @@ const nav = [
   { href: '/tested-on/', label: 'Tested on', match: '/tested-on/' },
 ];
 const repo = 'https://github.com/UrDeck/urdeck';
+// The visitor's theme is decided here, before the first paint; the accent of each theme is generated from the catalog.
+const names = themes.map((t) => t.name);
+const titles = Object.fromEntries(themes.map((t) => [t.name, t.title]));
+const decide = `(function(){var names=${JSON.stringify(names)},titles=${JSON.stringify(titles)};${headScript}})();`;
+const accents = accentCss(themes.map((t) => ({ name: t.name, accent: t.swatch.accent })));
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline set:html={decide}></script>
+    <style is:inline set:html={accents}></style>
     <title>{full}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#080918" />
@@ -72,5 +83,6 @@ const repo = 'https://github.com/UrDeck/urdeck';
         </p>
       </div>
     </footer>
+    <ThemePicker />
   </body>
 </html>

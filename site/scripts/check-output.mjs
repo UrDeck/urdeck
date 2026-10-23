@@ -92,6 +92,40 @@ if (existsSync(manifestFile)) {
   problems.push('src/generated/media.json is missing (npm run media makes it)');
 }
 
+// 5. The theme picker (spec "site-theme-picker"): every theme of the catalog either has a deck in the manifest or is named as
+// left out (a warning: a theme may land before its media refresh); every theme with media has an accent rule in the pages and
+// is in the picker; every file a slot lists for any theme is in the output.
+const catalogFile = join(siteRoot, 'src', 'generated', 'catalog.json');
+if (existsSync(catalogFile) && existsSync(manifestFile)) {
+  const catalog = JSON.parse(readFileSync(catalogFile, 'utf8'));
+  const decks = new Set(JSON.parse(readFileSync(manifestFile, 'utf8')).entries.filter((e) => e.kind === 'decks').map((e) => e.theme));
+  const left = catalog.themes.filter((t) => !decks.has(t.name)).map((t) => t.name);
+  if (left.length > 0) console.warn(`Themes left out of the site (no deck in media.json): ${left.join(', ')}`);
+  const shown = catalog.themes.filter((t) => decks.has(t.name)).map((t) => t.name);
+  const home = readFileSync(join(dist, 'index.html'), 'utf8');
+  for (const name of shown) {
+    if (name !== 'glass' && !home.includes(`:root[data-theme="${name}"]`)) problems.push(`index.html: no accent rule for the theme "${name}"`);
+    if (!home.includes(`id="tp-${name}"`)) problems.push(`index.html: the theme picker does not list "${name}"`);
+  }
+  const unescape = (text) => text.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#39;/g, "'");
+  let slots = 0;
+  for (const page of pages) {
+    const html = readFileSync(page, 'utf8');
+    const pageUrl = urlPath(page).replace(/index\.html$/, '');
+    for (const match of html.matchAll(/data-slot="([^"]*)"[^>]*?data-variants="([^"]*)"/g)) {
+      slots++;
+      const variants = JSON.parse(unescape(match[2]));
+      if (!variants.glass) problems.push(`${pageUrl}: slot ${match[1]} has no glass variant`);
+      for (const [theme, v] of Object.entries(variants)) {
+        if (!shown.includes(theme)) problems.push(`${pageUrl}: slot ${match[1]} lists "${theme}", which has no deck`);
+        const urls = [v.src, v.poster, ...(v.srcset ? v.srcset.split(',').map((part) => part.trim().split(/\s+/)[0]) : [])].filter(Boolean);
+        for (const url of urls) if (!resolves(url)) problems.push(`${pageUrl}: slot ${match[1]}, theme ${theme}: ${url} leads nowhere`);
+      }
+    }
+  }
+  if (slots === 0) problems.push('index.html: no media slot found (data-slot / data-variants)');
+}
+
 if (problems.length > 0) {
   console.error('Site checks failed:\n' + problems.map((p) => '  - ' + p).join('\n'));
   process.exit(1);
