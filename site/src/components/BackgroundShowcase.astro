@@ -1,15 +1,16 @@
 ---
-// The built-in animated backgrounds. Names and copy are in src/data/backgrounds.json. A background shows with a loop
-// (public/generated/backgrounds/<name>.mp4), a still (src/generated/backgrounds/<name>.webp) or both, the still being the loop's
-// poster. One with neither is left out of the built site and shows as a labelled blank while running `npm run dev`.
+// Every built-in background, from the catalog: its loop (public/generated/backgrounds/<name>.mp4), its still (the loop's poster),
+// its description and the themes it pairs with. With a theme chosen, the backgrounds that pair with it are marked and its
+// default background comes first. A background without media is left out of the built site and shows as a labelled blank
+// while running `npm run dev`.
 import { Image } from 'astro:assets';
-import data from '../data/backgrounds.json';
+import { backgrounds, themes } from '../lib/catalog';
 import { backgroundMedia } from '../lib/media';
 
 const dev = import.meta.env.DEV;
-const items = data.backgrounds
-  .map((b) => ({ ...b, media: backgroundMedia(b.name) }))
-  .filter((b) => dev || b.media.video || b.media.poster);
+const items = backgrounds.map((b) => ({ ...b, media: backgroundMedia(b.name) })).filter((b) => dev || b.media.video || b.media.poster);
+// For the script: per theme, its default background and the ones it pairs with.
+const pairing = JSON.stringify(Object.fromEntries(themes.map((t) => [t.name, { title: t.title, first: t.defaultBackground, pairs: t.pairsWith }])));
 ---
 {items.length > 0 && (
   <section class="section" id="backgrounds">
@@ -20,21 +21,25 @@ const items = data.backgrounds
       </div>
       <p>
         Small shaders drawn on the GPU behind translucent cards. Without a background setting nothing of this exists: no
-        surface, no frames, no cost. They draw with the theme's palette, so they follow the theme.
+        surface, no frames, no cost. Each is shown here in the palette of a theme it pairs with. Choose a theme in the corner to see which ones it was designed for.
       </p>
     </div>
 
-    <div class="backgrounds" data-backgrounds>
+    <div class="backgrounds" data-backgrounds data-pairing={pairing}>
       {items.map((b) => (
-        <figure>
+        <figure data-background={b.name}>
           <div class="bg-frame">
+            <span class="pair-badge" data-badge hidden></span>
             {b.media.video
-              ? <video src={b.media.video} poster={b.media.poster?.src} muted loop playsinline preload="none" aria-label={`The ${b.name} background, moving.`}></video>
+              ? <video src={b.media.video} poster={b.media.poster?.src} muted loop playsinline preload="none" aria-label={`The ${b.title} background, moving.`}></video>
               : b.media.poster
-                ? <Image src={b.media.poster} alt={`The ${b.name} background.`} widths={[270, 540]} sizes="(min-width: 60rem) 17rem, 80vw" />
+                ? <Image src={b.media.poster} alt={`The ${b.title} background.`} widths={[270, 540]} sizes="(min-width: 60rem) 17rem, 80vw" />
                 : <span class="todo">[ {b.name}.mp4 ]</span>}
           </div>
-          <figcaption><b>{b.name}</b>{b.description}</figcaption>
+          <figcaption>
+            <b>{b.name}</b>{b.description}
+            {b.pairsWith.length > 0 && <span class="chips"><span>Pairs with</span> {b.pairsWith.map((t) => <b>{t.title}</b>)}</span>}
+          </figcaption>
         </figure>
       ))}
     </div>
@@ -46,6 +51,25 @@ const items = data.backgrounds
 )}
 
 <script>
+  // With a theme chosen, mark the backgrounds it pairs with and put its default first (CSS `order`, no element moves).
+  type Theme = { on(cb: (name: string) => void): void };
+  const api = (window as unknown as { urdeckTheme?: Theme }).urdeckTheme;
+  const gallery = document.querySelector<HTMLElement>('[data-backgrounds]');
+  if (api && gallery) {
+    const pairing = JSON.parse(gallery.dataset.pairing ?? '{}') as Record<string, { title: string; first: string | null; pairs: string[] }>;
+    api.on((name) => {
+      const p = pairing[name];
+      for (const figure of gallery.querySelectorAll<HTMLElement>('figure[data-background]')) {
+        const id = figure.dataset.background!;
+        const badge = figure.querySelector<HTMLElement>('[data-badge]')!;
+        const paired = Boolean(p?.pairs.includes(id));
+        badge.hidden = !paired;
+        badge.textContent = paired ? `Pairs with ${p.title}` : '';
+        figure.style.order = p?.first === id ? '-1' : '0';
+      }
+    });
+  }
+
   // Loops play while they are on screen, and not at all for a visitor who asks for less motion.
   const grid = document.querySelector('[data-backgrounds]');
   const videos = grid ? [...grid.querySelectorAll('video')] : [];

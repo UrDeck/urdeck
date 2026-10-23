@@ -1,0 +1,115 @@
+---
+// The floating theme picker (spec "site-theme-picker"). Hidden in the markup: the script un-hides it, so without script it
+// does not exist and the page shows glass. The choice itself is made by window.urdeckTheme (src/scripts/theme-head.js).
+import { themes } from '../lib/catalog';
+import Swatch from './Swatch.astro';
+
+const first = themes[0];
+---
+<div class="theme-picker" data-theme-picker hidden>
+  <button type="button" class="tp-button" aria-haspopup="listbox" aria-expanded="false" aria-controls="tp-list" aria-label={`Theme: ${first.title}`}>
+    <Swatch swatch={first.swatch} />
+    <span class="tp-name">{first.title}</span>
+    <svg aria-hidden="true" class="tp-caret" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <ul class="tp-list" id="tp-list" role="listbox" aria-label="Theme" tabindex="-1" hidden>
+    {themes.map((t) => (
+      <li role="option" id={`tp-${t.name}`} data-theme={t.name} aria-selected={t.name === first.name ? 'true' : 'false'}>
+        <Swatch swatch={t.swatch} />
+        <span>{t.title}</span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  type Theme = { current: string; titles: Record<string, string>; set(name: string): void; on(cb: (name: string) => void): void };
+  const api = (window as unknown as { urdeckTheme?: Theme }).urdeckTheme;
+  const root = document.querySelector<HTMLElement>('[data-theme-picker]');
+
+  // Page-wide: the theme's name wherever the page says it, and the loops that start by themselves (the hero), unless the
+  // visitor asks for less motion.
+  if (api) {
+    api.on((name) => {
+      for (const el of document.querySelectorAll('[data-theme-name]')) el.textContent = api.titles[name];
+    });
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      for (const video of document.querySelectorAll<HTMLVideoElement>('video[data-autoplay]')) void video.play().catch(() => {});
+    }
+  }
+  if (api && root) {
+    const button = root.querySelector<HTMLButtonElement>('.tp-button')!;
+    const list = root.querySelector<HTMLElement>('.tp-list')!;
+    const options = [...list.querySelectorAll<HTMLElement>('[role="option"]')];
+    const dot = button.querySelector<HTMLElement>('.swatch')!;
+    const label = button.querySelector<HTMLElement>('.tp-name')!;
+    let active = 0;
+    root.hidden = false;
+
+    const open = () => {
+      list.hidden = false;
+      button.setAttribute('aria-expanded', 'true');
+      move(Math.max(0, options.findIndex((o) => o.getAttribute('aria-selected') === 'true')));
+      list.focus();
+    };
+    const close = (refocus: boolean) => {
+      list.hidden = true;
+      button.setAttribute('aria-expanded', 'false');
+      list.removeAttribute('aria-activedescendant');
+      if (refocus) button.focus();
+    };
+    const move = (index: number) => {
+      active = (index + options.length) % options.length;
+      options.forEach((o, i) => o.classList.toggle('active', i === active));
+      list.setAttribute('aria-activedescendant', options[active].id);
+      options[active].scrollIntoView({ block: 'nearest' });
+    };
+    const choose = (index: number) => {
+      api.set(options[index].dataset.theme!);
+      close(true);
+    };
+
+    button.addEventListener('click', () => (list.hidden ? open() : close(true)));
+    button.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (list.hidden) open();
+      }
+    });
+    list.addEventListener('keydown', (event) => {
+      const keys: Record<string, () => void> = {
+        ArrowDown: () => move(active + 1),
+        ArrowUp: () => move(active - 1),
+        Home: () => move(0),
+        End: () => move(options.length - 1),
+        Enter: () => choose(active),
+        ' ': () => choose(active),
+        Escape: () => close(true),
+        Tab: () => close(false),
+      };
+      const act = keys[event.key];
+      if (act) {
+        if (event.key !== 'Tab') event.preventDefault();
+        act();
+      }
+    });
+    list.addEventListener('click', (event) => {
+      const option = (event.target as HTMLElement).closest<HTMLElement>('[role="option"]');
+      if (option) choose(options.indexOf(option));
+    });
+    document.addEventListener('pointerdown', (event) => {
+      if (!list.hidden && !root.contains(event.target as Node)) close(false);
+    });
+
+    // Follows every choice, from here or from a gallery card.
+    api.on((name) => {
+      const at = options.findIndex((o) => o.dataset.theme === name);
+      if (at < 0) return;
+      options.forEach((o, i) => o.setAttribute('aria-selected', String(i === at)));
+      const style = options[at].querySelector<HTMLElement>('.swatch')!.getAttribute('style')!;
+      dot.setAttribute('style', style);
+      label.textContent = api.titles[name];
+      button.setAttribute('aria-label', `Theme: ${api.titles[name]}`);
+    });
+  }
+</script>

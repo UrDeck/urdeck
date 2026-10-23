@@ -1,18 +1,12 @@
 ---
 // The built-in widgets: a stage for the selected widget and size, and a slowly drifting row of every widget to pick from.
-// Widgets, sizes and their copy are in src/data/widgets.json; pictures and loops are found by name (src/lib/media.ts).
-import { Image } from 'astro:assets';
-import data from '../data/widgets.json';
+// Widgets and sizes come from the catalog, their copy from src/data/site-copy.json (src/lib/catalog.ts); pictures and loops
+// follow the visitor's theme (ProductMedia).
+import { widgets } from '../lib/catalog';
 import { widgetMedia } from '../lib/media';
+import ProductMedia from './ProductMedia.astro';
 
 const pad = (n: number) => String(n).padStart(2, '0');
-// A size without a picture is left out; a widget without any size is left out with it.
-const widgets = data.widgets
-  .map((w) => ({
-    ...w,
-    sizes: w.sizes.map((s) => ({ ...s, media: widgetMedia(`${w.id}-${s.size}`) })).filter((s) => s.media.image),
-  }))
-  .filter((w) => w.sizes.length > 0);
 const total = widgets.length;
 const seconds = Math.max(40, (total + 1) * 8);
 ---
@@ -34,14 +28,19 @@ const seconds = Math.max(40, (total + 1) * 8);
               : <span class="size-tag">{w.sizes[0].size}</span>}
           </div>
           {w.sizes.map((s, j) => <p class="note-line" data-note={j}>{s.note}</p>)}
-          <p class="type-id">{w.typeId} · glass theme</p>
+          <p class="type-id">{w.typeId} · <span data-theme-name>Glass</span> theme</p>
         </div>
         <div class="panel-media">
           {w.sizes.map((s, j) => (
             <div class="media" data-media={j}>
-              {s.media.video
-                ? <video src={s.media.video} poster={s.media.image!.src} muted loop playsinline preload="none" aria-label={s.alt}></video>
-                : <Image src={s.media.image!} alt={s.alt} widths={[480, 800, 1084]} sizes="(min-width: 60rem) 34rem, 90vw" loading={i === 0 && j === 0 ? 'eager' : 'lazy'} />}
+              <ProductMedia
+                slot={`widget:${w.id}:${s.size}`}
+                media={(theme) => widgetMedia(w.id, s.size, theme)}
+                alt={s.alt}
+                widths={[480, 800, 1084]}
+                sizes="(min-width: 60rem) 34rem, 90vw"
+                loading={i === 0 && j === 0 ? 'eager' : 'lazy'}
+              />
             </div>
           ))}
         </div>
@@ -111,6 +110,9 @@ const seconds = Math.max(40, (total + 1) * 8);
         render();
       }, 5000);
     };
+
+    // A theme change may have replaced a picture by a loop (or back): start the visible loops again.
+    (window as unknown as { urdeckTheme?: { on(cb: () => void): void } }).urdeckTheme?.on(() => render());
 
     root.addEventListener('click', (event) => {
       const target = (event.target as HTMLElement).closest<HTMLElement>('[data-pick], [data-size]');

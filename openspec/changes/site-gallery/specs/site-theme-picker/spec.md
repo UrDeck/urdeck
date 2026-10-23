@@ -38,9 +38,9 @@ theme keeps the glass picture.
 - **THEN** the hero deck, the gallery's highlighted card and every widget picture show Ember, and the site's accent turns
   amber
 
-#### Scenario: A light theme's accent
-- **WHEN** a visitor chooses Paper, whose accent is too dark to read on the site's background
-- **THEN** the site's accent is a lighter shade of Paper's accent that reads at 4.5:1 or more
+#### Scenario: A dark accent
+- **WHEN** a visitor chooses Pop, whose near-black accent is too dark to read on the site's background
+- **THEN** the site's accent is a lighter shade of Pop's accent that reads at 4.5:1 or more
 
 ### Requirement: Remembered And Linkable
 The choice MUST be kept in the visitor's browser for that visitor only, and applied on every page of the site before the

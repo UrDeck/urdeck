@@ -1,0 +1,8 @@
+---
+// A theme's colours in a dot: its ground, a card on it, and its accent.
+import type { Swatch } from '../lib/catalog';
+
+interface Props { swatch: Swatch }
+const { swatch } = Astro.props;
+---
+<span class="swatch" aria-hidden="true" style={`--sw-bg:${swatch.background};--sw-card:${swatch.card};--sw-accent:${swatch.accent}`}></span>

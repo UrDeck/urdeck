@@ -23,22 +23,17 @@ function resolve(id: string): { image?: ImageMetadata; video?: string } {
   };
 }
 
-/** The showcase page in a theme, over the theme's own background. */
-export const deck = (theme: string) => resolve(`deck:${theme}`);
-/** A widget at a size (`4x2`) in a theme. */
-export const widget = (name: string, size: string, theme: string) => resolve(`widget:${name}-${size}-${theme}`);
-/** A background's poster and loop, in the colours of the theme it is shown with. */
-export const background = (name: string) => resolve(`background:${name}`);
+export type Media = { image?: ImageMetadata; video?: string };
 
-// The landing page shows the glass theme.
-const landing = 'glass';
-export const deckImage = (theme: string) => deck(theme).image;
-export const widgetMedia = (base: string) => {
-  const i = base.lastIndexOf('-');
-  return widget(base.slice(0, i), base.slice(i + 1), landing);
-};
+/** The showcase page in a theme, over the theme's own background. */
+export const deckMedia = (theme: string): Media => resolve(`deck:${theme}`);
+/** The background a deck was drawn over, when the manifest names one. */
+export const deckBackground = (theme: string): string | undefined => (entries.get(`deck:${theme}`) as (Entry & { background?: string | null }) | undefined)?.background ?? undefined;
+/** A widget (`clock`) at a size (`4x2`) in a theme. */
+export const widgetMedia = (widget: string, size: string, theme: string): Media => resolve(`widget:${widget}-${size}-${theme}`);
+/** A background's poster and loop, in the colours of the theme it is shown with. */
 export const backgroundMedia = (name: string) => {
-  const m = background(name);
+  const m = resolve(`background:${name}`);
   return { poster: m.image, video: m.video };
 };
 

@@ -1,0 +1,42 @@
+---
+// A picture or loop of the product that follows the visitor's theme (spec "site-theme-picker"). It renders the glass one, as
+// the page is without script, and lists every theme's file in `data-variants` (theme -> { src, srcset } for a picture,
+// { src, poster } for a loop) for the swap routine in the page head (src/scripts/theme-head.js). A theme with no file is
+// left out of the list and keeps the glass one.
+import { Image, getImage } from 'astro:assets';
+import { themes } from '../lib/catalog';
+import type { Media } from '../lib/media';
+
+interface Props {
+  slot: string;
+  media: (theme: string) => Media;
+  alt: string;
+  widths: number[];
+  sizes: string;
+  loading?: 'eager' | 'lazy';
+  /** Play as soon as the page allows it (the hero), unless the visitor asks for less motion. */
+  autoplay?: boolean;
+}
+
+const { slot, media, alt, widths, sizes, loading = 'lazy', autoplay = false } = Astro.props;
+const glass = media('glass');
+const loop = Boolean(glass.video);
+
+// Per theme, a loop when it has one (with its poster), else the picture. The element is glass's kind; the head script
+// replaces it when a theme's kind differs.
+const variants: Record<string, { src: string; srcset?: string; poster?: string }> = {};
+for (const theme of themes) {
+  const m = media(theme.name);
+  if (!m.image) continue;
+  if (m.video) {
+    variants[theme.name] = { src: m.video, poster: (await getImage({ src: m.image, width: widths[widths.length - 1] })).src };
+  } else {
+    const img = await getImage({ src: m.image, widths, sizes });
+    variants[theme.name] = { src: img.src, srcset: img.srcSet.attribute };
+  }
+}
+const data = JSON.stringify(variants);
+---
+{loop
+  ? <video src={glass.video} poster={variants.glass?.poster} muted loop playsinline preload={autoplay ? 'auto' : 'none'} aria-label={alt} data-slot={slot} data-variants={data} data-sizes={sizes} data-autoplay={autoplay ? '' : undefined}></video>
+  : <Image src={glass.image!} alt={alt} widths={widths} sizes={sizes} loading={loading} data-slot={slot} data-variants={data} data-sizes={sizes} data-autoplay={autoplay ? "" : undefined} />}
