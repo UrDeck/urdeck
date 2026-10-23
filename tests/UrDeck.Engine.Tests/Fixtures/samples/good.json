@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "readings": {
+    "cpu/load": { "kind": "percent", "label": "CPU", "name": "CPU load", "value": 68 }
+  }
+}

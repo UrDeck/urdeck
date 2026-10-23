@@ -20,6 +20,18 @@ public sealed record WidgetDescriptor(
     RefreshStrategy Refresh,
     TimeSpan? RefreshInterval)
 {
+    private System.Drawing.Size[]? _previewSizes;
+
+    /// <summary>
+    /// The sizes generated pictures show (<see cref="WidgetSizeAttribute.Preview"/>), in declaration order: every supported
+    /// size unless the widget leaves some out.
+    /// </summary>
+    public System.Drawing.Size[] PreviewSizes
+    {
+        get => _previewSizes ?? SupportedSizes;
+        init => _previewSizes = value;
+    }
+
     public static WidgetDescriptor? TryCreate(Type type, out string? rejectReason)
     {
         rejectReason = null;
@@ -33,8 +45,8 @@ public sealed record WidgetDescriptor(
         if (meta == null)
         { rejectReason = "missing [Widget]"; return null; }
 
-        var sizes = type.GetCustomAttributes<WidgetSizeAttribute>()
-            .Select(s => new System.Drawing.Size(s.Width, s.Height)).ToArray();
+        var declared = type.GetCustomAttributes<WidgetSizeAttribute>().ToArray();
+        var sizes = declared.Select(s => new System.Drawing.Size(s.Width, s.Height)).ToArray();
         if (sizes.Length == 0)
         { rejectReason = "missing [WidgetSize]"; return null; }
 
@@ -79,7 +91,10 @@ public sealed record WidgetDescriptor(
             configType,
             sizes,
             refresh,
-            interval);
+            interval)
+        {
+            PreviewSizes = declared.Where(s => s.Preview).Select(s => new System.Drawing.Size(s.Width, s.Height)).ToArray(),
+        };
     }
 
     private static Type? FindConfigType(Type type) =>

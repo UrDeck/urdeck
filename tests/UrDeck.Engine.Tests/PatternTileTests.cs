@@ -264,15 +264,14 @@ public sealed class PatternTileTests
     [Fact]
     public void ASnapshotOfCarbon_ShowsDotsInTheGaps_AndNoneOverAnOpaqueCard()
     {
-        using var page = SamplePage.Build();
         var with = Load("carbon");
         var without = Load("carbon");
         without.Definition.Pattern = null;
-        using var dotted = PageRenderer.RenderToBitmap(1100, 1920, page.Widgets, with, SamplePage.Time);
-        using var plain = PageRenderer.RenderToBitmap(1100, 1920, page.Widgets, without, SamplePage.Time);
+        using var dotted = ThemePreview.Render(with, 1100, 1920);
+        using var plain = ThemePreview.Render(without, 1100, 1920);
 
         var layout = new GridLayoutManager(1100, 1920, with.Definition.Card!.Gap!.Value, 1920)
-            .RenderWidgetLayout(page.Widgets.Select(w => w.Config).ToList(), new System.Drawing.Size(1100, 1920));
+            .RenderWidgetLayout(PreviewConfig.Sample().Pages[0].Widgets, new System.Drawing.Size(1100, 1920));
         var card = layout[0];
         int differing = 0, overCard = 0;
         for (int y = 0; y < 1920; y++)

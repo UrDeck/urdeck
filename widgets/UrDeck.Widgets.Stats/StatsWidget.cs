@@ -50,6 +50,18 @@ public class StatsWidget : Widget<StatsConfig>
     private FractionHistory?[] _histories = [];
     private bool _animating;
 
+    /// <summary>A new card's readings: CPU, GPU and memory load and the GPU's temperature. A file without slots keeps none.</summary>
+    public override StatsConfig DefaultConfig => new()
+    {
+        Slots =
+        [
+            new StatsSlot { Reading = "system:cpu/load" },
+            new StatsSlot { Reading = "system:gpu/load" },
+            new StatsSlot { Reading = "system:memory/load", Label = "RAM" },
+            new StatsSlot { Reading = "system:gpu/temperature" },
+        ],
+    };
+
     public override IReadOnlyCollection<string> Subscriptions =>
         _subscriptions ??= Positions.Select(p => ReadingId(p.Slot)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
 

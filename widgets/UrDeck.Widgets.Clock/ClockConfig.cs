@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using System.ComponentModel.DataAnnotations;
 using UrDeck.Sdk;
 
 namespace UrDeck.Widgets.Clock.Config;
@@ -8,6 +9,7 @@ namespace UrDeck.Widgets.Clock.Config;
 public class ClockConfig : WidgetConfig
 {
     /// <summary>"24h" or "12h".</summary>
+    [AllowedValues("24h", "12h")]
     public string Format { get; set; } = "24h";
     public bool ShowDate { get; set; } = true;
     /// <summary>Hex color override (e.g. "#ffcc00"); null uses the theme text color.</summary>
@@ -15,12 +17,14 @@ public class ClockConfig : WidgetConfig
     /// <summary>Multiplier on the size-derived font size.</summary>
     public double FontSize { get; set; } = 1.0;
     /// <summary>"simple" (default) or "flap", a split-flap display; anything else is "simple".</summary>
+    [AllowedValues("simple", "flap")]
     public string Style { get; set; } = "simple";
 
     /// <summary>
     /// "date", "label" or "none": a header row above the time (and no date below it). Absent, or a value this version does not
     /// know, keeps the date below the time.
     /// </summary>
+    [AllowedValues("date", "label", "none")]
     public string? Header { get; set; }
 
     /// <summary>Text in the header: the label with <c>header: "label"</c>, the right-hand text with "date".</summary>

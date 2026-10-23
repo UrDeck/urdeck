@@ -349,6 +349,12 @@ or install the package you made with `dotnet pack tools/UrDeck.Cli -c Release -o
 `dotnet tool install --tool-path tools-bin --add-source out urdeck-cli`, which gives `urdeck-cli` (`urdeck-cli.exe` on Windows).
 `--help` on the tool and on each command lists the options and the exit codes; `--version` prints the version.
 
+To see a background behind a page of cards, as the deck shows it, use `urdeck-cli preview render` (described with the
+[theme commands](themes.md#checking-a-theme)): `preview render --theme ember --background embers --background-dir backgrounds -o
+page.png` draws the sample page in Ember over the background, and `--frames 90` writes three seconds of frames in which the
+shader moves from the time a still picture shows it, at its `speed`. `urdeck-cli catalog export` lists every background with its
+manifest values, parameters and pairings as JSON.
+
 #### `shader init`
 
 ```

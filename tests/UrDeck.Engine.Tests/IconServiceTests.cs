@@ -374,6 +374,24 @@ public sealed class IconServiceTests : IDisposable
 
         Assert.Equal(IconResult.None, services.Icons.GetIcon(Exe, 128));
     }
+
+    /// <summary>Demo mode (host-shell, "Demo Mode"): a web address gets no icon and nothing is asked of the web or the shell.</summary>
+    [Fact]
+    public void WithoutSiteIcons_AWebAddressGetsNone_AndNothingIsFetched()
+    {
+        using var service = new IconService(_loaders) { SiteIcons = false };
+        using var services = new WidgetServices(new NoReadings(), new NoLauncher(), service);
+
+        services.Icons.GetIcon("https://example.com/app", 200);
+        Assert.True(TestImages.WaitFor(() => !service.AnyPending), "the icon never settled");
+        var result = services.Icons.GetIcon("https://example.com/app", 200);
+        services.Icons.GetIcon(Exe, 200);
+        Assert.True(TestImages.WaitFor(() => !service.AnyPending), "the icon never settled");
+
+        Assert.Null(result.Image);
+        Assert.False(result.IsLoading);
+        Assert.Equal([$"shell:{Exe}"], Calls);
+    }
 }
 
 public sealed class RealIconSourcesTests : IDisposable

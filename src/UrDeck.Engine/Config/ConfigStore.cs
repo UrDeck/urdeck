@@ -156,15 +156,30 @@ public sealed class ConfigStore : IDisposable
             return;
         }
 
-        string json = ReadShared(_configPath);
-        Config = JsonSerializer.Deserialize<UrDeckConfig>(json, UrDeckJson.Options) ?? new UrDeckConfig();
-        Config.Pager ??= new PagerConfig();
-        Config.Dock ??= new List<WidgetConfig>();
-        Config.Pager.GetIndicatorMode(warn: true);
-        Motion.MotionPolicy.Parse(Config.Motion, warn: true);
-        Backgrounds.BackgroundSettings.NotePageBackgrounds(Config);
-        if (Config.Pages.Count == 0)
-            Config.Pages.Add(new PageConfig());
+        Config = Parse(ReadShared(_configPath), warn: true);
+    }
+
+    /// <summary>
+    /// Reads a configuration from its text as <see cref="Load"/> does, without a file, a watcher or a write: absent sections
+    /// are filled in and a configuration without pages gets one. With <paramref name="warn"/> its unknown values are logged.
+    /// Throws <see cref="JsonException"/> on text that is not a configuration.
+    /// </summary>
+    public static UrDeckConfig Parse(string json, bool warn = false)
+    {
+        var config = JsonSerializer.Deserialize<UrDeckConfig>(json, UrDeckJson.Options) ?? new UrDeckConfig();
+        config.Pager ??= new PagerConfig();
+        config.Dock ??= new List<WidgetConfig>();
+        config.Pages ??= new List<PageConfig>();
+        if (warn)
+        {
+            config.Pager.GetIndicatorMode(warn: true);
+            Motion.MotionPolicy.Parse(config.Motion, warn: true);
+            Backgrounds.BackgroundSettings.NotePageBackgrounds(config);
+        }
+
+        if (config.Pages.Count == 0)
+            config.Pages.Add(new PageConfig());
+        return config;
     }
 
     public void Save()

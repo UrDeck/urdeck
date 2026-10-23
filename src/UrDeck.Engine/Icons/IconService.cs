@@ -67,6 +67,12 @@ public sealed class IconService : IDisposable
 
     internal IconService(IIconLoaders loaders) => _loaders = loaders;
 
+    /// <summary>
+    /// False in the host's demo mode: a web address gets no icon (the shortcut draws its fallback), so nothing is fetched and
+    /// the picture does not depend on the network or the default browser. Files and shell items are asked for as usual.
+    /// </summary>
+    public bool SiteIcons { get; init; } = true;
+
     /// <summary>True while an icon somebody asked for is still being loaded.</summary>
     public bool AnyPending => Volatile.Read(ref _pending) > 0;
 
@@ -190,6 +196,9 @@ public sealed class IconService : IDisposable
                 bitmap = _loaders.LoadFile(target.Text);
                 if (bitmap == null)
                     Report(target, $"No icon: image file '{target.Text}' is missing or is not a readable image.");
+                break;
+            case LaunchTargetKind.Web when !SiteIcons:
+                bitmap = null;
                 break;
             case LaunchTargetKind.Web:
                 // The site's own icon, else what Windows shows for the address: the default browser's icon.

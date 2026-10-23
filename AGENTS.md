@@ -24,7 +24,15 @@ $env:URDECK_UPDATE_GOLDENS=1; dotnet test tests/UrDeck.Engine.Tests -c Release -
 openspec validate --all --strict
 dotnet run --project tools/UrDeck.Cli -c Release -- shader validate --all src/UrDeck.Engine/Backgrounds/Builtin --fail-on-warnings
 dotnet test tests/UrDeck.Cli.Tests -c Release           # the tool's tests (Windows and Linux); also in urdeck.slnx
+dotnet run --project tools/UrDeck.Cli -c Release -- preview render --theme rigline --background theme -o page.png   # sample data, any OS
+dotnet run --project tools/UrDeck.Cli -c Release -- preview render --widget urdeck.widgets.stats --widget-size 4x2 --frames 60 -o frames
+dotnet run --project tools/UrDeck.Cli -c Release -- catalog export -o catalog.json    # what the site's build reads
 ```
+
+`preview render` draws a configuration's page (the sample page, `src/UrDeck.Preview/SamplePage/urdeck-config.json`, by default) or one
+widget alone with the providers' sample files (`providers/*/sample.json`, embedded): deterministic, no network, Windows and Linux. The
+goldens, `theme render` and the site's pictures all come from `PreviewRenderer`. The host's `--demo` (alone or with `--snapshot`)
+replaces every provider that carries a sample by it and fetches no site icon; the log says `Demo mode: sample data for ...`.
 
 The website (`site/`, needs Node 22; details in `site/README.md`):
 
@@ -56,12 +64,13 @@ sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
 src/UrDeck.Engine     GPL. Plugin loader, config store, grid and dock layout, display identity and placement, gestures and hit testing, PageRenderer, ReadingHub (runs the
                       providers), per-widget WidgetServices, Launcher, IconService (shell, file and site icons), Backgrounds (settings, shader store,
                       palette, image cover-fit, DeckBackground), logging
-tools/UrDeck.Cli      GPL. `urdeck-cli`, a portable dotnet tool (DotMake.CommandLine): `shader init|validate|render` on a background folder and
+tools/UrDeck.Cli      GPL. `urdeck-cli`, a portable dotnet tool (DotMake.CommandLine): `shader init|validate|render` on a background folder, `preview render` (sample data) and `catalog export` (JSON for the site), and
                       `theme validate|render|init|schema` on a theme folder (findings are `THEME
                       uses only the engine's public API (not in its InternalsVisibleTo), runs on Windows and Linux, exit codes 0/1/2
 src/UrDeck.Host       GPL. WinUI 3 app: window/monitor placement, one SKXamlCanvas layer per widget
-src/UrDeck.Preview    GPL. `SamplePage` (the page every picture of a theme starts from) and `ThemePreview.Render`; above the engine and the four
-                      first-party widgets, used by the tool and the golden tests
+src/UrDeck.Preview    GPL. `PreviewRenderer` (a configuration's page or one widget, theme, background, size, moment, frames, with the
+                      providers' sample data), the sample page `SamplePage/urdeck-config.json` and `ThemePreview.Render`; above the engine
+                      and the four first-party widgets and two providers, used by the tool and the golden tests
 providers/            GPL. First-party data provider plugins (UrDeck.Providers.System); reference only UrDeck.Sdk
 widgets/              first-party widget plugins (UrDeck.Widgets.Clock, .Stats, .Weather, .Shortcut); with the providers, copied to
                       plugins/ by the host build (the UrDeckPlugin list in UrDeck.Host.csproj)

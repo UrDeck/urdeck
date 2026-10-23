@@ -1,0 +1,27 @@
+{
+  "theme": "default-dark",
+  "pager": { "indicator": "always" },
+  "activePage": 0,
+  "pages": [
+    {
+      "name": "Sample",
+      "widgets": [
+        { "typeId": "urdeck.widgets.clock", "col": 0, "row": 0, "width": 4, "height": 1 },
+        { "typeId": "urdeck.widgets.stats", "col": 0, "row": 1, "width": 2, "height": 1, "slots": [ { "reading": "system:cpu/load" } ] },
+        { "typeId": "urdeck.widgets.stats", "col": 2, "row": 1, "width": 2, "height": 1, "slots": [ { "reading": "system:gpu/load" } ] },
+        { "typeId": "urdeck.widgets.weather", "col": 0, "row": 2, "width": 4, "height": 2, "location": "Portland, OR" },
+        { "typeId": "urdeck.widgets.shortcut", "col": 0, "row": 4, "target": "https://example.invalid/terminal", "label": "Terminal" },
+        { "typeId": "urdeck.widgets.shortcut", "col": 1, "row": 4, "target": "https://example.invalid/browser", "label": "Browser" },
+        { "typeId": "urdeck.widgets.shortcut", "col": 2, "row": 4, "target": "https://example.invalid/music", "label": "Music" },
+        { "typeId": "urdeck.widgets.shortcut", "col": 3, "row": 4, "target": "https://example.invalid/files", "label": "Files" }
+      ]
+    },
+    { "name": "Second", "widgets": [] }
+  ],
+  "dock": [
+    { "typeId": "urdeck.widgets.shortcut", "target": "https://example.invalid/terminal", "label": "Terminal" },
+    { "typeId": "urdeck.widgets.shortcut", "target": "https://example.invalid/browser", "label": "Browser" },
+    { "typeId": "urdeck.widgets.shortcut", "target": "https://example.invalid/music", "label": "Music" },
+    { "typeId": "urdeck.widgets.shortcut", "target": "https://example.invalid/files", "label": "Files" }
+  ]
+}

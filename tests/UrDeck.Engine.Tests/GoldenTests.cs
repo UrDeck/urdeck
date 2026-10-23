@@ -6,6 +6,7 @@ using UrDeck.Engine.Layout;
 using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
 using UrDeck.Preview;
+using UrDeck.Sdk;
 using Xunit;
 using Xunit.Sdk;
 
@@ -23,16 +24,17 @@ public sealed class GoldenTests
 
     private static SKBitmap Render(string theme, bool dock = false)
     {
-        using var page = SamplePage.Build();
         var loaded = new ThemeStore("").Load(theme);
-        return ThemePreview.Render(loaded, page, Width, Height, dock);
+        return ThemePreview.Render(loaded, Width, Height, dock);
     }
 
-    private static List<WidgetLayoutItem> Layout(SamplePage page)
+    private static List<WidgetConfig> SampleWidgets => PreviewConfig.Sample().Pages[0].Widgets;
+
+    private static List<WidgetLayoutItem> Layout()
     {
         var loaded = new ThemeStore("").Load(ThemeStore.DefaultName);
         return new GridLayoutManager(Width, Height, loaded.Definition.Card!.Gap!.Value, Height)
-            .RenderWidgetLayout(page.Widgets.Select(w => w.Config).ToList(), new System.Drawing.Size(Width, Height));
+            .RenderWidgetLayout(SampleWidgets, new System.Drawing.Size(Width, Height));
     }
 
     [WindowsGlyphFact]
@@ -107,10 +109,9 @@ public sealed class GoldenTests
     [Fact]
     public void TheSamplePage_LaysOutWithoutOverlapOrAnUnplacedWidget()
     {
-        using var page = SamplePage.Build();
-        var layout = Layout(page);
+        var layout = Layout();
 
-        Assert.Equal(page.Widgets.Count, layout.Count);
+        Assert.Equal(SampleWidgets.Count, layout.Count);
         Assert.All(layout, item => Assert.True(item.Placed));
         var screen = new System.Drawing.Rectangle(0, 0, Width, Height);
         for (int i = 0; i < layout.Count; i++)
@@ -126,9 +127,8 @@ public sealed class GoldenTests
     public void ACardBorderOnePixelWider_FailsTheComparison()
     {
         using var bitmap = Render("default-dark");
-        using (var page = SamplePage.Build())
         {
-            var card = Layout(page)[^1];
+            var card = Layout()[^1];
             using var canvas = new SKCanvas(bitmap);
             using var paint = new SKPaint { Color = SKColors.White, Style = SKPaintStyle.Stroke, StrokeWidth = 1, IsAntialias = false };
             canvas.DrawRect(SKRect.Create(card.Position.X + 0.5f, card.Position.Y + 0.5f, card.Size.Width - 1, card.Size.Height - 1), paint);

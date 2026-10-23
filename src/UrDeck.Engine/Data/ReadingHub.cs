@@ -27,12 +27,27 @@ public sealed partial class ReadingHub : IReadingSource, IDisposable
     private readonly Dictionary<string, ProviderRuntime> _runtimes = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _loggedBad = new(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, int> _intervals = new(StringComparer.OrdinalIgnoreCase);
+    private readonly bool _manual;
     private bool _disposed;
 
-    public ReadingHub(ProviderRegistry providers, TimeProvider? time = null, bool? regionUsesFahrenheit = null, bool? regionUses24HourClock = null)
+    /// <param name="providers">The providers that may be started.</param>
+    /// <param name="time">The clock of the sampling loop and the linger.</param>
+    /// <param name="regionUsesFahrenheit">The region's temperature unit; null reads the machine's region.</param>
+    /// <param name="regionUses24HourClock">The region's clock; null reads the current culture.</param>
+    /// <param name="sampling">
+    /// <see cref="ReadingHubSampling.Manual"/> runs no sampling loop: providers start when first subscribed to and are sampled
+    /// only by <see cref="SampleNow"/>. For previews, which set the moment of each drawing themselves; the host uses the loop.
+    /// </param>
+    public ReadingHub(
+        ProviderRegistry providers,
+        TimeProvider? time = null,
+        bool? regionUsesFahrenheit = null,
+        bool? regionUses24HourClock = null,
+        ReadingHubSampling sampling = ReadingHubSampling.Loop)
     {
         _providers = providers;
         _time = time ?? TimeProvider.System;
+        _manual = sampling == ReadingHubSampling.Manual;
         RegionUsesFahrenheit = regionUsesFahrenheit ?? !RegionIsMetric();
         RegionUses24HourClock = regionUses24HourClock
             ?? !CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern.Contains("tt", StringComparison.Ordinal);
@@ -110,10 +125,14 @@ public sealed partial class ReadingHub : IReadingSource, IDisposable
         return list;
     }
 
-    /// <summary>Counts one more subscriber for each id; the first subscriber of an id makes its reading pending.</summary>
+    /// <summary>
+    /// Counts one more subscriber for each id; the first subscriber of an id makes its reading pending. In the manual mode a
+    /// provider that is not running yet is started here, before the call returns.
+    /// </summary>
     public void Subscribe(IEnumerable<string> ids)
     {
         var changed = new List<string>();
+        List<ProviderRuntime>? starts = null;
         lock (_gate)
         {
             if (_disposed)
@@ -125,9 +144,14 @@ public sealed partial class ReadingHub : IReadingSource, IDisposable
                 if (count == 0)
                     SubscribeFirst(id, changed);
             }
+
+            if (_manual)
+                starts = _runtimes.Values.Where(rt => rt.Wanted.Count > 0 && !rt.Started).ToList();
         }
 
         Raise(changed);
+        foreach (var rt in starts ?? [])
+            StartManual(rt);
     }
 
     /// <summary>Counts one subscriber less for each id; an id nobody is subscribed to is ignored.</summary>
@@ -348,4 +372,14 @@ public sealed partial class ReadingHub : IReadingSource, IDisposable
             UrDeckLog.Error("A ReadingsChanged handler failed", ex);
         }
     }
+}
+
+/// <summary>How a <see cref="ReadingHub"/> samples its providers.</summary>
+public enum ReadingHubSampling
+{
+    /// <summary>A loop per provider at the provider's interval: the deck.</summary>
+    Loop,
+
+    /// <summary>No loop; <see cref="ReadingHub.SampleNow"/> samples every started provider once: previews.</summary>
+    Manual,
 }

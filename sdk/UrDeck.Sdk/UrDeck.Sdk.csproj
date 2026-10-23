@@ -32,8 +32,9 @@
          Package 0.12.0 (themes-carbon-paper): GaugeTheme.ReadoutGap. Additive, so the assembly version stays.
          Package 0.13.0 (theme-icons): IIconSet, IconGlyph, IconShape, IconTheme, Theme.Icons and the ThemedIcon component;
          ImageTile.Draw gained a glyphKey parameter (a source-breaking change for callers that pass the later arguments
-         positionally; the product has not shipped). The assembly version stays. -->
-    <Version>0.13.0</Version>
+         positionally; the product has not shipped). The assembly version stays.
+         Package 0.14.0 (preview-renderer): WidgetSizeAttribute.Preview. Additive, so the assembly version stays. -->
+    <Version>0.14.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 
