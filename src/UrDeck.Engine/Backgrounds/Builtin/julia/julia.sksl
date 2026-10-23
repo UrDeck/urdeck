@@ -25,8 +25,12 @@ half4 main(float2 fragCoord) {
     // A smooth escape time, so the colour changes everywhere and not only in bands around the set.
     float mu = n >= 127.0 ? 128.0 : n + 1.0 - log2(0.5 * log2(dot(z, z)));
     float v = mu >= 128.0 ? 1.0 : sqrt(clamp(mu / 24.0, 0.0, 1.0));
-    float3 col = mix(iColor0.rgb, iColor1.rgb, smoothstep(0.0, 0.35, v));
-    col = mix(col, iColor2.rgb, smoothstep(0.3, 0.7, v));
-    col = mix(col, iColor3.rgb, smoothstep(0.65, 1.0, v));
-    return half4(half3(col), 1.0);
+    float3 col = mix(iColor0.rgb, iColor1.rgb, smoothstep(0.0, 0.3, v));
+    col = mix(col, iColor2.rgb, smoothstep(0.2, 0.55, v));
+    col = mix(col, iColor3.rgb, smoothstep(0.45, 0.9, v));
+    // A bright rim where the escape time is slow, so the set's outline stands out from the dark ground: the last two
+    // palette colours, lifted, are added on a narrow band near the set.
+    float rim = smoothstep(0.55, 0.95, v) * (1.0 - smoothstep(0.95, 1.0, v));
+    col += (iColor3.rgb * 0.5 + iColor2.rgb * 0.5) * rim * 0.9;
+    return half4(half3(clamp(col, 0.0, 1.0)), 1.0);
 }

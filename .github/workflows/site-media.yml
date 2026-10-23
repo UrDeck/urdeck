@@ -22,6 +22,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - name: Check the app is set up
         env:
@@ -50,14 +51,35 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
 
-      - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
-
       - name: Install the site's tools
+        timeout-minutes: 10
         working-directory: site
         run: npm ci
 
+      # Nothing to render is the usual case: say so before installing ffmpeg (an apt mirror once hung the job for 10 minutes).
+      - name: Check what is stale
+        id: stale
+        timeout-minutes: 20
+        working-directory: site
+        env:
+          RENDER_ALL: ${{ inputs.all }}
+        run: |
+          npm run --silent media -- --status | tee "$RUNNER_TEMP/status.txt"
+          count="$(awk '/^ +(missing|stale|unneeded):/ { n += $2 } END { print n + 0 }' "$RUNNER_TEMP/status.txt")"
+          if [ "$count" -gt 0 ] || [ "$RENDER_ALL" = "true" ]; then
+            echo "needed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install ffmpeg
+        if: steps.stale.outputs.needed == 'true'
+        timeout-minutes: 10
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
       - name: Render the media
+        if: steps.stale.outputs.needed == 'true'
+        timeout-minutes: 90
         working-directory: site
         env:
           RENDER_ALL: ${{ inputs.all }}
