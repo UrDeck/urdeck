@@ -339,7 +339,7 @@ public sealed class ThemeValidateTests : IDisposable
     public void Sarif_has_a_result_for_each_finding_and_a_rule_for_each_code()
     {
         _work.Theme("THEME020-missing", "mine");
-        File.WriteAllText("mine/theme.json", File.ReadAllText("mine/theme.json").Replace("\"format\": 2", "\"format\": 9", StringComparison.Ordinal));
+        File.WriteAllText("mine/theme.json", File.ReadAllText("mine/theme.json").Replace("\"meta\"", "\"format\": 2, \"meta\"", StringComparison.Ordinal));
 
         var run = Workspace.Invoke("theme", "validate", "mine", "--format", "sarif");
 
@@ -349,7 +349,7 @@ public sealed class ThemeValidateTests : IDisposable
         var results = sarif.GetProperty("results").EnumerateArray().ToList();
         Assert.Equal(["error", "warning"], results.Select(r => r.GetProperty("level").GetString()).Order(StringComparer.Ordinal));
         var rules = sarif.GetProperty("tool").GetProperty("driver").GetProperty("rules").EnumerateArray().Select(r => r.GetProperty("id").GetString()).ToList();
-        Assert.Equal(["THEME010", "THEME020"], rules);
+        Assert.Equal(["THEME002", "THEME020"], rules);
         Assert.All(results, r => Assert.Equal("mine/theme.json", r.GetProperty("locations")[0].GetProperty("physicalLocation").GetProperty("artifactLocation").GetProperty("uri").GetString()));
     }
 

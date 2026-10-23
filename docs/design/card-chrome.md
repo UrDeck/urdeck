@@ -23,7 +23,7 @@ CardChrome.DrawFront(canvas, chrome, save)          // highlight (still clipped)
 - **`CardShape`** is a small record `{ SKRoundRect? Round; SKPath? Path; SKRect Bounds }`. `round` and `circle` are an
   `SKRoundRect` (a circle is a radius of half the smaller side: cells are square, so a 1x1 card or a dock slot is square
   within the grid's 1 px rounding, and a non-square card becomes a capsule, logged once at info). Only `chamfer` is an `SKPath`.
-- **The v1 fast path**: a `ResolvedCardStyle.IsPlain` (no format-2 card key) draws exactly today's `DrawCard` and
+- **The v1 fast path**: a `ResolvedCardStyle.IsPlain` (no card chrome key) draws exactly today's `DrawCard` and
   `ClipRoundRect`, and `DrawFront` only restores. That path is the code of today moved, not rewritten; the goldens prove it.
 - **The non-plain back clips first and then fills** (`DrawPaint` under the clip), and strokes the border twice as wide under
   the same clip, so the border is inside the edge for any shape, the chamfer included. The prototype draws every draft this way.
@@ -116,7 +116,7 @@ blur (and the glow's blur) are scaled down together until the bleed equals the g
 - **Detection**: a card is compact when it is a dock slot, or a page card whose grid size is 1x1 (`WidgetLayoutItem.GridSize`;
   1x1 is the smallest size, so "one cell or less" is exactly 1x1).
 - **What applies**: `card.compact` overrides `radius`, `borderWidth`, `shape` (`circle` included), `accentStrip` and
-  `cornerMarks`, as `ThemeCardCompactDefinition` has them. **There is no compact `padding`** (`02` listed one; format 2 did not
+  `cornerMarks`, as `ThemeCardCompactDefinition` has them. **There is no compact `padding`** (`02` listed one; the first draft did not
   build it), so a compact card's content rectangle is the page's.
 - **What the widget sees**: the page's `Theme` on a 1x1 page card, and the dock's `Theme` in a slot. The dock's `Theme` takes the
   compact `radius` and `borderWidth` (with `circle`, `CardRadius` is half the slot), so `ImageTile` and `Gauge`, which echo

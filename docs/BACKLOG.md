@@ -116,8 +116,9 @@ everything else should be fine on Sonnet.
   media pipeline (`docs-rewrite`, `site-gallery`, `site-media-pipeline`). `urdeck.app` and GitHub Pages are live.
 - Milestone 1 (daily driver) is done (2026-10-23): the owner ran UrDeck on the panel in place of Nexus for about two weeks.
   The CPU temperature helper (item 3, fourth change) moves to milestone 2 or later; the card shows a dash until then.
-- Next: milestone 2 is reshaped as a *downloadable* preview, releasable build first (see the roadmap and item 12), after
-  `fold-theme-format-2-into-v1` (the theme format becomes one format with no `format` key; schema `docs/schemas/v1/theme.json`).
+- `fold-theme-format-2-into-v1` is done and archived (2026-10-23): the theme format is one format with no `format` key and no
+  `THEME010`; the schema is `docs/schemas/v1/theme.json`; a value of the wrong kind costs only that value; goldens unchanged.
+- Next: milestone 2 is reshaped as a *downloadable* preview, releasable build first (see the roadmap and item 12).
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.

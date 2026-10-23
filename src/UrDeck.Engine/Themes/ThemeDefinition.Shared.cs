@@ -3,7 +3,6 @@
 
 namespace UrDeck.Engine.Themes;
 
-[Format2]
 public sealed partial class ThemeGradientDefinition
 {
     /// <summary>Stops, evenly spaced.</summary>
@@ -19,7 +18,6 @@ public sealed partial class ThemeGradientDefinition
     }
 }
 
-[Format2]
 public sealed partial class ThemeGlowDefinition
 {
     /// <summary>Blur radius, fraction of a cell.</summary>

@@ -3,7 +3,6 @@
 
 namespace UrDeck.Engine.Themes;
 
-[Format2]
 public sealed partial class ThemeMotionDefinition
 {
     /// <summary>The ceiling for theme-driven animation (borderAnimate, and what a later change adds). The effective level is the lower of this and the user/OS setting. Does not touch the shader background, which has its own control.</summary>

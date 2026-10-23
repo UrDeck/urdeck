@@ -85,7 +85,6 @@ public static class ThemeCodes
     public const string BadColor = "THEME006";
     public const string BadList = "THEME007";
     public const string MissingMember = "THEME008";
-    public const string NewerFormat = "THEME010";
     public const string FontFile = "THEME020";
     public const string FontFileSize = "THEME021";
     public const string FontFamily = "THEME022";

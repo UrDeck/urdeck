@@ -1,6 +1,5 @@
 {
-  "$schema": "https://urdeck.app/schemas/v2/theme.json",
-  "format": 2,
+  "$schema": "https://urdeck.app/schemas/v1/theme.json",
   "meta": {
     "name": "Tach with a redline",
     "description": "Dial gauges with ticks, a needle and a red zone that lights when the load is high.",

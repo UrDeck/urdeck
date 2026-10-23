@@ -11,17 +11,17 @@ using Xunit;
 namespace UrDeck.Engine.Tests;
 
 /// <summary>
-/// Format 2 of the theme file: the values are read, checked, merged and kept. Most of the checks are driven by the published
+/// The theme file's value groups: the values are read, checked, merged and kept. Most of the checks are driven by the published
 /// schema, so every key it lists is tried valid, out of range and of the wrong kind.
 /// </summary>
-public sealed class ThemeFormat2Tests : IDisposable
+public sealed class ThemeValueGroupTests : IDisposable
 {
     private const string Name = "probe";
 
     private static readonly JsonObject Schema = LoadSchema();
 
-    // Format 1 keys fail the whole theme when they are of the wrong kind, as they always did: only format 2 keys are swept.
-    private static readonly HashSet<string> Format1Paths =
+    // The values the default theme sets; every other key is an optional value that a theme leaves out.
+    private static readonly HashSet<string> DefaultThemePaths =
     [
         "colors.background", "colors.cardFill", "colors.cardBorder", "colors.text", "colors.textMuted", "colors.accent",
         "colors.accentDim", "colors.good", "colors.warning", "colors.critical", "colors.backgroundPalette",
@@ -33,7 +33,7 @@ public sealed class ThemeFormat2Tests : IDisposable
     private readonly string _root = Path.Combine(Path.GetTempPath(), "urdeck-theme2-tests-" + Guid.NewGuid().ToString("N"));
     private readonly string _logBefore = UrDeckLog.LogPath;
 
-    public ThemeFormat2Tests()
+    public ThemeValueGroupTests()
     {
         Directory.CreateDirectory(_root);
         UrDeckLog.LogPath = Path.Combine(_root, "test.log");
@@ -50,7 +50,7 @@ public sealed class ThemeFormat2Tests : IDisposable
         string root = AppContext.BaseDirectory;
         while (!File.Exists(Path.Combine(root, "urdeck.slnx")))
             root = Path.GetDirectoryName(root)!;
-        return JsonNode.Parse(File.ReadAllText(Path.Combine(root, "docs", "schemas", "v2", "theme.json")))!.AsObject();
+        return JsonNode.Parse(File.ReadAllText(Path.Combine(root, "docs", "schemas", "v1", "theme.json")))!.AsObject();
     }
 
     private static string[] ThemeLines =>
@@ -134,13 +134,13 @@ public sealed class ThemeFormat2Tests : IDisposable
         }
     }
 
-    private static bool IsFormat2(string path) =>
-        !Format1Paths.Contains(path) && !Format1Paths.Any(f => path.StartsWith(f + ".", StringComparison.Ordinal));
+    private static bool IsOptional(string path) =>
+        !DefaultThemePaths.Contains(path) && !DefaultThemePaths.Any(f => path.StartsWith(f + ".", StringComparison.Ordinal));
 
     public static TheoryData<string> Leaves()
     {
         var data = new TheoryData<string>();
-        foreach (string path in Paths(Schema, "", groups: false).Where(p => p != "format"))
+        foreach (string path in Paths(Schema, "", groups: false))
             data.Add(path);
         return data;
     }
@@ -148,7 +148,7 @@ public sealed class ThemeFormat2Tests : IDisposable
     public static TheoryData<string> Groups()
     {
         var data = new TheoryData<string>();
-        foreach (string path in Paths(Schema, "", groups: true).Where(p => NodeAt(p)["properties"] != null && IsFormat2(p) && p is not ("colors" or "card" or "typography" or "gauge")))
+        foreach (string path in Paths(Schema, "", groups: true).Where(p => NodeAt(p)["properties"] != null && IsOptional(p) && p is not ("colors" or "card" or "typography" or "gauge")))
             data.Add(path);
         return data;
     }
@@ -267,9 +267,6 @@ public sealed class ThemeFormat2Tests : IDisposable
     [MemberData(nameof(Leaves))]
     public void EveryKey_AcceptsAValidValue_AndKeepsIt(string path)
     {
-        if (!IsFormat2(path) && path != "gauge.style")
-            return;
-
         var loaded = Load(ThemeWith(path, path == "gauge.style" ? "tach" : Sample(NodeAt(path))));
 
         Assert.Empty(ThemeLines);
@@ -280,9 +277,6 @@ public sealed class ThemeFormat2Tests : IDisposable
     [MemberData(nameof(Leaves))]
     public void EveryKey_RefusesAnInvalidValue_WithOneWarning_AndTakesTheDefault(string path)
     {
-        if (!IsFormat2(path) && path != "gauge.style")
-            return;
-
         var node = NodeAt(path);
         foreach (var bad in path == "gauge.style" ? ["plain"] : Invalid(node))
         {
@@ -309,10 +303,10 @@ public sealed class ThemeFormat2Tests : IDisposable
     }
 
     [Fact]
-    public void ATheme_WithEveryFormat2ValueInvalid_LoadsTheDefaultsAndWarnsOncePerKey()
+    public void ATheme_WithEveryValueInvalid_LoadsTheDefaultsAndWarnsOncePerKey()
     {
         var root = new JsonObject();
-        var leaves = Paths(Schema, "", groups: false).Where(p => p != "format" && IsFormat2(p)).ToList();
+        var leaves = Paths(Schema, "", groups: false).ToList();
         foreach (string path in leaves)
         {
             var bad = Invalid(NodeAt(path)).First();
@@ -328,47 +322,26 @@ public sealed class ThemeFormat2Tests : IDisposable
 
         Assert.Equal(leaves.Count, ThemeLines.Length);
         foreach (string path in leaves)
-            Assert.Null(Dig(loaded.Definition, path));
+        {
+            // An original value takes the default theme's; an optional one, and the background palette, is never taken from it.
+            if (IsOptional(path) || path == "colors.backgroundPalette")
+                Assert.Null(Dig(loaded.Definition, path));
+            else
+                Assert.Equal(Dig(dark.Definition, path), Dig(loaded.Definition, path));
+        }
         Assert.Equal(dark.Definition.Colors!.Accent, loaded.Definition.Colors!.Accent);
         Assert.Equal(dark.Definition.Card!.Radius, loaded.Definition.Card!.Radius);
     }
 
-    // ---------------------------------------------------------------- format
+    // ---------------------------------------------------------------- keys the deck does not read
 
     [Fact]
-    public void Format_IsOptional_AndAFormat2ThemeLoadsWithoutIt()
+    public void ALeftoverFormatKey_LoadsWithoutALoadTimeWarning()
     {
-        var plain = Load("""{ "card": { "shadow": { "blur": 0.1 } } }""");
-        var declared = Load("""{ "format": 2 }""");
+        var loaded = Load("""{ "format": 2, "colors": { "accent": "#ff00ff" } }""");
 
-        Assert.Null(plain.Definition.Format);
-        Assert.Equal(0.1, plain.Definition.Card!.Shadow!.Blur);
-        Assert.Equal(2, declared.Definition.Format);
         Assert.Empty(ThemeLines);
-    }
-
-    [Fact]
-    public void ANewerFormat_LoadsWithOneWarning()
-    {
-        var loaded = Load("""{ "format": 3, "colors": { "accent": "#ff00ff" }, "futureGroup": { "x": 1 } }""");
-
-        string line = Assert.Single(ThemeLines);
-        Assert.Contains("format 3", line, StringComparison.Ordinal);
-        Assert.Contains("supports 2", line, StringComparison.Ordinal);
         Assert.Equal("#ff00ff", loaded.Definition.Colors!.Accent);
-    }
-
-    [Theory]
-    [InlineData("0")]
-    [InlineData("-1")]
-    [InlineData("2.5")]
-    [InlineData("\"two\"")]
-    public void AFormatThatIsNotAWholeNumberOfAtLeastOne_IsDroppedWithAWarning(string value)
-    {
-        var loaded = Load("{ \"format\": " + value + " }");
-
-        Assert.Single(ThemeLines);
-        Assert.Null(loaded.Definition.Format);
     }
 
     [Fact]
@@ -382,10 +355,9 @@ public sealed class ThemeFormat2Tests : IDisposable
 
     // ---------------------------------------------------------------- merge
 
-    /// <summary><paramref name="allowMeta"/>: the built-in themes carry <c>meta</c> (a catalog lists them by it) and nothing else of format 2.</summary>
-    private static void AssertNoFormat2Groups(ThemeDefinition d, bool allowMeta = false)
+    /// <summary><paramref name="allowMeta"/>: the built-in themes carry <c>meta</c> (a catalog lists them by it) and nothing else of the optional groups.</summary>
+    private static void AssertNoOptionalGroups(ThemeDefinition d, bool allowMeta = false)
     {
-        Assert.Null(d.Format);
         if (!allowMeta)
             Assert.Null(d.Meta);
         Assert.Null(d.Pattern);
@@ -395,7 +367,7 @@ public sealed class ThemeFormat2Tests : IDisposable
         Assert.Null(d.Icons);
         Assert.Null(d.Background);
         Assert.Null(d.Motion);
-        foreach (string path in Paths(Schema, "", groups: false).Where(p => p != "format" && IsFormat2(p) && !(allowMeta && p.StartsWith("meta.", StringComparison.Ordinal))))
+        foreach (string path in Paths(Schema, "", groups: false).Where(p => IsOptional(p) && !(allowMeta && p.StartsWith("meta.", StringComparison.Ordinal))))
             Assert.Null(Dig(d, path));
     }
 
@@ -403,12 +375,12 @@ public sealed class ThemeFormat2Tests : IDisposable
     [InlineData("default-dark")]
     [InlineData("default-light")]
     [InlineData("glass")]
-    public void TheBuiltInThemes_LoadCleanWithOnlyMetaOfFormat2(string name)
+    public void TheBuiltInThemes_LoadCleanWithOnlyMetaOfTheOptionalGroups(string name)
     {
         var theme = new ThemeStore(Path.Combine(_root, "themes")).Load(name);
 
         Assert.Equal(name, theme.Name);
-        AssertNoFormat2Groups(theme.Definition, allowMeta: true);
+        AssertNoOptionalGroups(theme.Definition, allowMeta: true);
         Assert.False(string.IsNullOrWhiteSpace(theme.Definition.Meta?.Name));
         Assert.False(string.IsNullOrWhiteSpace(theme.Definition.Meta?.Description));
         Assert.NotNull(theme.Definition.Meta?.Mode);
@@ -416,11 +388,11 @@ public sealed class ThemeFormat2Tests : IDisposable
     }
 
     [Fact]
-    public void AFormat1Theme_MergedOverTheDefault_HasNoFormat2Group()
+    public void ATheme_OfTheDefaultThemesKeys_MergedOverTheDefault_HasNoOptionalGroup()
     {
         var loaded = Load("""{ "colors": { "accent": "#ff00ff" }, "card": { "radius": 0.2, "borderWidth": 0.01 }, "gauge": { "style": "bar" } }""");
 
-        AssertNoFormat2Groups(loaded.Definition);
+        AssertNoOptionalGroups(loaded.Definition);
         Assert.Empty(ThemeLines);
         Assert.Equal("", Log);
     }
@@ -639,7 +611,7 @@ public sealed class ThemeFormat2Tests : IDisposable
     [InlineData("marker")]
     [InlineData("thickbar")]
     [InlineData("THICKBAR")]
-    public void AFormat2GaugeStyle_IsKept_AndTheResolverGivesIt(string style)
+    public void ALaterGaugeStyle_IsKept_AndTheResolverGivesIt(string style)
     {
         var loaded = Load("{ \"gauge\": { \"style\": \"" + style + "\" } }");
         using var theme = ThemeResolver.Resolve(loaded, 275);
@@ -649,13 +621,21 @@ public sealed class ThemeFormat2Tests : IDisposable
         Assert.Equal(Enum.Parse<GaugeStyle>(style, ignoreCase: true), theme.GaugeStyle);
     }
 
-    [Fact]
-    public void AFormat1Value_OfTheWrongKind_StillFailsTheWholeTheme()
+    [Theory]
+    [InlineData("card", "gap", "\"wide\"")]
+    [InlineData("card", "radius", "true")]
+    [InlineData("colors", "accent", "5")]
+    [InlineData("typography", "font", "7")]
+    public void AnOriginalValue_OfTheWrongKind_CostsOnlyThatValue(string group, string key, string json)
     {
-        var loaded = Load("""{ "card": { "radius": "big" }, "colors": { "accent": "#ff00ff" } }""");
+        var loaded = Load("{ \"" + group + "\": { \"" + key + "\": " + json + " }, \"gauge\": { \"style\": \"bar\" } }");
 
-        Assert.Contains("could not be read", Log, StringComparison.Ordinal);
-        Assert.NotEqual("#ff00ff", loaded.Definition.Colors!.Accent);
+        string line = Assert.Single(ThemeLines);
+        Assert.Contains(group + "." + key, line, StringComparison.Ordinal);
+        Assert.DoesNotContain("could not be read", Log, StringComparison.Ordinal);
+        Assert.Equal("bar", loaded.Definition.Gauge!.Style);
+        Assert.NotNull(Dig(new ThemeStore(Path.Combine(_root, "themes")).Load("default-dark").Definition, group + "." + key));
+        Assert.Equal(Dig(new ThemeStore(Path.Combine(_root, "themes")).Load("default-dark").Definition, group + "." + key), Dig(loaded.Definition, group + "." + key));
     }
 
     // ---------------------------------------------------------------- rules between values

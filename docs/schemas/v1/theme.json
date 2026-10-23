@@ -1,15 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://urdeck.app/schemas/v2/theme.json",
-  "title": "UrDeck theme, format 2",
-  "description": "theme.json. Everything is optional and merges over default-dark. Unknown keys are allowed (an older host ignores what it does not know, which is how a format-2 theme degrades on a format-1 host). Sizes are fractions of one grid cell unless a unit is stated. Every v1 key keeps its meaning.",
+  "$id": "https://urdeck.app/schemas/v1/theme.json",
+  "title": "UrDeck theme",
+  "description": "theme.json. Everything is optional and merges over default-dark. Unknown keys are allowed (the deck ignores a key it does not read and says so). Sizes are fractions of one grid cell unless a unit is stated.",
   "type": "object",
   "additionalProperties": true,
   "$defs": {
     "color": {
       "type": "string",
       "pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$",
-      "description": "#RRGGBB or #AARRGGBB (alpha first, as in v1)."
+      "description": "#RRGGBB or #AARRGGBB (alpha first)."
     },
     "gradient": {
       "type": "object",
@@ -66,14 +66,6 @@
     "$schema": {
       "type": "string",
       "description": "This schema's URL, for editor completion. Ignored."
-    },
-    "format": {
-      "type": "integer",
-      "enum": [
-        1,
-        2
-      ],
-      "description": "Optional. 2 declares that the file uses format-2 keys; the host warns if it is newer than it supports. Absent = 1."
     },
     "meta": {
       "type": "object",

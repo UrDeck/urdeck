@@ -41,7 +41,6 @@ public sealed class ThemeFindingTests
     [InlineData("""{ "colors": { "background": "red" } }""", ThemeCodes.BadColor, "colors.background")]
     [InlineData("""{ "colors": { "backgroundPalette": ["#000000", "nope"] } }""", ThemeCodes.BadList, "colors.backgroundPalette")]
     [InlineData("""{ "card": { "shadow": { "blur": 5 } } }""", ThemeCodes.OutOfRange, "card.shadow.blur")]
-    [InlineData("""{ "format": 0 }""", ThemeCodes.OutOfRange, "format")]
     [InlineData("""{ "gauge": { "ticks": { "count": 1 } } }""", ThemeCodes.OutOfRange, "gauge.ticks.count")]
     [InlineData("""{ "card": { "borderGradient": { "colors": ["#ff0000", "#00ff00"], "angle": 900 }, "borderWidth": 0.01 } }""", ThemeCodes.OutOfRange, "card.borderGradient.angle")]
     [InlineData("""{ "card": { "shape": "blob" } }""", ThemeCodes.NotOneOf, "card.shape")]
@@ -55,7 +54,6 @@ public sealed class ThemeFindingTests
     [InlineData("""{ "icons": { "tint": "purple" } }""", ThemeCodes.NotOneOf, "icons.tint")]
     [InlineData("""{ "stroke": { "cap": "flat" } }""", ThemeCodes.NotOneOf, "stroke.cap")]
     [InlineData("""{ "gauge": { "style": "dial" } }""", ThemeCodes.NotOneOf, "gauge.style")]
-    [InlineData("""{ "format": 9 }""", ThemeCodes.NewerFormat, "format")]
     public void A_value_that_fails_a_check_is_one_finding_with_its_code_and_key(string json, string code, string key)
     {
         var finding = Only(Sanitize(json));
@@ -218,7 +216,7 @@ public sealed class ThemeFindingTests
         {
             var log = new LogFindings("mine");
             log.Report(new ThemeFinding(ThemeCodes.OutOfRange, ThemeSeverity.Warning, "card.gap", "card.gap 5 is outside 0..1; using the default."));
-            log.Report(new ThemeFinding(ThemeCodes.NewerFormat, ThemeSeverity.Warning, "format", "declares format 9.") { Form = ThemeLogForm.Space });
+            log.Report(new ThemeFinding(ThemeCodes.OutOfRange, ThemeSeverity.Warning, "card.gap", "declares a gap of 5.") { Form = ThemeLogForm.Space });
             log.Report(new ThemeFinding(ThemeCodes.FontFile, ThemeSeverity.Error, null, "Font 'x' could not be read.") { Form = ThemeLogForm.Bare });
             log.Report(new ThemeFinding(ThemeCodes.EffectReach, ThemeSeverity.Warning, "card.shadow", "limited.") { LoggedAsInfo = true });
             log.Report(new ThemeFinding(ThemeCodes.CompactCapsule, ThemeSeverity.Info, null, "a capsule."));
@@ -231,7 +229,7 @@ public sealed class ThemeFindingTests
         Assert.Equal(
             [
                 ("WARN", "Theme 'mine': card.gap 5 is outside 0..1; using the default."),
-                ("WARN", "Theme 'mine' declares format 9."),
+                ("WARN", "Theme 'mine' declares a gap of 5."),
                 ("WARN", "Font 'x' could not be read."),
                 ("INFO", "Theme 'mine': limited."),
                 ("INFO", "Theme 'mine': a capsule."),

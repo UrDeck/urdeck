@@ -229,7 +229,7 @@ test('the manifest is sorted and records the options of each file', async () => 
 
 const recipe = (name, show = 'page', extra = {}) => {
   put(site, `cookbook/${name}/recipe.json`, JSON.stringify({ title: name, summary: 's', order: 1, show, background: null, ...extra }));
-  put(site, `cookbook/${name}/theme.json`, `{"format":2,"meta":{"name":"${name}"}}`);
+  put(site, `cookbook/${name}/theme.json`, `{"meta":{"name":"${name}"}}`);
   put(site, `cookbook/${name}/README.md`, 'why');
 };
 
@@ -270,7 +270,7 @@ test('a change inside one recipe folder stales only that recipe, an asset of it 
   recipe('hard-shadow');
   await generate();
   assert.deepEqual(await staleIds(), []);
-  put(site, 'cookbook/circular-dock/theme.json', '{"format":2,"card":{"compact":{"shape":"circle"}}}');
+  put(site, 'cookbook/circular-dock/theme.json', '{"card":{"compact":{"shape":"circle"}}}');
   assert.deepEqual(await staleIds(), ['cookbook:circular-dock']);
   await generate();
   put(site, 'cookbook/hard-shadow/icons/mine/sun.svg', '<svg/>');

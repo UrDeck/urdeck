@@ -408,7 +408,7 @@ a background:
   default parameters were lightened until they are
 
 ### Requirement: Theme Backgrounds
-The deck MUST show the background that a theme chooses with its `background` group (see theme, "Format 2 Values"),
+The deck MUST show the background that a theme chooses with its `background` group (see theme, "Theme Value Groups"),
 unless the configuration chooses one:
 
 - `default.name` is the name of a shader background that the deck shows when the configuration has no `background`

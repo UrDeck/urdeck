@@ -80,7 +80,7 @@ public class RootCommand
             public int Run() => ThemeInitRunner.Run(new ThemeInitOptions(Name, Output, From), CliApp.Out);
         }
 
-        [CliCommand(Description = "Prints the JSON Schema of the theme format, the file the product publishes as docs/schemas/v2/theme.json."
+        [CliCommand(Description = "Prints the JSON Schema of the theme format, the file the product publishes as docs/schemas/v1/theme.json."
             + ExitCodes.HelpText)]
         public class SchemaCommand
         {

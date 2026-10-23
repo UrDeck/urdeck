@@ -4,7 +4,7 @@
 
 /**
  * @param catalog   the product's catalog (themes, backgrounds, widgets with settings, findings)
- * @param schemas   [{ name: 'v2/theme.json', paths: [...every key as a dotted path] }]
+ * @param schemas   [{ name: 'v1/theme.json', paths: [...every key as a dotted path] }]
  * @param records   what the components rendered, or null when there is no record at all
  * @param troubleshooting  the text of the troubleshooting page
  * @returns a list of sentences, empty when nothing is missing

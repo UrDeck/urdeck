@@ -3,7 +3,6 @@
 
 namespace UrDeck.Engine.Themes;
 
-[Format2]
 public sealed partial class ThemePatternDefinition
 {
     /// <summary>Default none.</summary>
@@ -38,7 +37,6 @@ public sealed partial class ThemePatternDefinition
     }
 }
 
-[Format2]
 public sealed partial class ThemePatternMajorDefinition
 {
     public string? Color { get; set; }

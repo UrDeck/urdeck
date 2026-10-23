@@ -178,8 +178,7 @@ public sealed class ThemeCommandsTests : IDisposable
         Assert.Contains("next: urdeck-cli theme validate mine", run.Out);
         using var json = JsonDocument.Parse(File.ReadAllText("mine/theme.json"));
         var root = json.RootElement;
-        Assert.Equal("https://urdeck.app/schemas/v2/theme.json", root.GetProperty("$schema").GetString());
-        Assert.Equal(2, root.GetProperty("format").GetInt32());
+        Assert.Equal("https://urdeck.app/schemas/v1/theme.json", root.GetProperty("$schema").GetString());
         Assert.Equal("mine", root.GetProperty("meta").GetProperty("name").GetString());
         Assert.Equal("", root.GetProperty("meta").GetProperty("description").GetString());
         Assert.Equal("dark", root.GetProperty("meta").GetProperty("mode").GetString());
@@ -293,7 +292,7 @@ public sealed class ThemeCommandsTests : IDisposable
 
         Assert.Equal(0, run.Code);
         Assert.Equal("", run.Error);
-        Assert.Equal(File.ReadAllText(RepositoryFile("docs", "schemas", "v2", "theme.json")).ReplaceLineEndings("\n"), run.Out);
+        Assert.Equal(File.ReadAllText(RepositoryFile("docs", "schemas", "v1", "theme.json")).ReplaceLineEndings("\n"), run.Out);
     }
 
     [Fact]
@@ -306,7 +305,7 @@ public sealed class ThemeCommandsTests : IDisposable
         Assert.Equal(0, run.Code);
         Assert.Equal("", run.Out);
         Assert.Equal(
-            File.ReadAllBytes(RepositoryFile("docs", "schemas", "v2", "theme.json")),
+            File.ReadAllBytes(RepositoryFile("docs", "schemas", "v1", "theme.json")),
             File.ReadAllBytes("theme.schema.json"));
     }
 

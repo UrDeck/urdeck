@@ -3,7 +3,6 @@
 
 namespace UrDeck.Engine.Themes;
 
-[Format2]
 public sealed partial class ThemeIconsDefinition
 {
     /// <summary>Name of an icon set: a folder icons/&lt;set&gt;/ inside the theme folder (with a manifest.json), or a built-in set (outline). A key the set lacks is answered by the built-in 'outline' set. See Icon sets in the theme reference.</summary>

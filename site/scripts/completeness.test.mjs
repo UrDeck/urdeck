@@ -12,10 +12,10 @@ const catalog = () => ({
   ],
   findings: [{ code: 'THEME001' }, { code: 'SHADER001' }],
 });
-const schemas = [{ name: 'v2/theme.json', paths: ['card', 'card.radius', 'colors'] }];
+const schemas = [{ name: 'v1/theme.json', paths: ['card', 'card.radius', 'colors'] }];
 const records = () => [
-  { kind: 'schema', schema: 'v2/theme.json', paths: ['card', 'card.radius'] },
-  { kind: 'schema', schema: 'v2/theme.json', paths: ['colors'] },
+  { kind: 'schema', schema: 'v1/theme.json', paths: ['card', 'card.radius'] },
+  { kind: 'schema', schema: 'v1/theme.json', paths: ['colors'] },
   { kind: 'builtin', what: 'themes', names: ['carbon', 'paper'] },
   { kind: 'builtin', what: 'backgrounds', names: ['aurora'] },
   { kind: 'builtin', what: 'widgets', names: ['urdeck.widgets.clock', 'urdeck.widgets.shortcut'] },
@@ -46,14 +46,14 @@ test('a theme, a background, a setting, a finding code and a schema key that no 
   c.findings.push({ code: 'THEME999' });
   const problems = check({
     catalog: c,
-    schemas: [{ name: 'v2/theme.json', paths: ['card', 'card.radius', 'colors', 'card.cut'] }],
+    schemas: [{ name: 'v1/theme.json', paths: ['card', 'card.radius', 'colors', 'card.cut'] }],
   });
   const text = problems.join('\n');
   assert.match(text, /theme "neon"/);
   assert.match(text, /background "waves"/);
   assert.match(text, /"showSeconds" of urdeck\.widgets\.clock/);
   assert.match(text, /THEME999 is in no findings table/);
-  assert.match(text, /v2\/theme\.json: no documentation page shows 1 key\(s\): card\.cut/);
+  assert.match(text, /v1\/theme\.json: no documentation page shows 1 key\(s\): card\.cut/);
 });
 
 test('a finding that is in a table but not on the troubleshooting page fails', () => {
