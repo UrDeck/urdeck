@@ -77,6 +77,21 @@ for (const file of files.filter((f) => f.endsWith('.css') || f.endsWith('.js')))
   }
 }
 
+// 4. Every file the media manifest names exists: pictures in src/generated/ (Astro optimises them into the output), loops in
+// public/generated/ (copied to the output as they are).
+const siteRoot = join(here, '..');
+const manifestFile = join(siteRoot, 'src', 'generated', 'media.json');
+if (existsSync(manifestFile)) {
+  for (const entry of JSON.parse(readFileSync(manifestFile, 'utf8')).entries) {
+    for (const file of entry.files) {
+      const served = file.startsWith('public/') ? join(dist, file.slice('public/'.length)) : join(siteRoot, file);
+      if (!existsSync(served)) problems.push(`media.json: ${entry.id} names ${file}, which does not exist`);
+    }
+  }
+} else {
+  problems.push('src/generated/media.json is missing (npm run media makes it)');
+}
+
 if (problems.length > 0) {
   console.error('Site checks failed:\n' + problems.map((p) => '  - ' + p).join('\n'));
   process.exit(1);

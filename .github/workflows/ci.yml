@@ -181,6 +181,32 @@ jobs:
           $cli theme render --builtin carbon -o "$out/carbon.png"
           test -s "$out/carbon.png"
 
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install the site's tools
+        run: npm ci
+        working-directory: site
+
+      # Non-blocking: how many of the site's generated pictures and loops are out of date (site/README.md, "Media").
+      - name: Site media staleness
+        continue-on-error: true
+        working-directory: site
+        run: |
+          out="$(npm run --silent media -- --status)"
+          echo "$out"
+          {
+            echo '### Site media'
+            echo
+            echo '```'
+            echo "$out"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Site media::$(echo "$out" | sed -n 2,4p | xargs)"
+
   openspec:
     needs: changes
     if: needs.changes.outputs.openspec == 'true'
@@ -217,6 +243,25 @@ jobs:
 
       - name: Build and check
         run: npm run build
+
+      - name: Test the media generator
+        run: npm test
+
+      # No .NET in this job: the report uses the committed site/src/generated/catalog.json and says so.
+      - name: Site media staleness
+        continue-on-error: true
+        working-directory: site
+        run: |
+          out="$(npm run --silent media -- --status)"
+          echo "$out"
+          {
+            echo '### Site media'
+            echo
+            echo '```'
+            echo "$out"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=Site media::$(echo "$out" | sed -n 2,4p | xargs)"
 
   # Required status check, the one gate for the jobs above. Skipped counts as passed; failed or cancelled (a failed
   # `changes` included) fails it. Every job except pr-title belongs in `needs`: add a new job here in the pull request that adds it.

@@ -39,8 +39,9 @@ The website (`site/`, needs Node 22; details in `site/README.md`):
 ```powershell
 cd site; npm ci; npm run build   # builds and runs the checks (schema copy, internal links, third-party references)
 npm run dev                      # local preview
-pwsh scripts/Render-SiteDecks.ps1   # re-render the sample deck pictures (Windows, builds the host)
-npm run media                    # the widget pictures, background posters and loops (Windows; loops need ffmpeg)
+npm run media                    # render the site's stale pictures and loops (Windows or Linux; .NET, ffmpeg); see site/README.md "Media"
+npm run media -- --status        # what is missing or stale, nothing rendered
+npm test                         # the media generator's tests
 ```
 
 `urdeck-cli shader init|validate|render` (`docs/backgrounds.md`, "The command line tool") makes, checks and renders a background folder; CI
@@ -48,7 +49,7 @@ runs it on the sixteen built-ins and on an `init` of a copy of one. `render --up
 
 Render without a screen (from `src/UrDeck.Host/bin/Release/net10.0-windows10.0.19041.0/`):
 `UrDeck.Host.exe --snapshot out.snapshot.png --size 1100x3840`. `--snapshot <folder> --frames N [--fps F] [--start <local time>]` writes N
-pictures one frame of time apart (a split-flap clock flips, the weather icons move); the site's loops use it.
+pictures one frame of time apart (a split-flap clock flips, the weather icons move); the old site loops used it.
 
 CI (`.github/workflows/ci.yml`) runs the build, format and tests on `windows-latest` and the Linux tests when a change touches
 anything outside docs, root Markdown, `openspec/`, `site/` and most of `.github/`; OpenSpec validation runs when `openspec/` changed.

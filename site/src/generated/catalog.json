@@ -1,0 +1,1762 @@
+{
+  "backgrounds": [
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Three glowing curtains swaying along the longer side of the display.",
+      "name": "aurora",
+      "pairsWith": [],
+      "parameters": {
+        "intensity": {
+          "description": "Brightness of the curtains; 0 is dark, 1 is the designed look.",
+          "hidden": false,
+          "kind": null,
+          "label": "Intensity",
+          "max": 3,
+          "min": 0,
+          "step": 0.1,
+          "unit": null
+        }
+      },
+      "tags": [
+        "nature",
+        "calm"
+      ],
+      "title": "Aurora"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Topographic contour lines drifting slowly like a survey map.",
+      "name": "contour",
+      "pairsWith": [
+        "carbon",
+        "paper",
+        "blueprint"
+      ],
+      "parameters": {
+        "density": {
+          "description": "Number of contour lines.",
+          "hidden": false,
+          "kind": null,
+          "label": "Density",
+          "max": 40,
+          "min": 4,
+          "step": 1,
+          "unit": null
+        },
+        "lineWidth": {
+          "description": "Thickness of the lines; 1 is the designed look.",
+          "hidden": false,
+          "kind": null,
+          "label": "Line width",
+          "max": 3,
+          "min": 0.3,
+          "step": 0.1,
+          "unit": null
+        },
+        "relief": {
+          "description": "How rugged the terrain is.",
+          "hidden": false,
+          "kind": null,
+          "label": "Relief",
+          "max": 2,
+          "min": 0.3,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "technical",
+        "calm",
+        "business"
+      ],
+      "title": "Contour"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Sparks lifting off a glowing horizon and fading as they rise. Dark at the top where widgets live.",
+      "name": "embers",
+      "pairsWith": [
+        "rigline",
+        "ember"
+      ],
+      "parameters": {
+        "density": {
+          "description": "How many sparks.",
+          "hidden": false,
+          "kind": null,
+          "label": "Density",
+          "max": 2,
+          "min": 0.2,
+          "step": 0.05,
+          "unit": null
+        },
+        "heat": {
+          "description": "Strength of the glow at the bottom.",
+          "hidden": false,
+          "kind": null,
+          "label": "Heat",
+          "max": 2,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "fire",
+        "warm",
+        "gaming"
+      ],
+      "title": "Embers"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Spectrum bars dancing along the bottom edge, with peak caps that fall slowly.",
+      "name": "equalizer",
+      "pairsWith": [
+        "rigline",
+        "ember"
+      ],
+      "parameters": {
+        "bars": {
+          "description": "Number of bars.",
+          "hidden": false,
+          "kind": null,
+          "label": "Bars",
+          "max": 40,
+          "min": 4,
+          "step": 1,
+          "unit": null
+        },
+        "gap": {
+          "description": "Space between bars.",
+          "hidden": false,
+          "kind": null,
+          "label": "Gap",
+          "max": 0.7,
+          "min": 0,
+          "step": 0.01,
+          "unit": null
+        },
+        "reach": {
+          "description": "How tall the bars can grow, as a fraction of the display.",
+          "hidden": false,
+          "kind": null,
+          "label": "Reach",
+          "max": 0.9,
+          "min": 0.2,
+          "step": 0.01,
+          "unit": null
+        }
+      },
+      "tags": [
+        "music",
+        "rgb",
+        "gaming"
+      ],
+      "title": "Equalizer"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "A soft gradient whose colour bands drift slowly.",
+      "name": "gradient",
+      "pairsWith": [],
+      "parameters": {
+        "angle": {
+          "description": "Direction of the gradient, in degrees.",
+          "hidden": false,
+          "kind": null,
+          "label": "Angle",
+          "max": 360,
+          "min": 0,
+          "step": 1,
+          "unit": "°"
+        }
+      },
+      "tags": [
+        "gradient",
+        "calm"
+      ],
+      "title": "Gradient"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "A retro sun setting over a glowing perspective grid that streams toward you.",
+      "name": "horizon",
+      "pairsWith": [
+        "rigline",
+        "prism"
+      ],
+      "parameters": {
+        "gridDensity": {
+          "description": "Number of grid lines; 1 is the designed look.",
+          "hidden": false,
+          "kind": null,
+          "label": "Grid density",
+          "max": 3,
+          "min": 0.4,
+          "step": 0.1,
+          "unit": null
+        },
+        "horizon": {
+          "description": "Height of the horizon line as a fraction of the display, from the top.",
+          "hidden": false,
+          "kind": null,
+          "label": "Horizon",
+          "max": 0.8,
+          "min": 0.3,
+          "step": 0.01,
+          "unit": null
+        },
+        "sunSize": {
+          "description": "Size of the sun; 1 is the designed look.",
+          "hidden": false,
+          "kind": null,
+          "label": "Sun size",
+          "max": 1.8,
+          "min": 0.4,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "retro",
+        "synthwave",
+        "gaming"
+      ],
+      "title": "Horizon"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "A Julia set whose constant circles slowly. The heaviest built-in; lower the scale if it is too much.",
+      "name": "julia",
+      "pairsWith": [],
+      "parameters": {
+        "radius": {
+          "description": "Size of the circle the Julia constant travels on; it changes the set's shape.",
+          "hidden": false,
+          "kind": null,
+          "label": "Radius",
+          "max": 1,
+          "min": 0.5,
+          "step": 0.005,
+          "unit": null
+        },
+        "zoom": {
+          "description": "How far the set is magnified; 1 shows the whole set.",
+          "hidden": false,
+          "kind": null,
+          "label": "Zoom",
+          "max": 4,
+          "min": 0.25,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "fractal"
+      ],
+      "title": "Julia"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Drifting colour clouds with an irregular scatter of twinkling stars, some in loose clusters.",
+      "name": "nebula",
+      "pairsWith": [
+        "carbon",
+        "prism",
+        "obsidian"
+      ],
+      "parameters": {
+        "starClustering": {
+          "description": "0 spreads the stars evenly, 1 gathers them into clumps.",
+          "hidden": false,
+          "kind": null,
+          "label": "Star clustering",
+          "max": 1,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        },
+        "starDensity": {
+          "description": "How many stars.",
+          "hidden": false,
+          "kind": null,
+          "label": "Star density",
+          "max": 3,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        },
+        "twinkle": {
+          "description": "How much the stars flicker.",
+          "hidden": false,
+          "kind": null,
+          "label": "Twinkle",
+          "max": 2,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        },
+        "zoom": {
+          "description": "Scale of the clouds; larger is closer.",
+          "hidden": false,
+          "kind": null,
+          "label": "Zoom",
+          "max": 2.5,
+          "min": 0.5,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "space",
+        "calm"
+      ],
+      "title": "Nebula"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Slow warped fields of colour, drawn with the theme's palette.",
+      "name": "plasma",
+      "pairsWith": [],
+      "parameters": {
+        "angle": {
+          "description": "Direction the colour fields drift, in degrees.",
+          "hidden": false,
+          "kind": null,
+          "label": "Angle",
+          "max": 360,
+          "min": 0,
+          "step": 1,
+          "unit": "°"
+        },
+        "zoom": {
+          "description": "How many colour fields fit on the display; higher is busier.",
+          "hidden": false,
+          "kind": null,
+          "label": "Zoom",
+          "max": 10,
+          "min": 0.5,
+          "step": 0.1,
+          "unit": null
+        }
+      },
+      "tags": [
+        "abstract",
+        "calm"
+      ],
+      "title": "Plasma"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "A drafting grid with a slow scan line and dashed rings that pulse out and vanish.",
+      "name": "plotter",
+      "pairsWith": [
+        "carbon",
+        "paper",
+        "blueprint"
+      ],
+      "parameters": {
+        "cells": {
+          "description": "Number of major grid cells across the width.",
+          "hidden": false,
+          "kind": null,
+          "label": "Cells",
+          "max": 40,
+          "min": 6,
+          "step": 1,
+          "unit": null
+        },
+        "ringRate": {
+          "description": "How far the rings grow; 1 is the designed look.",
+          "hidden": false,
+          "kind": null,
+          "label": "Ring size",
+          "max": 2,
+          "min": 0.3,
+          "step": 0.05,
+          "unit": null
+        },
+        "scan": {
+          "description": "Brightness of the scan line; 0 hides it.",
+          "hidden": false,
+          "kind": null,
+          "label": "Scan line",
+          "max": 2,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "technical",
+        "business",
+        "blueprint"
+      ],
+      "title": "Plotter"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Sunlight caustics rippling across a pool floor.",
+      "name": "ripple",
+      "pairsWith": [
+        "prism",
+        "paper",
+        "pop"
+      ],
+      "parameters": {
+        "ripples": {
+          "description": "How many ripples fit across the display; larger is smaller ripples.",
+          "hidden": false,
+          "kind": null,
+          "label": "Ripple density",
+          "max": 3,
+          "min": 0.4,
+          "step": 0.05,
+          "unit": null
+        },
+        "sharpness": {
+          "description": "Contrast of the bright lines.",
+          "hidden": false,
+          "kind": null,
+          "label": "Sharpness",
+          "max": 2.5,
+          "min": 0.3,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "water",
+        "calm"
+      ],
+      "title": "Ripple"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Flat outlined shapes bobbing and turning slowly. Made for light, bold themes.",
+      "name": "shapes",
+      "pairsWith": [
+        "paper",
+        "pop"
+      ],
+      "parameters": {
+        "count": {
+          "description": "Number of shapes, up to 12.",
+          "hidden": false,
+          "kind": null,
+          "label": "Count",
+          "max": 12,
+          "min": 2,
+          "step": 1,
+          "unit": null
+        },
+        "outline": {
+          "description": "Thickness of the outlines; 0 removes them.",
+          "hidden": false,
+          "kind": null,
+          "label": "Outline",
+          "max": 3,
+          "min": 0,
+          "step": 0.1,
+          "unit": null
+        },
+        "outlineColor": {
+          "description": "Colour of the outlines.",
+          "hidden": false,
+          "kind": "color",
+          "label": "Outline colour",
+          "max": null,
+          "min": null,
+          "step": null,
+          "unit": null
+        }
+      },
+      "tags": [
+        "playful",
+        "light",
+        "flat"
+      ],
+      "title": "Shapes"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Slow shifting rainbow light, the RGB-keyboard look, kept soft so widgets stay readable.",
+      "name": "spectrum",
+      "pairsWith": [
+        "rigline",
+        "prism"
+      ],
+      "parameters": {
+        "hueShift": {
+          "description": "Rotates the colours around the wheel.",
+          "hidden": false,
+          "kind": null,
+          "label": "Hue shift",
+          "max": 1,
+          "min": 0,
+          "step": 0.01,
+          "unit": null
+        },
+        "intensity": {
+          "description": "Brightness.",
+          "hidden": false,
+          "kind": null,
+          "label": "Intensity",
+          "max": 2,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        },
+        "saturation": {
+          "description": "Colour strength.",
+          "hidden": false,
+          "kind": null,
+          "label": "Saturation",
+          "max": 1.5,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        },
+        "vignette": {
+          "description": "How strongly the edges darken.",
+          "hidden": false,
+          "kind": null,
+          "label": "Vignette",
+          "max": 1,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "rgb",
+        "gaming",
+        "calm"
+      ],
+      "title": "Spectrum"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Fine columns of light flowing downward, like data in a server room.",
+      "name": "streams",
+      "pairsWith": [
+        "carbon",
+        "rigline",
+        "blueprint"
+      ],
+      "parameters": {
+        "density": {
+          "description": "Number of streams.",
+          "hidden": false,
+          "kind": null,
+          "label": "Density",
+          "max": 3,
+          "min": 0.3,
+          "step": 0.05,
+          "unit": null
+        },
+        "trail": {
+          "description": "Length of each trail.",
+          "hidden": false,
+          "kind": null,
+          "label": "Trail",
+          "max": 3,
+          "min": 0.3,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "technical",
+        "data",
+        "gaming"
+      ],
+      "title": "Streams"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Light rays spiralling into a glowing core in two layers turning in opposite directions.",
+      "name": "vortex",
+      "pairsWith": [
+        "rigline",
+        "prism",
+        "obsidian"
+      ],
+      "parameters": {
+        "arms": {
+          "description": "Number of spiral arms.",
+          "hidden": false,
+          "kind": null,
+          "label": "Arms",
+          "max": 24,
+          "min": 3,
+          "step": 1,
+          "unit": null
+        },
+        "core": {
+          "description": "Size of the glowing core.",
+          "hidden": false,
+          "kind": null,
+          "label": "Core",
+          "max": 3,
+          "min": 0.3,
+          "step": 0.05,
+          "unit": null
+        },
+        "twist": {
+          "description": "How tightly the arms wind.",
+          "hidden": false,
+          "kind": null,
+          "label": "Twist",
+          "max": 3,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "hypnotic",
+        "space",
+        "gaming"
+      ],
+      "title": "Vortex"
+    },
+    {
+      "author": "Patrick Bigler",
+      "builtIn": true,
+      "description": "Falling through an event horizon at light speed: starlight streaks, pulsing rings of light and a swirling bright core.",
+      "name": "warpgate",
+      "pairsWith": [
+        "carbon",
+        "rigline",
+        "ember",
+        "obsidian"
+      ],
+      "parameters": {
+        "coreSize": {
+          "description": "Size of the glowing core.",
+          "hidden": false,
+          "kind": null,
+          "label": "Core size",
+          "max": 2.5,
+          "min": 0.4,
+          "step": 0.05,
+          "unit": null
+        },
+        "ringRate": {
+          "description": "How far the rings of light reach.",
+          "hidden": false,
+          "kind": null,
+          "label": "Ring size",
+          "max": 2,
+          "min": 0.3,
+          "step": 0.05,
+          "unit": null
+        },
+        "streaks": {
+          "description": "How many starlight streaks.",
+          "hidden": false,
+          "kind": null,
+          "label": "Streaks",
+          "max": 2,
+          "min": 0.2,
+          "step": 0.05,
+          "unit": null
+        },
+        "swirl": {
+          "description": "How tightly the tunnel walls twist.",
+          "hidden": false,
+          "kind": null,
+          "label": "Swirl",
+          "max": 3,
+          "min": 0,
+          "step": 0.05,
+          "unit": null
+        }
+      },
+      "tags": [
+        "space",
+        "sci-fi",
+        "gaming"
+      ],
+      "title": "Warp Gate"
+    }
+  ],
+  "findings": [
+    {
+      "code": "SHADER001",
+      "severity": "error, stops",
+      "summary": "`manifest.json` is missing: add the file (see the minimal manifest)"
+    },
+    {
+      "code": "SHADER002",
+      "severity": "error, stops",
+      "summary": "not valid JSON, or the top level is not an object: fix the syntax at the position given"
+    },
+    {
+      "code": "SHADER003",
+      "severity": "error, stops",
+      "summary": "`manifest` is missing, not an integer, or not a version this product reads: use `\"manifest\": 1`"
+    },
+    {
+      "code": "SHADER004",
+      "severity": "warning",
+      "summary": "an unknown key in the manifest, a parameter or a sample: fix the spelling or remove it"
+    },
+    {
+      "code": "SHADER005",
+      "severity": "warning",
+      "summary": "a value has the wrong JSON type (a number where text is expected): fix the value"
+    },
+    {
+      "code": "SHADER010",
+      "severity": "error, stops",
+      "summary": "the entry file does not exist: create it, or fix `entry`"
+    },
+    {
+      "code": "SHADER011",
+      "severity": "error, stops",
+      "summary": "`entry` is absolute or leaves the folder: name a file inside it"
+    },
+    {
+      "code": "SHADER012",
+      "severity": "error",
+      "summary": "the folder's name is not a valid background name (letters, digits, `-`, `_`): rename the folder. The deck could never select it, so only `urdeck-cli` reports it"
+    },
+    {
+      "code": "SHADER020",
+      "severity": "error, stops",
+      "summary": "the shader does not compile: the compiler's message follows, with its line number"
+    },
+    {
+      "code": "SHADER021",
+      "severity": "error, stops",
+      "summary": "the shader declares a `uniform shader`: the host has nothing to give it; remove it"
+    },
+    {
+      "code": "SHADER022",
+      "severity": "warning",
+      "summary": "a uniform has a type that cannot be set (`int`, a matrix): it stays 0; use `float`"
+    },
+    {
+      "code": "SHADER023",
+      "severity": "warning",
+      "summary": "a `// default:` cannot be read: give numbers matching the type, or a `#RRGGBB` colour"
+    },
+    {
+      "code": "SHADER030",
+      "severity": "warning",
+      "summary": "the manifest annotates a parameter the shader does not declare: fix the name"
+    },
+    {
+      "code": "SHADER031",
+      "severity": "warning",
+      "summary": "the shader declares a parameter the manifest does not annotate: add it under `parameters`"
+    },
+    {
+      "code": "SHADER032",
+      "severity": "error",
+      "summary": "the manifest annotates a name that belongs to the product (`speed`, `iTime`, ...): remove it"
+    },
+    {
+      "code": "SHADER033",
+      "severity": "warning",
+      "summary": "`kind` `color` on a parameter without three or four components: use `float3` or `float4`"
+    },
+    {
+      "code": "SHADER034",
+      "severity": "warning",
+      "summary": "an unknown `kind`: use `number` or `color`"
+    },
+    {
+      "code": "SHADER035",
+      "severity": "warning",
+      "summary": "`min` is above `max`, or the shader's default is outside the range: fix the range or the default"
+    },
+    {
+      "code": "SHADER040",
+      "severity": "warning",
+      "summary": "no `title`"
+    },
+    {
+      "code": "SHADER041",
+      "severity": "warning",
+      "summary": "no `description`"
+    },
+    {
+      "code": "SHADER042",
+      "severity": "warning",
+      "summary": "a parameter that is not `hidden` has no `description`"
+    },
+    {
+      "code": "SHADER050",
+      "severity": "warning",
+      "summary": "no `samples`: render a picture and list it"
+    },
+    {
+      "code": "SHADER051",
+      "severity": "error",
+      "summary": "a sample file does not exist: create it or fix `file`"
+    },
+    {
+      "code": "SHADER052",
+      "severity": "error",
+      "summary": "a sample `file` is absolute or leaves the folder: name a file inside it"
+    },
+    {
+      "code": "SHADER053",
+      "severity": "warning",
+      "summary": "an unknown sample `type`: use `image` (or `video`)"
+    },
+    {
+      "code": "SHADER060",
+      "severity": "info",
+      "summary": "the shader says `layout(color)` and the manifest says `kind` `number`: the manifest wins"
+    },
+    {
+      "code": "SHADER070",
+      "severity": "warning",
+      "summary": "only `urdeck-cli shader render` reports it: the picture is still the theme's background colour everywhere, so the shader drew nothing at that time. Check `--time` and the alpha of the returned colour; a shader can be legitimately blank at one instant"
+    },
+    {
+      "code": "THEME001",
+      "severity": "error",
+      "summary": "`theme.json` is missing, is not valid JSON or holds no object: add it, or fix the syntax at the position given. Nothing else is checked"
+    },
+    {
+      "code": "THEME002",
+      "severity": "warning",
+      "summary": "a key the deck does not read (a typo, or a key of a later format): fix the name, the message suggests the nearest key"
+    },
+    {
+      "code": "THEME003",
+      "severity": "warning, error",
+      "summary": "a value of the wrong JSON type (also logged). An error for a value of format 1 (`card.gap`, `colors`...), where the deck skips the whole theme"
+    },
+    {
+      "code": "THEME004",
+      "severity": "warning",
+      "summary": "a number outside its range, which the message gives (also logged): the deck uses the default"
+    },
+    {
+      "code": "THEME005",
+      "severity": "warning",
+      "summary": "a value that is not one of the names allowed, which the message lists (also logged; the case does not matter)"
+    },
+    {
+      "code": "THEME006",
+      "severity": "warning",
+      "summary": "a colour that is not `#RRGGBB` or `#AARRGGBB` (also logged)"
+    },
+    {
+      "code": "THEME007",
+      "severity": "warning",
+      "summary": "a list outside its length limits or with an invalid element (also logged): the deck drops the list whole"
+    },
+    {
+      "code": "THEME008",
+      "severity": "warning",
+      "summary": "a group that needs a member it does not have, such as a gradient without `colors` (also logged): the group is ignored"
+    },
+    {
+      "code": "THEME010",
+      "severity": "warning",
+      "summary": "`format` is newer than the deck reads (also logged): the deck ignores what it does not know"
+    },
+    {
+      "code": "THEME020",
+      "severity": "error",
+      "summary": "a font file is missing from the theme, is not a `.ttf`, `.otf` or `.ttc`, or its path leaves the theme's folder (also logged when it leaves the folder or cannot be loaded): add the file, fix the name, keep it inside the folder"
+    },
+    {
+      "code": "THEME021",
+      "severity": "warning",
+      "summary": "a font file is over 3 MB (subset it) or has no licence file beside it (`*-OFL.txt`, `LICENSE*` or `*-LICENSE*`): add the licence so the theme can be shared"
+    },
+    {
+      "code": "THEME022",
+      "severity": "warning",
+      "summary": "a font named by family, which is used only where it is installed: put a `.ttf` or `.otf` in the folder and name the file"
+    },
+    {
+      "code": "THEME023",
+      "severity": "warning",
+      "summary": "a weight outside a variable font's range, or one a static font does not have, for a role (also logged): choose a weight the file has"
+    },
+    {
+      "code": "THEME040",
+      "severity": "warning",
+      "summary": "`background.default.name` is not a background that exists: use a built-in one, or point `--background-dir` at yours"
+    },
+    {
+      "code": "THEME041",
+      "severity": "warning",
+      "summary": "`meta.pairsWith.backgrounds` names a background that does not exist: fix the name or remove it"
+    },
+    {
+      "code": "THEME042",
+      "severity": "warning",
+      "summary": "the default background is not in the theme's own `pairsWith` list: add it"
+    },
+    {
+      "code": "THEME043",
+      "severity": "warning",
+      "summary": "the still background picture is missing, leaves the folder or is over 8 MB"
+    },
+    {
+      "code": "THEME044",
+      "severity": "warning",
+      "summary": "`icons.set` names an icon set that exists neither in the theme's `icons/` folder nor among the built-in sets (also logged): fix the name"
+    },
+    {
+      "code": "THEME050",
+      "severity": "warning",
+      "summary": "a border style, gradient or animation with `card.borderWidth` 0 (also logged): give the border a width"
+    },
+    {
+      "code": "THEME051",
+      "severity": "warning",
+      "summary": "`card.borderAnimate` `spin` without a conic `card.borderGradient` (also logged): the deck switches the animation off"
+    },
+    {
+      "code": "THEME052",
+      "severity": "warning",
+      "summary": "a pattern whose marks are closer than three pixels at the panel width (also logged): raise `spacing`"
+    },
+    {
+      "code": "THEME053",
+      "severity": "warning",
+      "summary": "outside corner marks reaching past `card.gap`, thickness included (also logged): move them in or widen the gap"
+    },
+    {
+      "code": "THEME054",
+      "severity": "warning",
+      "summary": "a shadow or glow whose reach is more than the gap over a translucent fill (logged as information, the deck limits it): reduce the blur or offset"
+    },
+    {
+      "code": "THEME055",
+      "severity": "warning",
+      "summary": "a line (border, highlight, accent strip, corner mark) that resolves under one pixel, which the deck draws 1 px wide (also logged)"
+    },
+    {
+      "code": "THEME056",
+      "severity": "info",
+      "summary": "`card.compact.shape` `circle` on a card that is not square, which is a capsule (also logged)"
+    },
+    {
+      "code": "THEME057",
+      "severity": "warning",
+      "summary": "`card.borderAnimate` on a `dashed` `card.borderStyle` (also logged): the border is drawn still, because the moving ring is stretched round the card and a dash pattern fitted to each side does not survive that"
+    },
+    {
+      "code": "THEME060",
+      "severity": "warning",
+      "summary": "the text colour on the card fill, or on its gradient's darkest or lightest stop, is under 4.5:1: change the colours; a translucent fill is composited over `colors.background`, and the message says so because the page behind may be a moving background"
+    },
+    {
+      "code": "THEME061",
+      "severity": "warning",
+      "summary": "the text colour on a card tint is under 4.5:1 (a tinted card keeps `colors.text`): change the tint at the position the message names"
+    },
+    {
+      "code": "THEME062",
+      "severity": "info",
+      "summary": "the muted text colour on the card fill is under 3:1"
+    },
+    {
+      "code": "THEME070",
+      "severity": "error",
+      "summary": "an icon set's `manifest.json` is missing, is not valid JSON, has a `version` other than 1 or has no `keys` (also logged): add or fix it"
+    },
+    {
+      "code": "THEME071",
+      "severity": "error",
+      "summary": "a manifest entry names a file that is missing, does not end in `.svg` or leaves the set's folder (also logged)"
+    },
+    {
+      "code": "THEME072",
+      "severity": "error",
+      "summary": "an icon file breaks the file rules: over 4 KB, no `viewBox` of `0 0 24 24`, an element or attribute that is not allowed, a `transform`, not valid XML (also logged)"
+    },
+    {
+      "code": "THEME073",
+      "severity": "warning",
+      "summary": "a manifest key is not one of the product's icon keys, so no widget asks for it"
+    },
+    {
+      "code": "THEME074",
+      "severity": "warning",
+      "summary": "the manifest's `license` or `source` is empty, or the set's folder has no licence file"
+    },
+    {
+      "code": "THEME075",
+      "severity": "warning",
+      "summary": "an `.svg` file in the set's folder that no manifest entry names (the tool alone reports it)"
+    },
+    {
+      "code": "THEME076",
+      "severity": "info",
+      "summary": "the set has no icon for some of the product's keys; the message names them and says `outline` answers them"
+    },
+    {
+      "code": "THEME080",
+      "severity": "warning",
+      "summary": "`meta` lacks a `name`, a `description` or a `mode`: add them so an editor can list the theme"
+    },
+    {
+      "code": "THEME090",
+      "severity": "info",
+      "summary": "more than one continuous animation is on (also logged): each costs CPU while it runs"
+    }
+  ],
+  "pairings": [
+    {
+      "backgrounds": [
+        {
+          "mutual": true,
+          "name": "plotter"
+        },
+        {
+          "mutual": true,
+          "name": "contour"
+        },
+        {
+          "mutual": true,
+          "name": "streams"
+        }
+      ],
+      "theme": "blueprint"
+    },
+    {
+      "backgrounds": [
+        {
+          "mutual": true,
+          "name": "contour"
+        },
+        {
+          "mutual": true,
+          "name": "streams"
+        },
+        {
+          "mutual": true,
+          "name": "plotter"
+        },
+        {
+          "mutual": true,
+          "name": "nebula"
+        },
+        {
+          "mutual": true,
+          "name": "warpgate"
+        }
+      ],
+      "theme": "carbon"
+    },
+    {
+      "backgrounds": [],
+      "theme": "default-dark"
+    },
+    {
+      "backgrounds": [],
+      "theme": "default-light"
+    },
+    {
+      "backgrounds": [
+        {
+          "mutual": true,
+          "name": "embers"
+        },
+        {
+          "mutual": true,
+          "name": "warpgate"
+        },
+        {
+          "mutual": true,
+          "name": "equalizer"
+        }
+      ],
+      "theme": "ember"
+    },
+    {
+      "backgrounds": [],
+      "theme": "glass"
+    },
+    {
+      "backgrounds": [
+        {
+          "mutual": true,
+          "name": "nebula"
+        },
+        {
+          "mutual": true,
+          "name": "vortex"
+        },
+        {
+          "mutual": true,
+          "name": "warpgate"
+        }
+      ],
+      "theme": "obsidian"
+    },
+    {
+      "backgrounds": [
+        {
+          "mutual": true,
+          "name": "contour"
+        },
+        {
+          "mutual": true,
+          "name": "ripple"
+        },
+        {
+          "mutual": true,
+          "name": "plotter"
+        },
+        {
+          "mutual": true,
+          "name": "shapes"
+        }
+      ],
+      "theme": "paper"
+    },
+    {
+      "backgrounds": [
+        {
+          "mutual": true,
+          "name": "shapes"
+        },
+        {
+          "mutual": true,
+          "name": "ripple"
+        }
+      ],
+      "theme": "pop"
+    },
+    {
+      "backgrounds": [
+        {
+          "mutual": true,
+          "name": "nebula"
+        },
+        {
+          "mutual": true,
+          "name": "vortex"
+        },
+        {
+          "mutual": true,
+          "name": "horizon"
+        },
+        {
+          "mutual": true,
+          "name": "spectrum"
+        },
+        {
+          "mutual": true,
+          "name": "ripple"
+        }
+      ],
+      "theme": "prism"
+    },
+    {
+      "backgrounds": [
+        {
+          "mutual": true,
+          "name": "horizon"
+        },
+        {
+          "mutual": true,
+          "name": "spectrum"
+        },
+        {
+          "mutual": true,
+          "name": "equalizer"
+        },
+        {
+          "mutual": true,
+          "name": "streams"
+        },
+        {
+          "mutual": true,
+          "name": "warpgate"
+        },
+        {
+          "mutual": true,
+          "name": "vortex"
+        },
+        {
+          "mutual": true,
+          "name": "embers"
+        }
+      ],
+      "theme": "rigline"
+    }
+  ],
+  "providers": [
+    {
+      "id": "system",
+      "name": "System",
+      "sample": true
+    },
+    {
+      "id": "weather",
+      "name": "Weather",
+      "sample": true
+    }
+  ],
+  "themes": [
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": "plotter",
+      "description": "A technical drawing come alive. Cyanotype ground with a drafting grid, dashed outlines, yellow corner marks and dimension lines. Gauges are protractor dials with one needle.",
+      "displayName": "Blueprint",
+      "mode": "dark",
+      "name": "blueprint",
+      "pairsWith": [
+        "plotter",
+        "contour",
+        "streams"
+      ],
+      "swatch": {
+        "accent": "#ffd34d",
+        "background": "#0c2d52",
+        "cardFill": "#cc0c2d52",
+        "text": "#dcecff"
+      },
+      "tags": [
+        "technical",
+        "engineering",
+        "dark"
+      ]
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": "contour",
+      "description": "IT and business. Near-black, hairline cards with registration corners, mono numerals, segmented bars, one phosphor accent, with the status word turning amber and red under load.",
+      "displayName": "Carbon",
+      "mode": "dark",
+      "name": "carbon",
+      "pairsWith": [
+        "contour",
+        "streams",
+        "plotter",
+        "nebula",
+        "warpgate"
+      ],
+      "swatch": {
+        "accent": "#4ff0c8",
+        "background": "#090b0e",
+        "cardFill": "#0f1318",
+        "text": "#e6e9ee"
+      },
+      "tags": [
+        "technical",
+        "business",
+        "dark"
+      ]
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": null,
+      "description": "The standard UrDeck look: deep navy cards with a blue accent.",
+      "displayName": "Default Dark",
+      "mode": "dark",
+      "name": "default-dark",
+      "pairsWith": [],
+      "swatch": {
+        "accent": "#4a9eff",
+        "background": "#0f0f1a",
+        "cardFill": "#b31a1a2e",
+        "text": "#ffffff"
+      },
+      "tags": []
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": null,
+      "description": "The standard UrDeck look on a light ground.",
+      "displayName": "Default Light",
+      "mode": "light",
+      "name": "default-light",
+      "pairsWith": [],
+      "swatch": {
+        "accent": "#1f6feb",
+        "background": "#e9ebf2",
+        "cardFill": "#b3ffffff",
+        "text": "#14141f"
+      },
+      "tags": []
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": "embers",
+      "description": "An instrument cluster. Chamfered cards, tachometer gauges with a red-line zone that lights when load spikes, condensed italic numerals glowing amber.",
+      "displayName": "Ember",
+      "mode": "dark",
+      "name": "ember",
+      "pairsWith": [
+        "embers",
+        "warpgate",
+        "equalizer"
+      ],
+      "swatch": {
+        "accent": "#ffb347",
+        "background": "#0b0806",
+        "cardFill": "#140d09",
+        "text": "#fbeede"
+      },
+      "tags": [
+        "gaming",
+        "racing",
+        "dark"
+      ]
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": null,
+      "description": "Translucent cards over a deep blue-violet ground, made for a moving background.",
+      "displayName": "Glass",
+      "mode": "dark",
+      "name": "glass",
+      "pairsWith": [],
+      "swatch": {
+        "accent": "#8ab8ff",
+        "background": "#1b2760",
+        "cardFill": "#38ffffff",
+        "text": "#ffffff"
+      },
+      "tags": []
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": "nebula",
+      "description": "Executive calm. Warm black, champagne hairlines, high-contrast Didone numerals, gauges reduced to a thin ring with one jewel marker, circular dock buttons.",
+      "displayName": "Obsidian",
+      "mode": "dark",
+      "name": "obsidian",
+      "pairsWith": [
+        "nebula",
+        "vortex",
+        "warpgate"
+      ],
+      "swatch": {
+        "accent": "#d9b86c",
+        "background": "#0a0908",
+        "cardFill": "#15120e",
+        "text": "#efe6d3"
+      },
+      "tags": [
+        "executive",
+        "calm",
+        "dark"
+      ]
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": "contour",
+      "description": "The daylight option. Warm off-white, soft shadows instead of borders, one vermilion accent, tabular figures. Reads like a well-set report.",
+      "displayName": "Paper",
+      "mode": "light",
+      "name": "paper",
+      "pairsWith": [
+        "contour",
+        "ripple",
+        "plotter",
+        "shapes"
+      ],
+      "swatch": {
+        "accent": "#e5502b",
+        "background": "#e9e7e0",
+        "cardFill": "#f8f7f3",
+        "text": "#17181c"
+      },
+      "tags": [
+        "light",
+        "business",
+        "calm"
+      ]
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": "shapes",
+      "description": "The loud one. Flat saturated colour per card, thick black outlines, hard offset shadows, huge heavy numerals. Photographs well for the site.",
+      "displayName": "Pop",
+      "mode": "light",
+      "name": "pop",
+      "pairsWith": [
+        "shapes",
+        "ripple"
+      ],
+      "swatch": {
+        "accent": "#111111",
+        "background": "#f6f0e0",
+        "cardFill": "#ffd84a",
+        "text": "#111111"
+      },
+      "tags": [
+        "playful",
+        "light",
+        "bold"
+      ]
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": "nebula",
+      "description": "Glass, grown up. Thick frost, a specular top edge and inner rim light make cards read as cut glass. Light, wide numerals. The safe showpiece over any moving background.",
+      "displayName": "Prism",
+      "mode": "dark",
+      "name": "prism",
+      "pairsWith": [
+        "nebula",
+        "vortex",
+        "horizon",
+        "spectrum",
+        "ripple"
+      ],
+      "swatch": {
+        "accent": "#ffffff",
+        "background": "#10163a",
+        "cardFill": "#26ffffff",
+        "text": "#ffffff"
+      },
+      "tags": [
+        "glass",
+        "calm",
+        "dark"
+      ]
+    },
+    {
+      "author": null,
+      "builtIn": true,
+      "defaultBackground": "horizon",
+      "description": "The RGB crowd. A slow spectrum travels round every card edge, numbers glow, gauges are gradient arcs whose hue follows load, tiles light a strip underneath like case fans.",
+      "displayName": "Rigline",
+      "mode": "dark",
+      "name": "rigline",
+      "pairsWith": [
+        "horizon",
+        "spectrum",
+        "equalizer",
+        "streams",
+        "warpgate",
+        "vortex",
+        "embers"
+      ],
+      "swatch": {
+        "accent": "#19e6ff",
+        "background": "#07060d",
+        "cardFill": "#141026",
+        "text": "#f4f2ff"
+      },
+      "tags": [
+        "gaming",
+        "rgb",
+        "dark"
+      ]
+    }
+  ],
+  "version": 1,
+  "widgets": [
+    {
+      "category": "System",
+      "defaultConfig": {
+        "blinkSeparator": false,
+        "fontSize": 1,
+        "format": "24h",
+        "showDate": true,
+        "showSeconds": false,
+        "showWeek": false,
+        "style": "simple",
+        "typeId": "urdeck.widgets.clock"
+      },
+      "description": "Display current time",
+      "name": "Clock",
+      "settings": [
+        {
+          "default": false,
+          "name": "blinkSeparator",
+          "type": "onOff"
+        },
+        {
+          "default": 1,
+          "name": "fontSize",
+          "type": "number"
+        },
+        {
+          "default": "24h",
+          "name": "format",
+          "type": "values",
+          "values": [
+            "24h",
+            "12h"
+          ]
+        },
+        {
+          "default": null,
+          "name": "header",
+          "type": "values",
+          "values": [
+            "date",
+            "label",
+            "none"
+          ]
+        },
+        {
+          "default": true,
+          "name": "showDate",
+          "type": "onOff"
+        },
+        {
+          "default": false,
+          "name": "showSeconds",
+          "type": "onOff"
+        },
+        {
+          "default": false,
+          "name": "showWeek",
+          "type": "onOff"
+        },
+        {
+          "default": "simple",
+          "name": "style",
+          "type": "values",
+          "values": [
+            "simple",
+            "flap"
+          ]
+        },
+        {
+          "default": null,
+          "name": "subtitle",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "textColor",
+          "type": "text"
+        }
+      ],
+      "sizes": [
+        {
+          "height": 2,
+          "preview": true,
+          "width": 4
+        },
+        {
+          "height": 1,
+          "preview": true,
+          "width": 4
+        },
+        {
+          "height": 1,
+          "preview": true,
+          "width": 2
+        },
+        {
+          "height": 1,
+          "preview": true,
+          "width": 1
+        }
+      ],
+      "typeId": "urdeck.widgets.clock"
+    },
+    {
+      "category": "Launch",
+      "defaultConfig": {
+        "label": "UrDeck",
+        "target": "https://urdeck.app",
+        "typeId": "urdeck.widgets.shortcut"
+      },
+      "description": "Opens an application, a file, a folder or a web address on tap",
+      "name": "Shortcut",
+      "settings": [
+        {
+          "default": null,
+          "name": "arguments",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "icon",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "label",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "target",
+          "type": "text"
+        }
+      ],
+      "sizes": [
+        {
+          "height": 1,
+          "preview": true,
+          "width": 1
+        }
+      ],
+      "typeId": "urdeck.widgets.shortcut"
+    },
+    {
+      "category": "System",
+      "defaultConfig": {
+        "slots": [
+          {
+            "reading": "system:cpu/load"
+          },
+          {
+            "reading": "system:gpu/load"
+          },
+          {
+            "label": "RAM",
+            "reading": "system:memory/load"
+          },
+          {
+            "reading": "system:gpu/temperature"
+          }
+        ],
+        "typeId": "urdeck.widgets.stats"
+      },
+      "description": "Shows readings from any data provider",
+      "name": "Stats",
+      "settings": [
+        {
+          "default": [],
+          "name": "slots",
+          "type": "list"
+        }
+      ],
+      "sizes": [
+        {
+          "height": 1,
+          "preview": true,
+          "width": 1
+        },
+        {
+          "height": 2,
+          "preview": true,
+          "width": 2
+        },
+        {
+          "height": 2,
+          "preview": true,
+          "width": 4
+        },
+        {
+          "height": 4,
+          "preview": true,
+          "width": 4
+        }
+      ],
+      "typeId": "urdeck.widgets.stats"
+    },
+    {
+      "category": "Weather",
+      "defaultConfig": {
+        "location": "Portland, OR",
+        "typeId": "urdeck.widgets.weather"
+      },
+      "description": "Shows the weather of a place",
+      "name": "Weather",
+      "settings": [
+        {
+          "default": null,
+          "name": "animateForecast",
+          "type": "onOff"
+        },
+        {
+          "default": null,
+          "max": 7,
+          "min": 1,
+          "name": "days",
+          "type": "wholeNumber"
+        },
+        {
+          "default": null,
+          "name": "label",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "latitude",
+          "type": "number"
+        },
+        {
+          "default": null,
+          "name": "location",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "longitude",
+          "type": "number"
+        },
+        {
+          "default": null,
+          "name": "motion",
+          "type": "values",
+          "values": [
+            "periodic",
+            "full",
+            "off"
+          ]
+        },
+        {
+          "default": null,
+          "name": "periodSeconds",
+          "type": "number"
+        },
+        {
+          "default": null,
+          "name": "unit",
+          "type": "values",
+          "values": [
+            "celsius",
+            "fahrenheit"
+          ]
+        }
+      ],
+      "sizes": [
+        {
+          "height": 2,
+          "preview": true,
+          "width": 4
+        },
+        {
+          "height": 4,
+          "preview": true,
+          "width": 4
+        }
+      ],
+      "typeId": "urdeck.widgets.weather"
+    }
+  ]
+}
