@@ -3,7 +3,6 @@
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 using SkiaSharp;
 using UrDeck.Engine.Config;
 
@@ -84,7 +83,8 @@ public static partial class ThemeLint
             found.Add(Warning(ThemeCodes.UnknownKey, $"{unknown.Path} is not a key the deck reads and it is ignored; {advice}", file, unknown.Path));
         }
 
-        // A value of the wrong kind in a format 1 group fails the deck's whole read, so the theme is skipped.
+        // A value of the wrong kind is removed with its own warning (THEME003) among the engine's findings below; a file the
+        // reader still cannot use is skipped whole by the deck.
         ThemeDefinition user;
         try
         {
@@ -92,9 +92,7 @@ public static partial class ThemeLint
         }
         catch (JsonException ex)
         {
-            string key = ex.Path is { } path ? path.TrimStart('$', '.') : "";
-            found.Add(Error(ThemeCodes.WrongType,
-                $"{(key.Length == 0 ? "a value" : key)} must be {Expected(ex)}; the deck skips the whole theme while a value of this key has the wrong kind.", file, key.Length == 0 ? null : key));
+            found.Add(Error(ThemeCodes.FileUnusable, $"{file} could not be read: {Reason(ex)}{Where(ex)}; fix the value there.", file, null));
             return found;
         }
 
@@ -162,7 +160,6 @@ public static partial class ThemeLint
         string message = finding.Form == ThemeLogForm.Space ? "the theme " + finding.Message : finding.Message;
         string? fix = finding.Code switch
         {
-            ThemeCodes.NewerFormat => "Set format to a number up to 2, or update UrDeck.",
             ThemeCodes.FontFile when message.Contains("leaves the theme folder", StringComparison.Ordinal) =>
                 "Put the font file in the theme's folder and name it without a path.",
             ThemeCodes.BorderWithoutWidth => "Give card.borderWidth a value above 0, or remove the style.",
@@ -194,23 +191,6 @@ public static partial class ThemeLint
 
     private static string Where(JsonException ex) =>
         ex.LineNumber is { } line ? $" (the reader stopped at line {line + 1}, position {(ex.BytePositionInLine ?? 0) + 1})" : "";
-
-    /// <summary>What the value of a failed read should have been, from the type the serializer named.</summary>
-    private static string Expected(JsonException ex) =>
-        ConvertedTo().Match(ex.Message) is { Success: true } match
-            ? match.Groups[1].Value switch
-            {
-                var t when t.Contains("Double", StringComparison.Ordinal) => "a number",
-                var t when t.Contains("Int32", StringComparison.Ordinal) => "a whole number",
-                var t when t.Contains("String", StringComparison.Ordinal) => "text",
-                var t when t.Contains("Boolean", StringComparison.Ordinal) => "true or false",
-                var t when t.Contains("List", StringComparison.Ordinal) => "a list",
-                _ => "a value of another kind",
-            }
-            : "a value of another kind";
-
-    [GeneratedRegex(@"converted to ([\w.`\[\]<>,]+)")]
-    private static partial Regex ConvertedTo();
 
     /// <summary>Colours as the deck parses them; the sanitised definition holds only valid ones.</summary>
     internal static SKColor Parse(string color) => SKColor.Parse(color);

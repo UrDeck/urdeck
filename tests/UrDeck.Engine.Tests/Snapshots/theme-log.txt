@@ -20,7 +20,6 @@ WARN Theme 'palette-long': colors.backgroundPalette must be one to four colours 
 WARN Theme 'number': card.radius 7 is outside 0..1; using the default.
 WARN Theme 'number': card.shadow.blur 5 is outside 0..1; using the default.
 == failing integer
-WARN Theme 'integer': format 0 is outside 1..2147483647; using the default.
 WARN Theme 'integer': gauge.ticks.count 1 is outside 2..60; using the default.
 == failing angle
 WARN Theme 'angle': card.borderGradient.angle 900 is outside -360..360; using the default.
@@ -44,9 +43,8 @@ WARN Theme 'name-list': card.cutCorners has 'up', not one of 'tl', 'tr', 'br', '
 == failing wrong-kind
 WARN Theme 'wrong-kind': card.shadow.blur "big" must be a number; using the default.
 WARN Theme 'wrong-kind': card.cutCorners "tl" must be a list; using the default.
-== failing wrong-kind-format1
-WARN Theme 'wrong-kind-format1' could not be read from <tmp>/themes/wrong-kind-format1/theme.json and is skipped: The JSON value could not be converted to System.Nullable`1[System.Double]. Path: $.card.gap | LineNumber: 2 | BytePositionInLine: 17.
-WARN Theme 'wrong-kind-format1' was not found; using 'default-dark'.
+== failing wrong-kind-original
+WARN Theme 'wrong-kind-original': card.gap "wide" must be a number; using the default.
 == failing missing-member
 WARN Theme 'missing-member': card.fillGradient needs 'colors'; ignoring it.
 WARN Theme 'missing-member': card.borderGradient needs 'colors'; ignoring it.
@@ -58,8 +56,6 @@ WARN Theme 'icon-set-unknown': icons.set 'nosuch' is not an icon set that exists
 WARN Theme 'stroke': stroke.thickness 4 is outside 0.001..1; using the default.
 WARN Theme 'stroke': stroke.cap 'flat' must be 'round' or 'square'; using the default.
 WARN Theme 'stroke': gauge.style 'dial' must be 'ring', 'bar', 'verticalBar', 'meter', 'tach', 'marker' or 'thickbar'; using the default.
-== failing newer-format
-WARN Theme 'newer-format' declares format 9; this host supports 2; values it does not know are ignored.
 == failing rule-border-none
 WARN Theme 'rule-border-none': card.borderStyle, card.borderGradient has no effect with card.borderWidth 0.
 == failing rule-spin

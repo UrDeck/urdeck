@@ -65,7 +65,7 @@ public sealed class GoldenTests
         GoldenImage.Compare(bitmap, "default-dark-dock");
     }
 
-    /// <summary>Carbon, Paper, Prism, Obsidian, Ember, Blueprint, Pop and Rigline, the built-in format 2 themes, in their own fonts.</summary>
+    /// <summary>Carbon, Paper, Prism, Obsidian, Ember, Blueprint, Pop and Rigline, the built-in themes, in their own fonts.</summary>
     [WindowsGlyphTheory]
     [InlineData("carbon")]
     [InlineData("paper")]

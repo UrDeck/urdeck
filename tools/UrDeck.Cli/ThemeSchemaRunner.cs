@@ -9,7 +9,7 @@ internal sealed record ThemeSchemaOptions(string? Output);
 
 /// <summary>
 /// <c>theme schema</c>: prints the JSON Schema of the theme format, the file the product publishes as
-/// <c>docs/schemas/v2/theme.json</c>, which the tool carries as a linked resource.
+/// <c>docs/schemas/v1/theme.json</c>, which the tool carries as a linked resource.
 /// </summary>
 internal static class ThemeSchemaRunner
 {

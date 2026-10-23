@@ -54,7 +54,6 @@ public sealed class BuiltInRiglineTests : IDisposable
         using var theme = ThemeResolver.Resolve(loaded, 275);
 
         Assert.Equal("rigline", loaded.Name);
-        Assert.Equal(2, loaded.Definition.Format);
         foreach (var role in Enum.GetValues<TextRole>())
             _ = theme.GetTypeface(role);
         Assert.Empty(Log);

@@ -12,7 +12,7 @@ using Xunit;
 namespace UrDeck.Engine.Tests;
 
 /// <summary>
-/// The card chrome of format 2: the resolved style, the order, the shape, the fill and the border (card-chrome-back); the
+/// The card chrome: the resolved style, the order, the shape, the fill and the border (card-chrome-back); the
 /// highlight, sheen, accent strip and corner marks on the card (card-chrome-front).
 /// </summary>
 public sealed class CardChromeTests
@@ -126,7 +126,7 @@ public sealed class CardChromeTests
     [InlineData(160f, 2f)]
     [InlineData(60f, 1f)]
     [InlineData(110f, 1f)]
-    public void AFormat2BorderOfTwoPixelsOrLess_IsWhole(float cell, float expected)
+    public void ABorderOfTwoPixelsOrLess_IsWhole(float cell, float expected)
     {
         var loaded = With(new ThemeCardDefinition { BorderWidth = 0.01, Shape = "round" });
         using var style = ResolvedCardStyle.Resolve(loaded, cell);

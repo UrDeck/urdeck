@@ -39,8 +39,8 @@ public sealed class BackgroundPlanTests : IDisposable
             parts.Add(StillJson);
         if (extra.Length > 0)
             parts.Add(extra);
-        string background = parts.Count == 0 ? "" : $$""", "background": { {{string.Join(",", parts)}} }""";
-        return _fixture.WriteTheme("t" + Guid.NewGuid().ToString("N")[..6], $$"""{ "format": 2 {{background}} }""");
+        string background = parts.Count == 0 ? "" : $"\"background\": {{ {string.Join(",", parts)} }}";
+        return _fixture.WriteTheme("t" + Guid.NewGuid().ToString("N")[..6], "{ " + background + " }");
     }
 
     private static string Show(BackgroundPlan plan) =>
@@ -200,7 +200,7 @@ public sealed class BackgroundPlanTests : IDisposable
     [Fact]
     public void A_default_that_does_not_compile_falls_to_the_still_background_with_one_warning()
     {
-        var theme = _fixture.WriteTheme("fall", """{ "format": 2, "background": { "default": { "name": "broken" }, "static": { "color": "#102030" } } }""");
+        var theme = _fixture.WriteTheme("fall", """{ "background": { "default": { "name": "broken" }, "static": { "color": "#102030" } } }""");
         var plan = BackgroundPlan.Resolve(BackgroundSettings.None, theme);
 
         using var background = plan.Build(_fixture.Store, _fixture.Root);
@@ -225,7 +225,7 @@ public sealed class BackgroundPlanTests : IDisposable
     [Fact]
     public void Everything_failing_leaves_only_the_colour_and_logs_each_failure()
     {
-        var theme = _fixture.WriteTheme("allfail", """{ "format": 2, "background": { "default": { "name": "broken" }, "static": { "image": "missing.png" } } }""");
+        var theme = _fixture.WriteTheme("allfail", """{ "background": { "default": { "name": "broken" }, "static": { "image": "missing.png" } } }""");
         var plan = BackgroundPlan.Resolve(BackgroundSettings.None, theme);
 
         Assert.Null(plan.Build(_fixture.Store, _fixture.Root));
@@ -258,7 +258,7 @@ public sealed class BackgroundPlanTests : IDisposable
 
     private DeckBackground BuildStill(string json)
     {
-        var theme = _fixture.WriteTheme("s" + Guid.NewGuid().ToString("N")[..6], $$"""{ "format": 2, "background": {{json}} }""");
+        var theme = _fixture.WriteTheme("s" + Guid.NewGuid().ToString("N")[..6], $$"""{ "background": {{json}} }""");
         return BackgroundPlan.Resolve(BackgroundSettings.None, theme).Build(_fixture.Store, _fixture.Root)!;
     }
 
@@ -316,7 +316,7 @@ public sealed class BackgroundPlanTests : IDisposable
     [Fact]
     public async Task A_theme_picture_is_read_from_its_folder_and_covers_the_deck()
     {
-        var theme = _fixture.WriteTheme("pic", """{ "format": 2, "background": { "static": { "image": "wall.png" } } }""");
+        var theme = _fixture.WriteTheme("pic", """{ "background": { "static": { "image": "wall.png" } } }""");
         using (var picture = new SKBitmap(10, 10))
         {
             picture.Erase(new SKColor(0, 200, 0));
@@ -336,7 +336,7 @@ public sealed class BackgroundPlanTests : IDisposable
     public void A_picture_that_leaves_the_theme_folder_is_ignored_with_one_warning(string path)
     {
         File.WriteAllBytes(Path.Combine(_fixture.Root, "secret.png"), []);
-        var theme = _fixture.WriteTheme("escape", $$"""{ "format": 2, "background": { "static": { "image": "{{path}}" } } }""");
+        var theme = _fixture.WriteTheme("escape", $$"""{ "background": { "static": { "image": "{{path}}" } } }""");
 
         Assert.Null(BackgroundPlan.Resolve(BackgroundSettings.None, theme).Build(_fixture.Store, _fixture.Root));
         Assert.Equal(1, _fixture.Log.Split('\n').Count(l => l.Contains("leaves the theme folder")));
@@ -400,11 +400,11 @@ public sealed class BackgroundPlanTests : IDisposable
     [Fact]
     public void A_scrim_is_not_drawn_with_none_or_over_the_plain_colour()
     {
-        var theme = _fixture.WriteTheme("veil", """{ "format": 2, "background": { "default": { "name": "horizon" }, "scrim": { "color": "#000000", "alpha": 0.5 } } }""");
+        var theme = _fixture.WriteTheme("veil", """{ "background": { "default": { "name": "horizon" }, "scrim": { "color": "#000000", "alpha": 0.5 } } }""");
 
         Assert.Null(BackgroundPlan.Resolve(BackgroundFixture.Parse("""{ "type": "none" }"""), theme).Build(_fixture.Store, _fixture.Root));
 
-        var onlyScrim = _fixture.WriteTheme("veil2", """{ "format": 2, "background": { "scrim": { "color": "#000000", "alpha": 0.5 } } }""");
+        var onlyScrim = _fixture.WriteTheme("veil2", """{ "background": { "scrim": { "color": "#000000", "alpha": 0.5 } } }""");
         var plan = BackgroundPlan.Resolve(BackgroundSettings.None, onlyScrim);
         Assert.Null(plan.RequestKey(_fixture.Store, _fixture.Root));
         Assert.Null(plan.Build(_fixture.Store, _fixture.Root));
@@ -413,7 +413,7 @@ public sealed class BackgroundPlanTests : IDisposable
     [Fact]
     public void A_scrim_covers_what_the_user_chose_too()
     {
-        var theme = _fixture.WriteTheme("veil3", """{ "format": 2, "background": { "scrim": { "color": "#000000", "alpha": 0.5 } } }""");
+        var theme = _fixture.WriteTheme("veil3", """{ "background": { "scrim": { "color": "#000000", "alpha": 0.5 } } }""");
         var plan = BackgroundPlan.Resolve(BackgroundFixture.Parse("""{ "type": "shader", "name": "mine" }"""), theme);
         using var background = plan.Build(_fixture.Store, _fixture.Root)!;
 
@@ -427,7 +427,7 @@ public sealed class BackgroundPlanTests : IDisposable
     public void A_snapshot_draws_a_radial_gradient_and_its_scrim_the_same_way_every_time()
     {
         var theme = _fixture.WriteTheme("golden", """
-            { "format": 2, "background": {
+            { "background": {
               "static": { "gradient": { "colors": ["#ffffff", "#000000"], "kind": "radial", "cx": 0.5, "cy": 0.5, "radius": 0.5 } },
               "scrim": { "color": "#000000", "alpha": 0.25 } } }
             """);
@@ -464,7 +464,7 @@ public sealed class BackgroundPlanTests : IDisposable
     [Fact]
     public void Motion_level_off_does_not_touch_the_background()
     {
-        var theme = _fixture.WriteTheme("calm", """{ "format": 2, "motion": { "level": "off" }, "background": { "default": { "name": "horizon" } } }""");
+        var theme = _fixture.WriteTheme("calm", """{ "motion": { "level": "off" }, "background": { "default": { "name": "horizon" } } }""");
         using var background = BackgroundPlan.Resolve(BackgroundSettings.None, theme).Build(_fixture.Store, _fixture.Root);
 
         Assert.NotNull(background);
@@ -476,7 +476,7 @@ public sealed class BackgroundPlanTests : IDisposable
     public void A_moving_default_still_moves_with_motion_off()
     {
         _fixture.WriteShader("drift", "uniform float iTime;\nhalf4 main(float2 p) { return half4(fract(iTime), 0, 0, 1); }");
-        var theme = _fixture.WriteTheme("calm2", """{ "format": 2, "motion": { "level": "off" }, "background": { "default": { "name": "drift" } } }""");
+        var theme = _fixture.WriteTheme("calm2", """{ "motion": { "level": "off" }, "background": { "default": { "name": "drift" } } }""");
         using var background = BackgroundPlan.Resolve(BackgroundSettings.None, theme).Build(_fixture.Store, _fixture.Root);
 
         Assert.True(background!.IsMoving);
@@ -487,7 +487,7 @@ public sealed class BackgroundPlanTests : IDisposable
     private LoadedTheme DriftTheme(string name, string extra = "")
     {
         _fixture.WriteShader("drift", "uniform float iTime;\nhalf4 main(float2 p) { return half4(fract(iTime), 0, 0, 1); }");
-        return _fixture.WriteTheme(name, $$"""{ "format": 2 {{extra}}, "background": { "default": { "name": "drift" } } }""");
+        return _fixture.WriteTheme(name, "{ " + extra + """ "background": { "default": { "name": "drift" } } }""");
     }
 
     [Theory]
@@ -534,7 +534,7 @@ public sealed class BackgroundPlanTests : IDisposable
     [Fact]
     public void The_themes_ceiling_does_not_slow_the_background_but_the_users_level_does()
     {
-        var theme = DriftTheme("ceiling", ", \"motion\": { \"level\": \"off\" }");
+        var theme = DriftTheme("ceiling", "\"motion\": { \"level\": \"off\" },");
         // Windows animations on, the theme caps at off: the user's level is still full, so the shader moves.
         var decision = MotionPolicy.Decide(null, true, "off");
 

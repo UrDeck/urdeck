@@ -10,7 +10,7 @@ using Xunit;
 namespace UrDeck.Engine.Tests;
 
 /// <summary>
-/// The built-in format 2 themes against the published schema: each must satisfy it and load without a warning.
+/// The built-in themes against the published schema: each must satisfy it and load without a warning.
 /// </summary>
 public sealed class ThemeDraftTests : IDisposable
 {
@@ -43,7 +43,7 @@ public sealed class ThemeDraftTests : IDisposable
         string root = AppContext.BaseDirectory;
         while (!File.Exists(Path.Combine(root, "urdeck.slnx")))
             root = Path.GetDirectoryName(root)!;
-        return JsonSchema.FromText(File.ReadAllText(Path.Combine(root, "docs", "schemas", "v2", "theme.json")));
+        return JsonSchema.FromText(File.ReadAllText(Path.Combine(root, "docs", "schemas", "v1", "theme.json")));
     }
 
     private static string BuiltInText(string name)
@@ -83,7 +83,6 @@ public sealed class ThemeDraftTests : IDisposable
         var loaded = new ThemeStore("").Load(name);
 
         Assert.Equal(name, loaded.Name);
-        Assert.Equal(2, loaded.Definition.Format);
         Assert.NotNull(loaded.Definition.Meta?.Name);
         Assert.Empty(Log);
     }

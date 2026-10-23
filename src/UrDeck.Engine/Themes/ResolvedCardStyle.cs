@@ -26,12 +26,15 @@ public enum CardCorners
 /// </summary>
 public sealed class ResolvedCardStyle : IDisposable
 {
-    private static readonly PropertyInfo[] Format2CardKeys = typeof(ThemeCardDefinition)
+    // The card shape values; every other card value is card chrome, and a theme that sets none draws the plain card.
+    private static readonly string[] CardShapeKeys = [nameof(ThemeCardDefinition.Radius), nameof(ThemeCardDefinition.BorderWidth), nameof(ThemeCardDefinition.Gap), nameof(ThemeCardDefinition.Padding)];
+
+    private static readonly PropertyInfo[] CardChromeKeys = typeof(ThemeCardDefinition)
         .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-        .Where(p => p.IsDefined(typeof(Format2Attribute)))
+        .Where(p => !CardShapeKeys.Contains(p.Name))
         .ToArray();
 
-    // The defaults of the published schema (docs/schemas/v2/theme.json).
+    // The defaults of the published schema (docs/schemas/v1/theme.json).
     private const double DefaultCut = 0.14;
     private const double DefaultFillAngle = 90;
     private const double DefaultBorderAngle = 135;
@@ -85,7 +88,7 @@ public sealed class ResolvedCardStyle : IDisposable
     }
 
     /// <summary>
-    /// True when the theme sets no card value of format 2: the card is drawn exactly as before card chrome existed, and its
+    /// True when the theme sets no card chrome value: the card is drawn exactly as before card chrome existed, and its
     /// border width is not rounded.
     /// </summary>
     public bool IsPlain { get; private init; }
@@ -325,7 +328,7 @@ public sealed class ResolvedCardStyle : IDisposable
         var d = loaded.Definition;
         var colors = d.Colors!;
         // The compact variant is never plain: the plain path draws with the SDK theme's radius, which is the page's.
-        bool plain = !compact && Format2CardKeys.All(p => p.GetValue(card) == null);
+        bool plain = !compact && CardChromeKeys.All(p => p.GetValue(card) == null);
 
         float borderWidth = Px(card.BorderWidth, cellPx);
         if (!plain)

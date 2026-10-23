@@ -1,5 +1,4 @@
 {
-  "format": 2,
   "meta": {
     "name": "Ember",
     "description": "An instrument cluster. Chamfered cards, tachometer gauges with a red-line zone that lights when load spikes, condensed italic numerals glowing amber.",

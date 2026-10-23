@@ -15,7 +15,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <!-- SkiaSharp's native library on Linux (Windows ships it with SkiaSharp). Keep the version equal to SkiaSharp's. -->
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" />
-    <!-- Validates the sample themes against docs/schemas/v2/theme.json; a test dependency only. -->
+    <!-- Validates the sample themes against docs/schemas/v1/theme.json; a test dependency only. -->
     <PackageReference Include="JsonSchema.Net" />
     <!-- Line-coverage floor for UrDeck.Engine. Run: dotnet test tests/UrDeck.Engine.Tests -p:CollectCoverage=true -->
     <PackageReference Include="coverlet.msbuild" PrivateAssets="all" />

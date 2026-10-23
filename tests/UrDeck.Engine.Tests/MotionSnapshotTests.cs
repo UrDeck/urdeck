@@ -32,7 +32,7 @@ public sealed class MotionSnapshotTests : IDisposable
     public void ASnapshot_WithMotionOff_DrawsAMovingShaderAsSpeedZeroDoes()
     {
         _fixture.WriteShader("drift", "uniform float iTime;\nhalf4 main(float2 p) { return half4(fract(iTime), 0.2, 0.4, 1); }");
-        var theme = _fixture.WriteTheme("snap", """{ "format": 2 }""");
+        var theme = _fixture.WriteTheme("snap", """{ }""");
         var moving = BackgroundFixture.Parse("""{ "type": "shader", "name": "drift", "speed": 1 }""");
         var stopped = BackgroundFixture.Parse("""{ "type": "shader", "name": "drift", "speed": 0 }""");
 

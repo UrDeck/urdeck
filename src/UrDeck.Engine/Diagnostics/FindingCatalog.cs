@@ -16,14 +16,13 @@ public static class FindingCatalog
     public static IReadOnlyList<FindingCode> All { get; } =
     [
         new("THEME001", "error", "`theme.json` is missing, is not valid JSON or holds no object: add it, or fix the syntax at the position given. Nothing else is checked"),
-        new("THEME002", "warning", "a key the deck does not read (a typo, or a key of a later format): fix the name, the message suggests the nearest key"),
-        new("THEME003", "warning, error", "a value of the wrong JSON type (also logged). An error for a value of format 1 (`card.gap`, `colors`...), where the deck skips the whole theme"),
+        new("THEME002", "warning", "a key the deck does not read (a typo, or a key left over from an older draft): fix the name, the message suggests the nearest key"),
+        new("THEME003", "warning", "a value of the wrong JSON type (also logged): the deck skips that value and takes the default"),
         new("THEME004", "warning", "a number outside its range, which the message gives (also logged): the deck uses the default"),
         new("THEME005", "warning", "a value that is not one of the names allowed, which the message lists (also logged; the case does not matter)"),
         new("THEME006", "warning", "a colour that is not `#RRGGBB` or `#AARRGGBB` (also logged)"),
         new("THEME007", "warning", "a list outside its length limits or with an invalid element (also logged): the deck drops the list whole"),
         new("THEME008", "warning", "a group that needs a member it does not have, such as a gradient without `colors` (also logged): the group is ignored"),
-        new("THEME010", "warning", "`format` is newer than the deck reads (also logged): the deck ignores what it does not know"),
         new("THEME020", "error", "a font file is missing from the theme, is not a `.ttf`, `.otf` or `.ttc`, or its path leaves the theme's folder (also logged when it leaves the folder or cannot be loaded): add the file, fix the name, keep it inside the folder"),
         new("THEME021", "warning", "a font file is over 3 MB (subset it) or has no licence file beside it (`*-OFL.txt`, `LICENSE*` or `*-LICENSE*`): add the licence so the theme can be shared"),
         new("THEME022", "warning", "a font named by family, which is used only where it is installed: put a `.ttf` or `.otf` in the folder and name the file"),
