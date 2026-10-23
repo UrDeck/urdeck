@@ -55,11 +55,10 @@ Add the `$schema` line and an editor with JSON Schema support (Visual Studio Cod
 description while you type:
 
 ```json
-{ "$schema": "https://urdeck.app/schemas/v2/theme.json", "format": 2 }
+{ "$schema": "https://urdeck.app/schemas/v1/theme.json" }
 ```
 
-`"format": 2` says that the file uses the newer keys (chamfered cards, shadows, patterns, more gauge styles, icons, a
-background of its own). A theme can use any of them without it; the declaration is for people and tools. All of them are in the
+All the keys (chamfered cards, shadows, patterns, gauge styles, icons, a background of its own) are in the
 [theme reference](/docs/themes/reference/), and the [cookbook](/docs/cookbook/) shows the common ones at work.
 
 ## 4. See it without a deck

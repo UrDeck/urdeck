@@ -62,7 +62,7 @@ The documentation does not repeat what the product already says. These component
 | `BuiltinList` (`kind="themes"`, `"backgrounds"` or `"widgets"`) | Every built-in of the catalog, with its picture from the media manifest when there is one. | (The completeness check fails when a page that should list a kind does not.) |
 | `WidgetSizes` (`<WidgetSizes widget="clock" />`) | A widget at every size the catalog previews, in the visitor's theme (`ProductMedia`). | |
 
-A new theme key therefore needs a `description` in `docs/schemas/v2/theme.json` and nothing else on the site; a new widget
+A new theme key therefore needs a `description` in `docs/schemas/v1/theme.json` and nothing else on the site; a new widget
 setting needs one line under `settings:` in its page; a new finding code needs a summary in `FindingCatalog`.
 `catalog.json` is `urdeck-cli catalog export` (`npm run media` refreshes it).
 

@@ -15,7 +15,7 @@ const schema = {
     glow: { type: 'object', description: 'A glow.', properties: { blur: { type: 'number', minimum: 0, maximum: 1, description: 'Blur.' } } },
   },
   properties: {
-    format: { enum: [1, 2], description: 'The format.' },
+    mode: { enum: ['dark', 'light'], description: 'The mode.' },
     card: {
       type: 'object',
       description: 'The card.',
@@ -56,7 +56,7 @@ test('a group is a row with its keys below it, and a key says what it accepts an
 
 test('maps and lists of groups get <name> and [] paths, and allPaths lists every key', () => {
   assert.deepEqual(allPaths(readSchema('v9/a.json', root)), [
-    'format', 'card', 'card.radius', 'card.cutCorners', 'card.fill', 'card.glow', 'card.glow.blur', 'card.stops',
+    'mode', 'card', 'card.radius', 'card.cutCorners', 'card.fill', 'card.glow', 'card.glow.blur', 'card.stops',
     'parameters', 'parameters.<name>.label', 'samples', 'samples[].file',
   ]);
   assert.deepEqual(rowsOf('v9/a.json', 'samples', root).map((r) => r.path), ['samples', 'samples[].file']);
@@ -68,9 +68,9 @@ test('a key without a description fails the build and names the key; a $ref does
   writeFileSync(join(base, 'docs', 'schemas', 'v9', 'b.json'), JSON.stringify(broken));
   assert.throws(() => rowsOf('v9/b.json', 'card', root), /the key "card\.fill" has no description/);
   const blank = structuredClone(schema);
-  blank.properties.format.description = '  ';
+  blank.properties.mode.description = '  ';
   writeFileSync(join(base, 'docs', 'schemas', 'v9', 'c.json'), JSON.stringify(blank));
-  assert.throws(() => rowsOf('v9/c.json', '', root), /the key "format" has no description/);
+  assert.throws(() => rowsOf('v9/c.json', '', root), /the key "mode" has no description/);
 });
 
 test('a path that is not in the schema fails instead of rendering nothing', () => {

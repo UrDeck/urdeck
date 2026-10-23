@@ -158,7 +158,7 @@ const troubleshootingPage = join(dist, 'docs', 'troubleshooting', 'index.html');
 if (existsSync(catalogFile)) {
   const gaps = completenessProblems({
     catalog: JSON.parse(readFileSync(catalogFile, 'utf8')),
-    schemas: ['v2/theme.json', 'v1/shader-manifest.json'].map((name) => ({ name, paths: allPaths(readSchema(name, siteRoot)) })),
+    schemas: ['v1/theme.json', 'v1/shader-manifest.json'].map((name) => ({ name, paths: allPaths(readSchema(name, siteRoot)) })),
     records,
     troubleshooting: existsSync(troubleshootingPage) ? readFileSync(troubleshootingPage, 'utf8') : '',
   });
