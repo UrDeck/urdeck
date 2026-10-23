@@ -1,0 +1,29 @@
+{
+  "$schema": "https://urdeck.app/schemas/v2/theme.json",
+  "format": 2,
+  "meta": {
+    "name": "Hard shadow",
+    "description": "Flat yellow cards with a black outline and a shadow that is a copy of the card.",
+    "mode": "light"
+  },
+  "colors": {
+    "background": "#f6f0e0",
+    "cardFill": "#ffd84a",
+    "cardBorder": "#111111",
+    "text": "#111111",
+    "textMuted": "#2b2b2b",
+    "accent": "#111111",
+    "accentDim": "#22111111"
+  },
+  "card": {
+    "radius": 0.1,
+    "borderWidth": 0.02,
+    "gap": 0.11,
+    "shadow": { "x": 0.05, "y": 0.05, "blur": 0, "color": "#111111" }
+  },
+  "indicator": {
+    "active": "#111111",
+    "inactive": "#55111111",
+    "backdrop": "#ccf6f0e0"
+  }
+}

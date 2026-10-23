@@ -1,0 +1,41 @@
+---
+// A widget's settings: names, types and defaults from the catalog (the widget's configuration type), meanings from the
+// `settings` map in the front matter of the widget's page. A setting without a meaning, or a meaning for a setting the
+// product no longer has, fails the build.
+import { getEntry } from 'astro:content';
+import catalog from '../generated/catalog.json';
+import { inline, record, settingDefault, settingValue } from '../lib/reference.mjs';
+
+interface Props {
+  /** The widget's short id: `clock`, `stats`, `weather`, `shortcut`. */
+  widget: string;
+}
+
+const { widget } = Astro.props;
+const typeId = `urdeck.widgets.${widget}`;
+const product = catalog.widgets.find((w) => w.typeId === typeId);
+if (!product) throw new Error(`SettingsTable: the catalog has no widget ${typeId}`);
+const page = await getEntry('docs', `widgets/${widget}`);
+const meanings: Record<string, string> = page?.data.settings ?? {};
+const settings = product.settings as { name: string; type: string; values?: string[]; default?: unknown }[];
+for (const s of settings) {
+  if (!meanings[s.name]?.trim()) throw new Error(`SettingsTable: the setting "${s.name}" of ${typeId} has no description in the front matter of widgets/${widget}.md`);
+}
+for (const name of Object.keys(meanings)) {
+  if (!settings.some((s) => s.name === name)) throw new Error(`SettingsTable: widgets/${widget}.md describes "${name}", which ${typeId} does not have`);
+}
+record({ kind: 'settings', widget: typeId, names: settings.map((s) => s.name) });
+---
+<table class="ref">
+  <thead><tr><th>Setting</th><th>Value</th><th>Default</th><th>Meaning</th></tr></thead>
+  <tbody>
+    {settings.map((s) => (
+      <tr id={`setting-${s.name}`}>
+        <td><code>{s.name}</code></td>
+        <td set:html={inline(settingValue(s))} />
+        <td set:html={inline(settingDefault(s))} />
+        <td set:html={inline(meanings[s.name])} />
+      </tr>
+    ))}
+  </tbody>
+</table>

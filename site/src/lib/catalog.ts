@@ -26,6 +26,8 @@ const css = (color: string) => (color.length === 9 ? `#${color.slice(3)}${color.
 
 type SiteCopy = {
   themes: Record<string, { alt?: string } | undefined>;
+  /** What each of a background's four palette colours means to it (the documentation's built-in list). */
+  backgrounds?: Record<string, { palette?: string } | undefined>;
   widgets: Record<string, { description?: string; sizes?: Record<string, { note?: string; alt?: string }> } | undefined>;
 };
 const siteCopy = copy as SiteCopy;

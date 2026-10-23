@@ -1,0 +1,26 @@
+{
+  "$schema": "https://urdeck.app/schemas/v2/theme.json",
+  "format": 2,
+  "meta": {
+    "name": "Tach with a redline",
+    "description": "Dial gauges with ticks, a needle and a red zone that lights when the load is high.",
+    "mode": "dark"
+  },
+  "colors": {
+    "cardFill": "#140d09",
+    "accent": "#ffb347",
+    "critical": "#ff3b2a"
+  },
+  "gauge": {
+    "style": "tach",
+    "sweep": { "start": 135, "span": 270 },
+    "ticks": { "count": 28, "majorEvery": 4, "length": 0.07, "thickness": 0.01, "color": "#33ffffff" },
+    "redline": {
+      "from": 0.8,
+      "color": "#ff3b2a",
+      "lightsAbove": true,
+      "glow": { "blur": 0.07, "alpha": 0.7 }
+    },
+    "marker": { "shape": "needle", "size": 0.05, "color": "#ffb347" }
+  }
+}

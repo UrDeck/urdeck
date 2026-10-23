@@ -1,0 +1,37 @@
+---
+title: Choosing a theme
+description: The built-in themes, and how to choose one or make your own.
+section: Themes
+order: 20
+---
+
+import BuiltinList from '../../components/BuiltinList.astro';
+
+A theme decides how every card on a page looks: its colours, corners, border, light and shadow, the fonts, the shape of gauges,
+the page behind the cards and a little motion. Widgets only draw their content, so a theme changes all of them at once and
+a new widget needs no styling of its own.
+
+Choose one with the `theme` key of `urdeck-config.json`, for example `"theme": "carbon"`. Saving the file applies it; no
+restart. The picker in the corner of this site shows every picture on the page in the theme you choose.
+
+## The built-in themes
+
+Each is drawn here from the sample page by UrDeck itself, over the background it names. Most name a [background](/docs/backgrounds/)
+that suits them and fall back to a still colour or gradient of their own where shaders are unavailable.
+
+<BuiltinList kind="themes" />
+
+`rigline` turns the spectrum round every card edge only at the `full` [motion level](/docs/themes/motion/); at `reduced` and
+`off` it stands still.
+
+## Your own
+
+A theme is a folder next to `UrDeck.Host.exe`: `themes/my-theme/theme.json`, and font files if it uses any. Every value is
+optional and what you leave out comes from `default-dark`, so a theme can be a few lines.
+
+- [A theme in five minutes](/docs/themes/quick-start/) makes one, from nothing or from a copy of a built-in theme.
+- [The theme reference](/docs/themes/reference/) lists every key with its range and default.
+- [The cookbook](/docs/cookbook/) has recipes for chamfered cards, a gradient border, a hard shadow, LED bars and more, each a
+  small theme you can copy.
+- [Fonts and licences](/docs/themes/fonts/), [icon sets](/docs/themes/icons/) and [motion](/docs/themes/motion/) have a page each.
+- [Checking a theme](/docs/themes/checking/) finds mistakes and draws a picture of the theme without a deck.

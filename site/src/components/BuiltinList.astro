@@ -1,0 +1,93 @@
+---
+// What ships with the product, from the catalog: every built-in theme (with its picture, from the media manifest), background
+// (its poster and settings) or widget (its sizes). Nothing is typed here: a new entry in the catalog is listed at the next
+// build, one without media is listed without a picture, and the build's check (scripts/check-output.mjs) fails when a page
+// that should list a kind does not.
+import { Image } from 'astro:assets';
+import catalog from '../generated/catalog.json';
+import copy from '../data/site-copy.json';
+import { themeByName } from '../lib/catalog';
+import { backgroundMedia, deckMedia } from '../lib/media';
+import { inline, record } from '../lib/reference.mjs';
+import Swatch from './Swatch.astro';
+
+interface Props {
+  kind: 'themes' | 'backgrounds' | 'widgets';
+}
+
+type Parameter = { label?: string; description?: string; min?: number | null; max?: number | null; unit?: string | null; hidden?: boolean };
+const { kind } = Astro.props;
+
+const themeTitle = (name: string) => catalog.themes.find((t) => t.name === name)?.displayName ?? name;
+const backgroundTitle = (name: string) => catalog.backgrounds.find((b) => b.name === name)?.title ?? name;
+const pairs = (name: string) => catalog.pairings.filter((p) => p.backgrounds.some((b) => b.name === name)).map((p) => p.theme);
+const copyOf = copy as { backgrounds?: Record<string, { palette?: string }> };
+const range = (p: Parameter) => (p.min != null && p.max != null ? `${p.min} to ${p.max}` : '');
+
+const names = kind === 'themes' ? catalog.themes.map((t) => t.name) : kind === 'backgrounds' ? catalog.backgrounds.map((b) => b.name) : catalog.widgets.map((w) => w.typeId);
+record({ kind: 'builtin', what: kind, names });
+---
+{kind === 'themes' && (
+  <div class="builtin themes">
+    {catalog.themes.map((t) => {
+      const image = deckMedia(t.name).image;
+      const shown = themeByName(t.name);
+      return (
+        <article id={t.name}>
+          {image && <Image src={image} alt={shown?.alt ?? `The sample deck in the ${t.displayName} theme.`} widths={[240, 360]} sizes="(min-width: 60rem) 14rem, 40vw" />}
+          <div>
+            <h3>{shown && <Swatch swatch={shown.swatch} />} {t.displayName} <code>{t.name}</code></h3>
+            <p>{t.description}</p>
+            <p class="note">{t.mode === 'light' ? 'Light' : 'Dark'}{t.defaultBackground ? <> · background <a href={`/docs/backgrounds/#bg-${t.defaultBackground}`}>{backgroundTitle(t.defaultBackground)}</a></> : ''}{t.tags.length > 0 ? ` · ${t.tags.join(', ')}` : ''}</p>
+          </div>
+        </article>
+      );
+    })}
+  </div>
+)}
+{kind === 'backgrounds' && (
+  <div class="builtin backgrounds">
+    {catalog.backgrounds.map((b) => {
+      const poster = backgroundMedia(b.name).poster;
+      const parameters = Object.entries(b.parameters as Record<string, Parameter>).filter(([, p]) => !p.hidden);
+      const suits = pairs(b.name);
+      return (
+        <article id={`bg-${b.name}`}>
+          {poster && <Image src={poster} alt={`The ${b.title} background.`} widths={[135, 270]} sizes="(min-width: 60rem) 9rem, 30vw" />}
+          <div>
+            <h3>{b.title} <code>{b.name}</code></h3>
+            <p>{b.description}</p>
+            {suits.length > 0 && <p class="note">Pairs with {suits.map(themeTitle).join(', ')}</p>}
+            {copyOf.backgrounds?.[b.name]?.palette && <p class="note">Palette: {copyOf.backgrounds[b.name].palette}</p>}
+            {parameters.length > 0 && (
+              <details>
+                <summary>Settings ({parameters.length})</summary>
+                <table class="ref">
+                  <thead><tr><th>Key</th><th>Range</th><th>Meaning</th></tr></thead>
+                  <tbody>
+                    {parameters.map(([key, p]) => (
+                      <tr><td><code>{key}</code></td><td>{range(p)}{p.unit ? ` ${p.unit}` : ''}</td><td set:html={inline(p.description ?? p.label ?? '')} /></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </details>
+            )}
+          </div>
+        </article>
+      );
+    })}
+  </div>
+)}
+{kind === 'widgets' && (
+  <ul class="builtin widgets">
+    {catalog.widgets.map((w) => {
+      const id = w.typeId.split('.').pop();
+      return (
+        <li id={`widget-${id}`}>
+          <a href={`/docs/widgets/${id}/`}><b>{w.name}</b></a> <code>{w.typeId}</code> · {w.description}
+          <span class="note"> Sizes: {w.sizes.map((s) => `${s.width}x${s.height}`).join(', ')}.</span>
+        </li>
+      );
+    })}
+  </ul>
+)}

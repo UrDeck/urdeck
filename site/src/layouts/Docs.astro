@@ -1,6 +1,7 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from './Base.astro';
+import DocsNav from '../components/DocsNav.astro';
+import { navigation } from '../lib/docs';
 
 interface Props {
   title: string;
@@ -9,24 +10,16 @@ interface Props {
 
 const { title, description } = Astro.props;
 const path = Astro.url.pathname;
-const pages = (await getCollection('docs')).sort((a, b) => a.data.order - b.data.order);
-const sections = ['Start', 'Widgets', 'Look'] as const;
-const hrefOf = (id: string) => (id === 'index' ? '/docs/' : `/docs/${id}/`);
+const pages = await navigation();
 ---
 <Base title={title} description={description}>
   <div class="docs">
-    <nav class="docs-nav" aria-label="Documentation">
-      {sections.map((section) => (
-        <>
-          <h2>{section}</h2>
-          <ul>
-            {pages.filter((p) => p.data.section === section).map((p) => (
-              <li><a href={hrefOf(p.id)} aria-current={path === hrefOf(p.id) ? 'page' : undefined}>{p.data.title}</a></li>
-            ))}
-          </ul>
-        </>
-      ))}
-    </nav>
+    {/* A narrow screen gets the navigation in a menu that starts closed, so the page comes first; a wide one gets the sidebar. */}
+    <details class="docs-menu">
+      <summary>Documentation</summary>
+      <nav class="docs-nav" aria-label="Documentation"><DocsNav pages={pages} current={path} /></nav>
+    </details>
+    <nav class="docs-nav docs-side" aria-label="Documentation"><DocsNav pages={pages} current={path} /></nav>
     <article class="docs-body">
       <slot />
     </article>

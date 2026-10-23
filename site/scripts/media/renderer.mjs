@@ -4,7 +4,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import sharp from 'sharp';
-import { DECK_LOOP_SIZE, DECK_SIZE, FPS, LOOP_SECONDS, POSTER_SIZE, SAMPLE_MOMENT, addSeconds, deckConfigPath } from './lib.mjs';
+import { COOKBOOK_SIZE, DECK_LOOP_SIZE, DECK_SIZE, FPS, LOOP_SECONDS, POSTER_SIZE, SAMPLE_MOMENT, addSeconds, deckConfigPath } from './lib.mjs';
 
 const MB = 1024 * 1024;
 // 'Media Limits': the most a loop of each kind may weigh, and how wide it may be.
@@ -40,22 +40,33 @@ export function createRenderer({ repo, site, canRender = true }) {
     return exe('dotnet', [dll, ...args]);
   };
 
+  // One widget at a size, with the site's settings for it (showcase/widgets.json) when it has any; `dir` holds the file written for them.
+  function widgetArgs(entry, dir, moment) {
+    const [cols, rows] = entry.size.split('x').map(Number);
+    const args = ['--widget', entry.widget, '--widget-size', entry.size, '--time', moment ?? addSeconds(SAMPLE_MOMENT, entry.loopStart)];
+    if (Object.keys(entry.config).length > 0) {
+      mkdirSync(dir, { recursive: true });
+      const config = join(dir, 'widget-config.json');
+      writeFileSync(config, JSON.stringify({ pages: [{ name: 'Media', widgets: [{ typeId: entry.widget, col: 0, row: 0, width: cols, height: rows, ...entry.config }] }], activePage: 0 }));
+      args.push('--config', config);
+    }
+    return args;
+  }
+
   // The arguments of `preview render` for an entry, besides the output; `dir` holds the configuration files it writes.
   function previewArgs(entry, dir, { moment, size } = {}) {
+    if (entry.kind === 'cookbook') {
+      // The recipe's own folder is the theme (`--theme-dir`); it shows the page, the dock or one widget, over its background or none.
+      const base = ['preview', 'render', '--theme-dir', join(site, 'cookbook', entry.name), '--background', entry.background ?? 'none'];
+      if (entry.show === 'widget') return [...base, ...widgetArgs(entry, dir, moment), '--width', '1100'];
+      return [...base, ...(entry.show === 'dock' ? ['--page', 'dock'] : []), '--size', COOKBOOK_SIZE];
+    }
     const common = ['--theme', entry.theme];
     if (entry.kind === 'decks') {
       return ['preview', 'render', '--config', deckConfigPath(site, entry), ...common, '--background', 'theme', '--size', size ?? DECK_SIZE, '--page', 'dock'];
     }
     if (entry.kind === 'widgets') {
-      const [cols, rows] = entry.size.split('x').map(Number);
-      const args = ['preview', 'render', '--widget', entry.widget, '--widget-size', entry.size, '--width', '1100', ...common, '--background', 'theme', '--time', moment ?? addSeconds(SAMPLE_MOMENT, entry.loopStart)];
-      if (Object.keys(entry.config).length > 0) {
-        mkdirSync(dir, { recursive: true });
-        const config = join(dir, 'widget-config.json');
-        writeFileSync(config, JSON.stringify({ pages: [{ name: 'Media', widgets: [{ typeId: entry.widget, col: 0, row: 0, width: cols, height: rows, ...entry.config }] }], activePage: 0 }));
-        args.push('--config', config);
-      }
-      return args;
+      return ['preview', 'render', ...widgetArgs(entry, dir, moment), '--width', '1100', ...common, '--background', 'theme'];
     }
     mkdirSync(dir, { recursive: true });
     const config = join(dir, 'empty-page.json');

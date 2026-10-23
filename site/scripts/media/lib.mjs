@@ -28,7 +28,8 @@ const SHARED_EXCLUDED = ['src/UrDeck.Engine/Themes/Builtin', 'src/UrDeck.Engine/
 const THEME_DIR = 'src/UrDeck.Engine/Themes/Builtin';
 const BACKGROUND_DIR = 'src/UrDeck.Engine/Backgrounds/Builtin';
 
-const KINDS = ['decks', 'widgets', 'backgrounds'];
+const KINDS = ['decks', 'widgets', 'backgrounds', 'cookbook'];
+export const COOKBOOK_SIZE = '1100x1920'; // the sample page's own size: the cookbook shows a page, the dock or a widget, never the whole 3840 px deck
 
 export const stable = (value) => JSON.stringify(sortKeys(value), null, 2) + '\n';
 function sortKeys(v) {
@@ -95,6 +96,12 @@ function backgroundHash(repo, name) {
   return hashFiles(repo, walk(dir, (p, e) => !e.isDirectory() && e.name === 'sample.png'));
 }
 
+/** A cookbook recipe's inputs are its whole folder: the theme, its assets (an icon set), the recipe and the explanation. */
+function recipeHash(site, name) {
+  const dir = join(site, 'cookbook', name);
+  return existsSync(dir) ? hashFiles(dir, walk(dir)) : `no-recipe:${name}`;
+}
+
 const fileHash = (file) => (file && existsSync(file) ? hashFiles(dirname(file), [file]) : null);
 const sha = (text) => createHash('sha256').update(text).digest('hex');
 
@@ -111,7 +118,10 @@ export function backgroundTheme(background, themes) {
 
 export const widgetId = (typeId) => typeId.split('.').pop();
 
-/** @param overrides {decks: Set<theme>, widgets: {typeId: {config, loopStart, sizes: {"4x2": {config, loopStart}}}}} */
+/**
+ * @param overrides {decks: Set<theme>, widgets: {typeId: {config, loopStart, sizes: {"4x2": {config, loopStart}}}},
+ *                   recipes: {name: {title, summary, order, show, background}}}
+ */
 export function matrix(catalog, overrides = {}) {
   const entries = [];
   const themes = [...catalog.themes].sort((a, b) => a.name.localeCompare(b.name, 'en'));
@@ -144,6 +154,19 @@ export function matrix(catalog, overrides = {}) {
       size: POSTER_SIZE, background: b.name, picture: `backgrounds/${b.name}.webp`, loop: `backgrounds/${b.name}.mp4`,
     });
   }
+  // One picture of each recipe's theme folder, showing what its recipe.json asks for (the page, the dock or one widget).
+  for (const name of Object.keys(overrides.recipes ?? {}).sort((a, c) => a.localeCompare(c, 'en'))) {
+    const { show = 'page', background = null } = overrides.recipes[name];
+    const widget = typeof show === 'object' ? show.widget : null;
+    const size = typeof show === 'object' ? show.size : null;
+    const o = (widget && overrides.widgets?.[widget]) || {};
+    const per = (size && o.sizes?.[size]) || {};
+    entries.push({
+      id: `cookbook:${name}`, kind: 'cookbook', name, theme: name, widget, size, background: background || null,
+      show: typeof show === 'object' ? 'widget' : show, picture: `cookbook/${name}.webp`, loop: null,
+      config: { ...(o.config ?? {}), ...(per.config ?? {}) }, loopStart: per.loopStart ?? o.loopStart ?? 0,
+    });
+  }
   return entries;
 }
 
@@ -156,7 +179,16 @@ export function readOverrides(site) {
     for (const d of readdirSync(dir)) if (existsSync(join(dir, d, 'urdeck-config.json'))) decks.add(d);
   }
   const widgetsFile = join(site, 'showcase', 'widgets.json');
-  return { decks, widgets: existsSync(widgetsFile) ? JSON.parse(readFileSync(widgetsFile, 'utf8')) : {} };
+  // A folder of site/cookbook/ with a recipe.json is a recipe; its name is the folder's.
+  const recipes = {};
+  const cookbook = join(site, 'cookbook');
+  if (existsSync(cookbook)) {
+    for (const d of readdirSync(cookbook)) {
+      const file = join(cookbook, d, 'recipe.json');
+      if (existsSync(file)) recipes[d] = JSON.parse(readFileSync(file, 'utf8'));
+    }
+  }
+  return { decks, widgets: existsSync(widgetsFile) ? JSON.parse(readFileSync(widgetsFile, 'utf8')) : {}, recipes };
 }
 
 export const deckConfigPath = (site, entry) =>
@@ -175,6 +207,11 @@ export function settingsOf(entry, loop) {
   if (entry.kind === 'decks') {
     return { ...common, config: entry.override ? `site/decks/${entry.theme}/urdeck-config.json` : 'site/showcase/urdeck-config.json',
       page: 'dock', size: DECK_SIZE, moment: SAMPLE_MOMENT, loop: loop ? { frames: LOOP_SECONDS * FPS, fps: FPS, size: DECK_LOOP_SIZE } : null };
+  }
+  if (entry.kind === 'cookbook') {
+    return { themeDir: `site/cookbook/${entry.name}`, background: entry.background ?? 'none', show: entry.show, widget: entry.widget,
+      widgetSize: entry.size, widgetConfig: entry.widget ? entry.config : null, size: entry.widget ? null : COOKBOOK_SIZE,
+      moment: entry.widget ? addSeconds(SAMPLE_MOMENT, entry.loopStart) : SAMPLE_MOMENT, loop: null };
   }
   if (entry.kind === 'widgets') {
     return { ...common, widget: entry.widget, widgetSize: entry.size, width: 1100, widgetConfig: entry.config,
@@ -217,7 +254,7 @@ export async function plan({ repo, site, catalog, moves = null, log = () => {} }
 
   for (const e of entries) {
     const specific = {
-      theme: themeHash(repo, e.theme),
+      theme: e.kind === 'cookbook' ? recipeHash(site, e.name) : themeHash(repo, e.theme),
       background: e.background ? backgroundHash(repo, e.background) : null,
       // The theme's own background is the one that is drawn over a background that is a name.
       kind: e.kind, widget: e.widget, size: e.size, config: e.config ?? null, loopStart: e.loopStart ?? null,
@@ -228,6 +265,7 @@ export async function plan({ repo, site, catalog, moves = null, log = () => {} }
     const old = previous.get(e.id);
     const present = (files) => files.every((f) => existsSync(join(site, f)));
     if (e.kind === 'backgrounds') e.loopMade = true;
+    else if (e.kind === 'cookbook') e.loopMade = false; // a recipe is a still picture
     else if (old && old.key === e.key) e.loopMade = old.files.some((f) => f.startsWith(LOOPS));
     else {
       // Probes start now and run together; their answers are read just below.
@@ -345,7 +383,7 @@ export async function run({ repo, site, renderer, argv, log = console.log }) {
       // Only now does the entry's media change in the site: a failed render leaves the previous files.
       move(dest.picture, join(site, IMAGES, e.picture));
       if (dest.loop) move(dest.loop, join(site, LOOPS, e.loop));
-      else rmSync(join(site, LOOPS, e.loop), { force: true });
+      else if (e.loop) rmSync(join(site, LOOPS, e.loop), { force: true });
       e.state = 'ok';
       log(`  ${e.id}: ${((Date.now() - began) / 1000).toFixed(1)} s`);
     };

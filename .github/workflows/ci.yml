@@ -25,6 +25,7 @@ jobs:
       pull-requests: read
     outputs:
       code: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.code_candidate == 'true' || steps.filter.outputs.code_schema == 'true' || steps.filter.outputs.code_workflow == 'true' }}
+      cookbook: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.cookbook == 'true' }}
       openspec: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.openspec == 'true' }}
       site: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.site_files == 'true' || steps.filter.outputs.site_schema == 'true' || steps.filter.outputs.site_workflow == 'true' }}
     steps:
@@ -51,6 +52,8 @@ jobs:
               - 'docs/schemas/**'
             code_workflow:
               - '.github/workflows/ci.yml'
+            cookbook:
+              - 'site/cookbook/**'
             openspec:
               - 'openspec/**'
             site_files:
@@ -136,7 +139,8 @@ jobs:
   # test projects are built directly. Tests of Windows-only code are skipped there.
   test-linux:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    # The cookbook's recipes (site/cookbook) are theme folders the tool validates below, so a change to one runs this job.
+    if: needs.changes.outputs.code == 'true' || needs.changes.outputs.cookbook == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -180,6 +184,8 @@ jobs:
           $cli theme validate "$work/mine-theme" --fail-on-warnings
           $cli theme render --builtin carbon -o "$out/carbon.png"
           test -s "$out/carbon.png"
+          # every recipe of the site's theme cookbook is a theme folder and checks clean (docs/cookbook pages show these files).
+          $cli theme validate --all site/cookbook --fail-on-warnings
 
       - uses: actions/setup-node@v7
         with:

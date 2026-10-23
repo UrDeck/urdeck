@@ -1,7 +1,8 @@
 # The UrDeck website
 
 The site at <https://urdeck.app>: a landing page, the user documentation, and the "Tested on" page. It is an
-[Astro](https://astro.build) project (static output, no UI or CSS framework). Nothing outside `site/` needs Node.
+[Astro](https://astro.build) project (static output, no UI or CSS framework; MDX only for the documentation pages that place a
+generated table). Nothing outside `site/` needs Node.
 
 ```powershell
 cd site
@@ -23,6 +24,11 @@ the `site` job of a pull request:
 - The theme picker: every theme of `catalog.json` that has a deck in `media.json` is in the picker and has an accent rule
   (a theme without a deck is named in the build log as left out, a warning, since a theme may land before its media
   refresh), and every file a media slot lists for any theme is in the output.
+- Every link to a section (`/docs/themes/reference/#card`) finds an element with that id on the page it leads to.
+- **The generated reference is complete** (`scripts/completeness.mjs`): every key of the two published schemas is in a table,
+  every setting of every widget is in its widget's table, every finding code is in a table and on the troubleshooting page, and
+  every built-in theme, background and widget is on a documentation page. A failure lists what is missing. A cookbook recipe
+  without a picture is named in the build log, a warning, as a theme without a deck is.
 
 ## Where things are
 
@@ -30,17 +36,44 @@ Content and layout are kept apart, so a new design replaces the second without t
 
 | Path | Holds |
 |---|---|
-| `src/content/docs/` | The documentation pages, Markdown. `section` and `order` in the front matter place a page in the navigation. |
+| `src/content/docs/` | The documentation pages, Markdown or MDX (MDX where a page places a table component). `section` and `order` in the front matter place a page in the navigation. A widget's page also has `settings:`, the meaning of each setting. |
+| `cookbook/<recipe>/` | The theme cookbook: `theme.json` (shown as it is), `recipe.json` (title, summary, order, what to show, background), `README.md` (the explanation) and any asset, such as an icon set. Validated in CI; its picture is made by the media pipeline. |
 | `src/data/tested-on.json` | The hardware list; the "Tested on" page is made from it. |
 | `src/pages/` | The landing page, "Tested on", and the route for the documentation. The landing copy is in `index.astro`. |
 | `src/layouts/`, `src/components/`, `src/styles/` | Layout and style. `home.css` is the landing page's, `global.css` is shared with the documentation. |
+| `src/lib/reference.mjs` | Reads the published schemas and the catalog into table rows, and records what the components rendered (`.astro/urdeck-reference.jsonl`, reset when a build starts) for the completeness check. |
 | `src/lib/catalog.ts` | The themes, backgrounds and widgets the pages list, read from `src/generated/catalog.json` and `media.json`: one with media appears, one without is left out. Nothing about the product is typed into the site. |
-| `src/data/site-copy.json` | The only words kept by hand: a theme's `alt`, a widget's `description` and, per size, a `note` and `alt`. All optional; an entry without them gets text made from the catalog (widget id, then size). |
+| `src/data/site-copy.json` | The only words kept by hand: a theme's `alt`, a widget's `description` and, per size, a `note` and `alt`, and what a background's four palette colours mean (`backgrounds.<name>.palette`). All optional; an entry without them gets text made from the catalog (widget id, then size). |
 | `src/scripts/theme-head.js` | The visitor's theme, inlined in `<head>` by `Base.astro`. |
 | `src/generated/`, `public/generated/` | The site's pictures (`.webp`), loops (`.mp4`), `media.json` and `catalog.json`. **Generated** by `npm run media`; never edited by hand. See "Media" below. |
 | `showcase/` | The page every theme is shown with (`urdeck-config.json`) and the site's widget settings (`widgets.json`). |
 | `decks/<theme>/urdeck-config.json` | Optional: a page for one theme instead of the showcase page. None ships. |
 | `public/` | Served as they are: `CNAME`, the favicon, the fonts with their licences, and the generated loops. |
+
+## The generated reference
+
+The documentation does not repeat what the product already says. These components make tables from it (`src/components/`):
+
+| Component | Reads | Fails the build when |
+|---|---|---|
+| `SchemaTable` (`<SchemaTable schema="v2/theme.json" path="card" />`) | A published schema (`docs/schemas/`): a group and its keys, nested groups and `$ref`s followed. Key, value (type, names or range), default, meaning. | A key has no `description` of its own, or the path is not in the schema. |
+| `SettingsTable` (`<SettingsTable widget="clock" />`) | The widget's settings from `catalog.json` (name, type, default); the meanings from `settings:` in the front matter of `widgets/<id>`. | A setting has no meaning there, or a meaning is for a setting the widget no longer has. |
+| `FindingsTable` (`<FindingsTable prefix="THEME" />`) | The finding codes of `catalog.json` (`THEME` or `SHADER`), with severity and summary. | A code has no summary. |
+| `BuiltinList` (`kind="themes"`, `"backgrounds"` or `"widgets"`) | Every built-in of the catalog, with its picture from the media manifest when there is one. | (The completeness check fails when a page that should list a kind does not.) |
+| `WidgetSizes` (`<WidgetSizes widget="clock" />`) | A widget at every size the catalog previews, in the visitor's theme (`ProductMedia`). | |
+
+A new theme key therefore needs a `description` in `docs/schemas/v2/theme.json` and nothing else on the site; a new widget
+setting needs one line under `settings:` in its page; a new finding code needs a summary in `FindingCatalog`.
+`catalog.json` is `urdeck-cli catalog export` (`npm run media` refreshes it).
+
+## The cookbook
+
+`cookbook/<recipe>/` holds `theme.json`, `recipe.json`, `README.md` and anything the theme needs. `recipe.json` is
+`{ "title", "summary", "order", "show": "page" | "dock" | { "widget": "<typeId>", "size": "WxH" }, "background": "<name>" | null }`.
+The recipe's page (`src/pages/docs/cookbook/[recipe].astro`) shows the summary, the `theme.json` as it is (imported raw), the
+picture and the README's text; the cookbook page lists them and the navigation follows `order`. CI validates every recipe with
+`urdeck-cli theme validate --all site/cookbook --fail-on-warnings`. Adding a folder adds a page and, at the next media refresh, a
+picture (`npm run media -- cookbook`).
 
 ## The theme picker
 
@@ -74,7 +107,9 @@ personal data. What the site needs is **computed**, never listed by hand (`opens
   when the theme or its background moves;
 - a picture of every widget at every size it declares for previews, in every theme, and a loop when the widget moves by
   itself (the clock's flip, the weather icons, the stats keyframes);
-- a poster and a loop of every background, in the colours of the theme it is shown with.
+- a poster and a loop of every background, in the colours of the theme it is shown with;
+- one picture of every cookbook recipe (`cookbook/<recipe>/`), drawn from the recipe's own folder as a theme with what its
+  `recipe.json` asks to show (the sample page, the dock or one widget at a size), over its background or none; recipes have no loops.
 
 Adding a theme, widget, size or background adds its files; removing one deletes them.
 
@@ -83,7 +118,7 @@ cd site
 npm run media                    # render what is missing or stale
 npm run media -- --status        # say what is missing, stale and unneeded; render nothing
 npm run media -- --all           # render everything
-npm run media -- decks|widgets|backgrounds [name...]   # only some (carbon, clock-4x2, aurora)
+npm run media -- decks|widgets|backgrounds|cookbook [name...]   # only some (carbon, clock-4x2, aurora, hard-shadow)
 npm test                         # the generator's tests (a stub catalog and a fake renderer)
 ```
 
@@ -92,7 +127,7 @@ It needs .NET (the tool is built from source), Node 22 and `ffmpeg` on the PATH 
 (about 1 % of pixels), so the committed files are the ones made on Linux, by the workflow below.
 
 **Folders.** `src/generated/` holds `decks/<theme>.webp`, `widgets/<widget>-<WxH>-<theme>.webp`,
-`backgrounds/<name>.webp` (lossless WebP, optimised by Astro), `media.json` and `catalog.json`; `public/generated/` holds
+`backgrounds/<name>.webp`, `cookbook/<recipe>.webp` (lossless WebP, optimised by Astro), `media.json` and `catalog.json`; `public/generated/` holds
 the loops (`.mp4`, H.264, played forwards then backwards so they have no jump; a loop's first frame is its picture). Files in
 these folders that the matrix does not name are deleted. Nothing else is written.
 

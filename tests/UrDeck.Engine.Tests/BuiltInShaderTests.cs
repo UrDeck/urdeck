@@ -20,7 +20,7 @@ public sealed class BuiltInShaderTests : IDisposable
 
     public static TheoryData<string> Names() => [.. ShaderStore.BuiltInNames];
 
-    // The four first built-ins drift without a period and jump once at the wrap (docs/backgrounds.md, "Time"); the twelve
+    // The four first built-ins drift without a period and jump once at the wrap (the site's "Speed, colours and images" page); the twelve
     // added later are periodic.
     public static TheoryData<string> PeriodicNames() => [.. ShaderStore.BuiltInNames.Except(["plasma", "aurora", "gradient", "julia"])];
 
@@ -106,18 +106,17 @@ public sealed class BuiltInShaderTests : IDisposable
         Assert.Equal(ShaderStore.BuiltInNames.Order(StringComparer.Ordinal), embedded);
     }
 
-    [Theory]
-    [InlineData("docs", "backgrounds.md")]
-    [InlineData("site", "src", "content", "docs", "backgrounds.md")]
-    public void Every_built_in_is_listed_in_the_documentation(params string[] path)
+    // The documentation lists the built-ins from the product's catalog, and the site's build fails when one is missing
+    // (site/scripts/completeness.mjs); what this keeps is that the page that lists them still asks for the list.
+    [Fact]
+    public void The_documentation_lists_the_built_ins_from_the_catalog()
     {
         string root = AppContext.BaseDirectory;
         while (!File.Exists(Path.Combine(root, "urdeck.slnx")))
             root = Path.GetDirectoryName(root)!;
-        string text = File.ReadAllText(Path.Combine([root, .. path]));
+        string text = File.ReadAllText(Path.Combine(root, "site", "src", "content", "docs", "backgrounds.mdx"));
 
-        foreach (string name in ShaderStore.BuiltInNames)
-            Assert.Contains($"| `{name}` |", text);
+        Assert.Contains("<BuiltinList kind=\"backgrounds\" />", text);
     }
 
     [Fact]

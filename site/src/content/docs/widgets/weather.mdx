@@ -1,0 +1,58 @@
+---
+title: Weather
+description: A weather card with animated or outline icons and a forecast, for any place.
+section: Widgets
+order: 12
+settings:
+  animateForecast: "4x4 only: `true` lets the forecast icons move as `motion` says. Off by default: each moving icon costs about 2.7 MB of memory. No effect under a theme that names an icon set."
+  days: "4x4 only: how many forecast days, 1 to 7 (default 5)."
+  label: "Absent: the place's resolved name. A text: shown instead. `\"\"`: no place is shown."
+  latitude: "Decimal degrees. When both `latitude` and `longitude` are set they replace `location` and no search is made."
+  location: "The place as text: a city (`Zurich`), `City, ST` (`Portland, OR`), `City, State` (`Portland, Oregon`), a postal code (`90210`), optionally with a country code after a comma (`Paris, FR`). It is looked up once per run and the first match is used; `urdeck.log` lists the other matches, so an ambiguous name (`Springfield`) can be fixed by adding a state or by giving coordinates. There is no default: with none the card shows dashes."
+  longitude: "Decimal degrees. See `latitude`."
+  motion: "`periodic` (the default) plays the icon's loop once a minute and rests on its first frame in between; `full` loops it all the time; `off` shows only the first frame. No effect under a theme that names an icon set, whose icons do not move."
+  periodSeconds: "Seconds between loops in the `periodic` mode (default 60). No effect under a theme that names an icon set."
+  unit: "`celsius` or `fahrenheit`. Absent: the region's. It chooses the system of the whole card: Celsius is kilometres per hour, millimetres and centimetres; Fahrenheit is miles per hour and inches."
+---
+
+import SettingsTable from '../../../components/SettingsTable.astro';
+import WidgetSizes from '../../../components/WidgetSizes.astro';
+
+`urdeck.widgets.weather` is a 4x2 card with an icon (an animated colour one, or an outline glyph in themes that have an icon
+set; day and night variants), the temperature, the condition in words, today's high and low, the place, and sunrise and
+sunset in the place's own local time. At 4x4 the same card sits on top of a forecast: what it feels like, the humidity and
+the wind, the snow expected over the days shown, and one column per day with the weekday, an icon, high and low, the chance
+of precipitation and the rain and snow expected.
+
+It takes its data from the `weather` provider (Open-Meteo) and needs no provider setting: the place is typed into the widget.
+
+<WidgetSizes widget="weather" />
+
+```json
+{ "typeId": "urdeck.widgets.weather", "col": 0, "row": 0, "width": 4, "height": 2, "location": "Portland, OR" }
+{ "typeId": "urdeck.widgets.weather", "col": 0, "row": 2, "width": 4, "height": 4, "location": "Portland, OR", "unit": "fahrenheit", "days": 5 }
+```
+
+## Settings
+
+<SettingsTable widget="weather" />
+
+The card's parts follow the [theme](/docs/themes/): at 4x4 the rule between now and the forecast is the theme's `divider`, each
+forecast day can sit on the theme's `well`, and the condition on its `chip` (a pill, in some themes). A theme that sets none of
+them draws the card as before.
+
+## Icons
+
+With a theme that names an [icon set](/docs/themes/icons/) (`"icons": { "set": "outline" }`, as Carbon and Paper do) the card
+draws outline glyphs instead of the animated colour icons, for the current condition and for each forecast day, in the theme's
+`icons.stroke` and `icons.tint`, with its `icons.glow` if it has one. They are pictures: nothing moves, the card is repainted
+only when what it shows changes, and it keeps no animation or image cache. With the tint `ramp` each glyph takes its colour from
+the theme's `colors.ramp` by temperature, from -10 to 40 degrees Celsius (the current temperature for the main icon, the day's
+high for a forecast day, whichever unit the card shows). A theme with no icon set shows the animated icons.
+
+## Places and updates
+
+Any number of weather cards can show different places on one page; two cards with the same place share one request.
+A new or edited place is fetched at once. The data is fetched every 15 minutes
+(`"providers": { "weather": { "intervalMs": 600000 } }`; the minimum is 5 minutes). When the network is down the values
+stay on the card in the dimmed colour and come back by themselves.

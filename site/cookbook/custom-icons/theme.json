@@ -1,0 +1,18 @@
+{
+  "$schema": "https://urdeck.app/schemas/v2/theme.json",
+  "format": 2,
+  "meta": {
+    "name": "Custom icons",
+    "description": "The weather card drawn with an icon set of the theme's own.",
+    "mode": "dark"
+  },
+  "colors": {
+    "cardFill": "#10131f",
+    "accent": "#7fd1ff"
+  },
+  "icons": {
+    "set": "mine",
+    "stroke": 0.075,
+    "tint": "accent"
+  }
+}

@@ -369,6 +369,190 @@
       "widget": null
     },
     {
+      "background": null,
+      "files": [
+        "src/generated/cookbook/chamfered-cards.webp"
+      ],
+      "id": "cookbook:chamfered-cards",
+      "key": "60ec6535b545b44ec82d43d208dc4746235561c343c324d211297c69dfcf2445",
+      "kind": "cookbook",
+      "settings": {
+        "background": "none",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32",
+        "show": "page",
+        "size": "1100x1920",
+        "themeDir": "site/cookbook/chamfered-cards",
+        "widget": null,
+        "widgetConfig": null,
+        "widgetSize": null
+      },
+      "size": null,
+      "theme": "chamfered-cards",
+      "widget": null
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/cookbook/circular-dock.webp"
+      ],
+      "id": "cookbook:circular-dock",
+      "key": "00bffe467f497c41fa3639bacd0e47f20f9e6225ca0e0a5c63b82927e29b09f4",
+      "kind": "cookbook",
+      "settings": {
+        "background": "none",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32",
+        "show": "dock",
+        "size": "1100x1920",
+        "themeDir": "site/cookbook/circular-dock",
+        "widget": null,
+        "widgetConfig": null,
+        "widgetSize": null
+      },
+      "size": null,
+      "theme": "circular-dock",
+      "widget": null
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/cookbook/custom-icons.webp"
+      ],
+      "id": "cookbook:custom-icons",
+      "key": "d170a16bd225066da138683cb9f3eaa1264a92e759896c71c9a16107a63eaf52",
+      "kind": "cookbook",
+      "settings": {
+        "background": "none",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "show": "widget",
+        "size": null,
+        "themeDir": "site/cookbook/custom-icons",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2"
+      },
+      "size": "4x2",
+      "theme": "custom-icons",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/cookbook/dotted-page.webp"
+      ],
+      "id": "cookbook:dotted-page",
+      "key": "04790acc4239b94e3503b5701bc1286b4dabf678768afca1d4470c94bfb76618",
+      "kind": "cookbook",
+      "settings": {
+        "background": "none",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32",
+        "show": "page",
+        "size": "1100x1920",
+        "themeDir": "site/cookbook/dotted-page",
+        "widget": null,
+        "widgetConfig": null,
+        "widgetSize": null
+      },
+      "size": null,
+      "theme": "dotted-page",
+      "widget": null
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/cookbook/gradient-border.webp"
+      ],
+      "id": "cookbook:gradient-border",
+      "key": "20134c1803ea2cc39d22155ad322006ea300b9301be8c83cea40e3583d3d6de6",
+      "kind": "cookbook",
+      "settings": {
+        "background": "none",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32",
+        "show": "page",
+        "size": "1100x1920",
+        "themeDir": "site/cookbook/gradient-border",
+        "widget": null,
+        "widgetConfig": null,
+        "widgetSize": null
+      },
+      "size": null,
+      "theme": "gradient-border",
+      "widget": null
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/cookbook/hard-shadow.webp"
+      ],
+      "id": "cookbook:hard-shadow",
+      "key": "fbc2c863e44ad5d2da95266d876c7dd6332d13ee9543814cc7af733b112efbac",
+      "kind": "cookbook",
+      "settings": {
+        "background": "none",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32",
+        "show": "page",
+        "size": "1100x1920",
+        "themeDir": "site/cookbook/hard-shadow",
+        "widget": null,
+        "widgetConfig": null,
+        "widgetSize": null
+      },
+      "size": null,
+      "theme": "hard-shadow",
+      "widget": null
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/cookbook/led-bars.webp"
+      ],
+      "id": "cookbook:led-bars",
+      "key": "b0cd940b3a2a398cd9715e95dee285383f9110da1630f0e287fa5f9e92ab3a32",
+      "kind": "cookbook",
+      "settings": {
+        "background": "none",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "show": "widget",
+        "size": null,
+        "themeDir": "site/cookbook/led-bars",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2"
+      },
+      "size": "4x2",
+      "theme": "led-bars",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/cookbook/tach-redline.webp"
+      ],
+      "id": "cookbook:tach-redline",
+      "key": "622ed5cfa450157337429990c5a29929f0fd6c732216ca2908fca47901af43ec",
+      "kind": "cookbook",
+      "settings": {
+        "background": "none",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "show": "widget",
+        "size": null,
+        "themeDir": "site/cookbook/tach-redline",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4"
+      },
+      "size": "4x4",
+      "theme": "tach-redline",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
       "background": "plotter",
       "files": [
         "src/generated/decks/blueprint.webp",

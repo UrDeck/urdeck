@@ -335,7 +335,7 @@ The three changes are listed under "Suggested order". Left for later, each with 
 
 ## 5. Theme and card (`openspec/changes/archive/2026-10-03-theme-and-card`)
 
-**Status:** done (SDK 0.2.0.0; paint cost in `docs/perf/theme-card-paint.md`, format in `docs/themes.md`).
+**Status:** done (SDK 0.2.0.0; paint cost in `docs/perf/theme-card-paint.md`, format in the site's theme reference).
 
 Themes as data (colours, card shape, typography, stroke; a folder with optional bundled fonts), a host-drawn card
 behind every widget, the gap in the grid layout, and the first shared components (readout, text line), with the Clock
@@ -428,7 +428,7 @@ What is settled and what is open, so the next session starts from context:
   first are in design decision 10 of `openspec/changes/archive/2026-10-05-data-providers/design.md` and `docs/perf/data-providers.md`.
   Revisit this if gauges make the difference more noticeable.
 - Text sizes are theme values; a gauge's inner readout must use them like every other readout, so the theme alone decides
-  how large the small text is (it was enlarged twice after the first look at the panel, see `docs/themes.md`).
+  how large the small text is (it was enlarged twice after the first look at the panel, see the site's theme reference).
 
 **Weather widget (explored 2026-10-08; the first change is 4x2 only, 4x4 is its own change).** Settled with the owner,
 or checked against the code and the spike (`H:\projects\urdeck-render-spike`, `render-host-spike.md`):
@@ -558,7 +558,7 @@ Static image, video, and generative visualizations per page (the `pages[].backgr
 Video is expensive: gate it behind the performance budget and measure. **Model:** Sonnet.
 
 **Status (2026-10-12):** the image and the painted (shader) background are implemented in `backgrounds`
-(`openspec/changes/archive/2026-10-12-backgrounds`; docs in `docs/backgrounds.md`): a top-level `background` setting, four built-in SkSL
+(`openspec/changes/archive/2026-10-12-backgrounds`; docs on the site's backgrounds pages): a top-level `background` setting, four built-in SkSL
 shaders (`plasma`, `aurora`, `gradient`, `julia`) that draw with the theme's palette (`colors.backgroundPalette`), the
 user's own `backgrounds/<name>.sksl` with parameters read from its uniforms, a wallpaper image that covers the panel, 30
 frames per second on one GPU surface at a configurable `scale` (default 0.5), no frames while the deck is hidden or the

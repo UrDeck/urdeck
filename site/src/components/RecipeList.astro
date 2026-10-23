@@ -1,0 +1,18 @@
+---
+// The cookbook's recipes as a list with their pictures, from site/cookbook/.
+import { Image } from 'astro:assets';
+import { getRecipes } from '../lib/cookbook';
+
+const recipes = await getRecipes();
+---
+<ul class="recipes">
+  {recipes.map((r) => (
+    <li>
+      <a href={`/docs/cookbook/${r.id}/`}>
+        {r.image.image && <Image src={r.image.image} alt="" widths={[160, 320]} sizes="10rem" />}
+        <b>{r.title}</b>
+        <span>{r.summary}</span>
+      </a>
+    </li>
+  ))}
+</ul>

@@ -1,0 +1,84 @@
+---
+title: Choosing a background
+description: "A moving picture or a wallpaper behind the cards: the setting, what a theme chooses, and the sixteen built-in shaders."
+section: Backgrounds
+order: 30
+---
+
+import BuiltinList from '../../components/BuiltinList.astro';
+
+The deck can show a moving picture or a wallpaper behind its cards. It is one layer for the whole deck: pages slide over it,
+cards are drawn on it with their own transparency (a translucent theme such as `glass` lets it show through), and it never takes
+a swipe or a tap.
+
+A theme can bring a background of its own. A configuration without a `background` shows the theme's choice, and
+**`"background": { "type": "none" }` switches every background off**. A theme that chooses nothing, and a background that is off,
+cost nothing: no surface, no frames.
+
+## The `background` setting
+
+A top-level object in `urdeck-config.json`. It applies when the file is saved, without a restart.
+
+```json
+"background": { "type": "shader", "name": "aurora", "speed": 0.5, "angle": 30 }
+"background": { "type": "shader", "name": "plasma", "colors": ["#0f1a4d", "#8c268c", "#fa9e40"] }
+"background": { "type": "shader", "name": "my-thing", "scale": 0.25, "density": 3.0, "glow": "#ff8800" }
+"background": { "type": "image", "path": "D:/Pictures/wall.jpg" }
+"background": { "type": "none" }
+```
+
+| Key | For | Meaning | Default | Valid |
+|---|---|---|---|---|
+| `type` | all | `shader`, `image` or `none` (nothing else is needed for `none`) | required | those three |
+| `name` | shader | A built-in name, or a folder in `backgrounds/` (see [writing a background](/docs/backgrounds/writing/)) | required | letters, digits, `-`, `_` |
+| `speed` | shader | Multiplies time: 2 is twice as fast, 0 stops it | `1` | 0 to 10 |
+| `scale` | shader | The resolution it is drawn at, as a fraction of the panel's | `0.5` | 0.1 to 1 |
+| `colors` | shader | Replaces the theme's palette | the theme's | 1 to 4 colours |
+| `path` | image | The picture | required | see [images](/docs/backgrounds/speed-colours-images/#images) |
+| any other key | shader | A parameter of that shader | the shader's default | |
+
+A configuration with no `background`, or with `"background": null`, leaves the choice to the theme. A value that is wrong (not an
+object, an unknown `type`, a missing `name` or `path`) is logged and the deck shows what a failed background shows: the theme's
+still background if it has one, else its background colour. A `speed` or `scale` out of range is logged and the default is used.
+A page's own `background` is not supported: it is ignored, and `urdeck.log` says so; set the top-level one.
+
+## Theme backgrounds
+
+A theme can choose its background with its [`background` group](/docs/themes/reference/#background): a default shader
+(`background.default.name`), a still background (`background.static`: a gradient, a colour, or a picture file inside the theme's
+folder, scaled to cover) and a scrim. What the deck shows is the first of these that applies:
+
+1. the configuration's `background`, `none` included
+2. the theme's default shader
+3. the theme's still background
+4. the theme's background colour
+
+A background that fails (an unknown shader name, SkSL that does not compile, a missing picture) is logged once and the next one in
+the list is tried, so a theme with a still gradient shows the gradient when its shader cannot run. The theme's default is only
+used when the configuration says nothing: choose a shader or an image and that is shown, in the theme's palette unless you give
+`colors`; its still background is only what a failure of yours falls back to. A picture path that leaves the theme's folder is
+ignored with a warning, and built-in themes have no pictures.
+
+**To switch a theme's background off**, set `"background": { "type": "none" }`: the deck shows the theme's background colour and
+nothing else, no still background and no scrim. Deleting the `background` key brings the theme's choice back.
+
+The **scrim** (`background.scrim`, a colour and an alpha from 0 to 1) is a veil drawn over the shader, the picture or the still
+background, whoever chose it, so text keeps its contrast over a bright or busy one. It is not drawn over the plain background
+colour, and not when the background is `none`.
+
+The theme's `motion.level` does not change the background: a moving default moves. The user's [motion level](/docs/themes/motion/)
+does: when the configuration's `motion` is `reduced` or `off`, or the configuration has none and Windows' *Animation effects*
+setting is off, a moving shader is drawn still, at its first frame. `"motion": "full"` brings the motion back.
+
+The log says what was chosen, once per change: `Background: shader 'horizon' (built-in) from theme default, surface ...` (or
+`configuration`, `theme still background`), and `Background: colour (theme colour)` when only the colour is left.
+
+## The built-in backgrounds
+
+Sixteen ship with UrDeck. Each is a folder with a manifest, which is the source of truth for its settings and their ranges; the
+list below is made from them. Every one draws with the palette, so it follows the theme (see
+[colours](/docs/backgrounds/speed-colours-images/#colours)), except `spectrum`, whose colours are hues. "Palette" says what the
+four colours mean to that shader, in order. Each names the themes it suits, which an editor uses to recommend a pairing; it never
+decides what is shown.
+
+<BuiltinList kind="backgrounds" />

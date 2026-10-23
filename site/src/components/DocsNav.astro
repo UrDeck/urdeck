@@ -1,0 +1,22 @@
+---
+// The documentation's navigation, by section. Docs.astro shows it twice: as the sidebar and, on a narrow screen, inside a menu.
+import { sections } from '../lib/sections';
+import type { NavItem } from '../lib/docs';
+
+interface Props {
+  pages: NavItem[];
+  current: string;
+}
+
+const { pages, current } = Astro.props;
+---
+{sections.map((section) => (
+  <>
+    <h2>{section}</h2>
+    <ul>
+      {pages.filter((p) => p.section === section).map((p) => (
+        <li><a href={p.href} aria-current={current === p.href ? 'page' : undefined}>{p.title}</a></li>
+      ))}
+    </ul>
+  </>
+))}

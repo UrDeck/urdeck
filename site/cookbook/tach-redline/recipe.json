@@ -1,0 +1,7 @@
+{
+  "title": "Tach with a redline",
+  "summary": "A dial with ticks, a needle, and a red zone that only lights when the value is in it.",
+  "order": 5,
+  "show": { "widget": "urdeck.widgets.stats", "size": "4x4" },
+  "background": null
+}

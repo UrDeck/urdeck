@@ -49,7 +49,8 @@
           "description": "Blur radius, fraction of a cell."
         },
         "color": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The glow's colour. Default: the colour of the thing it glows round."
         },
         "alpha": {
           "type": "number",
@@ -77,23 +78,27 @@
     "meta": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Descriptive data. Never affects rendering.",
+      "description": "Descriptive data for an editor. It never affects what the deck draws.",
       "properties": {
         "name": {
           "type": "string",
           "description": "Display name for the editor."
         },
         "description": {
-          "type": "string"
+          "type": "string",
+          "description": "A sentence about the theme, for an editor's list."
         },
         "author": {
-          "type": "string"
+          "type": "string",
+          "description": "Who made the theme."
         },
         "license": {
-          "type": "string"
+          "type": "string",
+          "description": "The licence of the theme's files, for example `MIT` or `CC-BY-4.0`."
         },
         "version": {
-          "type": "string"
+          "type": "string",
+          "description": "The theme's own version, as text."
         },
         "mode": {
           "enum": [
@@ -106,19 +111,20 @@
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "Words that help find the theme, such as `dark` or `mono`."
         },
         "pairsWith": {
           "type": "object",
           "additionalProperties": true,
-          "description": "Recommendations for the config editor.",
+          "description": "Recommendations for a settings editor. They never decide what the deck shows.",
           "properties": {
             "backgrounds": {
               "type": "array",
               "items": {
                 "type": "string"
               },
-              "description": "Background names that suit this theme, best first. Names of built-in or user backgrounds."
+              "description": "Names of the backgrounds that suit this theme, best first. Built-in or yours; a name that does not exist is skipped. The theme's default background belongs in this list."
             }
           }
         },
@@ -130,10 +136,12 @@
             "description": "Screenshots inside the theme folder.",
             "properties": {
               "file": {
-                "type": "string"
+                "type": "string",
+                "description": "A picture of the theme: a file inside the theme folder."
               },
               "caption": {
-                "type": "string"
+                "type": "string",
+                "description": "Text to show with the picture."
               }
             }
           },
@@ -144,37 +152,57 @@
     "colors": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Colours.",
+      "description": "The theme's palette.",
       "properties": {
         "background": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The colour behind everything, and the colour a translucent card is blended over.",
+          "default": "#0f0f1a"
         },
         "cardFill": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The fill of a card. An alpha makes it translucent.",
+          "default": "#b31a1a2e"
         },
         "cardBorder": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The colour of a card's border (see `card.borderWidth`).",
+          "default": "#00000000"
         },
         "text": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The colour of values and text.",
+          "default": "#ffffff"
         },
         "textMuted": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The colour of labels and units, and of a reading that is not current.",
+          "default": "#b3ffffff"
         },
         "accent": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The colour of a gauge's fill and of highlights.",
+          "default": "#4a9eff"
         },
         "accentDim": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "Its alpha sets the opacity of a gauge's track, which is drawn in the gauge's own colour.",
+          "default": "#664a9eff"
         },
         "good": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The colour of a healthy level: the first step of the default ramp and the `OK` chip.",
+          "default": "#3ddc84"
         },
         "warning": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "A gauge's colour once its reading reaches the warning level.",
+          "default": "#ffb020"
         },
         "critical": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "A gauge's colour once its reading reaches the critical level.",
+          "default": "#ff5a4d"
         },
         "backgroundPalette": {
           "type": "array",
@@ -183,11 +211,17 @@
           "items": {
             "$ref": "#/$defs/color"
           },
-          "description": "v1: one to four shader colours."
+          "description": "One to four `#RRGGBB` colours the built-in background shaders draw with; fewer than four repeat the last. Without it the palette is made from `colors.background` mixed towards `colors.accent`.",
+          "default": [
+            "#0f0f1a",
+            "#1a2350",
+            "#3a2a6e",
+            "#24507a"
+          ]
         },
         "accent2": {
           "$ref": "#/$defs/color",
-          "description": "NEW. A second accent for gradients, markers, redlines, tab highlights. Default: accent."
+          "description": "A second accent for gradients, markers, redlines and highlights. Default: the accent."
         },
         "ramp": {
           "type": "array",
@@ -196,7 +230,7 @@
           "items": {
             "$ref": "#/$defs/color"
           },
-          "description": "NEW. Low-to-high load colours. Default: [good, warning, critical]. Used when gauge.colorBy is 'ramp'."
+          "description": "Two to five colours from low to high load. Default: good, warning, critical. Used when `gauge.colorBy` is `ramp`, and by `icons.tint` `ramp`."
         },
         "cardTints": {
           "type": "array",
@@ -205,56 +239,60 @@
           "items": {
             "$ref": "#/$defs/color"
           },
-          "description": "NEW. Fill colours that cards cycle through when card.tint is 'cycle' (Pop)."
+          "description": "One to eight fill colours the cards cycle through when `card.tint` is `cycle`."
         },
         "ink": {
           "$ref": "#/$defs/color",
-          "description": "NEW. Text colour used on top of an accent or tint fill. Default: whichever of text/background contrasts most with the fill."
+          "description": "The text colour on top of an accent or tint fill. Default: whichever of the text and background colours contrasts more with the fill."
         }
       }
     },
     "card": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Card chrome.",
+      "description": "The card each widget sits on: its shape, fill, border, light and shadow.",
       "properties": {
         "radius": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "v1. Capped at half the smaller side."
+          "description": "Corner radius, a fraction of a cell, limited to half the card's smaller side. 0 gives flat tiles.",
+          "default": 0.08
         },
         "borderWidth": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "v1."
+          "description": "Border width, a fraction of a cell. 0 draws no border.",
+          "default": 0
         },
         "gap": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "v1."
+          "description": "The space between neighbouring cards, a fraction of a cell.",
+          "default": 0.06
         },
         "padding": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "v1."
+          "description": "The space between a card's edge and its content, a fraction of a cell.",
+          "default": 0.065
         },
         "shape": {
           "enum": [
             "round",
             "chamfer"
           ],
-          "description": "NEW. 'chamfer' cuts corners with straight lines (Ember). Default round.",
+          "description": "`round` is the rounded rectangle of `radius`; `chamfer` cuts the corners named in `cutCorners` with a straight line (Ember).",
           "default": "round"
         },
         "cut": {
           "type": "number",
           "minimum": 0,
           "maximum": 0.5,
-          "description": "NEW. Chamfer size, fraction of a cell, capped at half the smaller side.",
+          "description": "Chamfer size, a fraction of a cell, limited to half the card's smaller side.",
           "default": 0.14
         },
         "cutCorners": {
@@ -269,7 +307,7 @@
             "description": "A card corner."
           },
           "uniqueItems": true,
-          "description": "NEW. Which corners are cut. Default [tr, bl].",
+          "description": "The corners a chamfer cuts: `tl`, `tr`, `br`, `bl`. An empty list gives square cards.",
           "default": [
             "tr",
             "bl"
@@ -277,7 +315,7 @@
         },
         "fillGradient": {
           "$ref": "#/$defs/gradient",
-          "description": "NEW. Replaces cardFill with a gradient."
+          "description": "A linear gradient that replaces `colors.cardFill`."
         },
         "borderStyle": {
           "enum": [
@@ -285,32 +323,32 @@
             "dashed",
             "none"
           ],
-          "description": "NEW. Default solid.",
+          "description": "`solid`, `dashed` (see `borderDash`) or `none`.",
           "default": "solid"
         },
         "borderDash": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Dash pattern for dashed/dotted.",
+          "description": "The dashes of a `dashed` border. Absent: a dash of three border widths and a gap of two. A dash is centred on every corner.",
           "properties": {
             "on": {
               "type": "number",
               "minimum": 0.002,
               "maximum": 1,
-              "description": "Dash length."
+              "description": "Length of a dash, a fraction of a cell."
             },
             "off": {
               "type": "number",
               "minimum": 0.002,
               "maximum": 1,
-              "description": "Gap length."
+              "description": "Length of a gap, a fraction of a cell."
             }
           }
         },
         "borderGradient": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Gradient border (Rigline, Ember, Obsidian hairline).",
+          "description": "Colours the border with a gradient, solid or dashed (Rigline, Ember).",
           "properties": {
             "colors": {
               "type": "array",
@@ -319,21 +357,21 @@
               "items": {
                 "$ref": "#/$defs/color"
               },
-              "description": "Stops."
+              "description": "The stops, evenly spaced."
             },
             "kind": {
               "enum": [
                 "linear",
                 "conic"
               ],
-              "description": "conic walks round the card, so it can rotate.",
+              "description": "`linear` runs across the card at `angle`; `conic` goes once round the card from the right, which is what lets it spin.",
               "default": "linear"
             },
             "angle": {
               "type": "number",
               "minimum": -360,
               "maximum": 360,
-              "description": "Linear only.",
+              "description": "Direction of a linear gradient in degrees: 0 left to right, 90 top to bottom.",
               "default": 135
             }
           },
@@ -344,7 +382,7 @@
         "borderAnimate": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Animated border. Bounded by motion.level.",
+          "description": "Moves the border. It moves only at the motion level `full`, and never on a dashed border or one without a width.",
           "properties": {
             "mode": {
               "enum": [
@@ -352,14 +390,14 @@
                 "spin",
                 "pulse"
               ],
-              "description": "spin rotates a conic gradient; pulse breathes the alpha.",
+              "description": "`spin` turns a conic `borderGradient` once round the card; `pulse` breathes the border's opacity; `none` leaves it still.",
               "default": "none"
             },
             "period": {
               "type": "number",
               "minimum": 1,
               "maximum": 120,
-              "description": "Seconds per cycle.",
+              "description": "Seconds for one cycle.",
               "default": 7
             }
           }
@@ -367,7 +405,7 @@
         "cornerMarks": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Registration marks (Carbon, Blueprint). Drawn outside the clip, so needs a bleed margin.",
+          "description": "Registration marks at the corners, on the card or outside it (Carbon, Blueprint).",
           "properties": {
             "style": {
               "enum": [
@@ -375,7 +413,7 @@
                 "bracket",
                 "tick"
               ],
-              "description": "Shape of each mark.",
+              "description": "`bracket` draws an L at each corner, `tick` one arm along the top or bottom edge, `none` draws no marks.",
               "default": "none"
             },
             "corners": {
@@ -390,93 +428,95 @@
                 "description": "A card corner."
               },
               "uniqueItems": true,
-              "description": "Default [tl, br]."
+              "description": "The corners that get a mark: `tl`, `tr`, `br`, `bl`. Default: `tl` and `br`."
             },
             "size": {
               "type": "number",
               "minimum": 0.01,
               "maximum": 0.5,
-              "description": "Arm length.",
+              "description": "Length of each arm, a fraction of a cell.",
               "default": 0.08
             },
             "thickness": {
               "type": "number",
               "minimum": 0.002,
               "maximum": 0.1,
-              "description": "Line width.",
+              "description": "Line width, a fraction of a cell.",
               "default": 0.01
             },
             "inset": {
               "type": "number",
               "minimum": -0.1,
               "maximum": 0.1,
-              "description": "Offset from the corner; negative sits outside the card.",
+              "description": "Distance from the card's edge to the mark's outer edge, a fraction of a cell. Negative puts the mark outside the card.",
               "default": 0
             },
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "The marks' colour. Default: the accent."
             }
           }
         },
         "shadow": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Drop shadow. Bleeds outside the card.",
+          "description": "A drop shadow under each card, soft or a hard offset. It is drawn under all the cards, never over a neighbour.",
           "properties": {
             "x": {
               "type": "number",
               "minimum": -0.5,
               "maximum": 0.5,
-              "description": "Offset.",
+              "description": "Horizontal offset, a fraction of a cell.",
               "default": 0
             },
             "y": {
               "type": "number",
               "minimum": -0.5,
               "maximum": 0.5,
-              "description": "Offset.",
+              "description": "Vertical offset, a fraction of a cell.",
               "default": 0
             },
             "blur": {
               "type": "number",
               "minimum": 0,
               "maximum": 1,
-              "description": "0 = hard offset (Pop)."
+              "description": "Blur, a fraction of a cell. 0 or absent gives a hard edge (Pop)."
             },
             "spread": {
               "type": "number",
               "minimum": -0.5,
               "maximum": 0.5,
-              "description": "",
+              "description": "How far the shadow grows beyond the card on every side, a fraction of a cell. Negative shrinks it.",
               "default": 0
             },
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "The shadow's colour. Default: black at 40 % opacity."
             }
           }
         },
         "glow": {
           "$ref": "#/$defs/glow",
-          "description": "NEW. Outer glow. Bleeds outside the card."
+          "description": "A glow round each card, blurred outwards from its shape (Rigline). Without `blur` it draws nothing."
         },
         "highlight": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Inset edge light (Prism).",
+          "description": "A line of light just inside the top or bottom edge of the card (Prism).",
           "properties": {
             "top": {
               "$ref": "#/$defs/color",
-              "description": "Specular line along the top edge."
+              "description": "Colour of the specular line along the top edge."
             },
             "bottom": {
               "$ref": "#/$defs/color",
-              "description": "Rim light along the bottom, inside."
+              "description": "Colour of the rim light along the bottom edge, inside the card."
             },
             "thickness": {
               "type": "number",
               "minimum": 0.001,
               "maximum": 0.1,
-              "description": "",
+              "description": "Line width, a fraction of a cell.",
               "default": 0.01
             }
           }
@@ -484,10 +524,11 @@
         "sheen": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. A radial light patch inside the card (Prism).",
+          "description": "A radial patch of light inside the card, over the fill and under the content (Prism).",
           "properties": {
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "The light's colour, fading to transparent at its edge. Without it there is no sheen."
             },
             "x": {
               "type": "number",
@@ -515,7 +556,7 @@
         "accentStrip": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. A lit line along one edge of every card, inside the clip (Carbon scan line, Rigline tile strips).",
+          "description": "A lit line along one edge of every card, inside it (Carbon's scan line, Rigline's tile strips).",
           "properties": {
             "side": {
               "enum": [
@@ -524,21 +565,21 @@
                 "left",
                 "right"
               ],
-              "description": "",
+              "description": "The edge the strip runs along: `top`, `bottom`, `left` or `right`.",
               "default": "bottom"
             },
             "thickness": {
               "type": "number",
               "minimum": 0.005,
               "maximum": 0.2,
-              "description": "",
+              "description": "Line width, a fraction of a cell.",
               "default": 0.03
             },
             "length": {
               "type": "number",
               "minimum": 0.1,
               "maximum": 1,
-              "description": "Fraction of the side.",
+              "description": "Length of the strip as a fraction of the side it runs along. It is centred on the side.",
               "default": 0.72
             },
             "colors": {
@@ -548,14 +589,15 @@
               "items": {
                 "$ref": "#/$defs/color"
               },
-              "description": "Cycled by slot index (compact cards) or by card index. Default [accent]."
+              "description": "Strip colours, one to eight, cycled card by card (and slot by slot in the dock). Default: the accent."
             },
             "fade": {
               "type": "boolean",
-              "description": "Fade to transparent along the length (Carbon's scan line)."
+              "description": "Fades the strip to transparent along its length (Carbon's scan line)."
             },
             "glow": {
-              "$ref": "#/$defs/glow"
+              "$ref": "#/$defs/glow",
+              "description": "A blurred copy of the strip laid under it, inside the card. A glow without `blur` draws nothing."
             }
           }
         },
@@ -564,25 +606,25 @@
             "none",
             "cycle"
           ],
-          "description": "NEW. 'cycle' fills cards from colors.cardTints in page order.",
+          "description": "`cycle` fills the cards from `colors.cardTints` in page order, row by row; `none` uses the card fill.",
           "default": "none"
         },
         "compact": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. A partial override applied to cards of 1x1 cell or less and to dock slots.",
+          "description": "Overrides for small cards: the dock's slots and page cards of one grid cell. A value left out is the page card's.",
           "properties": {
             "radius": {
               "type": "number",
               "minimum": 0,
               "maximum": 1,
-              "description": ""
+              "description": "Corner radius of a compact card, a fraction of a cell, in place of `card.radius`."
             },
             "borderWidth": {
               "type": "number",
               "minimum": 0,
               "maximum": 1,
-              "description": ""
+              "description": "Border width of a compact card, a fraction of a cell, in place of `card.borderWidth`."
             },
             "shape": {
               "enum": [
@@ -590,12 +632,12 @@
                 "chamfer",
                 "circle"
               ],
-              "description": "'circle' makes square cards round (Obsidian dock)."
+              "description": "`round`, `chamfer`, or `circle`, which makes a square card a circle (Obsidian's dock)."
             },
             "accentStrip": {
               "type": "object",
               "additionalProperties": true,
-              "description": "A lit strip on compact cards (Rigline tiles). Overrides card.accentStrip for them.",
+              "description": "A lit strip for compact cards (Rigline's tiles), merged over `card.accentStrip` key by key.",
               "properties": {
                 "side": {
                   "enum": [
@@ -604,21 +646,21 @@
                     "left",
                     "right"
                   ],
-                  "description": "",
+                  "description": "The edge the strip runs along: `top`, `bottom`, `left` or `right`.",
                   "default": "bottom"
                 },
                 "thickness": {
                   "type": "number",
                   "minimum": 0.005,
                   "maximum": 0.2,
-                  "description": "",
+                  "description": "Line width, a fraction of a cell.",
                   "default": 0.03
                 },
                 "length": {
                   "type": "number",
                   "minimum": 0.1,
                   "maximum": 1,
-                  "description": "Fraction of the side.",
+                  "description": "Length of the strip as a fraction of the side it runs along. It is centred on the side.",
                   "default": 0.72
                 },
                 "colors": {
@@ -628,17 +670,18 @@
                   "items": {
                     "$ref": "#/$defs/color"
                   },
-                  "description": "Cycled by slot index (compact cards) or by card index. Default [accent]."
+                  "description": "Strip colours, one to eight, cycled slot by slot. Default: the accent."
                 },
                 "glow": {
-                  "$ref": "#/$defs/glow"
+                  "$ref": "#/$defs/glow",
+                  "description": "A blurred copy of the strip laid under it, inside the card. A glow without `blur` draws nothing."
                 }
               }
             },
             "cornerMarks": {
               "type": "object",
               "additionalProperties": true,
-              "description": "Registration marks on compact cards. Overrides card.cornerMarks for them.",
+              "description": "Registration marks for compact cards, merged over `card.cornerMarks` key by key.",
               "properties": {
                 "style": {
                   "enum": [
@@ -646,7 +689,7 @@
                     "bracket",
                     "tick"
                   ],
-                  "description": "Shape of each mark.",
+                  "description": "`bracket` draws an L at each corner, `tick` one arm along the top or bottom edge, `none` draws no marks.",
                   "default": "none"
                 },
                 "corners": {
@@ -661,29 +704,30 @@
                     "description": "A card corner."
                   },
                   "uniqueItems": true,
-                  "description": "Default [tl, br]."
+                  "description": "The corners that get a mark: `tl`, `tr`, `br`, `bl`. Default: `tl` and `br`."
                 },
                 "size": {
                   "type": "number",
                   "minimum": 0.01,
                   "maximum": 0.5,
-                  "description": "Arm length."
+                  "description": "Length of each arm, a fraction of a cell."
                 },
                 "thickness": {
                   "type": "number",
                   "minimum": 0.002,
                   "maximum": 0.1,
-                  "description": "Line width."
+                  "description": "Line width, a fraction of a cell."
                 },
                 "inset": {
                   "type": "number",
                   "minimum": -0.1,
                   "maximum": 0.1,
-                  "description": "Offset from the corner; negative sits outside the card.",
+                  "description": "Distance from the card's edge to the mark's outer edge, a fraction of a cell. Negative puts the mark outside the card.",
                   "default": 0
                 },
                 "color": {
-                  "$ref": "#/$defs/color"
+                  "$ref": "#/$defs/color",
+                  "description": "The marks' colour. Default: the accent."
                 }
               }
             }
@@ -694,7 +738,7 @@
     "pattern": {
       "type": "object",
       "additionalProperties": true,
-      "description": "NEW. A page-level texture drawn over the background and under the cards (not per card).",
+      "description": "One texture over the whole window, above the background and under the cards. It does not slide with the pages.",
       "properties": {
         "kind": {
           "enum": [
@@ -704,45 +748,47 @@
             "hatch",
             "scanlines"
           ],
-          "description": "Default none.",
+          "description": "`dots`, `grid`, `hatch`, `scanlines` or `none`.",
           "default": "none"
         },
         "spacing": {
           "type": "number",
           "minimum": 0.02,
           "maximum": 2,
-          "description": "Distance between marks, fraction of a cell.",
+          "description": "Distance between marks, a fraction of a cell.",
           "default": 0.13
         },
         "majorEvery": {
           "type": "integer",
           "minimum": 2,
           "maximum": 20,
-          "description": "Every Nth line of a grid is drawn heavier (Blueprint: 5)."
+          "description": "Every Nth line of a `grid` is drawn heavier (Blueprint: 5)."
         },
         "thickness": {
           "type": "number",
           "minimum": 0.001,
           "maximum": 0.1,
-          "description": "Line width / dot radius.",
-              "default": 0.01
+          "description": "Line width, or a dot's radius, a fraction of a cell.",
+          "default": 0.01
         },
         "color": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The marks' colour. Default: the muted text colour at a sixteenth of its opacity."
         },
         "major": {
           "type": "object",
           "additionalProperties": true,
-          "description": "Style of the heavier lines.",
+          "description": "The look of a grid's heavier lines.",
           "properties": {
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "Colour of the heavier lines. Default: the pattern's own."
             },
             "thickness": {
               "type": "number",
               "minimum": 0.001,
               "maximum": 0.1,
-              "description": ""
+              "description": "Width of the heavier lines, a fraction of a cell. Default: the pattern's own."
             }
           }
         },
@@ -750,7 +796,7 @@
           "type": "number",
           "minimum": -180,
           "maximum": 180,
-          "description": "hatch/lines direction, degrees.",
+          "description": "Direction of a `hatch` in degrees from horizontal, rising to the right.",
           "default": 45
         }
       }
@@ -758,7 +804,7 @@
     "divider": {
       "type": "object",
       "additionalProperties": true,
-      "description": "NEW. The rule widgets draw between their sections.",
+      "description": "The rule widgets draw between their sections, such as the weather card's between now and the forecast.",
       "properties": {
         "style": {
           "enum": [
@@ -767,72 +813,79 @@
             "gradient",
             "dimension"
           ],
-          "description": "dimension = a line with end ticks and an optional centred label (Blueprint).",
+          "description": "`line`, `gradient`, `dimension` (a line with end ticks and an optional centred label, Blueprint) or `none`.",
           "default": "line"
         },
         "color": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The rule's colour. Default: the muted text colour at about a third of its opacity."
         },
         "thickness": {
           "type": "number",
           "minimum": 0.001,
           "maximum": 0.05,
-          "description": "",
-              "default": 0.01
+          "description": "Line width, a fraction of a cell.",
+          "default": 0.01
         },
         "gradientTo": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The colour a `gradient` rule fades to."
         }
       }
     },
     "well": {
       "type": "object",
       "additionalProperties": true,
-      "description": "NEW. A recessed rounded rectangle widgets draw behind grouped content such as the weather forecast days (Rigline). Absent = no well.",
+      "description": "A recessed rounded rectangle behind grouped content, such as each forecast day of the weather card (Rigline). Absent: no well.",
       "properties": {
         "fill": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The well's fill colour."
         },
         "radius": {
           "type": "number",
           "minimum": 0,
           "maximum": 0.5,
-          "description": "",
+          "description": "Corner radius, a fraction of a cell.",
           "default": 0.09
         },
         "border": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The well's border colour."
         }
       }
     },
     "chip": {
       "type": "object",
       "additionalProperties": true,
-      "description": "NEW. Small status labels (OK, WARM, rig online).",
+      "description": "A pill round short text: a gauge's status word (`OK`, `WARM`) and the weather card's condition.",
       "properties": {
         "shape": {
           "enum": [
             "none",
             "pill"
           ],
-          "description": "",
+          "description": "`pill` draws a pill round the text and shrinks it with the text; `none` draws only the text.",
           "default": "none"
         },
         "fill": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The pill's fill colour."
         },
         "border": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The pill's border colour."
         },
         "textColor": {
-          "$ref": "#/$defs/color"
+          "$ref": "#/$defs/color",
+          "description": "The colour of the text inside the pill."
         },
         "colorBy": {
           "enum": [
             "none",
             "status"
           ],
-          "description": "status tints the chip by good/warning/critical.",
+          "description": "`status` tints a gauge's status chip by its level (good, warning, critical); `none` keeps the chip's own colours.",
           "default": "status"
         }
       }
@@ -840,62 +893,71 @@
     "typography": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Type.",
+      "description": "Fonts, weights, sizes and the look of values and labels.",
       "properties": {
         "font": {
           "type": "string",
-          "description": "v1. Default family for every role."
+          "description": "The default font for every role: an installed family, or the name of a `.ttf` or `.otf` file in the theme folder.",
+          "default": "InterVariable.ttf"
         },
         "fonts": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Per-role overrides; each is a family or a file in the theme folder. Missing role falls back to typography.font.",
+          "description": "A font per role. A role without one uses `typography.font`.",
           "properties": {
             "value": {
-              "type": "string"
+              "type": "string",
+              "description": "Font of readout values: a family or a file in the theme folder."
             },
             "unit": {
-              "type": "string"
+              "type": "string",
+              "description": "Font of readout units: a family or a file in the theme folder."
             },
             "label": {
-              "type": "string"
+              "type": "string",
+              "description": "Font of readout labels: a family or a file in the theme folder."
             }
           }
         },
         "weights": {
           "type": "object",
           "additionalProperties": true,
-          "description": "v1.",
+          "description": "Font weight per role. A variable font takes it through its weight axis; a static font is used as it is.",
           "properties": {
             "value": {
               "type": "number",
               "minimum": 1,
               "maximum": 1000,
-              "description": ""
+              "description": "Weight of readout values.",
+              "default": 600
             },
             "unit": {
               "type": "number",
               "minimum": 1,
               "maximum": 1000,
-              "description": ""
+              "description": "Weight of readout units.",
+              "default": 500
             },
             "label": {
               "type": "number",
               "minimum": 1,
               "maximum": 1000,
-              "description": ""
+              "description": "Weight of readout labels.",
+              "default": 400
             },
             "body": {
               "type": "number",
               "minimum": 1,
               "maximum": 1000,
-              "description": ""
+              "description": "Weight of body text.",
+              "default": 400
             },
             "title": {
               "type": "number",
               "minimum": 1,
               "maximum": 1000,
-              "description": ""
+              "description": "Weight of titles.",
+              "default": 300
             }
           }
         },
@@ -903,37 +965,41 @@
           "type": "number",
           "minimum": 0.005,
           "maximum": 1,
-          "description": "v1."
+          "description": "Size of labels, a fraction of a cell.",
+          "default": 0.091
         },
         "bodySize": {
           "type": "number",
           "minimum": 0.005,
           "maximum": 1,
-          "description": "v1."
+          "description": "Size of body text, a fraction of a cell.",
+          "default": 0.0845
         },
         "titleSize": {
           "type": "number",
           "minimum": 0.005,
           "maximum": 1,
-          "description": "v1."
+          "description": "Size of titles, a fraction of a cell.",
+          "default": 0.11
         },
         "unitRatio": {
           "type": "number",
           "minimum": 0.05,
           "maximum": 1,
-          "description": "v1."
+          "description": "The size of a readout's unit as a fraction of its value's size.",
+          "default": 0.4
         },
         "valueScale": {
           "type": "number",
           "minimum": 0.5,
           "maximum": 2,
-          "description": "NEW. Multiplies the readout's size (Pop and Obsidian run big).",
+          "description": "Multiplies the size a widget asks of a readout, never beyond the size at which value, unit and label fill their rectangle (Pop and Obsidian run big).",
           "default": 1
         },
         "case": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Letter case applied at draw time.",
+          "description": "Letter case applied when text is drawn.",
           "properties": {
             "label": {
               "enum": [
@@ -941,7 +1007,7 @@
                 "upper",
                 "lower"
               ],
-              "description": "",
+              "description": "Case of readout labels and of text lines at the label step: `none`, `upper` or `lower`.",
               "default": "none"
             },
             "title": {
@@ -950,7 +1016,7 @@
                 "upper",
                 "lower"
               ],
-              "description": "",
+              "description": "Case of text lines at the title step: `none`, `upper` or `lower`.",
               "default": "none"
             }
           }
@@ -958,25 +1024,25 @@
         "tracking": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Letter spacing in em. Applied per glyph at draw time; the Readout's equal-width digits are kept.",
+          "description": "Letter spacing in em, added after each character but the last. Equal-width digits stay equal.",
           "properties": {
             "value": {
               "type": "number",
               "minimum": -0.1,
               "maximum": 0.6,
-              "description": "em"
+              "description": "Spacing of readout values, in em."
             },
             "label": {
               "type": "number",
               "minimum": -0.1,
               "maximum": 0.6,
-              "description": "em"
+              "description": "Spacing of readout labels and label lines, in em."
             },
             "title": {
               "type": "number",
               "minimum": -0.1,
               "maximum": 0.6,
-              "description": "em"
+              "description": "Spacing of title lines, in em."
             }
           }
         },
@@ -985,20 +1051,20 @@
             "off",
             "auto"
           ],
-          "description": "NEW. off leaves a font's optical size axis (opsz) at its default; auto sets it per role: the top of the axis for value and unit, the role's pixel size for label, body and title. A font without the axis is unaffected.",
+          "description": "`off` leaves a font's optical size axis (`opsz`) where the font puts it; `auto` sets it for each role: the top of the axis for values and units, the role's pixel size for labels, body and titles. A font without the axis is unaffected.",
           "default": "off"
         },
         "slant": {
           "type": "number",
           "minimum": 0,
           "maximum": 20,
-          "description": "NEW. Synthetic skew of the value, degrees. Prefer a real italic file when the family has one.",
+          "description": "Leans a readout's value to the right, in degrees. Prefer a real italic file when the family has one.",
           "default": 0
         },
         "valueFill": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Fills the value text with a gradient (Rigline clock).",
+          "description": "Fills the value text with a gradient (Rigline's clock).",
           "properties": {
             "colors": {
               "type": "array",
@@ -1007,47 +1073,49 @@
               "items": {
                 "$ref": "#/$defs/color"
               },
-              "description": "Gradient stops."
+              "description": "Gradient stops, two to six, evenly spaced."
             },
             "angle": {
               "type": "number",
               "minimum": -360,
               "maximum": 360,
-              "description": "",
+              "description": "Direction in degrees: 0 left to right, 90 top to bottom.",
               "default": 0
             }
           }
         },
         "valueGlow": {
           "$ref": "#/$defs/glow",
-          "description": "NEW. Glow behind value text."
+          "description": "A blurred copy behind the value text."
         }
       }
     },
     "stroke": {
       "type": "object",
       "additionalProperties": true,
-      "description": "v1.",
+      "description": "How components that draw lines draw them.",
       "properties": {
         "thickness": {
           "type": "number",
           "minimum": 0.001,
           "maximum": 1,
-          "description": "v1."
+          "description": "Line thickness as a fraction of the drawn element.",
+          "default": 0.08
         },
         "cap": {
           "enum": [
             "round",
             "square"
           ],
-          "description": "v1."
+          "description": "The ends of a line: `round` or `square`.",
+          "default": "round"
         }
       }
     },
     "gauge": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Gauges.",
+      "description": "The shape of a gauge and the parts it can have.",
       "properties": {
         "style": {
           "enum": [
@@ -1059,7 +1127,7 @@
             "marker",
             "thickbar"
           ],
-          "description": "v1 had ring|bar|verticalBar. NEW: meter (thin bar with ticks and scale), tach (arc with ticks, redline and a needle), marker (hairline ring/bar with a jewel), thickbar (heavy outlined bar). A widget's explicit style still wins.",
+          "description": "The shape a gauge takes when a widget asks for the theme's: `ring`, `bar`, `verticalBar`, `meter` (a thin bar with ticks and a scale), `tach` (an arc with ticks, a redline and a needle), `marker` (a hairline ring or bar with a jewel) or `thickbar` (a heavy outlined bar). A widget's own style wins.",
           "default": "ring"
         },
         "labelPosition": {
@@ -1069,7 +1137,7 @@
             "below",
             "above"
           ],
-          "description": "NEW. Where a gauge's label sits. auto keeps the v1 placement (Prism: below).",
+          "description": "Where a gauge's label sits. `auto` keeps the default placement (Prism: below).",
           "default": "auto"
         },
         "layout": {
@@ -1077,33 +1145,33 @@
             "auto",
             "stacked"
           ],
-          "description": "NEW. stacked draws a bar with the readout above, left-aligned, and the track at the bottom (Carbon). A meter and a thick bar are stacked by definition. auto keeps the bar's own layout.",
+          "description": "`stacked` draws a bar with the readout above, left-aligned, and the track at the bottom (Carbon). A meter and a thick bar are stacked by definition; `auto` keeps the bar's own layout.",
           "default": "auto"
         },
         "readoutGap": {
           "type": "number",
           "minimum": 0,
           "maximum": 4,
-          "description": "NEW. The space between a bar's, meter's or thick bar's track and its readout, in thicknesses of the track.",
+          "description": "The space between a bar's, meter's or thick bar's track and its readout, in thicknesses of the track.",
           "default": 0.5
         },
         "sweep": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Ring/tach/marker geometry.",
+          "description": "The arc a ring, tach or marker gauge covers.",
           "properties": {
             "start": {
               "type": "number",
               "minimum": -360,
               "maximum": 360,
-              "description": "Degrees, 0 = 3 o'clock, clockwise. v1 ring: 135.",
+              "description": "Where the arc starts, in degrees: 0 is 3 o'clock, clockwise. The default ring starts at 135.",
               "default": 135
             },
             "span": {
               "type": "number",
               "minimum": 30,
               "maximum": 360,
-              "description": "v1 ring: 270.",
+              "description": "How many degrees the arc covers. The default ring covers 270.",
               "default": 270
             }
           }
@@ -1111,78 +1179,82 @@
         "segments": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Chops the fill into LED blocks.",
+          "description": "Chops the fill, and the track, into LED-style blocks.",
           "properties": {
             "length": {
               "type": "number",
               "minimum": 0.005,
               "maximum": 1,
-              "description": "Segment length (bars) or arc length in cells (rings)."
+              "description": "Length of a segment: along a bar, a fraction of a cell; round a ring, the arc length in cells."
             },
             "gap": {
               "type": "number",
               "minimum": 0,
               "maximum": 1,
-              "description": "Space between segments."
+              "description": "The space between segments, in the same unit as the length."
             }
           }
         },
         "outline": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Outline round the track (thickbar).",
+          "description": "An outline round the track (the thick bar).",
           "properties": {
             "width": {
               "type": "number",
               "minimum": 0.002,
               "maximum": 0.2,
-              "description": ""
+              "description": "Outline width, a fraction of a cell."
             },
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "The outline's colour."
             }
           }
         },
         "ticks": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Tick marks on rings/tach/meter.",
+          "description": "Tick marks on rings, tachs and meters.",
           "properties": {
             "count": {
               "type": "integer",
               "minimum": 2,
-              "maximum": 60
+              "maximum": 60,
+              "description": "How many ticks. A tach with no ticks group has 28; a ticks group that leaves this out has 11."
             },
             "majorEvery": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 20
+              "maximum": 20,
+              "description": "Every Nth tick is longer."
             },
             "length": {
               "type": "number",
               "minimum": 0.005,
               "maximum": 0.5,
-              "description": ""
+              "description": "Tick length, a fraction of a cell."
             },
             "thickness": {
               "type": "number",
               "minimum": 0.001,
               "maximum": 0.05,
-              "description": ""
+              "description": "Tick width, a fraction of a cell."
             },
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "The ticks' colour."
             },
             "labels": {
               "type": "boolean",
-              "description": "Print numbers at major ticks."
+              "description": "Prints a number at each major tick, from 0 to 100."
             }
           }
         },
         "scale": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Scale labels under a bar (Paper).",
+          "description": "Labels printed under a bar (Paper).",
           "properties": {
             "labels": {
               "type": "array",
@@ -1191,37 +1263,39 @@
               },
               "minItems": 2,
               "maxItems": 11,
-              "description": "Printed under a bar at even spacing, e.g. [\"0\",\"50\",\"100\"]."
+              "description": "Two to eleven labels printed under a bar at even spacing, for example `[\"0\", \"50\", \"100\"]`."
             },
             "size": {
               "type": "number",
               "minimum": 0.005,
               "maximum": 0.5,
-              "description": ""
+              "description": "Size of the labels, a fraction of a cell."
             }
           }
         },
         "redline": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW.",
+          "description": "A zone at the top of the scale drawn in its own colour (Ember). A tach has one from 0.85 even when the theme sets none.",
           "properties": {
             "from": {
               "type": "number",
               "minimum": 0,
               "maximum": 1,
-              "description": "Fraction where the zone starts.",
+              "description": "Where the zone starts, as a fraction of the scale.",
               "default": 0.85
             },
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "The zone's colour."
             },
             "glow": {
-              "$ref": "#/$defs/glow"
+              "$ref": "#/$defs/glow",
+              "description": "A soft glow on the zone."
             },
             "lightsAbove": {
               "type": "boolean",
-              "description": "Zone only lights while the value is inside it (Ember)."
+              "description": "The zone lights only while the value is inside it (Ember)."
             }
           }
         },
@@ -1234,57 +1308,59 @@
               "$ref": "#/$defs/gradient"
             }
           ],
-          "description": "NEW. Fill gradient along the value: 'ramp' uses colors.ramp, or give stops."
+          "description": "`\"ramp\"` fills along `colors.ramp`; or give a gradient's own stops."
         },
         "glow": {
           "$ref": "#/$defs/glow",
-          "description": "NEW. Glow round the fill. color omitted = fill colour."
+          "description": "A glow round the fill. Default colour: the fill's."
         },
         "marker": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Value marker (Obsidian jewel, Blueprint needle).",
+          "description": "A marker at the value (Obsidian's jewel, Blueprint's needle).",
           "properties": {
             "shape": {
               "enum": [
                 "diamond",
                 "needle"
               ],
-              "description": "",
+              "description": "`diamond` or `needle`.",
               "default": "diamond"
             },
             "size": {
               "type": "number",
               "minimum": 0.005,
               "maximum": 0.5,
-              "description": ""
+              "description": "Marker size, a fraction of a cell."
             },
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "The marker's colour."
             },
             "halo": {
               "type": "boolean",
-              "description": "Dark ring round the marker."
+              "description": "Draws a dark ring round the marker."
             }
           }
         },
         "crosshair": {
           "type": "boolean",
-          "description": "NEW. Centre cross on dials (Blueprint)."
+          "description": "Draws a cross at the centre of dials (Blueprint)."
         },
         "track": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Overrides the default accentDim track.",
+          "description": "Overrides the default track, which is the fill's colour at the alpha of `colors.accentDim`.",
           "properties": {
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "The track's colour."
             },
             "widthRatio": {
               "type": "number",
               "minimum": 0.1,
               "maximum": 2,
-              "description": "Track width relative to stroke.thickness.",
+              "description": "Track width relative to `stroke.thickness`.",
               "default": 1
             }
           }
@@ -1294,51 +1370,53 @@
             "accent",
             "ramp"
           ],
-          "description": "NEW. 'ramp' colours the fill by value along colors.ramp instead of the accent/warning/critical steps.",
+          "description": "`ramp` colours the fill by its value along `colors.ramp` instead of the accent, warning and critical steps.",
           "default": "accent"
         },
         "valueTint": {
           "type": "boolean",
-          "description": "NEW. Colours the readout with the same colour as the fill.",
+          "description": "Colours the readout with the same colour as the fill.",
           "default": false
         },
         "sparkline": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. A history line under the readout; needs Stats to keep a ring buffer.",
+          "description": "A history line under the readout, in the fill's colour. Stats keeps the history, one value a second, and draws the line when the card is at least 0.9 of a cell tall.",
           "properties": {
             "enabled": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Turns the history line on."
             },
             "height": {
               "type": "number",
               "minimum": 0.05,
               "maximum": 1,
-              "description": "",
+              "description": "Height of the line, a fraction of a cell.",
               "default": 0.3
             },
             "historySeconds": {
               "type": "number",
               "minimum": 10,
               "maximum": 600,
-              "description": "",
+              "description": "How many seconds of history the line shows.",
               "default": 60
             },
             "strokeWidth": {
               "type": "number",
               "minimum": 0.002,
               "maximum": 0.1,
-              "description": ""
+              "description": "Line width, a fraction of a cell."
             }
           }
         },
         "status": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. A status chip beside the label.",
+          "description": "A status chip on the label's row. Stats chooses the word from the gauge's fraction and the thresholds, or from a slot's own warning and critical levels.",
           "properties": {
             "enabled": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Turns the status chip on."
             },
             "thresholds": {
               "type": "array",
@@ -1347,7 +1425,7 @@
               },
               "minItems": 2,
               "maxItems": 2,
-              "description": "[warm, hot] as 0..1. Default [0.7,0.9]."
+              "description": "Where the status turns warm and hot, as fractions from 0 to 1. Default: 0.7 and 0.9."
             },
             "labels": {
               "type": "array",
@@ -1356,7 +1434,7 @@
               },
               "minItems": 3,
               "maxItems": 3,
-              "description": "[ok, warm, hot]."
+              "description": "The three words, for a healthy, a warm and a hot reading."
             }
           }
         }
@@ -1365,134 +1443,146 @@
     "indicator": {
       "type": "object",
       "additionalProperties": true,
-      "description": "v1, unchanged.",
+      "description": "The page indicator: one dot per page, the current one a pill.",
       "properties": {
         "bandHeight": {
           "type": "number",
           "minimum": 0.02,
           "maximum": 1,
-          "description": "Height of the band reserved at the bottom of the screen, fraction of a cell."
+          "description": "Height of the band reserved at the bottom of the screen, fraction of a cell.",
+          "default": 0.25
         },
         "dotSize": {
           "type": "number",
           "minimum": 0.005,
           "maximum": 0.5,
-          "description": "Diameter of a dot."
+          "description": "Diameter of a dot.",
+          "default": 0.05
         },
         "pillLength": {
           "type": "number",
           "minimum": 0.005,
           "maximum": 1,
-          "description": "Length of the current page's pill."
+          "description": "Length of the current page's pill.",
+          "default": 0.14
         },
         "spacing": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Space between marks."
+          "description": "Space between marks.",
+          "default": 0.05
         },
         "active": {
           "$ref": "#/$defs/color",
-          "description": "Colour of the current page's mark."
+          "description": "Colour of the current page's mark.",
+          "default": "#ffffff"
         },
         "inactive": {
           "$ref": "#/$defs/color",
-          "description": "Colour of the other marks."
+          "description": "Colour of the other marks.",
+          "default": "#59ffffff"
         },
         "backdrop": {
           "$ref": "#/$defs/color",
-          "description": "Colour of the translucent pill behind a floating indicator."
+          "description": "Colour of the translucent pill behind a floating indicator.",
+          "default": "#8c0f0f1a"
         }
       }
     },
     "press": {
       "type": "object",
       "additionalProperties": true,
-      "description": "v1, unchanged.",
+      "description": "How a card looks while a finger is down on a widget that accepts taps (a shortcut).",
       "properties": {
         "scale": {
           "type": "number",
           "minimum": 0.5,
           "maximum": 1,
-          "description": "The pressed card's size; 1 leaves it unchanged."
+          "description": "The pressed card's size; 1 leaves it unchanged.",
+          "default": 0.96
         },
         "opacity": {
           "type": "number",
           "minimum": 0.1,
           "maximum": 1,
-          "description": "The pressed card's opacity; 1 leaves it unchanged."
+          "description": "The pressed card's opacity; 1 leaves it unchanged.",
+          "default": 0.85
         }
       }
     },
     "dock": {
       "type": "object",
       "additionalProperties": true,
-      "description": "v1, unchanged.",
+      "description": "The dock at the bottom of the screen.",
       "properties": {
         "height": {
           "type": "number",
           "minimum": 0.2,
           "maximum": 1,
-          "description": "Height of the dock's band, which is also the side of a dock slot, fraction of a cell."
+          "description": "Height of the dock's band, which is also the side of a dock slot, fraction of a cell.",
+          "default": 0.71
         }
       }
     },
     "icons": {
       "type": "object",
       "additionalProperties": true,
-      "description": "NEW. Theme-specific icon set.",
+      "description": "The icon set the weather and shortcut cards draw their glyphs from.",
       "properties": {
         "set": {
           "type": "string",
-          "description": "Name of an icon set: a folder icons/<set>/ inside the theme folder (with a manifest.json), or a built-in set (outline). A key the set lacks is answered by the built-in 'outline' set. See Icon sets in the theme reference."
+          "description": "Name of an icon set: a folder `icons/<set>/` inside the theme folder (with a `manifest.json`), or a built-in set (`outline`). A key the set lacks is answered by `outline`."
         },
         "stroke": {
           "type": "number",
           "minimum": 0.005,
           "maximum": 0.2,
-          "description": "Override stroke width for set icons, fraction of the icon size."
+          "description": "Line width of the set's icons, a fraction of the icon's size."
         },
         "tint": {
           "type": "string",
-          "description": "'accent', 'accent2', 'text', 'ramp' (the colour of colors.ramp for the value shown, such as the temperature), 'none' (the text colour) or a #colour."
+          "description": "`accent`, `accent2`, `text`, `ramp` (the colour of `colors.ramp` that suits the value shown, such as the temperature), `none` (the text colour) or a `#colour`."
         },
         "glow": {
           "$ref": "#/$defs/glow",
-          "description": "Glow behind set icons (Rigline). Colour defaults to the icon's tint."
+          "description": "A glow behind the set's icons (Rigline). Its colour defaults to the icon's tint."
         }
       }
     },
     "background": {
       "type": "object",
       "additionalProperties": true,
-      "description": "NEW. Background pairing.",
+      "description": "What the deck shows behind the cards when the configuration has no `background` of its own.",
       "properties": {
         "default": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. The animated background this theme selects when the user has not picked one.",
+          "description": "The moving background this theme selects.",
           "properties": {
             "name": {
-              "type": "string"
+              "type": "string",
+              "description": "A shader background's name: built in, or a folder in `backgrounds/`. It draws with the theme's palette."
             }
           }
         },
         "static": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. Still background used when no animated background is selected, or when motion is off. Image, gradient or colour.",
+          "description": "A still background, used when there is no default or when the default cannot be shown: an image, a gradient or a colour, the first that is given. It is drawn once.",
           "properties": {
             "image": {
               "type": "string",
-              "description": "File in the theme folder."
+              "description": "A file in the theme folder, scaled to cover the deck. A path that leaves the folder is ignored."
             },
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "A plain colour."
             },
             "gradient": {
               "type": "object",
               "additionalProperties": true,
-              "description": "Linear or radial gradient.",
+              "description": "A linear or radial gradient.",
               "properties": {
                 "colors": {
                   "type": "array",
@@ -1501,42 +1591,42 @@
                   "items": {
                     "$ref": "#/$defs/color"
                   },
-                  "description": "Stops."
+                  "description": "The stops, two to six, evenly spaced."
                 },
                 "kind": {
                   "enum": [
                     "linear",
                     "radial"
                   ],
-                  "description": "",
+                  "description": "`linear` or `radial`.",
                   "default": "linear"
                 },
                 "angle": {
                   "type": "number",
                   "minimum": -360,
                   "maximum": 360,
-                  "description": "Linear only.",
+                  "description": "Direction of a linear gradient in degrees: 0 left to right, 90 top to bottom.",
                   "default": 90
                 },
                 "cx": {
                   "type": "number",
                   "minimum": -1,
                   "maximum": 2,
-                  "description": "Radial centre x, fraction of width.",
+                  "description": "Centre of a radial gradient across the deck, as a fraction of its width.",
                   "default": 0.5
                 },
                 "cy": {
                   "type": "number",
                   "minimum": -1,
                   "maximum": 2,
-                  "description": "Radial centre y, fraction of height.",
+                  "description": "Centre of a radial gradient down the deck, as a fraction of its height.",
                   "default": 0
                 },
                 "radius": {
                   "type": "number",
                   "minimum": 0.1,
                   "maximum": 3,
-                  "description": "Radial radius, fraction of width.",
+                  "description": "Radius of a radial gradient, as a fraction of the deck's width.",
                   "default": 0.7
                 }
               },
@@ -1549,16 +1639,17 @@
         "scrim": {
           "type": "object",
           "additionalProperties": true,
-          "description": "NEW. A veil between the background and the cards, to hold text contrast.",
+          "description": "A veil between the background and the cards that holds text contrast. It is drawn over a shader, a picture and a still background, not over the plain colour.",
           "properties": {
             "color": {
-              "$ref": "#/$defs/color"
+              "$ref": "#/$defs/color",
+              "description": "The veil's colour. Its own alpha multiplies `alpha`."
             },
             "alpha": {
               "type": "number",
               "minimum": 0,
               "maximum": 1,
-              "description": ""
+              "description": "The veil's opacity. Without both a colour and an alpha there is no scrim."
             }
           }
         }
@@ -1567,7 +1658,7 @@
     "motion": {
       "type": "object",
       "additionalProperties": true,
-      "description": "NEW.",
+      "description": "How much the theme may move.",
       "properties": {
         "level": {
           "enum": [
@@ -1575,7 +1666,7 @@
             "reduced",
             "off"
           ],
-          "description": "The ceiling for theme-driven animation (borderAnimate, and what a later change adds). The effective level is the lower of this and the user/OS setting. Does not touch the shader background, which has its own control.",
+          "description": "The ceiling for the theme's own animation (`card.borderAnimate`). The level that applies is the lower of this and the user's: the configuration's `motion`, or Windows' animation setting. It does not touch a moving background, which follows the user's level alone.",
           "default": "full"
         }
       }

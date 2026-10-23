@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "name": "mine",
+  "source": "https://urdeck.app/docs/cookbook/custom-icons/",
+  "license": "CC0-1.0",
+  "upstreamVersion": "1.0.0",
+  "keys": {
+    "weather/clear-day": "sun.svg",
+    "weather/clear-night": "moon.svg",
+    "weather/partly-cloudy-day": "cloud-sun.svg",
+    "weather/partly-cloudy-night": "cloud.svg",
+    "weather/overcast": "cloud.svg",
+    "weather/rain": "cloud-rain.svg",
+    "weather/snow": "cloud-snow.svg",
+    "app/terminal": "terminal.svg",
+    "app/home": "house.svg"
+  }
+}
