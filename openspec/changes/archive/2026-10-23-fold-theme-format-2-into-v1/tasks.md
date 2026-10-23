@@ -39,5 +39,5 @@
 
 ## 6. Land
 
-- [ ] 6.1 Push the branch and open a PR titled `refactor(theme): fold theme format 2 into the one theme format`, with the description covering the removed `format` key, the removed `THEME010`, the moved schema URL and the lenient wrong-kind rule; wait for `ci-ok` and `pr-title`
-- [ ] 6.2 After merge, archive the change (`opsx:archive`), which syncs the delta specs into `openspec/specs/`
+- [x] 6.1 Push the branch and open a PR titled `refactor(theme): fold theme format 2 into the one theme format`, with the description covering the removed `format` key, the removed `THEME010`, the moved schema URL and the lenient wrong-kind rule; wait for `ci-ok` and `pr-title`
+- [x] 6.2 After merge, archive the change (`opsx:archive`), which syncs the delta specs into `openspec/specs/`

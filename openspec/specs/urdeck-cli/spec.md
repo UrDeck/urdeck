@@ -439,7 +439,7 @@ every finding:
 - The folder `<name>` is made in the current directory, or in the directory `--output` names, which must exist
 - The name is a single folder name of letters, digits, `-` and `_`; anything else is a failure of the tool (exit code 2)
   and nothing is created
-- Without `--from`, the folder holds a `theme.json` with the `$schema` line, `"format": 2`, a `meta` group with the
+- Without `--from`, the folder holds a `theme.json` with the `$schema` line, a `meta` group with the
   name, an empty description for the author to fill in and a `mode` of `dark`, and a `colors` group holding the default
   dark theme's colours
 - With `--from <built-in name>`, the folder holds that theme's settings as shipped, with a `meta.name` of the new name,
@@ -468,7 +468,7 @@ every finding:
 `urdeck-cli theme schema` MUST print the JSON Schema of the theme format that the tool was built with:
 
 - The schema goes to the output stream, or to the file `--output` names, which is replaced when it exists
-- It is the schema the product publishes as `docs/schemas/v2/theme.json`, byte for byte
+- It is the schema the product publishes as `docs/schemas/v1/theme.json`, byte for byte
 - It needs no network
 
 #### Scenario: Printed

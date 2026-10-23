@@ -52,18 +52,17 @@ A theme whose file cannot be used MUST be reported, and a theme whose values are
 |---|---|---|
 | `THEME001` | error | `theme.json` is missing, is not valid JSON or holds no object. The theme cannot load |
 | `THEME002` | warning | a key the deck does not read. The message names the closest key that is read when one is within two edits |
-| `THEME003` | warning | a value of the wrong JSON type; an error for a format 1 value, where the deck skips the whole theme |
+| `THEME003` | warning | a value of the wrong JSON type; the deck skips that value and takes the default |
 | `THEME004` | warning | a number outside its range; the message carries the range |
 | `THEME005` | warning | a value that is not one of an enumeration's names; the message lists the names |
 | `THEME006` | warning | a colour that is not `#RRGGBB` or `#AARRGGBB` |
 | `THEME007` | warning | an array outside its length limits or with an invalid element |
 | `THEME008` | warning | a group that cannot work without a member it does not have (a gradient without `colors`); the group is ignored |
-| `THEME010` | warning | `format` is newer than the deck reads |
 
 - Every message says what is wrong and how to fix it, in one line, without a stack trace
 - Each finding names the key by its path (`card.shadow.blur`), and the file it is in
 - Comments and trailing commas in `theme.json` are accepted, as the deck accepts them
-- A key of the format the deck reads is not unknown; a key in the deferred-keys document is, because the deck does not
+- A key the deck reads is not unknown; a key in the deferred-keys document is, because the deck does not
   read it
 - A theme with an error from `THEME001` is not checked further
 
@@ -81,15 +80,15 @@ A theme whose file cannot be used MUST be reported, and a theme whose values are
 
 #### Scenario: Wrong type
 - **WHEN** a theme sets `card.gap` to `"wide"`
-- **THEN** a `THEME003` error names `card.gap` and says a number is expected (`card.gap` is a format 1 value, so the deck skips the whole theme; a format 2 value of the wrong type is a warning and costs only that value)
+- **THEN** a `THEME003` warning names `card.gap` and says a number is expected; the deck skips that value only
 
 #### Scenario: Enumeration in another case
 - **WHEN** a theme sets `card.borderStyle` to `Dashed`
 - **THEN** there is no finding
 
-#### Scenario: Newer format
-- **WHEN** a theme declares `format` 9
-- **THEN** a `THEME010` warning says the deck reads up to format 2 and ignores what it does not know
+#### Scenario: A leftover format key
+- **WHEN** a theme declares `"format": 2`
+- **THEN** a `THEME002` warning says the key is not read
 
 ### Requirement: Findings About Files The Theme Names
 A theme's fonts and pictures MUST be checked as files:
