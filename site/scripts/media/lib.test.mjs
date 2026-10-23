@@ -224,3 +224,70 @@ test('the manifest is sorted and records the options of each file', async () => 
   assert.equal(clock.settings.widgetSize, '4x2');
   assert.equal(clock.settings.moment, '2026-10-13T21:47:32.000');
 });
+
+// ---- The cookbook ("Cookbook Pictures" of the site-media spec)
+
+const recipe = (name, show = 'page', extra = {}) => {
+  put(site, `cookbook/${name}/recipe.json`, JSON.stringify({ title: name, summary: 's', order: 1, show, background: null, ...extra }));
+  put(site, `cookbook/${name}/theme.json`, `{"format":2,"meta":{"name":"${name}"}}`);
+  put(site, `cookbook/${name}/README.md`, 'why');
+};
+
+test('a recipe folder adds one still picture, named by the folder, to the matrix', () => {
+  recipe('hard-shadow');
+  recipe('led-bars', { widget: 'urdeck.widgets.clock', size: '4x2' });
+  const entries = matrix(catalog, { recipes: { 'hard-shadow': { show: 'page' }, 'led-bars': { show: { widget: 'urdeck.widgets.clock', size: '4x2' } } } });
+  const rows = entries.filter((e) => e.kind === 'cookbook');
+  assert.deepEqual(rows.map((e) => e.id), ['cookbook:hard-shadow', 'cookbook:led-bars']);
+  assert.equal(rows[0].picture, 'cookbook/hard-shadow.webp');
+  assert.equal(rows[0].loop, null);
+  assert.equal(rows[1].widget, 'urdeck.widgets.clock');
+  assert.equal(rows[1].show, 'widget');
+});
+
+test('a new recipe gets its picture and the media manifest names it; removing it removes both', async () => {
+  await generate();
+  renders = [];
+  recipe('hard-shadow');
+  const result = await generate();
+  assert.deepEqual(renders, ['cookbook:hard-shadow']);
+  assert.ok(existsSync(join(site, 'src/generated/cookbook/hard-shadow.webp')));
+  assert.ok(!existsSync(join(site, 'public/generated/cookbook/hard-shadow.mp4')));
+  const { entries } = JSON.parse(readFileSync(join(site, 'src/generated/media.json'), 'utf8'));
+  const entry = entries.find((e) => e.id === 'cookbook:hard-shadow');
+  assert.deepEqual(entry.files, ['src/generated/cookbook/hard-shadow.webp']);
+  assert.equal(entry.settings.themeDir, 'site/cookbook/hard-shadow');
+  assert.equal(result.rendered.length, 1);
+
+  rmSync(join(site, 'cookbook/hard-shadow'), { recursive: true });
+  const after = await generate();
+  assert.ok(!existsSync(join(site, 'src/generated/cookbook/hard-shadow.webp')));
+  assert.deepEqual(after.removed, ['src/generated/cookbook/hard-shadow.webp']);
+});
+
+test('a change inside one recipe folder stales only that recipe, an asset of it included', async () => {
+  recipe('circular-dock', 'dock');
+  recipe('hard-shadow');
+  await generate();
+  assert.deepEqual(await staleIds(), []);
+  put(site, 'cookbook/circular-dock/theme.json', '{"format":2,"card":{"compact":{"shape":"circle"}}}');
+  assert.deepEqual(await staleIds(), ['cookbook:circular-dock']);
+  await generate();
+  put(site, 'cookbook/hard-shadow/icons/mine/sun.svg', '<svg/>');
+  assert.deepEqual(await staleIds(), ['cookbook:hard-shadow']);
+  await generate();
+  put(site, 'cookbook/hard-shadow/README.md', 'a better explanation');
+  assert.deepEqual(await staleIds(), ['cookbook:hard-shadow']); // the folder is the input, the text included
+});
+
+test('what a recipe shows is part of its key, and only the cookbook filter renders recipes', async () => {
+  recipe('circular-dock', 'dock');
+  await generate();
+  put(site, 'cookbook/circular-dock/recipe.json', JSON.stringify({ title: 'x', summary: 's', order: 1, show: 'page', background: null }));
+  assert.deepEqual(await staleIds(), ['cookbook:circular-dock']);
+  renders = [];
+  await generate('decks');
+  assert.deepEqual(renders, []);
+  await generate('cookbook');
+  assert.deepEqual(renders, ['cookbook:circular-dock']);
+});

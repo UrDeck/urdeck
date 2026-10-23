@@ -188,15 +188,13 @@ public sealed class ThemeFindingTests
         Assert.Equal("card.borderWidth", finding.Key);
     }
 
-    /// <summary>A code nobody can look up is no use to an author: every code is in the reference with how to fix it.</summary>
+    /// <summary>
+    /// A code nobody can look up is no use to an author: every code is in the finding catalog with how to fix it. The site's
+    /// troubleshooting page is made from that catalog and its build fails when a code is missing from it.
+    /// </summary>
     [Fact]
-    public void Every_code_is_in_the_theme_reference()
+    public void Every_code_is_in_the_finding_catalog()
     {
-        string root = AppContext.BaseDirectory;
-        while (!File.Exists(Path.Combine(root, "urdeck.slnx")))
-            root = Path.GetDirectoryName(root)!;
-        string text = File.ReadAllText(Path.Combine(root, "docs", "themes.md"));
-
         var codes = typeof(ThemeCodes).GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
             .Select(f => (string)f.GetRawConstantValue()!)
             .ToList();
@@ -204,7 +202,10 @@ public sealed class ThemeFindingTests
         Assert.NotEmpty(codes);
         Assert.Equal(codes.Count, codes.Distinct().Count());
         foreach (string code in codes)
-            Assert.Contains($"| {code} |", text, StringComparison.Ordinal);
+        {
+            var listed = Assert.Single(UrDeck.Engine.Diagnostics.FindingCatalog.All, f => f.Code == code);
+            Assert.False(string.IsNullOrWhiteSpace(listed.Summary), code);
+        }
     }
 
     [Fact]

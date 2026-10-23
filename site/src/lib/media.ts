@@ -31,6 +31,8 @@ export const deckMedia = (theme: string): Media => resolve(`deck:${theme}`);
 export const deckBackground = (theme: string): string | undefined => (entries.get(`deck:${theme}`) as (Entry & { background?: string | null }) | undefined)?.background ?? undefined;
 /** A widget (`clock`) at a size (`4x2`) in a theme. */
 export const widgetMedia = (widget: string, size: string, theme: string): Media => resolve(`widget:${widget}-${size}-${theme}`);
+/** A cookbook recipe's picture, made from its folder in site/cookbook/. */
+export const cookbookMedia = (recipe: string): Media => resolve(`cookbook:${recipe}`);
 /** A background's poster and loop, in the colours of the theme it is shown with. */
 export const backgroundMedia = (name: string) => {
   const m = resolve(`background:${name}`);

@@ -107,6 +107,7 @@ td { color: var(--muted); }
 
 /* Documentation */
 .docs { display: grid; grid-template-columns: 14rem minmax(0, 1fr); gap: 3.5rem; }
+.docs-menu { display: none; }
 .docs-nav h2 { font: 500 0.78rem/1.2 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 1.75rem 0 0.4rem; }
 .docs-nav h2:first-child { margin-top: 0; }
 .docs-nav ul { list-style: none; margin: 0; padding: 0; }
@@ -117,9 +118,41 @@ td { color: var(--muted); }
 .docs-body h1 { font-size: clamp(2rem, 3.4vw, 2.75rem); color: var(--text); }
 .docs-body h2, .docs-body h3 { color: var(--text); }
 .docs-body strong { color: var(--text); }
+.docs-body :not(pre) > code { overflow-wrap: anywhere; }
 .docs-body li { margin-bottom: 0.3rem; }
 .docs-body figure { margin: 1.5rem 0; max-width: 20rem; }
 .docs-body figcaption { color: var(--dim); font-size: 0.9rem; }
+
+/* Generated reference: schema, settings and finding tables, the lists of built-ins, widget sizes, cookbook recipes. */
+.docs-body .lead { font-size: 1.15rem; color: var(--text); }
+.ref-lead { color: var(--muted); }
+table.ref { font-size: 0.92rem; }
+table.ref th, table.ref td { padding: 0.55rem 0.65rem; }
+table.ref td:last-child { min-width: 13rem; }
+table.ref td:first-child { white-space: nowrap; }
+table.ref tr.ref-group td:first-child code { color: var(--text); }
+table.ref tr:target td { background: rgba(var(--accent-rgb) / 0.12); }
+.on-page { margin: 0 0 1.5rem; padding: 0.75rem 1rem; border: 1px solid var(--line); border-radius: 0.9rem; background: var(--surface); }
+.on-page ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+.on-page li { margin: 0; }
+.builtin { list-style: none; padding: 0; margin: 1.5rem 0; display: grid; gap: 1.5rem; }
+.builtin article { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 1.25rem; align-items: start; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
+.builtin.themes article { grid-template-columns: 11rem minmax(0, 1fr); }
+.builtin article img { border-radius: 0.6rem; border: 1px solid var(--line); }
+.builtin article h3 { margin-top: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.builtin article p { margin: 0 0 0.5rem; }
+.builtin details { margin-top: 0.5rem; }
+.builtin details summary { cursor: pointer; color: var(--accent); }
+.builtin.widgets { gap: 0.5rem; }
+.sizes { display: flex; flex-wrap: wrap; gap: 1.5rem; margin: 1.5rem 0; align-items: flex-end; }
+.sizes figure { margin: 0; flex: 0 1 24rem; max-width: 100%; }
+.docs-body .sizes figure { max-width: 24rem; }
+.recipes { list-style: none; margin: 1.5rem 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); gap: 1.25rem; }
+.recipes a { display: grid; gap: 0.4rem; color: var(--muted); text-decoration: none; height: 100%; }
+.recipes a:hover b { color: var(--accent-hover); }
+.recipes b { color: var(--text); }
+.recipes img { border-radius: 0.6rem; border: 1px solid var(--line); width: 100%; }
+.recipe-picture { max-width: 24rem; }
 
 /* Tested on */
 main.wrap > section { margin-top: 1.5rem; }
@@ -127,6 +160,13 @@ main.wrap > p, main.wrap > section p, main.wrap > ul { color: var(--muted); }
 
 @media (max-width: 52rem) {
   .docs { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  .docs-side { display: none; }
+  .docs-menu { display: block; border: 1px solid var(--line); border-radius: 0.9rem; background: var(--surface); padding: 0 1rem; }
+  .docs-menu summary { cursor: pointer; padding: 0.75rem 0; color: var(--text); font-weight: 600; }
+  .docs-menu[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 0.5rem; }
+  .docs-menu .docs-nav { padding-bottom: 1rem; }
+  .builtin article, .builtin.themes article { grid-template-columns: minmax(0, 1fr); }
+  .builtin article img { max-width: 14rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

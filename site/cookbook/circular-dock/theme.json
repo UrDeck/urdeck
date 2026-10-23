@@ -1,0 +1,22 @@
+{
+  "$schema": "https://urdeck.app/schemas/v2/theme.json",
+  "format": 2,
+  "meta": {
+    "name": "Circular dock",
+    "description": "Round shortcut buttons with a thin gold ring; larger cards stay rectangles.",
+    "mode": "dark"
+  },
+  "colors": {
+    "cardFill": "#14110c",
+    "cardBorder": "#d9b86c"
+  },
+  "card": {
+    "radius": 0.08,
+    "borderWidth": 0,
+    "compact": {
+      "shape": "circle",
+      "borderWidth": 0.01
+    }
+  },
+  "dock": { "height": 0.71 }
+}

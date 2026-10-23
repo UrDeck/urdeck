@@ -1,0 +1,22 @@
+{
+  "$schema": "https://urdeck.app/schemas/v2/theme.json",
+  "format": 2,
+  "meta": {
+    "name": "Chamfered cards",
+    "description": "Cards with two cut corners and a thin amber outline.",
+    "mode": "dark"
+  },
+  "colors": {
+    "cardFill": "#1a120c",
+    "cardBorder": "#ffb347",
+    "accent": "#ffb347",
+    "accentDim": "#33ffb347"
+  },
+  "card": {
+    "shape": "chamfer",
+    "cut": 0.12,
+    "cutCorners": ["tr", "bl"],
+    "borderWidth": 0.008,
+    "gap": 0.07
+  }
+}

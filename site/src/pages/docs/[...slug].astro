@@ -1,6 +1,12 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Docs from '../../layouts/Docs.astro';
+import BuiltinList from '../../components/BuiltinList.astro';
+import FindingsTable from '../../components/FindingsTable.astro';
+import SchemaTable from '../../components/SchemaTable.astro';
+import SettingsTable from '../../components/SettingsTable.astro';
+import WidgetSizes from '../../components/WidgetSizes.astro';
+import RecipeList from '../../components/RecipeList.astro';
 
 export async function getStaticPaths() {
   const pages = await getCollection('docs');
@@ -11,9 +17,16 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
+// A long page gets a short list of its sections at the top.
+const sections = headings.filter((h) => h.depth === 2);
 ---
 <Docs title={entry.data.title} description={entry.data.description}>
   <h1>{entry.data.title}</h1>
-  <Content />
+  {sections.length >= 5 && (
+    <nav class="on-page" aria-label="On this page">
+      <ul>{sections.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}</ul>
+    </nav>
+  )}
+  <Content components={{ BuiltinList, FindingsTable, SchemaTable, SettingsTable, WidgetSizes, RecipeList }} />
 </Docs>

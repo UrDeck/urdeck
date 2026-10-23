@@ -12,10 +12,10 @@
     "title": { "type": "string", "description": "The name a person sees." },
     "description": { "type": "string", "description": "What the background looks like." },
     "entry": { "type": "string", "description": "The shader file inside the folder. Default: <folder name>.sksl." },
-    "author": { "type": "string" },
+    "author": { "type": "string", "description": "Who made the background. For a person and a store; it never decides what runs." },
     "license": { "type": "string", "description": "An SPDX identifier is best." },
     "version": { "type": "string", "description": "The background's own version." },
-    "tags": { "type": "array", "items": { "type": "string" } },
+    "tags": { "type": "array", "items": { "type": "string" }, "description": "Words that help find the background." },
     "pairsWith": {
       "type": "object",
       "description": "Themes this background suits. Used to recommend, never to decide what runs.",
@@ -31,27 +31,28 @@
         "type": "object",
         "additionalProperties": true,
         "properties": {
-          "label": { "type": "string" },
-          "description": { "type": "string" },
+          "label": { "type": "string", "description": "The name an editor shows for the parameter." },
+          "description": { "type": "string", "description": "What the parameter changes, in a sentence." },
           "kind": { "enum": ["number", "color"], "description": "color only for a parameter with three or four components." },
           "min": { "type": "number", "description": "Per component for a vector." },
           "max": { "type": "number", "description": "Per component for a vector." },
-          "step": { "type": "number" },
-          "unit": { "type": "string" },
+          "step": { "type": "number", "description": "The size of one step in an editor's slider." },
+          "unit": { "type": "string", "description": "The unit to show beside the value, such as `degrees`." },
           "hidden": { "type": "boolean", "description": "Keeps the parameter out of an editor; the configuration can still set it." }
         }
       }
     },
     "samples": {
       "type": "array",
+      "description": "Pictures of the background. The deck never reads them.",
       "items": {
         "type": "object",
         "additionalProperties": true,
         "properties": {
           "type": { "enum": ["image", "video"], "description": "video is accepted and never played." },
           "file": { "type": "string", "description": "A file inside the folder." },
-          "order": { "type": "integer" },
-          "caption": { "type": "string" },
+          "order": { "type": "integer", "description": "Where the picture comes in a list of samples." },
+          "caption": { "type": "string", "description": "Text to show with the picture." },
           "settings": {
             "type": "object",
             "description": "How the sample was made. A record for people and tools; the deck never uses it.",

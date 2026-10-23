@@ -1,0 +1,20 @@
+{
+  "$schema": "https://urdeck.app/schemas/v2/theme.json",
+  "format": 2,
+  "meta": {
+    "name": "LED bars",
+    "description": "Bars cut into lit blocks that turn from green to red with the load.",
+    "mode": "dark"
+  },
+  "colors": {
+    "cardFill": "#10121c",
+    "ramp": ["#3ddc84", "#ffb020", "#ff5a4d"]
+  },
+  "stroke": { "thickness": 0.12, "cap": "square" },
+  "gauge": {
+    "style": "bar",
+    "colorBy": "ramp",
+    "segments": { "length": 0.035, "gap": 0.012 },
+    "track": { "color": "#1affffff" }
+  }
+}

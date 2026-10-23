@@ -1,0 +1,18 @@
+---
+title: Cookbook
+description: "Small themes that each teach one look: chamfered cards, a gradient border, a hard shadow, LED bars, a tach, a dotted page, a circular dock and custom icons."
+section: Cookbook
+order: 50
+---
+
+import RecipeList from '../../components/RecipeList.astro';
+
+Each recipe is a small theme folder: only the keys the recipe teaches, on top of the default theme the loader starts from. Its
+page shows the `theme.json` exactly as it is in the repository, a picture UrDeck drew from that folder, and a short explanation
+of why each value is there. To use one, copy the folder into `themes/`, set `"theme"` to its name, and then change the numbers.
+
+<RecipeList />
+
+Every recipe is checked by `urdeck-cli theme validate` in the project's continuous integration, so a key that is renamed or
+removed fails the build instead of leaving a recipe that quietly stops working. The values are fractions of a grid cell, as
+everywhere else in a theme; the [theme reference](/docs/themes/reference/) explains each key.

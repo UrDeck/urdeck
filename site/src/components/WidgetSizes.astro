@@ -1,0 +1,25 @@
+---
+// A widget at each size its page can show, in the visitor's theme (ProductMedia follows the picker). The sizes and their
+// pictures come from the catalog and the media manifest; the sentence beside each is the catalog's size or src/data/site-copy.json.
+import { widgets } from '../lib/catalog';
+import { widgetMedia } from '../lib/media';
+import ProductMedia from './ProductMedia.astro';
+
+interface Props {
+  /** The widget's short id: `clock`, `stats`, `weather`, `shortcut`. */
+  widget: string;
+}
+
+const { widget } = Astro.props;
+const found = widgets.find((w) => w.id === widget);
+---
+{found && (
+  <div class="sizes">
+    {found.sizes.map((s) => (
+      <figure>
+        <ProductMedia slot={`widget:${found.id}:${s.size}`} media={(theme) => widgetMedia(found.id, s.size, theme)} alt={s.alt} widths={[320, 480, 800]} sizes="(min-width: 60rem) 24rem, 90vw" />
+        <figcaption><code>{s.size}</code> {s.note}</figcaption>
+      </figure>
+    ))}
+  </div>
+)}

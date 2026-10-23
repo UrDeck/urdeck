@@ -37,14 +37,15 @@ replaces every provider that carries a sample by it and fetches no site icon; th
 The website (`site/`, needs Node 22; details in `site/README.md`):
 
 ```powershell
-cd site; npm ci; npm run build   # builds and runs the checks (schema copy, internal links, third-party references)
+cd site; npm ci; npm run build   # builds and runs the checks (schema copy, internal links and anchors, third-party references, the generated reference is complete)
 npm run dev                      # local preview
 npm run media                    # render the site's stale pictures and loops (Windows or Linux; .NET, ffmpeg); see site/README.md "Media"
 npm run media -- --status        # what is missing or stale, nothing rendered
-npm test                         # the media generator's tests
+npm test                         # the media generator's, the reference tables' and the completeness check's tests
+dotnet run --project tools/UrDeck.Cli -c Release -- theme validate --all site/cookbook --fail-on-warnings   # the cookbook's recipes (CI runs it)
 ```
 
-`urdeck-cli shader init|validate|render` (`docs/backgrounds.md`, "The command line tool") makes, checks and renders a background folder; CI
+`urdeck-cli shader init|validate|render` (the site's "The shader tool" page, `site/src/content/docs/backgrounds/tool.md`) makes, checks and renders a background folder; CI
 runs it on the sixteen built-ins and on an `init` of a copy of one. `render --update-manifest` rewrites `manifest.json` (refusing a comment, a trailing comma or a duplicate key).
 
 Render without a screen (from `src/UrDeck.Host/bin/Release/net10.0-windows10.0.19041.0/`):
@@ -52,7 +53,8 @@ Render without a screen (from `src/UrDeck.Host/bin/Release/net10.0-windows10.0.1
 pictures one frame of time apart (a split-flap clock flips, the weather icons move); the old site loops used it.
 
 CI (`.github/workflows/ci.yml`) runs the build, format and tests on `windows-latest` and the Linux tests when a change touches
-anything outside docs, root Markdown, `openspec/`, `site/` and most of `.github/`; OpenSpec validation runs when `openspec/` changed.
+anything outside docs, root Markdown, `openspec/`, `site/` and most of `.github/` (and when `site/cookbook/` changed, whose recipes it
+validates); OpenSpec validation runs when `openspec/` changed.
 The required checks are `ci-ok` and `pr-title` (`workflow_dispatch` runs everything). Run the commands locally before pushing.
 
 ## Layout
@@ -76,8 +78,8 @@ providers/            GPL. First-party data provider plugins (UrDeck.Providers.S
 widgets/              first-party widget plugins (UrDeck.Widgets.Clock, .Stats, .Weather, .Shortcut); with the providers, copied to
                       plugins/ by the host build (the UrDeckPlugin list in UrDeck.Host.csproj)
 tests/                xUnit projects
-site/                 the website (Astro) published at urdeck.app; user documentation in `src/content/docs/`, sample decks in `decks/`
-docs/                 ROADMAP.md (milestones), BACKLOG.md (work items and status), perf/, design notes
+site/                 the website (Astro) published at urdeck.app; user documentation in `src/content/docs/` (reference tables generated from `docs/schemas/` and the catalog), the theme cookbook in `cookbook/`, sample decks in `decks/`
+docs/                 ROADMAP.md (milestones), BACKLOG.md (work items and status), perf/, design notes, schemas/ (published), themes.md and backgrounds.md (notes for adding a built-in)
 openspec/             spec-driven change documents
 ```
 
@@ -140,7 +142,7 @@ See the README license map before moving code between projects: it can change th
   event keyed on the folder, `UrDeck.Engine/Startup/InstanceNames`), then the XAML application. `--quit` sets the event
   and waits for the mutex. "Start with Windows" is the `UrDeck` value under `HKCU\...\Run` (`RunKeyAutostart`); Windows
   owns the setting, the config has no field for it.
-- The background (`docs/backgrounds.md`, `src/UrDeck.Engine/Backgrounds`, host `BackgroundLayer`): what it is comes from `BackgroundPlan.Resolve(settings, theme)`,
+- The background (the site's `backgrounds` pages, `docs/backgrounds.md` for adding a built-in, `src/UrDeck.Engine/Backgrounds`, host `BackgroundLayer`): what it is comes from `BackgroundPlan.Resolve(settings, theme)`,
   an ordered list of candidates: the configuration's `background` (`none` is explicit; absent and `null` leave the choice to the theme), the
   theme's `background.default` shader, its `background.static` (picture inside the theme folder, gradient or colour, drawn by `StillPainter`) and the
   colour. `Build` tries them in order and logs each failure once; the layer goes on from `CandidateIndex + 1` when a picture cannot be decoded.
@@ -160,14 +162,16 @@ See the README license map before moving code between projects: it can change th
   in `urdeck.log`. The layer keys on `DeckBackground.RequestKey`, so an unrelated config save does not restart the motion,
   and a background that failed is not tried again until its key changes. A background is a folder `backgrounds/<name>/` next to the exe
   holding `manifest.json` (required, version 1) and the entry `<name>.sksl`; the sixteen built-ins are embedded folders of the same shape
-  (`UrDeck.Backgrounds.<name>/<file>`) with a `sample.png` made by `urdeck-cli shader render` (`docs/backgrounds.md`). A loose
+  (`UrDeck.Backgrounds.<name>/<file>`) with a `sample.png` made by `urdeck-cli shader render` (`docs/backgrounds.md`, "Regenerating the built-in samples"). A loose
   `.sksl` is not loaded (the log names the folder to make). `ShaderLint` checks a folder and `DeckBackground.Create` logs each finding once as
-  `Background 'name': SHADERnnn message (file)` (the codes are in `docs/backgrounds.md`); the built-ins must lint clean. `scripts/Install-Local.ps1`
+  `Background 'name': SHADERnnn message (file)` (the codes are in `FindingCatalog` and on the site's troubleshooting page); the built-ins must lint clean. `scripts/Install-Local.ps1`
   never touches `backgrounds/`. The deck window must keep **square corners**
   (`WindowCorners.Square`, `DWMWA_WINDOW_CORNER_PREFERENCE` = do not round): with Windows 11's rounded corners the desktop
   compositor blends translucent content over a swap chain three times along the window's diagonal, a bright dotted line
   through every translucent card (`glass` theme, moving background). The log says `Window corners are square`.
   `FrameClock` delivers about 21 frames per second, not 30 (`docs/perf/backgrounds.md`).
-- A change to a widget's settings, a theme or a background updates its page in `site/src/content/docs/` as well as the README or `docs/`.
-- Do not add per-widget styling or resolution assumptions: styling belongs in the theme (`src/UrDeck.Engine/Themes`, `docs/themes.md`)
+- A change to a widget's settings, a theme or a background updates its page in `site/src/content/docs/` (the one home of the user
+  documentation; its reference tables are generated and the site's build fails on a key, setting or finding code without a
+  description) as well as the README.
+- Do not add per-widget styling or resolution assumptions: styling belongs in the theme (`src/UrDeck.Engine/Themes`, the site's theme reference)
   and the user never sees resolution or scaling. Widgets draw no card and name no font; use the SDK components.

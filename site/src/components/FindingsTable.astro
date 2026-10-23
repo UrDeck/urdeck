@@ -1,0 +1,31 @@
+---
+// The finding codes of the theme checks (THEME) or the background checks (SHADER), from the catalog: code, severity, and what it
+// means and how to fix it. A code without a summary fails the build.
+import catalog from '../generated/catalog.json';
+import { inline, record } from '../lib/reference.mjs';
+
+interface Props {
+  /** `THEME` or `SHADER`. */
+  prefix: string;
+}
+
+const { prefix } = Astro.props;
+const findings = (catalog.findings as { code: string; severity: string; summary: string }[]).filter((f) => f.code.startsWith(prefix));
+if (findings.length === 0) throw new Error(`FindingsTable: the catalog has no finding code that starts with ${prefix}`);
+for (const f of findings) {
+  if (!f.summary?.trim()) throw new Error(`FindingsTable: the finding ${f.code} has no summary in the catalog`);
+}
+record({ kind: 'findings', codes: findings.map((f) => f.code) });
+---
+<table class="ref">
+  <thead><tr><th>Code</th><th>Severity</th><th>Meaning and how to fix it</th></tr></thead>
+  <tbody>
+    {findings.map((f) => (
+      <tr id={f.code}>
+        <td><code>{f.code}</code></td>
+        <td>{f.severity}</td>
+        <td set:html={inline(f.summary)} />
+      </tr>
+    ))}
+  </tbody>
+</table>

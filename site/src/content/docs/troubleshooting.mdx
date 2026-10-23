@@ -1,0 +1,79 @@
+---
+title: Troubleshooting
+description: Common problems, where to look, and every finding code of the theme and background checks.
+section: Troubleshooting
+order: 60
+---
+
+import FindingsTable from '../../components/FindingsTable.astro';
+
+The place to look is `urdeck.log`, next to `UrDeck.Host.exe`. Each line starts with the date and time, and at 5 MB the file becomes
+`urdeck.log.1`. Almost everything UrDeck does not like is written there once, with the name of the thing and the reason.
+
+## The configuration is not applied
+
+- A file that is not valid JSON is ignored and the last good configuration stays in use; the log says why. Comments and trailing
+  commas are accepted.
+- UrDeck notices a saved change after about a second. A theme is re-read when the configuration is reloaded, so after editing
+  `theme.json`, save the configuration file too.
+- An unknown `typeId` leaves its place empty. A `col`, `row`, `width` or `height` out of range is clamped with a warning.
+- With the monitor the deck remembers (`display`) not connected, there is no window at all, only the tray icon. Remove `display`
+  from the file, or choose **Choose automatically** in Settings. See [the monitor](/docs/#the-monitor).
+
+## A theme
+
+- **A value is ignored.** The log has one warning naming the theme, the key and the value, and the default is used instead:
+  a colour that does not parse, a number outside its range, a name that is not allowed, a value of the wrong kind. Run
+  `urdeck-cli theme validate` for the same findings with a suggestion for a misspelled key. See
+  [checking a theme](/docs/themes/checking/).
+- **The whole theme is missing.** A `theme.json` that is not valid JSON makes the theme unavailable and the default theme is used.
+- **A font does not show.** A font named by family is used only where it is installed. Put the `.ttf` or `.otf` in the theme
+  folder and name the file. See [fonts and licences](/docs/themes/fonts/).
+- **Text is hard to read.** `THEME060` to `THEME062` measure the contrast of the text on the card fill. A translucent fill is
+  measured over `colors.background`, but the page behind may be a moving background.
+- **The border does not move.** It moves only at the motion level `full`, never on a dashed border, and `spin` needs a conic
+  gradient. See [motion](/docs/themes/motion/).
+- **A shadow or glow is smaller than I wrote.** Over translucent cards it is limited to the gap between cards, and the log says
+  so once.
+
+## A background
+
+The deck shows the theme's background colour, the widgets are unaffected, and `urdeck.log` has one line that starts with
+`Background` and names the cause:
+
+- an unknown shader name, a folder that cannot be read, or a loose `.sksl` file (the line names the folder to make;
+  `urdeck-cli shader init` makes it);
+- a missing or unreadable `manifest.json` (`SHADER001` to `SHADER003`; `urdeck-cli shader init` writes one), or an `entry` that is
+  missing or leaves the folder;
+- SkSL that does not compile (the compiler's message is in the line, with its line number);
+- a picture that is missing, too large, or not an image (its path is in the line);
+- a failure while painting, or a GPU surface that does not start.
+
+With a theme that has a still background, that is what shows instead of the colour (and the colour when it fails too).
+
+Warnings that do not stop the background (a parameter without a description, an unknown manifest key) are logged the same way,
+with their `SHADERnnn` code, listed below. A background that failed is not tried again until its configuration, its files or the
+theme changes; fix the file and save the config.
+
+A shader that is too heavy for your GPU, or a game that stutters beside the deck: lower `scale` to `0.25`. See
+[speed, colours and images](/docs/backgrounds/speed-colours-images/).
+
+`UrDeck.Host.exe --snapshot out.png` draws the background too (a shader at `iTime` 10, whatever the speed, with the palette of the
+theme in use, a theme's default, still background and scrim as the deck draws them), so a snapshot with the same configuration is
+the same every time. The snapshot is drawn on the CPU and does not need the GPU.
+
+## Theme findings
+
+Every finding of `urdeck-cli theme validate` has a code that never changes meaning. **error** means the deck cannot use the theme
+or the file, **warning** means it works and could be better, **info** is a remark. The deck logs the findings it can act on (the
+codes marked "also logged"); the rest only the tool reports. The table is made from the product's own list.
+
+<FindingsTable prefix="THEME" />
+
+## Background findings
+
+The same for a background folder, from `urdeck-cli shader validate` and from the log when the background loads. **error** means the
+folder is broken or breaks a rule; only the codes marked "stops" also stop the background. **warning** means it works but could be
+better described. **info** is a remark. The built-in backgrounds produce none of these.
+
+<FindingsTable prefix="SHADER" />

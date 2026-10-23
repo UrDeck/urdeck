@@ -1,0 +1,7 @@
+{
+  "title": "A circular dock",
+  "summary": "Make the dock's buttons circles without touching the cards above them.",
+  "order": 7,
+  "show": "dock",
+  "background": null
+}

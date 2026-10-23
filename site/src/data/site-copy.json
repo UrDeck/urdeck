@@ -7,6 +7,18 @@
         "4x2": {
           "note": "Four cells wide and two tall.",
           "alt": "The clock widget in its split-flap style, showing the time and the date."
+        },
+        "4x1": {
+          "note": "Four cells wide and one tall: the time on a slim card.",
+          "alt": "The clock widget at 4x1: the time and the date on a slim card."
+        },
+        "2x1": {
+          "note": "Two cells wide and one tall.",
+          "alt": "The clock widget at 2x1: the time and the date on a half-width card."
+        },
+        "1x1": {
+          "note": "One cell, which also fits a slot of the dock.",
+          "alt": "The clock widget at 1x1: the time on a square card."
         }
       }
     },
@@ -20,6 +32,14 @@
         "4x2": {
           "note": "Two readings on top, three text readings below.",
           "alt": "The stats widget at 4x2: a bar for CPU load and a memory gauge above three text readings."
+        },
+        "2x2": {
+          "note": "One reading on a square card.",
+          "alt": "The stats widget at 2x2: one reading with its gauge."
+        },
+        "1x1": {
+          "note": "One reading on one cell, which also fits a slot of the dock.",
+          "alt": "The stats widget at 1x1: one reading."
         }
       }
     },
@@ -44,6 +64,56 @@
           "alt": "The dock with four shortcuts: GitHub, Wikipedia, Steam and VS Code."
         }
       }
+    }
+  },
+  "backgrounds": {
+    "plasma": {
+      "palette": "the palette, in order"
+    },
+    "aurora": {
+      "palette": "the palette, in order"
+    },
+    "gradient": {
+      "palette": "the palette, in order"
+    },
+    "julia": {
+      "palette": "the palette, in order"
+    },
+    "horizon": {
+      "palette": "sky, horizon glow, sun, grid"
+    },
+    "spectrum": {
+      "palette": "ground; the fourth colour only at saturation 0; the other two unused"
+    },
+    "contour": {
+      "palette": "ground, ground lit, minor lines, index lines"
+    },
+    "nebula": {
+      "palette": "space, then three cloud colours"
+    },
+    "streams": {
+      "palette": "background, faint trail, body, bright head"
+    },
+    "ripple": {
+      "palette": "deep water, water, light, highlights"
+    },
+    "embers": {
+      "palette": "night, heat glow, spark, white-hot spark"
+    },
+    "plotter": {
+      "palette": "paper, minor grid, major grid and rings, scan line"
+    },
+    "shapes": {
+      "palette": "ground, then three fills"
+    },
+    "warpgate": {
+      "palette": "deep space, tunnel wall, streaks and rings, core"
+    },
+    "equalizer": {
+      "palette": "ground, bar bottom, bar middle, bar top"
+    },
+    "vortex": {
+      "palette": "void, outer rays, inner rays, core"
     }
   }
 }

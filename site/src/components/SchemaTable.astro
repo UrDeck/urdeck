@@ -1,0 +1,37 @@
+---
+// The keys of a published schema as a table: key, what it accepts, default, meaning. `path` is a group (its description leads
+// the table, its keys follow, nested groups included), a single key, or a list of them; absent, the whole schema. Everything
+// comes from docs/schemas/**; a key without a description fails the build (src/lib/reference.mjs).
+import { inline, record, rowsOf } from '../lib/reference.mjs';
+
+interface Props {
+  /** The schema under docs/schemas/, for example `v2/theme.json`. */
+  schema: string;
+  path?: string | string[];
+}
+
+const { schema, path = '' } = Astro.props;
+const tables = (Array.isArray(path) ? path : [path]).map((p) => rowsOf(schema, p));
+const all = tables.flat();
+record({ kind: 'schema', schema, paths: all.map((r) => r.path) });
+// One group asked for: its own description is the lead-in, its keys the rows.
+const lead = tables.length === 1 && all[0]?.group ? all[0] : undefined;
+const rows = lead ? all.slice(1) : all;
+const anchor = (key: string) => key.replace(/[<>]/g, '');
+---
+{lead && <p class="ref-lead" set:html={inline(lead.description)} />}
+{rows.length > 0 && (
+  <table class="ref">
+    <thead><tr><th>Key</th><th>Value</th><th>Default</th><th>Meaning</th></tr></thead>
+    <tbody>
+      {rows.map((r) => (
+        <tr class={r.group ? 'ref-group' : undefined} id={anchor(r.path)}>
+          <td><code>{r.path}</code></td>
+          <td set:html={inline(r.value)} />
+          <td set:html={inline(r.default)} />
+          <td set:html={inline(r.description)} />
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)}

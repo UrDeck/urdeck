@@ -1,0 +1,7 @@
+{
+  "title": "Custom icons",
+  "summary": "Give the weather card and the shortcuts glyphs from a set that ships inside the theme.",
+  "order": 8,
+  "show": { "widget": "urdeck.widgets.weather", "size": "4x2" },
+  "background": null
+}

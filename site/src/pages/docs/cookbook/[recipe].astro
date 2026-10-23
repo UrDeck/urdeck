@@ -1,0 +1,33 @@
+---
+import { Image } from 'astro:assets';
+import { Code } from 'astro:components';
+import { getCollection, render } from 'astro:content';
+import Docs from '../../../layouts/Docs.astro';
+import { getRecipes } from '../../../lib/cookbook';
+
+export async function getStaticPaths() {
+  const recipes = await getRecipes();
+  const explanations = await getCollection('cookbook');
+  return recipes.map((recipe) => ({
+    params: { recipe: recipe.id },
+    props: { recipe, entry: explanations.find((e) => e.id === recipe.id)! },
+  }));
+}
+
+const { recipe, entry } = Astro.props;
+const { Content } = await render(entry);
+const shows = recipe.show === 'page' ? 'the sample page' : recipe.show === 'dock' ? 'the sample page with the dock' : `the ${recipe.show.widget} widget at ${recipe.show.size}`;
+---
+<Docs title={recipe.title} description={recipe.summary}>
+  <h1>{recipe.title}</h1>
+  <p class="lead">{recipe.summary}</p>
+  {recipe.image.image
+    ? <figure class="recipe-picture"><Image src={recipe.image.image} alt={`${recipe.title}: ${shows}.`} widths={[320, 480, 640]} sizes="(min-width: 60rem) 20rem, 90vw" /><figcaption>{shows[0].toUpperCase() + shows.slice(1)}{recipe.background ? `, over the ${recipe.background} background` : ''}, drawn by UrDeck from this theme.</figcaption></figure>
+    : import.meta.env.DEV && <p class="note">No picture yet: <code>npm run media -- cookbook</code> makes it.</p>}
+  <h2>The theme</h2>
+  <p>This is the <code>theme.json</code> of the recipe, exactly as it is in the repository (<code>site/cookbook/{recipe.id}/</code>). Save it as <code>themes/my-theme/theme.json</code> next to <code>UrDeck.Host.exe</code> and set <code>"theme": "my-theme"</code>, or copy the keys you like into your own theme.</p>
+  <Code code={recipe.theme.trimEnd()} lang="json" theme="github-dark" />
+  <h2>How it works</h2>
+  <Content />
+  <p class="note"><a href="/docs/cookbook/">All recipes</a> · <a href="/docs/themes/reference/">Theme reference</a></p>
+</Docs>

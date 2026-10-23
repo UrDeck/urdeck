@@ -1,0 +1,7 @@
+{
+  "title": "Gradient border",
+  "summary": "Colour the border with a gradient instead of one colour.",
+  "order": 2,
+  "show": "page",
+  "background": null
+}

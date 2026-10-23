@@ -1,0 +1,7 @@
+{
+  "title": "LED bars",
+  "summary": "Chop a bar into blocks and colour the lit ones by the load.",
+  "order": 4,
+  "show": { "widget": "urdeck.widgets.stats", "size": "4x2" },
+  "background": null
+}

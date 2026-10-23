@@ -32,6 +32,7 @@ CI runs only the jobs a change can affect (`ci-ok` passes when every job that ra
 | Only root `*.md`, `docs/` (not `docs/schemas/`), `site/`, `.github/` (not `ci.yml`), `LICENSE`, `PLUGIN-EXCEPTION.md`, `THIRD-PARTY-NOTICES.md` | nothing but `ci-ok` and `pr-title` |
 | `openspec/` | `openspec` (validation) |
 | `site/`, `docs/schemas/`, `.github/workflows/site-deploy.yml` | `site` (the website's build and checks) |
+| `site/cookbook/` | `test-linux` as well (the recipes are validated with `urdeck-cli`), and `site` |
 
 `workflow_dispatch` (Actions tab, Run workflow) runs every job.
 
@@ -40,7 +41,20 @@ CI runs only the jobs a change can affect (`ci-ok` passes when every job that ra
 `site/` is the Astro project behind urdeck.app (how to run and check it: `site/README.md`). A pull request that changes it
 is checked by the `site` job (build, schema copy, internal links, no third-party reference); a merge to `main` publishes
 it. A change to the settings of a widget, a theme or a background updates its page in `site/src/content/docs/` in the same
-pull request.
+pull request: the site is the one home of the user documentation, and `docs/themes.md` and `docs/backgrounds.md` are only the
+notes for adding a built-in theme or background.
+
+**The reference is generated.** The tables of theme keys and background manifest keys come from the published schemas
+(`docs/schemas/`), a widget's settings table from the catalog (`urdeck-cli catalog export`) with the meanings in the front
+matter of its page, the findings tables and the lists of built-in themes, backgrounds and widgets from the catalog. So a new key
+needs a `description` in the schema, a new setting needs a line under `settings:` in its widget's page, and a new finding needs a
+summary in `FindingCatalog`; the site's build fails, naming the gap, when one is missing, and when a built-in or a code is on no
+page. After a change that alters the catalog, run `npm run media` (it rewrites `site/src/generated/catalog.json`).
+
+**The theme cookbook** (`site/cookbook/<recipe>/`: `theme.json`, `recipe.json`, `README.md`) is a set of small theme folders
+whose pages show the JSON exactly as it is and a picture drawn from it. CI runs `urdeck-cli theme validate --all site/cookbook
+--fail-on-warnings`, so a theme key that is renamed or removed fails the pull request that does it. Add a recipe by adding a
+folder; its picture comes with the next media refresh (`npm run media -- cookbook`).
 
 **The pictures and loops** are generated from the product itself: see "Refreshing the site's media" below.
 
@@ -153,7 +167,7 @@ public class HelloWidget : Widget<HelloConfig>
 ```
 
 Widgets draw no card or background and name no font or fixed size: the theme owns the look of every widget on the page
-(see [docs/themes.md](docs/themes.md)). Use `Readout` for a big value with a unit and label, `TextLine` for a line of
+(see the [theme reference](https://urdeck.app/docs/themes/reference/)). Use `Readout` for a big value with a unit and label, `TextLine` for a line of
 text at the theme's label, body or title size, `ImageTile` for an icon or a picture, and `context.Theme` for colours.
 
 Rules enforced at compile time by the analyzer and again by the loader:

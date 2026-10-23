@@ -3,9 +3,12 @@
 import { existsSync, readdirSync, readFileSync, statSync, mkdirSync, copyFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { completenessProblems } from './completeness.mjs';
+import { allPaths, readRecords, readSchema } from '../src/lib/reference.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const dist = join(here, '..', 'dist');
+const siteRoot = join(here, '..');
+const dist = join(siteRoot, 'dist');
 const schemasSource = join(here, '..', '..', 'docs', 'schemas');
 const problems = [];
 
@@ -42,6 +45,18 @@ function resolves(target) {
   return existsSync(candidate) && statSync(candidate).isFile();
 }
 
+// A link to `/docs/themes/#icons` must find an element with that id on the page it leads to.
+const ids = new Map();
+function anchorExists(target, fragment) {
+  const clean = decodeURIComponent(fragment);
+  if (clean === '') return true;
+  const path = target.split('#')[0].split('?')[0];
+  const file = path.endsWith('/') ? join(dist, decodeURIComponent(path), 'index.html') : join(dist, decodeURIComponent(path));
+  if (!file.endsWith('.html')) return true;
+  if (!ids.has(file)) ids.set(file, new Set([...readFileSync(file, 'utf8').matchAll(/\sid="([^"]*)"/g)].map((m) => m[1])));
+  return ids.get(file).has(clean);
+}
+
 for (const page of pages) {
   const html = readFileSync(page, 'utf8');
   const pageUrl = urlPath(page).replace(/index\.html$/, '');
@@ -62,6 +77,9 @@ for (const page of pages) {
       }
       const target = value.startsWith('/') ? value : new URL(value, 'https://x.invalid' + pageUrl).pathname;
       if (!resolves(target)) problems.push(`${pageUrl}: ${name}="${value}" leads nowhere`);
+      else if (name.toLowerCase() === 'href' && value.includes('#') && !anchorExists(target, value.split('#')[1])) {
+        problems.push(`${pageUrl}: ${name}="${value}" names a section the page does not have`);
+      }
     }
   }
   // Other places a page can reach out from: CSS url() and @import in inline styles, <link> and <script> elements.
@@ -79,7 +97,6 @@ for (const file of files.filter((f) => f.endsWith('.css') || f.endsWith('.js')))
 
 // 4. Every file the media manifest names exists: pictures in src/generated/ (Astro optimises them into the output), loops in
 // public/generated/ (copied to the output as they are).
-const siteRoot = join(here, '..');
 const manifestFile = join(siteRoot, 'src', 'generated', 'media.json');
 if (existsSync(manifestFile)) {
   for (const entry of JSON.parse(readFileSync(manifestFile, 'utf8')).entries) {
@@ -124,6 +141,28 @@ if (existsSync(catalogFile) && existsSync(manifestFile)) {
     }
   }
   if (slots === 0) problems.push('index.html: no media slot found (data-slot / data-variants)');
+}
+
+// A recipe of the cookbook without a picture is named, not failed: a recipe may land before its media refresh.
+if (existsSync(manifestFile)) {
+  const made = new Set(JSON.parse(readFileSync(manifestFile, 'utf8')).entries.filter((e) => e.kind === 'cookbook').map((e) => e.id.slice('cookbook:'.length)));
+  const cookbook = join(siteRoot, 'cookbook');
+  const bare = existsSync(cookbook) ? readdirSync(cookbook).filter((d) => existsSync(join(cookbook, d, 'recipe.json')) && !made.has(d)) : [];
+  if (bare.length > 0) console.warn(`Cookbook recipes without a picture (no cookbook entry in media.json): ${bare.join(', ')}`);
+}
+
+// 6. The generated reference is complete ("Configuration Pages"): every key of the published schemas, every setting of every
+// widget, every finding code and every built-in theme, background and widget is on a documentation page.
+const records = readRecords(siteRoot);
+const troubleshootingPage = join(dist, 'docs', 'troubleshooting', 'index.html');
+if (existsSync(catalogFile)) {
+  const gaps = completenessProblems({
+    catalog: JSON.parse(readFileSync(catalogFile, 'utf8')),
+    schemas: ['v2/theme.json', 'v1/shader-manifest.json'].map((name) => ({ name, paths: allPaths(readSchema(name, siteRoot)) })),
+    records,
+    troubleshooting: existsSync(troubleshootingPage) ? readFileSync(troubleshootingPage, 'utf8') : '',
+  });
+  for (const gap of gaps) problems.push(`documentation: ${gap}`);
 }
 
 if (problems.length > 0) {

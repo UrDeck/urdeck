@@ -1,0 +1,47 @@
+---
+title: Shortcut
+description: A tappable icon that opens an application, a folder, a file or a web address.
+section: Widgets
+order: 13
+settings:
+  arguments: "Arguments for a file target. Ignored, with a warning in the log, for an address. They are never written to the log."
+  icon: "Where the icon comes from instead of `target`: a local image file (PNG, JPEG, WebP, BMP, GIF or ICO), anything else that could be a target, or `theme:KEY` for a glyph of the theme's icon set (`theme:app/terminal`)."
+  label: "A text under the icon. Absent or `\"\"`: no label, and the icon takes the whole card."
+  target: "What to open. A rooted path to an executable, a `.lnk`, a document or a folder (`%NAME%` environment variables are expanded); a bare name Windows resolves itself (`notepad`); a `shell:` item; a web address (`http` or `https`); or any other address Windows has an application for (`steam://open/main`, `ms-settings:display`). A relative path is refused. With no target the card shows an empty placeholder and does not react."
+---
+
+import SettingsTable from '../../../components/SettingsTable.astro';
+import WidgetSizes from '../../../components/WidgetSizes.astro';
+
+`urdeck.widgets.shortcut` is a 1x1 card that shows the icon of an application, a file, a folder or a web address and opens
+it when you tap it, the way a desktop shortcut does. While your finger is down the card shrinks and dims slightly (the
+amounts are the theme's `press` values); a swipe that starts on a shortcut still changes the page and opens nothing, and
+so does a long hold.
+
+<WidgetSizes widget="shortcut" />
+
+```json
+{ "typeId": "urdeck.widgets.shortcut", "col": 0, "row": 8, "target": "C:\\Program Files (x86)\\Steam\\steam.exe" },
+{ "typeId": "urdeck.widgets.shortcut", "col": 1, "row": 8, "target": "shell:AppsFolder\\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App" },
+{ "typeId": "urdeck.widgets.shortcut", "col": 2, "row": 8, "target": "%USERPROFILE%\\Documents" },
+{ "typeId": "urdeck.widgets.shortcut", "col": 3, "row": 8, "target": "https://example.com", "icon": "C:\\Icons\\example.png" }
+```
+
+## Settings
+
+<SettingsTable widget="shortcut" />
+
+A packaged (Store) application has no path; its target is `shell:AppsFolder\` followed by its id, which `Get-StartApps`
+lists in PowerShell:
+
+```powershell
+Get-StartApps | Where-Object Name -like '*Terminal*'   # AppID: Microsoft.WindowsTerminal_8wekyb3d8bbwe!App
+```
+
+## Launching
+
+The target is handed to the Windows shell with its default action: never through a command interpreter and never
+elevated. Whether a running application is brought forward or a second window opens is the application's decision, as it
+is for a desktop shortcut, and Windows and the application decide which monitor the window opens on. A double tap opens
+one window. A target Windows refuses (a missing file, no application for the address) opens nothing and `urdeck.log` says
+why.

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- urdeck-cli: checks and renders a background or a theme folder without a deck. GPL-3.0-or-later (it links the engine); running it
-       on a shader does not change the shader's licence (docs/backgrounds.md). Uses only the engine's public API: it is
+       on a shader does not change the shader's licence (the site's "The command line tool" page). Uses only the engine's public API: it is
        deliberately not in the engine's InternalsVisibleTo. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>

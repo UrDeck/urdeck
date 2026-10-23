@@ -1,0 +1,21 @@
+{
+  "$schema": "https://urdeck.app/schemas/v2/theme.json",
+  "format": 2,
+  "meta": {
+    "name": "Gradient border",
+    "description": "A border that fades from blue to pink across every card.",
+    "mode": "dark"
+  },
+  "colors": {
+    "cardFill": "#12121f"
+  },
+  "card": {
+    "radius": 0.1,
+    "borderWidth": 0.012,
+    "borderGradient": {
+      "colors": ["#7aa2ff", "#ff7ad9"],
+      "kind": "linear",
+      "angle": 135
+    }
+  }
+}

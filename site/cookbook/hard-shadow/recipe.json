@@ -1,0 +1,7 @@
+{
+  "title": "Hard shadow",
+  "summary": "A shadow with no blur: the card's own shape, moved down and to the right.",
+  "order": 3,
+  "show": "page",
+  "background": null
+}

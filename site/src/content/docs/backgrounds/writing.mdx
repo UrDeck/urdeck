@@ -1,0 +1,163 @@
+---
+title: Writing a background
+description: A background is a folder with a manifest and a shader. How to make one, what the manifest holds and how the shader is written.
+section: Backgrounds
+order: 32
+---
+
+import SchemaTable from '../../../components/SchemaTable.astro';
+
+A background is a **folder** next to `UrDeck.Host.exe`, `backgrounds/<name>/`, and the folder's name is what you select with
+`"name": "<name>"`. It holds a shader written in [SkSL](https://skia.org/docs/user/sksl/), the shading language of Skia, and a
+manifest that says what the background is called and what its parameters mean.
+
+```
+backgrounds/waves/
+  manifest.json     required: what the background is called, what its parameters mean
+  waves.sksl        the shader (or the file the manifest's "entry" names)
+  sample.png        optional pictures, listed under "samples"
+```
+
+Copy a folder in to install it, delete it to remove it. A folder with the name of a built-in one replaces it. Folders are re-read
+whenever the configuration is reloaded: after editing a file, save the config. The built-ins are folders of the same shape inside
+the program; copy one to start. A loose `backgrounds/<name>.sksl` is **not** loaded: if the configuration selects it,
+`urdeck.log` says which folder to create, and `urdeck-cli shader init backgrounds/<name>.sksl` makes the folder and a manifest
+for you.
+
+[The shader tool](/docs/backgrounds/tool/) makes, checks and draws a background folder; the quickest way to start is
+
+1. `urdeck-cli shader init backgrounds/waves.sksl` makes `backgrounds/waves/` with the shader and a manifest stub.
+2. Fill in the descriptions in `manifest.json` (and `min`, `max`, `step` where they help); delete a `kind` that guessed wrong.
+3. `urdeck-cli shader render backgrounds/waves -o backgrounds/waves/sample.png --update-manifest`, look at the picture; it is
+   listed under `samples` with how it was made.
+4. `urdeck-cli shader validate backgrounds/waves --fail-on-warnings` until it is clean.
+
+## The minimal manifest
+
+`shader init` writes this and one entry for each parameter of the shader. By hand, copy this, save it as `manifest.json` next to
+your shader and change the words:
+
+```json
+{
+  "$schema": "https://urdeck.app/schemas/v1/shader-manifest.json",
+  "manifest": 1,
+  "title": "Waves",
+  "description": "Slow waves of colour."
+}
+```
+
+Only `"manifest": 1` is required. Everything else makes the background easier to understand and to find in a settings page later;
+leaving it out costs a warning when the background loads, never the background. Comments (`//`) and trailing commas are accepted,
+as in the configuration file. With the `$schema` line an editor completes the keys and shows their descriptions.
+
+## The manifest reference
+
+The table is made from the [published schema](/schemas/v1/shader-manifest.json).
+
+<SchemaTable schema="v1/shader-manifest.json" />
+
+**The shader decides which parameters exist, their types and their defaults; the manifest only annotates them.** A configured
+value outside `min` and `max` logs a warning and the default is used, as `speed` and `scale` do; a parameter with neither is not
+checked. For a vector, `min` and `max` apply to each component.
+
+A sample may hold `settings`, an object saying how the picture was made so it can be made again: `size` (`"270x480"`), `time` (the
+shader's seconds), `theme` (a built-in theme's name), `colors` (as the configuration's `colors`) and `parameters` (an object of
+values, as the configuration sets them). Every key is optional and none is checked. It is a record for people and tools: the deck
+never uses it, and `urdeck-cli shader render --update-manifest` writes it.
+
+A key the format does not define, a `kind` or sample `type` it does not define, and a value of the wrong JSON type each log one
+warning and are ignored, so a manifest written for a newer version still loads. The names `type`, `name`, `path`, `speed`,
+`scale`, `colors` and the host inputs (`iTime`, `iResolution`, `iColor0` to `iColor3`) belong to the product and cannot be
+annotated.
+
+What stops a background is short: no `manifest.json`, one that is not a JSON object, a `manifest` that is not the integer 1, an
+`entry` that is missing or leaves the folder, a shader that does not compile, a `uniform shader`. Everything else shows the
+background and logs a warning. When a background loads, `urdeck.log` gets one line per finding, once per change of the
+background's files or settings:
+
+```
+[2026-10-12 11:04:12.311] WARN Background 'waves': SHADER042 parameter 'density' has no description. (manifest.json)
+```
+
+Every code is in the [list of background findings](/docs/troubleshooting/#background-findings). The built-in backgrounds produce
+none of them.
+
+## The shader
+
+A shader is written like GLSL, with one function:
+
+```glsl
+half4 main(float2 fragCoord)
+```
+
+`fragCoord` is in pixels of the render surface, origin top left. The result is shown opaque over the theme's background colour:
+where you return transparency, the theme colour shows.
+
+**Inputs the host sets**, each only if you declare it with this type:
+
+| Uniform | Type | Value |
+|---|---|---|
+| `iTime` | `float` | Seconds, times `speed`, wrapped as [described here](/docs/backgrounds/speed-colours-images/#speed-scale-and-cost). |
+| `iResolution` | `float2` | The render surface's size in pixels. |
+| `iColor0` to `iColor3` | `float4` | The palette: red, green, blue, alpha from 0 to 1. |
+
+**Parameters** are every other uniform you declare, one per line: `float`, `float2`, `float3`, `float4` (and the aliases `vec2`,
+`vec3`, `vec4`, `half`, `half2`, `half3`, `half4`). A configuration key with the same name sets it: a number for `float`, an
+array of numbers for a vector, a `#RRGGBB` string for a three- or four-component one. Give a default in a trailing comment: a
+number, comma-separated numbers, or a colour. A declaration may start with `layout(...)`, as shaders written for Skia or Flutter
+do: `layout(color) uniform half4 glow;` is read as a colour parameter (an editor offers a colour picker), and the manifest's
+`kind` wins if it says otherwise.
+
+## A worked example
+
+```glsl
+uniform float iTime;
+uniform float2 iResolution;
+uniform float4 iColor0;
+uniform float4 iColor1;
+uniform float density;                      // default: 6.0
+layout(color) uniform float4 glow;          // default: #ff8800
+
+half4 main(float2 fragCoord) {
+    float2 uv = fragCoord / iResolution;
+    float v = 0.5 + 0.5 * sin(uv.y * density + iTime);
+    float3 col = mix(iColor0.rgb, iColor1.rgb, v);
+    col += glow.rgb * 0.15 * smoothstep(0.8, 1.0, v);
+    return half4(half3(col), 1.0);
+}
+```
+
+with this `manifest.json`:
+
+```json
+{
+  "manifest": 1,
+  "title": "Waves",
+  "description": "Slow bands of colour with a glow on the crests.",
+  "parameters": {
+    "density": { "label": "Density", "description": "How many bands fit on the display.", "min": 1, "max": 20, "step": 0.5 },
+    "glow": { "label": "Glow", "description": "The colour of the crests." }
+  },
+  "samples": [{ "type": "image", "file": "sample.png" }]
+}
+```
+
+Select it with `{ "type": "shader", "name": "waves", "density": 9, "glow": "#00ccff" }`.
+
+Parameters are read from the source text, one `uniform` per line. A declaration it cannot read (two on one line, one inside a
+block comment) stays 0 and `urdeck.log` names it. Other uniform types (`int`, matrices, arrays) stay 0 with a warning, and a
+`uniform shader` makes the file unusable: there is nothing to give it.
+
+**Porting from Shadertoy** takes three lines: rename `mainImage(out vec4 fragColor, in vec2 fragCoord)` to
+`half4 main(float2 fragCoord)` returning the colour, declare `uniform float iTime; uniform float2 iResolution;` (the names match),
+and replace `vec` with `float` types where SkSL wants them (`vec3` works as an alias). Shaders that read textures or the mouse
+(`iChannel0`, `iMouse`) cannot be ported as they are. Then add a `manifest.json`.
+
+Keep it cheap: a loop of a hundred iterations per pixel is fine at `scale` 0.5 and may not be at 1.
+
+## Sharing it
+
+A background folder is the whole package: the shader, the manifest and the pictures. `author`, `license` and `version` in the
+manifest are for a person and a store and never decide what runs. `pairsWith.themes` lists the themes it suits, best first. The
+tool links the GPL-licensed engine, but running it on a shader does not affect the shader's licence, any more than running a
+compiler does.

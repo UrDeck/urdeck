@@ -76,7 +76,9 @@ first-party `system` and `weather` do) is replaced by it, and a shortcut to a we
 the site's icon, so the deck shows the same made-up readings on any machine and makes no network request of its own. Everything
 else is as usual; the configuration is never written. The log says `Demo mode: sample data for system, weather`. With
 `--snapshot` the samples are read at `--start`, so `--demo --snapshot out.png --size 1100x3840 --start 2026-10-13T21:47:32` gives
-the same picture every time. For pictures without Windows, use `urdeck-cli preview render`, which draws with the same samples.
+the same picture every time. For pictures without Windows, use `urdeck-cli preview render`, which draws with the same samples. Pictures of every theme,
+widget size and background, drawn that way, are in the gallery at [urdeck.app/docs/themes](https://urdeck.app/docs/themes/) and on
+the widget pages; they are regenerated from the product (`site/README.md`, "Media"), not captured by hand.
 
 ## Configuration
 
@@ -85,12 +87,17 @@ UrDeck is configured by `urdeck-config.json` next to the executable (the tracked
 next to the executable for live tweaks). The file is hot-reloaded about a second after saving; an invalid edit is ignored
 and the last good config is kept.
 
-The user documentation lives on the website, at [urdeck.app/docs](https://urdeck.app/docs/): the config file, pages and
-the dock, the monitor and the settings window, each widget (
-[Clock](https://urdeck.app/docs/widgets/clock/), [Stats](https://urdeck.app/docs/widgets/stats/),
+The user documentation lives on the website, at [urdeck.app/docs](https://urdeck.app/docs/), and nowhere else: the config
+file, [pages and the dock](https://urdeck.app/docs/pages-and-dock/), the monitor and the settings window, each widget
+([Clock](https://urdeck.app/docs/widgets/clock/), [Stats](https://urdeck.app/docs/widgets/stats/),
 [Weather](https://urdeck.app/docs/widgets/weather/), [Shortcut](https://urdeck.app/docs/widgets/shortcut/)),
-[themes](https://urdeck.app/docs/themes/) and [backgrounds](https://urdeck.app/docs/backgrounds/). Its source is
-`site/src/content/docs/`; change it in the pull request that changes a setting. The references for authors are
+[themes](https://urdeck.app/docs/themes/) (with the [theme reference](https://urdeck.app/docs/themes/reference/) and the
+[cookbook](https://urdeck.app/docs/cookbook/)), [backgrounds](https://urdeck.app/docs/backgrounds/),
+[the command line tool](https://urdeck.app/docs/command-line/) and [troubleshooting](https://urdeck.app/docs/troubleshooting/)
+with every finding code. The reference tables (theme keys, background manifest keys, widget settings, finding codes, the
+built-in lists) are made from the product when the site is built, and the build fails when one has no description, so a
+change to a setting, a theme key or a finding is documented in the pull request that makes it. Its source is
+`site/src/content/docs/`. The notes for the people who add a built-in theme or background are
 [docs/themes.md](docs/themes.md) and [docs/backgrounds.md](docs/backgrounds.md).
 
 ## Writing a widget
@@ -109,8 +116,8 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 | `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather` | First-party data providers: `system` (CPU, memory and GPU readings) and `weather` (Open-Meteo, any number of places) |
 | `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather`, `widgets/UrDeck.Widgets.Shortcut` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`), Weather (`urdeck.widgets.weather`) and Shortcut (`urdeck.widgets.shortcut`) |
 | `tests/UrDeck.Engine.Tests`, `tests/UrDeck.Analyzer.Tests` | xUnit tests |
-| `site/` | The website at urdeck.app (Astro): landing page, user documentation (`src/content/docs/`), "Tested on"; see `site/README.md` |
-| `docs/` | `ROADMAP.md` (the milestones), `BACKLOG.md` (what to work on next), performance notes |
+| `site/` | The website at urdeck.app (Astro): landing page, the user documentation (`src/content/docs/`) and the theme cookbook (`cookbook/`), "Tested on"; see `site/README.md` |
+| `docs/` | `ROADMAP.md` (the milestones), `BACKLOG.md` (what to work on next), performance notes, the published JSON Schemas, notes for adding a built-in theme or background |
 | `openspec/` | Spec-driven documents: `specs/` holds the current capability specs (grid layout, host shell, widget SDK, Clock), `changes/` holds proposals in flight and the archive of finished changes |
 
 The Windows SDK suffix on the host and test target frameworks is required: the Windows App SDK and `SkiaSharp.Views.WinUI` target `net10.0-windows10.0.19041`.

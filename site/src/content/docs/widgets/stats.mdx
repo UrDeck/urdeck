@@ -3,10 +3,17 @@ title: Stats
 description: Show readings from the system or the weather as numbers and gauges.
 section: Widgets
 order: 11
+settings:
+  slots: "The readings to show, a list of slots that fill the positions of the card's size in order. See the table below."
 ---
+
+import SettingsTable from '../../../components/SettingsTable.astro';
+import WidgetSizes from '../../../components/WidgetSizes.astro';
 
 `urdeck.widgets.stats` shows readings from any data provider: a large value with its unit and a label, optionally inside
 a gauge. Its settings are a list of `slots` that fill the positions of the card's size in order.
+
+<WidgetSizes widget="stats" />
 
 | Size | Positions |
 |---|---|
@@ -30,11 +37,15 @@ power and clock, and the CPU's first core):
   { "reading": "system:gpu/power" }, { "reading": "system:gpu/clock" }, { "reading": "system:cpu/core/1/load" } ] }
 ```
 
-## A slot
+## Settings
+
+<SettingsTable widget="stats" />
+
+### A slot
 
 | Field | Meaning |
 |---|---|
-| `reading` | The reading's id, `<provider>:<path>`. With no slot the widget shows `system:cpu/load`. |
+| `reading` | The reading's id, `provider:path`. With no slot the widget shows `system:cpu/load`. |
 | `label` | Absent: the label the provider declares (for example `Core 2`). A text: shown instead. `""`: no label. |
 | `unit` | `celsius` or `fahrenheit` for readings that have several units (otherwise the reading's default, then the region's). |
 | `decimals` | Number of decimals to show (default 0). |
@@ -48,18 +59,18 @@ A theme can ask a gauge for two more parts. With `gauge.status` the label's row 
 `HOT` in the themes that use it), chosen from the gauge's fraction by the theme's thresholds; a slot that sets `warning` or
 `critical` is judged by those instead. With `gauge.sparkline` a line of the last minute or so is drawn under the number; Stats
 keeps that history itself, one value a second, only for a gauge the theme gives a sparkline and that is tall enough for it, and
-it starts again when the slot's reading or the settings change. See [Themes](/docs/themes/).
+it starts again when the slot's reading or the settings change. See [the theme reference](/docs/themes/reference/#gauge).
 
-## The `system` readings
+## The system readings
 
 The `system` provider needs no administrator rights.
 
 | Reading | Meaning |
 |---|---|
 | `system:cpu/load` | The share of time all logical processors are busy, in percent. |
-| `system:cpu/core/<n>/load` | The same for logical processor `n`, counted from 1. |
+| `system:cpu/core/N/load` | The same for logical processor `N`, counted from 1. |
 | `system:memory/load` | Memory in use, in percent. |
-| `system:gpu/load`, `system:gpu/temperature`, `system:gpu/power`, `system:gpu/clock` | The main GPU (the one with the most video memory): load in percent, temperature, power in watts and clock in MHz. `system:gpu/<n>/...` is each adapter, counted from 1 in that order. |
+| `system:gpu/load`, `system:gpu/temperature`, `system:gpu/power`, `system:gpu/clock` | The main GPU (the one with the most video memory): load in percent, temperature, power in watts and clock in MHz. `system:gpu/N/...` is each adapter, counted from 1 in that order. |
 
 CPU load is the share of time the processors are busy, so with a CPU that boosts it reads lower under load than Task
 Manager, which weighs by clock speed. GPU load is the busiest engine of the adapter, as in Task Manager.
