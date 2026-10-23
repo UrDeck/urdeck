@@ -5,14 +5,14 @@ UrDeck is a lightweight, extensible widget dashboard for secondary and case disp
 read the source of, low resource use, great visuals, a modular widget SDK, a WYSIWYG editor, and touch.
 
 This page is the plan in outcomes. The work items behind it, with their design notes and status, are in
-[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-10-11.
+[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-10-23.
 
 ## Where it is today
 
 The foundation is in place and runs on the real panel: a WinUI 3 host that composites each widget on the GPU, a plugin
 SDK with hot reload, themes, animation, data providers, pages you swipe between, a dock, and the Clock, Stats,
 Weather (4x2 and 4x4) and Shortcut widgets. There is no
-installer and no editor yet: you build from source and edit a JSON file. See the [README](../README.md).
+downloadable release and no editor yet: you build from source and edit a JSON file. See the [README](../README.md).
 
 ## Milestones
 
@@ -23,8 +23,8 @@ frozen last (milestone 5), because the editor and the web page widget both still
 | # | Milestone | Done when | Status |
 |---|---|---|---|
 | 0 | Foundation | Plugins, themes, GPU host, animation and data providers work on the panel | done |
-| 1 | Daily driver | The owner's PC runs UrDeck in place of HYTE Nexus for two weeks, sleep and resume included | in progress |
-| 2 | Public preview (0.1) | Somebody else with a case display downloads a release and has a working page in five minutes, without the .NET SDK | not started |
+| 1 | Daily driver | The owner's PC runs UrDeck in place of HYTE Nexus for two weeks, sleep and resume included | done |
+| 2 | Downloadable preview (0.1) | Somebody else with a case display downloads a release from GitHub and has a working page in five minutes, without the .NET SDK | not started |
 | 3 | Editor (0.5, beta) | A new user builds and changes a page without opening a file | not started |
 | 4 | Living page | A page with a video background, a web view and an animated icon runs within the Nexus bar (no more memory, CPU or GPU than HYTE Nexus) | not started |
 | 5 | SDK 1.0 for authors | A widget and a provider built outside this repo, from the template and the NuGet package alone, load in a release build | not started |
@@ -34,7 +34,7 @@ frozen last (milestone 5), because the editor and the web page widget both still
 host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data providers with the `system` and
 `weather` providers (item 3), Clock, Stats and Weather 4x2 (item 7).
 
-**1. Daily driver.** Everything on the owner's current Nexus page, and nothing that forces a restart of the app.
+**1. Daily driver (done 2026-10-23).** The owner ran UrDeck on the panel in place of Nexus for about two weeks. Everything on the owner's current Nexus page, and nothing that forces a restart of the app.
 - The 4x4 weather widget (item 7; implemented in `weather-4x4-forecast`; the panel look is the owner's to confirm).
 - Pages, swipe and the page indicator, and taps on widgets (item 8; done).
 - The shortcut widget, which brought tap input, launching, icons and the image tile (item 7; implemented in
@@ -46,17 +46,30 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
   question takes long; the card shows a dash until then.
 - Start with Windows, in its simplest form (item 12; done in `start-with-windows`, checked on three cold boots, a sign-out, an Explorer restart and a sleep).
 
-**2. Public preview (0.1).** For people who are willing to edit a JSON file. Its purpose is hardware variety: every
-measurement so far is from one panel and one NVIDIA GPU, and that is the largest unknown in the project.
-- A portable zip built and published by a release workflow, with the third-party notices (item 12).
-- Config, themes, plugins and the log in a per-user folder instead of next to the executable (item 15).
+**2. Downloadable preview (0.1).** For people who are willing to edit a JSON file. Its purpose is hardware variety: every
+measurement so far is from one panel and one NVIDIA GPU, and that is the largest unknown in the project. A binary on GitHub
+comes first and the Microsoft Store later (after 1.0), so the order is: something to download, then what makes it work for
+a stranger, then trust.
+
+*A. A releasable build (first).*
+- A release workflow: a tag builds the self-contained app, runs the tests and attaches a portable zip to a GitHub release
+  with the third-party notices and the version stamped in (item 12).
+- A per-user installer (no administrator rights) after the zip, if the zip alone proves to be a poor first run (item 12).
+- The website's download button points at the latest release (`landing-site` left it open).
+
+*B. Works for somebody else.*
+- Config, themes, plugins and the log in a per-user folder instead of next to the executable, with the portable mode kept
+  (item 15).
 - A config format version and a first migration (item 15).
 - A first run that produces a sensible page on any monitor, including a landscape one (item 15).
 - A tray icon with Quit (item 12; shipped in `tray-icon`), later the entry that opens the config editor.
-- Code signing, so the download is not blocked by SmartScreen (item 15).
+
+*C. Trust and feedback.*
+- Code signing, so the download is not blocked by SmartScreen (item 15). The first releases may ship unsigned, with the
+  SmartScreen warning explained in the README, while the signing application is pending.
 - A compatibility table: AMD and Intel GPUs, other panels (item 15). The hardware report issue template and the first "Tested on" page are done (`landing-site`); the table grows with reports.
-- The website at urdeck.app: landing page, user documentation, "Tested on" (`landing-site`); a working download follows with the signed release.
-- Screenshots and a short clip in the README, issue templates, Discussions.
+- The website at urdeck.app (live: landing page, user documentation, theme gallery, "Tested on").
+- Screenshots and a short clip in the README (the site's media pipeline renders them), issue templates, Discussions.
 
 **3. Editor (0.5, beta).** Item 11, plus what it needs from the rest:
 - Settings metadata in the SDK, so the editor can build a form from a widget's config type (item 15). This is public
@@ -88,7 +101,8 @@ measurement so far is from one panel and one NVIDIA GPU, and that is the largest
 **6. UrDeck 1.0.** Installer, auto-update, winget manifest, final logo and branding (item 12); every config written
 since 0.1 still loads; a written statement of what the app sends over the network and to whom (item 15).
 
-**After 1.0.** The marketplace registry, display backends for USB LCDs, splitting the template and the SDK into their
+**After 1.0.** The Microsoft Store package (start-up through the `StartupTask` API, a read-only application folder),
+the marketplace registry, display backends for USB LCDs, splitting the template and the SDK into their
 own repos (item 13), the camera widget (item 7).
 
 ## Following along and helping
