@@ -37,7 +37,7 @@
 ## 7. Verification
 
 - [x] 7.1 `npm run build` in `site/` with its checks; `dotnet build urdeck.slnx -c Release`; `openspec validate --all --strict`
-- [ ] 7.2 After merge and the owner's app setup: the workflow run by hand reports "Media are current"; then a throwaway branch that changes one theme colour, the workflow on it opens a pull request whose required checks run (close it unmerged)
+- [x] 7.2 After merge and the owner's app setup: the workflow run by hand reports "Media are current"; then a throwaway branch that changes one theme colour, the workflow on it opens a pull request whose required checks run (close it unmerged)
 
 ## 8. Documentation
 
