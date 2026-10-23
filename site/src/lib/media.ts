@@ -1,35 +1,46 @@
-// Media for the landing page is found by file name, so adding a picture or a video is dropping a file, not editing code.
-//
-//   src/assets/widgets/<widget>-<size>.(png|jpg|webp)      picture of a widget at a size (required for the entry to show)
-//   public/media/widgets/<widget>-<size>.mp4               optional short loop; the picture is its poster
-//   src/assets/backgrounds/<name>.(png|jpg|webp)           optional poster frame of a background
-//   public/media/backgrounds/<name>.mp4                    the loop of a background (a background with none is left out)
+// The site's pictures and loops are generated (npm run media, site/README.md "Media"); what exists is listed in
+// src/generated/media.json. Nothing here looks at a file name: an entry the manifest does not have is undefined, and the
+// page leaves it out.
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { ImageMetadata } from 'astro';
+import manifest from '../generated/media.json';
 
 type Glob = Record<string, { default: ImageMetadata }>;
+type Entry = { id: string; kind: string; files: string[] };
 
-const widgetImages = import.meta.glob<{ default: ImageMetadata }>('/src/assets/widgets/*.{png,jpg,jpeg,webp}', { eager: true }) as Glob;
-const backgroundImages = import.meta.glob<{ default: ImageMetadata }>('/src/assets/backgrounds/*.{png,jpg,jpeg,webp}', { eager: true }) as Glob;
-const deckImages = import.meta.glob<{ default: ImageMetadata }>('/src/assets/decks/*.{png,jpg,jpeg,webp}', { eager: true }) as Glob;
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/generated/**/*.webp', { eager: true }) as Glob;
+const entries = new Map((manifest.entries as Entry[]).map((e) => [e.id, e]));
 
-function find(images: Glob, dir: string, base: string): ImageMetadata | undefined {
-  for (const ext of ['png', 'jpg', 'jpeg', 'webp']) {
-    const hit = images[`/src/assets/${dir}/${base}.${ext}`];
-    if (hit) return hit.default;
-  }
-  return undefined;
+function resolve(id: string): { image?: ImageMetadata; video?: string } {
+  const entry = entries.get(id);
+  if (!entry) return {};
+  const picture = entry.files.find((f) => f.startsWith('src/'));
+  const loop = entry.files.find((f) => f.startsWith('public/'));
+  return {
+    image: picture ? images[`/${picture}`]?.default : undefined,
+    video: loop ? `/${loop.slice('public/'.length)}` : undefined,
+  };
 }
 
-// A site build runs with site/ as the working directory.
-function video(kind: 'widgets' | 'backgrounds', base: string): string | undefined {
-  return existsSync(join(process.cwd(), 'public', 'media', kind, `${base}.mp4`)) ? `/media/${kind}/${base}.mp4` : undefined;
-}
+/** The showcase page in a theme, over the theme's own background. */
+export const deck = (theme: string) => resolve(`deck:${theme}`);
+/** A widget at a size (`4x2`) in a theme. */
+export const widget = (name: string, size: string, theme: string) => resolve(`widget:${name}-${size}-${theme}`);
+/** A background's poster and loop, in the colours of the theme it is shown with. */
+export const background = (name: string) => resolve(`background:${name}`);
 
-export const widgetMedia = (base: string) => ({ image: find(widgetImages, 'widgets', base), video: video('widgets', base) });
-export const backgroundMedia = (name: string) => ({ poster: find(backgroundImages, 'backgrounds', name), video: video('backgrounds', name) });
-export const deckImage = (id: string) => find(deckImages, 'decks', id);
+// The landing page shows the glass theme.
+const landing = 'glass';
+export const deckImage = (theme: string) => deck(theme).image;
+export const widgetMedia = (base: string) => {
+  const i = base.lastIndexOf('-');
+  return widget(base.slice(0, i), base.slice(i + 1), landing);
+};
+export const backgroundMedia = (name: string) => {
+  const m = background(name);
+  return { poster: m.image, video: m.video };
+};
 
-// The social preview picture is optional: public/og-image.png (1200x630).
+// The social preview picture is optional: public/og-image.png (1200x630). A site build runs with site/ as the working directory.
 export const hasSocialImage = existsSync(join(process.cwd(), 'public', 'og-image.png'));

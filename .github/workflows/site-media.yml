@@ -1,0 +1,113 @@
+name: Site media
+
+# Renders the site's pictures and loops that are missing or stale (site/README.md, "Media") on Linux and, when any file
+# changed, opens a pull request "chore(site): refresh media" as a GitHub App, so that the pull request's required checks run
+# (a pull request opened with GITHUB_TOKEN triggers no workflow). Started by hand; a release trigger is one more line under `on:`.
+on:
+  workflow_dispatch:
+    inputs:
+      all:
+        description: Render everything, not only what is stale
+        type: boolean
+        default: false
+
+concurrency:
+  group: site-media
+  cancel-in-progress: false
+
+# The job reads the repository; the app's token does the writing.
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the app is set up
+        env:
+          APP_ID: ${{ secrets.URDECK_MEDIA_APP_ID }}
+          APP_KEY: ${{ secrets.URDECK_MEDIA_APP_KEY }}
+        run: |
+          if [ -z "$APP_ID" ] || [ -z "$APP_KEY" ]; then
+            echo "::error::The secrets URDECK_MEDIA_APP_ID and URDECK_MEDIA_APP_KEY are not set. Create the GitHub App described in CONTRIBUTING.md (Refreshing the site's media) and add them to the repository's Actions secrets."
+            exit 1
+          fi
+
+      # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      # v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+        with:
+          global-json-file: global.json
+
+      # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Install the site's tools
+        working-directory: site
+        run: npm ci
+
+      - name: Render the media
+        working-directory: site
+        env:
+          RENDER_ALL: ${{ inputs.all }}
+        run: |
+          flags=""
+          if [ "$RENDER_ALL" = "true" ]; then flags="--all"; fi
+          npm run media -- $flags --report "$RUNNER_TEMP/report.md"
+
+      - name: Find what changed
+        id: changes
+        run: |
+          git add --intent-to-add site/src/generated site/public/generated
+          if [ -z "$(git status --porcelain site/src/generated site/public/generated)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Media are current. No branch or pull request was made." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git status --short site/src/generated site/public/generated | head -100
+          fi
+
+      # v3
+      - name: Mint the app's token
+        if: steps.changes.outputs.changed == 'true'
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510
+        with:
+          app-id: ${{ secrets.URDECK_MEDIA_APP_ID }}
+          private-key: ${{ secrets.URDECK_MEDIA_APP_KEY }}
+
+      - name: Commit, push and open the pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          BRANCH: chore/site-media-${{ github.run_number }}
+        run: |
+          bot="${APP_SLUG}[bot]"
+          id="$(gh api "/users/${bot}" --jq .id)"
+          git config user.name "$bot"
+          git config user.email "${id}+${bot}@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add site/src/generated site/public/generated
+          git commit -m "chore(site): refresh media"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
+          {
+            echo "Refreshed by the *Site media* workflow (run ${GITHUB_RUN_NUMBER}); see site/README.md, \"Media\"."
+            echo
+            cat "$RUNNER_TEMP/report.md"
+            echo
+            echo "🤖 Generated with [Claude Code](https://claude.com/claude-code)"
+          } > "$RUNNER_TEMP/body.md"
+          gh pr create --base main --head "$BRANCH" --title "chore(site): refresh media" --body-file "$RUNNER_TEMP/body.md"
+          echo "Opened a pull request from ${BRANCH}." >> "$GITHUB_STEP_SUMMARY"

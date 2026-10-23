@@ -1,0 +1,10 @@
+{
+  "urdeck.widgets.clock": {
+    "config": {
+      "style": "flap",
+      "format": "24h",
+      "showDate": true
+    },
+    "loopStart": 26.5
+  }
+}

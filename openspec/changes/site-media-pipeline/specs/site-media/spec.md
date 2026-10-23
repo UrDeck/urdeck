@@ -50,7 +50,8 @@ all its sizes or for one size).
 The media MUST be rendered by `urdeck-cli preview render` with sample data and the sample page's moment (loops start
 there), and encoded with `ffmpeg` (H.264, no audio, playing forwards then backwards so a loop has no jump). Generation
 MUST work on Linux and on Windows, MUST NOT need the host, the network (beyond installing its tools) or a display, and
-MUST NOT read the machine's readings. Every loop's first frame equals its picture. Loops respect the sizes and limits of
+MUST NOT read the machine's readings. Every loop's first frame is its picture (a deck loop is drawn at the size it ships at, so its first frame is the picture
+scaled, not the same pixels). Loops respect the sizes and limits of
 "Media Limits".
 
 #### Scenario: On a Linux runner
@@ -59,7 +60,7 @@ MUST NOT read the machine's readings. Every loop's first frame equals its pictur
 
 #### Scenario: A loop starts where its picture is
 - **WHEN** the clock's loop and picture are generated in a theme
-- **THEN** the loop's first frame is the picture
+- **THEN** the loop's first frame is the picture (the same pixels for a widget or a background)
 
 ### Requirement: Media Limits
 Generated files MUST stay within these limits, and generation MUST fail naming the file that does not:

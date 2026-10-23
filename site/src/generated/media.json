@@ -1,0 +1,3834 @@
+{
+  "entries": [
+    {
+      "background": "aurora",
+      "files": [
+        "src/generated/backgrounds/aurora.webp",
+        "public/generated/backgrounds/aurora.mp4"
+      ],
+      "id": "background:aurora",
+      "key": "3c9d3cd9413afa2d3a27ac29e2ac2b19cdef518bea2261e7c4cb67bfad699881",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "aurora",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "default-dark"
+      },
+      "size": "540x960",
+      "theme": "default-dark",
+      "widget": null
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/backgrounds/contour.webp",
+        "public/generated/backgrounds/contour.mp4"
+      ],
+      "id": "background:contour",
+      "key": "160a9fee37bf34c8791b4ece588446177f28057e6c999ac08f50b40d81f7cf9f",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "contour",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "carbon"
+      },
+      "size": "540x960",
+      "theme": "carbon",
+      "widget": null
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/backgrounds/embers.webp",
+        "public/generated/backgrounds/embers.mp4"
+      ],
+      "id": "background:embers",
+      "key": "9b5a75146732daa53efa6aaf73f018e64f8c229f17841137f194bcd9c2eba886",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "embers",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "ember"
+      },
+      "size": "540x960",
+      "theme": "ember",
+      "widget": null
+    },
+    {
+      "background": "equalizer",
+      "files": [
+        "src/generated/backgrounds/equalizer.webp",
+        "public/generated/backgrounds/equalizer.mp4"
+      ],
+      "id": "background:equalizer",
+      "key": "e31021b4dfdc27f47302a8493d7fa3e75d9653ce8932a79854f2e07bd5a48cf1",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "equalizer",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "ember"
+      },
+      "size": "540x960",
+      "theme": "ember",
+      "widget": null
+    },
+    {
+      "background": "gradient",
+      "files": [
+        "src/generated/backgrounds/gradient.webp",
+        "public/generated/backgrounds/gradient.mp4"
+      ],
+      "id": "background:gradient",
+      "key": "73817ff650c151fe25f361c003adea8dbbb83a78bce8552aea09a9fd7c1f4c95",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "gradient",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "default-dark"
+      },
+      "size": "540x960",
+      "theme": "default-dark",
+      "widget": null
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/backgrounds/horizon.webp",
+        "public/generated/backgrounds/horizon.mp4"
+      ],
+      "id": "background:horizon",
+      "key": "a0e72a67789641b96551e49960a4493c1c7e135ed8e8b7bd2415ec6b7783cec2",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "horizon",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "rigline"
+      },
+      "size": "540x960",
+      "theme": "rigline",
+      "widget": null
+    },
+    {
+      "background": "julia",
+      "files": [
+        "src/generated/backgrounds/julia.webp",
+        "public/generated/backgrounds/julia.mp4"
+      ],
+      "id": "background:julia",
+      "key": "9c2e6f2c30b083ad6399f409833c893dafbcb4a28879b9e72ae7f76be8e37693",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "julia",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "default-dark"
+      },
+      "size": "540x960",
+      "theme": "default-dark",
+      "widget": null
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/backgrounds/nebula.webp",
+        "public/generated/backgrounds/nebula.mp4"
+      ],
+      "id": "background:nebula",
+      "key": "95ca6d1141dbdbe116994ad73b0c3a5855e7bf2eecccf459d2d8f26c54fb77f9",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "nebula",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "obsidian"
+      },
+      "size": "540x960",
+      "theme": "obsidian",
+      "widget": null
+    },
+    {
+      "background": "plasma",
+      "files": [
+        "src/generated/backgrounds/plasma.webp",
+        "public/generated/backgrounds/plasma.mp4"
+      ],
+      "id": "background:plasma",
+      "key": "790e7c5a0b8c8b58ec94c7e51a7b77158b77687166122b53cc6dc54d122f2fcd",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "plasma",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "default-dark"
+      },
+      "size": "540x960",
+      "theme": "default-dark",
+      "widget": null
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/backgrounds/plotter.webp",
+        "public/generated/backgrounds/plotter.mp4"
+      ],
+      "id": "background:plotter",
+      "key": "4c6b1c15d36bb5f523240268c785715f11a41750a5b40244399d0e9a34dc21cb",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "plotter",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "blueprint"
+      },
+      "size": "540x960",
+      "theme": "blueprint",
+      "widget": null
+    },
+    {
+      "background": "ripple",
+      "files": [
+        "src/generated/backgrounds/ripple.webp",
+        "public/generated/backgrounds/ripple.mp4"
+      ],
+      "id": "background:ripple",
+      "key": "235fabae5c62d93b69e96bc84082e3affebe584fced51d1395f3cc3c001dfb85",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "ripple",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "paper"
+      },
+      "size": "540x960",
+      "theme": "paper",
+      "widget": null
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/backgrounds/shapes.webp",
+        "public/generated/backgrounds/shapes.mp4"
+      ],
+      "id": "background:shapes",
+      "key": "50033ec1826101996bbf3f8692b992a4bccff9e25505bd94cb53034a881951b9",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "shapes",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "pop"
+      },
+      "size": "540x960",
+      "theme": "pop",
+      "widget": null
+    },
+    {
+      "background": "spectrum",
+      "files": [
+        "src/generated/backgrounds/spectrum.webp",
+        "public/generated/backgrounds/spectrum.mp4"
+      ],
+      "id": "background:spectrum",
+      "key": "b8651d747456dee320c484139638bdc05b756eb60a28924e2c5c0f5572d5bad2",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "spectrum",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "prism"
+      },
+      "size": "540x960",
+      "theme": "prism",
+      "widget": null
+    },
+    {
+      "background": "streams",
+      "files": [
+        "src/generated/backgrounds/streams.webp",
+        "public/generated/backgrounds/streams.mp4"
+      ],
+      "id": "background:streams",
+      "key": "03a2a68d0cdb2585c506fe20ebaf1d99cbd493655f1cd69b68a70c84707aa22f",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "streams",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "blueprint"
+      },
+      "size": "540x960",
+      "theme": "blueprint",
+      "widget": null
+    },
+    {
+      "background": "vortex",
+      "files": [
+        "src/generated/backgrounds/vortex.webp",
+        "public/generated/backgrounds/vortex.mp4"
+      ],
+      "id": "background:vortex",
+      "key": "46663b5b6e8d80f89c6e0897a103829b225b70f9d9045937ab9424fc3c98ab9b",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "vortex",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "obsidian"
+      },
+      "size": "540x960",
+      "theme": "obsidian",
+      "widget": null
+    },
+    {
+      "background": "warpgate",
+      "files": [
+        "src/generated/backgrounds/warpgate.webp",
+        "public/generated/backgrounds/warpgate.mp4"
+      ],
+      "id": "background:warpgate",
+      "key": "d672b6940d64311fa9dc17ff0428cc1e1e5d6c8aa1c2788089395ef0729f5905",
+      "kind": "backgrounds",
+      "settings": {
+        "background": "warpgate",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32",
+        "size": "540x960",
+        "theme": "carbon"
+      },
+      "size": "540x960",
+      "theme": "carbon",
+      "widget": null
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/decks/blueprint.webp",
+        "public/generated/decks/blueprint.mp4"
+      ],
+      "id": "deck:blueprint",
+      "key": "f1d37172e17a55d8f9ff709110275731d88a361f146224bc2f87b50155ee71d8",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": {
+          "fps": 30,
+          "frames": 90,
+          "size": "550x1920"
+        },
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "blueprint"
+      },
+      "size": null,
+      "theme": "blueprint",
+      "widget": null
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/decks/carbon.webp",
+        "public/generated/decks/carbon.mp4"
+      ],
+      "id": "deck:carbon",
+      "key": "8260a072c2986c8bb4bfd45721fbbff5063c59c382ea7154f558f6d4d43c7e9e",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": {
+          "fps": 30,
+          "frames": 90,
+          "size": "550x1920"
+        },
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "carbon"
+      },
+      "size": null,
+      "theme": "carbon",
+      "widget": null
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/decks/default-dark.webp"
+      ],
+      "id": "deck:default-dark",
+      "key": "17ba6d60f9fff4e0d354681099e0a7dfd0e3d31ac1abffe91a3bd9fec0e7e4c3",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "default-dark"
+      },
+      "size": null,
+      "theme": "default-dark",
+      "widget": null
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/decks/default-light.webp"
+      ],
+      "id": "deck:default-light",
+      "key": "effeed302f38adb7d3c572850816436f6656f0b17aadea640c07ccc8651c6ae1",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "default-light"
+      },
+      "size": null,
+      "theme": "default-light",
+      "widget": null
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/decks/ember.webp",
+        "public/generated/decks/ember.mp4"
+      ],
+      "id": "deck:ember",
+      "key": "701219fcf52affe7829d8c9e4d540def12bc9754151e302941465179eaa5baa0",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": {
+          "fps": 30,
+          "frames": 90,
+          "size": "550x1920"
+        },
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "ember"
+      },
+      "size": null,
+      "theme": "ember",
+      "widget": null
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/decks/glass.webp"
+      ],
+      "id": "deck:glass",
+      "key": "b9c32344a8ad0823f52ee318927ec297357e8ce290e231910f4d1af931aeb8b6",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "glass"
+      },
+      "size": null,
+      "theme": "glass",
+      "widget": null
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/decks/obsidian.webp",
+        "public/generated/decks/obsidian.mp4"
+      ],
+      "id": "deck:obsidian",
+      "key": "15dcf6044891efa0cfeb88c3f2c88183178c5060d585b36a9e985b7971c3d1b3",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": {
+          "fps": 30,
+          "frames": 90,
+          "size": "550x1920"
+        },
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "obsidian"
+      },
+      "size": null,
+      "theme": "obsidian",
+      "widget": null
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/decks/paper.webp",
+        "public/generated/decks/paper.mp4"
+      ],
+      "id": "deck:paper",
+      "key": "5a2db928b44bc9ce4beea69eef17ef91648c7c5d0f2708539d47ae993f649332",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": {
+          "fps": 30,
+          "frames": 90,
+          "size": "550x1920"
+        },
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "paper"
+      },
+      "size": null,
+      "theme": "paper",
+      "widget": null
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/decks/pop.webp",
+        "public/generated/decks/pop.mp4"
+      ],
+      "id": "deck:pop",
+      "key": "f1d64212f8f02c6c907cfd825f106e36b6f2808773bbd450fd8c2d7389cec2fb",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": {
+          "fps": 30,
+          "frames": 90,
+          "size": "550x1920"
+        },
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "pop"
+      },
+      "size": null,
+      "theme": "pop",
+      "widget": null
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/decks/prism.webp",
+        "public/generated/decks/prism.mp4"
+      ],
+      "id": "deck:prism",
+      "key": "7c207f3a1104e367af6563acc5d0497f5568afa82ba7bd2f0d3aa5112b414836",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": {
+          "fps": 30,
+          "frames": 90,
+          "size": "550x1920"
+        },
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "prism"
+      },
+      "size": null,
+      "theme": "prism",
+      "widget": null
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/decks/rigline.webp",
+        "public/generated/decks/rigline.mp4"
+      ],
+      "id": "deck:rigline",
+      "key": "5e026ba1f909e0b155be07e80703a9d4e4c34013df473228a2ed31b918682360",
+      "kind": "decks",
+      "settings": {
+        "background": "theme",
+        "config": "site/showcase/urdeck-config.json",
+        "loop": {
+          "fps": 30,
+          "frames": 90,
+          "size": "550x1920"
+        },
+        "moment": "2026-10-13T21:47:32",
+        "page": "dock",
+        "size": "1100x3840",
+        "theme": "rigline"
+      },
+      "size": null,
+      "theme": "rigline",
+      "widget": null
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/clock-1x1-blueprint.webp",
+        "public/generated/widgets/clock-1x1-blueprint.mp4"
+      ],
+      "id": "widget:clock-1x1-blueprint",
+      "key": "a033d0250d0b85b12aa11f06342c7d17ddf3a10fa9ff5cc2b31ef732ebf8008b",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/clock-1x1-carbon.webp",
+        "public/generated/widgets/clock-1x1-carbon.mp4"
+      ],
+      "id": "widget:clock-1x1-carbon",
+      "key": "3e74822f7408841e4b8407fff937a0bdf1da16baf14bedab8bbe64bf18a63449",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-1x1-default-dark.webp",
+        "public/generated/widgets/clock-1x1-default-dark.mp4"
+      ],
+      "id": "widget:clock-1x1-default-dark",
+      "key": "9b9850d09cac0828ec7b099b3c0f5a360a8ecf52190093ec63510c6cd5d22e4a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-1x1-default-light.webp",
+        "public/generated/widgets/clock-1x1-default-light.mp4"
+      ],
+      "id": "widget:clock-1x1-default-light",
+      "key": "249bb8f42a2c82754f8b2838c0aa7b9d88aec9be62a1a75911a27c9defde963d",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/clock-1x1-ember.webp",
+        "public/generated/widgets/clock-1x1-ember.mp4"
+      ],
+      "id": "widget:clock-1x1-ember",
+      "key": "718e4143e4a88ac0169497672d83e75f87c197a653f19064541ca4f8f5d442a6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "ember",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-1x1-glass.webp",
+        "public/generated/widgets/clock-1x1-glass.mp4"
+      ],
+      "id": "widget:clock-1x1-glass",
+      "key": "6bef76f507828104713f0afeaf83cf49372de6787080f88e6ca6d8e0a6a66cf2",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "glass",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/clock-1x1-obsidian.webp",
+        "public/generated/widgets/clock-1x1-obsidian.mp4"
+      ],
+      "id": "widget:clock-1x1-obsidian",
+      "key": "4edde32868c2ca4adf61ec43b763616c8d975c6b977533d30a438ec94b45fe2f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/clock-1x1-paper.webp",
+        "public/generated/widgets/clock-1x1-paper.mp4"
+      ],
+      "id": "widget:clock-1x1-paper",
+      "key": "8c2e8e9db9e594edd3ede809fb736c93d950193367a73888e9627419a8a56d6a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "paper",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/clock-1x1-pop.webp",
+        "public/generated/widgets/clock-1x1-pop.mp4"
+      ],
+      "id": "widget:clock-1x1-pop",
+      "key": "178c82e5d7f8acf9c0d60c1f100597424f6e3815005298b7bc22ad4ee0278496",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "pop",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/clock-1x1-prism.webp",
+        "public/generated/widgets/clock-1x1-prism.mp4"
+      ],
+      "id": "widget:clock-1x1-prism",
+      "key": "ac363e514bce0cc8a9bfc7a401a8ee0e420bbb72afa08b0651bb0897928a2293",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "prism",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/clock-1x1-rigline.webp",
+        "public/generated/widgets/clock-1x1-rigline.mp4"
+      ],
+      "id": "widget:clock-1x1-rigline",
+      "key": "9944294f1d3e1b4374fe7e0ffb524888f94e196eba4962504344891fef030068",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/clock-2x1-blueprint.webp",
+        "public/generated/widgets/clock-2x1-blueprint.mp4"
+      ],
+      "id": "widget:clock-2x1-blueprint",
+      "key": "63cbb36385458d29cccfbe82bf3364fce6cc39c159e63a037b62ca177e8912d8",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/clock-2x1-carbon.webp",
+        "public/generated/widgets/clock-2x1-carbon.mp4"
+      ],
+      "id": "widget:clock-2x1-carbon",
+      "key": "b901076f709342fa01219d61ba3c2bb60ac6efb97219347730c139c30bb45517",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-2x1-default-dark.webp",
+        "public/generated/widgets/clock-2x1-default-dark.mp4"
+      ],
+      "id": "widget:clock-2x1-default-dark",
+      "key": "c36bacfa8f620cb43130bbe3637a14add79bf0f299c11d3787a7d1370bbe6fb1",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-2x1-default-light.webp",
+        "public/generated/widgets/clock-2x1-default-light.mp4"
+      ],
+      "id": "widget:clock-2x1-default-light",
+      "key": "ce0a6e545f9b8540848eb8fdeb04b01ac6950f242576c56963c51030ece52d4a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/clock-2x1-ember.webp",
+        "public/generated/widgets/clock-2x1-ember.mp4"
+      ],
+      "id": "widget:clock-2x1-ember",
+      "key": "b847830b6ea5035945c1608de59771ed7fbdcc840354aa80de4e26af186325b2",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "ember",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-2x1-glass.webp",
+        "public/generated/widgets/clock-2x1-glass.mp4"
+      ],
+      "id": "widget:clock-2x1-glass",
+      "key": "5e550a2d684a15c20e49e54d2f7dd95021ebce2b4d41d18f1170484a487c3d85",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "glass",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/clock-2x1-obsidian.webp",
+        "public/generated/widgets/clock-2x1-obsidian.mp4"
+      ],
+      "id": "widget:clock-2x1-obsidian",
+      "key": "38880fc82b07318731d4cc5cdf471f4bca9ebfc7626a893b1d0bc42b86e44ba6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/clock-2x1-paper.webp",
+        "public/generated/widgets/clock-2x1-paper.mp4"
+      ],
+      "id": "widget:clock-2x1-paper",
+      "key": "3efd4c8653a665ea45c0ccd50f916c5e2a459c253cfe3d9cca06bb6209cdbcb8",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "paper",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/clock-2x1-pop.webp",
+        "public/generated/widgets/clock-2x1-pop.mp4"
+      ],
+      "id": "widget:clock-2x1-pop",
+      "key": "569b14e61925ea7a400d8066d36376a94ae6e4ae022daacd8a5078c6603435e0",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "pop",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/clock-2x1-prism.webp",
+        "public/generated/widgets/clock-2x1-prism.mp4"
+      ],
+      "id": "widget:clock-2x1-prism",
+      "key": "094e3b3d143796f9ebc3861a7f7601c68191a2e7bf85f5a42ac9a3b89bfaa093",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "prism",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/clock-2x1-rigline.webp",
+        "public/generated/widgets/clock-2x1-rigline.mp4"
+      ],
+      "id": "widget:clock-2x1-rigline",
+      "key": "0c2c527df4f399b7229311fc1064db69f06f80d566a3f6cd462599d4b325995a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/clock-4x1-blueprint.webp",
+        "public/generated/widgets/clock-4x1-blueprint.mp4"
+      ],
+      "id": "widget:clock-4x1-blueprint",
+      "key": "628c0e4f359474bb82ceee06a9373147f18f5468f514705db784ca3b95c18b37",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/clock-4x1-carbon.webp",
+        "public/generated/widgets/clock-4x1-carbon.mp4"
+      ],
+      "id": "widget:clock-4x1-carbon",
+      "key": "8ae6fbc86423d559200278aff8a77a0790189476ed157bb7fd6c05980d31f410",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-4x1-default-dark.webp",
+        "public/generated/widgets/clock-4x1-default-dark.mp4"
+      ],
+      "id": "widget:clock-4x1-default-dark",
+      "key": "d1f0fef67a43c91977a726f9503b7f8a4b6b36a11afdb84ed2a9fa2e41031716",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-4x1-default-light.webp",
+        "public/generated/widgets/clock-4x1-default-light.mp4"
+      ],
+      "id": "widget:clock-4x1-default-light",
+      "key": "554ba07409447e85f31f2a2aa3936cee5c98c72224d13b884e7cb6986bf1f49f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/clock-4x1-ember.webp",
+        "public/generated/widgets/clock-4x1-ember.mp4"
+      ],
+      "id": "widget:clock-4x1-ember",
+      "key": "501dedf07226d9253ec5277010acee59de62fcbcfde9acc586c54cfe37d088c0",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "ember",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-4x1-glass.webp",
+        "public/generated/widgets/clock-4x1-glass.mp4"
+      ],
+      "id": "widget:clock-4x1-glass",
+      "key": "da77f9ecf8232694b7eba402f1f9d33c30d89bcd58b42a3f7b623f5b3d061ce5",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "glass",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/clock-4x1-obsidian.webp",
+        "public/generated/widgets/clock-4x1-obsidian.mp4"
+      ],
+      "id": "widget:clock-4x1-obsidian",
+      "key": "7bba5b0b1d8c21a4b2b3d4c66c67fa18de6c8230c43ec8d9ac6087d554c4cdcd",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/clock-4x1-paper.webp",
+        "public/generated/widgets/clock-4x1-paper.mp4"
+      ],
+      "id": "widget:clock-4x1-paper",
+      "key": "daf6b56c16a9b53f7c4410e99585e1ad5509e722907596b0143c76be9c9d65ee",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "paper",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/clock-4x1-pop.webp",
+        "public/generated/widgets/clock-4x1-pop.mp4"
+      ],
+      "id": "widget:clock-4x1-pop",
+      "key": "643c3389a643670ae865e1014463aa7b5c7ff1a07dbd6116d9e37ff9a9b7c3c5",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "pop",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/clock-4x1-prism.webp",
+        "public/generated/widgets/clock-4x1-prism.mp4"
+      ],
+      "id": "widget:clock-4x1-prism",
+      "key": "0fa47512310fafe783d93b703f98e2cc043f7f6e4f69db78b5d9c874d3c37022",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "prism",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/clock-4x1-rigline.webp",
+        "public/generated/widgets/clock-4x1-rigline.mp4"
+      ],
+      "id": "widget:clock-4x1-rigline",
+      "key": "c564e620ad1ff7b4fc3cd514588f5c06fe2ee1fb49a8da8325245cfe380410fa",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x1",
+        "width": 1100
+      },
+      "size": "4x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/clock-4x2-blueprint.webp",
+        "public/generated/widgets/clock-4x2-blueprint.mp4"
+      ],
+      "id": "widget:clock-4x2-blueprint",
+      "key": "f5aa5d0401fe24a5d35cdcec0c760d3ab2f93ea953c06658913dd2eb1d575a6c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/clock-4x2-carbon.webp",
+        "public/generated/widgets/clock-4x2-carbon.mp4"
+      ],
+      "id": "widget:clock-4x2-carbon",
+      "key": "1ebecb9b9a16e77433fc769f6f952192ee1f60749a6a2b0176a752034a1c820f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-4x2-default-dark.webp",
+        "public/generated/widgets/clock-4x2-default-dark.mp4"
+      ],
+      "id": "widget:clock-4x2-default-dark",
+      "key": "e10afadc8ba80537d1b59ceba758dd7620f4fbc7155f445a16cee96dbb3a4b34",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-4x2-default-light.webp",
+        "public/generated/widgets/clock-4x2-default-light.mp4"
+      ],
+      "id": "widget:clock-4x2-default-light",
+      "key": "eea01961d2a84ae3440328c5ecb917bce8d1c339332e4494591ab6d1fdbe824c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/clock-4x2-ember.webp",
+        "public/generated/widgets/clock-4x2-ember.mp4"
+      ],
+      "id": "widget:clock-4x2-ember",
+      "key": "4cb537b8674465819f8937f89656d395d6f5556cfb9b882ba3a0cd432497fb8e",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "ember",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "ember",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/clock-4x2-glass.webp",
+        "public/generated/widgets/clock-4x2-glass.mp4"
+      ],
+      "id": "widget:clock-4x2-glass",
+      "key": "921f80908ac4520edae81cf5a48535171ef67a365a29bbda9abfb1f74c789514",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "glass",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "glass",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/clock-4x2-obsidian.webp",
+        "public/generated/widgets/clock-4x2-obsidian.mp4"
+      ],
+      "id": "widget:clock-4x2-obsidian",
+      "key": "aac74ac5c868e28867ff5eb66215ca4e0d2f5f8ced794a845f276efa670a6bdd",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/clock-4x2-paper.webp",
+        "public/generated/widgets/clock-4x2-paper.mp4"
+      ],
+      "id": "widget:clock-4x2-paper",
+      "key": "a3d8b18d706bb868fa0565e708214d3c186392fbe4b67944c45a458269b6c85c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "paper",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "paper",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/clock-4x2-pop.webp",
+        "public/generated/widgets/clock-4x2-pop.mp4"
+      ],
+      "id": "widget:clock-4x2-pop",
+      "key": "570babe7c08aac0bd6cef3c6ed97fa52e11a753629195217f554168f9b6a8f39",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "pop",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "pop",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/clock-4x2-prism.webp",
+        "public/generated/widgets/clock-4x2-prism.mp4"
+      ],
+      "id": "widget:clock-4x2-prism",
+      "key": "d8321cc1fb6a139627fd0afca10692a44f30cb9636cbfffe4acf02a3d27cd818",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "prism",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "prism",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/clock-4x2-rigline.webp",
+        "public/generated/widgets/clock-4x2-rigline.mp4"
+      ],
+      "id": "widget:clock-4x2-rigline",
+      "key": "d2c511ec4c45da98446b8341c73dea782fda7531c80627ccf7c0427a23cf9c4e",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:58.500",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.clock",
+        "widgetConfig": {
+          "format": "24h",
+          "showDate": true,
+          "style": "flap"
+        },
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.clock"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/shortcut-1x1-blueprint.webp"
+      ],
+      "id": "widget:shortcut-1x1-blueprint",
+      "key": "b0aadd8650f1fb13f0f23035e84102a8d118b0c4a3d6a026e1aa9388475ee0e3",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/shortcut-1x1-carbon.webp"
+      ],
+      "id": "widget:shortcut-1x1-carbon",
+      "key": "18497b7cd33d17ebe78cb63169c71d81af1ae2b602f0e01a2f4ebc811de06f0e",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/shortcut-1x1-default-dark.webp"
+      ],
+      "id": "widget:shortcut-1x1-default-dark",
+      "key": "fd6d4489225b6cb1aeed7944ea7940d5eb7c4469f4c8903f4c10d654c5ea401d",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/shortcut-1x1-default-light.webp"
+      ],
+      "id": "widget:shortcut-1x1-default-light",
+      "key": "7bf2a8f459810ccbf24459425cc3e5f61bd611294ef17fca74b783ffed84bf75",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/shortcut-1x1-ember.webp"
+      ],
+      "id": "widget:shortcut-1x1-ember",
+      "key": "c02ede2c3d0f1789b0b15136aab36d3918e7c9b8cd1cb10df3bfbe5a0d2f68e6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/shortcut-1x1-glass.webp"
+      ],
+      "id": "widget:shortcut-1x1-glass",
+      "key": "abdaa8344861f275cb576fd1e73d4aedaaf4b00e3eb05ce0d34f855466da13eb",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/shortcut-1x1-obsidian.webp"
+      ],
+      "id": "widget:shortcut-1x1-obsidian",
+      "key": "f0d51d1ed5dc8a905fef58622516de8f80e7f68de0b32e75dbc6b98eb15d852c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/shortcut-1x1-paper.webp"
+      ],
+      "id": "widget:shortcut-1x1-paper",
+      "key": "7c4ff6a13626465976131a5c4bacc9dafe50784c9f185f1815f2cdb6d289fdda",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/shortcut-1x1-pop.webp"
+      ],
+      "id": "widget:shortcut-1x1-pop",
+      "key": "bcda02bb5e5c8bbc260a2c4c338891b85ea7c86b9805121b3c3982ddd7492470",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/shortcut-1x1-prism.webp"
+      ],
+      "id": "widget:shortcut-1x1-prism",
+      "key": "f695345c5f9b7414858b1ef50161ec960511c593f2e888674841213fab6aabc0",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/shortcut-1x1-rigline.webp"
+      ],
+      "id": "widget:shortcut-1x1-rigline",
+      "key": "cdae924a63336d3ed7ac00286a29656ab8219b128ceb29d58e61cee7fb234e66",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.shortcut",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.shortcut"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/stats-1x1-blueprint.webp",
+        "public/generated/widgets/stats-1x1-blueprint.mp4"
+      ],
+      "id": "widget:stats-1x1-blueprint",
+      "key": "9a0690e011dff63ac3c0e996e607ad372bc6318062818e19a2dd288aa0357dc5",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-1x1-carbon.webp",
+        "public/generated/widgets/stats-1x1-carbon.mp4"
+      ],
+      "id": "widget:stats-1x1-carbon",
+      "key": "9bb6d9db8bd59dac0f5ebd398c84bf0283dea2097739c253a26ef9d0e311dabc",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-1x1-default-dark.webp",
+        "public/generated/widgets/stats-1x1-default-dark.mp4"
+      ],
+      "id": "widget:stats-1x1-default-dark",
+      "key": "b7fcba9b64d1e2505fc1660048382c3fbf8c390b10fe8da713ce873d4da57ba4",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-1x1-default-light.webp",
+        "public/generated/widgets/stats-1x1-default-light.mp4"
+      ],
+      "id": "widget:stats-1x1-default-light",
+      "key": "6ac10ba19ce3c0c730ae09ef3758c8a3c1bc419a2773c02642f52dc3ea088831",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/stats-1x1-ember.webp",
+        "public/generated/widgets/stats-1x1-ember.mp4"
+      ],
+      "id": "widget:stats-1x1-ember",
+      "key": "a80d36ab394fb38ae0599c88f0aaddc44c6e0c614466615c16a3b3a2edf9cadd",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-1x1-glass.webp",
+        "public/generated/widgets/stats-1x1-glass.mp4"
+      ],
+      "id": "widget:stats-1x1-glass",
+      "key": "242147ec02d6348307af37a35a725447f5730951211ba8d22bacd4c59d1e4ca3",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-1x1-obsidian.webp",
+        "public/generated/widgets/stats-1x1-obsidian.mp4"
+      ],
+      "id": "widget:stats-1x1-obsidian",
+      "key": "ea1365dfefbd5dc4c5592a9125e2ebab15b49bc076515d74b18537cff88974c9",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-1x1-paper.webp",
+        "public/generated/widgets/stats-1x1-paper.mp4"
+      ],
+      "id": "widget:stats-1x1-paper",
+      "key": "b693fac827974bc5487b732a2bd2a2ccaf82a3f447d64b8f6c2e7c8f239c1836",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/stats-1x1-pop.webp",
+        "public/generated/widgets/stats-1x1-pop.mp4"
+      ],
+      "id": "widget:stats-1x1-pop",
+      "key": "49f279dfddec1bb220e80a622d67a75251c91966ef539baf2ffffde110fdc43f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-1x1-prism.webp",
+        "public/generated/widgets/stats-1x1-prism.mp4"
+      ],
+      "id": "widget:stats-1x1-prism",
+      "key": "2d9d5aee5a56bc7b4ef708416c06474fdffbed4eccbb85a1fe289e7c0050dad7",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/stats-1x1-rigline.webp",
+        "public/generated/widgets/stats-1x1-rigline.mp4"
+      ],
+      "id": "widget:stats-1x1-rigline",
+      "key": "ccfff0d192529ffd32307037b1ceb201fbac9954357ec4798e80808ebed22d37",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/stats-2x2-blueprint.webp",
+        "public/generated/widgets/stats-2x2-blueprint.mp4"
+      ],
+      "id": "widget:stats-2x2-blueprint",
+      "key": "f5db554c7a730c0282aae2ca04e48dd05dc5f414d31d490eb81fae79b6adc223",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-2x2-carbon.webp",
+        "public/generated/widgets/stats-2x2-carbon.mp4"
+      ],
+      "id": "widget:stats-2x2-carbon",
+      "key": "a10a42ad7a6432b0fcfd057cc1e4719bf9f48714fee0cc51f37639057555e6f1",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-2x2-default-dark.webp",
+        "public/generated/widgets/stats-2x2-default-dark.mp4"
+      ],
+      "id": "widget:stats-2x2-default-dark",
+      "key": "6748966c18be5254c98e0f54374f5fa530e80f70770f0276ce08acb85f8a671a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-2x2-default-light.webp",
+        "public/generated/widgets/stats-2x2-default-light.mp4"
+      ],
+      "id": "widget:stats-2x2-default-light",
+      "key": "03ddcbe9cde6800b964f8e2cd04476889c783c51b253bbbf9edc01c8b11eaccb",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/stats-2x2-ember.webp",
+        "public/generated/widgets/stats-2x2-ember.mp4"
+      ],
+      "id": "widget:stats-2x2-ember",
+      "key": "90a32101483b836846f8e8f48ac34b0d06f87444c84292cf11c7c3432339829f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "ember",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-2x2-glass.webp",
+        "public/generated/widgets/stats-2x2-glass.mp4"
+      ],
+      "id": "widget:stats-2x2-glass",
+      "key": "6506a7b5784e61562ab7bb396c22dead87cd6ce844cf28c3ceef1ec5cbc055fc",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "glass",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-2x2-obsidian.webp",
+        "public/generated/widgets/stats-2x2-obsidian.mp4"
+      ],
+      "id": "widget:stats-2x2-obsidian",
+      "key": "d6dee4040160e1dda8415e231dc8598e4a61a1f55bfabbba06aa06e6e711198a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-2x2-paper.webp",
+        "public/generated/widgets/stats-2x2-paper.mp4"
+      ],
+      "id": "widget:stats-2x2-paper",
+      "key": "faa2d3be471e05a10738c8a382ee89a55af5dec0c10e49e7d6eccd1e08fb45c5",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "paper",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/stats-2x2-pop.webp",
+        "public/generated/widgets/stats-2x2-pop.mp4"
+      ],
+      "id": "widget:stats-2x2-pop",
+      "key": "e59aa481bb0acfefe1a3a920ccd8c0c100e94117fa68fecead1d202cc07aadde",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "pop",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-2x2-prism.webp",
+        "public/generated/widgets/stats-2x2-prism.mp4"
+      ],
+      "id": "widget:stats-2x2-prism",
+      "key": "1a6a8351fde6a2d17d76736258cf3d4ccead5e0b36aef12595a8f2b547579c62",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "prism",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/stats-2x2-rigline.webp",
+        "public/generated/widgets/stats-2x2-rigline.mp4"
+      ],
+      "id": "widget:stats-2x2-rigline",
+      "key": "99dfcfdadd97da34308b88ecf567aa5c2dcab8054f1585f6f36e7bd3b79ee151",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/stats-4x2-blueprint.webp",
+        "public/generated/widgets/stats-4x2-blueprint.mp4"
+      ],
+      "id": "widget:stats-4x2-blueprint",
+      "key": "fd3b5b44aabc97afe151d2cf0c82d51e2d3a0d83ee69ee293b53c4c83be5658c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-4x2-carbon.webp",
+        "public/generated/widgets/stats-4x2-carbon.mp4"
+      ],
+      "id": "widget:stats-4x2-carbon",
+      "key": "de295f93b1f4b5c6146b1f3e9b2f48acb79058019821b24926590129abe73843",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-4x2-default-dark.webp",
+        "public/generated/widgets/stats-4x2-default-dark.mp4"
+      ],
+      "id": "widget:stats-4x2-default-dark",
+      "key": "3c5b586a129046b167c2831c6d837021af17f5b8f2f5a234e3d13c3332c19b18",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-4x2-default-light.webp",
+        "public/generated/widgets/stats-4x2-default-light.mp4"
+      ],
+      "id": "widget:stats-4x2-default-light",
+      "key": "1ec908bd3e3a3c7a16d6146a0bab6eacbe88d227462f3d74e02e8d323506536f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/stats-4x2-ember.webp",
+        "public/generated/widgets/stats-4x2-ember.mp4"
+      ],
+      "id": "widget:stats-4x2-ember",
+      "key": "b3b3ce798fd11e15c8247ea5d46470fc2c6da020ec0700836d37e35a397ddb45",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "ember",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-4x2-glass.webp",
+        "public/generated/widgets/stats-4x2-glass.mp4"
+      ],
+      "id": "widget:stats-4x2-glass",
+      "key": "79aff7b7b1d6234b30e5d1612d948e4cf0ee76b183ef7bdab204a071bc9aebcd",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "glass",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-4x2-obsidian.webp",
+        "public/generated/widgets/stats-4x2-obsidian.mp4"
+      ],
+      "id": "widget:stats-4x2-obsidian",
+      "key": "604774b4c5accf08308742237ebead88e2feeae1797fee8e87e294d080289126",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-4x2-paper.webp",
+        "public/generated/widgets/stats-4x2-paper.mp4"
+      ],
+      "id": "widget:stats-4x2-paper",
+      "key": "83fd85e3c44bd3a0f387de87049dc37f0fca35e0d9bab3792a73d22dfffcf4f6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "paper",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/stats-4x2-pop.webp",
+        "public/generated/widgets/stats-4x2-pop.mp4"
+      ],
+      "id": "widget:stats-4x2-pop",
+      "key": "d21b111e21df10e8afa610483e7eec3bf4c11a04edb4d8f897c272095112b896",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "pop",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-4x2-prism.webp",
+        "public/generated/widgets/stats-4x2-prism.mp4"
+      ],
+      "id": "widget:stats-4x2-prism",
+      "key": "d1663baf8657afbeb35dc270dca458b8e77e3082cbc0b07413215bf2be3cc67a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "prism",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/stats-4x2-rigline.webp",
+        "public/generated/widgets/stats-4x2-rigline.mp4"
+      ],
+      "id": "widget:stats-4x2-rigline",
+      "key": "d31e150803ee2fb1f9ea5477cb204cd6551a66c9bb120d72bce4cfa36340481a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/stats-4x4-blueprint.webp",
+        "public/generated/widgets/stats-4x4-blueprint.mp4"
+      ],
+      "id": "widget:stats-4x4-blueprint",
+      "key": "a266a6c7deda4dfd385de14dc1072ab6e3f8614bacc8db2ece81e20f220e23e2",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-4x4-carbon.webp",
+        "public/generated/widgets/stats-4x4-carbon.mp4"
+      ],
+      "id": "widget:stats-4x4-carbon",
+      "key": "e3fffd908d85c99aa6dd54760a48c83103cab96ed8bcaa8bba76fedeb7fe1745",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-4x4-default-dark.webp",
+        "public/generated/widgets/stats-4x4-default-dark.mp4"
+      ],
+      "id": "widget:stats-4x4-default-dark",
+      "key": "a7c96d28dd22750ad09b9bb4a7d1246739d2472f3b58b33ae00427e3603b1bc3",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-4x4-default-light.webp",
+        "public/generated/widgets/stats-4x4-default-light.mp4"
+      ],
+      "id": "widget:stats-4x4-default-light",
+      "key": "806f5b86c691cedb573ccbd2a773d0c9d6cb435c1c57f8b1ca2bff27206f3f21",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/stats-4x4-ember.webp",
+        "public/generated/widgets/stats-4x4-ember.mp4"
+      ],
+      "id": "widget:stats-4x4-ember",
+      "key": "aeda5bb3a18ea6a6e36bd30c54baa46bbd7928b04089365e11733600f39be937",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "ember",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-4x4-glass.webp",
+        "public/generated/widgets/stats-4x4-glass.mp4"
+      ],
+      "id": "widget:stats-4x4-glass",
+      "key": "27deb0dc8a7b9cddb27e6f16ad0a5fa6fae5a2d45f1f1f45d0cbf11e8cfa7763",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "glass",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-4x4-obsidian.webp",
+        "public/generated/widgets/stats-4x4-obsidian.mp4"
+      ],
+      "id": "widget:stats-4x4-obsidian",
+      "key": "2f8ff2373a9e2777edbfd420935453596c2cd091a4797fe1864d29355fd8b161",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-4x4-paper.webp",
+        "public/generated/widgets/stats-4x4-paper.mp4"
+      ],
+      "id": "widget:stats-4x4-paper",
+      "key": "f92bb2f68e555b55a68aeae693ff947ae5ced2dc28265e6752afc62b1e365f64",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "paper",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/stats-4x4-pop.webp",
+        "public/generated/widgets/stats-4x4-pop.mp4"
+      ],
+      "id": "widget:stats-4x4-pop",
+      "key": "467fcbaf7526647c7e382ed246f8217e4f93724c317fc2feb7f8297f870f9691",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "pop",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-4x4-prism.webp",
+        "public/generated/widgets/stats-4x4-prism.mp4"
+      ],
+      "id": "widget:stats-4x4-prism",
+      "key": "dce78ca4168f928aae9dcf08a3ae847a6924a1dbfbc91242182648e5b71f0e75",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "prism",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/stats-4x4-rigline.webp",
+        "public/generated/widgets/stats-4x4-rigline.mp4"
+      ],
+      "id": "widget:stats-4x4-rigline",
+      "key": "45f66a88f25d711d8cb2ade72463c5611691213e4baa083942b8f933dedef4b6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/weather-4x2-blueprint.webp"
+      ],
+      "id": "widget:weather-4x2-blueprint",
+      "key": "cb8ac0d6eafc9d25ffb2315d983780fecde5ddad6f9e2b01b70b8375423e59a0",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/weather-4x2-carbon.webp"
+      ],
+      "id": "widget:weather-4x2-carbon",
+      "key": "3ef0fe8482cbc22258f277ffc6ff3145816408c33a1b2d80cad5d852decb7085",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/weather-4x2-default-dark.webp"
+      ],
+      "id": "widget:weather-4x2-default-dark",
+      "key": "bb72138bcc99f29f45909ce676fa7f2f408a1aa99ebcc156f41ff1b440dce225",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/weather-4x2-default-light.webp"
+      ],
+      "id": "widget:weather-4x2-default-light",
+      "key": "add62db6c2b379f7411b643b2a7559fc64487942aba37667727efbb82eb35bc8",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/weather-4x2-ember.webp"
+      ],
+      "id": "widget:weather-4x2-ember",
+      "key": "dd74cf1796cb3db2d01ac4068a65c5f63b8fb85d660090229518eb8ac9e5abc7",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "ember",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/weather-4x2-glass.webp"
+      ],
+      "id": "widget:weather-4x2-glass",
+      "key": "9a73a266cf6a9f5deac17f686c356a983523f9ce0e603847a7b182a29b0a30c9",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "glass",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/weather-4x2-obsidian.webp"
+      ],
+      "id": "widget:weather-4x2-obsidian",
+      "key": "22ae3b4f33be1d0e65c2499fd070e301f11c3a69ce4d1632e96091f702f91e47",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/weather-4x2-paper.webp"
+      ],
+      "id": "widget:weather-4x2-paper",
+      "key": "f7db5bb961180abd304fde6c0f17539a0a9d63b66403486904e7e5ec26204862",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "paper",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/weather-4x2-pop.webp"
+      ],
+      "id": "widget:weather-4x2-pop",
+      "key": "50e1aa52c5b6edd1b57b91a3e5c1e3e3634896089c94d097f63a95f12e1ed2df",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "pop",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/weather-4x2-prism.webp"
+      ],
+      "id": "widget:weather-4x2-prism",
+      "key": "d5730d3422733522fd245493c41ab76ceecf3db762d93e6ede79ab0287b9f296",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "prism",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/weather-4x2-rigline.webp"
+      ],
+      "id": "widget:weather-4x2-rigline",
+      "key": "4b6b34314527613858b8a49c485b45f0d9c533bcfcf4ff81f1e0b0f72d31e3f6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/weather-4x4-blueprint.webp"
+      ],
+      "id": "widget:weather-4x4-blueprint",
+      "key": "fe4140592538077bfbc7a60239f8b8950a2ea9724286450d4c7d3e08acd1074a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/weather-4x4-carbon.webp"
+      ],
+      "id": "widget:weather-4x4-carbon",
+      "key": "9d194d534b06b476bc8bafb9ed1ab27ec70755ae3d09323515a1e0ad0239421f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/weather-4x4-default-dark.webp"
+      ],
+      "id": "widget:weather-4x4-default-dark",
+      "key": "99cfb519ab25790b03f79caad8634b611bb3e8bdf5a7258026da9bc1da82a8da",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/weather-4x4-default-light.webp"
+      ],
+      "id": "widget:weather-4x4-default-light",
+      "key": "98147222beecd991a927b7b0d8e76d3d51bf745b5e0be92d58568f398d969fc9",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/weather-4x4-ember.webp"
+      ],
+      "id": "widget:weather-4x4-ember",
+      "key": "f3ea3e141287018d98df52c473e5fb11b3ce6349e3861f54c963406c901afa3f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "ember",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/weather-4x4-glass.webp"
+      ],
+      "id": "widget:weather-4x4-glass",
+      "key": "f8b9086be7aaa24ff7486872fa4aba16e90b42f81d505e8d728bfeaf9f5c9613",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "glass",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/weather-4x4-obsidian.webp"
+      ],
+      "id": "widget:weather-4x4-obsidian",
+      "key": "c3d9bdabe2546072b3a4711fbc44716ead3ca9b431950a68f431d67c185b403a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/weather-4x4-paper.webp"
+      ],
+      "id": "widget:weather-4x4-paper",
+      "key": "13b8672a2b38238ada10de5833e7b7c3c14d603508760e7ae24234125a2d6aab",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "paper",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/weather-4x4-pop.webp"
+      ],
+      "id": "widget:weather-4x4-pop",
+      "key": "2122acbf96c1e486e4693a9af75d26376e40a70aa69e2fff2b2465faa8752ee5",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "pop",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/weather-4x4-prism.webp"
+      ],
+      "id": "widget:weather-4x4-prism",
+      "key": "64be31f5598ab76bafcd151c2b3ed730a6e81d62ac0c540af562db4b5636c9dc",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "prism",
+      "widget": "urdeck.widgets.weather"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/weather-4x4-rigline.webp"
+      ],
+      "id": "widget:weather-4x4-rigline",
+      "key": "f0f41f764a85be03795b888d5ae74d7966bd105b076b8bb051080483d1524493",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.weather",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.weather"
+    }
+  ],
+  "version": 1
+}

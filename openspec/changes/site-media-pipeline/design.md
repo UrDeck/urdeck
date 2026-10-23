@@ -80,11 +80,17 @@ machines, so every run would look stale.
 
 ### 4. What moves, and loops
 
-- **Deck loops:** made when the theme has an animated border, or its chosen background is a moving shader. 5 s at 30 fps,
-  scaled to 540 wide.
-- **Widget loops:** made when the widget's media differ between frame 0 and the last frame of a 3-second probe at 10 fps
-  (cheap, decided per widget and size, independent of theme), then rendered for every theme. This picks up the weather
-  icons, the stats keyframes and, with the override's `loopStart`, the clock's flip.
+- **Deck loops:** made when the theme has an animated border, or its chosen background is a moving shader (probed as: the
+  second of two frames 2 s apart differs between `--motion full` and `--motion off`, so the page's own widgets do not
+  count). 3 s forwards then backwards (5.9 s) at 30 fps. The frames are drawn at 550x1920 and scaled to 540 wide; the
+  deck picture is drawn separately at 1100x3840. Found in the first Linux run: the shader on the CPU costs about 1.3 s a
+  frame at 1100x3840 and a quarter of that at half the size, and the loop ships at 540 wide anyway.
+- **Widget loops:** made when the widget's media differ from frame 0 in a 3-second probe at 10 fps with `--motion off`
+  (the background and borders are still, so only the widget's own drawing counts), decided per widget, size and theme
+  (a theme can still a widget: Blueprint stills the weather icons). This picks up the weather icons, the stats keyframes
+  and, with the override's `loopStart`, the clock's flip.
+- **Concurrency:** probes and renders run several at a time (`--jobs`, default a quarter of the cores up to 6); a render is
+  one process and mostly one core. A full Linux generation took about 10 minutes.
 - `site/showcase/widgets.json` may give, per widget (and optionally per size): `config` (merged over the default
   configuration) and `loopStart` (seconds from the sample moment). The clock gets `style: flap` and a start 1.5 s before a
   minute; that is the only override shipped.

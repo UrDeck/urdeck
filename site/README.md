@@ -32,31 +32,75 @@ Content and layout are kept apart, so a new design replaces the second without t
 | `src/pages/` | The landing page, "Tested on", and the route for the documentation. The landing copy is in `index.astro`. |
 | `src/layouts/`, `src/components/`, `src/styles/` | Layout and style. `home.css` is the landing page's, `global.css` is shared with the documentation. |
 | `src/data/widgets.json`, `themes.json`, `backgrounds.json` | What the landing page's showcases list: the widgets with their sizes, the sample decks, the backgrounds. |
-| `src/assets/widgets/`, `src/assets/backgrounds/`, `public/media/` | Pictures and loops of the widgets and backgrounds, found by file name. See `MEDIA-CHECKLIST.md`. |
-| `decks/<name>/urdeck-config.json` | The config of each sample deck. |
-| `src/assets/decks/<name>.png` | The sample decks, rendered by UrDeck itself and committed. |
-| `public/` | Served as they are: `CNAME`, the favicon, the fonts with their licences, and the loops in `media/`. |
+| `src/generated/`, `public/generated/` | The site's pictures (`.webp`), loops (`.mp4`), `media.json` and `catalog.json`. **Generated** by `npm run media`; never edited by hand. See "Media" below. |
+| `showcase/` | The page every theme is shown with (`urdeck-config.json`) and the site's widget settings (`widgets.json`). |
+| `decks/<theme>/urdeck-config.json` | Optional: a page for one theme instead of the showcase page. None ships. |
+| `public/` | Served as they are: `CNAME`, the favicon, the fonts with their licences, and the generated loops. |
 
-## Sample decks
+## Media
 
-Run `pwsh scripts/Render-SiteDecks.ps1` from the repository root on a Windows machine (it builds the host and runs
-`UrDeck.Host.exe --snapshot --size 1100x3840` for each folder under `decks/`). The pictures show the readings of the
-machine that drew them and the weather needs the network, so look at each one before committing it: nothing personal, the
-readings present, the weather drawn. CI does not render them.
+Every picture and loop on the site is made by UrDeck itself, with `urdeck-cli preview render` and the providers' sample
+data (no host, no network, no readings of the machine), so a visitor can reproduce it and nobody has to check a picture for
+personal data. What the site needs is **computed**, never listed by hand (`openspec/specs/site-media`):
 
-## Pictures and loops on the landing page
+- a deck picture of `showcase/urdeck-config.json` (1100x3840) for every theme, over the theme's own background, and a loop
+  when the theme or its background moves;
+- a picture of every widget at every size it declares for previews, in every theme, and a loop when the widget moves by
+  itself (the clock's flip, the weather icons, the stats keyframes);
+- a poster and a loop of every background, in the colours of the theme it is shown with.
 
-The widget and background showcases list what is in `src/data/*.json` and look for media by name, so adding a widget, a size
-or a background is a data entry and a file. A size or background with no media is left out of the built page. The full list
-of what to render, with sizes and file names, is in `MEDIA-CHECKLIST.md`.
+Adding a theme, widget, size or background adds its files; removing one deletes them.
 
-## Widget and background media
+```bash
+cd site
+npm run media                    # render what is missing or stale
+npm run media -- --status        # say what is missing, stale and unneeded; render nothing
+npm run media -- --all           # render everything
+npm run media -- decks|widgets|backgrounds [name...]   # only some (carbon, clock-4x2, aurora)
+npm test                         # the generator's tests (a stub catalog and a fake renderer)
+```
 
-`npm run media` renders the pictures of each widget size, the background posters, and the loops with UrDeck itself
-(Windows; the loops need `ffmpeg`, `winget install Gyan.FFmpeg`). `npm run media -- widgets|posters|loops [name...]`
-limits it. The pictures use the host's `--snapshot` and `urdeck-cli shader render`; the clock and weather loops use the
-host's `--snapshot <folder> --frames N`, which renders the widgets at advancing times. `MEDIA-CHECKLIST.md` lists what the
-page wants and what has no loop yet. Look at each picture before committing it.
+It needs .NET (the tool is built from source), Node 22 and `ffmpeg` on the PATH (`apt install ffmpeg`,
+`winget install Gyan.FFmpeg`), and runs on Linux and Windows. Text on Linux differs from Windows at the edges of glyphs
+(about 1 % of pixels), so the committed files are the ones made on Linux, by the workflow below.
+
+**Folders.** `src/generated/` holds `decks/<theme>.webp`, `widgets/<widget>-<WxH>-<theme>.webp`,
+`backgrounds/<name>.webp` (lossless WebP, optimised by Astro), `media.json` and `catalog.json`; `public/generated/` holds
+the loops (`.mp4`, H.264, played forwards then backwards so they have no jump; a loop's first frame is its picture). Files in
+these folders that the matrix does not name are deleted. Nothing else is written.
+
+**The manifest.** `src/generated/media.json` lists every entry (`id`, `kind`, `theme`, `widget`, `size`, `background`,
+`files`), a `key` of its inputs and the exact options it was rendered with (`settings`), which is what you need to reproduce
+a picture by hand. `catalog.json` is `urdeck-cli catalog export`, kept for the site's build. Both are sorted and end with a
+newline so a refresh's diff is small. `src/lib/media.ts` reads the manifest; an entry it lacks is left out of the page.
+
+**Keys.** A key is a SHA-256 over the shared inputs (every file of `src/UrDeck.Engine`, `src/UrDeck.Preview`,
+`sdk/UrDeck.Sdk`, `widgets/`, `providers/*/sample.json`, except build output and the built-in theme and background folders,
+and a settings version in `scripts/media/lib.mjs`) and the entry's own: its theme file and fonts, its background folder, its
+widget configuration, the page and the render settings. Text files hash with LF line endings. An engine change therefore
+stales everything (any of it can move pixels); changing Ember's file stales Ember's files and the posters shown in it.
+A run with nothing changed renders nothing.
+
+**The showcase.** `showcase/urdeck-config.json` is the page every theme's deck shows. `showcase/widgets.json` gives a
+widget a configuration for the site (`config`, merged over the default, and `loopStart`, seconds after the sample moment,
+for the whole widget or per size under `sizes`); the clock has `style: flap` and starts 26.5 s in, 1.5 s before a minute
+turns, so its loop shows the flip. A `decks/<theme>/urdeck-config.json` replaces the showcase page for that theme.
+
+**Limits.** Deck loops are at most 540 px wide and 1.5 MB, widget loops 800 px and 1 MB, background loops 540x960 and 1 MB,
+all 4 to 6 s. A loop over its size is encoded again once at `-crf 32`; if it is still over, the run fails naming the file,
+its size and the limit.
+
+**Refreshing.** The *Site media* workflow (Actions, run by hand; tick "all" to render everything) renders what is stale on
+Linux and opens a pull request `chore(site): refresh media`, or says the media are current. CI reports how many files are
+stale (a notice and the job summary, never a failure). See `CONTRIBUTING.md`, "Refreshing the site's media", for the
+GitHub App the workflow uses.
+
+**Size.** The first full generation (11 themes, 4 widgets in 13 sizes, 16 backgrounds) is recorded below; unchanged pixels
+give unchanged bytes, so a refresh adds only what moved. If the repository nears 1 GB the fallback is a release asset
+holding the generated folders, downloaded by the deploy job (Git LFS is not used: its bandwidth quota counts every CI
+checkout and Pages deploy, and objects cannot be deleted).
+
+The first full generation (`--all`, in a `mcr.microsoft.com/dotnet/sdk:10.0` container with Node 22 and ffmpeg, 6 renders at once) took about 10 minutes and produced 148 pictures and 112 loops: 12 MB of pictures in `src/generated/` and 11 MB of loops in `public/generated/` (the largest loop is 0.5 MB). A re-run with nothing changed renders nothing. Drawing the shader backgrounds on the CPU dominates the time, which is why a deck loop is drawn at half size.
 
 ## Licence
 

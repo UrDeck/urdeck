@@ -42,13 +42,35 @@ is checked by the `site` job (build, schema copy, internal links, no third-party
 it. A change to the settings of a widget, a theme or a background updates its page in `site/src/content/docs/` in the same
 pull request.
 
-**The pictures and loops** of the landing page (one picture per widget size, the background posters, the loops) are
-rendered by UrDeck itself with `npm run media` in `site/` (Windows; `ffmpeg` for the loops). Re-render them when the
-app's look changes, and add the widget, theme or background to `MEDIA-CHECKLIST.md`'s list when you add one.
+**The pictures and loops** are generated from the product itself: see "Refreshing the site's media" below.
 
 **Adding a "Tested on" entry:** add an object to `site/src/data/tested-on.json` (display, connection, resolution, GPU,
 Windows version, what was checked) and open a pull request. The page is made from the file. People without a pull request
 use the hardware report issue form.
+
+### Refreshing the site's media
+
+The pictures and loops on the site are generated, never edited by hand and never listed by hand: `urdeck-cli catalog export`
+says what exists and `npm run media` in `site/` renders what is missing or stale (`site/README.md`, "Media"). Adding a theme,
+widget, widget size or background needs no site file for its media; it only makes the files stale.
+
+- `npm run media -- --status` says how many are missing or stale. CI shows the same counts in a job summary and never fails
+  on them, so a pull request that changes a theme does not carry its own pictures.
+- The **Site media** workflow (Actions, *Run workflow*; tick "all" to render everything) renders the stale files on Linux
+  and opens a pull request `chore(site): refresh media`, or says the media are current. Review that pull request like any other:
+  look at the contact sheet of what changed, then squash-merge it.
+- Locally, `npm run media` (needs .NET, Node 22 and `ffmpeg`) does the same into your working tree. Prefer the workflow for
+  what you commit: text on Linux differs from Windows at the edges of glyphs, and the workflow's output is the reference.
+
+**The GitHub App (once, by the owner).** A pull request opened with the default `GITHUB_TOKEN` does not start the
+required checks, so the workflow opens it as an app:
+
+1. Settings > Developer settings > GitHub Apps > New GitHub App. Name it (for example `urdeck-media`), no webhook, no
+   callback. Repository permissions: *Contents* read and write, *Pull requests* read and write. Install it on this repository only.
+2. Generate a private key on the app's page. Add two repository secrets (Settings > Secrets and variables > Actions):
+   `URDECK_MEDIA_APP_ID` (the app's id) and `URDECK_MEDIA_APP_KEY` (the whole `.pem` file).
+3. Run the workflow by hand. It should say "Media are current" once the first generation is merged. Without the secrets it
+   fails at its first step and says which are missing.
 
 ## Licensing
 
