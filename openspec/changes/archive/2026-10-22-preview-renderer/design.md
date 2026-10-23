@@ -222,3 +222,44 @@ later without changing JSON or configuration. The SDK's minor version goes up.
 
 Internal only. `SamplePage` users move to the new page in the same change; `theme render`'s options and output stay.
 Rollback is reverting the change.
+
+## Findings during apply
+
+- **Goldens.** All 20 moved, for one reason: the weather card now draws "Weather data by Open-Meteo.com" (and its lines move up
+  to make room), because the weather sample's descriptions equal the real catalog's, attribution included, as the panel shows
+  them. Every other pixel (clock, stats, shortcuts, dock, borders, indicator, Carbon's pattern) was identical before the
+  redraw; the diff pictures were checked theme by theme.
+- **Sample file format.** A top-level `defaults` object (any optional descriptor field) was added so the weather sample does not
+  repeat its device and attribution 71 times. A repeating list of numbers closes its loop: between the last key and `period` the
+  value moves back to the first key, so a loop has no jump.
+- **Border in frames.** The first step of a cycle (spin angle 0, pulse opacity 1) is drawn as the still border, so frame 0 equals
+  the still picture byte for byte; the other steps are composed as the host composes them (`BorderFrame`: the conic source at
+  1.5 x the longer side, turned about the centre, masked by the ring at the card's exact size, over the content). The host's
+  step constants moved into `BorderFrame` and `BorderMotion` uses them.
+- **History pre-roll.** Only Carbon has a sparkline; its 60 paints cost under a second. The last pre-roll paint shows frame 0's
+  readings a second early, so a stats gauge has finished its 300 ms ease by frame 0 (otherwise frame 0 showed the value of
+  -1 s mid-ease). The 2x1 stats cards of the sample page are too short for a sparkline, so Carbon's goldens did not change for it.
+- **Manual hub.** The preview's hub logs no `Provider ... started` line, so `ThemeLogSnapshotTests` (the log while a theme renders)
+  is unchanged.
+- **Settings in the catalog.** The values a widget accepts come from the standard `[AllowedValues]` and `[Range]` attributes
+  (`System.ComponentModel.DataAnnotations`) on the configuration's properties (Clock `format`, `style`, `header`; Weather `unit`,
+  `motion`, `days`, `animateForecast`), so no SDK type was added. The finding summaries are one engine table
+  (`FindingCatalog`), taken from the docs' tables; a CLI test keeps it equal to `ThemeCodes` and `ShaderCodes`.
+- **Exit codes of `preview render`.** As the spec says: `1` for an input that cannot be used (configuration, theme, widget, size,
+  page, background), `2` for usage; `theme render` keeps its own (`2` for a folder that does not exist).
+- **Demo snapshot.** Under `--snapshot` the samples are read at `--start` (a frozen clock), not at `--start` plus the real time
+  elapsed while the providers start, which made the readings differ by a few tenths between runs.
+  Two `--demo --snapshot --size 1100x3840 --start 2026-10-13T21:47:32` runs on the development configuration showed the same readings,
+  time and weather; 93 pixels differed, all inside two dock shortcuts with local targets (Steam, VS Code), whose icons come from
+  Windows' shell, which demo mode leaves as it is. The configuration was not written.
+- **Linux.** Engine, CLI and analyzer tests pass in `mcr.microsoft.com/dotnet/sdk:10.0`; every built-in theme over its own
+  background differs from Windows in 1.0 to 1.4 % of pixels (0.6 to 1.1 % by more than 32 levels), all at text edges, as in the
+  spike. Two plugin-unload tests (`Reload_AllowsOldPluginContextToBeCollected`, `..._LetsItsContextBeCollected`) fail now and
+  then in a full run in the container, on `main` as well (2 of 4 runs each): a timing limit of theirs, not this change.
+- **Docs.** The site has no command line page and no page of the host's options yet; `preview render` went on the site's theme
+  page and `--demo` into the README. The rest belongs to `docs-rewrite`.
+- **Frames by eye (8.3).** Rigline's and Ember's sample pages as 105 frames at 15 per second, 1100x3840, made into loops with
+  ffmpeg, were played beside the deck on the panel: the owner found them very similar and could not tell the video from the panel.
+- **Demo mode on the panel (8.4).** The installed copy (`scripts/Install-Local.ps1`) started with `--demo` showed the sample
+  readings (the owner checked). Its log has `Demo mode: sample data for system, weather` and, from then on, no request to the
+  forecast service; `Provider 'weather' started` is the sample running under the provider's id.

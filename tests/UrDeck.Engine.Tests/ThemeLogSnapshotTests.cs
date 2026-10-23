@@ -77,8 +77,7 @@ public sealed class ThemeLogSnapshotTests : IDisposable
 
     private static void Render(LoadedTheme loaded)
     {
-        using var page = SamplePage.Build();
-        using var bitmap = ThemePreview.Render(loaded, page, 1100, 1920, dock: true);
+        using var bitmap = ThemePreview.Render(loaded, 1100, 1920, dock: true);
     }
 
     private string Capture(string title, Action work)

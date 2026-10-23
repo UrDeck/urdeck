@@ -24,16 +24,33 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     private readonly object _gate = new();
     private readonly List<LoadedPlugin> _loaded = new();
     private readonly List<string> _pendingDeletes = new();
+    private readonly SampleClock? _demo;
+    private readonly List<string> _sampled = [];
     private static int StaleCleaned;
 
     /// <param name="time">The clock of the readings, the launcher's repeat guard and the icon cache's age.</param>
     /// <param name="iconCacheFolder">Where fetched site icons are kept; by default <c>cache/icons</c> next to the executable.</param>
-    public WidgetPluginLoader(TimeProvider? time = null, string? iconCacheFolder = null)
+    /// <param name="demo">
+    /// Demo mode (host-shell, "Demo Mode"): every provider whose assembly carries a sample is registered as its sample, read by
+    /// this clock, and no site icon is fetched. Null runs the providers.
+    /// </param>
+    public WidgetPluginLoader(TimeProvider? time = null, string? iconCacheFolder = null, SampleClock? demo = null)
     {
+        _demo = demo;
         _hub = new ReadingHub(_providers, time);
-        _icons = new IconService(iconCacheFolder ?? Path.Combine(AppContext.BaseDirectory, "cache", "icons"), time);
+        _icons = new IconService(iconCacheFolder ?? Path.Combine(AppContext.BaseDirectory, "cache", "icons"), time) { SiteIcons = demo == null };
         _launcher = new Launcher(time);
         _registry.CreateServices = () => new WidgetServices(_hub, _launcher, _icons);
+    }
+
+    /// <summary>In demo mode, the ids of the providers that run as their sample; empty otherwise.</summary>
+    public IReadOnlyList<string> SampledProviders
+    {
+        get
+        {
+            lock (_gate)
+                return [.. _sampled.Order(StringComparer.Ordinal)];
+        }
     }
 
     public event Action? PluginsChanged;
@@ -59,6 +76,14 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
             CleanStaleShadowDirs();
         lock (_gate)
             LoadAll();
+        if (_demo != null)
+        {
+            var sampled = SampledProviders;
+            UrDeckLog.Info(sampled.Count == 0
+                ? "Demo mode: no provider carries sample data; every provider runs as usual"
+                : $"Demo mode: sample data for {string.Join(", ", sampled)}");
+        }
+
         WatchForChanges();
     }
 
@@ -70,6 +95,7 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
             // Providers go first: they hold plugin types, and the page rebuild that follows resubscribes against the new ones.
             _hub.ReleaseAll();
             _providers.Clear();
+            _sampled.Clear();
             _registry.Clear();
             UnloadAll();
             LoadAll();
@@ -302,13 +328,22 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
             return false;
         }
 
-        if (!_providers.TryRegister(descriptor, out var existing))
+        // In demo mode the sample takes the provider's place under its own id; the provider itself is never created.
+        var sample = _demo != null ? ProviderSamples.Find(descriptor) : null;
+        var registered = sample != null ? ProviderSamples.Replace(descriptor, sample, _demo!.Now, _demo.Start) : descriptor;
+        if (!_providers.TryRegister(registered, out var existing))
         {
             UrDeckLog.Warn($"Provider '{descriptor.Id}' from {descriptor.AssemblyName} rejected: {existing!.AssemblyName} already provides it");
             return false;
         }
 
-        UrDeckLog.Info($"Registered provider '{descriptor.Id}' ({type.FullName}, default {descriptor.DefaultIntervalMs} ms, minimum {descriptor.MinIntervalMs} ms)");
+        if (sample != null)
+        {
+            lock (_gate)
+                _sampled.Add(descriptor.Id);
+        }
+
+        UrDeckLog.Info($"Registered provider '{descriptor.Id}' ({type.FullName}, default {descriptor.DefaultIntervalMs} ms, minimum {descriptor.MinIntervalMs} ms{(sample != null ? ", as its sample" : "")})");
         return true;
     }
 

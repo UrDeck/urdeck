@@ -198,7 +198,9 @@ Drawn today: the shape (`shape`, `cut`, `cutCorners`), the fill (`fillGradient`,
   never repainted for them, at about 3 % of one CPU core for eight cards. The border moves only at the effective motion level
   `full` (see [`motion`](#motion)), while the display is on and the deck is shown; at `reduced` or `off`, with the display off or
   with the deck hidden it is the still border, drawn exactly as a border without `borderAnimate`. A snapshot (`--snapshot`,
-  `urdeck-cli theme render`) always draws it still, at its starting angle and full opacity. It does not apply to a `dashed`
+  `urdeck-cli theme render`) always draws it still, at its starting angle and full opacity; the frames of `urdeck-cli preview render
+  --frames` move it in the same steps from there, composed the way the compositor composes it (the same colours and ring, not the same
+  bytes). It does not apply to a `dashed`
   border (`THEME057`), to a border width of 0, or to `spin` without a conic gradient (`THEME051`).
 - **Hairlines.** In a theme that sets any card value of format 2, a border of 2 pixels or less is drawn at a whole number of
   pixels, never under 1; under one pixel it is written to `urdeck.log` once. A theme with no such value draws its cards
@@ -629,6 +631,10 @@ urdeck-cli theme validate --builtin [...]
 urdeck-cli theme render <folder> | --builtin <name> -o <file.png> [--page page|dock] [--size WIDTHxHEIGHT] [--fail-on-warnings]
 urdeck-cli theme init <name> [--output <directory>] [--from <built-in theme>]
 urdeck-cli theme schema [--output <file>]
+urdeck-cli preview render -o <file.png | folder> [--config <file>] [--page N|dock] [--widget <typeId> --widget-size WxH] [--width px]
+                           [--theme <name> | --theme-dir <folder>] [--background <name>|none|theme] [--background-dir <directory>]
+                           [--size WIDTHxHEIGHT] [--time <local time>] [--frames N] [--fps F] [--motion full|reduced|off] [--fail-on-warnings]
+urdeck-cli catalog export [-o <file>] [--theme-dir <directory>] [--background-dir <directory>]
 ```
 
 - **`validate`** prints every finding of a folder, of every folder directly inside a directory (`--all`, in the order of their
@@ -636,8 +642,9 @@ urdeck-cli theme schema [--output <file>]
   (`--builtin`). The folder's name is the theme's name, and a folder named like a built-in is checked as the folder it is.
   `--background-dir` adds a directory of background folders that `background.default.name` and `meta.pairsWith` may name; the
   built-in backgrounds are always known. The formats are those of `shader validate`; a JSON diagnostic of a value also has `key`.
-- **`render`** draws the sample page (a clock, two stats cards, a weather card and four shortcuts, with fixed readings and time)
-  in the theme, at 1100x1920 unless `--size` says otherwise, with the page renderer the deck uses. `--page dock` adds the dock and
+- **`render`** draws the sample page (a clock, two stats cards, a weather card and four shortcuts, with the data providers' sample
+  readings and a fixed time) in the theme without a background, at 1100x1920 unless `--size` says otherwise, with the preview
+  renderer, which lays out and draws the page with the code the deck uses. `--page dock` adds the dock and
   the page indicator. The same input gives the same picture on one machine; pictures from different machines can differ in the
   edge pixels of text. The findings go to the error stream and do not stop the picture; a theme that cannot be read at all gets no
   picture.
@@ -645,6 +652,21 @@ urdeck-cli theme schema [--output <file>]
   you to fill in and the default dark theme's colours; with `--from` it makes a self-contained copy of a built-in theme with the
   fonts and licence files it names. It never overwrites a folder.
 - **`schema`** prints the JSON Schema of the format, the file published as `docs/schemas/v2/theme.json`.
+- **`preview render`** draws a preview: a configuration's page (`--config`; the sample page, `src/UrDeck.Preview/SamplePage/urdeck-config.json`,
+  when absent; `--page dock` is the active page with the dock and the indicator) or one widget alone at one of its sizes
+  (`--widget`, `--widget-size`, drawn with its default configuration or the first of its type in `--config`, on a panel `--width` wide;
+  the picture is the widget's cells), in a theme (`--theme`, `--theme-dir`, else the configuration's) over a background (a name,
+  `none`, or `theme` for the theme's own choice; else the configuration's). Readings come from the providers' sample files and the moment
+  is `--time` (default the sample page's), so the picture is the same every time and the command makes no network request. With
+  `--frames N` the output is a folder of `frame-0000.png` onwards, `--fps` apart (default 30): the widgets, the readings, a moving
+  background and an animated border move as on the panel, and frame 0 is the still picture; below `--motion full` the background and the
+  border stay still. An unknown widget, a size the widget does not declare, a page that does not exist or a background that does not
+  exist is exit code `1` with the reason, and nothing is written.
+- **`catalog export`** writes, as one JSON document (to `-o` or the output), what the product ships: the themes (meta, swatch,
+  default background, pairings), the backgrounds (manifest values and parameters), the pairings, the first-party widgets (sizes and
+  whether each is previewed, the default configuration, each setting's name, type or accepted values and default), the data
+  providers and whether each carries a sample, and every finding code with its severity and summary. Keys and lists are sorted, so the
+  same input gives the same bytes. The website's build reads it.
 
 Exit codes are those of the other commands: `0` nothing that fails the run, `1` an error (or a warning with
 `--fail-on-warnings`; an information finding never fails), `2` the tool could not do its job (bad arguments, a folder that does

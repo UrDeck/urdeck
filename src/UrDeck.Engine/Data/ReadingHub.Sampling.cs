@@ -21,7 +21,7 @@ public sealed partial class ReadingHub
 
     private void EnsureLoop(ProviderRuntime rt)
     {
-        if (rt.Loop != null)
+        if (rt.Loop != null || _manual)
             return;
         rt.Cts = new CancellationTokenSource();
         int generation = rt.Generation;
@@ -39,7 +39,7 @@ public sealed partial class ReadingHub
     private void MarkDemandDirty(ProviderRuntime rt)
     {
         rt.DemandDirty = true;
-        if (!rt.Started || rt.DemandPumpRunning)
+        if (!rt.Started || rt.DemandPumpRunning || _manual)
             return;
         rt.DemandPumpRunning = true;
         Task.Run(() =>
@@ -369,8 +369,70 @@ public sealed partial class ReadingHub
             rt.DemandDirty = true;
         }
 
-        UrDeckLog.Info($"Provider '{rt.Descriptor.Id}' started ({rt.IntervalMs} ms)");
+        // A preview's providers are not the deck's: its log says nothing of them.
+        if (!_manual)
+            UrDeckLog.Info($"Provider '{rt.Descriptor.Id}' started ({rt.IntervalMs} ms)");
         return true;
+    }
+
+    /// <summary>The manual mode's start: on the caller's thread, once, with a failure recorded as the loop records it.</summary>
+    private void StartManual(ProviderRuntime rt)
+    {
+        int generation;
+        lock (_gate)
+        {
+            if (_disposed || rt.Started)
+                return;
+            generation = rt.Generation;
+        }
+
+        if (!TryStart(rt, generation, out string? error))
+            FailProvider(rt, generation, error ?? "failed to start", null);
+    }
+
+    /// <summary>
+    /// The manual mode's sample: every started provider is told its demand and sampled once, on the caller's thread, and what
+    /// it published is committed as a loop's sample is (states, change notifications). Returns when all of them are done; a
+    /// provider that does not finish synchronously is waited for.
+    /// </summary>
+    public void SampleNow()
+    {
+        if (!_manual)
+            throw new InvalidOperationException("SampleNow is for a hub made with ReadingHubSampling.Manual; this one runs its own loop.");
+
+        List<(ProviderRuntime Runtime, int Generation)> started;
+        lock (_gate)
+        {
+            if (_disposed)
+                return;
+            started = _runtimes.Values.Where(rt => rt.Started && rt.Instance != null).Select(rt => (rt, rt.Generation)).ToList();
+        }
+
+        foreach (var (rt, generation) in started)
+        {
+            PumpDemand(rt);
+            IDataProvider provider;
+            lock (_gate)
+            {
+                if (rt.Generation != generation || rt.Instance == null)
+                    continue;
+                provider = rt.Instance;
+                rt.Buffer.Clear();
+                rt.InSample = true;
+            }
+
+            try
+            {
+                provider.SampleAsync(CancellationToken.None).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                FailProvider(rt, generation, $"sample failed: {ex.GetBaseException().Message}", ex);
+                continue;
+            }
+
+            CommitSample(rt, generation);
+        }
     }
 
     private async Task<bool> SampleOnceAsync(ProviderRuntime rt, int generation, CancellationToken stop)

@@ -37,7 +37,9 @@
 
   <ItemGroup>
     <!-- Recorded answers of the weather services, fed to the provider in place of the network. -->
-    <Content Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Fixtures\**\*" Exclude="Fixtures\samples\**" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Sample files of two pretend providers, carried as a provider carries its own (ProviderSamples). -->
+    <EmbeddedResource Include="Fixtures\samples\*.json" LogicalName="urdeck.sample.test-%(Filename).json" />
     <!-- The checked-in pictures the golden tests compare with (see CONTRIBUTING.md, "Golden images"). -->
     <Content Include="Goldens\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>

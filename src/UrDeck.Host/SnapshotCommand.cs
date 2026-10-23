@@ -4,6 +4,7 @@
 using System.Globalization;
 using SkiaSharp;
 using UrDeck.Engine.Backgrounds;
+using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Layout;
 using UrDeck.Engine.Motion;
@@ -14,7 +15,7 @@ using UrDeck.Sdk;
 namespace UrDeck.Host;
 
 /// <summary>
-/// <c>--snapshot out.png [--size WxH] [--theme name] [--page N] [--frames N [--fps F] [--start time]]</c>: renders a page (default: the one at
+/// <c>--snapshot out.png [--size WxH] [--theme name] [--page N] [--frames N [--fps F]] [--start time] [--demo]</c>: renders a page (default: the one at
 /// <c>activePage</c>) off-screen with the same layout and
 /// widget code as the live window, and the configured <c>background</c> (a shader at a fixed time, in the palette of the
 /// theme in effect; a picture covering the page), writes a PNG and exits. Defaults to the target monitor's resolution, to the primary
@@ -22,7 +23,8 @@ namespace UrDeck.Host;
 /// never writes the configuration. With <c>--frames N</c> the output is a folder and N pictures <c>frame-0000.png</c> ... are
 /// written, one every 1/<c>--fps</c> second (default 30) of the time the widgets are given, from <c>--start</c> (a local
 /// date and time, default now): a widget draws from that time, so an animation (the split-flap clock, the weather icons)
-/// moves from frame to frame. The background stays at its snapshot time.
+/// moves from frame to frame. The background stays at its snapshot time. With <c>--demo</c> the providers that carry a sample
+/// are replaced by it, read at <c>--start</c>, and no site icon is fetched (host-shell, "Demo Mode").
 /// </summary>
 internal static class SnapshotCommand
 {
@@ -31,20 +33,8 @@ internal static class SnapshotCommand
         var settings = BackgroundSettings.Parse(host.Config.Config.Background);
         // The configuration's motion alone decides; Windows' setting is not read, so a snapshot is the same on every machine.
         var motion = MotionPolicy.ForSnapshot(host.Config.Config.Motion, theme.Definition.Motion?.Level);
-        var plan = BackgroundPlan.Resolve(settings, theme, motion.User);
-
         // As the live layer does: a picture that cannot be decoded goes on to the plan's next candidate.
-        int first = 0;
-        while (plan.Build(host.Shaders, host.AppDirectory, first) is { } background)
-        {
-            if (background.PrepareAsync(width, height).GetAwaiter().GetResult())
-                return background;
-
-            first = background.CandidateIndex + 1;
-            background.Dispose();
-        }
-
-        return null;
+        return BackgroundPlan.Resolve(settings, theme, motion.User).BuildPrepared(host.Shaders, host.AppDirectory, width, height);
     }
 
     public static int Run(string[] args)
@@ -52,7 +42,14 @@ internal static class SnapshotCommand
         int index = Array.IndexOf(args, "--snapshot");
         try
         {
-            using var host = new HostContext(saveConfiguration: false);
+            // The moment the widgets are drawn at; with --demo the samples are read at it too, so the picture is the same every time.
+            var start = DateTime.Now;
+            int startIndex = Array.IndexOf(args, "--start");
+            if (startIndex >= 0 && startIndex + 1 < args.Length)
+                start = DateTime.Parse(args[startIndex + 1], CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
+            bool demo = Array.IndexOf(args, "--demo") >= 0;
+
+            using var host = new HostContext(saveConfiguration: false, demo: demo ? new SampleClock(() => start, start) : null);
             string output = index + 1 < args.Length ? args[index + 1] : "urdeck.snapshot.png";
             int width, height;
 
@@ -137,11 +134,6 @@ internal static class SnapshotCommand
                 UrDeckLog.Error("Snapshot failed: --frames must not be negative and --fps must be above zero");
                 return 1;
             }
-
-            var start = DateTime.Now;
-            int startIndex = Array.IndexOf(args, "--start");
-            if (startIndex >= 0 && startIndex + 1 < args.Length)
-                start = DateTime.Parse(args[startIndex + 1], CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
 
             var chrome = new PageRenderer.Chrome(config.Pager.GetIndicatorMode(), pageIndex, config.Pages.Count);
             var bitmap = PageRenderer.RenderToBitmap(width, height, widgets, theme, start, chrome, dock, background);

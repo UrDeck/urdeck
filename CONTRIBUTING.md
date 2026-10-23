@@ -80,9 +80,10 @@ use the hardware report issue form.
 ## Golden images
 
 A golden image is a PNG in `tests/UrDeck.Engine.Tests/Goldens/` that a test renders again and compares with. The sample page
-(`Support/SamplePage.cs`: a clock, two stats cards, a weather card and four shortcuts, with fixed readings and the time
-13 October 2026, 21:47:32) is drawn with `default-dark`, `default-light` and `glass` at 1100x1920, and with `default-dark` plus a
-dock and a page indicator. A change that moves a pixel of a v1 theme fails `GoldenTests`.
+(`src/UrDeck.Preview/SamplePage/urdeck-config.json`: a clock, two stats cards, a weather card and four shortcuts, with the
+providers' sample readings and the time 13 October 2026, 21:47:32) is drawn by the preview renderer with every built-in theme at
+1100x1920, and with a dock and a page indicator. A change that moves a pixel of a v1 theme fails `GoldenTests`. A change to the
+sample page or to a provider's `sample.json` moves the goldens too.
 
 - The goldens run on Windows only (FreeType and DirectWrite rasterise text differently); on Linux they show as skipped.
 - A picture passes when at most 0.01 % of its pixels (about 211 of the 2.1 million) have a channel more than 2 away from the
@@ -140,6 +141,17 @@ Rules enforced at compile time by the analyzer and again by the loader:
 - Exactly one of `[RefreshOnTick]`, `[RefreshAdaptive]` or `[RefreshOnData]` (no timer: the widget is painted when shown and
   when a reading it declared changes).
 - A public parameterless constructor.
+
+The default configuration (`DefaultConfig`, the settings a widget gets when it is added without any) must draw something
+meaningful at every size the widget declares, with the providers' sample data, and depend on nothing of the user's machine (a
+file path, an installed application). The previews, the website and a future editor's "add a widget" start from it, and
+`PreviewTests.EveryDefaultConfiguration_DrawsSomething_AtEveryPreviewedSize` fails for a card that is empty or reads a reading
+that is unavailable. Override it rather than changing the configuration type's own defaults, which are what a file without
+the setting gets: `public override StatsConfig DefaultConfig => new() { Slots = [...] };`. A widget that fetches its own data
+in `UpdateAsync` has no sample data in a preview: take data through a provider to get one.
+
+`[WidgetSize(4, 8, Preview = false)]` leaves a size out of generated pictures (previews, the website, that test) without
+changing where the widget may be placed: for a size that only repeats rows a smaller one shows.
 
 Animation: a widget that moves overrides `IsAnimating` and returns `true` while it is mid-animation. The host reads it
 after each paint; while it is `true` the host repaints the widget about 30 times a second (without calling
@@ -386,6 +398,56 @@ public sealed class ExampleProvider : IDataProvider
   come with the first provider that needs them.
 
 Windows-only APIs need `[SupportedOSPlatform("windows")]` on the provider class when the project targets plain `net10.0`.
+
+### Sample files
+
+A provider can carry made-up readings: previews, the website's pictures, the picture tests and the host's demo mode
+(`--demo`) draw with them instead of the provider, so a picture is the same on every machine and shows nothing personal. A
+first-party provider must carry one; a provider without one is left out of previews (its readings are unavailable there) and
+runs as usual in demo mode. The file is `sample.json`, embedded in the provider's assembly under the name
+`urdeck.sample.<provider id>.json`:
+
+```xml
+<ItemGroup>
+  <EmbeddedResource Include="sample.json" LogicalName="urdeck.sample.example.json" />
+</ItemGroup>
+```
+
+```json
+{
+  "version": 1,
+  "defaults": { "device": "Sensor 1" },
+  "readings": {
+    "room/temperature": { "kind": "temperature", "label": "Room", "name": "Room temperature", "min": -20, "max": 50,
+                          "keys": [ { "at": 0, "value": 21.5 }, { "at": 3, "value": 22.5 } ], "period": 6 },
+    "room/window": { "kind": "onOff", "label": "Window", "name": "Window open", "value": false },
+    "room/updated": { "kind": "time", "label": "Updated", "name": "Last update", "value": "07:14" },
+    "{place}/name": { "kind": "text", "label": "Place", "name": "Place", "value": "{place}" },
+    "room/humidity": { "kind": "percent", "label": "Humidity", "name": "Humidity", "unavailable": "no humidity sensor" }
+  }
+}
+```
+
+- **Readings.** Each key is a path below the provider, and each entry describes the reading as `Describe()` does (the field
+  names of `ReadingDescriptor` in camelCase: `kind`, `label`, `name`, and where they apply `device`, `unit`, `displayUnit`,
+  `depthUnit`, `min`, `max`, `warning`, `critical`, `decimals`, `attribution`). `defaults` sets any of the optional fields for
+  every reading that does not set it. The file describes its readings itself because a catalog may depend on the machine
+  (cores, adapters); make the sample a plausible machine.
+- **Values.** Give exactly one of `value` (fixed), `keys` (keyframes) or `unavailable` (a reason, to show how a widget draws a
+  missing reading). A value has the reading's kind: a number, a text, `true`/`false`, a time of day `"HH:mm"` (that day's time
+  in the drawing), or for a `date` a whole number of days from the day drawn (`0` is that day). Keyframes give seconds from the
+  start of a drawing (`at`, the first at 0, ascending): a number changes in a straight line between two keys, anything else
+  steps; after the last key the value holds, or with `period` (seconds, longer than the last key) the keys repeat, a number
+  closing the loop back to the first key, and they continue backwards before 0 (the history a preview fills before its first
+  frame). The same moment always gives the same value.
+- **Placeholders.** A path may hold whole segments written `{name}`, as a catalog pattern does: the sample answers for any value
+  there (`weather:Zurich/...` and `weather:Portland, OR/...` alike), and `{name}` in a text value is replaced by the value asked
+  for, so a place's name reads back as the place.
+- **The check.** The engine reads the file strictly: an unknown key, a value of the wrong kind or keys out of order are each a
+  finding naming the reading, and a file with any finding gives no sample (the log says so once, with the provider's name).
+  Add a test like `tests/UrDeck.Engine.Tests/ProviderSampleTests.cs`: the file parses without findings, and every path your
+  `Describe()` can list has a sample with an equal description (for a catalog that depends on the machine, every family of
+  paths, numbers made `#`). A reading the provider gains without a sample then fails the test, naming it.
 
 ### Adding a GPU vendor (AMD, Intel)
 

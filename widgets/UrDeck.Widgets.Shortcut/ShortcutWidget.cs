@@ -26,6 +26,9 @@ public class ShortcutWidget : Widget<ShortcutConfig>, ITapTarget
     private LaunchTarget _target;
     private bool? _folder;
 
+    /// <summary>A new card opens a web address with a label; a file without a target still has none.</summary>
+    public override ShortcutConfig DefaultConfig => new() { Target = "https://urdeck.app", Label = "UrDeck" };
+
     protected override void OnConfigured()
     {
         _target = LaunchTarget.Parse(Config.Target);

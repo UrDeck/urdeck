@@ -14,4 +14,9 @@
     <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
   </ItemGroup>
 
+  <!-- Made-up readings for previews, the picture tests and the host's demo mode (docs: "Sample files"). -->
+  <ItemGroup>
+    <EmbeddedResource Include="sample.json" LogicalName="urdeck.sample.weather.json" />
+  </ItemGroup>
+
 </Project>

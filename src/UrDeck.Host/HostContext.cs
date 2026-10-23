@@ -3,6 +3,7 @@
 
 using UrDeck.Engine.Backgrounds;
 using UrDeck.Engine.Config;
+using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
 using UrDeck.Engine.Plugin;
@@ -33,8 +34,9 @@ internal sealed class HostContext : IDisposable
     public DisplayInfo? Target { get; }
 
     // Startup sequence per host-shell spec: monitor -> config -> plugins.
-    /// <param name="saveConfiguration">False for <c>--snapshot</c>, which never writes the configuration.</param>
-    public HostContext(bool saveConfiguration)
+    /// <param name="saveConfiguration">False for <c>--snapshot</c> and <c>--demo</c>, which never write the configuration.</param>
+    /// <param name="demo">The clock of the samples in demo mode (<c>--demo</c>); null runs the providers.</param>
+    public HostContext(bool saveConfiguration, SampleClock? demo = null)
     {
         _saveConfiguration = saveConfiguration;
         string appDir = AppContext.BaseDirectory;
@@ -52,7 +54,7 @@ internal sealed class HostContext : IDisposable
         // User background shaders live in a backgrounds folder next to the executable; the built-in ones are embedded.
         Shaders = new ShaderStore(Path.Combine(appDir, "backgrounds"));
 
-        Plugins = new WidgetPluginLoader();
+        Plugins = new WidgetPluginLoader(demo: demo);
         Plugins.ScanAndLoadPlugins(Path.Combine(appDir, "plugins"));
 
         Target = DisplaySelector.Select(Config.Config, Displays).Display;

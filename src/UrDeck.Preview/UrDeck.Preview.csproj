@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- The sample page and the code that draws it in a theme: shared by the command line tool (theme render) and the tests.
-       GPL-3.0-or-later (it links the engine). It sits above both the engine and the first-party widgets: the engine loads
-       plugins and never references them, and the widgets reference only the SDK. -->
+  <!-- The preview renderer: a configuration's page, or one widget alone, in a theme over a background with sample data, as
+       one picture or as frames; and the sample page every picture of a theme starts from. Shared by the command line tool
+       and the tests. GPL-3.0-or-later (it links the engine). It sits above both the engine and the first-party widgets and
+       providers: the engine loads plugins and never references them, and the plugins reference only the SDK. It references
+       the providers for the sample files they carry; it never creates a real provider. -->
   <PropertyGroup>
     <TargetFramework>$(UrDeckTfm)</TargetFramework>
     <RootNamespace>UrDeck.Preview</RootNamespace>
@@ -14,6 +16,17 @@
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Stats\UrDeck.Widgets.Stats.csproj" />
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Weather\UrDeck.Widgets.Weather.csproj" />
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Shortcut\UrDeck.Widgets.Shortcut.csproj" />
+    <ProjectReference Include="..\..\providers\UrDeck.Providers.System\UrDeck.Providers.System.csproj" />
+    <ProjectReference Include="..\..\providers\UrDeck.Providers.Weather\UrDeck.Providers.Weather.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
+
+  <!-- The sample page: an ordinary urdeck-config.json (preview-rendering, "The Sample Page"). -->
+  <ItemGroup>
+    <EmbeddedResource Include="SamplePage\urdeck-config.json" LogicalName="UrDeck.Preview.sample-page.json" />
   </ItemGroup>
 
 </Project>

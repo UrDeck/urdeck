@@ -137,11 +137,10 @@ public sealed class ThemeFindingTests
                 UrDeck.Engine.Diagnostics.UrDeckLog.Listener = before;
             }
 
-            using var page = SamplePage.Build();
-            using var bitmap = ThemePreview.Render(loaded, page, 1100, 1920, dock: true);
+            using var bitmap = ThemePreview.Render(loaded, 1100, 1920, dock: true);
             // A second render of the same load reports nothing more: each finding is once per load.
             int once = sink.Found.Count;
-            using var again = ThemePreview.Render(loaded, page, 1100, 1920, dock: true);
+            using var again = ThemePreview.Render(loaded, 1100, 1920, dock: true);
             Assert.Equal(once, sink.Found.Count);
             return sink.Found.ToList();
         }

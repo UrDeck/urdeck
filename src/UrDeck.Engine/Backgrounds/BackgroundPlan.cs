@@ -150,6 +150,26 @@ public sealed class BackgroundPlan
         return null;
     }
 
+    /// <summary>
+    /// The background a picture of <paramref name="width"/> x <paramref name="height"/> pixels is drawn over, ready to paint: the
+    /// first candidate that builds and prepares, as the live layer goes on from a picture that cannot be decoded. Null when only
+    /// the background colour is left. Used by the host's snapshot and by previews, which wait for it.
+    /// </summary>
+    public DeckBackground? BuildPrepared(ShaderStore store, string appDirectory, int width, int height)
+    {
+        int first = 0;
+        while (Build(store, appDirectory, first) is { } background)
+        {
+            if (background.PrepareAsync(width, height).GetAwaiter().GetResult())
+                return background;
+
+            first = background.CandidateIndex + 1;
+            background.Dispose();
+        }
+
+        return null;
+    }
+
     private DeckBackground? CreateStill(ThemeBackgroundStaticDefinition still)
     {
         var background = DeckBackground.TryCreateStill(still, Theme, out string? failure);

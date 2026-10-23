@@ -187,6 +187,9 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
     /// <summary>True when the card asks for moving forecast icons and <c>motion</c> does not forbid all motion.</summary>
     private bool AnimateForecast => Config.AnimateForecast is { ValueKind: JsonValueKind.True } && Motion != MotionMode.Off;
 
+    /// <summary>A new card names a place, so it shows weather at once; a file without one still has no place.</summary>
+    public override WeatherConfig DefaultConfig => new() { Location = "Portland, OR" };
+
     protected override void OnConfigured()
     {
         _subscriptions = null;

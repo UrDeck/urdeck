@@ -21,14 +21,10 @@ namespace UrDeck.Host;
 /// </summary>
 internal sealed class BorderMotion : IDisposable
 {
-    /// <summary>The steps per second of the border's motion; the owner watched 15 and 30 on the panel and kept 15 (docs/perf/theme-look.md).</summary>
-    internal const int StepsPerSecond = 15;
-
-    // The border pulses between full strength and this.
-    private const float PulseLow = 0.55f;
-
-    // The turning picture is scaled up until its square always covers the card, even a long one (width x 1.5 covers the diagonal).
-    private const float ConicScale = 1.5f;
+    // Shared with the frames the page renderer draws (BorderFrame), so a preview's border moves as this one does.
+    internal const int StepsPerSecond = BorderFrame.StepsPerSecond;
+    private const float PulseLow = BorderFrame.PulseLow;
+    private const float ConicScale = BorderFrame.ConicScale;
 
     private readonly MotionGate _gate;
     private readonly string _name;

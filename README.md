@@ -21,6 +21,8 @@ Not done yet: an editor UI, the other widgets, sensors that need administrator r
 dotnet build urdeck.slnx -c Release      # builds everything and copies the first-party plugins to plugins/
 dotnet run --project src/UrDeck.Host -c Release
 dotnet test urdeck.slnx -c Release       # grid, config, plugin loader and analyzer tests
+dotnet run --project tools/UrDeck.Cli -c Release -- preview render --theme rigline --background theme -o page.png   # a picture with sample data
+dotnet run --project tools/UrDeck.Cli -c Release -- catalog export -o catalog.json   # themes, backgrounds, widgets, providers, finding codes
 ```
 
 The window covers the target monitor completely. Press Esc to close it. Diagnostics go to `urdeck.log` next to the executable.
@@ -69,6 +71,13 @@ the website's loops are made with it (`site/README.md`). `--page N` renders the 
 `activePage`) with the band and the indicator showing that page; an index outside the page list fails with a logged reason
 and exit code 1. `*.snapshot.png` files are git-ignored.
 
+`--demo` (with or without `--snapshot`) runs the deck on sample data: every data provider that carries a sample file (the
+first-party `system` and `weather` do) is replaced by it, and a shortcut to a web address draws its fallback instead of fetching
+the site's icon, so the deck shows the same made-up readings on any machine and makes no network request of its own. Everything
+else is as usual; the configuration is never written. The log says `Demo mode: sample data for system, weather`. With
+`--snapshot` the samples are read at `--start`, so `--demo --snapshot out.png --size 1100x3840 --start 2026-10-13T21:47:32` gives
+the same picture every time. For pictures without Windows, use `urdeck-cli preview render`, which draws with the same samples.
+
 ## Configuration
 
 UrDeck is configured by `urdeck-config.json` next to the executable (the tracked sample is
@@ -96,7 +105,7 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 | `sdk/UrDeck.Analyzer` | Roslyn analyzer (`netstandard2.0`, MIT) reporting URDECK001-005 |
 | `src/UrDeck.Engine` | Plugin loader, config store, grid and dock layout, gesture recognition and hit testing, `PageRenderer`, the reading hub that runs the data providers, the launcher and the icon service |
 | `src/UrDeck.Host` | WinUI 3 application (`net10.0-windows10.0.19041.0`): window and monitor placement, one `SKXamlCanvas` layer per widget |
-| `src/UrDeck.Preview` | the sample page and the code that draws it in a theme (`urdeck-cli theme render`, the golden tests); above the engine and the first-party widgets |
+| `src/UrDeck.Preview` | the preview renderer (a configuration's page or one widget, in a theme over a background, with sample data, as a picture or frames) and the sample page (`SamplePage/urdeck-config.json`), for `urdeck-cli theme render` and `preview render` and the golden tests; above the engine and the first-party widgets and providers |
 | `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather` | First-party data providers: `system` (CPU, memory and GPU readings) and `weather` (Open-Meteo, any number of places) |
 | `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather`, `widgets/UrDeck.Widgets.Shortcut` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`), Weather (`urdeck.widgets.weather`) and Shortcut (`urdeck.widgets.shortcut`) |
 | `tests/UrDeck.Engine.Tests`, `tests/UrDeck.Analyzer.Tests` | xUnit tests |

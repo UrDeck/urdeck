@@ -98,6 +98,7 @@ The complete list of settings, with the range of each, is the
 urdeck-cli theme init my-theme                  # a starter, or --from carbon for a copy of a built-in theme
 urdeck-cli theme validate my-theme              # every finding, text, markdown, json or sarif
 urdeck-cli theme render my-theme -o preview.png # the sample page drawn in the theme
+urdeck-cli preview render --theme-dir my-theme --background theme -o page.png   # over its background; --frames 90 for a loop
 urdeck-cli theme schema                         # the JSON Schema, for an editor
 ```
 

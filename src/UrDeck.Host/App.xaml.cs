@@ -3,6 +3,7 @@
 
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
 using UrDeck.Engine.Startup;
@@ -43,7 +44,11 @@ public partial class App : Application
             _memTimer.Start();
         }
 
-        _host = new HostContext(saveConfiguration: true);
+        // --demo: the providers that carry a sample run as it, from now on; the configuration is never written.
+        bool demo = Array.IndexOf(Environment.GetCommandLineArgs(), "--demo") >= 0;
+        _host = new HostContext(
+            saveConfiguration: !demo,
+            demo: demo ? new SampleClock(() => DateTime.Now, DateTime.Now) : null);
         _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Shaders, _host.AppDirectory, _host.SaveConfiguration);
         _window.Closed += (_, _) =>
         {

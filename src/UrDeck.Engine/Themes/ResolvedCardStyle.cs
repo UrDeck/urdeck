@@ -71,6 +71,10 @@ public sealed class ResolvedCardStyle : IDisposable
     private BorderPicture? _conicSource;
     private readonly Dictionary<(bool Chamfer, int Reach, CardCorners Cut, int Width, int CardWidth, int CardHeight), BorderPicture> _rings = [];
 
+    // A moving border drawn into a frame (Rendering.BorderFrame): the conic source as an image, and the ring at each card size.
+    private SKImage? _frameConic;
+    private readonly Dictionary<(int Width, int Height), SKImage> _frameRings = [];
+
     // The underlay pictures: the nine-grid one under (0, 0), an exact one under its card's size.
     private readonly Dictionary<(int Width, int Height), UnderlayPicture> _underlays = [];
     private int _backImagesMade;
@@ -123,7 +127,8 @@ public sealed class ResolvedCardStyle : IDisposable
 
     /// <summary>
     /// How the host moves the border (<c>card.borderAnimate</c>); null for none: mode <c>none</c>, <c>spin</c> without a conic
-    /// gradient, a dashed border, no border at all. The snapshot and the page renderer ignore it and draw the still border.
+    /// gradient, a dashed border, no border at all. The snapshot and a still picture draw the still border; a frame of a run
+    /// draws it moving (<see cref="Rendering.BorderFrame"/>).
     /// </summary>
     public BorderAnimation? BorderAnimation { get; private init; }
 
@@ -198,7 +203,8 @@ public sealed class ResolvedCardStyle : IDisposable
     /// <summary>
     /// The same style with no border, for cards whose border the host draws as a moving sprite: its backs hold everything
     /// but the ring. Made on first use and owned by this style (the compact variant has its own). Never used by the snapshot
-    /// or <see cref="Rendering.PageRenderer"/>, which draw the still border, so the goldens do not depend on it.
+    /// or a still picture, which draw the still border, so the goldens do not depend on it; a frame of a run whose border moves
+    /// draws its card from it (<see cref="Rendering.PageRenderer"/>).
     /// </summary>
     public ResolvedCardStyle WithoutBorder()
     {
@@ -252,6 +258,49 @@ public sealed class ResolvedCardStyle : IDisposable
             ObjectDisposedException.ThrowIf(_disposed, this);
             if (!_rings.TryGetValue(key, out var ring))
                 _rings[key] = ring = BorderPicture.MakeRing(this, reach, exact ? cardPx : null);
+            return ring;
+        }
+    }
+
+    /// <summary>
+    /// The conic source of <see cref="BorderConicSource"/> as an image, for a frame drawn by the page renderer; null unless this
+    /// style's animated border is conic. Kept until the style is disposed.
+    /// </summary>
+    internal SKImage? FrameConicImage()
+    {
+        if (BorderAnimation == null || !BorderConic || BorderGradient == null)
+            return null;
+        lock (_sized)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (_frameConic == null)
+            {
+                using var bitmap = BorderPicture.DrawConicSource(this);
+                _frameConic = SKImage.FromBitmap(bitmap);
+            }
+
+            return _frameConic;
+        }
+    }
+
+    /// <summary>
+    /// The ring of a moving border drawn at a card's exact size, in white, for a frame drawn by the page renderer: the shape
+    /// <see cref="BorderRing"/> draws, without the nine-grid. Null unless this style's border animates. Kept until disposed.
+    /// </summary>
+    internal SKImage? FrameRingImage(System.Drawing.Size cardPx)
+    {
+        if (BorderAnimation == null || cardPx.Width <= 0 || cardPx.Height <= 0)
+            return null;
+        lock (_sized)
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            if (!_frameRings.TryGetValue((cardPx.Width, cardPx.Height), out var ring))
+            {
+                float reach = Math.Min(Chamfer ? Cut : Radius, Math.Min(cardPx.Width, cardPx.Height) / 2f);
+                using var bitmap = BorderPicture.DrawRing(this, reach, cardPx);
+                _frameRings[(cardPx.Width, cardPx.Height)] = ring = SKImage.FromBitmap(bitmap);
+            }
+
             return ring;
         }
     }
@@ -575,6 +624,10 @@ public sealed class ResolvedCardStyle : IDisposable
         foreach (var ring in _rings.Values)
             ring.Dispose();
         _rings.Clear();
+        _frameConic?.Dispose();
+        foreach (var ring in _frameRings.Values)
+            ring.Dispose();
+        _frameRings.Clear();
         _withoutBorder?.Dispose();
         _compact?.Dispose();
     }

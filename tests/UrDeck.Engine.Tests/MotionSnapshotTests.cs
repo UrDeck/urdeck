@@ -67,11 +67,10 @@ public sealed class MotionSnapshotTests : IDisposable
 
     private static SKBitmap Render(bool removeAnimation)
     {
-        using var page = SamplePage.Build();
         var loaded = new ThemeStore("").Load("rigline");
         Assert.NotNull(loaded.Definition.Card!.BorderAnimate);
         if (removeAnimation)
             loaded.Definition.Card.BorderAnimate = null;
-        return ThemePreview.Render(loaded, page, 550, 960, dock: true);
+        return ThemePreview.Render(loaded, 550, 960, dock: true);
     }
 }

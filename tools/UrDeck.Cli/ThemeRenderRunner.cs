@@ -74,8 +74,7 @@ internal static class ThemeRenderRunner
             return ExitCodes.Findings;
         }
 
-        using (var page = SamplePage.Build())
-        using (var bitmap = ThemePreview.Render(theme, page, width, height, dock: options.Page == "dock"))
+        using (var bitmap = ThemePreview.Render(theme, width, height, dock: options.Page == "dock"))
         {
             try
             {

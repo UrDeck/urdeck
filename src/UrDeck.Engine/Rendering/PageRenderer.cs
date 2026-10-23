@@ -24,6 +24,9 @@ public static class PageRenderer
     /// <see cref="DockLayout.Select"/>), each with its widget or null for a slot that stays empty; null or empty means
     /// no dock, and nothing is reserved for it. A <paramref name="background"/> is painted over the theme's background colour,
     /// at the snapshot time (see <see cref="BackgroundClock.SnapshotTime"/>), before anything else.
+    /// With <paramref name="motion"/> the page is one frame of a run: the background is painted at the snapshot time plus the
+    /// frame's elapsed time (scaled by its speed, so a stilled one stays put) and an animated card border at the frame's step
+    /// (<see cref="BorderFrame"/>). Without it both are drawn still, as every snapshot and picture test draws them.
     /// </summary>
     public static void Render(
         SKCanvas canvas,
@@ -34,14 +37,15 @@ public static class PageRenderer
         DateTime time,
         Chrome? chrome = null,
         IReadOnlyList<(WidgetConfig Config, IWidget? Widget)>? dock = null,
-        DeckBackground? background = null)
+        DeckBackground? background = null,
+        FrameTime? motion = null)
     {
         // Pixels are physical here, so the theme resolves against this canvas's own cell size.
         using var theme = ThemeResolver.Resolve(loaded, widthPx / 4f);
         using var cardStyle = ResolvedCardStyle.Resolve(loaded, widthPx / 4f);
         canvas.Clear(theme.Background);
         if (background != null)
-            PaintBackground(canvas, widthPx, heightPx, background);
+            PaintBackground(canvas, widthPx, heightPx, background, BackgroundTime(background, motion));
 
         var screen = new System.Drawing.Size(widthPx, heightPx);
         PaintPattern(canvas, loaded, widthPx, screen);
@@ -65,7 +69,7 @@ public static class PageRenderer
             var item = layout[i];
             if (!item.Placed)
                 continue;
-            PaintAt(canvas, widget, item, theme, new CardLook(cardStyle.ForCard(item), order[i]), time);
+            PaintAt(canvas, widget, item, theme, cardStyle.ForCard(item), order[i], time, motion);
         }
 
         int side = hasDock ? DockLayout.SlotSide(frame.Dock) : 0;
@@ -82,7 +86,7 @@ public static class PageRenderer
             {
                 var (config, widget) = dock[i];
                 if (widget != null && config.IsVisible)
-                    PaintAt(canvas, widget, slots[i], slotTheme, new CardLook(slotStyle.ForCard(slots[i]), slotOrder[i]), time);
+                    PaintAt(canvas, widget, slots[i], slotTheme, slotStyle.ForCard(slots[i]), slotOrder[i], time, motion);
             }
         }
 
@@ -102,20 +106,27 @@ public static class PageRenderer
         DateTime time,
         Chrome? chrome = null,
         IReadOnlyList<(WidgetConfig Config, IWidget? Widget)>? dock = null,
-        DeckBackground? background = null)
+        DeckBackground? background = null,
+        FrameTime? motion = null)
     {
         var bitmap = new SKBitmap(widthPx, heightPx);
         using var canvas = new SKCanvas(bitmap);
-        Render(canvas, widthPx, heightPx, widgets, loaded, time, chrome, dock, background);
+        Render(canvas, widthPx, heightPx, widgets, loaded, time, chrome, dock, background, motion);
         return bitmap;
     }
+
+    /// <summary>The background's <c>iTime</c>: the snapshot time, plus a frame's elapsed time at the background's speed.</summary>
+    private static float BackgroundTime(DeckBackground background, FrameTime? motion) =>
+        motion is { } frame
+            ? BackgroundClock.SnapshotTime + BackgroundClock.Wrap(frame.ElapsedSeconds, background.Speed)
+            : BackgroundClock.SnapshotTime;
 
     /// <summary>
     /// A shader renders into a surface of its scale times the page's size and is stretched over the page, so a snapshot
     /// has the softness of the live layer; a picture is painted at full size. A failure is logged and the page is
     /// drawn without a background.
     /// </summary>
-    private static void PaintBackground(SKCanvas canvas, int widthPx, int heightPx, DeckBackground background)
+    private static void PaintBackground(SKCanvas canvas, int widthPx, int heightPx, DeckBackground background, float time)
     {
         try
         {
@@ -126,13 +137,13 @@ public static class PageRenderer
                 int height = Math.Max(1, (int)Math.Round(heightPx * background.Scale));
                 using var surface = SKSurface.Create(new SKImageInfo(width, height, SKImageInfo.PlatformColorType, SKAlphaType.Premul));
                 surface.Canvas.Clear(SKColors.Transparent);
-                background.PaintAtTime(surface.Canvas, width, height, BackgroundClock.SnapshotTime);
+                background.PaintAtTime(surface.Canvas, width, height, time);
                 using var image = surface.Snapshot();
                 canvas.DrawImage(image, SKRect.Create(widthPx, heightPx), new SKSamplingOptions(SKFilterMode.Linear));
             }
             else
             {
-                background.PaintAtTime(canvas, widthPx, heightPx, BackgroundClock.SnapshotTime);
+                background.PaintAtTime(canvas, widthPx, heightPx, time);
             }
             canvas.RestoreToCount(save);
         }
@@ -178,13 +189,19 @@ public static class PageRenderer
         canvas.RestoreToCount(save);
     }
 
-    /// <summary>Paints one card clipped to its rectangle, as its own surface clips it in the window.</summary>
-    private static void PaintAt(SKCanvas canvas, IWidget widget, WidgetLayoutItem item, Theme theme, CardLook look, DateTime time)
+    /// <summary>
+    /// Paints one card clipped to its rectangle, as its own surface clips it in the window. A border that moves at this frame
+    /// is left off the card's back and drawn over the card, where the host's sprite lies.
+    /// </summary>
+    private static void PaintAt(SKCanvas canvas, IWidget widget, WidgetLayoutItem item, Theme theme, ResolvedCardStyle style, int index, DateTime time, FrameTime? motion)
     {
+        var border = BorderFrame.StepAt(style, motion);
         int save = canvas.Save();
         canvas.Translate(item.Position.X, item.Position.Y);
         canvas.ClipRect(SKRect.Create(item.Size.Width, item.Size.Height));
-        WidgetPainter.Paint(widget, canvas, item.Size, theme, look, time, CancellationToken.None);
+        WidgetPainter.Paint(widget, canvas, item.Size, theme, new CardLook(border == null ? style : style.WithoutBorder(), index), time, CancellationToken.None);
+        if (border is { } step)
+            BorderFrame.Draw(canvas, style, item.Size, step);
         canvas.RestoreToCount(save);
     }
 }
