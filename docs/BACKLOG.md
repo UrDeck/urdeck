@@ -31,7 +31,7 @@ did not change.
 Suggested model per item is noted as **Model**. Items marked Opus involve architecture decisions or hard debugging;
 everything else should be fine on Sonnet.
 
-## Current state (2026-10-23)
+## Current state (2026-10-24)
 
 - `urdeck-framework` (Phase 1 foundation) is complete and archived: SDK, analyzer, plugin loader with hot-reload
   (collectible AssemblyLoadContext), grid layout, WPF host with per-monitor DPI placement, Clock widget, tests, placeholder
@@ -119,6 +119,9 @@ everything else should be fine on Sonnet.
 - `fold-theme-format-2-into-v1` is done and archived (2026-10-23): the theme format is one format with no `format` key and no
   `THEME010`; the schema is `docs/schemas/v1/theme.json`; a value of the wrong kind costs only that value; goldens unchanged.
 - Next: milestone 2 is reshaped as a *downloadable* preview, releasable build first (see the roadmap and item 12).
+  The release decisions of 2026-10-24 (item 12) settle the shape: 0.x versions from the git tag, a per-user Velopack
+  installer, data in `%APPDATA%\UrDeck`, SignPath signing from the release after 0.1, and the same installer listed in the
+  Microsoft Store. First change: `per-user-data-folder`.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -306,6 +309,11 @@ What the exploration settled (it replaced the earlier "named topics with typed v
   region, because hardware temperatures are read in Celsius even where weather is read in Fahrenheit.
 - **Elevation is opt-in:** a one-time deliberate action enables the helper, and demand decides whether it runs.
   Without it those readings are in the catalog and report unavailable.
+- **UrDeck never ships a kernel driver (decided 2026-10-24).** The helper is a signed user-mode executable that uses
+  PawnIO (the signed driver that replaced WinRing0, which Defender now flags) when the user has installed it. The app
+  works fully without it. This keeps driver signing out of the project and keeps the helper inside Microsoft Store
+  policy 10.2.4 (a dependency on a third-party driver is "generally not allowed", considered case by case, and must be
+  disclosed in the certification notes); see item 12.
 
 The three changes are listed under "Suggested order". Left for later, each with the change or consumer that needs it:
 
@@ -654,16 +662,48 @@ Done in `start-with-windows`: start with Windows (tray entry, Run key), the publ
 the installer: a manifest of the files it installed (the script cannot remove a first-party plugin that was dropped), the
 per-user data folder (item 15), and the single-instance message the editor will want (bring the first copy forward).
 
-Owner's distribution goals: the Microsoft Store as an eventual target (start-up then goes through the `StartupTask` API
-and the application folder is read-only, so item 15 comes first), signing releases at no cost if that is possible, and
-research before an installer technology is chosen.
+Owner's distribution goals: the Microsoft Store as an eventual target (the developer account exists and is verified),
+signing releases at no cost if that is possible, and research before an installer technology is chosen.
 
-**Release order (decided 2026-10-23):** first a GitHub release (milestone 2, part A): a tag-triggered workflow builds the
-self-contained app, runs the tests, and attaches a portable zip with the third-party notices and a stamped version; then, if the zip
-is a poor first run, a per-user installer (no administrator rights); the winget manifest and auto-update stay milestone 6. The
-Microsoft Store package comes after 1.0. Unsigned early releases are acceptable if the README explains SmartScreen; the
-signing application (item 15) runs in parallel. The release workflow needs the version in one place (`Directory.Build.props`)
-and the item 15 data folder before an installer is worth building.
+**Release decisions (2026-10-24, replacing the release order of 2026-10-23).** Explored in one session; each line is
+settled unless it says otherwise.
+
+- **Versions:** SemVer 0.x until 1.0 (0.y.z already says "anything may change"); `-rc.N` only when testers are wanted
+  before a minor release. A prerelease label never reaches Windows: `0.2.0-rc.1` is file version `0.2.0.0`, and the
+  Store needs four numbers with the last one 0, which 0.x maps to directly. The SDK gets its own version (milestone 5).
+- **Where the version comes from:** the git tag. A release is drafted in the GitHub UI (tag `vX.Y.Z`, "Generate release
+  notes" from the PR titles the `pr-title` check already enforces), and the release workflow passes `-p:Version` to the
+  host's publish only, never to `sdk/` (plugins bind to the SDK's assembly version, which follows SDK changes, not app
+  releases). First-party plugins take the app version. `Directory.Build.props` holds only a `0.0.0-dev` fallback, so a
+  self-built copy says so in `urdeck.log`. No commit per release; release-please can come later if a `CHANGELOG.md` or
+  automatic numbering is wanted. A tag ruleset limits who can create `v*` tags.
+- **Runtime:** self-contained .NET and Windows App SDK, as today; no trimming or AOT (plugins need the whole framework).
+  A .NET security update means a patch release. Because the host carries its runtime, the project chooses when it moves
+  to a new .NET major, which is part of the plugin compatibility promise (milestone 5).
+- **Installer and updates:** Velopack. Its `Setup.exe` installs per user into `%LocalAppData%\UrDeck` without
+  administrator rights, updates itself (with deltas) from the GitHub releases, and `vpk pack` also writes a portable zip,
+  so there is no separate zip-only step. Velopack owns its folder and replaces it on every update and removes it on
+  uninstall, so item 15's data folder comes first. `VelopackApp.Build().Run()` goes at the top of `Program.Main`, before
+  `--snapshot`, `--quit` and the guard; its uninstall hook removes the Run key, and an update quits the running copy with
+  the existing `--quit` handshake. `scripts/Install-Local.ps1` is retired or becomes "install the locally packed build".
+- **Signing:** SignPath Foundation (free for open source; the certificate names "SignPath Foundation" as publisher). Its
+  terms want a project already released in the form to be signed and builds with origin verification (GitHub-hosted
+  runners), so 0.1 ships unsigned with the SmartScreen warning explained, and signing starts with the next release. The
+  site needs a code-signing policy page and a privacy statement (what the app sends over the network: weather, site
+  icons), which pulls that milestone 6 item forward. Sign `UrDeck.Host.exe`, every first-party DLL including the plugins,
+  and `Setup.exe`; CI checks that every PE file in the output carries a signature. Azure Artifact Signing ($9.99 a month,
+  available to individuals in the US) is the fallback if SignPath declines or donations make it affordable.
+- **Microsoft Store:** the same signed `Setup.exe`, listed by URL under policy 10.2.9 (an .exe or .msi; the binary and
+  all its PE files signed with a certificate from the Microsoft Trusted Root Program; a versioned URL whose binary never
+  changes, which a GitHub release asset is; a silent install; a standalone installer, not a downloader). Microsoft's own
+  comparison says the application manages its own updates on this route, so the Store build needs no switch to turn
+  Velopack off. No MSIX: it would bring a read-only application folder, redirected AppData, the `StartupTask` API and
+  no elevated helper. Open: whether Partner Center passes Velopack's silent switch or the default run counts as silent
+  (a spike); the helper waits for a second submission that discloses PawnIO (item 3).
+
+Planned changes, in order: `per-user-data-folder` (item 15), `release-pipeline` (the tag workflow, Velopack, the update
+check, third-party notices, then SignPath after 0.1), `store-listing` (the silent-install spike, the Partner Center
+submission, the code-signing policy and privacy pages). The winget manifest stays milestone 6.
 
 Tray icon with Quit: done (`tray-icon`). The menu is a list of entries, so the editor's "Open editor" entry (and a
 single-instance guard, which would also be the place to bring the first copy's editor forward) are added later. Still
@@ -732,7 +772,11 @@ Collected while the milestones were drawn up. Each names the milestone that need
 
 - **Per-user data folder** (milestone 2). Config, themes, plugins and `urdeck.log` live next to the executable today,
   which an installer into a protected folder and an updater that replaces the folder both break. Move them to a
-  per-user folder and keep "next to the executable" as a portable mode.
+  per-user folder and keep "next to the executable" as a portable mode. Decided 2026-10-24 (item 12): the data root is
+  `%APPDATA%\UrDeck` (not `%LOCALAPPDATA%\UrDeck`, which Velopack owns and removes on uninstall); a marker file next to
+  the exe selects portable mode; every path goes through one resolver, and a tray entry opens the folder it returns;
+  first-party plugins stay in the application folder and user plugins go in the data root; the single-instance key
+  follows the data root, not the application folder. The change is `per-user-data-folder`.
 - **Config format version and migrations** (milestone 2, proven by 1.0). The file has no version. Add one before the
   first public release, so that every later change to the format can carry a migration.
 - **First run** (milestone 2). With no config the app should place a default page that suits the monitor it finds, and
@@ -741,7 +785,7 @@ Collected while the milestones were drawn up. Each names the milestone that need
   1920x1080 monitor two rows of very large cells. Decide whether the column count follows the monitor's shape or is a
   page setting. This touches the grid spec and every widget's composition, so decide before the editor is built.
 - **Code signing** (milestone 2). An unsigned download is blocked by SmartScreen, which is a poor start for a project
-  whose point is trust. Look at the free signing programmes for open source (SignPath Foundation is one to verify).
+  whose point is trust. Decided 2026-10-24: SignPath Foundation, from the release after 0.1 (item 12).
 - **Hardware reports** (milestone 2). An issue template that asks for the lines `urdeck.log` already writes (monitors,
   GPUs and the source of each reading), and a compatibility table in the docs fed from them.
 - **Settings metadata in the SDK** (milestone 3). Labels, ranges, choices and "this is a reading id" or "this is a
