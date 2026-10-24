@@ -5,7 +5,7 @@ UrDeck is a lightweight, extensible widget dashboard for secondary and case disp
 read the source of, low resource use, great visuals, a modular widget SDK, a WYSIWYG editor, and touch.
 
 This page is the plan in outcomes. The work items behind it, with their design notes and status, are in
-[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-10-23.
+[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-10-24.
 
 ## Where it is today
 
@@ -47,26 +47,29 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
 - Start with Windows, in its simplest form (item 12; done in `start-with-windows`, checked on three cold boots, a sign-out, an Explorer restart and a sleep).
 
 **2. Downloadable preview (0.1).** For people who are willing to edit a JSON file. Its purpose is hardware variety: every
-measurement so far is from one panel and one NVIDIA GPU, and that is the largest unknown in the project. A binary on GitHub
-comes first and the Microsoft Store later (after 1.0), so the order is: something to download, then what makes it work for
-a stranger, then trust.
+measurement so far is from one panel and one NVIDIA GPU, and that is the largest unknown in the project. An installer on
+GitHub comes first, and the same signed installer is then listed in the Microsoft Store, so the order is: something to
+install, then what makes it work for a stranger, then trust. The release decisions of 2026-10-24 are in item 12.
 
 *A. A releasable build (first).*
-- A release workflow: a tag builds the self-contained app, runs the tests and attaches a portable zip to a GitHub release
-  with the third-party notices and the version stamped in (item 12).
-- A per-user installer (no administrator rights) after the zip, if the zip alone proves to be a poor first run (item 12).
+- Config, themes, user plugins and the log in `%APPDATA%\UrDeck` instead of next to the executable, with a portable mode
+  kept (item 15, the `per-user-data-folder` change). It comes first because the installer replaces the application
+  folder on every update.
+- A release workflow (`release-pipeline`): publishing a GitHub release tagged `vX.Y.Z` builds the self-contained app with
+  that version, runs the tests and attaches a per-user Velopack installer (no administrator rights; it updates itself from
+  the GitHub releases) and a portable zip, with the third-party notices (item 12). Versions are 0.x until 1.0.
 - The website's download button points at the latest release (`landing-site` left it open).
 
 *B. Works for somebody else.*
-- Config, themes, plugins and the log in a per-user folder instead of next to the executable, with the portable mode kept
-  (item 15).
 - A config format version and a first migration (item 15).
 - A first run that produces a sensible page on any monitor, including a landscape one (item 15).
 - A tray icon with Quit (item 12; shipped in `tray-icon`), later the entry that opens the config editor.
 
 *C. Trust and feedback.*
-- Code signing, so the download is not blocked by SmartScreen (item 15). The first releases may ship unsigned, with the
-  SmartScreen warning explained in the README, while the signing application is pending.
+- Code signing through SignPath Foundation, so the download is not blocked by SmartScreen (items 12 and 15). Its terms
+  want a project that is already released, so 0.1 ships unsigned with the SmartScreen warning explained, and signing
+  starts with the next release. The site gains a code-signing policy page and a privacy statement.
+- The Microsoft Store listing (`store-listing`): the same signed installer, submitted by URL (item 12). Not an MSIX.
 - A compatibility table: AMD and Intel GPUs, other panels (item 15). The hardware report issue template and the first "Tested on" page are done (`landing-site`); the table grows with reports.
 - The website at urdeck.app (live: landing page, user documentation, theme gallery, "Tested on").
 - Screenshots and a short clip in the README (the site's media pipeline renders them), issue templates, Discussions.
@@ -98,12 +101,13 @@ a stranger, then trust.
 - Provider settings and secrets (item 3), proven by one provider that needs them (Home Assistant is the candidate).
 - Author documentation: a walkthrough from the template to a loaded widget.
 
-**6. UrDeck 1.0.** Installer, auto-update, winget manifest, final logo and branding (item 12); every config written
-since 0.1 still loads; a written statement of what the app sends over the network and to whom (item 15).
+**6. UrDeck 1.0.** Winget manifest, final logo and branding (item 12; the installer and auto-update arrive in milestone 2);
+every config written since 0.1 still loads; the statement of what the app sends over the network and to whom (item 15),
+first written for code signing in milestone 2, is complete.
 
-**After 1.0.** The Microsoft Store package (start-up through the `StartupTask` API, a read-only application folder),
-the marketplace registry, display backends for USB LCDs, splitting the template and the SDK into their
-own repos (item 13), the camera widget (item 7).
+**After 1.0.** An MSIX package only if a Store feature needs one (the milestone 2 listing does not), the marketplace
+registry, display backends for USB LCDs, splitting the template and the SDK into their own repos (item 13), the camera
+widget (item 7).
 
 ## Following along and helping
 
