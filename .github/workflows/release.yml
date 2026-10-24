@@ -1,0 +1,100 @@
+name: Release
+
+# Makes a release by hand: start it from the Actions tab with a version. It builds, tests, packs and creates a DRAFT release;
+# nothing reaches users until the owner reads the draft and publishes it (publishing creates the tag, on the commit built here).
+# See CONTRIBUTING.md, "Making a release". The packing is scripts/Pack-Release.ps1, which a PC can run too.
+# Signing goes between the publish and the pack: the script's -SignTemplate (added by the signing change).
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version: 0.2.0 or 0.2.0-rc.1 (no leading v)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ inputs.version }}
+    steps:
+      - name: Only from main
+        if: github.ref != 'refs/heads/main'
+        shell: pwsh
+        run: |
+          Write-Error "Releases are made from main; this run is on '$env:GITHUB_REF'."
+          exit 1
+
+      - uses: actions/checkout@v7
+
+      # Before anything is built: the form, a version nobody has used (tag, release or draft) and one higher than the latest release.
+      - name: Check the version
+        shell: pwsh
+        run: |
+          $form = '^v?(\d+\.\d+\.\d+(-rc\.\d+)?)$'
+          $releases = gh release list --repo $env:GITHUB_REPOSITORY --limit 1000 --json tagName,isDraft | ConvertFrom-Json
+          $tags = git ls-remote --tags origin | ForEach-Object { ($_ -split "`t")[1] -replace '^refs/tags/', '' -replace '\^\{\}$', '' }
+          $published = @($releases | Where-Object { -not $_.isDraft } | ForEach-Object tagName)
+          $existing = @($releases | ForEach-Object tagName) + @($tags)
+          function Strip($names) { @($names | Where-Object { $_ -match $form } | ForEach-Object { $_ -replace '^v', '' } | Select-Object -Unique) }
+          $latest = Strip $published
+          $all = Strip $existing
+          Write-Host "Published releases: $($latest -join ', ')"
+          Write-Host "Existing tags, releases and drafts: $($all -join ', ')"
+          ./scripts/Test-ReleaseVersion.ps1 -Version $env:VERSION -Latest $latest -Existing $all
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          "HAS_PUBLISHED=$(if ($latest.Count -gt 0) { 'true' } else { 'false' })" | Out-File -Append -FilePath $env:GITHUB_ENV
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Build
+        run: |
+          dotnet restore urdeck.slnx
+          dotnet build urdeck.slnx -c Release --no-restore
+
+      - name: Test
+        run: dotnet test urdeck.slnx -c Release --no-build
+
+      # The delta base: the files of the newest published release (prereleases included). The first release has none.
+      - name: Download the previous release
+        if: env.HAS_PUBLISHED == 'true'
+        shell: pwsh
+        run: |
+          dotnet tool restore
+          dotnet vpk download github --repoUrl "https://github.com/$env:GITHUB_REPOSITORY" --pre --channel win --outputDir artifacts/previous --token $env:GH_TOKEN
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      # Checks that the Velopack package and vpk are the same version, publishes with the version and packs.
+      - name: Pack
+        shell: pwsh
+        run: |
+          $packArgs = @('-Version', $env:VERSION)
+          if (Test-Path artifacts/previous) { $packArgs += @('-Previous', 'artifacts/previous') }
+          ./scripts/Pack-Release.ps1 @packArgs
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      # A draft: invisible to visitors and to installed copies. --target pins the commit built here, so a later push to main
+      # cannot move what is released; publishing the draft creates the tag.
+      - name: Create the draft release
+        shell: pwsh
+        run: |
+          # This version's packages and the installers and feed that describe them; the previous release's packages stay with their release.
+          $files = Get-ChildItem artifacts/release -File | Where-Object {
+            $_.Extension -ne '.nupkg' -or $_.Name -match "^UrDeck-$([regex]::Escape($env:VERSION))-(full|delta)\.nupkg$"
+          } | ForEach-Object FullName
+          $flags = @('--draft', '--target', $env:GITHUB_SHA, '--generate-notes', '--title', "UrDeck $env:VERSION")
+          if ($env:VERSION -match '-') { $flags += '--prerelease' }
+          gh release create "v$env:VERSION" @flags @files
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          gh release view "v$env:VERSION" --json isDraft,isPrerelease,url,assets --jq '"Draft: \(.url)  prerelease: \(.isPrerelease)  assets: \([.assets[].name] | join(", "))"'

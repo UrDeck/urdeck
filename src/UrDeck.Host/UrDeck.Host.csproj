@@ -23,6 +23,7 @@
         <PackageReference Include="Microsoft.Win32.SystemEvents" />
         <PackageReference Include="SkiaSharp" />
         <PackageReference Include="SkiaSharp.Views.WinUI" />
+        <PackageReference Include="Velopack" />
     </ItemGroup>
     <ItemGroup>
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Clock\UrDeck.Widgets.Clock.csproj" />
@@ -47,6 +48,12 @@
         </None>
         <!-- The window icon is set at runtime through AppWindow, which needs the .ico as a file. -->
         <Content Include="Resources/urdeck.ico" Link="urdeck.ico" CopyToOutputDirectory="PreserveNewest" />
+        <!-- The licence and the notices travel with the application (distribution spec); the build output does not need them. -->
+        <None Include="..\..\LICENSE" Link="LICENSE" CopyToPublishDirectory="PreserveNewest" />
+        <None Include="..\..\PLUGIN-EXCEPTION.md" Link="PLUGIN-EXCEPTION.md" CopyToPublishDirectory="PreserveNewest" />
+        <None Include="..\..\THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToPublishDirectory="PreserveNewest" />
+        <!-- The full licence texts that the notices point to: the Windows App SDK's and the bundle of the native Skia library. -->
+        <None Include="..\..\licenses\*.txt" Link="licenses\%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
         <!-- The marker that makes a build output portable (data-folder spec): the data stays in bin/. The published folder has none. -->
         <Content Include="Resources/urdeck.portable" Link="urdeck.portable" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
     </ItemGroup>

@@ -9,6 +9,8 @@
     <PackageVersion Include="SkiaSharp" Version="4.153.1" />
     <PackageVersion Include="SkiaSharp.Skottie" Version="4.153.1" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.153.1" />
+    <!-- The vpk tool in dotnet-tools.json must be the same version as this package (release-process spec); bump both together. -->
+    <PackageVersion Include="Velopack" Version="1.2.161" />
     <PackageVersion Include="DotMake.CommandLine" Version="3.7.0" />
     <PackageVersion Include="SkiaSharp.Views.WinUI" Version="4.153.1" />
     <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.5.1" />

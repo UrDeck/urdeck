@@ -11,6 +11,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
+using UrDeck.Engine.Startup;
 
 namespace UrDeck.Host;
 
@@ -147,6 +148,14 @@ internal sealed class SettingsWindow : Window
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
         buttons.Children.Add(_identify);
         buttons.Children.Add(_automatic);
+        buttons.Children.Add(new TextBlock
+        {
+            Text = $"UrDeck {AppVersion.WithoutMetadata(Program.Version)}",
+            Opacity = 0.5,
+            FontSize = 12,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(8, 0, 0, 0),
+        });
         Grid.SetRow(buttons, 2);
         root.Children.Add(buttons);
 

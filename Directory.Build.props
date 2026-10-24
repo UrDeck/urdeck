@@ -34,6 +34,14 @@
     <NuGetAuditLevel>low</NuGetAuditLevel>
   </PropertyGroup>
 
+  <!-- The app's version (release-process spec). It travels in UrDeckAppVersion, not Version: a global property flows to every
+       referenced project, and -p:Version would also stamp UrDeck.Sdk, whose version follows its own changes. Projects outside
+       sdk/ take it; a build without it is 0.0.0-dev. A project that sets its own Version (the tool) keeps it. -->
+  <PropertyGroup Condition="!$(MSBuildProjectDirectory.StartsWith('$(MSBuildThisFileDirectory)sdk'))">
+    <Version Condition="'$(UrDeckAppVersion)' != ''">$(UrDeckAppVersion)</Version>
+    <Version Condition="'$(UrDeckAppVersion)' == ''">0.0.0-dev</Version>
+  </PropertyGroup>
+
   <!-- Test projects: xunit v3 on the plain TFM, so they run on Windows and Linux (the host is the only project that
        needs Windows; a test of Windows-only code says so, see tests/UrDeck.Engine.Tests/Support/WindowsOnlyAttributes.cs). Never packed. -->
   <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">

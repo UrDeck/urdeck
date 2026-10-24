@@ -11,6 +11,9 @@ updates:
         patterns: ["xunit*"]
       skiasharp:
         patterns: ["SkiaSharp*"]
+      # The vpk tool in dotnet-tools.json is not updated by Dependabot: bump it to the same version in this PR.
+      velopack:
+        patterns: ["Velopack*"]
   - package-ecosystem: npm
     directory: /site
     schedule:

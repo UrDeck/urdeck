@@ -14,7 +14,7 @@ written to `urdeck.log`, next to the file. The first start creates the file from
 
 Everything you own sits in that folder, so reinstalling or updating UrDeck never touches it: the configuration, the log, `themes/`,
 `backgrounds/`, `plugins/` (plugins you add) and `cache/`. To keep it beside the program instead (on a USB stick, say), put an
-empty file named `urdeck.portable` next to `UrDeck.Host.exe` and restart; that folder is then the data folder.
+empty file named `urdeck.portable` next to `UrDeck.Host.exe` and restart; that folder is then the data folder. The release's portable zip does this for itself; see [Installing and updating](/docs/installing/#the-portable-zip).
 
 ## The file
 
@@ -49,6 +49,7 @@ empty file named `urdeck.portable` next to `UrDeck.Host.exe` and restart; that f
 | `providers` | Optional settings per data provider, for example `"providers": { "system": { "intervalMs": 500 } }` reads the `system` provider every 500 ms instead of every 2000 ms. A value below the provider's minimum is raised to it. |
 | `pager` | How the page indicator shows, see [Pages and the dock](/docs/pages-and-dock/#pages). |
 | `motion` | How much the deck may move: `"full"`, `"reduced"` or `"off"`. Without it the deck follows Windows' Animation effects setting (off means `off`, on means `full`) and a change of that setting applies without a restart. `"full"` overrides Windows: the deck moves even with its animations off. A theme can lower the level further. Below `full`, a theme's animated border and a moving background shader are drawn still; the page slide and the press feedback are not affected. The log says `Motion: <level> (<what decided it>)`. |
+| `updates` | Whether an installed copy looks for a newer release: `"auto"` (the default) or `"off"`, which makes no request. Another value is treated as `"auto"` with a warning in the log. See [Installing and updating](/docs/installing/#updating). |
 
 ## The widgets
 
@@ -93,6 +94,7 @@ flyout (the `^` arrow) until you drag it to the taskbar. **Start with Windows** 
 
 ## Where to go next
 
+- [Installing and updating](/docs/installing/): the installer, updates, uninstalling and what UrDeck sends over the network.
 - [Pages and the dock](/docs/pages-and-dock/): several pages, the page indicator and the row of shortcuts at the bottom.
 - [Themes](/docs/themes/) change how every card looks, and [backgrounds](/docs/backgrounds/) put a moving picture or a wallpaper behind them.
 - [The command line tool](/docs/command-line/) checks a theme or a background and draws a picture of it without a deck.

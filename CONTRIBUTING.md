@@ -36,6 +36,34 @@ CI runs only the jobs a change can affect (`ci-ok` passes when every job that ra
 
 `workflow_dispatch` (Actions tab, Run workflow) runs every job.
 
+## Making a release
+
+Only the owner makes releases. A release is a draft that the workflow builds and the owner publishes; nothing reaches users (or
+installed copies, which read the releases) before that. The version is the git tag: it is stored nowhere in the repository, and
+a build without one says `0.0.0-dev`.
+
+1. On `main` with green CI, open **Actions → Release → Run workflow** (branch `main`) and give the version: `0.2.0`, or
+   `0.2.0-rc.1` for testers before a minor release. Until 1.0 every version is `0.y.z`. The workflow refuses another form, a
+   version that has a tag, a release or a draft already, and one that is not higher than the latest release.
+2. It builds, runs the tests, packs the release with `scripts/Pack-Release.ps1` (a delta from the previous release when
+   there is one) and creates a **draft** release named `UrDeck <version>` for the commit it built, with generated notes (the PR
+   titles) and `UrDeck-win-Setup.exe`, `UrDeck-win-Portable.zip`, the packages and the feed. A version with `-rc.N` is marked
+   as a prerelease. Nothing is pushed to a branch.
+3. Read the draft's notes. Install its `Setup.exe` on a PC that has no UrDeck (a second Windows account will do) and check that
+   a working page is up within five minutes.
+4. Publish the draft. Publishing creates the tag `v<version>` on the commit the workflow built, even if `main` has moved. Only the
+   owner and the workflow can create `v*` tags (a ruleset).
+
+A bad release is deleted together with its tag, as long as it was never submitted to the Microsoft Store. Installed copies that
+already updated stay on it until a higher version is released: the update check only moves forward.
+
+Try the whole path on your own PC first: `pwsh scripts/Pack-Release.ps1 -Version 0.1.0` packs into `artifacts/release/` the same files
+the workflow does. Uninstall the copy that `scripts/Install-Local.ps1` made (`UrDeck.Host.exe --quit`, delete its folder) before
+installing from `Setup.exe`, because both share `%APPDATA%\UrDeck`. To test an update, pack a higher version into another folder with
+`-OutputDir`, give the installed copy `URDECK_UPDATE_SOURCE=<that folder>` and restart it; the tray offers the update within the first
+check, a minute later. Velopack (the `Velopack` package in `Directory.Packages.props`) and its `vpk` tool (`dotnet-tools.json`) are
+always the same version, and the packing script stops when they are not: bump both in one pull request.
+
 ## The website
 
 `site/` is the Astro project behind urdeck.app (how to run and check it: `site/README.md`). A pull request that changes it
