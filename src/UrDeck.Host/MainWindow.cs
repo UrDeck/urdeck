@@ -37,7 +37,7 @@ public sealed class MainWindow : Window, ISettingsHost
     private readonly WidgetPluginLoader _plugins;
     private readonly ThemeStore _themes;
     private readonly ShaderStore _shaders;
-    private readonly string _appDirectory;
+    private readonly string _dataFolder;
     private readonly nint _hwnd;
     private readonly WindowFocus? _focus;
     private readonly DisplayPowerWatcher? _power;
@@ -88,13 +88,13 @@ public sealed class MainWindow : Window, ISettingsHost
     private event Action? SettingsChanged;
 
     /// <summary><paramref name="saveDisplay"/> writes the configuration after the remembered display was set or updated.</summary>
-    internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, ShaderStore shaders, string appDirectory, Action saveDisplay)
+    internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, ShaderStore shaders, string dataFolder, Action saveDisplay)
     {
         _configStore = configStore;
         _plugins = plugins;
         _themes = themes;
         _shaders = shaders;
-        _appDirectory = appDirectory;
+        _dataFolder = dataFolder;
         _backgroundLayer = new BackgroundLayer(_background);
         _backgroundSettings = BackgroundSettings.Parse(_configStore.Config.Background);
         _saveDisplay = saveDisplay;
@@ -116,6 +116,7 @@ public sealed class MainWindow : Window, ISettingsHost
         presenter.IsMaximizable = false;
         presenter.IsMinimizable = false;
         AppWindow.SetPresenter(presenter);
+        // The icon ships with the executable: the application folder, not the data folder.
         string icon = Path.Combine(AppContext.BaseDirectory, "urdeck.ico");
         if (File.Exists(icon))
             AppWindow.SetIcon(icon);
@@ -481,8 +482,8 @@ public sealed class MainWindow : Window, ISettingsHost
         var theme = _loadedTheme;
         var plan = BackgroundPlan.Resolve(settings, theme, _motion.User);
         _backgroundLayer.Apply(
-            plan.RequestKey(_shaders, _appDirectory),
-            first => plan.Build(_shaders, _appDirectory, first),
+            plan.RequestKey(_shaders, _dataFolder),
+            first => plan.Build(_shaders, _dataFolder, first),
             screen,
             scale,
             SKColor.Parse(theme.Definition.Colors!.Background));

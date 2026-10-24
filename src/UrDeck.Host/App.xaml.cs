@@ -47,9 +47,10 @@ public partial class App : Application
         // --demo: the providers that carry a sample run as it, from now on; the configuration is never written.
         bool demo = Array.IndexOf(Environment.GetCommandLineArgs(), "--demo") >= 0;
         _host = new HostContext(
+            Program.Data,
             saveConfiguration: !demo,
             demo: demo ? new SampleClock(() => DateTime.Now, DateTime.Now) : null);
-        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Shaders, _host.AppDirectory, _host.SaveConfiguration);
+        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Shaders, _host.Data.Root, _host.SaveConfiguration);
         _window.Closed += (_, _) =>
         {
             // Quitting closes Settings too: it holds the host, which is disposed next.
@@ -59,6 +60,7 @@ public partial class App : Application
             _host.Dispose();
             _host = null;
         };
+        // AppContext.BaseDirectory below is the application folder: the icon ships with the executable.
         // The tray icon is the way to close the app: the window never takes focus and has no taskbar button.
         var window = _window;
         var dispatcher = DispatcherQueue.GetForCurrentThread();
@@ -67,6 +69,7 @@ public partial class App : Application
         _tray = new TrayIcon(
             [
                 new TrayMenuEntry("Settings", OpenSettingsLater),
+                new TrayMenuEntry("Open data folder", OpenDataFolder),
                 new TrayMenuEntry("Start with Windows", ToggleAutostart, () => _autostart.State == AutostartState.On),
                 new TrayMenuEntry("Quit", window.Close),
             ],
@@ -114,6 +117,21 @@ public partial class App : Application
         };
         _settings = settings;
         settings.Open();
+    }
+
+    /// <summary>Shows the data folder in File Explorer, creating it first if it is missing; a failure is logged.</summary>
+    private void OpenDataFolder()
+    {
+        string root = Program.Data.Root;
+        try
+        {
+            Directory.CreateDirectory(root);
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("explorer.exe", $"\"{root}\"") { UseShellExecute = true })?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            UrDeckLog.Warn($"Could not open the data folder {root}: {ex.Message}");
+        }
     }
 
     private void ToggleAutostart()

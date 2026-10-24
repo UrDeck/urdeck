@@ -78,9 +78,9 @@ A `shader` background MUST be an SkSL program selected by `name`:
 - The product ships sixteen built-in shaders, available regardless of the user's folders: `plasma`, `aurora`,
   `gradient` and `julia`, and `horizon`, `spectrum`, `contour`, `nebula`, `streams`, `ripple`, `embers`, `plotter`,
   `shapes`, `warpgate`, `equalizer` and `vortex`
-- A folder `backgrounds/<name>/` next to the executable that holds a manifest and the entry shader is a user shader,
-  selected by `<name>` exactly like a built-in one (see background-manifest, "Background Folder"). A user shader with
-  the name of a built-in one takes precedence over it
+- A folder `backgrounds/<name>/` in the data folder (see data-folder) that holds a manifest and the entry shader is a
+  user shader, selected by `<name>` exactly like a built-in one (see background-manifest, "Background Folder"). A user
+  shader with the name of a built-in one takes precedence over it
 - A name MUST consist of letters, digits, `-` and `_`. Any other name is rejected before a file is touched, so a name
   cannot refer to a file outside the `backgrounds` folder
 - A shader defines `half4 main(float2 fragCoord)`, where `fragCoord` is in pixels of the render surface with the
@@ -247,7 +247,7 @@ Every shader background MUST receive a palette of four opaque colours, taken fro
 ### Requirement: Image Backgrounds
 An `image` background MUST show a picture file of the user's:
 
-- `path` is absolute or relative to the application folder; environment variables in it are expanded
+- `path` is absolute or relative to the data folder (see data-folder); environment variables in it are expanded
 - PNG, JPEG, BMP and WebP files are supported, and the first frame of a GIF; a photo's stored orientation is applied
 - The picture is scaled to cover the whole panel, keeping its proportions, centred; what overflows is cropped
 - An image is a still background
@@ -263,7 +263,7 @@ An `image` background MUST show a picture file of the user's:
 - **THEN** it is scaled to the panel's height, centred, and its left and right parts are cropped
 
 #### Scenario: Relative path
-- **WHEN** `path` is `wall.png` and that file is next to the executable
+- **WHEN** `path` is `wall.png` and that file is in the data folder, next to `urdeck-config.json`
 - **THEN** that file is shown
 
 ### Requirement: Frame Pacing And Render Scale

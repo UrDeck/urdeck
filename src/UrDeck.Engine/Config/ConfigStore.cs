@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
@@ -63,6 +65,10 @@ public class ProviderSettings
 
 public class UrDeckConfig
 {
+    /// <summary>The configuration format version; written first, and always the current one on save. Absent in a file means 1.</summary>
+    [JsonPropertyName("version")]
+    public int Version { get; set; } = ConfigStore.CurrentVersion;
+
     [JsonPropertyName("pages")]
     public List<PageConfig> Pages { get; set; } = new List<PageConfig>
     {
@@ -130,17 +136,46 @@ public class UrDeckConfig
 
 public sealed class ConfigStore : IDisposable
 {
+    /// <summary>The configuration format version this build reads and writes.</summary>
+    public const int CurrentVersion = 1;
+
+    private static readonly IReadOnlyList<(int From, Action<JsonObject> Apply)> NoMigrations = Array.Empty<(int, Action<JsonObject>)>();
+
     private readonly string _configPath;
+    private readonly string? _samplePath;
+    private readonly bool _create;
+    private readonly int _currentVersion;
+    private readonly IReadOnlyList<(int From, Action<JsonObject> Apply)> _migrations;
     private FileSystemWatcher? _watcher;
     private Timer? _debounce;
     private DateTime _ignoreChangesUntil;
+    private int? _migratedFrom;
+    private byte[]? _originalBytes;
+    private bool _newerThanHost;
+    private bool _newerNoted;
 
     /// <summary>Raised on a thread-pool thread after the file changed on disk and was reloaded.</summary>
     public event Action<UrDeckConfig>? ConfigChanged;
 
-    public ConfigStore(string configPath)
+    /// <param name="configPath">The configuration file.</param>
+    /// <param name="samplePath">The sample page that seeds a missing file; without it (or when it is missing) a configuration with one empty page is used.</param>
+    /// <param name="createIfMissing">
+    /// True (the deck) writes the missing file. False (<c>--snapshot</c>, <c>--demo</c>) reads the sample in memory and writes nothing.
+    /// </param>
+    public ConfigStore(string configPath, string? samplePath = null, bool createIfMissing = true)
+        : this(configPath, samplePath, createIfMissing, CurrentVersion, NoMigrations)
+    {
+    }
+
+    /// <summary>Tests give their own current version and migrations; version 1 has none.</summary>
+    internal ConfigStore(string configPath, string? samplePath, bool createIfMissing, int currentVersion,
+        IReadOnlyList<(int From, Action<JsonObject> Apply)> migrations)
     {
         _configPath = configPath;
+        _samplePath = samplePath;
+        _create = createIfMissing;
+        _currentVersion = currentVersion;
+        _migrations = migrations;
         Load();
         WatchForConfigChanges();
     }
@@ -149,14 +184,105 @@ public sealed class ConfigStore : IDisposable
 
     public void Load()
     {
+        _migratedFrom = null;
+        _originalBytes = null;
+        _newerThanHost = false;
+
         if (!File.Exists(_configPath))
         {
-            Config = new UrDeckConfig();
-            Save();
+            LoadMissing();
             return;
         }
 
-        Config = Parse(ReadShared(_configPath), warn: true);
+        byte[] bytes = ReadShared(_configPath);
+        string text = new StreamReader(new MemoryStream(bytes), Encoding.UTF8).ReadToEnd();
+        Config = ParseVersioned(text, bytes);
+    }
+
+    // First run (data-folder spec): the sample page when there is one, otherwise a configuration with one empty page.
+    private void LoadMissing()
+    {
+        bool hasSample = _samplePath != null && File.Exists(_samplePath);
+        if (!_create)
+        {
+            Config = hasSample ? ParseSample() : new UrDeckConfig();
+            return;
+        }
+
+        string? dir = Path.GetDirectoryName(Path.GetFullPath(_configPath));
+        if (!string.IsNullOrEmpty(dir))
+            Directory.CreateDirectory(dir);
+
+        _ignoreChangesUntil = DateTime.UtcNow.AddSeconds(2);
+        if (hasSample)
+        {
+            File.Copy(_samplePath!, _configPath);
+            Config = ParseVersioned(File.ReadAllText(_configPath), null);
+            UrDeckLog.Info($"Configuration created at {_configPath} from the sample page");
+        }
+        else
+        {
+            Config = new UrDeckConfig();
+            Save();
+            UrDeckLog.Info($"Configuration created at {_configPath} with an empty page");
+        }
+    }
+
+    private UrDeckConfig ParseSample()
+    {
+        try
+        {
+            return ParseVersioned(File.ReadAllText(_samplePath!), null);
+        }
+        catch (Exception ex) when (ex is JsonException or IOException)
+        {
+            UrDeckLog.Warn($"Could not read the sample page {_samplePath}: {ex.Message}");
+            return new UrDeckConfig();
+        }
+    }
+
+    // The version is read from the JSON before it is bound, so a migration can reshape the file.
+    private UrDeckConfig ParseVersioned(string text, byte[]? original)
+    {
+        var options = new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
+        if (JsonNode.Parse(text, documentOptions: options) is not JsonObject root)
+            return Parse(text, warn: true);
+
+        int version = ReadVersion(root);
+        if (version > _currentVersion)
+        {
+            _newerThanHost = true;
+            UrDeckLog.Warn($"{_configPath} has configuration version {version}, newer than this build's {_currentVersion}: reading it as well as possible, never writing it.");
+            return Parse(text, warn: true);
+        }
+
+        if (version == _currentVersion)
+            return Parse(root.ToJsonString(), warn: true);
+
+        int from = version;
+        while (version < _currentVersion)
+        {
+            var step = _migrations.FirstOrDefault(m => m.From == version);
+            step.Apply?.Invoke(root);
+            version++;
+            root["version"] = version;
+            UrDeckLog.Info($"Configuration migrated from version {version - 1} to {version}");
+        }
+
+        _migratedFrom = from;
+        _originalBytes = original;
+        return Parse(root.ToJsonString(), warn: true);
+    }
+
+    private int ReadVersion(JsonObject root)
+    {
+        if (!root.TryGetPropertyValue("version", out var node) || node is null)
+            return 1;
+        if (node is JsonValue value && value.TryGetValue<int>(out int version) && version > 0)
+            return version;
+        UrDeckLog.Warn($"{_configPath}: version must be a positive whole number; reading it as version 1.");
+        root["version"] = 1; // so that it binds
+        return 1;
     }
 
     /// <summary>
@@ -184,11 +310,32 @@ public sealed class ConfigStore : IDisposable
 
     public void Save()
     {
+        if (_newerThanHost)
+        {
+            if (!_newerNoted)
+            {
+                _newerNoted = true;
+                UrDeckLog.Warn($"{_configPath} is from a newer version of UrDeck and is left as it is; nothing is saved.");
+            }
+
+            return;
+        }
+
         _ignoreChangesUntil = DateTime.UtcNow.AddSeconds(2);
+        if (_migratedFrom is { } from && _originalBytes is { } original)
+        {
+            string backup = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(_configPath))!, $"urdeck-config.v{from}.json");
+            File.WriteAllBytes(backup, original);
+            UrDeckLog.Info($"Configuration version {from} kept as {backup}");
+            _migratedFrom = null;
+            _originalBytes = null;
+        }
+
+        Config.Version = _currentVersion;
         File.WriteAllText(_configPath, JsonSerializer.Serialize(Config, UrDeckJson.Options));
     }
 
-    private static string ReadShared(string path)
+    private static byte[] ReadShared(string path)
     {
         // Editors often hold the file briefly while saving; retry a few times.
         for (int attempt = 0; ; attempt++)
@@ -196,8 +343,9 @@ public sealed class ConfigStore : IDisposable
             try
             {
                 using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                using var reader = new StreamReader(stream);
-                return reader.ReadToEnd();
+                using var buffer = new MemoryStream();
+                stream.CopyTo(buffer);
+                return buffer.ToArray();
             }
             catch (IOException) when (attempt < 5)
             {

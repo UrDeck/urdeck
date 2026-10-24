@@ -9,6 +9,7 @@ using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Layout;
 using UrDeck.Engine.Motion;
 using UrDeck.Engine.Rendering;
+using UrDeck.Engine.Startup;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 
@@ -34,10 +35,10 @@ internal static class SnapshotCommand
         // The configuration's motion alone decides; Windows' setting is not read, so a snapshot is the same on every machine.
         var motion = MotionPolicy.ForSnapshot(host.Config.Config.Motion, theme.Definition.Motion?.Level);
         // As the live layer does: a picture that cannot be decoded goes on to the plan's next candidate.
-        return BackgroundPlan.Resolve(settings, theme, motion.User).BuildPrepared(host.Shaders, host.AppDirectory, width, height);
+        return BackgroundPlan.Resolve(settings, theme, motion.User).BuildPrepared(host.Shaders, host.Data.Root, width, height);
     }
 
-    public static int Run(string[] args)
+    public static int Run(string[] args, DataFolder data)
     {
         int index = Array.IndexOf(args, "--snapshot");
         try
@@ -49,7 +50,7 @@ internal static class SnapshotCommand
                 start = DateTime.Parse(args[startIndex + 1], CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal);
             bool demo = Array.IndexOf(args, "--demo") >= 0;
 
-            using var host = new HostContext(saveConfiguration: false, demo: demo ? new SampleClock(() => start, start) : null);
+            using var host = new HostContext(data, saveConfiguration: false, demo: demo ? new SampleClock(() => start, start) : null);
             string output = index + 1 < args.Length ? args[index + 1] : "urdeck.snapshot.png";
             int width, height;
 

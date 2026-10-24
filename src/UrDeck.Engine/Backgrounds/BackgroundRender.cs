@@ -25,10 +25,11 @@ public static class BackgroundRender
     /// still the theme's background colour everywhere comes with a <see cref="ShaderCodes.BlankRender"/> warning.
     /// </summary>
     public static BackgroundRenderResult Render(BackgroundSettings settings, LoadedTheme theme, ShaderStore store, int width, int height,
-        float time = BackgroundClock.SnapshotTime) =>
+        float time = BackgroundClock.SnapshotTime, string? pictureFolder = null) =>
         RenderCore(width, height, theme, time, () =>
         {
-            var background = DeckBackground.TryCreate(settings, theme, store, AppContext.BaseDirectory, out string? failure, out var diagnostics);
+            // The tool is no host: relative picture paths start at its own folder unless the caller says where.
+            var background = DeckBackground.TryCreate(settings, theme, store, pictureFolder ?? AppContext.BaseDirectory, out string? failure, out var diagnostics);
             return (background, failure, diagnostics);
         });
 

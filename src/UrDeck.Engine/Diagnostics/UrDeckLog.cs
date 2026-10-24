@@ -4,7 +4,7 @@
 namespace UrDeck.Engine.Diagnostics;
 
 /// <summary>
-/// Minimal file + debug-output logger. Writes to urdeck.log next to the executable, every line dated. When the file
+/// Minimal file + debug-output logger. Writes to urdeck.log in the data folder (see <see cref="SetDefaultPath"/>), every line dated. When the file
 /// passes <see cref="DefaultMaxBytes"/> it is renamed to <c>urdeck.log.1</c> (replacing an earlier one) and a new file
 /// starts; a rename that fails is retried on a later write.
 /// </summary>
@@ -16,7 +16,7 @@ public static class UrDeckLog
     private static readonly object Gate = new();
     private static readonly Dictionary<string, long> Sizes = new(StringComparer.OrdinalIgnoreCase);
 
-    private static readonly string DefaultPath = Path.Combine(AppContext.BaseDirectory, "urdeck.log");
+    private static string? DefaultPath;
     private static readonly AsyncLocal<string?> Redirect = new();
     private static readonly AsyncLocal<long?> CapRedirect = new();
     private static readonly AsyncLocal<Action<string, string>?> ListenerRedirect = new();
@@ -24,13 +24,19 @@ public static class UrDeckLog
     /// <summary>
     /// Where the log is written. Setting it redirects only the code running in the current execution context (and what it
     /// starts), so parallel tests that redirect the log, and background work of other tests, cannot disturb each other.
-    /// The application never sets it.
+    /// The application never sets it. Empty until <see cref="SetDefaultPath"/> ran: lines then go to the debug output only.
     /// </summary>
     public static string LogPath
     {
-        get => Redirect.Value ?? DefaultPath;
+        get => Redirect.Value ?? DefaultPath ?? "";
         set => Redirect.Value = value;
     }
+
+    /// <summary>
+    /// Sets the process-wide log file, once, at startup, before the first line. The application folder is never a default:
+    /// until this is called, lines go to the debug output only. A second call is ignored.
+    /// </summary>
+    public static void SetDefaultPath(string path) => Interlocked.CompareExchange(ref DefaultPath, path, null);
 
     /// <summary>The rotation size, redirected per execution context like <see cref="LogPath"/>. The application never sets it.</summary>
     public static long MaxBytes
@@ -65,9 +71,11 @@ public static class UrDeckLog
 
         string line = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}] {level} {message}";
         System.Diagnostics.Debug.WriteLine(line);
+        string path = LogPath;
+        if (path.Length == 0)
+            return;
         try
         {
-            string path = LogPath;
             string text = line + Environment.NewLine;
             lock (Gate)
             {

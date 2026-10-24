@@ -7,10 +7,14 @@ order: 0
 
 import BuiltinList from '../../components/BuiltinList.astro';
 
-UrDeck is configured by one JSON file, `urdeck-config.json`, which sits next to `UrDeck.Host.exe`. There is no editor
+UrDeck is configured by one JSON file, `urdeck-config.json`, which lives in UrDeck's data folder, `%APPDATA%\UrDeck` (choose **Open data folder** in the tray menu to open it). There is no editor
 yet (it is planned); you edit the file in any text editor. UrDeck notices a saved change after about a second and applies
 it without a restart. A file that is not valid JSON is ignored and the last good configuration stays in use; the reason is
-written to `urdeck.log`, next to the file. A missing file is created with defaults.
+written to `urdeck.log`, next to the file. The first start creates the file from the sample page. The file's `"version"` is 1; a file written by a newer UrDeck is read as well as possible but never changed.
+
+Everything you own sits in that folder, so reinstalling or updating UrDeck never touches it: the configuration, the log, `themes/`,
+`backgrounds/`, `plugins/` (plugins you add) and `cache/`. To keep it beside the program instead (on a USB stick, say), put an
+empty file named `urdeck.portable` next to `UrDeck.Host.exe` and restart; that folder is then the data folder.
 
 ## The file
 

@@ -339,7 +339,7 @@ Project file for a first-party widget (modelled on `widgets/UrDeck.Widgets.Clock
 
 For a first-party widget or provider also add its project to the `UrDeckPlugin` list in `src/UrDeck.Host/UrDeck.Host.csproj`
 (the host builds every listed project and copies its DLL to `plugins/`). Otherwise build the DLL and copy it into the host's `plugins/`
-folder (next to `UrDeck.Host.exe`). While UrDeck is running, adding, replacing or deleting a DLL there reloads the plugins
+folder (next to `UrDeck.Host.exe`; a plugin of your own goes in the `plugins/` folder of the data folder, `%APPDATA%\UrDeck`, and the application folder's wins when both register the same id). While UrDeck is running, adding, replacing or deleting a DLL there reloads the plugins
 and rebuilds the page after about half a second; the original file is never locked because plugins load from a shadow
 copy in their own collectible `AssemblyLoadContext`. Reference the widget by its `Id` in `urdeck-config.json`. A widget
 that throws in `Render` shows a red error tile instead of taking the dashboard down.

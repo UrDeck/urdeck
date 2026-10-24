@@ -25,26 +25,40 @@ dotnet run --project tools/UrDeck.Cli -c Release -- preview render --theme rigli
 dotnet run --project tools/UrDeck.Cli -c Release -- catalog export -o catalog.json   # themes, backgrounds, widgets, providers, finding codes
 ```
 
-The window covers the target monitor completely. Press Esc to close it. Diagnostics go to `urdeck.log` next to the executable.
+The window covers the target monitor completely. Press Esc to close it. Diagnostics go to `urdeck.log` in the data folder (see below); a build is portable, so there it sits next to the executable.
 
 ### Installing a copy and starting with Windows
 
-`dotnet build` output is for development: a build either fails on locked files or replaces the working configuration with
-the sample. To run UrDeck daily, install a copy:
+`dotnet build` output is for development: it fails on locked files while a copy runs, and it keeps its data in its own folder
+(portable, see below). To run UrDeck daily, install a copy:
 
 ```powershell
 pwsh scripts/Install-Local.ps1            # publishes to %LOCALAPPDATA%\Programs\UrDeck (or -Destination <folder>)
 ```
 
 The script closes a running copy (`UrDeck.Host.exe --quit`), replaces the application's files and starts it again; add
-`-Start` to start a copy that was not running. It never replaces `urdeck-config.json` (the sample is copied only when
-there is none), the log, `cache/`, `themes/`, `backgrounds/` or plugins it did not build. Copy your working `urdeck-config.json` into the
-installed folder once.
+`-Start` to start a copy that was not running. It writes no configuration and never touches the data folder: the first
+start creates `urdeck-config.json` there from the sample page. A copy installed before the data folder existed has its
+configuration, log, `themes/`, `backgrounds/`, `cache/` and your own plugins next to the executable; the script moves them to
+the data folder once (when the data folder has no configuration yet, and otherwise names them and moves nothing).
+
+#### The data folder
+
+Your files live in `%APPDATA%\UrDeck`, so replacing or reinstalling the application never touches them: `urdeck-config.json`
+(and the `urdeck-config.v<N>.json` backup a format migration leaves), `urdeck.log`, `themes/`, `backgrounds/`, `plugins/` (the
+plugins you add; the first-party ones stay in the application folder's `plugins/` and win when both define the same widget type
+or provider id) and `cache/`. **Open data folder** in the tray menu opens it. A relative picture `path` of a background
+starts there.
+
+**Portable mode:** a file named `urdeck.portable` next to `UrDeck.Host.exe` makes that folder the data folder instead (and
+its `plugins/` the only plugin folder). The build output has the marker, so a development build keeps everything in `bin/`;
+a published copy has none. Add or remove the marker and restart. The log's first line says which folder and why:
+`Data folder: ... (per-user)` or `(portable: ...)`.
 
 Right-click the tray icon and choose **Start with Windows** to start that copy at sign-in. The check mark shows what
-Windows will do, including after you switch it off in Task Manager or Settings. Only one copy runs per folder: a second
-start from the same folder logs a line and exits, while a build beside the installed copy still starts.
-`UrDeck.Host.exe --quit` asks the copy in the same folder to close and waits up to 10 seconds.
+Windows will do, including after you switch it off in Task Manager or Settings. Only one copy runs per data folder: a second
+start that uses the same data folder logs a line and exits, while a portable build beside the installed copy still starts.
+`UrDeck.Host.exe --quit` asks the copy with the same data folder to close and waits up to 10 seconds.
 
 `urdeck.log` lines start with the date (`[2026-10-11 07:15:02.250]`); at 5 MB the file becomes `urdeck.log.1`.
 
@@ -82,9 +96,10 @@ the widget pages; they are regenerated from the product (`site/README.md`, "Medi
 
 ## Configuration
 
-UrDeck is configured by `urdeck-config.json` next to the executable (the tracked sample is
-`src/UrDeck.Host/urdeck-config.json`; the build copies it to the output folder when the source is newer, so edit the copy
-next to the executable for live tweaks). The file is hot-reloaded about a second after saving; an invalid edit is ignored
+UrDeck is configured by `urdeck-config.json` in the data folder (`%APPDATA%\UrDeck`, or next to the executable in a
+build; **Open data folder** in the tray menu opens it). The tracked sample is `src/UrDeck.Host/urdeck-config.default.json`: it
+ships next to the executable, and the first start copies it to the data folder when there is no configuration. The build never
+overwrites a working configuration. The file has a `"version"` (1); a file from a newer version is read but never written. The file is hot-reloaded about a second after saving; an invalid edit is ignored
 and the last good config is kept.
 
 The user documentation lives on the website, at [urdeck.app/docs](https://urdeck.app/docs/), and nowhere else: the config

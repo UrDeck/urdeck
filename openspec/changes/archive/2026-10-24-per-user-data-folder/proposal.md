@@ -21,7 +21,7 @@ to give the configuration a format version, so that every later format change ca
   mode the two folders are the same folder.
 - **First run.** With no configuration in the data folder, the host creates the folder and copies the sample page
   (`urdeck-config.default.json`, shipped in the application folder) to `urdeck-config.json`, and logs where. `--snapshot`
-  never creates the folder or the file: it draws the sample page from memory.
+  creates the folder (so its log lines are kept) but never the file: it draws the sample page from memory.
 - **"Open data folder" in the tray menu**, between Settings and Start with Windows, opens the data folder in Explorer.
 - **One host per data folder.** The single-instance guard and `--quit` are keyed on the data folder instead of the
   application folder: two installed copies sharing `%APPDATA%\UrDeck` cannot both run, and a portable development

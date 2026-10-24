@@ -10,7 +10,7 @@ A theme is a folder with one settings file in it. You can start from nothing, be
 
 ## 1. Make the folder
 
-Next to `UrDeck.Host.exe`, make `themes/my-theme/theme.json`. The smallest useful theme is a few lines:
+In the data folder (**Open data folder** in the tray menu), make `themes/my-theme/theme.json`. The smallest useful theme is a few lines:
 
 ```json
 {

@@ -212,7 +212,7 @@ MUST be available regardless of the contents of the user themes folder.
 - **THEN** selecting `pop` loads the user's theme, as for any built-in name
 
 ### Requirement: User Themes
-The host MUST discover user themes in a `themes` folder next to the executable.
+The host MUST discover user themes in a `themes` folder in the data folder (see data-folder).
 
 - A user theme MAY omit values; omitted values are taken from the default theme
 - A user theme with the same name as a built-in theme takes precedence over it
@@ -232,6 +232,10 @@ The host MUST discover user themes in a `themes` folder next to the executable.
 #### Scenario: Invalid single value
 - **WHEN** a user theme sets the text colour to a string that is not a colour
 - **THEN** the theme loads, the default theme's text colour is used, and a warning is logged
+
+#### Scenario: Theme in the per-user data folder
+- **WHEN** a per-user copy runs and `%APPDATA%\UrDeck\themes\` holds a valid theme folder `mine`
+- **THEN** the configuration can select `mine`, and a `themes` folder in the application folder is not read
 
 ### Requirement: Theme Selection
 The active theme MUST be selected by the `theme` key in the configuration and applied without restarting.

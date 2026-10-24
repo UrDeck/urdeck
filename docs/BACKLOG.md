@@ -17,7 +17,7 @@ did not change.
 3. Verify:
    - `dotnet build urdeck.slnx` (0 warnings) and `dotnet test urdeck.slnx`. `AGENTS.md` has the full command list.
    - Rendering without a screen: `UrDeck.Host.exe --snapshot out.png --size 1100x3840` (from the host's bin folder).
-   - On the real panel: launch detached (the app otherwise blocks the shell), read `urdeck.log` next to the exe.
+   - On the real panel: launch detached (the app otherwise blocks the shell), read `urdeck.log` (next to the exe in a build, which is portable; `%APPDATA%\UrDeck` for an installed copy).
      It logs monitors, actual vs. target window bounds, placed widgets, reloads and warnings.
    - Screen capture on Windows: use Windows PowerShell 5.1 (`powershell.exe`, not `pwsh`), call
      `SetProcessDpiAwarenessContext(-4)` first, then `Graphics.CopyFromScreen` of the monitor bounds.
@@ -33,6 +33,12 @@ everything else should be fine on Sonnet.
 
 ## Current state (2026-10-24)
 
+- `per-user-data-folder` (item 15) is implemented on `feat/per-user-data-folder`: one resolver (`DataFolder`) decides the data folder
+  (`%APPDATA%\UrDeck`, or the application folder when `urdeck.portable` sits next to the executable; the build output has the
+  marker, a publish has none), the host's files move there, plugins load from the application folder then the data folder (the
+  first wins), the first run seeds the configuration from `urdeck-config.default.json`, the configuration has a `version` with
+  migrations, the single-instance key is the data folder and the tray has "Open data folder". `Install-Local.ps1` moves an old
+  installation's files once. Remaining: the owner's daily copy is migrated by running the script (task 7.5).
 - `urdeck-framework` (Phase 1 foundation) is complete and archived: SDK, analyzer, plugin loader with hot-reload
   (collectible AssemblyLoadContext), grid layout, WPF host with per-monitor DPI placement, Clock widget, tests, placeholder
   icon and render skipping (`NeedsRender`).
@@ -773,17 +779,17 @@ navigation (item 8; the spike only tries a swipe), display targeting (item 6).
 
 Collected while the milestones were drawn up. Each names the milestone that needs it; none has an OpenSpec change yet.
 
-- **Per-user data folder** (milestone 2). Config, themes, plugins and `urdeck.log` live next to the executable today,
+- **Per-user data folder** (milestone 2; implemented, see Current state). Config, themes, plugins and `urdeck.log` live next to the executable today,
   which an installer into a protected folder and an updater that replaces the folder both break. Move them to a
   per-user folder and keep "next to the executable" as a portable mode. Decided 2026-10-24 (item 12): the data root is
   `%APPDATA%\UrDeck` (not `%LOCALAPPDATA%\UrDeck`, which Velopack owns and removes on uninstall); a marker file next to
   the exe selects portable mode; every path goes through one resolver, and a tray entry opens the folder it returns;
   first-party plugins stay in the application folder and user plugins go in the data root; the single-instance key
   follows the data root, not the application folder. The change is `per-user-data-folder`.
-- **Config format version and migrations** (milestone 2, proven by 1.0). The file has no version. Add one before the
-  first public release, so that every later change to the format can carry a migration.
-- **First run** (milestone 2). With no config the app should place a default page that suits the monitor it finds, and
-  say in the log and the tray where the config is.
+- **Config format version and migrations** (milestone 2, proven by 1.0; the version and the mechanism are in `per-user-data-folder`).
+  The file has `"version": 1` and no migration yet; the first real format change adds one.
+- **First run** (milestone 2). With no config the app now copies the sample page and logs where (`per-user-data-folder`); still
+  open: a default page that suits the monitor it finds.
 - **Landscape and other shapes** (milestone 2). The grid is four square columns from the monitor width, which gives a
   1920x1080 monitor two rows of very large cells. Decide whether the column count follows the monitor's shape or is a
   page setting. This touches the grid spec and every widget's composition, so decide before the editor is built.
