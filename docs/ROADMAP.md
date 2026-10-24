@@ -55,9 +55,10 @@ install, then what makes it work for a stranger, then trust. The release decisio
 - Config, themes, user plugins and the log in `%APPDATA%\UrDeck` instead of next to the executable, with a portable mode
   kept (item 15, the `per-user-data-folder` change). It comes first because the installer replaces the application
   folder on every update.
-- A release workflow (`release-pipeline`): publishing a GitHub release tagged `vX.Y.Z` builds the self-contained app with
-  that version, runs the tests and attaches a per-user Velopack installer (no administrator rights; it updates itself from
-  the GitHub releases) and a portable zip, with the third-party notices (item 12). Versions are 0.x until 1.0.
+- A release workflow (`release-pipeline`): started by hand with a version, it builds the self-contained app with that
+  version, runs the tests and attaches a per-user Velopack installer (no administrator rights; it updates itself from
+  the GitHub releases) and a portable zip, with the third-party notices, to a draft release the owner publishes (item 12).
+  Versions are 0.x until 1.0.
 - The website's download button points at the latest release (`landing-site` left it open).
 
 *B. Works for somebody else.*
@@ -66,10 +67,10 @@ install, then what makes it work for a stranger, then trust. The release decisio
 - A tray icon with Quit (item 12; shipped in `tray-icon`), later the entry that opens the config editor.
 
 *C. Trust and feedback.*
-- Code signing through SignPath Foundation, so the download is not blocked by SmartScreen (items 12 and 15). Its terms
+- Code signing through SignPath Foundation (`signing-and-store`), so the download is not blocked by SmartScreen (items 12 and 15). Its terms
   want a project that is already released, so 0.1 ships unsigned with the SmartScreen warning explained, and signing
   starts with the next release. The site gains a code-signing policy page and a privacy statement.
-- The Microsoft Store listing (`store-listing`): the same signed installer, submitted by URL (item 12). Not an MSIX.
+- The Microsoft Store listing (`signing-and-store`): the same signed installer, submitted by URL (item 12). Not an MSIX.
 - A compatibility table: AMD and Intel GPUs, other panels (item 15). The hardware report issue template and the first "Tested on" page are done (`landing-site`); the table grows with reports.
 - The website at urdeck.app (live: landing page, user documentation, theme gallery, "Tested on").
 - Screenshots and a short clip in the README (the site's media pipeline renders them), issue templates, Discussions.
