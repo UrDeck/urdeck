@@ -41,11 +41,14 @@
         </ProjectReference>
     </ItemGroup>
     <ItemGroup>
-        <None Update="urdeck-config.json">
+        <!-- The sample page. A first run copies it to the data folder as urdeck-config.json; the build never touches a working configuration. -->
+        <None Update="urdeck-config.default.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
         <!-- The window icon is set at runtime through AppWindow, which needs the .ico as a file. -->
         <Content Include="Resources/urdeck.ico" Link="urdeck.ico" CopyToOutputDirectory="PreserveNewest" />
+        <!-- The marker that makes a build output portable (data-folder spec): the data stays in bin/. The published folder has none. -->
+        <Content Include="Resources/urdeck.portable" Link="urdeck.portable" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
     </ItemGroup>
 
     <!-- Drop first-party plugin assemblies into $(OutDir)plugins so the host discovers them like any third-party plugin. -->

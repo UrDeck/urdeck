@@ -10,7 +10,8 @@ The tray icon MUST open a native popup menu on right-click:
   to the list and nothing in the tray code changes
 - An entry may also say whether it is checked. That is asked every time the menu opens, and a checked entry is shown
   with the menu's standard check mark. An entry that does not say so has no check mark
-- The menu has three entries, in this order: **Settings** (the same action as a left click), **Start with Windows**
+- The menu has four entries, in this order: **Settings** (the same action as a left click), **Open data folder**
+  (opens the data folder in File Explorer; see data-folder, "Opening The Data Folder"), **Start with Windows**
   (checked as autostart, "Autostart Entry", says) and **Quit**
 - Choosing an entry runs its action; dismissing the menu (a click elsewhere, Escape) runs nothing and leaves the menu
   closed
@@ -19,6 +20,10 @@ The tray icon MUST open a native popup menu on right-click:
 #### Scenario: Settings entry opens the window
 - **WHEN** the user right-clicks the icon and chooses Settings
 - **THEN** the settings window is shown and has focus
+
+#### Scenario: Open data folder entry
+- **WHEN** the user right-clicks the icon and chooses Open data folder
+- **THEN** File Explorer opens the data folder and the host keeps running
 
 #### Scenario: Quit closes the host
 - **WHEN** the user right-clicks the icon and chooses Quit

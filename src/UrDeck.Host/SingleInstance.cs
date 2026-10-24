@@ -7,7 +7,7 @@ using UrDeck.Engine.Startup;
 namespace UrDeck.Host;
 
 /// <summary>
-/// One host per application folder: a session-local mutex held for the life of the process (the system releases it
+/// One host per data folder: a session-local mutex held for the life of the process (the system releases it
 /// however the process ends, so a crash never blocks the next start) and a session-local event that <c>--quit</c>
 /// sets. Create it on the thread that lives as long as the process, and dispose it there.
 /// </summary>
@@ -25,17 +25,17 @@ internal sealed class SingleInstance : IDisposable
         _quitEvent = quitEvent;
     }
 
-    /// <summary>Takes the instance for the folder, or returns null when another host from it is running.</summary>
-    public static SingleInstance? TryAcquire(string applicationFolder)
+    /// <summary>Takes the instance for the data folder, or returns null when another host uses it.</summary>
+    public static SingleInstance? TryAcquire(string dataFolder)
     {
-        var mutex = new Mutex(initiallyOwned: true, InstanceNames.Mutex(applicationFolder), out bool created);
+        var mutex = new Mutex(initiallyOwned: true, InstanceNames.Mutex(dataFolder), out bool created);
         if (!created)
         {
             mutex.Dispose();
             return null;
         }
 
-        var quitEvent = new EventWaitHandle(false, EventResetMode.ManualReset, InstanceNames.QuitEvent(applicationFolder));
+        var quitEvent = new EventWaitHandle(false, EventResetMode.ManualReset, InstanceNames.QuitEvent(dataFolder));
         return new SingleInstance(mutex, quitEvent);
     }
 
@@ -60,15 +60,15 @@ internal sealed class SingleInstance : IDisposable
         _quitEvent.Dispose();
     }
 
-    /// <summary><c>--quit</c>: asks the host of the folder to close and waits for it. 0 when it ended or none runs, 1 on timeout.</summary>
-    public static int Quit(string applicationFolder)
+    /// <summary><c>--quit</c>: asks the host of the data folder to close and waits for it. 0 when it ended or none runs, 1 on timeout.</summary>
+    public static int Quit(string dataFolder)
     {
-        if (!Mutex.TryOpenExisting(InstanceNames.Mutex(applicationFolder), out var mutex))
+        if (!Mutex.TryOpenExisting(InstanceNames.Mutex(dataFolder), out var mutex))
             return 0;
 
         using (mutex)
         {
-            if (!EventWaitHandle.TryOpenExisting(InstanceNames.QuitEvent(applicationFolder), out var quitEvent))
+            if (!EventWaitHandle.TryOpenExisting(InstanceNames.QuitEvent(dataFolder), out var quitEvent))
                 return 0;
             using (quitEvent)
                 quitEvent.Set();
@@ -89,7 +89,7 @@ internal sealed class SingleInstance : IDisposable
             }
         }
 
-        UrDeckLog.Warn($"--quit: the host in {applicationFolder} did not end within {QuitTimeout.TotalSeconds:0} s");
+        UrDeckLog.Warn($"--quit: the host of {dataFolder} did not end within {QuitTimeout.TotalSeconds:0} s");
         return 1;
     }
 }

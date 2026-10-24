@@ -615,7 +615,8 @@ public sealed class ReadingHubTests : IDisposable
     {
         Provider.OnSample = (_, _, _) => Task.CompletedTask;
         Hub.Subscribe(["fake:a"]);
-        Assert.True(Wait(() => Provider.Sink != null));
+        // The first sample means the hub has the catalog; a publish before that has nowhere to go.
+        Assert.True(Wait(() => Provider.Sink != null && Provider.Samples >= 1));
         Provider.Sink!.Publish("a", 1);
 
         _time.Advance(TimeSpan.FromSeconds(30));

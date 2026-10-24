@@ -7,6 +7,7 @@ using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
 using UrDeck.Engine.Plugin;
+using UrDeck.Engine.Startup;
 using UrDeck.Engine.Themes;
 
 namespace UrDeck.Host;
@@ -20,8 +21,9 @@ internal sealed class HostContext : IDisposable
     public ThemeStore Themes { get; }
     public ShaderStore Shaders { get; }
 
-    /// <summary>The application folder: where relative picture paths of a background start.</summary>
-    public string AppDirectory { get; } = AppContext.BaseDirectory;
+    /// <summary>Where the user's files live; a background picture's relative path starts at its root.</summary>
+    public DataFolder Data { get; }
+
     public WidgetPluginLoader Plugins { get; }
 
     /// <summary>The displays connected at startup.</summary>
@@ -34,28 +36,32 @@ internal sealed class HostContext : IDisposable
     public DisplayInfo? Target { get; }
 
     // Startup sequence per host-shell spec: monitor -> config -> plugins.
+    /// <param name="data">Where the user's files live.</param>
     /// <param name="saveConfiguration">False for <c>--snapshot</c> and <c>--demo</c>, which never write the configuration.</param>
     /// <param name="demo">The clock of the samples in demo mode (<c>--demo</c>); null runs the providers.</param>
-    public HostContext(bool saveConfiguration, SampleClock? demo = null)
+    public HostContext(DataFolder data, bool saveConfiguration, SampleClock? demo = null)
     {
         _saveConfiguration = saveConfiguration;
-        string appDir = AppContext.BaseDirectory;
-        UrDeckLog.Info($"UrDeck starting from {appDir}");
+        Data = data;
+        UrDeckLog.Info($"UrDeck starting from {data.ApplicationFolder}");
 
         Displays = MonitorPlacement.GetDisplays();
         foreach (var d in Displays)
             UrDeckLog.Info($"Monitor: {d}");
 
-        Config = new ConfigStore(Path.Combine(appDir, "urdeck-config.json"));
+        // The deck creates a missing configuration from the sample; --snapshot and --demo read the sample in memory and write nothing.
+        Config = new ConfigStore(data.ConfigPath, data.SamplePath, createIfMissing: saveConfiguration);
 
-        // User themes live in a themes folder next to the executable; the built-in ones are embedded in the engine.
-        Themes = new ThemeStore(Path.Combine(appDir, "themes"));
+        // User themes live in the data folder; the built-in ones are embedded in the engine.
+        Themes = new ThemeStore(data.ThemesFolder);
 
-        // User background shaders live in a backgrounds folder next to the executable; the built-in ones are embedded.
-        Shaders = new ShaderStore(Path.Combine(appDir, "backgrounds"));
+        // User background shaders live in the data folder; the built-in ones are embedded.
+        Shaders = new ShaderStore(data.BackgroundsFolder);
 
-        Plugins = new WidgetPluginLoader(demo: demo);
-        Plugins.ScanAndLoadPlugins(Path.Combine(appDir, "plugins"));
+        // First-party plugins come with the application, the user's from the data folder. A context that writes nothing
+        // does not create the user folder, and so not the data folder either.
+        Plugins = new WidgetPluginLoader(iconCacheFolder: data.IconCacheFolder, demo: demo);
+        Plugins.ScanAndLoadPlugins(saveConfiguration ? data.PluginFolders : data.PluginFolders.Where(Directory.Exists).ToList());
 
         Target = DisplaySelector.Select(Config.Config, Displays).Display;
     }

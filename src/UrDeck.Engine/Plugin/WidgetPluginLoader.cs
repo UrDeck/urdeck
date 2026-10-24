@@ -18,9 +18,10 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     private readonly ReadingHub _hub;
     private readonly IconService _icons;
     private readonly Launcher _launcher;
-    private FileSystemWatcher? _watcher;
     private Timer? _debounce;
-    private string? _pluginDirectory;
+    private readonly List<string> _pluginDirectories = new();
+    private readonly List<FileSystemWatcher> _watchers = new();
+    private string? _loadingFile;
     private readonly object _gate = new();
     private readonly List<LoadedPlugin> _loaded = new();
     private readonly List<string> _pendingDeletes = new();
@@ -29,7 +30,7 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     private static int StaleCleaned;
 
     /// <param name="time">The clock of the readings, the launcher's repeat guard and the icon cache's age.</param>
-    /// <param name="iconCacheFolder">Where fetched site icons are kept; by default <c>cache/icons</c> next to the executable.</param>
+    /// <param name="iconCacheFolder">Where fetched site icons are kept; by default the system's temp folder, so that nothing is written beside the executable.</param>
     /// <param name="demo">
     /// Demo mode (host-shell, "Demo Mode"): every provider whose assembly carries a sample is registered as its sample, read by
     /// this clock, and no site icon is fetched. Null runs the providers.
@@ -38,7 +39,7 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     {
         _demo = demo;
         _hub = new ReadingHub(_providers, time);
-        _icons = new IconService(iconCacheFolder ?? Path.Combine(AppContext.BaseDirectory, "cache", "icons"), time) { SiteIcons = demo == null };
+        _icons = new IconService(iconCacheFolder ?? Path.Combine(Path.GetTempPath(), "urdeck-icons"), time) { SiteIcons = demo == null };
         _launcher = new Launcher(time);
         _registry.CreateServices = () => new WidgetServices(_hub, _launcher, _icons);
     }
@@ -68,10 +69,25 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     /// <summary>The launch service every widget created here shares.</summary>
     public Launcher Launcher => _launcher;
 
-    public void ScanAndLoadPlugins(string pluginDirectory)
+    public void ScanAndLoadPlugins(string pluginDirectory) => ScanAndLoadPlugins(new[] { pluginDirectory });
+
+    /// <summary>
+    /// Loads the plugins of several folders in priority order: when two folders register the same widget type or provider
+    /// id, the earlier folder's wins and a warning names the other file. A folder given twice is scanned once. Only the last
+    /// folder is created when missing (the user's; the application's exists or has no plugins), and each folder is watched.
+    /// </summary>
+    public void ScanAndLoadPlugins(IReadOnlyList<string> pluginDirectories)
     {
-        _pluginDirectory = Path.GetFullPath(pluginDirectory);
-        Directory.CreateDirectory(_pluginDirectory);
+        _pluginDirectories.Clear();
+        foreach (string directory in pluginDirectories)
+        {
+            string full = Path.GetFullPath(directory);
+            if (!_pluginDirectories.Contains(full, OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal))
+                _pluginDirectories.Add(full);
+        }
+
+        if (_pluginDirectories.Count > 0)
+            Directory.CreateDirectory(_pluginDirectories[^1]);
         if (Interlocked.Exchange(ref StaleCleaned, 1) == 0)
             CleanStaleShadowDirs();
         lock (_gate)
@@ -104,11 +120,17 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
 
     private void LoadAll()
     {
-        if (_pluginDirectory == null)
-            return;
+        // Folders in priority order, and in each one by file name, so that which of two plugins claims an id does not depend on the file system.
+        foreach (string folder in _pluginDirectories)
+        {
+            if (Directory.Exists(folder))
+                LoadFolder(folder);
+        }
+    }
 
-        // In file name order, so that which of two plugins claims a provider id does not depend on the file system.
-        foreach (string dllPath in Directory.EnumerateFiles(_pluginDirectory, "*.dll").Order(StringComparer.OrdinalIgnoreCase))
+    private void LoadFolder(string pluginDirectory)
+    {
+        foreach (string dllPath in Directory.EnumerateFiles(pluginDirectory, "*.dll").Order(StringComparer.OrdinalIgnoreCase))
         {
             string? shadowDir = null;
             PluginLoadContext? context = null;
@@ -122,13 +144,14 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
                 File.Copy(dllPath, shadowDll);
                 foreach (string? ext in new[] { ".pdb", ".deps.json" })
                 {
-                    string side = Path.Combine(_pluginDirectory, name + ext);
+                    string side = Path.Combine(pluginDirectory, name + ext);
                     if (File.Exists(side))
                         File.Copy(side, Path.Combine(shadowDir, name + ext));
                 }
 
-                context = new PluginLoadContext(shadowDll, _pluginDirectory);
+                context = new PluginLoadContext(shadowDll, pluginDirectory);
                 _loaded.Add(new LoadedPlugin(context, shadowDir));
+                _loadingFile = dllPath;
                 LoadAssembly(context.LoadFromAssemblyPath(shadowDll));
             }
             catch (Exception ex)
@@ -137,6 +160,10 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
                 // A context created for a failed plugin (e.g. not a .NET assembly) stays tracked and is unloaded on the next reload.
                 if (context == null && shadowDir != null)
                     _pendingDeletes.Add(shadowDir);
+            }
+            finally
+            {
+                _loadingFile = null;
             }
         }
     }
@@ -314,7 +341,12 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
             return false;
         }
 
-        _registry.Register(descriptor);
+        if (!_registry.TryRegister(descriptor, out var existing))
+        {
+            UrDeckLog.Warn($"Widget '{descriptor.Id}' from {_loadingFile ?? type.Assembly.GetName().Name} rejected: {existing!.WidgetType.Assembly.GetName().Name} already provides it");
+            return false;
+        }
+
         UrDeckLog.Info($"Registered widget '{descriptor.Id}' ({type.FullName}, {descriptor.Refresh} {descriptor.RefreshInterval})");
         return true;
     }
@@ -333,7 +365,7 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
         var registered = sample != null ? ProviderSamples.Replace(descriptor, sample, _demo!.Now, _demo.Start) : descriptor;
         if (!_providers.TryRegister(registered, out var existing))
         {
-            UrDeckLog.Warn($"Provider '{descriptor.Id}' from {descriptor.AssemblyName} rejected: {existing!.AssemblyName} already provides it");
+            UrDeckLog.Warn($"Provider '{descriptor.Id}' from {_loadingFile ?? descriptor.AssemblyName} rejected: {existing!.AssemblyName} already provides it");
             return false;
         }
 
@@ -362,16 +394,20 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
             }
         });
 
-        _watcher = new FileSystemWatcher(_pluginDirectory!, "*.dll")
+        foreach (string folder in _pluginDirectories.Where(Directory.Exists))
         {
-            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
-        };
-        FileSystemEventHandler onChange = (_, _) => _debounce.Change(TimeSpan.FromMilliseconds(500), Timeout.InfiniteTimeSpan);
-        _watcher.Changed += onChange;
-        _watcher.Created += onChange;
-        _watcher.Deleted += onChange;
-        _watcher.Renamed += (_, _) => _debounce.Change(TimeSpan.FromMilliseconds(500), Timeout.InfiniteTimeSpan);
-        _watcher.EnableRaisingEvents = true;
+            var watcher = new FileSystemWatcher(folder, "*.dll")
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
+            };
+            FileSystemEventHandler onChange = (_, _) => _debounce.Change(TimeSpan.FromMilliseconds(500), Timeout.InfiniteTimeSpan);
+            watcher.Changed += onChange;
+            watcher.Created += onChange;
+            watcher.Deleted += onChange;
+            watcher.Renamed += (_, _) => _debounce.Change(TimeSpan.FromMilliseconds(500), Timeout.InfiniteTimeSpan);
+            watcher.EnableRaisingEvents = true;
+            _watchers.Add(watcher);
+        }
     }
 
     public IReadOnlyList<string> GetRegisteredWidgetTypes() => _registry.GetRegisteredWidgetTypes();
@@ -384,7 +420,8 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
 
     public void Dispose()
     {
-        _watcher?.Dispose();
+        foreach (var watcher in _watchers)
+            watcher.Dispose();
         _debounce?.Dispose();
         lock (_gate)
         {

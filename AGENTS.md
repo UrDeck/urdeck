@@ -112,7 +112,7 @@ See the README license map before moving code between projects: it can change th
   window per opening, so nothing lingers). Quit closes it first. `URDECK_SETTINGS_SOAK=1` opens and closes it 20 times at
   startup and logs memory (`Soak ...` lines; the numbers are in `docs/perf/settings-window.md`). To try the window without a
   deck on a screen, copy the build output elsewhere and give its config a `display` that is not connected.
-- Launching `UrDeck.Host.exe` (not `--snapshot`) blocks the shell. Start it detached and read `urdeck.log` next to the exe;
+- Launching `UrDeck.Host.exe` (not `--snapshot`) blocks the shell. Start it detached and read `urdeck.log` (next to the exe for a build, `%APPDATA%\UrDeck` for an installed copy);
   it logs monitors, target vs. actual content area, placed widgets, reloads and warnings.
 - Where the window is, and whether it is shown, is decided by `PlacementController` (`src/UrDeck.Engine/Display`, tested
   with scripted display sequences); `MainWindow` only reports signals and arms one timer. The log has `Display chosen
@@ -123,9 +123,9 @@ See the README license map before moving code between projects: it can change th
   subscribed from the UI thread (which has the `DispatcherQueueSynchronizationContext` from `Program.Main`) it delivered
   nothing, not even Suspend. The log says `Windows: power mode Resume` / `display settings changed` when one arrives;
   if a sleep leaves no such line, the subscription is broken, not the placement.
-- The host remembers its display in `urdeck-config.json` (`display`) and writes the file when it does. With that
-  display not connected there is no window at all, only the tray icon: delete `display` from the config next to the exe
-  to make it choose again. `--snapshot` never writes the config.
+- The host remembers its display in `urdeck-config.json` (`display`, in the data folder) and writes the file when it does. With that
+  display not connected there is no window at all, only the tray icon: delete `display` from the configuration in the data folder
+  to make it choose again. A configuration with a `version` newer than the host's is read and never written (the log says so). `--snapshot` never writes the config.
 - Screen capture: use Windows PowerShell 5.1 (`powershell.exe`, not `pwsh`), call `SetProcessDpiAwarenessContext(-4)`
   first, then `Graphics.CopyFromScreen` on the monitor bounds. `PrintWindow` on the window returns blank. Prefer one
   capture, or ask the user to look.
@@ -133,13 +133,18 @@ See the README license map before moving code between projects: it can change th
 - Plugins load from a shadow copy in a collectible `AssemblyLoadContext`. A removed `SKXamlCanvas` can stay
   alive after it leaves the tree, so `WidgetView.Dispose` drops its widget reference (without that, old plugin contexts
   were not collected); keep plugin types out of long-lived static caches.
-- The host build copies `src/UrDeck.Host/urdeck-config.json` over the one next to the exe whenever the source file is
-  newer. After editing the tracked sample, a build replaces a working config in `bin/`: back it up first.
+- The tracked sample is `src/UrDeck.Host/urdeck-config.default.json`; the build copies it next to the exe as
+  `urdeck-config.default.json` and never touches a working `urdeck-config.json`. The first start copies it when there is no
+  configuration. The build output holds `urdeck.portable` (portable mode: log, configuration, `themes/`, `backgrounds/`, `plugins/`
+  and `cache/` stay in `bin/`); a published or installed copy has none and keeps them in `%APPDATA%\UrDeck`. `DataFolder.Resolve`
+  decides, once, at the start of `Program.Main`; the log's first line says `Data folder: ... (per-user)` or `(portable: ...)`.
+  Plugins load from the application folder's `plugins/` first and then the data folder's (the same folder in portable mode); on
+  the same widget type or provider id the first wins and the log names the other file.
 - The daily copy is installed with `pwsh scripts/Install-Local.ps1` (`%LOCALAPPDATA%\Programs\UrDeck`); the build output
-  is only for development. The script never touches `urdeck-config.json`, the log, `cache/`, `themes/` or foreign plugins.
-- `urdeck.log` lines are `[yyyy-MM-dd HH:mm:ss.fff] LEVEL message`; the file rotates to `urdeck.log.1` at 5 MB.
-- One host per application folder: `Program.Main` handles `--snapshot`, then `--quit`, then the guard (a named mutex and
-  event keyed on the folder, `UrDeck.Engine/Startup/InstanceNames`), then the XAML application. `--quit` sets the event
+  is only for development. The script never touches the data folder (`%APPDATA%\UrDeck`); it moves an old installation's user files there once.
+- `urdeck.log` is in the data folder; its lines are `[yyyy-MM-dd HH:mm:ss.fff] LEVEL message`; the file rotates to `urdeck.log.1` at 5 MB.
+- One host per data folder: `Program.Main` handles `--snapshot`, then `--quit`, then the guard (a named mutex and
+  event keyed on the data folder, `UrDeck.Engine/Startup/InstanceNames`), then the XAML application. `--quit` sets the event
   and waits for the mutex. "Start with Windows" is the `UrDeck` value under `HKCU\...\Run` (`RunKeyAutostart`); Windows
   owns the setting, the config has no field for it.
 - The background (the site's `backgrounds` pages, `docs/backgrounds.md` for adding a built-in, `src/UrDeck.Engine/Backgrounds`, host `BackgroundLayer`): what it is comes from `BackgroundPlan.Resolve(settings, theme)`,

@@ -232,6 +232,6 @@ At most one host MUST run per data folder (see data-folder) for one signed-in us
 - **WHEN** `--quit` is run and no host with that data folder is running
 - **THEN** the command exits with 0 and starts nothing
 
-#### Scenario: Another data folder's host
+#### Scenario: Another folder's host
 - **WHEN** a portable host is running and `--quit` is run by a per-user copy
 - **THEN** the portable host keeps running and the command exits with 0

@@ -123,7 +123,24 @@ public class WidgetRegistry
     /// </summary>
     internal Func<WidgetServices>? CreateServices { get; set; }
 
-    public void Register(WidgetDescriptor descriptor) => _widgets[descriptor.Id] = descriptor;
+    /// <summary>Registers a widget type. The first registration of an id stays; a later one is dropped (see <see cref="TryRegister"/>).</summary>
+    public void Register(WidgetDescriptor descriptor) => TryRegister(descriptor, out _);
+
+    /// <summary>
+    /// Registers a widget type unless its id is taken: the first registration wins, as it does for providers. When it is
+    /// taken, <paramref name="existing"/> is the descriptor that holds the id.
+    /// </summary>
+    public bool TryRegister(WidgetDescriptor descriptor, out WidgetDescriptor? existing)
+    {
+        existing = _widgets.GetOrAdd(descriptor.Id, descriptor);
+        if (ReferenceEquals(existing, descriptor))
+        {
+            existing = null;
+            return true;
+        }
+
+        return false;
+    }
 
     public void Clear() => _widgets.Clear();
 

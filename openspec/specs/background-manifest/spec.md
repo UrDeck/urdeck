@@ -7,8 +7,8 @@ a manifest is required, the lint that checks a background and its diagnostic cod
 picture. It is the format a person, a command line tool and a settings editor all read.
 ## Requirements
 ### Requirement: Background Folder
-A shader background MUST be a folder `backgrounds/<name>/` next to the executable, or a built-in one, holding a
-`manifest.json` and the entry shader file:
+A shader background MUST be a folder `backgrounds/<name>/` in the data folder (see data-folder), or a built-in one,
+holding a `manifest.json` and the entry shader file:
 
 - The folder name is the background's name in the configuration. It follows the name rule of "Shader Backgrounds"
 - The entry is `<name>.sksl` in the folder unless the manifest's `entry` names another file. `entry` MUST name a file
@@ -294,3 +294,4 @@ or a background that does not exist in the product is a failure of the check.
 #### Scenario: A name that does not exist
 - **WHEN** a manifest names the theme `carbonn`
 - **THEN** the check fails and names `carbonn`
+

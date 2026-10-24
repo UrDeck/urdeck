@@ -45,7 +45,7 @@ cropped.
 "background": { "type": "image", "path": "%USERPROFILE%/Pictures/wall.jpg" }
 ```
 
-- `path` is absolute, or relative to the folder of `UrDeck.Host.exe`. Environment variables are expanded.
+- `path` is absolute, or relative to the data folder (**Open data folder** in the tray menu). Environment variables are expanded.
 - PNG, JPEG, BMP and WebP files work, and the first frame of a GIF, up to 8192x8192 pixels. A photo's stored orientation
   (rotation) is applied.
 - The picture is decoded once at the panel's size; the decoded original is released. While it loads the theme colour shows. Edit

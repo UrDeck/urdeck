@@ -245,6 +245,79 @@ public class ForeignProvider : UrDeck.Sdk.Data.IDataProvider
         return new WeakReference(AssemblyLoadContext.GetLoadContext(_loader.Providers.Get("plug")!.ProviderType.Assembly));
     }
 
+    private string TwoFolders(out string second)
+    {
+        string first = Path.Combine(_dir, "first");
+        second = Path.Combine(_dir, "second");
+        Directory.CreateDirectory(first);
+        Directory.CreateDirectory(second);
+        return first;
+    }
+
+    [Fact]
+    public void WidgetTypeInBothFolders_UsesTheFirstFoldersAndNamesTheOtherFile()
+    {
+        string first = TwoFolders(out string second);
+        File.WriteAllBytes(Path.Combine(first, "A.dll"), BuildPlugin("dup.widget"));
+        File.WriteAllBytes(Path.Combine(second, "B.dll"), BuildPlugin("dup.widget"));
+
+        string log = CaptureLog(() => _loader.ScanAndLoadPlugins(new[] { first, second }));
+
+        Assert.Single(_loader.GetRegisteredWidgetTypes(), "dup.widget");
+        Assert.Contains("Widget 'dup.widget' from " + Path.Combine(second, "B.dll") + " rejected", log);
+    }
+
+    [Fact]
+    public void ProviderIdInBothFolders_UsesTheFirstFoldersAndNamesTheOtherFile()
+    {
+        string first = TwoFolders(out string second);
+        File.WriteAllBytes(Path.Combine(first, "A.dll"), Compile(ProviderPlugin("dupprov")));
+        File.WriteAllBytes(Path.Combine(second, "B.dll"), Compile(ProviderPlugin("dupprov")));
+
+        string log = CaptureLog(() => _loader.ScanAndLoadPlugins(new[] { first, second }));
+
+        Assert.NotNull(_loader.Providers.Get("dupprov"));
+        Assert.Contains("Provider 'dupprov' from " + Path.Combine(second, "B.dll") + " rejected", log);
+    }
+
+    [Fact]
+    public void DllAddedToTheSecondFolder_IsPickedUpByAReload()
+    {
+        string first = TwoFolders(out string second);
+        File.WriteAllBytes(Path.Combine(first, "A.dll"), BuildPlugin("first.widget"));
+        _loader.ScanAndLoadPlugins(new[] { first, second });
+        Assert.DoesNotContain("second.widget", _loader.GetRegisteredWidgetTypes());
+
+        File.WriteAllBytes(Path.Combine(second, "B.dll"), BuildPlugin("second.widget"));
+        _loader.ReloadPlugins();
+
+        Assert.Contains("first.widget", _loader.GetRegisteredWidgetTypes());
+        Assert.Contains("second.widget", _loader.GetRegisteredWidgetTypes());
+    }
+
+    [Fact]
+    public void TheSameFolderTwice_IsLoadedOnce()
+    {
+        File.WriteAllBytes(Path.Combine(_dir, "A.dll"), BuildPlugin("once.widget"));
+
+        string log = CaptureLog(() => _loader.ScanAndLoadPlugins(new[] { _dir, _dir }));
+
+        Assert.Contains("once.widget", _loader.GetRegisteredWidgetTypes());
+        Assert.DoesNotContain("rejected", log);
+    }
+
+    [Fact]
+    public void OnlyTheLastFolderIsCreated()
+    {
+        string missingFirst = Path.Combine(_dir, "missing-first");
+        string missingSecond = Path.Combine(_dir, "missing-second");
+
+        _loader.ScanAndLoadPlugins(new[] { missingFirst, missingSecond });
+
+        Assert.False(Directory.Exists(missingFirst));
+        Assert.True(Directory.Exists(missingSecond));
+    }
+
     [Fact]
     public void LoadsPlugin_InOwnContext_WithSharedContractTypes()
     {
