@@ -79,8 +79,8 @@ jobs:
       - name: Pack
         shell: pwsh
         run: |
-          $packArgs = @('-Version', $env:VERSION)
-          if (Test-Path artifacts/previous) { $packArgs += @('-Previous', 'artifacts/previous') }
+          $packArgs = @{ Version = $env:VERSION }
+          if (Test-Path artifacts/previous) { $packArgs.Previous = 'artifacts/previous' }
           ./scripts/Pack-Release.ps1 @packArgs
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
