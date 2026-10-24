@@ -35,5 +35,5 @@
 
 - [x] 6.1 `npm run build` with its checks; `openspec validate --all --strict`; `dotnet test tests/UrDeck.Cli.Tests -c Release` (schema)
 - [x] 6.2 Read every docs page on a phone width and a desktop width, with JavaScript off once; internal links checked by the build
-- [ ] 6.3 Owner's read-through of the themes reference and two cookbook pages (stop and ask; do not tick without them)
-- [ ] 6.4 `docs/design/look-and-feel/STATUS.md`: PR 17 row done; delete `docs/handoff/2026-10-22-site-media-automation.md` (all four changes done)
+- [x] 6.3 Owner's read-through of the themes reference and two cookbook pages (stop and ask; do not tick without them)
+- [x] 6.4 `docs/design/look-and-feel/STATUS.md`: PR 17 row done; delete `docs/handoff/2026-10-22-site-media-automation.md` (all four changes done)

@@ -20,7 +20,7 @@ public sealed partial class ThemeDefinition
         c.Warning = check.Color("colors.warning", c.Warning);
         c.Critical = check.Color("colors.critical", c.Critical);
         c.BackgroundPalette = check.Palette("colors.backgroundPalette", c.BackgroundPalette);
-        c.SanitizeFormat2(check, "colors");
+        c.Sanitize(check, "colors");
     }
 }
 
@@ -39,6 +39,26 @@ public sealed partial class ThemeColorsDefinition
 
     /// <summary>One to four colours for the backgrounds' shaders; absent means derived from this theme's own colours.</summary>
     public List<string>? BackgroundPalette { get; set; }
+
+    /// <summary>A second accent for gradients, markers, redlines, tab highlights. Default: accent.</summary>
+    public string? Accent2 { get; set; }
+
+    /// <summary>Low-to-high load colours. Default: [good, warning, critical]. Used when gauge.colorBy is 'ramp'.</summary>
+    public List<string>? Ramp { get; set; }
+
+    /// <summary>Fill colours that cards cycle through when card.tint is 'cycle' (Pop).</summary>
+    public List<string>? CardTints { get; set; }
+
+    /// <summary>Text colour used on top of an accent or tint fill. Default: whichever of text/background contrasts most with the fill.</summary>
+    public string? Ink { get; set; }
+
+    internal void Sanitize(ThemeValueCheck check, string path)
+    {
+        Accent2 = check.Color($"{path}.accent2", Accent2);
+        Ramp = check.Colors($"{path}.ramp", Ramp, 2, 5);
+        CardTints = check.Colors($"{path}.cardTints", CardTints, 1, 8);
+        Ink = check.Color($"{path}.ink", Ink);
+    }
 
     internal ThemeColorsDefinition MergeOver(ThemeColorsDefinition? b)
     {
@@ -59,7 +79,10 @@ public sealed partial class ThemeColorsDefinition
             // otherwise get the dark theme's palette. A theme without one has its own colours' palette derived.
             BackgroundPalette = BackgroundPalette,
         };
-        MergeFormat2(b, result);
+        result.Accent2 = Accent2 ?? b?.Accent2;
+        result.Ramp = Ramp;
+        result.CardTints = CardTints;
+        result.Ink = Ink ?? b?.Ink;
         return result;
     }
 }

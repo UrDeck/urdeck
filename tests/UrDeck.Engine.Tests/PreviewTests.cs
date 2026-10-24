@@ -127,7 +127,7 @@ public sealed class PreviewTests : IDisposable
     public void ASpinningBorder_HasTurnedAQuarter_AfterAQuarterOfItsPeriod()
     {
         var theme = _fixture.WriteTheme("spin", """
-            { "format": 2,
+            {
               "colors": { "background": "#000000", "cardFill": "#000000", "accent": "#ffffff" },
               "card": { "radius": 0, "gap": 0.05, "borderWidth": 0.04,
                         "borderGradient": { "kind": "conic", "colors": ["#ff0000", "#ffff00", "#00ff00", "#00ffff", "#0000ff", "#ff00ff", "#ff0000"] },
@@ -174,10 +174,10 @@ public sealed class PreviewTests : IDisposable
     public void BorderSteps_FollowTheHost_SpinInFifteenthsAndPulseBetweenFullAndLow()
     {
         var spin = _fixture.WriteTheme("steps", """
-            { "format": 2, "card": { "borderWidth": 0.01, "borderGradient": { "kind": "conic", "colors": ["#ff0000", "#0000ff"] },
+            { "card": { "borderWidth": 0.01, "borderGradient": { "kind": "conic", "colors": ["#ff0000", "#0000ff"] },
               "borderAnimate": { "mode": "spin", "period": 8 } } }
             """);
-        var pulse = _fixture.WriteTheme("breath", """{ "format": 2, "card": { "borderWidth": 0.01, "borderAnimate": { "mode": "pulse", "period": 2 } } }""");
+        var pulse = _fixture.WriteTheme("breath", """{ "card": { "borderWidth": 0.01, "borderAnimate": { "mode": "pulse", "period": 2 } } }""");
         using var spinStyle = ResolvedCardStyle.Resolve(spin, 275);
         using var pulseStyle = ResolvedCardStyle.Resolve(pulse, 275);
 

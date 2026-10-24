@@ -18,7 +18,7 @@ internal sealed record ThemeInitOptions(string Name, string? Output, string? Fro
 /// </summary>
 internal static partial class ThemeInitRunner
 {
-    private const string SchemaUri = "https://urdeck.app/schemas/v2/theme.json";
+    private const string SchemaUri = "https://urdeck.app/schemas/v1/theme.json";
 
     private static readonly JsonSerializerOptions Pretty = new()
     {
@@ -69,14 +69,13 @@ internal static partial class ThemeInitRunner
         return ExitCodes.Ok;
     }
 
-    /// <summary>A starter: the schema line, the format, the metadata to fill in, and the default dark theme's colours.</summary>
+    /// <summary>A starter: the schema line, the metadata to fill in, and the default dark theme's colours.</summary>
     private static List<(string Name, byte[] Bytes)> Starter(string name)
     {
         var dark = JsonNode.Parse(new EmbeddedThemeSource(ThemeStore.DefaultName).ReadSettings()!)!.AsObject();
         var root = new JsonObject
         {
             ["$schema"] = SchemaUri,
-            ["format"] = 2,
             ["meta"] = new JsonObject { ["name"] = name, ["description"] = "", ["mode"] = "dark" },
             ["colors"] = dark["colors"]!.DeepClone(),
         };

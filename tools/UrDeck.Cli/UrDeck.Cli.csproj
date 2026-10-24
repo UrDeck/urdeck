@@ -29,7 +29,7 @@
 
   <!-- The published theme schema, so that `theme schema` prints the file the product publishes and not a copy. -->
   <ItemGroup>
-    <EmbeddedResource Include="..\..\docs\schemas\v2\theme.json" LogicalName="UrDeck.Cli.theme.schema.json" Link="theme.schema.json" />
+    <EmbeddedResource Include="..\..\docs\schemas\v1\theme.json" LogicalName="UrDeck.Cli.theme.schema.json" Link="theme.schema.json" />
   </ItemGroup>
 
   <ItemGroup>

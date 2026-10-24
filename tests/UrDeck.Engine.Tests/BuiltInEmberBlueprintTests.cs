@@ -53,7 +53,6 @@ public sealed class BuiltInEmberBlueprintTests : IDisposable
         using var theme = ThemeResolver.Resolve(loaded, 275);
 
         Assert.Equal(name, loaded.Name);
-        Assert.Equal(2, loaded.Definition.Format);
         foreach (var role in Enum.GetValues<TextRole>())
             _ = theme.GetTypeface(role);
         Assert.Empty(Log);

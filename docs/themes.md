@@ -2,7 +2,7 @@
 
 **The user documentation for themes is on the website**, built from the product: [urdeck.app/docs/themes](https://urdeck.app/docs/themes/)
 (choosing and writing a theme), the [theme reference](https://urdeck.app/docs/themes/reference/) (every key, made from
-[`docs/schemas/v2/theme.json`](schemas/v2/theme.json)), [fonts and licences](https://urdeck.app/docs/themes/fonts/),
+[`docs/schemas/v1/theme.json`](schemas/v1/theme.json)), [fonts and licences](https://urdeck.app/docs/themes/fonts/),
 [icon sets](https://urdeck.app/docs/themes/icons/), [motion](https://urdeck.app/docs/themes/motion/),
 [checking a theme](https://urdeck.app/docs/themes/checking/) and the [cookbook](https://urdeck.app/docs/cookbook/). Its source is
 `site/src/content/docs/themes/`. This page is for the people who add a theme that ships with UrDeck.
@@ -15,7 +15,7 @@ name replaces it.
 
 ## Checklist
 
-1. **The file.** Format 2, with `meta` (`name`, `description`, `mode`, `tags`, `pairsWith.backgrounds`, `license`). Leave out what
+1. **The file.** With `meta` (`name`, `description`, `mode`, `tags`, `pairsWith.backgrounds`, `license`). Leave out what
    you do not need: a value you omit comes from `default-dark` (the groups that are never inherited are listed in the theme
    reference). Describe the theme in a sentence or two; `meta.description` is what the site's gallery shows.
 2. **Fonts.** Put the `.ttf` next to the JSON and the licence beside it (`<Font>-OFL.txt`), name the file in `typography`, and add
@@ -29,7 +29,7 @@ name replaces it.
    checked from both sides: a background's manifest names themes too (`BuiltInShaderTests` keeps them mutual).
 5. **Validation.** `urdeck-cli theme validate --builtin --fail-on-warnings` must be clean; CI runs it. So does a copy made with
    `urdeck-cli theme init x --from <name>`.
-6. **Tests.** Add the name to the theories of `GoldenTests` and `ThemeDraftTests` (which holds each format 2 built-in to the
+6. **Tests.** Add the name to the theories of `GoldenTests` and `ThemeDraftTests` (which holds each built-in to the
    published schema and to a load without a warning), render the goldens on Windows and look at every picture before committing
    (`CONTRIBUTING.md`, "Golden images"). A theme with a feature of its own can have a test of it, as `BuiltInRiglineTests` has.
 7. **The site.** Nothing to type: the theme list, the gallery, the picker and the accent rule come from the catalog. The theme
@@ -39,7 +39,7 @@ name replaces it.
 ## Changing a key of the format
 
 A new key goes into the engine (the definition class and its sanitising; the lint's list of keys the deck reads is that model)
-and into the schema ([`docs/schemas/v2/theme.json`](schemas/v2/theme.json)) **with a description**. The site's theme reference lists it after the next build with no page edited, and its build fails when the key has no
+and into the schema ([`docs/schemas/v1/theme.json`](schemas/v1/theme.json)) **with a description**. The site's theme reference lists it after the next build with no page edited, and its build fails when the key has no
 description. Add a sentence to the group's prose in `site/src/content/docs/themes/reference.mdx` if the key needs more than its
 description says. A new finding code goes into `ThemeCodes`, `FindingCatalog` (code, severity and summary: the troubleshooting page
 is made from it) and a test; a code never changes meaning and is never reused.
@@ -48,7 +48,7 @@ is made from it) and a test; a code never changes meaning and is never reused.
 
 | Was in this file | Now |
 |---|---|
-| Settings file, Format 2, the group tables | The site's theme reference, from the schema |
+| Settings file, the group tables | The site's theme reference, from the schema |
 | Background palette | The theme reference (`colors`) and the backgrounds page "Speed, colours and images" |
 | Icon sets | The site's "Icon sets" |
 | Checking a theme, Findings | The site's "Checking a theme" and "Troubleshooting" |

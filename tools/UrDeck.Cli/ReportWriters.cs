@@ -269,7 +269,6 @@ internal static class RuleCatalog
         [ThemeCodes.BadColor] = "A colour that is not #RRGGBB or #AARRGGBB.",
         [ThemeCodes.BadList] = "A list outside its length limits or with an invalid element.",
         [ThemeCodes.MissingMember] = "A group that needs a member it does not have.",
-        [ThemeCodes.NewerFormat] = "The format is newer than the deck reads.",
         [ThemeCodes.FontFile] = "A font file is missing, has the wrong extension or leaves the theme's folder.",
         [ThemeCodes.FontFileSize] = "A font file is over 3 MB or has no licence file beside it.",
         [ThemeCodes.FontFamily] = "A font is named by family, so it is used only where it is installed.",

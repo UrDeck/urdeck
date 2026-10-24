@@ -3,7 +3,6 @@
 
 namespace UrDeck.Engine.Themes;
 
-[Format2]
 public sealed partial class ThemeDividerDefinition
 {
     /// <summary>dimension = a line with end ticks and an optional centred label (Blueprint).</summary>
@@ -32,7 +31,6 @@ public sealed partial class ThemeDividerDefinition
     }
 }
 
-[Format2]
 public sealed partial class ThemeWellDefinition
 {
     public string? Fill { get; set; }
@@ -56,7 +54,6 @@ public sealed partial class ThemeWellDefinition
     }
 }
 
-[Format2]
 public sealed partial class ThemeChipDefinition
 {
     public string? Shape { get; set; }

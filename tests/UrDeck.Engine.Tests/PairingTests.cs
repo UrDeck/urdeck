@@ -181,7 +181,7 @@ public sealed class PairingTests : IDisposable
     [Fact]
     public void The_theme_catalog_lists_built_in_and_user_themes_with_swatches()
     {
-        _fixture.WriteTheme("mine", """{ "format": 2, "colors": { "accent": "#ff00ff" }, "meta": { "name": "Mine", "mode": "light", "tags": ["calm"], "pairsWith": { "backgrounds": ["plasma"] } }, "background": { "default": { "name": "plasma" } } }""");
+        _fixture.WriteTheme("mine", """{ "colors": { "accent": "#ff00ff" }, "meta": { "name": "Mine", "mode": "light", "tags": ["calm"], "pairsWith": { "backgrounds": ["plasma"] } }, "background": { "default": { "name": "plasma" } } }""");
 
         var list = ThemeCatalog.List(_fixture.Themes);
 
@@ -201,7 +201,7 @@ public sealed class PairingTests : IDisposable
     [Fact]
     public void A_user_theme_replaces_a_built_in_of_the_same_name()
     {
-        _fixture.WriteTheme("glass", """{ "format": 2, "meta": { "name": "My Glass" } }""");
+        _fixture.WriteTheme("glass", """{ "meta": { "name": "My Glass" } }""");
 
         var list = ThemeCatalog.List(_fixture.Themes);
 
@@ -214,7 +214,7 @@ public sealed class PairingTests : IDisposable
     [Fact]
     public void A_broken_theme_file_is_left_out_with_a_warning()
     {
-        _fixture.WriteTheme("fine", """{ "format": 2 }""");
+        _fixture.WriteTheme("fine", """{ }""");
         _fixture.WriteTheme("broken", "{ not json");
 
         var list = ThemeCatalog.List(_fixture.Themes);

@@ -9,14 +9,9 @@ using System.Text.Json.Serialization;
 
 namespace UrDeck.Engine.Themes;
 
-/// <summary>Marks a theme member, or a whole group, that belongs to format 2.</summary>
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
-internal sealed class Format2Attribute : Attribute;
-
 /// <summary>
-/// Reads a theme file so that a format 2 value of the wrong JSON kind (a text where a number goes) costs only that value:
-/// it is removed with one warning before the file is deserialized, where it would fail the whole theme. Format 1 values
-/// are left alone, so they fail as they always did.
+/// Reads a theme file so that a value of the wrong JSON kind (a text where a number goes) costs only that value:
+/// it is removed with one warning before the file is deserialized, where it would fail the whole theme.
 /// </summary>
 internal static class ThemeLenientJson
 {
@@ -32,11 +27,11 @@ internal static class ThemeLenientJson
         if (node is not JsonObject root)
             throw new JsonException("the file is empty");
 
-        Clean(root, typeof(ThemeDefinition), "", classIsFormat2: false, new ThemeValueCheck(sink, reported));
+        Clean(root, typeof(ThemeDefinition), "", new ThemeValueCheck(sink, reported));
         return root.Deserialize<ThemeDefinition>(options) ?? throw new JsonException("the file is empty");
     }
 
-    private static void Clean(JsonObject obj, Type type, string path, bool classIsFormat2, ThemeValueCheck check)
+    private static void Clean(JsonObject obj, Type type, string path, ThemeValueCheck check)
     {
         foreach (var (key, value) in obj.ToList())
         {
@@ -45,9 +40,7 @@ internal static class ThemeLenientJson
 
             var memberType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
             string memberPath = path.Length == 0 ? property.Name.ToLowerFirst() : $"{path}.{property.Name.ToLowerFirst()}";
-            bool format2 = classIsFormat2 || property.IsDefined(typeof(Format2Attribute));
-
-            if (format2 && Expected(memberType, value) is { } expected)
+            if (Expected(memberType, value) is { } expected)
             {
                 check.WrongKind(memberPath, Shorten(value.ToJsonString()), expected);
                 obj.Remove(key);
@@ -57,14 +50,14 @@ internal static class ThemeLenientJson
             if (memberType.IsDefined(typeof(JsonConverterAttribute)))
             {
                 if (value is JsonObject stops && memberType == typeof(ThemeGaugeGradientDefinition))
-                    Clean(stops, typeof(ThemeGradientDefinition), memberPath, classIsFormat2: true, check);
+                    Clean(stops, typeof(ThemeGradientDefinition), memberPath, check);
                 continue;
             }
             if (value is JsonObject child && IsGroup(memberType))
-                Clean(child, memberType, memberPath, memberType.IsDefined(typeof(Format2Attribute)), check);
+                Clean(child, memberType, memberPath, check);
             else if (value is JsonArray array && ItemType(memberType) is { } item && IsGroup(item))
                 foreach (var element in array.OfType<JsonObject>())
-                    Clean(element, item, memberPath, item.IsDefined(typeof(Format2Attribute)), check);
+                    Clean(element, item, memberPath, check);
         }
     }
 

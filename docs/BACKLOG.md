@@ -31,7 +31,7 @@ did not change.
 Suggested model per item is noted as **Model**. Items marked Opus involve architecture decisions or hard debugging;
 everything else should be fine on Sonnet.
 
-## Current state (2026-10-09)
+## Current state (2026-10-23)
 
 - `urdeck-framework` (Phase 1 foundation) is complete and archived: SDK, analyzer, plugin loader with hot-reload
   (collectible AssemblyLoadContext), grid layout, WPF host with per-monitor DPI placement, Clock widget, tests, placeholder
@@ -110,7 +110,15 @@ everything else should be fine on Sonnet.
   The memory gate passed (`docs/perf/settings-window.md`: +1.9 MB private after 20 cycles). Gaps carried forward: the
   window's look is unstyled (a design pass is planned), idle CPU and GPU with it open are not measured, and the title
   bar does not follow the dark theme.
-- Next: the cold-boot checks of `start-with-windows`, which begin the two-week run of milestone 1. Sensors that need elevation (item 3, fourth change) follow and may slip to milestone 2.
+- Theme and site work since 2026-10-12 (all archived under `openspec/changes/archive/`): theme format, card chrome, typography, gauges, icons,
+  motion, page pattern, sixteen built-in backgrounds, eight new built-in themes, `urdeck-cli theme` and `preview render`
+  (`src/UrDeck.Preview`), the site as the user documentation with a generated reference, a theme cookbook and gallery, and the
+  media pipeline (`docs-rewrite`, `site-gallery`, `site-media-pipeline`). `urdeck.app` and GitHub Pages are live.
+- Milestone 1 (daily driver) is done (2026-10-23): the owner ran UrDeck on the panel in place of Nexus for about two weeks.
+  The CPU temperature helper (item 3, fourth change) moves to milestone 2 or later; the card shows a dash until then.
+- `fold-theme-format-2-into-v1` is done and archived (2026-10-23): the theme format is one format with no `format` key and no
+  `THEME010`; the schema is `docs/schemas/v1/theme.json`; a value of the wrong kind costs only that value; goldens unchanged.
+- Next: milestone 2 is reshaped as a *downloadable* preview, releasable build first (see the roadmap and item 12).
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -649,6 +657,13 @@ per-user data folder (item 15), and the single-instance message the editor will 
 Owner's distribution goals: the Microsoft Store as an eventual target (start-up then goes through the `StartupTask` API
 and the application folder is read-only, so item 15 comes first), signing releases at no cost if that is possible, and
 research before an installer technology is chosen.
+
+**Release order (decided 2026-10-23):** first a GitHub release (milestone 2, part A): a tag-triggered workflow builds the
+self-contained app, runs the tests, and attaches a portable zip with the third-party notices and a stamped version; then, if the zip
+is a poor first run, a per-user installer (no administrator rights); the winget manifest and auto-update stay milestone 6. The
+Microsoft Store package comes after 1.0. Unsigned early releases are acceptable if the README explains SmartScreen; the
+signing application (item 15) runs in parallel. The release workflow needs the version in one place (`Directory.Build.props`)
+and the item 15 data folder before an installer is worth building.
 
 Tray icon with Quit: done (`tray-icon`). The menu is a list of entries, so the editor's "Open editor" entry (and a
 single-instance guard, which would also be the place to bring the first copy's editor forward) are added later. Still

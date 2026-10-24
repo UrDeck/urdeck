@@ -30,10 +30,10 @@ urdeck-cli theme schema [--output <file>]
   adds the dock and the page indicator. The same input gives the same picture on one machine; pictures from different machines can
   differ in the edge pixels of text. The findings go to the error stream and do not stop the picture; a theme that cannot be read
   at all gets no picture.
-- **`init`** makes `<name>` (letters, digits, `-` and `_`) with a `theme.json` holding the `$schema` line, `format` 2, a `meta`
+- **`init`** makes `<name>` (letters, digits, `-` and `_`) with a `theme.json` holding the `$schema` line, a `meta`
   for you to fill in and the default dark theme's colours; with `--from` it makes a self-contained copy of a built-in theme with
   the fonts and licence files it names. It never overwrites a folder.
-- **`schema`** prints the JSON Schema of the format, the file published at `https://urdeck.app/schemas/v2/theme.json`.
+- **`schema`** prints the JSON Schema of the format, the file published at `https://urdeck.app/schemas/v1/theme.json`.
 
 ## Seeing a theme at work
 

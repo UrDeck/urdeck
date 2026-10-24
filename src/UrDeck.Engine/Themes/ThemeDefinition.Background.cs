@@ -3,7 +3,6 @@
 
 namespace UrDeck.Engine.Themes;
 
-[Format2]
 public sealed partial class ThemeBackgroundDefinition
 {
     /// <summary>The animated background this theme selects when the user has not picked one.</summary>
@@ -22,14 +21,12 @@ public sealed partial class ThemeBackgroundDefinition
     }
 }
 
-[Format2]
 public sealed partial class ThemeBackgroundDefaultDefinition
 {
     public string? Name { get; set; }
 
 }
 
-[Format2]
 public sealed partial class ThemeBackgroundStaticDefinition
 {
     /// <summary>File in the theme folder.</summary>
@@ -57,7 +54,6 @@ public sealed partial class ThemeBackgroundStaticDefinition
     }
 }
 
-[Format2]
 public sealed partial class ThemeBackgroundStaticGradientDefinition
 {
     /// <summary>Stops.</summary>
@@ -88,7 +84,6 @@ public sealed partial class ThemeBackgroundStaticGradientDefinition
     }
 }
 
-[Format2]
 public sealed partial class ThemeBackgroundScrimDefinition
 {
     public string? Color { get; set; }

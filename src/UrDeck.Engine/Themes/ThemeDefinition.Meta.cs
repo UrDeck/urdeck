@@ -3,7 +3,6 @@
 
 namespace UrDeck.Engine.Themes;
 
-[Format2]
 public sealed partial class ThemeMetaDefinition
 {
     /// <summary>Display name for the editor.</summary>
@@ -36,7 +35,6 @@ public sealed partial class ThemeMetaDefinition
     }
 }
 
-[Format2]
 public sealed partial class ThemeMetaPairsWithDefinition
 {
     /// <summary>Background names that suit this theme, best first. Names of built-in or user backgrounds.</summary>
@@ -48,7 +46,6 @@ public sealed partial class ThemeMetaPairsWithDefinition
     }
 }
 
-[Format2]
 public sealed partial class ThemeMetaSampleDefinition
 {
     public string? File { get; set; }

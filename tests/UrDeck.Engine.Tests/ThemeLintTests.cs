@@ -26,7 +26,6 @@ public sealed class ThemeLintTests : IDisposable
         ["THEME001-missing"] = ThemeSeverity.Error,
         ["THEME001-notjson"] = ThemeSeverity.Error,
         ["THEME001-noobject"] = ThemeSeverity.Error,
-        ["THEME003-format1"] = ThemeSeverity.Error,
         ["THEME020-missing"] = ThemeSeverity.Error,
         ["THEME020-extension"] = ThemeSeverity.Error,
         ["THEME020-outside"] = ThemeSeverity.Error,
@@ -164,7 +163,6 @@ public sealed class ThemeLintTests : IDisposable
     }
 
     [Theory]
-    [InlineData("THEME010", "Set format to a number up to 2")]
     [InlineData("THEME020-outside", "Put the font file in the theme's folder")]
     [InlineData("THEME050", "Give card.borderWidth a value above 0")]
     [InlineData("THEME051", "Set card.borderGradient to kind conic")]
@@ -178,14 +176,6 @@ public sealed class ThemeLintTests : IDisposable
         var finding = Assert.Single(Check(Path.Combine(FixtureRoot, fixture, "fail")));
 
         Assert.Contains(fix, finding.Message, StringComparison.Ordinal);
-    }
-
-    [Fact]
-    public void A_newer_format_names_its_subject()
-    {
-        var finding = Assert.Single(Check(Path.Combine(FixtureRoot, "THEME010", "fail")));
-
-        Assert.StartsWith("the theme declares format 9;", finding.Message, StringComparison.Ordinal);
     }
 
     [Fact]

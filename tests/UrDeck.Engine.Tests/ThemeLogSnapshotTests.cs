@@ -45,7 +45,7 @@ public sealed class ThemeLogSnapshotTests : IDisposable
         ("palette", """{ "colors": { "backgroundPalette": ["#000000", "nope"] } }"""),
         ("palette-long", """{ "colors": { "backgroundPalette": ["#000000", "#111111", "#222222", "#333333", "#444444"] } }"""),
         ("number", """{ "card": { "shadow": { "blur": 5 }, "radius": 7 } }"""),
-        ("integer", """{ "format": 0, "gauge": { "ticks": { "count": 1 } } }"""),
+        ("integer", """{ "gauge": { "ticks": { "count": 1 } } }"""),
         ("angle", """{ "card": { "borderGradient": { "colors": ["#ff0000", "#00ff00"], "angle": 900 } } }"""),
         ("enum", """{ "card": { "borderStyle": "zigzag", "shape": "blob" }, "meta": { "mode": "grey" } }"""),
         ("enum-case", """{ "card": { "borderStyle": "Dashed", "borderWidth": 0.01 } }"""),
@@ -54,12 +54,11 @@ public sealed class ThemeLogSnapshotTests : IDisposable
         ("number-list", """{ "gauge": { "status": { "thresholds": [0.5, 7] } } }"""),
         ("name-list", """{ "card": { "cutCorners": ["tl", "up", "TL", "br"] } }"""),
         ("wrong-kind", """{ "card": { "shadow": { "blur": "big" }, "cutCorners": "tl" } }"""),
-        ("wrong-kind-format1", """{ "card": { "gap": "wide" } }"""),
+        ("wrong-kind-original", """{ "card": { "gap": "wide" } }"""),
         ("missing-member", """{ "card": { "fillGradient": { "angle": 10 }, "borderGradient": { "kind": "conic" } }, "background": { "gradient": { "angle": 1 } } }"""),
         ("icon-tint", """{ "icons": { "tint": "purple" } }"""),
         ("icon-set-unknown", """{ "icons": { "set": "nosuch" } }"""),
         ("stroke", """{ "stroke": { "thickness": 4, "cap": "flat" }, "gauge": { "style": "dial" } }"""),
-        ("newer-format", """{ "format": 9 }"""),
         ("rule-border-none", """{ "card": { "borderWidth": 0, "borderStyle": "dashed", "borderGradient": { "colors": ["#ff0000", "#00ff00"] } } }"""),
         ("rule-spin", """{ "card": { "borderWidth": 0.01, "borderAnimate": { "mode": "spin" } } }"""),
         ("rule-pattern", """{ "pattern": { "kind": "dots", "spacing": 0.02, "thickness": 0.01 } }"""),
@@ -156,7 +155,6 @@ public sealed class ThemeLogSnapshotTests : IDisposable
     [InlineData("must be 'accent', 'accent2'")]
     [InlineData("stroke.cap 'flat'")]
     [InlineData("gauge.style 'dial'")]
-    [InlineData("declares format 9")]
     [InlineData("has no effect with card.borderWidth 0")]
     [InlineData("needs card.borderGradient of kind 'conic'")]
     [InlineData("pattern is too dense")]

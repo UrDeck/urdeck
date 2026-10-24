@@ -842,12 +842,12 @@
     {
       "code": "THEME002",
       "severity": "warning",
-      "summary": "a key the deck does not read (a typo, or a key of a later format): fix the name, the message suggests the nearest key"
+      "summary": "a key the deck does not read (a typo, or a key left over from an older draft): fix the name, the message suggests the nearest key"
     },
     {
       "code": "THEME003",
-      "severity": "warning, error",
-      "summary": "a value of the wrong JSON type (also logged). An error for a value of format 1 (`card.gap`, `colors`...), where the deck skips the whole theme"
+      "severity": "warning",
+      "summary": "a value of the wrong JSON type (also logged): the deck skips that value and takes the default"
     },
     {
       "code": "THEME004",
@@ -873,11 +873,6 @@
       "code": "THEME008",
       "severity": "warning",
       "summary": "a group that needs a member it does not have, such as a gradient without `colors` (also logged): the group is ignored"
-    },
-    {
-      "code": "THEME010",
-      "severity": "warning",
-      "summary": "`format` is newer than the deck reads (also logged): the deck ignores what it does not know"
     },
     {
       "code": "THEME020",

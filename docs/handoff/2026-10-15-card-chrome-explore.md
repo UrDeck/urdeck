@@ -115,9 +115,9 @@ What each draft needs (from `tests/UrDeck.Engine.Tests/Fixtures/themes/*/theme.j
   `themes-2-ember-blueprint-pop-obsidian.png`; add the folder with `/add-dir`, and do not edit it). The eight drafts are in `tests/UrDeck.Engine.Tests/Fixtures/themes/`.
 - `docs/perf/theme-look.md` (S1, S2) and `docs/perf/theme-card-paint.md`.
 - Code: `src/UrDeck.Engine/Rendering/WidgetPainter.cs`, `PageRenderer.cs`, `src/UrDeck.Engine/Themes/ThemeResolver.cs`,
-  `ThemeDefinition.Card.cs`, `ThemeFormat2.Card.cs`, `src/UrDeck.Host/WidgetView.cs`, `PageHost.cs`, `MainWindow.cs`
+  `ThemeDefinition.Card.cs`, `src/UrDeck.Host/WidgetView.cs`, `PageHost.cs`, `MainWindow.cs`
   (the dock overlay), `src/UrDeck.Engine/Layout/DockLayout.cs`.
-- `openspec/specs/widget-card/spec.md`, `theme/spec.md` ("Format 2 Values"), `dock/spec.md`, `widget-input/spec.md`
+- `openspec/specs/widget-card/spec.md`, `theme/spec.md` ("Theme Value Groups"), `dock/spec.md`, `widget-input/spec.md`
   ("Press Feedback"); the deferred keys are in `docs/design/theme-format-2-deferred-keys.md`.
 - Archived changes with the recent pattern for a change of this size: `openspec/changes/archive/2026-10-15-theme-typography`
   and `2026-10-13-theme-format-2`.

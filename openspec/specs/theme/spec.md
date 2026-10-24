@@ -14,8 +14,8 @@ A theme MUST define all of the following values:
 - Typography: a font family, a weight for each text role (value, unit, label, body, title), a size for each of the
   three small-text steps (label, body, title), and the ratio of a unit's size to its value's size
 - Stroke: line thickness as a ratio of the drawn element's size, and round or square line ends
-- Gauge: the default gauge style, one of `ring`, `bar` and `verticalBar` (see components, "Gauge Styles"), or one of
-  the format 2 styles `meter`, `tach`, `marker` and `thickbar`
+- Gauge: the default gauge style, one of `ring`, `bar`, `verticalBar`, `meter`, `tach`, `marker` and `thickbar` (see
+  components, "Gauge Styles")
 - Page indicator: the height of its band, the diameter of a dot, the length of the current page's pill, the space
   between marks, the colour of the current page's mark, the colour of the other marks, and the colour of the
   translucent pill behind a floating indicator (see page-navigation, "Indicator Mode")
@@ -24,7 +24,7 @@ A theme MUST define all of the following values:
 - Dock: the height of the dock's band, which is also the side of a dock slot, as a fraction of a grid cell (see dock,
   "Dock Slots")
 
-A theme MAY also use the values of format 2 (see "Format 2 Values"); a theme never has to.
+A theme MAY also use the optional groups (see "Theme Value Groups"); a theme never has to.
 
 A theme MUST NOT contain executable code. The built-in themes use `ring` as the default gauge style. A default gauge
 style that is not one of the seven is replaced by the default theme's value with a logged warning. A widget that asks
@@ -49,7 +49,7 @@ built-in themes use a dock height of 0.71, which leaves the 1100x3840 panel its 
 - **WHEN** a user theme sets the default gauge style to `plain`
 - **THEN** the theme loads with `ring` and a warning is logged
 
-#### Scenario: Format 2 gauge style
+#### Scenario: Tach as the default gauge style
 - **WHEN** a user theme sets the default gauge style to `tach`
 - **THEN** the theme loads without a warning and keeps `tach`, and a widget that asks for the default gauge style
   receives `tach`
@@ -124,8 +124,8 @@ MUST be available regardless of the contents of the user themes folder.
 - A built-in theme MAY name font files that ship with the product; they are found as a user theme's files are found in
   its folder, and with no themes folder at all
 - Every built-in theme MUST load without a font or weight warning
-- A built-in theme in format 2 MUST set every colour of its own, so nothing of `default-dark`'s palette shows through
-  (in particular in the light themes `paper` and `pop`)
+- A built-in theme that uses the optional groups MUST set every colour of its own, so nothing of `default-dark`'s
+  palette shows through (in particular in the light themes `paper` and `pop`)
 - Every built-in theme MUST validate with no error and no warning (`urdeck-cli theme validate`)
 
 #### Scenario: Themes folder is missing
@@ -335,50 +335,37 @@ MAY define it as `colors.backgroundPalette`, one to four colours; otherwise it i
 - **WHEN** a user theme sets `colors.backgroundPalette` to `["#102030", "blue"]`
 - **THEN** a warning is logged and the derived palette is used
 
-### Requirement: Theme Format Version
-The host MUST load themes of format 1 and format 2 with the same code. A theme MAY declare `"format": 1` or
-`"format": 2`; a theme without it is format 1, and a theme need not declare `format` to use format 2 values.
-
-- A `format` greater than the highest the host supports logs one warning naming the theme, the declared and the
-  supported format, and the theme still loads
-- A `format` that is not a whole number of at least 1 is dropped with a logged warning
-- A key the host does not know, at any depth, is ignored without a warning at load time, so a theme written for a newer
-  host shows its known values on an older one
-
-#### Scenario: Format 2 theme
-- **WHEN** a theme declares `"format": 2`
-- **THEN** it loads, and its format 2 values are available on the loaded theme
-
-#### Scenario: Newer format than the host knows
-- **WHEN** a theme declares `"format": 3`
-- **THEN** it loads with the values the host knows, and one warning says the theme declares format 3 and the host
-  supports 2
+### Requirement: Unknown Theme Keys
+The host MUST ignore a key it does not know, at any depth, without a warning at load time, so that a theme written for
+a newer host shows its known values on an older one. There is no version key: a theme file does not declare which
+version of the format it follows. The checking tool reports unknown keys (see theme-lint).
 
 #### Scenario: Unknown key
 - **WHEN** a theme contains a key that is not in the schema, such as one the product has set aside for later
 - **THEN** the key is ignored and no warning is logged at load
 
-#### Scenario: Format is not required
-- **WHEN** a theme uses `card.shadow` and has no `format`
-- **THEN** the shadow is read as a format 2 value
+#### Scenario: A leftover format key
+- **WHEN** a theme contains `"format": 2`
+- **THEN** it is an unknown key: the theme loads, the key is ignored, and no warning is logged at load
 
-### Requirement: Format 2 Values Are Optional And Additive
-Every value of format 2 MUST be optional, and an absent value MUST mean that the feature is off. A theme written before
-format 2 MUST load with the same values, the same warnings and the same drawing as before.
+### Requirement: Optional Groups Are Additive
+Every optional group MUST be optional, and an absent value MUST mean that the feature is off. A theme that sets none
+of them MUST load with the same values, the same warnings and the same drawing as a theme did before they existed.
 
-- Every format 1 value keeps its name, range and meaning
+- Every original value (colours, card, typography, stroke, gauge style, indicator, press and dock) keeps its name,
+  range and meaning
 - A value whose absence means "off" stays absent in the loaded theme: merging a theme over the default theme never
   creates one
 - These are never inherited from the default theme, so a theme that does not define them does not get them: the
   background palette, `colors.ramp`, `colors.cardTints`, `pattern`, `background`, `icons`, and every card chrome,
-  typography effect and gauge modifier group of format 2
+  typography effect and gauge modifier group
 - `meta` is never inherited either: a theme without it has none
-- The values that are inherited are the format 1 values and any format 2 value the default theme defines; the default
+- The values that are inherited are the original values and any optional value the default theme defines; the default
   theme defines none of the groups above
 
-#### Scenario: Theme without format 2 values
-- **WHEN** a user theme written before format 2 is loaded
-- **THEN** it loads without a warning and none of the format 2 groups are present on it
+#### Scenario: Theme without optional groups
+- **WHEN** a user theme that sets only colours and card values is loaded
+- **THEN** it loads without a warning and none of the optional groups are present on it
 
 #### Scenario: Built-in themes are unchanged
 - **WHEN** `default-dark`, `default-light` and `glass` are loaded
@@ -411,7 +398,7 @@ names, best first) and `samples`.
 - **WHEN** a theme sets `meta.mode` to `sepia`
 - **THEN** the value is dropped with a logged warning and the theme loads
 
-### Requirement: Format 2 Values
+### Requirement: Theme Value Groups
 The host MUST accept the following groups in a theme, each documented key by key, with its range and default, in the
 theme reference and in the published schema. A value is read, checked, merged and kept on the loaded theme by this
 capability; what is drawn with it is specified by the capabilities that draw it.
@@ -458,14 +445,16 @@ The product has set some values aside for a later change; they are listed with t
 - **WHEN** a theme sets `motion.level` to `reduced`
 - **THEN** the value is kept, no warning is logged, and it caps the deck's motion as `motion` specifies
 
-### Requirement: Format 2 Validation
-An invalid format 2 value MUST be handled as a format 1 value is: it is cleared, the loaded theme takes the default
-(which for an optional value is "absent"), and one warning names the theme, the key and the value.
+### Requirement: Theme Value Validation
+An invalid value MUST be handled the same way for every key: it is cleared, the loaded theme takes the default (which
+for an optional value is "absent"), and one warning names the theme, the key and the value. One invalid value MUST NOT
+fail the theme.
 
 - A number outside its range, a colour that does not parse and a value that is not one of an enumeration's names are
   invalid; enumeration names are read case-insensitively
 - An array outside its length limits, or one with an invalid element, is dropped whole
-- A value of the wrong type is invalid
+- A value of the wrong JSON kind (a text where a number goes, a number where a group goes) is invalid, in any group,
+  original or optional, and costs only that value
 - A time is at least 1 second
 - Rules between values are checked after each value on its own. A rule that fails clears or downgrades only what it
   names and logs one warning:
@@ -497,17 +486,28 @@ An invalid format 2 value MUST be handled as a format 1 value is: it is cleared,
 - **WHEN** a theme sets `card.borderStyle` to `dashed` and leaves the border width at 0
 - **THEN** the theme loads and one warning says the style has no effect with a border width of 0
 
-#### Scenario: Every value invalid
-- **WHEN** a theme sets every format 2 value to something invalid
-- **THEN** it loads with the default theme's values, no format 2 group is present, and there is one warning per key
+#### Scenario: Every optional value invalid
+- **WHEN** a theme sets every value of the optional groups to something invalid
+- **THEN** it loads with the default theme's values, no optional group is present, and there is one warning per key
+
+#### Scenario: Wrong kind in an original value
+- **WHEN** a theme sets `card.gap` to `"wide"`
+- **THEN** the theme loads, `card.gap` takes the default theme's value, and one warning names the theme, `card.gap` and
+  that a number is expected
+
+#### Scenario: Wrong kind in an optional value
+- **WHEN** a theme sets `card.shadow.blur` to `"soft"`
+- **THEN** the theme loads with no `blur` for the shadow and one warning names the key and that a number is expected
 
 ### Requirement: Published Theme Schema
-The product MUST publish the theme's format 2 schema as a JSON Schema in the repository, `docs/schemas/v2/theme.json`,
-and a theme MAY point at it with `$schema` for completion in an editor. The schema MUST describe exactly the values
-the theme model reads, and a test MUST fail when the two differ.
+The product MUST publish the theme's schema as a JSON Schema in the repository, `docs/schemas/v1/theme.json`, served
+by the website at `/schemas/v1/theme.json` beside the other published schemas, and a theme MAY point at it with
+`$schema` for completion in an editor. The schema MUST describe exactly the values the theme model reads, and a test
+MUST fail when the two differ.
 
 - The schema lists each key with its type, range, default and a one-line description
 - A key the product has set aside for later is not in the schema
+- The schema has no `format` key
 - `docs/themes.md` and the schema describe the same keys
 
 #### Scenario: Draft themes satisfy the schema
@@ -540,7 +540,7 @@ catalog can list it without drawing it.
   background
 - `pop` is named "Pop" with mode `light`; it pairs with `shapes` then `ripple`, names `shapes` as its default
   background, and has a still colour as its static background
-- A built-in theme may carry pairings and tags; the three that exist before the format 2 themes define no background and
+- A built-in theme may carry pairings and tags; `default-dark`, `default-light` and `glass` define no background and
   no default, so adding `meta` changes nothing that is drawn
 
 #### Scenario: Built-ins have metadata
@@ -603,7 +603,7 @@ A theme MAY set `typography.opticalSize` to `off` or `auto`; absent means `off`.
 - the label, body and title roles use the role's size in pixels on the surface being drawn, limited to the axis range
 
 A font with no `opsz` axis is unaffected and nothing is logged. An unknown value is invalid and handled as any
-other invalid format 2 value.
+other invalid value (see "Theme Value Validation").
 
 #### Scenario: Off keeps the font as it was
 - **WHEN** a theme does not set `typography.opticalSize` and its font has an optical size axis
