@@ -5,7 +5,7 @@ The host MUST keep the user's files in one data folder, chosen once at startup b
 
 - **Portable mode:** when a file named `urdeck.portable` is in the application folder (the folder of
   `UrDeck.Host.exe`), the data folder is the application folder. The marker's content is ignored
-- **Portable release:** when the copy runs from the portable zip of a release (see release, "Release Assets"), the
+- **Portable release:** when the copy runs from the portable zip of a release (see release-process, "Release Assets"), the
   data folder is the folder the zip was unpacked into, which holds the application folder and is not replaced by an
   update. The log names it as `Data folder: <path> (portable release)`
 - **Per-user mode:** otherwise the data folder is `UrDeck` in the user's roaming application data folder

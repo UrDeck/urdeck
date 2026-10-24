@@ -33,7 +33,7 @@ SignPath Foundation signs only a project that already has a release.
 ## Capabilities
 
 ### New Capabilities
-- `release`: how a release is made: the workflow, its checks, the version rule, the stamped version, the assets and
+- `release-process`: how a release is made: the workflow, its checks, the version rule, the stamped version, the assets and
   the draft release.
 - `app-updates`: what the installer does, how an installed copy finds, downloads and applies an update, the
   `updates` setting, and uninstalling.

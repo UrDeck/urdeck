@@ -12,7 +12,7 @@ on a PC with neither the .NET SDK nor a .NET or Windows App SDK runtime installe
   folder: the .NET runtime, the Windows App SDK, SkiaSharp, Velopack and the material listed there today
 - No `urdeck-config.json` and no `urdeck.portable`: a published copy runs in per-user mode (see data-folder)
 
-When a version is given to the publish (see release, "Version Numbers"), the host, the engine and the first-party
+When a version is given to the publish (see release-process, "Version Numbers"), the host, the engine and the first-party
 plugins carry it; the SDK does not.
 
 The folder can be copied anywhere and started from there; it needs write access only to the data folder.

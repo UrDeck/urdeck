@@ -27,7 +27,7 @@ timestamp, from a certificate that chains to a certificate authority in the Micr
 - **THEN** its properties show a valid digital signature, and SmartScreen does not call the publisher unknown
 
 ### Requirement: Where Signatures Come From
-A signature MUST be requested only by the release workflow (see release, "Release Workflow") running on `main` on a
+A signature MUST be requested only by the release workflow (see release-process, "Release Workflow") running on `main` on a
 GitHub-hosted runner:
 
 - The signing service verifies that the request comes from that workflow, repository and branch, and signs only files
