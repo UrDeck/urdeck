@@ -3,6 +3,8 @@
 
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Startup;
+using Velopack;
+using Velopack.Locators;
 
 namespace UrDeck.Host;
 
@@ -11,19 +13,26 @@ public static class Program
     /// <summary>The instance guard of this process; the application listens on it for <c>--quit</c>.</summary>
     internal static SingleInstance? Instance { get; private set; }
 
+    /// <summary>The product version this copy was built as (<c>0.2.0+abc1234</c>; <c>0.0.0-dev</c> for a local build).</summary>
+    internal static string Version { get; } = AppVersion.Of(typeof(Program).Assembly);
+
     /// <summary>Where the user's files live, decided once at the start of <see cref="Main"/>.</summary>
     internal static DataFolder Data { get; private set; } = null!;
 
-    // A hand-written entry point (the generated one is disabled in the csproj): the data folder is resolved first, then
-    // --snapshot and --quit run with the engine alone and exit before the XAML application is created; the guard comes
-    // after them, so both can run while a host does.
+    // A hand-written entry point (the generated one is disabled in the csproj). Velopack runs first: at install, update and
+    // uninstall the installer starts the app with a hook argument, which it handles and exits on, before anything else
+    // here happens. Then the data folder is resolved, --snapshot and --quit run with the engine alone and exit before the
+    // XAML application is created; the guard comes after them, so both can run while a host does.
     [STAThread]
     public static int Main(string[] args)
     {
+        // No auto-apply: a downloaded update is applied when the user chooses "Restart to update" or quits (app-updates spec),
+        // never by itself at the next start, which on a case display would look like a crash.
+        VelopackApp.Build().SetAutoApplyOnStartup(false).OnBeforeUninstallFastCallback(_ => BeforeUninstall()).Run();
+
         AppDomain.CurrentDomain.UnhandledException += (_, e) => UrDeckLog.Error("Unhandled exception", e.ExceptionObject as Exception);
 
-        // AppContext.BaseDirectory is the application folder here: the folder of UrDeck.Host.exe.
-        Data = DataFolder.Resolve(AppContext.BaseDirectory, Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+        Data = ResolveDataFolder();
         UrDeckLog.SetDefaultPath(Data.LogPath);
 
         // --snapshot creates the per-user folder so its log lines are kept (it still writes no configuration); it renders
@@ -32,6 +41,7 @@ public static class Program
         {
             TryCreateDataFolder(Data);
             UrDeckLog.Info(Data.Describe());
+            UrDeckLog.Info($"UrDeck {Version}");
             return SnapshotCommand.Run(args, Data);
         }
 
@@ -42,6 +52,7 @@ public static class Program
             return 1;
 
         UrDeckLog.Info(Data.Describe());
+        UrDeckLog.Info($"UrDeck {Version}");
 
         Instance = SingleInstance.TryAcquire(Data.Root);
         if (Instance is null)
@@ -64,6 +75,47 @@ public static class Program
 
         Instance.Dispose();
         return 0;
+    }
+
+    // The marker first, then a portable release's unpack folder (Velopack knows it; the engine only gets a path), then the
+    // per-user folder. AppContext.BaseDirectory is the application folder: the folder of UrDeck.Host.exe.
+    private static DataFolder ResolveDataFolder() =>
+        DataFolder.Resolve(
+            AppContext.BaseDirectory,
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            PortableReleaseRoot());
+
+    private static string? PortableReleaseRoot()
+    {
+        try
+        {
+            return VelopackLocator.IsCurrentSet && VelopackLocator.Current.IsPortable ? VelopackLocator.Current.RootAppDir : null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"UrDeck cannot ask the installer for its root: {ex.Message}");
+            return null;
+        }
+    }
+
+    // Runs inside the uninstaller's call, with 30 seconds: close a running deck and take this copy out of Start with Windows,
+    // so nothing starts at the next sign-in. The data folder stays as it was (app-updates spec, "Uninstall"): no log line,
+    // which could create it.
+    private static void BeforeUninstall()
+    {
+        try
+        {
+            var data = ResolveDataFolder();
+            _ = SingleInstance.Quit(data.Root);
+
+            var autostart = new RunKeyAutostart();
+            if (autostart.State is AutostartState.On or AutostartState.SwitchedOffInWindows)
+                autostart.SwitchOff();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"UrDeck uninstall hook failed: {ex.Message}");
+        }
     }
 
     private static void TryCreateDataFolder(DataFolder data)

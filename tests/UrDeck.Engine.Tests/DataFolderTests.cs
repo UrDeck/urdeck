@@ -57,6 +57,35 @@ public class DataFolderTests : IDisposable
     }
 
     [Fact]
+    public void PortableRelease_IsTheFolderAboveTheApplicationFolder()
+    {
+        string unpacked = Path.Combine(_root, "unpacked");
+
+        var folder = DataFolder.Resolve(App, Roaming, unpacked);
+
+        Assert.Equal(DataFolderMode.PortableRelease, folder.Mode);
+        Assert.Equal(Path.GetFullPath(unpacked), folder.Root);
+        Assert.Equal(Path.GetFullPath(App), folder.ApplicationFolder);
+        Assert.Equal($"Data folder: {folder.Root} (portable release)", folder.Describe());
+        Assert.False(Directory.Exists(Roaming));
+    }
+
+    [Fact]
+    public void MarkerBeatsPortableRelease_AndPortableReleaseBeatsPerUser()
+    {
+        string unpacked = Path.Combine(_root, "unpacked");
+        Assert.Equal(DataFolderMode.PortableRelease, DataFolder.Resolve(App, Roaming, unpacked).Mode);
+        Assert.Equal(DataFolderMode.PerUser, DataFolder.Resolve(App, Roaming, null).Mode);
+        Assert.Equal(DataFolderMode.PerUser, DataFolder.Resolve(App, Roaming, "").Mode);
+
+        File.WriteAllText(Path.Combine(App, DataFolder.PortableMarker), "");
+        var folder = DataFolder.Resolve(App, Roaming, unpacked);
+
+        Assert.Equal(DataFolderMode.Portable, folder.Mode);
+        Assert.Equal(Path.GetFullPath(App), folder.Root);
+    }
+
+    [Fact]
     public void Resolving_WritesNothing()
     {
         DataFolder.Resolve(App, Roaming);

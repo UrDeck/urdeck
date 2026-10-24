@@ -10,10 +10,30 @@ Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloadi
 
 Not done yet: an editor UI, the other widgets, sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
 
+## Installing
+
+Download `UrDeck-win-Setup.exe` from the [latest release](https://github.com/UrDeck/urdeck/releases/latest) and run it. It installs
+UrDeck for you alone (no administrator rights) into `%LocalAppData%\UrDeck`, adds a Start menu shortcut and starts the deck;
+`UrDeck-win-Setup.exe --silent` shows no window. The first releases are not signed, so Windows SmartScreen may say it protected
+your PC: choose **More info**, then **Run anyway**. Signing follows in a later release.
+
+- **Updating:** an installed copy checks the releases of this repository about a minute after it starts and then once a day,
+  downloads a newer one in the background and offers **Restart to update to `<version>`** in the tray menu. An update you do not
+  choose is applied when you quit. A copy on a stable version takes only stable releases. This check is the one request UrDeck
+  makes on its own besides the weather and site icons; `"updates": "off"` in `urdeck-config.json` turns it off. A copy that was
+  not installed (a build, a plain publish) never checks.
+- **Uninstalling:** use Windows' **Installed apps**. It closes the deck, removes Start with Windows and the application, and
+  leaves `%APPDATA%\UrDeck`.
+- **Portable:** `UrDeck-win-Portable.zip` is the same program without an installer; the data folder is the folder you unpack
+  it into, so an update keeps your page.
+
+The user documentation, including [installing and updating](https://urdeck.app/docs/installing/), is at
+[urdeck.app/docs](https://urdeck.app/docs/). To make a release, see [CONTRIBUTING.md](CONTRIBUTING.md#making-a-release).
+
 ## Requirements
 
 - Windows 10 or 11
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download), only to build from source (a release is self-contained)
 
 ## Build, run, test
 
@@ -53,7 +73,8 @@ starts there.
 **Portable mode:** a file named `urdeck.portable` next to `UrDeck.Host.exe` makes that folder the data folder instead (and
 its `plugins/` the only plugin folder). The build output has the marker, so a development build keeps everything in `bin/`;
 a published copy has none. Add or remove the marker and restart. The log's first line says which folder and why:
-`Data folder: ... (per-user)` or `(portable: ...)`.
+`Data folder: ... (per-user)`, `(portable: ...)` or `(portable release)`. The release's portable zip keeps its data in the folder it was
+unpacked into, above the application folder that an update replaces.
 
 Right-click the tray icon and choose **Start with Windows** to start that copy at sign-in. The check mark shows what
 Windows will do, including after you switch it off in Task Manager or Settings. Only one copy runs per data folder: a second

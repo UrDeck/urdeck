@@ -108,6 +108,13 @@ public class UrDeckConfig
     [JsonPropertyName("motion")]
     public string? Motion { get; set; }
 
+    /// <summary>
+    /// Whether an installed copy looks for a newer release: <c>auto</c> (the default, and what an absent key means) or
+    /// <c>off</c>. <see cref="UpdatesSetting"/> reads it and treats an unknown value as <c>auto</c>.
+    /// </summary>
+    [JsonPropertyName("updates")]
+    public string? Updates { get; set; }
+
     /// <summary>1-based monitor index, used when <see cref="MonitorName"/> doesn't match anything.</summary>
     [JsonPropertyName("monitor")]
     public int Monitor { get; set; } = 1;
@@ -300,6 +307,7 @@ public sealed class ConfigStore : IDisposable
         {
             config.Pager.GetIndicatorMode(warn: true);
             Motion.MotionPolicy.Parse(config.Motion, warn: true);
+            UpdatesSetting.IsEnabled(config.Updates, warn: true);
             Backgrounds.BackgroundSettings.NotePageBackgrounds(config);
         }
 

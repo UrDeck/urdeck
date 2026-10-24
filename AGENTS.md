@@ -142,6 +142,15 @@ See the README license map before moving code between projects: it can change th
   the same widget type or provider id the first wins and the log names the other file.
 - The daily copy is installed with `pwsh scripts/Install-Local.ps1` (`%LOCALAPPDATA%\Programs\UrDeck`); the build output
   is only for development. The script never touches the data folder (`%APPDATA%\UrDeck`); it moves an old installation's user files there once.
+- Releases (`CONTRIBUTING.md` "Making a release"; the owner starts `.github/workflows/release.yml`, which ends in a draft): `pwsh scripts/Pack-Release.ps1 -Version 0.1.0
+  [-Previous <folder>] [-OutputDir <folder>]` publishes the host with `-p:UrDeckAppVersion=<v>` and packs it with `vpk` into `artifacts/release/` (the workflow
+  calls the same script); `pwsh scripts/Test-ReleaseVersion.ps1 -SelfTest` runs the version rule's cases. The app's version travels in `UrDeckAppVersion`, never `-p:Version`
+  (that would also stamp `UrDeck.Sdk`); a build without it is `0.0.0-dev`. The `Velopack` package and the `vpk` tool in `dotnet-tools.json` are one version and move
+  together (the script refuses otherwise). `Program.Main` starts with `VelopackApp.Build()...Run()`: the installer runs the app with hook arguments (its uninstall hook
+  removes the Run value and quits a running deck) before anything else. Only the host knows Velopack; the engine has `UpdateService` over `IUpdateBackend`, and a copy
+  that was not installed never checks. To try an update on one PC, install a packed `Setup.exe`, set `URDECK_UPDATE_SOURCE` to a folder holding a higher packed version
+  (not for users), restart, and read the `Update check:` log lines. The configuration's `updates` (`auto` / `off`) turns the check off. A release's portable zip
+  keeps its data in the folder it was unpacked into (`Data folder: ... (portable release)`; `DataFolder.Resolve` takes that root from Velopack).
 - `urdeck.log` is in the data folder; its lines are `[yyyy-MM-dd HH:mm:ss.fff] LEVEL message`; the file rotates to `urdeck.log.1` at 5 MB.
 - One host per data folder: `Program.Main` handles `--snapshot`, then `--quit`, then the guard (a named mutex and
   event keyed on the data folder, `UrDeck.Engine/Startup/InstanceNames`), then the XAML application. `--quit` sets the event

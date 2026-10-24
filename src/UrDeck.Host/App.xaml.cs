@@ -3,10 +3,12 @@
 
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using UrDeck.Engine.Config;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
 using UrDeck.Engine.Startup;
+using UrDeck.Engine.Updates;
 
 namespace UrDeck.Host;
 
@@ -20,6 +22,7 @@ public partial class App : Application
     private SettingsSoak? _soak;
     private DispatcherQueueTimer? _memTimer;
     private readonly RunKeyAutostart _autostart = new();
+    private UpdateService? _updates;
 
     public App()
     {
@@ -55,6 +58,10 @@ public partial class App : Application
         {
             // Quitting closes Settings too: it holds the host, which is disposed next.
             _settings?.Close();
+            // An update that is ready but was not chosen is applied once this process has exited, without a restart.
+            _updates?.ApplyOnQuit();
+            _updates?.Dispose();
+            _updates = null;
             _tray?.Dispose();
             _tray = null;
             _host.Dispose();
@@ -68,6 +75,11 @@ public partial class App : Application
         void OpenSettingsLater() => dispatcher.TryEnqueue(OpenSettings);
         _tray = new TrayIcon(
             [
+                new TrayMenuEntry(
+                    "Restart to update",
+                    RestartToUpdate,
+                    IsShown: () => _updates?.ReadyVersion is not null,
+                    GetLabel: () => $"Restart to update to {_updates?.ReadyVersion}"),
                 new TrayMenuEntry("Settings", OpenSettingsLater),
                 new TrayMenuEntry("Open data folder", OpenDataFolder),
                 new TrayMenuEntry("Start with Windows", ToggleAutostart, () => _autostart.State == AutostartState.On),
@@ -75,6 +87,8 @@ public partial class App : Application
             ],
             Path.Combine(AppContext.BaseDirectory, "urdeck.ico"));
         _tray.Selected += OpenSettingsLater;
+
+        StartUpdates();
 
         // --quit sets an event; closing the window on the UI thread is what the tray's Quit does.
         Program.Instance?.ListenForQuit(() =>
@@ -97,6 +111,23 @@ public partial class App : Application
             _soak.Start();
         }
     }
+
+    // Only a copy the installer installed checks for updates; a build output or a plain publish makes no request.
+    private void StartUpdates()
+    {
+        var backend = VelopackUpdateBackend.TryCreate(Program.Version);
+        if (backend is null)
+        {
+            UrDeckLog.Info("Updates: not an installed copy; no update check");
+            return;
+        }
+
+        // Asked at every tick, so a configuration reload takes effect without a restart.
+        _updates = new UpdateService(backend, () => UpdatesSetting.IsEnabled(_host?.Config.Config.Updates));
+        _updates.Start();
+    }
+
+    private void RestartToUpdate() => _updates?.ApplyAndRestart();
 
     /// <summary>Opens the settings window, or brings the open one forward: there is at most one.</summary>
     private void OpenSettings()

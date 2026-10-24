@@ -127,7 +127,7 @@ everything else should be fine on Sonnet.
 - Next: milestone 2 is reshaped as a *downloadable* preview, releasable build first (see the roadmap and item 12).
   The release decisions of 2026-10-24 (item 12) settle the shape: 0.x versions from the git tag, a per-user Velopack
   installer, data in `%APPDATA%\UrDeck`, SignPath signing from the release after 0.1, and the same installer listed in the
-  Microsoft Store. First change: `per-user-data-folder`.
+  Microsoft Store. First change: `per-user-data-folder` (done), then `release-pipeline` (implemented, 0.1 not released yet).
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
@@ -713,6 +713,14 @@ Planned changes, in order (proposed in `openspec/changes/`): `per-user-data-fold
 release workflow, Velopack, the in-app update, third-party notices; 0.1 ships from it unsigned), `signing-and-store`
 (SignPath signing, the signature check, the code-signing policy and privacy pages, the site's download button, the
 Microsoft Store listing). The winget manifest stays milestone 6.
+
+`release-pipeline` is implemented on its branch (2026-10-24; the openspec tasks say what is verified): the stamped version
+(`UrDeckAppVersion`), `VelopackApp` in `Program.Main` with the uninstall hook, the `updates` key and `UpdateService` with the
+tray's "Restart to update" entry, the portable release's data folder, the notices and licence texts in the published folder,
+`scripts/Pack-Release.ps1`, and `.github/workflows/release.yml` (ends in a draft). What still needs the owner's hands: the
+install, update and uninstall checks on a real PC, the `v*` tag ruleset, a dry run with `0.0.1-rc.1`, and releasing `0.1.0`.
+Observed while packing: the published folder is about 490 MB and the installer and portable zip about 105 MB each, mostly the
+Windows App SDK (`onnxruntime.dll`, `DirectML.dll`, the AI projections) and 240 MB of native `.pdb` files that `vpk` leaves out of the package.
 
 Tray icon with Quit: done (`tray-icon`). The menu is a list of entries, so the editor's "Open editor" entry (and a
 single-instance guard, which would also be the place to bring the first copy's editor forward) are added later. Still

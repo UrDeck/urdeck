@@ -8,9 +8,16 @@ namespace UrDeck.Host;
 
 /// <summary>
 /// One line of the tray menu: what the user reads and what choosing it does. <paramref name="IsChecked"/>, when given,
-/// is asked each time the menu opens and decides whether the entry shows a check mark.
+/// is asked each time the menu opens and decides whether the entry shows a check mark. <paramref name="IsShown"/> (an entry
+/// without it is always shown) and <paramref name="GetLabel"/> (the label to read; <paramref name="Label"/> otherwise) are
+/// asked then too.
 /// </summary>
-internal sealed record TrayMenuEntry(string Label, Action Run, Func<bool>? IsChecked = null);
+internal sealed record TrayMenuEntry(
+    string Label,
+    Action Run,
+    Func<bool>? IsChecked = null,
+    Func<bool>? IsShown = null,
+    Func<string>? GetLabel = null);
 
 /// <summary>
 /// The notification-area icon. It owns a hidden message-only window (the deck window never activates, and a popup
@@ -212,8 +219,17 @@ internal sealed class TrayIcon : IDisposable
 
         try
         {
+            // The label is read once per opening, so the line logged for a choice is the one the user saw.
+            string[] labels = new string[_entries.Count];
             for (int i = 0; i < _entries.Count; i++)
-                AppendMenu(menu, MfString | (_entries[i].IsChecked?.Invoke() == true ? MfChecked : 0), (nuint)(FirstCommandId + i), _entries[i].Label);
+            {
+                TrayMenuEntry entry = _entries[i];
+                if (entry.IsShown is { } isShown && !isShown())
+                    continue;
+
+                labels[i] = entry.GetLabel?.Invoke() ?? entry.Label;
+                AppendMenu(menu, MfString | (entry.IsChecked?.Invoke() == true ? MfChecked : 0), (nuint)(FirstCommandId + i), labels[i]);
+            }
 
             // Without the owner in the foreground the menu does not close on a click elsewhere; the WM_NULL after
             // it is the documented fix for the menu's first-click quirk.
@@ -224,7 +240,7 @@ internal sealed class TrayIcon : IDisposable
             int index = (int)chosen - (int)FirstCommandId;
             if (chosen != 0 && index >= 0 && index < _entries.Count)
             {
-                UrDeckLog.Info($"Tray menu: {_entries[index].Label}");
+                UrDeckLog.Info($"Tray menu: {labels[index]}");
                 _entries[index].Run();
             }
         }

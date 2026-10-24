@@ -94,10 +94,47 @@ subscription.
 Places are found with Open-Meteo's geocoding service, whose location database is from
 [GeoNames](https://www.geonames.org/), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-## SkiaSharp and Skottie
+## .NET runtime
+
+The application is self-contained: the published folder holds the .NET runtime and its libraries (`coreclr.dll`, `System.*.dll`
+and the others), under the MIT licence. Source: <https://github.com/dotnet/runtime>.
+
+Copyright (c) .NET Foundation and Contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## Windows App SDK
+
+The window, the controls and the composition come from the [Windows App SDK](https://github.com/microsoft/WindowsAppSDK),
+whose runtime is part of the published folder (`Microsoft.*.dll`, `Microsoft.UI.Xaml`, `DWriteCore.dll`, `MRM.dll`,
+`WebView2Loader.dll` and the others, with `onnxruntime.dll` and `DirectML.dll` from its machine-learning components). It is
+Microsoft's software under the Microsoft Software License Terms for the Windows App SDK
+(`licenses/WindowsAppSDK-LICENSE.txt`). The notices of the open source it includes are in
+`licenses/WindowsAppSDK-NOTICE.txt`.
+
+## SkiaSharp, Skia and Skottie
 
 Drawing is done with [SkiaSharp](https://github.com/mono/SkiaSharp) and `SkiaSharp.Skottie` (Lottie playback), both under
-the MIT licence:
+the MIT licence, with the native Skia library (`libSkiaSharp.dll`, BSD 3-clause licence, Copyright 2006 Google Inc. and The
+Skia Authors) and the ANGLE libraries (`libEGL.dll`, `libGLESv2.dll`, BSD licence) that the SkiaSharp view uses. The native
+library incorporates further components (HarfBuzz, FreeType, libpng, expat and others); their licences are in
+`licenses/SkiaSharp-THIRD-PARTY-NOTICES.txt`.
 
 Copyright (c) 2015-2016 Xamarin, Inc.
 Copyright (c) 2017-2018 Microsoft Corporation.
@@ -112,12 +149,37 @@ subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
 FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## Velopack (installer and updates)
+
+The installer, the updater (`Update.exe`) and the update check use [Velopack](https://github.com/velopack/velopack)
+(`Velopack.dll` in the published folder), under the MIT licence:
+
+Copyright (c) Velopack Ltd.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ## Fonts (Inter, Instrument Sans, JetBrains Mono, Bricolage Grotesque, Bodoni Moda, Jost, Barlow Condensed, IBM Plex Mono, Archivo, Chakra Petch)
 

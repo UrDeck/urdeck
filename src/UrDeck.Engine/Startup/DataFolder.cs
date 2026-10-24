@@ -11,6 +11,9 @@ public enum DataFolderMode
 
     /// <summary>The application folder, because it holds the <see cref="DataFolder.PortableMarker"/> file.</summary>
     Portable,
+
+    /// <summary>The folder a release's portable zip was unpacked into: it holds the application folder and survives an update.</summary>
+    PortableRelease,
 }
 
 /// <summary>
@@ -74,17 +77,32 @@ public sealed class DataFolder
     }
 
     /// <summary>The log line that names the folder and why it was chosen.</summary>
-    public string Describe() => Mode == DataFolderMode.Portable
-        ? $"Data folder: {Root} (portable: {PortableMarker} next to the executable)"
-        : $"Data folder: {Root} (per-user)";
+    public string Describe() => Mode switch
+    {
+        DataFolderMode.Portable => $"Data folder: {Root} (portable: {PortableMarker} next to the executable)",
+        DataFolderMode.PortableRelease => $"Data folder: {Root} (portable release)",
+        _ => $"Data folder: {Root} (per-user)",
+    };
 
-    public static DataFolder Resolve(string applicationFolder, string roamingAppData)
+    /// <summary>
+    /// Chooses the data folder: the marker first, then the portable release's root, then the per-user folder.
+    /// </summary>
+    /// <param name="applicationFolder">The folder of the executable.</param>
+    /// <param name="roamingAppData">The user's roaming application data folder.</param>
+    /// <param name="portableReleaseRoot">
+    /// The folder a release's portable zip was unpacked into, when the copy runs from one (the host asks the installer's
+    /// runtime); null otherwise. The engine sees a folder, not the installer.
+    /// </param>
+    public static DataFolder Resolve(string applicationFolder, string roamingAppData, string? portableReleaseRoot = null)
     {
         string app = Path.GetFullPath(applicationFolder);
 
         // A marker that is a folder does not count: it must be a file.
         if (File.Exists(Path.Combine(app, PortableMarker)))
             return new DataFolder(app, app, DataFolderMode.Portable);
+
+        if (!string.IsNullOrWhiteSpace(portableReleaseRoot))
+            return new DataFolder(Path.GetFullPath(portableReleaseRoot), app, DataFolderMode.PortableRelease);
 
         return new DataFolder(Path.Combine(Path.GetFullPath(roamingAppData), FolderName), app, DataFolderMode.PerUser);
     }
