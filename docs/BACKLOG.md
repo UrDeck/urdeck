@@ -671,9 +671,11 @@ settled unless it says otherwise.
 - **Versions:** SemVer 0.x until 1.0 (0.y.z already says "anything may change"); `-rc.N` only when testers are wanted
   before a minor release. A prerelease label never reaches Windows: `0.2.0-rc.1` is file version `0.2.0.0`, and the
   Store needs four numbers with the last one 0, which 0.x maps to directly. The SDK gets its own version (milestone 5).
-- **Where the version comes from:** the git tag. A release is drafted in the GitHub UI (tag `vX.Y.Z`, "Generate release
-  notes" from the PR titles the `pr-title` check already enforces), and the release workflow passes `-p:Version` to the
-  host's publish only, never to `sdk/` (plugins bind to the SDK's assembly version, which follows SDK changes, not app
+- **Where the version comes from:** the release's tag. The owner starts the release workflow from the Actions tab with
+  the version; it builds a draft release for `vX.Y.Z` with "Generate release notes" from the PR titles the `pr-title`
+  check already enforces, and publishing the draft creates the tag. The workflow passes the version as `UrDeckAppVersion`,
+  which `Directory.Build.props` turns into `Version` for every project outside `sdk/` (a plain `-p:Version` is global and
+  would also stamp `UrDeck.Sdk`, whose assembly version plugins bind to and which follows SDK changes, not app
   releases). First-party plugins take the app version. `Directory.Build.props` holds only a `0.0.0-dev` fallback, so a
   self-built copy says so in `urdeck.log`. No commit per release; release-please can come later if a `CHANGELOG.md` or
   automatic numbering is wanted. A tag ruleset limits who can create `v*` tags.
@@ -701,9 +703,10 @@ settled unless it says otherwise.
   no elevated helper. Open: whether Partner Center passes Velopack's silent switch or the default run counts as silent
   (a spike); the helper waits for a second submission that discloses PawnIO (item 3).
 
-Planned changes, in order: `per-user-data-folder` (item 15), `release-pipeline` (the tag workflow, Velopack, the update
-check, third-party notices, then SignPath after 0.1), `store-listing` (the silent-install spike, the Partner Center
-submission, the code-signing policy and privacy pages). The winget manifest stays milestone 6.
+Planned changes, in order (proposed in `openspec/changes/`): `per-user-data-folder` (item 15), `release-pipeline` (the
+release workflow, Velopack, the in-app update, third-party notices; 0.1 ships from it unsigned), `signing-and-store`
+(SignPath signing, the signature check, the code-signing policy and privacy pages, the site's download button, the
+Microsoft Store listing). The winget manifest stays milestone 6.
 
 Tray icon with Quit: done (`tray-icon`). The menu is a list of entries, so the editor's "Open editor" entry (and a
 single-instance guard, which would also be the place to bring the first copy's editor forward) are added later. Still
