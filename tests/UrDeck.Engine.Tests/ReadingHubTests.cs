@@ -615,11 +615,14 @@ public sealed class ReadingHubTests : IDisposable
     {
         Provider.OnSample = (_, _, _) => Task.CompletedTask;
         Hub.Subscribe(["fake:a"]);
-        // The first sample means the hub has the catalog; a publish before that has nowhere to go.
+        // The first sample means the hub has the catalog; a publish before that has nowhere to go. A publish during a sample is
+        // buffered until the sample is committed, so wait for the value to land before judging what the next samples do to it.
         Assert.True(Wait(() => Provider.Sink != null && Provider.Samples >= 1));
         Provider.Sink!.Publish("a", 1);
+        Assert.True(Wait(() => FirstSampleDone()));
 
-        _time.Advance(TimeSpan.FromSeconds(30));
+        int before = Provider.Samples;
+        Assert.True(Pump(() => Provider.Samples >= before + 3));
 
         Assert.Equal(ReadingState.Ok, Hub.Read("fake:a").State);
     }
