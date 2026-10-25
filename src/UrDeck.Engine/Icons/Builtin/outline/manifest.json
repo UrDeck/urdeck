@@ -42,6 +42,10 @@
     "app/star": "star.svg",
     "app/heart": "heart.svg",
     "app/bolt": "zap.svg",
-    "app/chart": "chart-line.svg"
+    "app/chart": "chart-line.svg",
+    "media/play": "play.svg",
+    "media/pause": "pause.svg",
+    "media/previous": "skip-back.svg",
+    "media/next": "skip-forward.svg"
   }
 }

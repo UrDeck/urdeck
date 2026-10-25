@@ -154,6 +154,42 @@ public sealed class IconService : IDisposable
         }
     }
 
+    /// <summary>Forgets that <paramref name="holder"/> asked for <paramref name="source"/> at any size; see <see cref="IIconSource.Release"/>.</summary>
+    internal void Release(WidgetServices holder, string? source)
+    {
+        if (string.IsNullOrWhiteSpace(source))
+            return;
+
+        lock (_gate)
+        {
+            if (_disposed)
+                return;
+
+            if (!_parsed.TryGetValue(source, out LaunchTarget target))
+                target = LaunchTarget.Parse(source);
+            if (!target.IsValid)
+                return;
+
+            string text = KeyOf(target);
+            List<Entry>? unused = null;
+            foreach (var entry in _entries.Values)
+            {
+                if (entry.Key.Source == text && entry.Holders.Remove(holder) && entry.Holders.Count == 0)
+                    (unused ??= []).Add(entry);
+            }
+
+            if (unused == null)
+                return;
+            foreach (var entry in unused)
+            {
+                // As for a disposed widget: a load still running disposes its image when it finds the entry gone.
+                _entries.Remove(entry.Key);
+                entry.Image?.Dispose();
+                entry.Image = null;
+            }
+        }
+    }
+
     private void Load(Entry entry, LaunchTarget target)
     {
         SKImage? image = null;

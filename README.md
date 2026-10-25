@@ -6,7 +6,7 @@ It is a .NET 10 WinUI 3 application (unpackaged, self-contained Windows App SDK)
 
 ## Status
 
-Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places, seven forecast days) and a Weather widget with animated icons, at 4x2 and at 4x4 with the forecast, are in too. Verified on the real 1100x3840 panel. Taps reach widgets, and a Shortcut widget shows the icon of an application, a folder or a web address and opens it on tap. A dock at the bottom of the screen keeps up to four widgets, normally shortcuts, in the same place on every page.
+Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places, seven forecast days) and a Weather widget with animated icons, at 4x2 and at 4x4 with the forecast, are in too. Verified on the real 1100x3840 panel. Taps reach widgets, and a Shortcut widget shows the icon of an application, a folder or a web address and opens it on tap. A dock at the bottom of the screen keeps up to four widgets, normally shortcuts, in the same place on every page. A Now playing widget (4x2) shows the cover, title, artist and a progress bar of whatever Windows says is playing and skips or pauses it by touch, through a first-party `media` provider over the Windows media session; it reads what players publish to Windows, sends nothing anywhere and logs no titles (see the privacy page).
 
 Not done yet: an editor UI, the other widgets, sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
 
@@ -112,7 +112,7 @@ and exit code 1. `*.snapshot.png` files are git-ignored.
 `--demo` (with or without `--snapshot`) runs the deck on sample data: every data provider that carries a sample file (the
 first-party `system` and `weather` do) is replaced by it, and a shortcut to a web address draws its fallback instead of fetching
 the site's icon, so the deck shows the same made-up readings on any machine and makes no network request of its own. Everything
-else is as usual; the configuration is never written. The log says `Demo mode: sample data for system, weather`. With
+else is as usual; the configuration is never written. The log says `Demo mode: sample data for media, system, weather`. With
 `--snapshot` the samples are read at `--start`, so `--demo --snapshot out.png --size 1100x3840 --start 2026-10-13T21:47:32` gives
 the same picture every time. For pictures without Windows, use `urdeck-cli preview render`, which draws with the same samples. Pictures of every theme,
 widget size and background, drawn that way, are in the gallery at [urdeck.app/docs/themes](https://urdeck.app/docs/themes/) and on
@@ -129,7 +129,8 @@ and the last good config is kept.
 The user documentation lives on the website, at [urdeck.app/docs](https://urdeck.app/docs/), and nowhere else: the config
 file, [pages and the dock](https://urdeck.app/docs/pages-and-dock/), the monitor and the settings window, each widget
 ([Clock](https://urdeck.app/docs/widgets/clock/), [Stats](https://urdeck.app/docs/widgets/stats/),
-[Weather](https://urdeck.app/docs/widgets/weather/), [Shortcut](https://urdeck.app/docs/widgets/shortcut/)),
+[Weather](https://urdeck.app/docs/widgets/weather/), [Shortcut](https://urdeck.app/docs/widgets/shortcut/),
+[Now playing](https://urdeck.app/docs/widgets/nowplaying/)),
 [themes](https://urdeck.app/docs/themes/) (with the [theme reference](https://urdeck.app/docs/themes/reference/) and the
 [cookbook](https://urdeck.app/docs/cookbook/)), [backgrounds](https://urdeck.app/docs/backgrounds/),
 [the command line tool](https://urdeck.app/docs/command-line/) and [troubleshooting](https://urdeck.app/docs/troubleshooting/)
@@ -147,13 +148,13 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 
 | Path | Purpose |
 |---|---|
-| `sdk/UrDeck.Sdk` | Plugin SDK (`net10.0`, MIT): attributes, `Widget<TConfig>`, `IWidget`, `WidgetConfig`, render context, `Theme`, the `Readout` / `TextLine` / `Gauge` / `ImageTile` components, tap input (`UrDeck.Sdk.Input`), launch targets and the launch and icon services (`UrDeck.Sdk.Launch`, `UrDeck.Sdk.Icons`), and the data provider contract and reading formatter (`UrDeck.Sdk.Data`) |
+| `sdk/UrDeck.Sdk` | Plugin SDK (`net10.0`, MIT): attributes, `Widget<TConfig>`, `IWidget`, `WidgetConfig`, render context, `Theme`, the `Readout` / `TextLine` / `Gauge` / `ImageTile` / `ButtonRow` components, tap input (`UrDeck.Sdk.Input`), launch targets and the launch and icon services (`UrDeck.Sdk.Launch`, `UrDeck.Sdk.Icons`), and the data provider contract and reading formatter (`UrDeck.Sdk.Data`) |
 | `sdk/UrDeck.Analyzer` | Roslyn analyzer (`netstandard2.0`, MIT) reporting URDECK001-005 |
 | `src/UrDeck.Engine` | Plugin loader, config store, grid and dock layout, gesture recognition and hit testing, `PageRenderer`, the reading hub that runs the data providers, the launcher and the icon service |
 | `src/UrDeck.Host` | WinUI 3 application (`net10.0-windows10.0.19041.0`): window and monitor placement, one `SKXamlCanvas` layer per widget |
 | `src/UrDeck.Preview` | the preview renderer (a configuration's page or one widget, in a theme over a background, with sample data, as a picture or frames) and the sample page (`SamplePage/urdeck-config.json`), for `urdeck-cli theme render` and `preview render` and the golden tests; above the engine and the first-party widgets and providers |
-| `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather` | First-party data providers: `system` (CPU, memory and GPU readings) and `weather` (Open-Meteo, any number of places) |
-| `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather`, `widgets/UrDeck.Widgets.Shortcut` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`), Weather (`urdeck.widgets.weather`) and Shortcut (`urdeck.widgets.shortcut`) |
+| `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather`, `providers/UrDeck.Providers.Media` | First-party data providers: `system` (CPU, memory and GPU readings), `weather` (Open-Meteo, any number of places) and `media` (what the current Windows media session plays, and its transport commands; the Windows Runtime projection is embedded in the plugin, see `docs/perf/now-playing.md`) |
+| `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather`, `widgets/UrDeck.Widgets.Shortcut`, `widgets/UrDeck.Widgets.NowPlaying` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`), Weather (`urdeck.widgets.weather`), Shortcut (`urdeck.widgets.shortcut`) and Now playing (`urdeck.widgets.nowplaying`) |
 | `tests/UrDeck.Engine.Tests`, `tests/UrDeck.Analyzer.Tests` | xUnit tests |
 | `site/` | The website at urdeck.app (Astro): landing page, the user documentation (`src/content/docs/`) and the theme cookbook (`cookbook/`), "Tested on"; see `site/README.md` |
 | `docs/` | `ROADMAP.md` (the milestones), `BACKLOG.md` (what to work on next), performance notes, the published JSON Schemas, notes for adding a built-in theme or background |

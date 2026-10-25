@@ -1,0 +1,65 @@
+---
+title: Now playing
+description: A card that shows what is playing on your PC, with its cover, and skips or pauses it by touch.
+section: Widgets
+order: 14
+settings:
+  idleLabel: "The words on the card when no player has anything to play (default `Nothing playing`). `\"\"` shows the placeholder alone."
+  showAlbum: "`true` (the default) shows the album under the artist when the card is tall enough; `false` never shows it."
+  showApp: "`true` shows the name of the player (`Spotify`, `chrome`) as a small line under the rest. Windows reports only the application's identifier, so the name is that identifier tidied up. Off by default."
+---
+
+import SettingsTable from '../../../components/SettingsTable.astro';
+import WidgetSizes from '../../../components/WidgetSizes.astro';
+
+`urdeck.widgets.nowplaying` is a 4x2 card that shows what Windows says is playing: the cover, the title, the artist and
+the album, a bar for how far along the track is, and three buttons: previous, play or pause, and next. It follows the same
+player the keyboard's media keys control (Windows calls it the current media session), so it works with a music player, a
+video in a browser tab or any other application that tells Windows what it plays. It needs no account and no settings.
+
+<WidgetSizes widget="nowplaying" />
+
+```json
+{ "typeId": "urdeck.widgets.nowplaying", "col": 0, "row": 4, "width": 4, "height": 2 }
+```
+
+## Settings
+
+<SettingsTable widget="nowplaying" />
+
+## Touch
+
+Each of the three buttons is a tap zone of its own, and the zones are as large as the card allows. A tap on a button sends
+the command to the player; the card changes when the player says it did, not before, so what you see is always what the
+player reports. A finger that lands a little off, in the gap between two buttons, counts for the nearer one. A tap anywhere
+else, on the cover or the title, does nothing. A button the player does not accept (a stream that cannot go back) is drawn
+dimmed and ignores taps. While your finger is down the whole card shrinks and dims slightly, as for every card (the amounts
+are the theme's `press` values).
+
+## What it shows
+
+- **Cover:** the picture the player gives Windows. A player that gives none, or a track without one, shows the theme's music
+  glyph. A new track never shows the previous track's cover.
+- **Title, artist, album:** each on one line, shrunk to fit its width. A player that reports no artist or album leaves the
+  line out.
+- **Progress:** the bar moves from the position the player last reported and the time since; the card is drawn again once a
+  second while something plays and the length is known, and not at all when it is paused or nothing is playing. A stream
+  that reports no length has no bar. A player that does not report its position often (some browsers) may drift until its
+  next report, and a player at a different speed is not corrected for.
+- **Nothing playing:** the music glyph and `idleLabel`, with no bar and no buttons. This is a calm state, not an error.
+
+The buttons use the theme's `media/play`, `media/pause`, `media/previous` and `media/next` glyphs
+([icon sets](/docs/themes/icons/)); a theme's own set that omits them gets the built-in ones, and the card falls back to the
+words Prev, Play, Pause and Next only if no set has them.
+
+## What it reads and where the cover goes
+
+The card reads what other applications publish to Windows about their playback, through the `media` data provider that
+ships with UrDeck. Nothing is sent anywhere. The cover is written to a small folder of its own under your temporary folder
+(`%TEMP%\UrDeck\media-art`), at most two pictures at a time, cleared when UrDeck starts and deleted when it stops. The title,
+the artist and the cover are never written to `urdeck.log`. The commands go to the application Windows calls current, which is
+what the media keys do. See the [privacy page](/privacy/).
+
+Other widgets can read the same data: the provider's readings are `media:status`, `media:title`, `media:artist`,
+`media:album`, `media:app`, `media:position`, `media:position/at`, `media:duration`, `media:art` and `media:can/previous`,
+`media:can/next` and `media:can/playpause`.

@@ -15,6 +15,10 @@
     <PackageVersion Include="SkiaSharp.Views.WinUI" Version="4.153.1" />
     <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="10.0.12" />
+    <!-- The media provider embeds the Windows Runtime projection in its own assembly (docs/perf/now-playing.md). The winmd files come
+         from the SDK reference package, so the build does not depend on an installed Windows SDK. -->
+    <PackageVersion Include="Microsoft.Windows.CsWinRT" Version="2.1.6" />
+    <PackageVersion Include="Microsoft.Windows.SDK.NET.Ref" Version="10.0.19041.57" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />

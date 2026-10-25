@@ -92,6 +92,11 @@ the provider and widget testable on Linux; a theme styles everything.
     the Windows SDK release, and `LangVersion` 9 or later, on a TFM "not tied to a specific Windows SDK version". The
     projection and its support code are compiled into the plugin's own assembly, so the shadow copy (DLL, symbols,
     dependency file) is self-contained and the plugin needs no runtime library from the host.
+    **Result of the spike (`docs/perf/now-playing.md`, 2026-10-25): (a) works**, with the whole `Windows` projection embedded
+    (24.9 MB; a narrow include list does not compile, the closure reaches all of it), `CsWinRTWindowsMetadata` pointed at the winmd
+    files of the `Microsoft.Windows.SDK.NET.Ref` package (the registry lookup fails without an installed SDK) and `UAC_VERSION_10`
+    defined. It reads the session, awaits, subscribes on the thread pool and loads and unloads in a collectible context; the
+    thumbnail read and the Linux build are still to be shown. The 25 MB is the decision for the owner.
     The plan, in the order task 1 tries it:
     a. **Embedded projection, Windows-only compile.** One `net10.0` project holds the logic, the sample and
        `IMediaSessionPlatform`; the Windows implementation file and the C#/WinRT properties apply only when the build runs
@@ -120,6 +125,18 @@ the provider and widget testable on Linux; a theme styles everything.
     toggle, skip next, skip previous). The session exposes the source application only as an application user model id, not
     a display name, so the `app` reading is that id tidied for display. The documentation lists the capability
     `globalMediaControl` for these classes; see Risks for what that means for a packaged build.
+
+13. **Batch publishing (found while building, 2026-10-25).** The hub commits a value published from a callback on its own, so
+    "the title, artist, album, duration, position and art in one batch" was not possible with `IReadingSink.Publish` alone: a
+    widget could paint the new title between two publications. `IReadingSink.PublishBatch(IReadOnlyList<ReadingUpdate>)` is an
+    additive default member (it publishes one by one for a host that lacks it); the engine commits a batch under one lock and
+    raises one notification. The provider reads the thumbnail before it publishes a changed track, so the batch holds the new
+    cover; if another event arrives while it is read, that pass publishes nothing and the next one does.
+
+14. **The sample is a playing track.** The sample file has no way to say "nothing playing" except per reading, and a variant
+    that flips with time would flip the host's `--demo` card to idle every few seconds. `sample.json` is a playing track without
+    art, with `position/at` late in the day so the extrapolated progress is zero ahead of the clock and the bar holds still in
+    pictures. The idle and paused states are drawn from fake readings in the widget tests and the golden images.
 
 ## Risks / Trade-offs
 

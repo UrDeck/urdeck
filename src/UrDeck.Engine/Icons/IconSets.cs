@@ -27,7 +27,9 @@ public static class IconKeys
         "app/link", "app/cloud", "app/download", "app/star", "app/heart", "app/bolt", "app/chart",
     ];
 
-    public static IReadOnlyList<string> All { get; } = [.. Weather, .. App];
+    public static IReadOnlyList<string> Media { get; } = ["media/play", "media/pause", "media/previous", "media/next"];
+
+    public static IReadOnlyList<string> All { get; } = [.. Weather, .. App, .. Media];
 }
 
 /// <summary>An icon set read: its identity and the glyphs its manifest maps. The set is shared and read-only.</summary>

@@ -1204,6 +1204,11 @@
   ],
   "providers": [
     {
+      "id": "media",
+      "name": "Media",
+      "sample": true
+    },
+    {
       "id": "system",
       "name": "System",
       "sample": true
@@ -1579,6 +1584,42 @@
         }
       ],
       "typeId": "urdeck.widgets.clock"
+    },
+    {
+      "category": "Media",
+      "defaultConfig": {
+        "idleLabel": "Nothing playing",
+        "showAlbum": true,
+        "showApp": false,
+        "typeId": "urdeck.widgets.nowplaying"
+      },
+      "description": "Shows what is playing and skips or pauses it by touch",
+      "name": "Now playing",
+      "settings": [
+        {
+          "default": "Nothing playing",
+          "name": "idleLabel",
+          "type": "text"
+        },
+        {
+          "default": true,
+          "name": "showAlbum",
+          "type": "onOff"
+        },
+        {
+          "default": false,
+          "name": "showApp",
+          "type": "onOff"
+        }
+      ],
+      "sizes": [
+        {
+          "height": 2,
+          "preview": true,
+          "width": 4
+        }
+      ],
+      "typeId": "urdeck.widgets.nowplaying"
     },
     {
       "category": "Launch",

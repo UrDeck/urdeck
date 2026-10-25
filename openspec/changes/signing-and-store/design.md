@@ -83,7 +83,11 @@ code-signing policy page. The release workflow already refuses to reuse a versio
 - **The Store rejects the submission** (silent install, the self-updater, a missing privacy address). → Each rejection
   reason is recorded, and the GitHub release is unaffected. The silent switch is tested before the first submission
   (`Setup.exe --silent` on a clean account).
-- **A third-party unsigned DLL that SignPath will not sign** blocks the release. → The inventory (decision 2) finds it
+- **A packaged (MSIX) build needs the `globalMediaControl` capability for the media session** that the now-playing widget's `media` provider reads
+  (`docs/perf/now-playing.md`). The unpackaged installer needs nothing (proved with an unpackaged process). If the Store listing becomes an MSIX
+  package, declare the capability in the manifest and expect certification to ask why. The `media` provider's assembly is large (about 25 MB, the embedded
+  Windows Runtime projection) and carries Microsoft's MIT-licensed C#/WinRT support code, so it belongs in the inventory (decision 2) of what must be signed.
+  - **A third-party unsigned DLL that SignPath will not sign** blocks the release. → The inventory (decision 2) finds it
   before the first signed release. The answers are to replace the dependency or ask its maintainers to sign.
 
 ## Migration Plan

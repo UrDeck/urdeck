@@ -68,6 +68,7 @@ The manifest is required and is the only way a file is found; no file is picked 
 |---|---|
 | `weather/` | `clear-day`, `clear-night`, `partly-cloudy-day`, `partly-cloudy-night`, `overcast`, `fog`, `drizzle`, `rain`, `sleet`, `snow`, `thunderstorms-day`, `thunderstorms-night`, `not-available` |
 | `app/` | `terminal`, `folder`, `file`, `music`, `gamepad`, `browser`, `mail`, `chat`, `settings`, `code`, `camera`, `image`, `video`, `calendar`, `clock`, `home`, `power`, `lock`, `link`, `cloud`, `download`, `star`, `heart`, `bolt`, `chart` |
+| `media/` | `play`, `pause`, `previous`, `next` (the [now playing](/docs/widgets/nowplaying/) card's buttons) |
 
 A set may have fewer; the lists only grow.
 

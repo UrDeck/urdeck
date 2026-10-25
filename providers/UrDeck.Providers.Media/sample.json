@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "readings": {
+    "status": { "kind": "text", "label": "Status", "name": "Playback status (playing, paused, stopped or none)", "value": "playing" },
+    "title": { "kind": "text", "label": "Title", "name": "Track title", "value": "Midnight Drive" },
+    "artist": { "kind": "text", "label": "Artist", "name": "Track artist", "value": "The Sample Band" },
+    "album": { "kind": "text", "label": "Album", "name": "Track album", "value": "Demo Tracks" },
+    "app": { "kind": "text", "label": "Player", "name": "The application playing", "value": "Music" },
+    "position": { "kind": "number", "label": "Position", "name": "Position in the track when last reported", "unit": "s", "min": 0, "value": 83 },
+    "position/at": { "kind": "time", "label": "Position time", "name": "The instant the position was reported", "value": "23:59:59" },
+    "duration": { "kind": "number", "label": "Length", "name": "Length of the track (0 when unknown)", "unit": "s", "min": 0, "value": 215 },
+    "art": { "kind": "text", "label": "Cover", "name": "Path of the album art file (empty when there is none)", "value": "" },
+    "can/previous": { "kind": "onOff", "label": "Can go back", "name": "Whether the player accepts Previous", "value": true },
+    "can/next": { "kind": "onOff", "label": "Can skip", "name": "Whether the player accepts Next", "value": true },
+    "can/playpause": { "kind": "onOff", "label": "Can play or pause", "name": "Whether the player accepts Play or Pause", "value": true }
+  }
+}

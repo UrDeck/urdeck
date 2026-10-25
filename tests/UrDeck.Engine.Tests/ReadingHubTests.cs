@@ -313,6 +313,28 @@ public sealed class ReadingHubTests : IDisposable
     }
 
     [Fact]
+    public void ABatchPublishedBetweenSamples_ArrivesTogether_InOneNotification()
+    {
+        Hub.Subscribe(["fake:a", "fake:b"]);
+        Assert.True(Wait(() => FirstSampleDone()));
+        Assert.True(Wait(() => Provider.SamplesRunning == 0));
+        int before;
+        lock (_changes)
+            before = _changes.Count;
+
+        Provider.Sink!.PublishBatch([ReadingUpdate.Of("a", 41), ReadingUpdate.Missing("b", "gone")]);
+
+        Assert.Equal(Reading.Ok(41), Hub.Read("fake:a"));
+        Assert.Equal(ReadingState.Unavailable, Hub.Read("fake:b").State);
+        Assert.Equal("gone", Hub.Read("fake:b").Reason);
+        lock (_changes)
+        {
+            Assert.Equal(before + 1, _changes.Count);
+            Assert.Contains("fake:b", _changes[^1].Ids, StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    [Fact]
     public void ASlowSample_IsNeverOverlapped_AndOtherProvidersAreSampledOnTime()
     {
         Provider.OnSample = async (_, _, ct) => await Task.Delay(TimeSpan.FromSeconds(3), _time, ct);

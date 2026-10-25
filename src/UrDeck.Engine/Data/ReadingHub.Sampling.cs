@@ -629,6 +629,12 @@ public sealed partial class ReadingHub
     {
         if (string.IsNullOrEmpty(path))
             return;
+        PublishFromProvider(rt, generation, [new KeyValuePair<string, Publication>(path, publication)]);
+    }
+
+    /// <summary>Stores publications as one batch: buffered into the running sample, else committed together.</summary>
+    private void PublishFromProvider(ProviderRuntime rt, int generation, KeyValuePair<string, Publication>[] items)
+    {
         var changed = new List<string>();
         lock (_gate)
         {
@@ -636,11 +642,12 @@ public sealed partial class ReadingHub
                 return;
             if (rt.InSample)
             {
-                rt.Buffer[path] = publication;
+                foreach (var (path, publication) in items)
+                    rt.Buffer[path] = publication;
                 return;
             }
 
-            CommitLocked(rt, [new KeyValuePair<string, Publication>(path, publication)], isSample: false, changed);
+            CommitLocked(rt, items, isSample: false, changed);
         }
 
         Raise(changed);
@@ -692,6 +699,19 @@ public sealed partial class ReadingHub
 
         public void Unavailable(string path, string reason) =>
             hub.PublishFromProvider(runtime, generation, path, new Publication(null, reason));
+
+        public void PublishBatch(IReadOnlyList<ReadingUpdate> updates)
+        {
+            var items = new List<KeyValuePair<string, Publication>>(updates.Count);
+            foreach (var update in updates)
+            {
+                if (!string.IsNullOrEmpty(update.Path))
+                    items.Add(new(update.Path, new Publication(update.Value, update.Value == null ? update.Reason ?? "unavailable" : null)));
+            }
+
+            if (items.Count > 0)
+                hub.PublishFromProvider(runtime, generation, items.ToArray());
+        }
 
         public void Log(string message) =>
             UrDeckLog.Info($"Provider '{runtime.Descriptor.Id}': {message}");
