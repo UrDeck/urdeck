@@ -12,7 +12,12 @@ on a PC with neither the .NET SDK nor a .NET or Windows App SDK runtime installe
 - `plugins/` with every first-party widget and provider assembly that the build places in the build output's
   `plugins/`
 - `urdeck.ico` and the sample page as `urdeck-config.default.json`
+- `LICENSE`, `PLUGIN-EXCEPTION.md` and `THIRD-PARTY-NOTICES.md`. The notices cover every third-party component in the
+  folder: the .NET runtime, the Windows App SDK, SkiaSharp, Velopack and the material listed there today
 - No `urdeck-config.json` and no `urdeck.portable`: a published copy runs in per-user mode (see data-folder)
+
+When a version is given to the publish (see release-process, "Version Numbers"), the host, the engine and the first-party
+plugins carry it; the SDK does not.
 
 The folder can be copied anywhere and started from there; it needs write access only to the data folder.
 
@@ -33,6 +38,11 @@ configuration, log and user files in its own folder. The build never writes `urd
   host rebuilt
 - **THEN** the build output's `urdeck-config.json` still holds the edited configuration, and
   `urdeck-config.default.json` holds the new sample
+
+#### Scenario: Notices shipped
+- **WHEN** the published folder is listed
+- **THEN** it holds `LICENSE`, `PLUGIN-EXCEPTION.md` and `THIRD-PARTY-NOTICES.md`, and the notices name SkiaSharp and
+  Velopack with their licences
 
 ### Requirement: Local Install
 The repository MUST provide one command that installs the current sources for the current user

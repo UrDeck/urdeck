@@ -9,6 +9,9 @@ The host MUST keep the user's files in one data folder, chosen once at startup b
 
 - **Portable mode:** when a file named `urdeck.portable` is in the application folder (the folder of
   `UrDeck.Host.exe`), the data folder is the application folder. The marker's content is ignored
+- **Portable release:** when the copy runs from the portable zip of a release (see release-process, "Release Assets"), the
+  data folder is the folder the zip was unpacked into, which holds the application folder and is not replaced by an
+  update. The log names it as `Data folder: <path> (portable release)`
 - **Per-user mode:** otherwise the data folder is `UrDeck` in the user's roaming application data folder
   (`%APPDATA%\UrDeck`)
 - The choice is made once per process. Adding or removing the marker takes effect at the next start
@@ -26,6 +29,12 @@ The host MUST keep the user's files in one data folder, chosen once at startup b
 - **WHEN** the host starts from a folder that holds `urdeck.portable`
 - **THEN** its configuration, log, themes, backgrounds, plugins and cache are in that folder, and nothing is written
   to `%APPDATA%\UrDeck`
+
+#### Scenario: Portable release survives its update
+- **WHEN** the portable zip of `0.1.0` is unpacked into `D:\UrDeck`, the page is edited, and the copy updates itself to
+  `0.2.0`
+- **THEN** the configuration is in `D:\UrDeck`, not in the application folder inside it, and the updated copy shows the
+  edited page
 
 #### Scenario: Log names the folder
 - **WHEN** the host starts in per-user mode

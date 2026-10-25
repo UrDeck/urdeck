@@ -10,9 +10,12 @@ The tray icon MUST open a native popup menu on right-click:
   to the list and nothing in the tray code changes
 - An entry may also say whether it is checked. That is asked every time the menu opens, and a checked entry is shown
   with the menu's standard check mark. An entry that does not say so has no check mark
-- The menu has four entries, in this order: **Settings** (the same action as a left click), **Open data folder**
-  (opens the data folder in File Explorer; see data-folder, "Opening The Data Folder"), **Start with Windows**
-  (checked as autostart, "Autostart Entry", says) and **Quit**
+- An entry may also say whether it is shown, and may give its label when the menu opens. Both are asked every time the
+  menu opens
+- The menu has these entries, in this order: **Restart to update to <version>** (shown only while an update is ready;
+  see app-updates, "Update Check"), **Settings** (the same action as a left click), **Open data folder** (opens the
+  data folder in File Explorer; see data-folder, "Opening The Data Folder"), **Start with Windows** (checked as
+  autostart, "Autostart Entry", says) and **Quit**
 - Choosing an entry runs its action; dismissing the menu (a click elsewhere, Escape) runs nothing and leaves the menu
   closed
 - Opening the menu does not take focus from the window that has it, other than the menu itself while it is open
@@ -24,6 +27,10 @@ The tray icon MUST open a native popup menu on right-click:
 #### Scenario: Open data folder entry
 - **WHEN** the user right-clicks the icon and chooses Open data folder
 - **THEN** File Explorer opens the data folder and the host keeps running
+
+#### Scenario: Update entry
+- **WHEN** an update to `0.2.0` is ready and the user opens the menu
+- **THEN** the first entry is "Restart to update to 0.2.0"; with no update ready the menu has no such entry
 
 #### Scenario: Quit closes the host
 - **WHEN** the user right-clicks the icon and chooses Quit
