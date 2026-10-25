@@ -694,7 +694,11 @@ settled unless it says otherwise.
   uninstall, so item 15's data folder comes first. `VelopackApp.Build().Run()` goes at the top of `Program.Main`, before
   `--snapshot`, `--quit` and the guard; its uninstall hook removes the Run key, and an update quits the running copy with
   the existing `--quit` handshake. `scripts/Install-Local.ps1` is retired or becomes "install the locally packed build".
-- **Signing:** SignPath Foundation (free for open source; the certificate names "SignPath Foundation" as publisher). Its
+- **Signing (deferred 2026-10-24):** the application to SignPath Foundation asks for a "Reputation" section (links showing the
+  project is widely used or trusted: coverage, download statistics, community discussion), which a project with no users cannot
+  fill. `signing-and-store` stays in `openspec/changes/` with only its privacy page done (task 1.1); the code-signing policy page
+  was removed until signing is real. Revisit when there are users, or sign sooner with Azure Artifact Signing (same design,
+  `--signTemplate`). The plan as decided: SignPath Foundation (free for open source; the certificate names "SignPath Foundation" as publisher). Its
   terms want a project already released in the form to be signed and builds with origin verification (GitHub-hosted
   runners), so 0.1 ships unsigned with the SmartScreen warning explained, and signing starts with the next release. The
   site needs a code-signing policy page and a privacy statement (what the app sends over the network: weather, site
@@ -802,7 +806,15 @@ Collected while the milestones were drawn up. Each names the milestone that need
   1920x1080 monitor two rows of very large cells. Decide whether the column count follows the monitor's shape or is a
   page setting. This touches the grid spec and every widget's composition, so decide before the editor is built.
 - **Code signing** (milestone 2). An unsigned download is blocked by SmartScreen, which is a poor start for a project
-  whose point is trust. Decided 2026-10-24: SignPath Foundation, from the release after 0.1 (item 12).
+  whose point is trust. Decided 2026-10-24: SignPath Foundation, from the release after 0.1 (item 12). **Deferred the same day**:
+  its application wants proof of reputation the project does not have yet (item 12).
+- **Plugin trust rating** (idea, 2026-10-24; milestone 5/6, with the marketplace). Plugins are unsandboxed .NET DLLs, so UrDeck
+  cannot promise what a third-party plugin does with the network or the user's data (the privacy page says so). A bronze / silver /
+  gold medallion in the marketplace could say what was checked: for example bronze = source published and builds from it,
+  silver = no network access and no telemetry found by review plus `urdeck-cli check` (which could flag `System.Net`, sockets, and
+  process starts), gold = silver plus a reproducible build or a second reviewer. It is an attestation, not enforcement; real
+  enforcement needs a capability declaration the host can check, or a sandbox. Decide with the capability declarations (item 3).
+  The privacy page links the rating once it exists.
 - **Hardware reports** (milestone 2). An issue template that asks for the lines `urdeck.log` already writes (monitors,
   GPUs and the source of each reading), and a compatibility table in the docs fed from them.
 - **Settings metadata in the SDK** (milestone 3). Labels, ranges, choices and "this is a reading id" or "this is a
