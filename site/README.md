@@ -30,6 +30,14 @@ the `site` job of a pull request:
   every built-in theme, background and widget is on a documentation page. A failure lists what is missing. A cookbook recipe
   without a picture is named in the build log, a warning, as a theme without a deck is.
 
+## The download button
+
+The landing page's button links `https://github.com/UrDeck/urdeck/releases/latest/download/UrDeck-win-Setup.exe`, which GitHub
+resolves to the latest stable release when it is clicked. The version, date and links beside it are read from the GitHub
+Releases API at build time (`src/lib/release.mjs`, with `GITHUB_TOKEN` when set); the visitor's browser asks GitHub for
+nothing. If the API cannot be read, the build warns and the button leads to the releases page without a version. A stable
+release that lacks `UrDeck-win-Setup.exe` fails the build. `site-deploy.yml` runs again when a release is published.
+
 ## Where things are
 
 Content and layout are kept apart, so a new design replaces the second without touching the first.

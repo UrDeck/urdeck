@@ -8,7 +8,7 @@ SignPath Foundation signs through its own service. A GitHub Actions step uploads
 request, and waits for the signed artifact; the service checks the request's origin (repository, branch, workflow,
 GitHub-hosted runner), and a policy can require a manual approval. Microsoft Store policy 10.2.9 lists an EXE by a
 versioned HTTPS address and wants the installer and all its PE files signed, a silent install and an unchanging binary
-at that address. The website promises (website, "Download State") to offer no file until a release is signed.
+at that address. The website's "Download State" (made by `site-download-link`) already offers the latest stable release's installer, with a note that unsigned releases may meet SmartScreen.
 
 ## Goals / Non-Goals
 
@@ -55,8 +55,8 @@ organization, project and policy slugs are variables.
 
 **5. The site's download control uses GitHub's latest-release address,**
 `https://github.com/UrDeck/urdeck/releases/latest/download/UrDeck-win-Setup.exe`. It always serves the latest stable
-release, because prereleases are never "latest", and needs no site rebuild per release. The switch from "coming soon"
-is one pull request made after the first signed release is published. The links are ordinary links the visitor
+release, because prereleases are never "latest", and needs no site rebuild per release. `site-download-link` already put it
+on the page; after the first signed release is published, one pull request removes the SmartScreen note and adds the Store link. The links are ordinary links the visitor
 follows, so website "Visitor Privacy" holds.
 
 **6. Store submissions stay manual.** Partner Center's form takes the versioned address and the `--silent` parameter.
@@ -92,5 +92,5 @@ code-signing policy page. The release workflow already refuses to reuse a versio
    policy page.
 2. On acceptance: set up the SignPath project, artifact configuration and release policy; add the `release` environment
    and its secret; run the spike on a throwaway version (`0.1.1-rc.1`, deleted afterwards).
-3. Publish the policy and privacy pages, then make the first signed release, then switch the site's download control.
+3. Publish the policy and privacy pages, then make the first signed release, then drop the SmartScreen note from the site's download control.
 4. Reserve the name in Partner Center, prepare the listing, and submit the first signed stable release.
