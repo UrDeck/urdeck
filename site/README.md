@@ -161,8 +161,8 @@ all 4 to 6 s. A loop over its size is encoded again once at `-crf 32`; if it is 
 its size and the limit.
 
 **Refreshing.** The *Site media* workflow (Actions, run by hand; tick "all" to render everything) renders what is stale on
-Linux and opens a pull request `chore(site): refresh media`, or says the media are current. CI reports how many files are
-stale (a notice and the job summary, never a failure). See `CONTRIBUTING.md`, "Refreshing the site's media", for the
+Linux and opens a pull request `chore(site): refresh media`, or says the media are current. CI does not check for stale
+media. See `CONTRIBUTING.md`, "Refreshing the site's media", for the
 GitHub App the workflow uses.
 
 **Size.** The first full generation (11 themes, 4 widgets in 13 sizes, 16 backgrounds) is recorded below; unchanged pixels
