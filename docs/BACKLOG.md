@@ -321,7 +321,10 @@ What the exploration settled (it replaced the earlier "named topics with typed v
   policy 10.2.4 (a dependency on a third-party driver is "generally not allowed", considered case by case, and must be
   disclosed in the certification notes); see item 12.
 
-The three changes are listed under "Suggested order". Left for later, each with the change or consumer that needs it:
+The three changes are listed under "Suggested order". `provider-actions` (issue #108, 2026-10-25) adds the path back: a provider
+may implement `IActionProvider`, a widget calls `Actions.Invoke("provider:path", argument)` and gets a result (per-provider
+ordered queue of at most eight, 10 s limit, a failed result for every error, one log line per action); `now-playing` (item 7)
+is the first consumer. Left for later, each with the change or consumer that needs it:
 
 - Provider-defined settings and secrets (a Home Assistant URL and token): with the first provider that needs them. The
   weather location no longer needs provider settings: it is per widget and travels in the reading id (item 7), so
@@ -414,7 +417,7 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 | Weather | 4x2 (done in `weather`) | animated colour icon (day and night variants), temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | Lottie icons, per-widget locations, the time reading, patterned catalogs; see "Weather widget" below |
 | Weather, 4x4 (done in `weather-4x4-forecast`) | 4x4 | everything of the 4x2 plus feels like, humidity and wind, the snow total, and 1 to 7 forecast columns (weekday, icon, high and low, chance, rain, snow) | the 4x2 weather change | forecast readings (`daily/N/...`), the date, speed and depth reading kinds |
 | Shortcut | 1x1 (done in `shortcut-and-tap`) | the icon of an application, a file, a folder or a web address; opens it on tap; settings `target`, `arguments`, `icon`, `label` | item 8 (touch) | tap input (`ITapTarget`), the launch and icon services, the image tile; all shared with the dock (item 10) |
-| Media / now playing | open | track, artist, art, controls | items 3 and 8 | image tile reuse |
+| Media / now playing | open | track, artist, art, controls | items 3 and 8 (actions: done, `provider-actions`) | image tile reuse |
 | Web page | open | any web page, with touch (the owner shows Frigate camera feeds this way in Nexus) | item 14 (new host), item 8 | a hosted widget kind: the host places a web view layer instead of calling `Render` |
 | Camera (parked) | open | camera streams without a browser, for example from Frigate's go2rtc | item 9 for real video | reuses the video layer; a first version could draw snapshots on the canvas |
 
@@ -557,6 +560,8 @@ Notes: sensors that need elevation likely via LibreHardwareMonitor in an opt-in 
 via a keyless API such as Open-Meteo; Meteocons (MIT, full-colour, Lottie) is a candidate for animated weather art.
 
 ## 8. Pages and touch
+
+**Status (2026-10-25):** the action path from a widget to a provider is done (`provider-actions`, item 3); `now-playing` is next.
 
 **Status (2026-10-09):** pages, swipe, the indicator and the no-focus window are done (`pages-and-pager`). Taps are
 done (`shortcut-and-tap`): a widget opts in with `UrDeck.Sdk.Input.ITapTarget`, the host finds the widget under the

@@ -20,11 +20,12 @@ public sealed class WidgetServices : IWidgetHost, IIconSource, IDisposable
     private readonly IconService? _icons;
     private volatile bool _disposed;
 
-    internal WidgetServices(IReadingSource readings, ILauncher launcher, IconService? icons)
+    internal WidgetServices(IReadingSource readings, ILauncher launcher, IconService? icons, IActionInvoker? actions = null)
     {
         Readings = readings;
         Launcher = launcher;
         _icons = icons;
+        Actions = actions ?? NullActions.Instance;
     }
 
     public IReadingSource Readings { get; }
@@ -32,6 +33,8 @@ public sealed class WidgetServices : IWidgetHost, IIconSource, IDisposable
     public ILauncher Launcher { get; }
 
     public IIconSource Icons => this;
+
+    public IActionInvoker Actions { get; }
 
     public void Log(string message) => UrDeckLog.Info(message);
 
@@ -60,4 +63,13 @@ public sealed class WidgetServices : IWidgetHost, IIconSource, IDisposable
         RepaintRequested = null;
         _icons?.Release(this);
     }
+}
+
+/// <summary>The invoker of a services object made without a hub: every action fails.</summary>
+internal sealed class NullActions : IActionInvoker
+{
+    public static readonly NullActions Instance = new();
+
+    public Task<ActionResult> Invoke(string id, ReadingValue? argument = null) =>
+        Task.FromResult(ActionResult.Failed("the host offers no actions"));
 }

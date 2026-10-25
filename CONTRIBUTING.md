@@ -461,6 +461,48 @@ public sealed class ExampleProvider : IDataProvider
 - **Not yet.** Provider settings and secrets (a URL, a token), image values and a catalog that changes while running
   come with the first provider that needs them.
 
+### Actions
+
+A provider that a widget should be able to *tell* something (skip a track, toggle a switch) also implements `IActionProvider`,
+beside `IDataProvider` and in the same class. A provider that does not is never asked and nothing else about it changes.
+
+```csharp
+public sealed class ExampleProvider : IDataProvider, IActionProvider
+{
+    public IReadOnlyList<ActionDescriptor> DescribeActions() =>
+        [new ActionDescriptor("control/next", "Next", "Skip to the next track")];
+
+    public async Task<ActionResult> InvokeAsync(string path, ReadingValue? argument, CancellationToken cancellationToken)
+    {
+        if (path != "control/next")
+            return ActionResult.Failed($"no action '{path}'");
+        await SkipAsync(cancellationToken);
+        return ActionResult.Done;
+    }
+    // ... the IDataProvider members
+}
+```
+
+- **Addressing.** An action id is written like a reading id, `<provider id>:<path>` (`media:control/next`,
+  `homeassistant:switch.desk_lamp/toggle`), so a widget never names a provider type. The path and its grammar are yours.
+  There is at most one optional argument, a `ReadingValue` (a volume, a brightness); a provider that needs two values makes
+  two actions or puts one in the path. A widget calls `Actions.Invoke(id, argument)`.
+- **Validation is yours.** The engine checks that the id parses and that the provider is running and implements the
+  interface; whether the path is one of your actions is for `InvokeAsync`, which answers `ActionResult.Failed(message)` when
+  it is not. `DescribeActions` is for editors and documentation and must not need `Start`.
+- **Overlap with sampling.** `InvokeAsync` can run while `SampleAsync` runs, on another thread. Guard what they share. It is
+  never called before `Start` or after `Shutdown`.
+- **Order and limits.** The actions of one provider run one at a time, in the order they were asked, on the thread pool; at
+  most eight wait (a ninth fails at once as busy). An action that does not finish within 10 seconds has its token cancelled
+  and fails as a timeout; the next one runs without waiting for you, so honour the token. When the provider stops (nothing
+  subscribes to it any more, or a plugin reload), waiting actions fail.
+- **A running provider only.** The engine never starts a provider for an action. A widget that acts on a provider also
+  subscribes to one of its readings, which keeps it running while the widget is shown.
+- **Results.** Return `ActionResult.Done` or `ActionResult.Failed(message)`; a thrown exception is a failed result with its
+  message. Every action leaves one line in `urdeck.log`: `Action 'media:control/next': done (12 ms)` or `failed: <message>`.
+  The argument's value is not logged. The effect of an action shows in the next reading; the SDK keeps no optimistic state.
+- **Demo.** A provider replaced by its sample file offers no actions, so `--demo` and the preview perform none.
+
 Windows-only APIs need `[SupportedOSPlatform("windows")]` on the provider class when the project targets plain `net10.0`.
 
 ### Sample files

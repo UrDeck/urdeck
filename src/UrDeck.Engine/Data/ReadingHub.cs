@@ -14,7 +14,7 @@ namespace UrDeck.Engine.Data;
 /// (lock-free, never blocking); the host subscribes the readings of the widgets it shows. A provider is created when a
 /// reading of it is first subscribed to, sampled on the thread pool and stopped after a linger once nothing uses it.
 /// </summary>
-public sealed partial class ReadingHub : IReadingSource, IDisposable
+public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDisposable
 {
     private static readonly TimeSpan Linger = TimeSpan.FromSeconds(5);
 
