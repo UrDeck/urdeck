@@ -1,0 +1,69 @@
+name: Widget or data provider
+description: Propose a widget, a data provider, or the SDK or engine groundwork they need.
+title: "Idea: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A provider fetches data and publishes readings; a widget draws them. Many ideas need only a provider, because the
+        stats widget shows any reading from any provider. Look through `docs/BACKLOG.md` item 7 first: it may already be planned.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - Data provider
+        - Widget
+        - Data provider and widget
+        - SDK or engine groundwork
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What it does
+      description: What the user sees or gets, in a sentence or two.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Data source
+      description: |
+        For a provider: the API, protocol or Windows interface, whether it polls or is pushed to, how often, whether it needs
+        a key or a login, and whether it works on Windows only. Leave empty for a widget that needs no provider.
+  - type: textarea
+    id: readings
+    attributes:
+      label: Readings
+      description: The reading ids and units a provider publishes, or that a widget consumes.
+      placeholder: |
+        homeassistant:sensor.office_temperature (°C)
+        homeassistant:switch.desk_lamp (on/off)
+  - type: textarea
+    id: widget
+    attributes:
+      label: Widget sizes and layout
+      description: Which sizes (1x1, 2x2, 4x2, 4x4, dock slot) and what each one shows. Which SDK components it uses. Leave empty for a provider only.
+  - type: textarea
+    id: interaction
+    attributes:
+      label: Interaction
+      description: What a tap does, and any action that goes back to the provider or the system (a service call, a command).
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Depends on
+      description: Other issues, groundwork (text layout, charts, widget-to-provider actions, credential storage) or backlog items.
+  - type: textarea
+    id: cost
+    attributes:
+      label: Privacy and cost
+      description: |
+        What it sends over the network and to whom (the privacy page lists every request), where any secret is kept, and what
+        it costs when idle (the budget is close to 0% CPU and GPU; `CONTRIBUTING.md`, performance budgets).
+  - type: textarea
+    id: questions
+    attributes:
+      label: Open questions and out of scope

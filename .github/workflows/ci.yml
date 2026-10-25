@@ -187,32 +187,6 @@ jobs:
           # every recipe of the site's theme cookbook is a theme folder and checks clean (docs/cookbook pages show these files).
           $cli theme validate --all site/cookbook --fail-on-warnings
 
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: site/.nvmrc
-          cache: npm
-          cache-dependency-path: site/package-lock.json
-
-      - name: Install the site's tools
-        run: npm ci
-        working-directory: site
-
-      # Non-blocking: how many of the site's generated pictures and loops are out of date (site/README.md, "Media").
-      - name: Site media staleness
-        continue-on-error: true
-        working-directory: site
-        run: |
-          out="$(npm run --silent media -- --status)"
-          echo "$out"
-          {
-            echo '### Site media'
-            echo
-            echo '```'
-            echo "$out"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice title=Site media::$(echo "$out" | sed -n 2,4p | xargs)"
-
   openspec:
     needs: changes
     if: needs.changes.outputs.openspec == 'true'
@@ -254,6 +228,7 @@ jobs:
         run: npm test
 
       # No .NET in this job: the report uses the committed site/src/generated/catalog.json and says so.
+      # Keep it that way: with .NET on the runner, `--status` builds urdeck-cli and renders probe frames for every entry (26 minutes).
       - name: Site media staleness
         continue-on-error: true
         working-directory: site

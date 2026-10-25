@@ -48,6 +48,9 @@ public interface IWidgetHost
 
     /// <summary>The icons of applications, files and web addresses. The default has none.</summary>
     IIconSource Icons => NullIconSource.Instance;
+
+    /// <summary>Asks a provider to do something (skip a track, toggle a switch). The default fails every action.</summary>
+    IActionInvoker Actions => NullActionInvoker.Instance;
 }
 
 /// <summary>The reading source of a widget that was never attached: everything is unavailable.</summary>

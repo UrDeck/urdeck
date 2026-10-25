@@ -1,0 +1,112 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Privacy" description="UrDeck collects nothing about you. What the app does send over the network, to whom, why, and how to turn each off.">
+  <h1>Privacy</h1>
+
+  <p>
+    UrDeck does not watch you. It has no telemetry, no analytics, no account, no advertising identifier and no crash
+    reporter. Nothing you type, show or configure is collected, so there is nothing to sell, leak or train anything on.
+  </p>
+
+  <p>
+    That is a design rule, not a setting. Too much software quietly reports on the people who use it, and a program that
+    sits on your desk all day and draws your CPU load and launches your programs has no business
+    joining in. UrDeck keeps your page, your log and your cache in one folder on your PC
+    (<code>%APPDATA%\UrDeck</code>, or the folder you unpacked a portable copy into), and that is where they stay.
+  </p>
+
+  <h2>What we promise</h2>
+  <p>These are promises about UrDeck as this project ships it: the program and the widgets and providers that come with it. <a href="#plugins">Plugins by other people</a> are a separate matter.</p>
+  <ul>
+    <li><strong>No telemetry.</strong> The program never reports how, when or how much you use it, or what hardware you have.</li>
+    <li><strong>No account.</strong> There is nothing to sign in to, and no server of ours to sign in to.</li>
+    <li><strong>No tracking on this site.</strong> It sets no cookies, runs no analytics and loads nothing from other servers, not even fonts.</li>
+    <li><strong>Your files are yours.</strong> Configuration, themes and logs are plain files in your data folder. Nothing is uploaded, and deleting the folder removes everything.</li>
+    <li><strong>The log stays on your PC.</strong> <code>urdeck.log</code> records what the app does (monitors found, widgets placed, warnings) so that you can see why something went wrong. It is never sent anywhere. If you report a problem, you copy the lines you choose into the issue yourself.</li>
+    <li><strong>The code is open.</strong> You do not have to take our word for any of this; the <a href="https://github.com/UrDeck/urdeck">source</a> is public and every request below can be found in it.</li>
+    <li><strong>This page stays true.</strong> A change that adds or alters a request the app makes updates this page in the same change.</li>
+  </ul>
+
+  <h2>The requests the app does make</h2>
+  <p>
+    A widget that shows the weather has to ask a weather service, and an app that updates itself has to ask where the update
+    is. These are all of them. Each is an ordinary encrypted (https) request, so the other side necessarily sees your IP
+    address and the program's name and version (<code>UrDeck/&lt;version&gt;</code>), as any web server would.
+  </p>
+
+  <table>
+    <thead>
+      <tr><th scope="col">What</th><th scope="col">To whom</th><th scope="col">What it carries</th><th scope="col">When</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Update check</th>
+        <td>GitHub (the releases of <code>UrDeck/urdeck</code>)</td>
+        <td>A request for the list of releases, and for the files of a newer one. No account, no token, nothing about you or your PC.</td>
+        <td>About a minute after start, then once a day. Only in an installed copy.</td>
+      </tr>
+      <tr>
+        <th scope="row">Place search</th>
+        <td>Open-Meteo (<code>geocoding-api.open-meteo.com</code>)</td>
+        <td>The place name as you typed it in a weather widget's settings.</td>
+        <td>When a place is not known yet, and when you change it.</td>
+      </tr>
+      <tr>
+        <th scope="row">Weather forecast</th>
+        <td>Open-Meteo (<code>api.open-meteo.com</code>)</td>
+        <td>The coordinates of the places of your weather widgets.</td>
+        <td>Every 15 minutes (at the shortest every 5) while a weather widget is on a page.</td>
+      </tr>
+      <tr>
+        <th scope="row">Site icons</th>
+        <td>The web site a shortcut points at</td>
+        <td>A request for its front page and for the icons it names, the way a browser would.</td>
+        <td>When a shortcut to a web address has no icon of its own and none is cached; a cached icon is refreshed after 30 days.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Nothing else leaves your PC from UrDeck and its bundled plugins. UrDeck sends no readings of your system, no page layout, no log and no crash report.
+  </p>
+
+  <h2 id="plugins">Plugins by other people</h2>
+  <p>
+    UrDeck can load widgets and data providers written by others. A plugin is a program that runs with your user's rights,
+    and UrDeck does not sandbox it, so we cannot promise what a plugin does. A plugin could make network requests or collect
+    data, and the tables on this page do not cover it. Install only plugins whose source you can read or whose author you
+    trust, and watch what a plugin does with a firewall if it matters to you. The plugins that ship with UrDeck are the ones
+    this page describes. The log lists each widget and provider that registers, so you can see what is running.
+  </p>
+
+  <h2>What those requests can tell someone</h2>
+  <p>It is better to say it plainly than to hide it in a table:</p>
+  <ul>
+    <li>Open-Meteo learns the places you ask the weather for, and so roughly where you are or care about, along with your IP address. The place search sends exactly what you typed.</li>
+    <li>A site you put on a shortcut learns that someone at your IP address runs UrDeck and has that site on their deck.</li>
+    <li>GitHub learns that your IP address asked for UrDeck's releases about once a day, which tells it that UrDeck is installed there.</li>
+  </ul>
+  <p>UrDeck does not combine these, keep a record of them or pass them on. Each goes straight from your PC to the service named.</p>
+
+  <h2>Turning each off</h2>
+  <ul>
+    <li><strong>Update check:</strong> add <code>"updates": "off"</code> to <code>urdeck-config.json</code>. A copy you built yourself or ran from a folder never checks.</li>
+    <li><strong>Place search and forecast:</strong> do not use a weather widget. Without one, the weather provider makes no request.</li>
+    <li><strong>Site icons:</strong> give the shortcut an <code>icon</code> of its own (a local image file), or point it at something that is not a web address. A shortcut with its own icon makes no request.</li>
+  </ul>
+  <p>
+    With all three off, UrDeck makes no network connection at all. Your firewall or a network monitor will confirm it.
+  </p>
+
+  <h2>This website</h2>
+  <p>
+    <a href="/">urdeck.app</a> is a static site served by GitHub Pages. It sets no cookies and runs no scripts that phone home.
+    GitHub, as the host, keeps the ordinary server logs any host keeps; that is outside our reach and outside this page.
+  </p>
+
+  <h2>Other parties</h2>
+  <p>
+    GitHub and Open-Meteo handle the requests above under their own privacy policies. Weather data is by <a href="https://open-meteo.com/">Open-Meteo.com</a>. The source of the program is <a href="https://github.com/UrDeck/urdeck">public</a>, so every statement here can be checked.
+  </p>
+</Base>

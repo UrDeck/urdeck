@@ -321,7 +321,10 @@ What the exploration settled (it replaced the earlier "named topics with typed v
   policy 10.2.4 (a dependency on a third-party driver is "generally not allowed", considered case by case, and must be
   disclosed in the certification notes); see item 12.
 
-The three changes are listed under "Suggested order". Left for later, each with the change or consumer that needs it:
+The three changes are listed under "Suggested order". `provider-actions` (issue #108, 2026-10-25) adds the path back: a provider
+may implement `IActionProvider`, a widget calls `Actions.Invoke("provider:path", argument)` and gets a result (per-provider
+ordered queue of at most eight, 10 s limit, a failed result for every error, one log line per action); `now-playing` (item 7)
+is the first consumer. Left for later, each with the change or consumer that needs it:
 
 - Provider-defined settings and secrets (a Home Assistant URL and token): with the first provider that needs them. The
   weather location no longer needs provider settings: it is per widget and travels in the reading id (item 7), so
@@ -414,7 +417,7 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 | Weather | 4x2 (done in `weather`) | animated colour icon (day and night variants), temperature, condition, high and low, place, sunrise and sunset | item 14, item 3 (it is a provider plus a widget) | Lottie icons, per-widget locations, the time reading, patterned catalogs; see "Weather widget" below |
 | Weather, 4x4 (done in `weather-4x4-forecast`) | 4x4 | everything of the 4x2 plus feels like, humidity and wind, the snow total, and 1 to 7 forecast columns (weekday, icon, high and low, chance, rain, snow) | the 4x2 weather change | forecast readings (`daily/N/...`), the date, speed and depth reading kinds |
 | Shortcut | 1x1 (done in `shortcut-and-tap`) | the icon of an application, a file, a folder or a web address; opens it on tap; settings `target`, `arguments`, `icon`, `label` | item 8 (touch) | tap input (`ITapTarget`), the launch and icon services, the image tile; all shared with the dock (item 10) |
-| Media / now playing | open | track, artist, art, controls | items 3 and 8 | image tile reuse |
+| Media / now playing | open | track, artist, art, controls | items 3 and 8 (actions: done, `provider-actions`) | image tile reuse |
 | Web page | open | any web page, with touch (the owner shows Frigate camera feeds this way in Nexus) | item 14 (new host), item 8 | a hosted widget kind: the host places a web view layer instead of calling `Render` |
 | Camera (parked) | open | camera streams without a browser, for example from Frigate's go2rtc | item 9 for real video | reuses the video layer; a first version could draw snapshots on the canvas |
 
@@ -558,6 +561,8 @@ via a keyless API such as Open-Meteo; Meteocons (MIT, full-colour, Lottie) is a 
 
 ## 8. Pages and touch
 
+**Status (2026-10-25):** the action path from a widget to a provider is done (`provider-actions`, item 3); `now-playing` is next.
+
 **Status (2026-10-09):** pages, swipe, the indicator and the no-focus window are done (`pages-and-pager`). Taps are
 done (`shortcut-and-tap`): a widget opts in with `UrDeck.Sdk.Input.ITapTarget`, the host finds the widget under the
 pointer, shows the press from pointer-down with the theme's `press` values and delivers the tap on release; a swipe, a
@@ -694,7 +699,11 @@ settled unless it says otherwise.
   uninstall, so item 15's data folder comes first. `VelopackApp.Build().Run()` goes at the top of `Program.Main`, before
   `--snapshot`, `--quit` and the guard; its uninstall hook removes the Run key, and an update quits the running copy with
   the existing `--quit` handshake. `scripts/Install-Local.ps1` is retired or becomes "install the locally packed build".
-- **Signing:** SignPath Foundation (free for open source; the certificate names "SignPath Foundation" as publisher). Its
+- **Signing (deferred 2026-10-24):** the application to SignPath Foundation asks for a "Reputation" section (links showing the
+  project is widely used or trusted: coverage, download statistics, community discussion), which a project with no users cannot
+  fill. `signing-and-store` stays in `openspec/changes/` with only its privacy page done (task 1.1); the code-signing policy page
+  was removed until signing is real. Revisit when there are users, or sign sooner with Azure Artifact Signing (same design,
+  `--signTemplate`). The plan as decided: SignPath Foundation (free for open source; the certificate names "SignPath Foundation" as publisher). Its
   terms want a project already released in the form to be signed and builds with origin verification (GitHub-hosted
   runners), so 0.1 ships unsigned with the SmartScreen warning explained, and signing starts with the next release. The
   site needs a code-signing policy page and a privacy statement (what the app sends over the network: weather, site
@@ -802,7 +811,15 @@ Collected while the milestones were drawn up. Each names the milestone that need
   1920x1080 monitor two rows of very large cells. Decide whether the column count follows the monitor's shape or is a
   page setting. This touches the grid spec and every widget's composition, so decide before the editor is built.
 - **Code signing** (milestone 2). An unsigned download is blocked by SmartScreen, which is a poor start for a project
-  whose point is trust. Decided 2026-10-24: SignPath Foundation, from the release after 0.1 (item 12).
+  whose point is trust. Decided 2026-10-24: SignPath Foundation, from the release after 0.1 (item 12). **Deferred the same day**:
+  its application wants proof of reputation the project does not have yet (item 12).
+- **Plugin trust rating** (idea, 2026-10-24; milestone 5/6, with the marketplace). Plugins are unsandboxed .NET DLLs, so UrDeck
+  cannot promise what a third-party plugin does with the network or the user's data (the privacy page says so). A bronze / silver /
+  gold medallion in the marketplace could say what was checked: for example bronze = source published and builds from it,
+  silver = no network access and no telemetry found by review plus `urdeck-cli check` (which could flag `System.Net`, sockets, and
+  process starts), gold = silver plus a reproducible build or a second reviewer. It is an attestation, not enforcement; real
+  enforcement needs a capability declaration the host can check, or a sandbox. Decide with the capability declarations (item 3).
+  The privacy page links the rating once it exists.
 - **Hardware reports** (milestone 2). An issue template that asks for the lines `urdeck.log` already writes (monitors,
   GPUs and the source of each reading), and a compatibility table in the docs fed from them.
 - **Settings metadata in the SDK** (milestone 3). Labels, ranges, choices and "this is a reading id" or "this is a

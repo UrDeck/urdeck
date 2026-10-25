@@ -41,7 +41,7 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
         _hub = new ReadingHub(_providers, time);
         _icons = new IconService(iconCacheFolder ?? Path.Combine(Path.GetTempPath(), "urdeck-icons"), time) { SiteIcons = demo == null };
         _launcher = new Launcher(time);
-        _registry.CreateServices = () => new WidgetServices(_hub, _launcher, _icons);
+        _registry.CreateServices = () => new WidgetServices(_hub, _launcher, _icons, _hub);
     }
 
     /// <summary>In demo mode, the ids of the providers that run as their sample; empty otherwise.</summary>

@@ -8,6 +8,9 @@ namespace UrDeck.Engine.Data;
 /// <summary>One thing a provider published: a value or a statement that the reading is unavailable.</summary>
 internal readonly record struct Publication(ReadingValue? Value, string? Reason);
 
+/// <summary>An action asked of a provider and not yet finished.</summary>
+internal sealed record PendingAction(string Id, string Path, ReadingValue? Argument, long Asked, TaskCompletionSource<ActionResult> Completion);
+
 /// <summary>
 /// The hub's state for one provider. Every field is guarded by the hub's gate except <see cref="DemandLock"/>, which
 /// only serializes calls to <see cref="IDataProvider.SetDemand"/>.
@@ -65,6 +68,18 @@ internal sealed class ProviderRuntime(ProviderDescriptor descriptor)
     public Dictionary<string, int> Misses { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     public int Failures { get; set; }
+
+    /// <summary>The actions waiting for this run of the provider; emptied (as failed) when the run ends.</summary>
+    public Queue<PendingAction> Actions { get; } = new();
+
+    /// <summary>Whether a task is working through <see cref="Actions"/>; belongs to the run it started in.</summary>
+    public bool ActionPumpRunning { get; set; }
+
+    /// <summary>Cancelled when the run ends, so an action in flight sees its token cancelled; null until the run's first action.</summary>
+    public CancellationTokenSource? ActionCts { get; set; }
+
+    /// <summary>The action catalog; kept across stops, dropped on release. Null until read.</summary>
+    public List<ActionDescriptor>? ActionCatalog { get; set; }
 
     public static TaskCompletionSource NewSignal() => new(TaskCreationOptions.RunContinuationsAsynchronously);
 }
