@@ -227,23 +227,6 @@ jobs:
       - name: Test the media generator
         run: npm test
 
-      # No .NET in this job: the report uses the committed site/src/generated/catalog.json and says so.
-      # Keep it that way: with .NET on the runner, `--status` builds urdeck-cli and renders probe frames for every entry (26 minutes).
-      - name: Site media staleness
-        continue-on-error: true
-        working-directory: site
-        run: |
-          out="$(npm run --silent media -- --status)"
-          echo "$out"
-          {
-            echo '### Site media'
-            echo
-            echo '```'
-            echo "$out"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice title=Site media::$(echo "$out" | sed -n 2,4p | xargs)"
-
   # Required status check, the one gate for the jobs above. Skipped counts as passed; failed or cancelled (a failed
   # `changes` included) fails it. Every job except pr-title belongs in `needs`: add a new job here in the pull request that adds it.
   ci-ok:
