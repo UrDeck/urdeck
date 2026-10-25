@@ -67,10 +67,12 @@ install, then what makes it work for a stranger, then trust. The release decisio
 - A tray icon with Quit (item 12; shipped in `tray-icon`), later the entry that opens the config editor.
 
 *C. Trust and feedback.*
-- Code signing through SignPath Foundation (`signing-and-store`), so the download is not blocked by SmartScreen (items 12 and 15). Its terms
-  want a project that is already released, so 0.1 ships unsigned with the SmartScreen warning explained, and signing
-  starts with the next release. The site gains a code-signing policy page and a privacy statement.
-- The Microsoft Store listing (`signing-and-store`): the same signed installer, submitted by URL (item 12). Not an MSIX.
+- **Deferred:** code signing through SignPath Foundation (`signing-and-store`), so the download is not blocked by SmartScreen
+  (items 12 and 15), and the Microsoft Store listing that needs it (the same signed installer, submitted by URL; not an MSIX).
+  SignPath's application asks for evidence of reputation (downloads, coverage, community), which a project with no users
+  cannot give yet. Revisit when there is some. 0.1 and later releases stay unsigned, with the SmartScreen warning explained;
+  Azure Artifact Signing ($9.99 a month) needs no reputation check and is the way to sign sooner if the warning costs users.
+- The privacy page (live): everything the app sends over the network, and the promise that it collects nothing.
 - A compatibility table: AMD and Intel GPUs, other panels (item 15). The hardware report issue template and the first "Tested on" page are done (`landing-site`); the table grows with reports.
 - The website at urdeck.app (live: landing page, user documentation, theme gallery, "Tested on").
 - Screenshots and a short clip in the README (the site's media pipeline renders them), issue templates, Discussions.

@@ -1,6 +1,8 @@
+> **Deferred (2026-10-24):** SignPath Foundation asks for evidence of reputation the project does not have yet. Only 1.1 (the privacy page) was done; the rest waits for users. See `docs/BACKLOG.md` item 12.
+
 ## 1. Pages first (needed by the SignPath application)
 
-- [ ] 1.1 Site: the app privacy statement page as website "App Privacy Statement" says (Open-Meteo, site icons, the update check, how to turn each off, no telemetry); check every network request in the engine, providers and host against it
+- [x] 1.1 Site: the app privacy statement page as website "App Privacy Statement" says (Open-Meteo, site icons, the update check, how to turn each off, no telemetry); check every network request in the engine, providers and host against it
 - [ ] 1.2 Site: the code signing policy page as website "Code Signing Policy Page" says (SignPath attribution, what is signed, roles, approval rule, the rule that a release submitted to the Store is never deleted or replaced); footer link; `npm run build` passes
 - [ ] 1.3 README: link both pages
 

@@ -61,4 +61,4 @@ first line says `Data folder: ... (portable release)`.
 - **The weather widget** asks Open-Meteo for the forecast of the places you configured.
 - **The shortcut widget** may ask a web site for its icon when you give it a web address.
 
-Nothing else leaves your PC.
+Nothing else leaves your PC. The [privacy page](/privacy/) lists these with what each one carries.

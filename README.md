@@ -17,6 +17,9 @@ UrDeck for you alone (no administrator rights) into `%LocalAppData%\UrDeck`, add
 `UrDeck-win-Setup.exe --silent` shows no window. The first releases are not signed, so Windows SmartScreen may say it protected
 your PC: choose **More info**, then **Run anyway**. Signing follows in a later release.
 
+UrDeck collects nothing about you. The [privacy page](https://urdeck.app/privacy/) lists the few requests the app makes over the
+network and how to turn each off.
+
 - **Updating:** an installed copy checks the releases of this repository about a minute after it starts and then once a day,
   downloads a newer one in the background and offers **Restart to update to `<version>`** in the tray menu. An update you do not
   choose is applied when you quit. A copy on a stable version takes only stable releases. This check is the one request UrDeck
