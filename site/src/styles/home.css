@@ -41,6 +41,8 @@
 .lede { margin: 2rem 0 0; max-width: 34rem; font-size: 1.25rem; line-height: 1.55; color: var(--muted); text-wrap: pretty; }
 .actions { margin-top: 2.5rem; display: flex; flex-wrap: wrap; gap: 0.875rem; }
 .hero .note { margin: 1.5rem 0 0; max-width: 30rem; line-height: 1.6; color: var(--dim); }
+.hero .note a { text-decoration: underline; }
+.hero .links-row { margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
 
 .device { position: relative; justify-self: center; width: 18.75rem; max-width: 100%; }
 .device-glow { position: absolute; inset: -2.5rem -3.75rem; background: radial-gradient(closest-side, rgba(110, 96, 240, 0.5), rgba(110, 96, 240, 0)); filter: blur(24px); }

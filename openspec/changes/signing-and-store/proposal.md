@@ -4,7 +4,7 @@ An unsigned download meets SmartScreen's warning, which is a poor first impressi
 trust, and the Microsoft Store refuses an installer whose files are not signed (Store policy 10.2.9). SignPath
 Foundation signs open source projects for free, but only a project that already has a release in the form to be
 signed. So this change follows the first unsigned release (`release-pipeline`, 0.1): signing is added to the release
-workflow, the site gains the pages SignPath and the Store ask for, the site's download button goes live, and the same
+workflow, the site gains the pages SignPath and the Store ask for, the site's download control (live since `site-download-link`) drops its unsigned-release note, and the same
 signed `Setup.exe` is listed in the Microsoft Store. The decisions are in backlog item 12 (2026-10-24).
 
 ## What Changes
@@ -22,8 +22,8 @@ signed `Setup.exe` is listed in the Microsoft Store. The decisions are in backlo
   - A privacy statement for the app: every request it makes (the weather provider to Open-Meteo, site icons from the
     sites a shortcut names, the daily update check to GitHub) and that it sends nothing else. The milestone 6 statement
     starts here.
-  - The landing page's download control offers the latest stable release's `Setup.exe` once that release is signed,
-    and the Store listing once it is live.
+  - The landing page's download control (already offering the latest stable release's `Setup.exe`, see
+    `site-download-link`) loses its SmartScreen note once releases are signed, and gains the Store listing once it is live.
 - **The Microsoft Store listing.** An "EXE or MSI app" in Partner Center that points at the versioned GitHub address of
   the latest stable release's `Setup.exe` with `--silent` as its install parameter, a listing made from the site's
   media, the privacy statement's address, and certification notes (self-updating under 10.2.9, no driver). Each stable

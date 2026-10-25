@@ -11,7 +11,7 @@
     "build": "astro build && node scripts/check-output.mjs",
     "preview": "astro preview",
     "media": "node scripts/render-media.mjs",
-    "test": "node --test scripts/media/lib.test.mjs scripts/completeness.test.mjs src/lib/accent.test.mjs src/lib/reference.test.mjs"
+    "test": "node --test scripts/media/lib.test.mjs scripts/completeness.test.mjs src/lib/accent.test.mjs src/lib/reference.test.mjs src/lib/release.test.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "8.1.0",

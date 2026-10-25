@@ -25,7 +25,7 @@
 ## 5. First signed release and the site
 
 - [ ] 5.1 Release the next stable version signed; install it on a clean account from the browser download (no "unknown publisher"); `Test-ReleaseSignatures.ps1` on the downloaded assets
-- [ ] 5.2 Site: the download control offers `releases/latest/download/UrDeck-win-Setup.exe` with the version line, requirements and links (website "Download State"); README drops the unsigned SmartScreen paragraph
+- [ ] 5.2 Site: remove the SmartScreen note from the download control (already offering `releases/latest/download/UrDeck-win-Setup.exe`, see `site-download-link`), add the Store link when it is live (website "Download State"); README and the installing page drop the unsigned SmartScreen paragraph
 
 ## 6. Microsoft Store
 

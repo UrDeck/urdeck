@@ -1,25 +1,16 @@
 ## MODIFIED Requirements
 
 ### Requirement: Download State
-Until a signed release exists, the landing page MUST NOT offer a file to download. The download control says that a
-download is coming and leads to the repository.
+The landing page MUST offer the installer of the latest stable release (see the base requirement) and, once releases
+are code signed, MUST NOT tell the visitor to expect a SmartScreen warning:
 
-Once a stable signed release exists:
-
-- The download control offers `UrDeck-win-Setup.exe` of the latest stable release, through GitHub's latest-release
-  download address, so the site does not change for each release
-- Next to it, the page names the version line ("0.x preview"), what the installer needs (Windows 10 or 11, x64, no
-  administrator rights) and a link to the portable zip and to all releases
-- When the Microsoft Store listing is live (see store-listing), the page also links it
-- An unsigned release and a prerelease are never offered by the site
-
-#### Scenario: No release yet
-- **WHEN** no signed stable release exists and a visitor uses the download control
-- **THEN** no file is downloaded and the visitor arrives at the repository on GitHub
+- The note about SmartScreen is removed from the landing page once the latest stable release is signed
+- When the Microsoft Store listing is live (see store-listing), the page also links it next to the download control
+- An unsigned release and a prerelease are never offered by the site once signing is in place
 
 #### Scenario: Signed release
-- **WHEN** signed `0.2.0` is the latest stable release and a visitor uses the download control
-- **THEN** the browser downloads `UrDeck-win-Setup.exe` of `0.2.0`
+- **WHEN** signed `0.2.0` is the latest stable release
+- **THEN** the download control offers its `UrDeck-win-Setup.exe` and the page carries no SmartScreen note
 
 #### Scenario: Store listing live
 - **WHEN** the Store listing is published

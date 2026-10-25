@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync, statSync, mkdirSync, copyFileSyn
 import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { completenessProblems } from './completeness.mjs';
+import { installerUrl, releasesUrl } from '../src/lib/release.mjs';
 import { allPaths, readRecords, readSchema } from '../src/lib/reference.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -163,6 +164,13 @@ if (existsSync(catalogFile)) {
     troubleshooting: existsSync(troubleshootingPage) ? readFileSync(troubleshootingPage, 'utf8') : '',
   });
   for (const gap of gaps) problems.push(`documentation: ${gap}`);
+}
+
+// 7. The landing page offers the installer ("Download State"): the permanent latest-release link, and no "coming soon".
+{
+  const home = readFileSync(join(dist, 'index.html'), 'utf8');
+  if (!home.includes(installerUrl) && !home.includes(releasesUrl)) problems.push('index.html: no download link (installer or releases page)');
+  if (/download:s*coming soon/i.test(home) || /There is no download yet/i.test(home)) problems.push('index.html: still says the download is coming');
 }
 
 if (problems.length > 0) {
