@@ -35,8 +35,10 @@
          positionally; the product has not shipped). The assembly version stays.
          Package 0.14.0 (preview-renderer): WidgetSizeAttribute.Preview. Additive, so the assembly version stays.
          Package 0.15.0 (provider-actions): Data.IActionProvider, ActionDescriptor, ActionResult and IActionInvoker,
-         IWidgetHost.Actions (default member) and Widget.Actions. All additive, so the assembly version stays. -->
-    <Version>0.15.0</Version>
+         IWidgetHost.Actions (default member) and Widget.Actions. All additive, so the assembly version stays.
+         Package 0.16.0 (now-playing): Components.ButtonRow, IIconSource.Release and IReadingSink.PublishBatch with ReadingUpdate
+         (default members). All additive, so the assembly version stays. -->
+    <Version>0.16.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

@@ -92,7 +92,7 @@ install, then what makes it work for a stranger, then trust. The release decisio
   Backgrounds as folders with a manifest, a lint and the `urdeck-cli` tool are planned next (item 9).
   The tool also checks themes (`theme validate`, `render`, `init`, `schema`); a later `urdeck-cli check <repository>` that classifies and checks a whole repository of themes, backgrounds and plugins is a direction, not planned work (`openspec/changes/theme-cli/design.md`).
 - The web page widget, a hosted widget kind (item 7). Also public SDK API.
-- Media / now playing (item 7); the SDK's action path to providers is in place (`provider-actions`), the widget and its provider are next.
+- Media / now playing (item 7): done in `now-playing` (the `media` provider and the 4x2 widget over the Windows media session, on the SDK's action path); other sizes and a choice of player are later.
 - The motion level as a theme or page setting, and the later theme knobs (items 5 and 14).
 - Pausing while the session is locked or the display is off (item 15).
 

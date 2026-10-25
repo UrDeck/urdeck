@@ -41,6 +41,10 @@
     "app/star": "x.svg",
     "app/heart": "x.svg",
     "app/bolt": "x.svg",
-    "app/chart": "x.svg"
+    "app/chart": "x.svg",
+    "media/play": "x.svg",
+    "media/pause": "x.svg",
+    "media/previous": "x.svg",
+    "media/next": "x.svg"
   }
 }

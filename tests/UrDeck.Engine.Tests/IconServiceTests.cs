@@ -274,6 +274,106 @@ public sealed class IconServiceTests : IDisposable
         Assert.Equal(2, Calls.Length);
     }
 
+    [Fact]
+    public void ReleasingASource_DisposesItsImage_AndKeepsTheOneThatIsStillShown()
+    {
+        const string A = @"C:\Art\a.png";
+        const string B = @"C:\Art\b.png";
+        var widget = NewHolder();
+        widget.Get(A);
+        Settle();
+        var imageA = widget.Get(A).Image!;
+
+        widget.Get(B);
+        Settle();
+        widget.Services.Icons.Release(A);
+
+        Assert.Equal(IntPtr.Zero, imageA.Handle);
+        Assert.Equal(1, _service.Count);
+        Assert.NotNull(widget.Get(B).Image);
+    }
+
+    [Fact]
+    public void ReleasingASourceAnotherWidgetStillShows_KeepsItsImage()
+    {
+        var a = NewHolder();
+        var b = NewHolder();
+        a.Get(Exe);
+        b.Get(Exe);
+        Settle();
+        var image = a.Get(Exe).Image!;
+
+        a.Services.Icons.Release(Exe);
+        Assert.Equal(1, _service.Count);
+        Assert.NotEqual(IntPtr.Zero, image.Handle);
+
+        b.Services.Icons.Release(Exe);
+        Assert.Equal(0, _service.Count);
+        Assert.Equal(IntPtr.Zero, image.Handle);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(@"C:\Never\asked.png")]
+    public void ReleasingASourceThatWasNeverAskedFor_DoesNothing(string? source)
+    {
+        var widget = NewHolder();
+        widget.Get(Exe);
+        Settle();
+
+        widget.Services.Icons.Release(source!);
+
+        Assert.Equal(1, _service.Count);
+        Assert.NotNull(widget.Get(Exe).Image);
+    }
+
+    [Fact]
+    public void ReleasingASourceThatIsStillLoading_DropsItWhenTheLoadFindsItGone()
+    {
+        _loaders.Hold.Reset();
+        var widget = NewHolder();
+        widget.Get(Exe);
+
+        widget.Services.Icons.Release(Exe);
+        Assert.Equal(0, _service.Count);
+        _loaders.Hold.Set();
+        Settle();
+
+        Assert.Equal(0, _service.Count);
+        Assert.Equal(0, widget.Repaints);
+    }
+
+    [Fact]
+    public void AfterReleasingASource_AskingAgainLoadsItAgain()
+    {
+        var widget = NewHolder();
+        widget.Get(Exe);
+        Settle();
+        widget.Services.Icons.Release(Exe);
+
+        Assert.True(widget.Get(Exe).IsLoading);
+        Settle();
+
+        Assert.NotNull(widget.Get(Exe).Image);
+        Assert.Equal(2, Calls.Length);
+    }
+
+    [Fact]
+    public void ReleasingASource_ReleasesItAtEverySizeBucket()
+    {
+        var widget = NewHolder();
+        foreach (int size in new[] { 50, 100, 200, 400 })
+            widget.Get(Exe, size);
+        Settle();
+        Assert.Equal(4, _service.Count);
+
+        widget.Services.Icons.Release(Exe);
+
+        Assert.Equal(0, _service.Count);
+    }
+
     [Theory]
     [InlineData(@"C:\Icons\steam.png", "file:")]
     [InlineData(@"C:\Icons\steam.ICO", "file:")]
