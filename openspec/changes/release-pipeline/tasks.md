@@ -32,7 +32,7 @@
 
 - [x] 5.1 `.github/workflows/release.yml`: `workflow_dispatch` with `version`, refuse a ref other than `main`; permissions `contents: write`; the version check against the latest release and existing tags and drafts; build and test on `windows-latest`; the Velopack and `vpk` version comparison; `vpk download github --pre` for the delta base; `Pack-Release.ps1`; `gh release create v<version> --draft --target <sha> --generate-notes --title "UrDeck <version>"` with `--prerelease` for a label, uploading the packed files
 - [x] 5.2 A repository ruleset on tags `v*`: creation, update and deletion limited to the owner and the GitHub Actions integration
-- [ ] 5.3 A dry run with `0.0.1-rc.1` on the real repository: the draft has the assets and generated notes and is marked prerelease; delete the draft afterwards
+- [x] 5.3 A dry run with `0.0.1-rc.1` on the real repository: the draft has the assets and generated notes and is marked prerelease; delete the draft afterwards
 
 ## 6. Documentation
 
@@ -44,4 +44,4 @@
 ## 7. Verification
 
 - [x] 7.1 `dotnet build urdeck.slnx -c Release` with 0 warnings, `dotnet test urdeck.slnx -c Release`, `dotnet format --verify-no-changes`, the Linux test projects, `openspec validate --all --strict`
-- [ ] 7.2 Release `0.1.0` with the workflow: install the draft's `Setup.exe` on a second Windows account, a working page within five minutes, then publish the draft
+- [x] 7.2 Release `0.1.0` with the workflow: install the draft's `Setup.exe` on a second Windows account, a working page within five minutes, then publish the draft
