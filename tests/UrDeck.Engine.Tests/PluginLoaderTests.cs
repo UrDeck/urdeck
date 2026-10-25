@@ -474,6 +474,58 @@ public class IconWidget : Widget<IconCfg>, ITapTarget
         return new WeakReference(AssemblyLoadContext.GetLoadContext(widget.GetType().Assembly));
     }
 
+    private const string ActionWidgetSource = @"
+using SkiaSharp;
+using UrDeck.Sdk;
+using UrDeck.Sdk.Input;
+public class ActionCfg : WidgetConfig { }
+[Widget(""A"", ""d"", Id = ""test.action"")]
+[WidgetSize(1, 1)]
+[RefreshOnData]
+public class ActionWidget : Widget<ActionCfg>, ITapTarget
+{
+    public string Outcome = """";
+    public override void Render(WidgetRenderContext context) { }
+    public void OnTap(SKPoint point) => Actions.Invoke(""nothing:control/next"").ContinueWith(t => Outcome = t.Result.Message);
+}";
+
+    [Fact]
+    public void AWidgetThatInvokedAnAction_AndWasDisposed_LeavesItsContextCollectible()
+    {
+        string path = WriteSource("Action.dll", ActionWidgetSource);
+        _loader.ScanAndLoadPlugins(_dir);
+        var contextRef = TapActionWidgetAndDisposeIt();
+
+        File.Delete(path);
+        _loader.ReloadPlugins();
+
+        for (int i = 0; i < 50 && contextRef.IsAlive; i++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Thread.Sleep(100);
+        }
+
+        Assert.False(contextRef.IsAlive, "A widget that invoked an action keeps its plugin context alive after it was disposed.");
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private WeakReference TapActionWidgetAndDisposeIt()
+    {
+        var config = new WidgetConfig { WidgetTypeId = "test.action", Width = 1, Height = 1 };
+        var widget = _loader.CreateWidget(config, out var services)!;
+        Assert.NotNull(services);
+        Assert.Same(_loader.Readings, services!.Actions);
+
+        ((UrDeck.Sdk.Input.ITapTarget)widget).OnTap(default);
+        var outcome = widget.GetType().GetField("Outcome")!;
+        Assert.True(Support.TestImages.WaitFor(() => ((string)outcome.GetValue(widget)!).Length > 0), "the action's result never reached the widget");
+        Assert.Contains("nothing", (string)outcome.GetValue(widget)!);
+
+        services.Dispose();
+        return new WeakReference(AssemblyLoadContext.GetLoadContext(widget.GetType().Assembly));
+    }
+
     [Fact]
     public void EveryWidget_GetsItsOwnServices_AndAnUnknownTypeGetsNone()
     {

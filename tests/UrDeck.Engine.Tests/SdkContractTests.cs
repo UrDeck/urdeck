@@ -101,6 +101,40 @@ public class SdkContractTests
         Assert.Equal(ReadingState.Ok, widget.ReadingOf("x:y").State);
     }
 
+    [Fact]
+    public async Task AWidgetNeverAttached_FailsEveryActionWithoutThrowing()
+    {
+        var widget = new PlainWidget();
+
+        var result = await widget.InvokeAction("x:control/next");
+
+        Assert.False(result.Succeeded);
+        Assert.Contains("no actions", result.Message);
+    }
+
+    [Fact]
+    public async Task AHostWrittenBeforeActions_FailsEveryActionWithoutThrowing()
+    {
+        var widget = new PlainWidget();
+        widget.Attach(new Host(new Source()));
+
+        var result = await widget.InvokeAction("x:control/next", 3);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains("no actions", result.Message);
+    }
+
+    [Fact]
+    public void ActionResult_DoneAndFailed()
+    {
+        Assert.True(ActionResult.Done.Succeeded);
+        Assert.Equal("", ActionResult.Done.Message);
+        Assert.False(ActionResult.Failed("why").Succeeded);
+        Assert.Equal("why", ActionResult.Failed("why").Message);
+        Assert.False(ActionResult.Failed("").Succeeded);
+        Assert.False(default(ActionResult).Succeeded);
+    }
+
     private sealed class Source : IReadingSource
     {
         public Reading Read(string id) => Reading.Ok(1);
@@ -138,6 +172,8 @@ public class SdkContractTests
         public Reading ReadingOf(string id) => Readings.Read(id);
 
         public ReadingDescriptor? DescriptionOf(string id) => Readings.Describe(id);
+
+        public Task<ActionResult> InvokeAction(string id, ReadingValue? argument = null) => Actions.Invoke(id, argument);
 
         public override void Render(WidgetRenderContext context)
         {

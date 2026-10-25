@@ -60,13 +60,15 @@ public sealed partial class ReadingHub
     /// Ends the provider's current run: the loop is cancelled and the instance forgotten, so the next subscription
     /// starts a fresh one. Returns what must be done outside the gate (waiting for the loop, calling Stop).
     /// </summary>
-    private static Action Detach(ProviderRuntime rt)
+    private Action Detach(ProviderRuntime rt)
     {
         var instance = rt.Started ? rt.Instance : null;
         var cts = rt.Cts;
         var loop = rt.Loop;
         var timer = rt.LingerTimer;
         string providerId = rt.Descriptor.Id;
+        var actionCts = rt.ActionCts;
+        var dropped = DrainActions(rt);
 
         rt.Instance = null;
         rt.Started = false;
@@ -79,10 +81,14 @@ public sealed partial class ReadingHub
         rt.InSample = false;
         rt.Buffer.Clear();
         rt.Misses.Clear();
+        rt.ActionCts = null;
+        rt.ActionPumpRunning = false;
 
         return () =>
         {
             timer?.Dispose();
+            actionCts?.Cancel();
+            FailActions(providerId, dropped, "stopped");
             cts?.Cancel();
             bool finished = true;
             if (loop != null)

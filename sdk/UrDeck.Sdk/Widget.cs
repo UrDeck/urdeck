@@ -56,6 +56,9 @@ public abstract class Widget<TConfig> : IWidget<TConfig> where TConfig : WidgetC
     /// <summary>The host's icon service; there are no icons until the widget is attached.</summary>
     protected IIconSource Icons => _host?.Icons ?? NullIconSource.Instance;
 
+    /// <summary>The host's action service; every action fails until the widget is attached.</summary>
+    protected IActionInvoker Actions => _host?.Actions ?? NullActionInvoker.Instance;
+
     /// <inheritdoc cref="IWidget.Attach"/>
     public virtual void Attach(IWidgetHost host) => _host = host;
 
