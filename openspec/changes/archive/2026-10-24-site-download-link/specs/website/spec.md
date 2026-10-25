@@ -29,6 +29,10 @@ The control MUST NOT claim a download that does not exist: the build fails if a 
 - **WHEN** `0.3.0-rc.1` is the newest release and `0.2.0` the latest stable one
 - **THEN** the page shows `0.2.0`
 
+#### Scenario: No release yet
+- **WHEN** no stable release exists and a visitor uses the download control
+- **THEN** no file is downloaded and the visitor arrives at the repository's releases page on GitHub
+
 #### Scenario: The API is unreachable
 - **WHEN** the site is built without access to the GitHub API
 - **THEN** the build succeeds, no version is shown, and the download control leads to the releases page
