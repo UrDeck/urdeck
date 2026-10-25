@@ -5,12 +5,14 @@ using UrDeck.Engine.Config;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Plugin;
 using UrDeck.Providers.Machine;
+using UrDeck.Providers.Media;
 using UrDeck.Providers.Weather;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Data;
 using UrDeck.Sdk.Icons;
 using UrDeck.Sdk.Launch;
 using UrDeck.Widgets.Clock;
+using UrDeck.Widgets.NowPlaying;
 using UrDeck.Widgets.Shortcut;
 using UrDeck.Widgets.Stats;
 using UrDeck.Widgets.Weather;
@@ -24,7 +26,7 @@ namespace UrDeck.Preview;
 public static class PreviewWidgets
 {
     private static readonly Lazy<IReadOnlyList<WidgetDescriptor>> All = new(() =>
-        new[] { typeof(ClockWidget), typeof(StatsWidget), typeof(WeatherWidget), typeof(ShortcutWidget) }
+        new[] { typeof(ClockWidget), typeof(StatsWidget), typeof(WeatherWidget), typeof(ShortcutWidget), typeof(NowPlayingWidget) }
             .Select(type => WidgetDescriptor.TryCreate(type, out _)!)
             .OrderBy(d => d.Id, StringComparer.Ordinal)
             .ToList());
@@ -65,7 +67,7 @@ public static class PreviewWidgets
 public static class PreviewProviders
 {
     private static readonly Lazy<IReadOnlyList<(ProviderDescriptor Provider, SampleFile? Sample)>> All = new(() =>
-        new[] { typeof(SystemProvider), typeof(WeatherProvider) }
+        new[] { typeof(MediaProvider), typeof(SystemProvider), typeof(WeatherProvider) }
             .Select(type => ProviderDescriptor.TryCreate(type, out _)!)
             .Select(provider => (provider, ProviderSamples.Find(provider)))
             .OrderBy(p => p.provider.Id, StringComparer.Ordinal)

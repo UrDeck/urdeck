@@ -48,6 +48,12 @@ public sealed class WidgetServices : IWidgetHost, IIconSource, IDisposable
     IconResult IIconSource.GetIcon(string source, int pixelSize) =>
         _disposed || _icons == null ? IconResult.None : _icons.Get(this, source, pixelSize);
 
+    void IIconSource.Release(string source)
+    {
+        if (!_disposed)
+            _icons?.Release(this, source);
+    }
+
     internal void RequestRepaint()
     {
         if (!_disposed)

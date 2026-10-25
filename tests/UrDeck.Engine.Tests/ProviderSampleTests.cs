@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Tests.Support;
 using UrDeck.Providers.Machine;
+using UrDeck.Providers.Media;
 using UrDeck.Providers.Weather;
 using UrDeck.Sdk.Data;
 using Xunit;
@@ -32,11 +33,53 @@ public sealed partial class ProviderSampleTests
     // MemoryReadings, not SystemProvider: it has no Windows-only attribute, and it lives in the same assembly.
     private static SampleFile System => Sample(typeof(MemoryReadings), "system");
 
+    private static SampleFile Media => Sample(typeof(MediaProvider), "media");
+
     [Fact]
-    public void BothSamples_ParseWithoutFindings()
+    public void AllSamples_ParseWithoutFindings()
     {
         Assert.NotEmpty(Weather.Readings);
         Assert.NotEmpty(System.Readings);
+        Assert.NotEmpty(Media.Readings);
+    }
+
+    [Fact]
+    public void TheMediaSample_DescribesEveryReadingOfTheCatalog_AsTheCatalogDoes()
+    {
+        var sample = Media.Describe().ToDictionary(d => d.Path);
+        using var provider = new MediaProvider();
+        var catalog = provider.Describe();
+
+        foreach (var entry in catalog)
+        {
+            Assert.True(sample.TryGetValue(entry.Path, out var described), $"the media sample has no '{entry.Path}'");
+            Assert.True(entry == described, Difference(entry, described!));
+        }
+
+        Assert.Equal(catalog.Count, sample.Count);
+    }
+
+    [Fact]
+    public void TheMediaSample_IsAPlayingTrack_ThatTheWidgetReadsAtAnyMoment()
+    {
+        var moment = new DateTime(2026, 10, 13, 21, 47, 32, DateTimeKind.Local);
+        ReadingValue At(string path) => Media.Match(path, out var bindings)!.ValueAt(0, moment, bindings)!.Value;
+
+        Assert.Equal("playing", At("status").Text);
+        Assert.NotEmpty(At("title").Text);
+        Assert.NotEmpty(At("artist").Text);
+        Assert.InRange(At("position").Number, 1, At("duration").Number - 1);
+        Assert.Equal("", At("art").Text);
+        Assert.True(At("can/previous").IsOn && At("can/next").IsOn && At("can/playpause").IsOn);
+
+        // Stamped late in the day, so the widget's extrapolation (zero when the stamp is ahead of the clock) holds the bar still.
+        Assert.True(At("position/at").Time.LocalDateTime > moment);
+    }
+
+    [Fact]
+    public void ASampleProvider_OffersNoActions()
+    {
+        Assert.False(typeof(IActionProvider).IsAssignableFrom(typeof(SampleProvider)));
     }
 
     [Fact]

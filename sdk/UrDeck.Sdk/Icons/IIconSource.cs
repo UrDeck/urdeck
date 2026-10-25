@@ -33,6 +33,17 @@ public interface IIconSource
     /// size the widget will draw it at.
     /// </summary>
     IconResult GetIcon(string source, int pixelSize);
+
+    /// <summary>
+    /// Says that the widget no longer shows <paramref name="source"/> (at any size), so the host may let go of the decoded
+    /// image once no other widget asks for it. A widget whose source changes over time (an album cover that follows the
+    /// track) releases the one it stops showing; a widget with a fixed source never needs to. Asking for the source again
+    /// afterwards loads it again. A source that was never asked for, an empty one and one that does not parse are ignored.
+    /// The default does nothing.
+    /// </summary>
+    void Release(string source)
+    {
+    }
 }
 
 /// <summary>The icon source of a widget that was never attached, and of a host that offers none: there are no icons.</summary>

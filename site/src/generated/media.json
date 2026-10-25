@@ -2146,6 +2146,248 @@
     {
       "background": "plotter",
       "files": [
+        "src/generated/widgets/nowplaying-4x2-blueprint.webp"
+      ],
+      "id": "widget:nowplaying-4x2-blueprint",
+      "key": "8a355069ea4f2a5b95aeeb2e5848aa40c193d885a08fd6b5844c7645a392592a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-carbon.webp"
+      ],
+      "id": "widget:nowplaying-4x2-carbon",
+      "key": "005a85a5cc755f79d66df7d229a1c586e284d90b97ec1675ffe03af15b132b06",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-default-dark.webp"
+      ],
+      "id": "widget:nowplaying-4x2-default-dark",
+      "key": "386853844c513b11a684972e65cfd94a1f6cb69071de4ea8aef329a19a7ddcc6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-default-light.webp"
+      ],
+      "id": "widget:nowplaying-4x2-default-light",
+      "key": "4bb57531a7b2415dfaa538c4f0381c33ff9e9c0236dffd98dd0553393be90551",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-ember.webp"
+      ],
+      "id": "widget:nowplaying-4x2-ember",
+      "key": "150b630d4d6197fcd542e90af3dcfca4d9e095eabea817ff27937aa79d2ac2c3",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "ember",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-glass.webp"
+      ],
+      "id": "widget:nowplaying-4x2-glass",
+      "key": "c024b14b867b382a948286818ee1decb0242511c16847fe1c02b4085d5de7348",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "glass",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-obsidian.webp"
+      ],
+      "id": "widget:nowplaying-4x2-obsidian",
+      "key": "39eafb895e9ceaed21c87dff83cda4907cfe186ccbac2ffa94d7cc0b7bed610a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-paper.webp"
+      ],
+      "id": "widget:nowplaying-4x2-paper",
+      "key": "195be92d00a0a539361008001a937f6d33311f9cd66ee44d34c2ad9c13f2ae53",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "paper",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-pop.webp"
+      ],
+      "id": "widget:nowplaying-4x2-pop",
+      "key": "e57078d507e391e6772a8331cf86bc194ee7e62d603b5bbde0ac9620c3fdc44b",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "pop",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-prism.webp"
+      ],
+      "id": "widget:nowplaying-4x2-prism",
+      "key": "b696c7d21967e60bd2dcdd808c2aac33b9d147c8fa1f5edf255813ad97f0236c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "prism",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/nowplaying-4x2-rigline.webp"
+      ],
+      "id": "widget:nowplaying-4x2-rigline",
+      "key": "1218d605f87635d4c356439eb105f9308fff7c9b994fe99a370c269973df81e2",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.nowplaying",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.nowplaying"
+    },
+    {
+      "background": "plotter",
+      "files": [
         "src/generated/widgets/shortcut-1x1-blueprint.webp"
       ],
       "id": "widget:shortcut-1x1-blueprint",

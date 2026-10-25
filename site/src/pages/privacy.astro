@@ -71,6 +71,16 @@ import Base from '../layouts/Base.astro';
     Nothing else leaves your PC from UrDeck and its bundled plugins. UrDeck sends no readings of your system, no page layout, no log and no crash report.
   </p>
 
+  <h2>What the app reads on your PC</h2>
+  <p>
+    Some cards show what is on your PC, and reading it is not sending it. The <strong>now playing</strong> card reads what the
+    applications you run publish to Windows about their playback (the title, artist, album and cover of the track, and whether it
+    plays) and sends the play, pause, previous and next commands to the application Windows calls current, which is what your
+    keyboard's media keys do. None of it leaves your PC. The cover is written to a small folder under your temporary folder
+    (<code>%TEMP%\UrDeck\media-art</code>, at most two pictures), cleared when UrDeck starts and removed when it stops, and the
+    title, artist and cover are never written to the log. Without a now playing card the provider reads nothing.
+  </p>
+
   <h2 id="plugins">Plugins by other people</h2>
   <p>
     UrDeck can load widgets and data providers written by others. A plugin is a program that runs with your user's rights,

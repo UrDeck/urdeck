@@ -111,7 +111,8 @@ playing", not as a fault.
 
 ### Requirement: Media Provider Samples
 The provider MUST carry sample data (see data-providers, "First-Party Providers Carry Samples") for a playing track without
-art and for nothing playing, so that the preview tool, the golden images and `--demo` draw the widget without a player.
+art, so that the preview tool, the golden images and `--demo` draw the widget without a player. (The idle state is drawn
+from readings the tests supply; a sample that flipped to idle would make `--demo` flip with it.)
 The sample provider offers no actions (see provider-actions, "Demo And Sample Providers").
 
 #### Scenario: Preview

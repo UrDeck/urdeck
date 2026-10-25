@@ -96,8 +96,8 @@ The pictures and loops on the site are generated, never edited by hand and never
 says what exists and `npm run media` in `site/` renders what is missing or stale (`site/README.md`, "Media"). Adding a theme,
 widget, widget size or background needs no site file for its media; it only makes the files stale.
 
-- `npm run media -- --status` says how many are missing or stale. CI shows the same counts in a job summary and never fails
-  on them, so a pull request that changes a theme does not carry its own pictures.
+- `npm run media -- --status` says how many are missing or stale. CI does not run it (with .NET it builds the CLI and renders
+  probe frames for every entry, which took 26 minutes), so a pull request that changes a theme does not carry its own pictures.
 - The **Site media** workflow (Actions, *Run workflow*; tick "all" to render everything) renders the stale files on Linux
   and opens a pull request `chore(site): refresh media`, or says the media are current. Review that pull request like any other:
   look at the contact sheet of what changed, then squash-merge it.

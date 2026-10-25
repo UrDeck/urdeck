@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(UrDeckTfm)</TargetFramework>
+    <Description>First-party data provider for what the current Windows media session plays, and the commands to control it.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- UrDeck.Sdk and SkiaSharp are provided by the host at runtime; don't copy them next to the plugin. -->
+    <ProjectReference Include="..\..\sdk\UrDeck.Sdk\UrDeck.Sdk.csproj" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
+
+  <!-- The Windows part (docs/perf/now-playing.md): the Windows Runtime projection is compiled into this assembly (embedded C#/WinRT)
+       so that the plugin stays a plain net10.0 project that the preview tool and the Linux tests reference, and its shadow copy is
+       self-contained. The projection tool is a Windows program: on any other system the project builds without it and the
+       provider reports the media session as unavailable. -->
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <UrDeckWinRT>true</UrDeckWinRT>
+    <DefineConstants>$(DefineConstants);URDECK_WINRT;UAC_VERSION_10</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CsWinRTEmbedded>true</CsWinRTEmbedded>
+    <CsWinRTIncludes>Windows</CsWinRTIncludes>
+    <!-- Not the default "Windows;Microsoft" (that would exclude what is included); PropertyType is defined by the support code too. -->
+    <CsWinRTExcludes>Microsoft;Windows.Foundation.PropertyType</CsWinRTExcludes>
+    <CsWinRTWindowsMetadata>$(PkgMicrosoft_Windows_SDK_NET_Ref)/winmd</CsWinRTWindowsMetadata>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UrDeckWinRT)' == 'true'">
+    <PackageReference Include="Microsoft.Windows.CsWinRT" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Windows.SDK.NET.Ref" GeneratePathProperty="true" PrivateAssets="all" ExcludeAssets="compile;runtime" />
+  </ItemGroup>
+
+  <!-- The embedded projection and its support code (the package's source files and the generated ones) are not ours: no style,
+       quality or nullable checks. A global analyzer config takes no wildcards in its sections, so every such file is listed; it is
+       written at build time, after the projection exists. -->
+  <Target Name="UrDeckWinRTAnalyzerConfig" BeforeTargets="CoreCompile" Condition="'$(UrDeckWinRT)' == 'true'">
+    <PropertyGroup>
+      <_UrDeckConfig>$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)'))embedded-winrt.globalconfig</_UrDeckConfig>
+    </PropertyGroup>
+    <!-- Module.cs only marks the whole assembly as Windows-only, which would make the provider's logic and its tests unusable on
+         other systems; the class that needs Windows says so itself. -->
+    <ItemGroup>
+      <_UrDeckModule Include="@(Compile)" Condition="'%(Filename)%(Extension)' == 'Module.cs'" />
+      <Compile Remove="@(_UrDeckModule)" />
+    </ItemGroup>
+    <ItemGroup>
+      <_UrDeckEmbedded Include="@(Compile)" Condition="$([System.String]::Copy('%(FullPath)').Replace('\', '/').Contains('/microsoft.windows.cswinrt/')) or $([System.String]::Copy('%(FullPath)').Replace('\', '/').Contains('/Generated Files/CsWinRT/'))">
+        <Slashed>$([System.String]::Copy('%(FullPath)').Replace('\', '/').Replace('{', '\{').Replace('}', '\}'))</Slashed>
+      </_UrDeckEmbedded>
+      <_UrDeckConfigLine Include="is_global = true" />
+      <_UrDeckConfigLine Include="@(_UrDeckEmbedded->'[%(Slashed)]%0Agenerated_code = true%0Adotnet_diagnostic.CS0219.severity = none%0Adotnet_diagnostic.CS0618.severity = none%0Adotnet_diagnostic.CS9191.severity = none%0Adotnet_diagnostic.CS8600.severity = none%0Adotnet_diagnostic.CS8601.severity = none%0Adotnet_diagnostic.CS8602.severity = none%0Adotnet_diagnostic.CS8603.severity = none%0Adotnet_diagnostic.CS8604.severity = none%0Adotnet_diagnostic.CS8605.severity = none%0Adotnet_diagnostic.CS8618.severity = none%0Adotnet_diagnostic.CS8619.severity = none%0Adotnet_diagnostic.CS8620.severity = none%0Adotnet_diagnostic.CS8621.severity = none%0Adotnet_diagnostic.CS8625.severity = none%0Adotnet_diagnostic.CS8629.severity = none%0Adotnet_diagnostic.CS8714.severity = none%0Adotnet_diagnostic.CS8765.severity = none%0Adotnet_diagnostic.CS8766.severity = none%0Adotnet_diagnostic.CS8767.severity = none%0Adotnet_diagnostic.CS8768.severity = none%0Adotnet_diagnostic.CS8769.severity = none%0Adotnet_diagnostic.CA5350.severity = none%0Adotnet_diagnostic.CA5351.severity = none%0Adotnet_diagnostic.CA1859.severity = none%0Adotnet_diagnostic.CA2000.severity = none%0Adotnet_diagnostic.CS1570.severity = none%0Adotnet_diagnostic.CS1571.severity = none%0Adotnet_diagnostic.CS1572.severity = none%0Adotnet_diagnostic.CS1573.severity = none%0Adotnet_diagnostic.CS1574.severity = none%0Adotnet_diagnostic.CS1580.severity = none%0Adotnet_diagnostic.CS1584.severity = none%0Adotnet_diagnostic.CS1587.severity = none%0Adotnet_diagnostic.CS1658.severity = none%0Adotnet_diagnostic.CS1712.severity = none%0Adotnet_diagnostic.CS0109.severity = none')" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(_UrDeckConfig)" Lines="@(_UrDeckConfigLine)" Overwrite="true" />
+    <ItemGroup>
+      <EditorConfigFiles Include="$(_UrDeckConfig)" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup Condition="'$(UrDeckWinRT)' != 'true'">
+    <Compile Remove="Windows\**" />
+  </ItemGroup>
+
+  <!-- Made-up readings of a playing track and of nothing playing for previews, the picture tests and the host's demo mode (docs: "Sample files"). -->
+  <ItemGroup>
+    <EmbeddedResource Include="sample.json" LogicalName="urdeck.sample.media.json" />
+  </ItemGroup>
+
+</Project>

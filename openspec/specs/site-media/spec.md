@@ -98,12 +98,16 @@ and the render settings. A file whose key did not change is not rendered again u
 
 ### Requirement: Staleness Report
 `npm run media -- --status` MUST print, without rendering, how many files of the matrix are missing, stale and
-unneeded, and list them. The CI of a pull request that touches the product or the site MUST run it and show the counts in
-its summary without failing the pull request.
+unneeded, and list them. The CI of a pull request MUST NOT run it: the check is slow, and media are refreshed by the
+refresh workflow, not per pull request.
 
 #### Scenario: A pull request that changes a theme
 - **WHEN** a pull request changes Paper's colours
-- **THEN** its CI summary says that Paper's files are stale, and the checks pass
+- **THEN** its CI does not report Paper's files as stale, and the checks pass
+
+#### Scenario: Asking by hand
+- **WHEN** a contributor runs `npm run media -- --status`
+- **THEN** it lists the missing, stale and unneeded files and renders nothing
 
 ### Requirement: Refresh Workflow
 A workflow started by hand MUST generate the stale media on a Linux runner and, when any file changed, open a pull
