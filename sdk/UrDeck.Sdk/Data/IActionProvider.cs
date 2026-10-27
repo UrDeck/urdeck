@@ -22,7 +22,7 @@ public interface IActionProvider
     /// Performs the action at <paramref name="path"/> (for example <c>control/next</c>). The engine only checks that the
     /// provider is running; whether the path is one of the provider's actions is for the provider, which returns
     /// <see cref="ActionResult.Failed"/> with a message when it is not. <paramref name="argument"/> is null or the one value
-    /// the caller passed. The token is cancelled after 10 seconds; a provider that ignores it holds one thread.
+    /// the caller passed. The token is cancelled after the provider's <c>actionTimeoutMs</c> (10 seconds unless set); a provider that ignores it holds one thread.
     /// </summary>
     Task<ActionResult> InvokeAsync(string path, ReadingValue? argument, CancellationToken cancellationToken);
 }

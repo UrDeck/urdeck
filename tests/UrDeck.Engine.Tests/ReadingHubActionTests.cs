@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using UrDeck.Engine.Config;
 using UrDeck.Engine.Data;
+using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Tests.Support;
 using UrDeck.Sdk.Data;
 using Xunit;
@@ -169,15 +171,181 @@ public sealed class ReadingHubActionTests : IDisposable
     }
 
     [Fact]
-    public async Task ProviderNotRunning_FailsAndDoesNotStartIt()
+    public async Task ProviderNotRunning_IsStartedForTheAction_AndLingersAfterwards()
     {
-        var result = await Hub.Invoke("fake:control/next");
+        var result = await Hub.Invoke("fake:control/next").WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
-        Assert.False(result.Succeeded);
-        Assert.Contains("not running", result.Message);
-        Assert.Equal(0, Provider.Count("start"));
+        Assert.True(result.Succeeded);
+        Assert.Equal(1, Provider.Count("start"));
+        Assert.Contains("control/next", Provider.Invoked);
+        Assert.Equal(0, Provider.Count("stop"));
+        Assert.True(_time.AdvanceUntil(() => Provider.Count("stop") == 1, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30)));
     }
 
+    [Fact]
+    public async Task AWidgetSubscribingMeanwhile_KeepsTheProviderAfterTheAction()
+    {
+        var first = await Hub.Invoke("fake:control/next").WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        Hub.Subscribe(["fake:a"]);
+
+        _time.Advance(TimeSpan.FromSeconds(20));
+
+        Assert.True(first.Succeeded);
+        Assert.Equal(0, Provider.Count("stop"));
+        Assert.Equal(1, Provider.Count("start"));
+    }
+
+    [Fact]
+    public async Task AConfiguredTimeLimit_AppliesToThatProvider()
+    {
+        Hub.ApplySettings(ConfigStore.Parse("""{"providers":{"fake":{"actionTimeoutMs":5000}}}""").Providers);
+        Run();
+        Provider.Handler = async (_, _, _) =>
+        {
+            await Task.Delay(Timeout.Infinite, CancellationToken.None);
+            return ActionResult.Done;
+        };
+
+        var hung = Hub.Invoke("fake:hang");
+        Assert.True(Wait(() => Provider.Invoked.Contains("hang")));
+        Assert.True(_time.AdvanceUntil(() => hung.IsCompleted, TimeSpan.FromMilliseconds(250), TimeSpan.FromSeconds(30)));
+
+        var result = await hung;
+        Assert.False(result.Succeeded);
+        Assert.Contains("5 s", result.Message);
+        Assert.True(_time.Elapsed < TimeSpan.FromSeconds(8));
+    }
+
+    [Fact]
+    public async Task ATimeLimitBelowOneSecond_IsRaisedToOneSecond_AndLoggedOnce()
+    {
+        var lines = new List<string>();
+        UrDeckLog.Listener = (_, message) => lines.Add(message);
+        try
+        {
+            Hub.ApplySettings(ConfigStore.Parse("""{"providers":{"fake":{"actionTimeoutMs":100}}}""").Providers);
+            Run();
+            Provider.Handler = async (_, _, _) =>
+            {
+                await Task.Delay(Timeout.Infinite, CancellationToken.None);
+                return ActionResult.Done;
+            };
+
+            var first = Hub.Invoke("fake:hang");
+            Assert.True(Wait(() => Provider.Invoked.Contains("hang")));
+            Assert.True(_time.AdvanceUntil(() => first.IsCompleted, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30)));
+            var second = Hub.Invoke("fake:hang");
+            Assert.True(_time.AdvanceUntil(() => second.IsCompleted, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30)));
+
+            Assert.Contains("1 s", (await first).Message);
+        }
+        finally
+        {
+            UrDeckLog.Listener = null;
+        }
+
+        Assert.Single(lines, l => l.Contains("actionTimeoutMs 100 is below the minimum"));
+    }
+
+    [Fact]
+    public async Task ASlowAction_IsDoneAndLogsAWarningNamingTheDurationAndTheThreshold()
+    {
+        var lines = new List<string>();
+        UrDeckLog.Listener = (_, message) => lines.Add(message);
+        try
+        {
+            Run();
+            Provider.Handler = async (_, _, token) =>
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(2400), _time, token);
+                return ActionResult.Done;
+            };
+
+            var slow = Hub.Invoke("fake:slow");
+            Assert.True(Wait(() => Provider.Invoked.Contains("slow")));
+            Assert.True(_time.AdvanceUntil(() => slow.IsCompleted, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(30)));
+
+            Assert.True((await slow).Succeeded);
+        }
+        finally
+        {
+            UrDeckLog.Listener = null;
+        }
+
+        Assert.Contains(lines, l => l.Contains("fake:slow") && l.Contains("took 2.") && l.Contains("over the 2 s warning threshold"));
+    }
+
+    [Fact]
+    public async Task AFastAction_LogsNoWarning()
+    {
+        var lines = new List<string>();
+        UrDeckLog.Listener = (_, message) => lines.Add(message);
+        try
+        {
+            Run();
+            await Hub.Invoke("fake:quick").WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        }
+        finally
+        {
+            UrDeckLog.Listener = null;
+        }
+
+        Assert.DoesNotContain(lines, l => l.Contains("warning threshold"));
+    }
+
+    [Fact]
+    public async Task AConfiguredWarningThreshold_IsUsed()
+    {
+        var lines = new List<string>();
+        UrDeckLog.Listener = (_, message) => lines.Add(message);
+        try
+        {
+            Hub.ApplySettings(ConfigStore.Parse("""{"providers":{"fake":{"actionWarnMs":500}}}""").Providers);
+            Run();
+            Provider.Handler = async (_, _, token) =>
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(700), _time, token);
+                return ActionResult.Done;
+            };
+
+            var slow = Hub.Invoke("fake:slow");
+            Assert.True(Wait(() => Provider.Invoked.Contains("slow")));
+            Assert.True(_time.AdvanceUntil(() => slow.IsCompleted, TimeSpan.FromMilliseconds(50), TimeSpan.FromSeconds(30)));
+            await slow;
+        }
+        finally
+        {
+            UrDeckLog.Listener = null;
+        }
+
+        Assert.Contains(lines, l => l.Contains("over the 0.5 s warning threshold"));
+    }
+
+    [Fact]
+    public async Task AProviderWhoseRequiredSettingsAreMissing_FailsTheActionWithItsReason()
+    {
+        var typed = new TypedFakeProvider();
+        _registry.TryRegister(typed.Descriptor(), out _);
+
+        var result = await Hub.Invoke("typed:scene/toggle").WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        Assert.False(result.Succeeded);
+        Assert.Contains("Set up Typed in Settings", result.Message);
+        Assert.Empty(typed.Starts);
+    }
+
+    [Fact]
+    public async Task AnActionAfterTheSettingsAreComplete_StartsTheProviderAndRuns()
+    {
+        var typed = new TypedFakeProvider();
+        _registry.TryRegister(typed.Descriptor(), out _);
+        Hub.ApplySettings(ConfigStore.Parse("""{"providers":{"typed":{"url":"https://ha.home","token":"tok"}}}""").Providers);
+
+        var result = await Hub.Invoke("typed:scene/toggle").WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+
+        Assert.True(result.Succeeded);
+        Assert.Single(typed.Starts);
+    }
     [Fact]
     public async Task UnknownProvider_NamesIt()
     {
@@ -346,7 +514,7 @@ public sealed class ReadingHubActionTests : IDisposable
 
         public IReadOnlyList<ReadingDescriptor> Describe() => _inner.Describe();
 
-        public void Start(IReadingSink sink) => _inner.Start(sink);
+        public void Start(IReadingSink sink, ProviderSettings settings) => _inner.Start(sink, settings);
 
         public void SetDemand(IReadOnlyCollection<string> paths) => _inner.SetDemand(paths);
 

@@ -375,32 +375,32 @@ that throws in `Render` shows a red error tile instead of taking the dashboard d
 ## Writing a data provider
 
 A data provider supplies readings (numbers, texts or on/off states) that any widget can show. It is a class implementing
-`IDataProvider` with `[DataProvider]`, in a plugin assembly that references only `UrDeck.Sdk` (a plugin may hold providers,
+`DataProvider<TSettings>` (or `IDataProvider`) with `[DataProvider]`, in a plugin assembly that references only `UrDeck.Sdk` (a plugin may hold providers,
 widgets or both; it loads from `plugins/` and hot-reloads like a widget). `providers/UrDeck.Providers.System` is the
 first-party example and uses the same contract.
 
 ```csharp
 [DataProvider("example", "Example", DefaultIntervalMs = 2000, MinIntervalMs = 500)]
-public sealed class ExampleProvider : IDataProvider
+public sealed class ExampleProvider : DataProvider<ProviderSettings>
 {
     private IReadingSink? _sink;
 
-    public IReadOnlyList<ReadingDescriptor> Describe() =>
+    public override IReadOnlyList<ReadingDescriptor> Describe() =>
     [
         new ReadingDescriptor("room/temperature", ReadingKind.Temperature, "Room", "Room temperature") { Device = "Sensor 1" },
     ];
 
-    public void Start(IReadingSink sink) => _sink = sink;
+    public override void Start(IReadingSink sink, ProviderSettings settings) => _sink = sink;
 
-    public void SetDemand(IReadOnlyCollection<string> paths) { /* remember what is wanted; skip work nobody needs */ }
+    public override void SetDemand(IReadOnlyCollection<string> paths) { /* remember what is wanted; skip work nobody needs */ }
 
-    public Task SampleAsync(CancellationToken cancellationToken)
+    public override Task SampleAsync(CancellationToken cancellationToken)
     {
         _sink!.Publish("room/temperature", 21.5);   // temperatures are always degrees Celsius
         return Task.CompletedTask;
     }
 
-    public void Shutdown() => _sink = null;
+    public override void Shutdown() => _sink = null;
 }
 ```
 
@@ -428,7 +428,7 @@ public sealed class ExampleProvider : IDataProvider
   event) publishes from its own callbacks at any time and may leave `SampleAsync` empty. `IReadingSink` is thread-safe.
   Publish `sink.Unavailable(path, reason)` for a reading you cannot supply right now.
 - **Rate.** `DefaultIntervalMs` is used unless the user sets `providers.<id>.intervalMs`; a smaller value is raised to
-  `MinIntervalMs`. The provider never sees the setting.
+  `MinIntervalMs`. The provider never sees the setting. The same object carries `actionTimeoutMs` and `actionWarnMs` (see Actions).
 - **States.** Readings the engine shows are ok, pending (subscribed, nothing reported yet), stale (the last sample failed
   or timed out, or the provider reported other readings in three samples in a row but not this one) or unavailable. You do
   not model them; throwing from a member, or not answering, is how a failure is reported.
@@ -458,8 +458,49 @@ public sealed class ExampleProvider : IDataProvider
   `HttpClient` in `Start` and dispose it in `Shutdown` (nothing static, so the plugin can be unloaded), and log the first
   failure and the first success after it, not every attempt. Throw from `SampleAsync` on a failure: the engine marks the
   readings stale and retries with its own backoff.
-- **Not yet.** Provider settings and secrets (a URL, a token), image values and a catalog that changes while running
-  come with the first provider that needs them.
+- **Settings and secrets.** See "Settings and secrets" below.
+- **Not yet.** Image values and a catalog that changes while running come with the first provider that needs them.
+
+### Settings and secrets
+
+A provider that needs an address or a token derives from `DataProvider<TSettings>` with a settings class that derives from
+`ProviderSettings`. The engine binds the object `providers.<id>` of `urdeck-config.json` to it (the base keys `intervalMs`,
+`actionTimeoutMs` and `actionWarnMs` are bound for every provider) and passes it to `Start(sink, settings)`.
+
+```csharp
+public sealed class HomeAssistantSettings : ProviderSettings
+{
+    [Setting("Address", Help = "Where Home Assistant is, for example https://homeassistant.local:8123.", Required = true)]
+    public string? Url { get; set; }
+
+    [Setting("Access token", Help = "A long-lived access token from your Home Assistant profile.", Required = true)]
+    [Secret(ContextSetting = "url")]
+    public SecretValue? Token { get; set; }
+}
+
+[DataProvider("homeassistant", "Home Assistant", MissingSettingMessage = "Set up Home Assistant in Settings")]
+public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings> { /* ... */ }
+```
+
+- **Declaring.** `[Setting(label)]` puts a property in the settings window and the site's reference (text, whole or fractional
+  number, on/off; `Help` is one sentence, and the build of the site fails without it for a first-party provider). The key in the file is
+  the property's `[JsonPropertyName]`, else its name in camelCase. A value of the wrong type is logged once and the default stays.
+  `Required = true` keeps the provider from starting while the setting is missing; its readings (and a tile's action) then say
+  `MissingSettingMessage`, or name the provider and the setting.
+- **Secrets.** A token or password is a `SecretValue` property with `[Secret]` (and `[Setting]`). It is filled by the engine from the
+  environment variable `URDECK_SECRET_<PROVIDER>_<SETTING>` or from Windows Credential Manager (`UrDeck/<provider>/<setting>`),
+  never read from or written to the file, and never logged: `ToString()` is `•••` and the text comes only from `Reveal()`. Pass the
+  text to the service it belongs to and to nothing else, and do not log it or its length. `ContextSetting` names the setting the
+  secret was issued for; the engine keeps its value with the secret and logs when a copy is set up for another one. A provider
+  receives only its own secrets. Plugins run in process with the user's rights, so this is a convenience and a hygiene measure, not a
+  sandbox.
+- **Changes.** When the user saves other settings (or a secret), the engine calls `Shutdown` and starts a new run with the new
+  settings; only that provider restarts. A change to `intervalMs` alone does not restart it. Do not read settings after `Start`.
+- **Connection test.** Override `OffersConnectionTest` (return true) and `ValidateAsync(settings, token)` to give the settings window a
+  "Test connection" button. It runs on a provider that is not started, with the unsaved values; return one line (`Connected to
+  Home Assistant 2026.10`) or throw with the reason. It is cancelled after 10 seconds.
+- **Tests.** Use `InMemorySecretBackend` with `SecretStore` in an engine test; keep any real Credential Manager test under the target
+  prefix `UrDeckTest` (see `SecretStoreTests`).
 
 ### Actions
 
@@ -467,7 +508,7 @@ A provider that a widget should be able to *tell* something (skip a track, toggl
 beside `IDataProvider` and in the same class. A provider that does not is never asked and nothing else about it changes.
 
 ```csharp
-public sealed class ExampleProvider : IDataProvider, IActionProvider
+public sealed class ExampleProvider : DataProvider<ProviderSettings>, IActionProvider
 {
     public IReadOnlyList<ActionDescriptor> DescribeActions() =>
         [new ActionDescriptor("control/next", "Next", "Skip to the next track")];
@@ -479,7 +520,7 @@ public sealed class ExampleProvider : IDataProvider, IActionProvider
         await SkipAsync(cancellationToken);
         return ActionResult.Done;
     }
-    // ... the IDataProvider members
+    // ... the DataProvider members
 }
 ```
 
@@ -487,17 +528,19 @@ public sealed class ExampleProvider : IDataProvider, IActionProvider
   `homeassistant:switch.desk_lamp/toggle`), so a widget never names a provider type. The path and its grammar are yours.
   There is at most one optional argument, a `ReadingValue` (a volume, a brightness); a provider that needs two values makes
   two actions or puts one in the path. A widget calls `Actions.Invoke(id, argument)`.
-- **Validation is yours.** The engine checks that the id parses and that the provider is running and implements the
+- **Validation is yours.** The engine checks that the id parses and that the provider is registered and implements the
   interface; whether the path is one of your actions is for `InvokeAsync`, which answers `ActionResult.Failed(message)` when
   it is not. `DescribeActions` is for editors and documentation and must not need `Start`.
 - **Overlap with sampling.** `InvokeAsync` can run while `SampleAsync` runs, on another thread. Guard what they share. It is
   never called before `Start` or after `Shutdown`.
 - **Order and limits.** The actions of one provider run one at a time, in the order they were asked, on the thread pool; at
-  most eight wait (a ninth fails at once as busy). An action that does not finish within 10 seconds has its token cancelled
-  and fails as a timeout; the next one runs without waiting for you, so honour the token. When the provider stops (nothing
+  most eight wait (a ninth fails at once as busy). An action that does not finish within the provider's `actionTimeoutMs`
+  (default 10 seconds, at least 1) has its token cancelled and fails as a timeout; the next one runs without waiting for you, so
+  honour the token. One slower than `actionWarnMs` (default 2 seconds) leaves a warning in the log. When the provider stops (nothing
   subscribes to it any more, or a plugin reload), waiting actions fail.
-- **A running provider only.** The engine never starts a provider for an action. A widget that acts on a provider also
-  subscribes to one of its readings, which keeps it running while the widget is shown.
+- **Starting for an action.** An action for a provider that is not running starts it (so a tile that only acts, a scene button,
+  works) and the provider lingers afterwards like one whose last subscriber left. If it cannot start, because a required setting
+  is missing or `Start` throws, the action fails with that reason. `InvokeAsync` is still never called before `Start`.
 - **Results.** Return `ActionResult.Done` or `ActionResult.Failed(message)`; a thrown exception is a failed result with its
   message. Every action leaves one line in `urdeck.log`: `Action 'media:control/next': done (12 ms)` or `failed: <message>`.
   The argument's value is not logged. The effect of an action shows in the next reading; the SDK keeps no optimistic state.

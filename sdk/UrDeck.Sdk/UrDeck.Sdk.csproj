@@ -37,8 +37,12 @@
          Package 0.15.0 (provider-actions): Data.IActionProvider, ActionDescriptor, ActionResult and IActionInvoker,
          IWidgetHost.Actions (default member) and Widget.Actions. All additive, so the assembly version stays.
          Package 0.16.0 (now-playing): Components.ButtonRow, IIconSource.Release and IReadingSink.PublishBatch with ReadingUpdate
-         (default members). All additive, so the assembly version stays. -->
-    <Version>0.16.0</Version>
+         (default members). All additive, so the assembly version stays.
+         Package 0.17.0 (provider-settings-and-secrets): IDataProvider.Start gained the provider's settings (breaking for a provider;
+         the product has not shipped, so plugins are rebuilt). ProviderSettings (moved here from the engine, with actionTimeoutMs
+         and actionWarnMs), DataProvider&lt;TSettings&gt;, IConnectionTest, SettingAttribute, SecretAttribute, SecretValue and
+         DataProviderAttribute.MissingSettingMessage arrived. The assembly version stays. -->
+    <Version>0.17.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

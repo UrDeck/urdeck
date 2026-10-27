@@ -13,7 +13,7 @@ namespace UrDeck.Providers.Machine;
 /// </summary>
 [SupportedOSPlatform("windows")]
 [DataProvider("system", "System", DefaultIntervalMs = 2000, MinIntervalMs = 250)]
-public sealed class SystemProvider : IDataProvider
+public sealed class SystemProvider : DataProvider<ProviderSettings>
 {
     /// <summary>What the subscribers want; replaced whole so a sample reads a consistent set.</summary>
     private sealed record Demand(bool Total, bool[] Cores, string[] MissingCores, bool Memory, GpuWant[] Gpu, string[] MissingGpu)
@@ -46,7 +46,7 @@ public sealed class SystemProvider : IDataProvider
 
     internal int GpuVendorQueries => _gpu.VendorQueries;
 
-    public IReadOnlyList<ReadingDescriptor> Describe()
+    public override IReadOnlyList<ReadingDescriptor> Describe()
     {
         var catalog = new List<ReadingDescriptor>(_cpu.CoreCount() + 10);
         _cpu.Describe(catalog);
@@ -55,13 +55,13 @@ public sealed class SystemProvider : IDataProvider
         return catalog;
     }
 
-    public void Start(IReadingSink sink)
+    public override void Start(IReadingSink sink, ProviderSettings settings)
     {
         _sink = sink;
         _cpu.EnsureBuffers();
     }
 
-    public void SetDemand(IReadOnlyCollection<string> paths)
+    public override void SetDemand(IReadOnlyCollection<string> paths)
     {
         int cores = _cpu.CoreCount();
         int adapters = _gpu.Count;
@@ -99,7 +99,7 @@ public sealed class SystemProvider : IDataProvider
         _demand = new Demand(total, wantedCores, missingCores?.ToArray() ?? [], memory, gpu, missingGpu?.ToArray() ?? []);
     }
 
-    public Task SampleAsync(CancellationToken cancellationToken)
+    public override Task SampleAsync(CancellationToken cancellationToken)
     {
         var sink = _sink;
         var demand = _demand;
@@ -123,7 +123,7 @@ public sealed class SystemProvider : IDataProvider
         return Task.CompletedTask;
     }
 
-    public void Shutdown()
+    public override void Shutdown()
     {
         _sink = null;
         _demand = None;

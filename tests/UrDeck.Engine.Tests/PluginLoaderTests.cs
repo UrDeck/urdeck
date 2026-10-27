@@ -52,7 +52,7 @@ public class PlugProvider : IDataProvider
 {
     private IReadingSink _sink;
     public IReadOnlyList<ReadingDescriptor> Describe() => new[] { new ReadingDescriptor(""v"", ReadingKind.Number, ""V"", ""Value"") };
-    public void Start(IReadingSink sink) { _sink = sink; }
+    public void Start(IReadingSink sink, ProviderSettings settings) { _sink = sink; }
     public void SetDemand(IReadOnlyCollection<string> paths) { }
     public Task SampleAsync(CancellationToken cancellationToken) { _sink.Publish(""v"", 3); return Task.CompletedTask; }
     public void Shutdown() { }

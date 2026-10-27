@@ -104,3 +104,16 @@ code running as the same user; a general configuration editor.
 
 None for users (no secrets exist yet). Plugins built against the old SDK must be rebuilt; the loader reports one that
 does not match.
+
+## Implementation notes
+
+- **Typed hand-off (decision 1):** `IDataProvider.Start(IReadingSink, ProviderSettings)` carries the settings, and the SDK adds
+  `DataProvider<TSettings>`, an abstract base whose `Start(sink, TSettings)` receives the typed object (the interface method
+  casts). The engine finds the settings type by walking the provider's base types for `DataProvider<>` (the base
+  `ProviderSettings` for one that implements `IDataProvider` directly), so the type is known before an instance exists, which
+  the settings form and `catalog export` need. The connection test is `IConnectionTest`, implemented by `DataProvider<T>`
+  (`OffersConnectionTest`, `ValidateAsync`). The analyzer checks nothing on providers, so it needed no change.
+- **Declarations:** `[Setting(label)] { Help, Required }` marks a property the user can set; `[Secret] { ContextSetting }` marks a
+  `SecretValue`; `DataProviderAttribute.MissingSettingMessage` is the reason a reading gives while a required setting is missing.
+- **`SecretValue` and JSON:** it carries a converter that skips on read and writes null, as a second line of defence beside the
+  engine never writing typed settings back; the engine strips secret keys before binding.

@@ -63,3 +63,15 @@ test('a finding that is in a table but not on the troubleshooting page fails', (
 test('no record at all is a problem of its own', () => {
   assert.match(check({ records: null })[0], /no record/);
 });
+
+test('a provider that declares settings and no page shows them fails, one that is shown does not', () => {
+  const c = catalog();
+  c.providers = [{ id: 'homeassistant', settings: [{ key: 'url' }, { key: 'token' }] }, { id: 'system', settings: [] }];
+  assert.match(check({ catalog: c }).join(), /provider "homeassistant" declares settings and no page shows them/);
+
+  const shown = [...records(), { kind: 'providerSettings', provider: 'homeassistant', names: ['url'] }];
+  assert.match(check({ catalog: c, records: shown }).join(), /setting "token" of the provider "homeassistant"/);
+
+  const all = [...records(), { kind: 'providerSettings', provider: 'homeassistant', names: ['url', 'token'] }];
+  assert.deepEqual(check({ catalog: c, records: all }), []);
+});

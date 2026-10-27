@@ -175,6 +175,65 @@ public sealed class PreviewCommandsTests : IDisposable
     }
 
     [Fact]
+    public void The_first_party_providers_declare_no_settings_beyond_the_base_ones()
+    {
+        using var document = JsonDocument.Parse(Workspace.Invoke("catalog", "export").Out);
+
+        Assert.All(document.RootElement.GetProperty("providers").EnumerateArray(), p => Assert.Equal(0, p.GetProperty("settings").GetArrayLength()));
+    }
+
+    [Fact]
+    public void A_providers_secret_is_listed_with_its_environment_variable_and_never_a_value()
+    {
+        var descriptor = UrDeck.Engine.Data.ProviderDescriptor.TryCreate(typeof(SecretProvider), out _)!;
+
+        var settings = CatalogExportRunner.ProviderSettingsOf(descriptor).Select(s => s.AsObject()).ToList();
+
+        Assert.Equal(["token", "url"], settings.Select(s => (string)s["key"]!));
+        var token = settings[0];
+        Assert.Equal("secret", (string)token["type"]!);
+        Assert.True((bool)token["secret"]!);
+        Assert.True((bool)token["required"]!);
+        Assert.Equal("URDECK_SECRET_SECRETS_TOKEN", (string)token["environmentVariable"]!);
+        Assert.Null(token["default"]);
+        Assert.Equal("Issued by the service.", (string)token["help"]!);
+        var url = settings[1];
+        Assert.Equal("text", (string)url["type"]!);
+        Assert.False((bool)url["secret"]!);
+        Assert.Null(url["environmentVariable"]);
+    }
+
+    [UrDeck.Sdk.Data.DataProvider("secrets", "Secrets")]
+    private sealed class SecretProvider : UrDeck.Sdk.Data.DataProvider<SecretSettings>
+    {
+        public override IReadOnlyList<UrDeck.Sdk.Data.ReadingDescriptor> Describe() => [];
+
+        public override void Start(UrDeck.Sdk.Data.IReadingSink sink, SecretSettings settings)
+        {
+        }
+
+        public override void SetDemand(IReadOnlyCollection<string> paths)
+        {
+        }
+
+        public override Task SampleAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public override void Shutdown()
+        {
+        }
+    }
+
+    private sealed class SecretSettings : UrDeck.Sdk.Data.ProviderSettings
+    {
+        [UrDeck.Sdk.Data.Setting("Address", Help = "Where the service is.", Required = true)]
+        public string? Url { get; set; }
+
+        [UrDeck.Sdk.Data.Setting("Token", Help = "Issued by the service.", Required = true)]
+        [UrDeck.Sdk.Data.Secret(ContextSetting = "url")]
+        public UrDeck.Sdk.Data.SecretValue? Token { get; set; }
+    }
+
+    [Fact]
     public void A_widgets_settings_name_their_type_values_and_default()
     {
         var run = Workspace.Invoke("catalog", "export");

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
-using UrDeck.Engine.Config;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Tests.Support;
 using UrDeck.Sdk.Data;

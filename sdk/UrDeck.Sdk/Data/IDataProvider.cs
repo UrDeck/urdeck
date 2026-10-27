@@ -14,8 +14,12 @@ public interface IDataProvider
     /// <summary>The catalog: every reading the provider offers. Called once; must not need <see cref="Start"/>.</summary>
     IReadOnlyList<ReadingDescriptor> Describe();
 
-    /// <summary>Begins work. Keep <paramref name="sink"/> to publish through.</summary>
-    void Start(IReadingSink sink);
+    /// <summary>
+    /// Begins work. Keep <paramref name="sink"/> to publish through. <paramref name="settings"/> is the user's settings bound to
+    /// the provider's settings type (see <see cref="DataProvider{TSettings}"/>; the base type for a provider that declares none).
+    /// A provider that derives from <see cref="DataProvider{TSettings}"/> receives the typed object in its own override.
+    /// </summary>
+    void Start(IReadingSink sink, ProviderSettings settings);
 
     /// <summary>The paths currently subscribed to; called after <see cref="Start"/> and whenever the set changes.</summary>
     void SetDemand(IReadOnlyCollection<string> paths);

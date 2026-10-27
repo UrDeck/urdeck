@@ -13,7 +13,7 @@ namespace UrDeck.Providers.Weather;
 /// widget whose location was just edited shows values in seconds. Nothing is held while no reading is shown.
 /// </summary>
 [DataProvider("weather", "Weather", DefaultIntervalMs = 900000, MinIntervalMs = 300000)]
-public sealed class WeatherProvider : IDataProvider, IDisposable
+public sealed class WeatherProvider : DataProvider<ProviderSettings>, IDisposable
 {
     /// <summary>A place fetched this recently is not fetched again, so a sample right after a new place's fetch makes no second request.</summary>
     private static readonly TimeSpan FreshFor = TimeSpan.FromSeconds(30);
@@ -57,9 +57,9 @@ public sealed class WeatherProvider : IDataProvider, IDisposable
         _time = time;
     }
 
-    public IReadOnlyList<ReadingDescriptor> Describe() => WeatherCatalog.Describe();
+    public override IReadOnlyList<ReadingDescriptor> Describe() => WeatherCatalog.Describe();
 
-    public void Start(IReadingSink sink)
+    public override void Start(IReadingSink sink, ProviderSettings settings)
     {
         _sink = sink;
         _http = _httpFactory();
@@ -68,7 +68,7 @@ public sealed class WeatherProvider : IDataProvider, IDisposable
         _stop = new CancellationTokenSource();
     }
 
-    public void SetDemand(IReadOnlyCollection<string> paths)
+    public override void SetDemand(IReadOnlyCollection<string> paths)
     {
         var next = new Dictionary<LocationKey, Dictionary<string, string>>();
         foreach (string path in paths)
@@ -118,7 +118,7 @@ public sealed class WeatherProvider : IDataProvider, IDisposable
             StartFetchingNewPlaces(toFetch);
     }
 
-    public async Task SampleAsync(CancellationToken cancellationToken)
+    public override async Task SampleAsync(CancellationToken cancellationToken)
     {
         LocationKey[] keys;
         lock (_lock)
@@ -150,7 +150,7 @@ public sealed class WeatherProvider : IDataProvider, IDisposable
         _fetching.Dispose();
     }
 
-    public void Shutdown()
+    public override void Shutdown()
     {
         CancellationTokenSource? stop = _stop;
         Task? running;

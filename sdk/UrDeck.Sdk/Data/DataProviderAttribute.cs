@@ -26,4 +26,10 @@ public sealed class DataProviderAttribute : Attribute
 
     /// <summary>The fastest sampling the provider allows; a faster setting is raised to it.</summary>
     public int MinIntervalMs { get; set; } = 250;
+
+    /// <summary>
+    /// What a reading says while a required setting is missing ("Set up Home Assistant in Settings"). Empty: the engine names the
+    /// provider and the setting.
+    /// </summary>
+    public string MissingSettingMessage { get; set; } = "";
 }

@@ -9,6 +9,7 @@ using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
 using UrDeck.Engine.Layout;
 using UrDeck.Sdk;
+using UrDeck.Sdk.Data;
 
 namespace UrDeck.Engine.Config;
 
@@ -50,17 +51,6 @@ public class PagerConfig
                 return IndicatorMode.Auto;
         }
     }
-}
-
-/// <summary>The user's settings for one data provider. Properties the engine does not know are kept for the provider.</summary>
-public class ProviderSettings
-{
-    /// <summary>Sampling interval in milliseconds; raised to the provider's minimum.</summary>
-    [JsonPropertyName("intervalMs")]
-    public int? IntervalMs { get; set; }
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; set; }
 }
 
 public class UrDeckConfig
@@ -188,6 +178,9 @@ public sealed class ConfigStore : IDisposable
     }
 
     public UrDeckConfig Config { get; private set; } = new UrDeckConfig();
+
+    /// <summary>Whether the file's <c>version</c> is newer than this build's: it is read and never written.</summary>
+    public bool IsNewerThanHost => _newerThanHost;
 
     public void Load()
     {

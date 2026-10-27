@@ -7,6 +7,7 @@ using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
 using UrDeck.Engine.Plugin;
+using UrDeck.Engine.Secrets;
 using UrDeck.Engine.Startup;
 using UrDeck.Engine.Themes;
 
@@ -62,6 +63,10 @@ internal sealed class HostContext : IDisposable
         // does not create the user folder, and so not the data folder either.
         Plugins = new WidgetPluginLoader(iconCacheFolder: data.IconCacheFolder, demo: demo);
         Plugins.ScanAndLoadPlugins(saveConfiguration ? data.PluginFolders : data.PluginFolders.Where(Directory.Exists).ToList());
+
+        // A token typed into the file by hand goes to Credential Manager before any provider starts.
+        if (saveConfiguration)
+            SecretStores.MoveFromConfigAndSave(Config, Plugins.Providers, Plugins.Secrets);
 
         Target = DisplaySelector.Select(Config.Config, Displays).Display;
     }
