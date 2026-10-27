@@ -47,7 +47,7 @@ that change sample values in `--demo` (samples stay a pure function of the momen
 
 ## Impact
 
-- `sdk/UrDeck.Sdk`: `IReadingSink.Interrupted(reason)` and `Describe(path, descriptor)` (default members),
+- `sdk/UrDeck.Sdk`: `IReadingSink.Interrupted(reason)` and `Describe(path, descriptor)` (default members), `DataProviderAttribute.LingerMs`,
   `ReadingDescriptor.Action` and `.Icon`, `IReadingBrowser`. Additive; one minor version.
 - `src/UrDeck.Engine`: `ReadingHub` applies interruptions with the failed-sample rule, keeps refined descriptions per
   concrete path (bounded by what is subscribed), repaints on a re-description, and exposes browsing; `SampleFile` reads

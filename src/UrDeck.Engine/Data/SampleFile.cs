@@ -24,7 +24,7 @@ public sealed class SampleFile
 
     private static readonly HashSet<string> ReadingKeys = new(StringComparer.Ordinal)
     {
-        "kind", "label", "name", "value", "keys", "period", "unavailable",
+        "kind", "label", "name", "value", "keys", "period", "unavailable", "action", "icon",
     };
 
     // A reading gives its value in exactly one of these.
@@ -250,6 +250,8 @@ public sealed class SampleFile
             DisplayUnit = Enum<DisplayUnit>(fields, "displayUnit", at, found),
             DepthUnit = Enum<DepthUnit>(fields, "depthUnit", at, found),
             Attribution = ReadAttribution(fields, at, found),
+            Action = NonEmptyText(fields, "action", at, found),
+            Icon = NonEmptyText(fields, "icon", at, found),
         };
 
         int given = ValueKeys.Count(fields.ContainsKey);
@@ -425,6 +427,19 @@ public sealed class SampleFile
             return element.GetString();
         found.Add($"{at}: {key} must be a text");
         return null;
+    }
+
+    /// <summary>An optional text that, when given, must say something (an action path, an icon key).</summary>
+    private static string? NonEmptyText(Dictionary<string, JsonElement> fields, string key, string at, List<string> found)
+    {
+        string? text = Text(fields, key, at, found, required: false);
+        if (text != null && string.IsNullOrWhiteSpace(text))
+        {
+            found.Add($"{at}: {key} must not be empty");
+            return null;
+        }
+
+        return text;
     }
 
     private static double? Number(Dictionary<string, JsonElement> fields, string key, string at, List<string> found)

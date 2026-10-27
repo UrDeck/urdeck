@@ -33,7 +33,7 @@ public sealed partial class ReadingHub
     {
         if (rt.Loop == null || rt.LingerTimer != null)
             return;
-        rt.LingerTimer = _time.CreateTimer(_ => OnLinger(rt), null, Linger, Timeout.InfiniteTimeSpan);
+        rt.LingerTimer = _time.CreateTimer(_ => OnLinger(rt), null, TimeSpan.FromMilliseconds(rt.Descriptor.LingerMs), Timeout.InfiniteTimeSpan);
     }
 
     private void MarkDemandDirty(ProviderRuntime rt)
@@ -87,6 +87,10 @@ public sealed partial class ReadingHub
         rt.StartedSignal = null;
         rt.Fingerprint = null;
         rt.MissingReason = null;
+        rt.Interrupted = false;
+        foreach (string path in rt.Listed.Where(p => !rt.Wanted.Contains(p)).ToList())
+            DropRefined(rt, path);
+        rt.Listed.Clear();
         startSignal?.TrySetResult("the provider stopped");
 
         return () =>
@@ -808,10 +812,12 @@ public sealed partial class ReadingHub
     }
 
     /// <summary>Under the gate: stores what a provider published and, after a sample, counts who was left out.</summary>
-    private void CommitLocked(ProviderRuntime rt, IReadOnlyCollection<KeyValuePair<string, Publication>> items, bool isSample, List<string> changed)
+    private void CommitLocked(ProviderRuntime rt, KeyValuePair<string, Publication>[] items, bool isSample, List<string> changed)
     {
         string providerId = rt.Descriptor.Id;
         var reported = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (items.Length > 0)
+            rt.Interrupted = false;
         foreach (var (path, publication) in items)
         {
             // A path made from a pattern is resolved only when a widget asked for it, so a provider cannot grow the cache.
@@ -869,5 +875,11 @@ public sealed partial class ReadingHub
 
         public void Log(string message) =>
             UrDeckLog.Info($"Provider '{runtime.Descriptor.Id}': {message}");
+
+        public void Interrupted(string reason) =>
+            hub.InterruptFromProvider(runtime, generation, reason);
+
+        public void Describe(string path, ReadingDescriptor descriptor) =>
+            hub.RefineFromProvider(runtime, generation, path, descriptor);
     }
 }

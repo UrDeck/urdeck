@@ -37,6 +37,12 @@ public sealed partial record ProviderDescriptor(
     /// <summary>Whether the provider can be asked to do something.</summary>
     public bool OffersActions => typeof(IActionProvider).IsAssignableFrom(ProviderType);
 
+    /// <summary>Whether the provider can list the concrete readings its patterns stand for.</summary>
+    public bool OffersBrowsing => typeof(IReadingBrowser).IsAssignableFrom(ProviderType);
+
+    /// <summary>How long the provider keeps running after nothing subscribes to it, in milliseconds.</summary>
+    public int LingerMs { get; init; } = 5000;
+
     public static ProviderDescriptor? TryCreate(Type type, out string? rejectReason)
     {
         rejectReason = null;
@@ -62,6 +68,9 @@ public sealed partial record ProviderDescriptor(
         if (meta.DefaultIntervalMs <= 0)
         { rejectReason = $"DefaultIntervalMs must be positive (was {meta.DefaultIntervalMs})"; return null; }
 
+        if (meta.LingerMs < 0)
+        { rejectReason = $"LingerMs must not be negative (was {meta.LingerMs})"; return null; }
+
         if (type.GetConstructor(Type.EmptyTypes) == null)
         { rejectReason = "no public parameterless constructor"; return null; }
 
@@ -77,6 +86,7 @@ public sealed partial record ProviderDescriptor(
             type.Assembly.GetName().Name ?? "?")
         {
             MissingSettingMessage = meta.MissingSettingMessage ?? "",
+            LingerMs = meta.LingerMs,
         };
     }
 

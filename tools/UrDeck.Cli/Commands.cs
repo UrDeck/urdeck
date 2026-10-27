@@ -173,6 +173,35 @@ public class RootCommand
         }
     }
 
+    [CliCommand(Description = "Commands about the readings of data providers." + ExitCodes.HelpText)]
+    public class ReadingsCommand
+    {
+        [CliCommand(Description = "Lists the readings a data provider can enumerate (the entities of Home Assistant), one per line: the reading id, its kind, its current value and its label. The provider runs as the deck runs it, with the configuration's settings and the secrets from the environment (URDECK_SECRET_<PROVIDER>_<SETTING>) or, on Windows, Credential Manager; a secret is used, never printed. Values are read for at most 5 seconds."
+            + ExitCodes.HelpText)]
+        public class BrowseCommand
+        {
+            [CliArgument(Description = "The provider's id, for example homeassistant.")]
+            public string Provider { get; set; } = "";
+
+            [CliOption(Description = "Keep the readings whose id or label contains this text (ignoring case).", Name = "search", Alias = "s", Required = false)]
+            public string? Search { get; set; }
+
+            [CliOption(Description = "Keep the reading ids that start with this domain: light keeps light.*.", Name = "domain", Alias = "d", Required = false)]
+            public string? Domain { get; set; }
+
+            [CliOption(Description = "The provider's address, in place of the configuration's url.", Name = "url", Required = false)]
+            public string? Url { get; set; }
+
+            [CliOption(Description = "A urdeck-config.json whose providers section is used; default: the one in the user's data folder (%APPDATA%\\UrDeck). It is read, never written.", Name = "config", Required = false)]
+            public string? Config { get; set; }
+
+            [CliOption(Description = "How the readings are printed.", Name = "format", Alias = "f", AllowedValues = ["text", "json"])]
+            public string Format { get; set; } = "text";
+
+            public int Run() => ReadingsBrowseRunner.Run(new ReadingsBrowseOptions(Provider, Search, Domain, Url, Config, Format), CliApp.Out, CliApp.Error);
+        }
+    }
+
     [CliCommand(Description = "Commands about shader backgrounds." + ExitCodes.HelpText)]
     public class ShaderCommand
     {

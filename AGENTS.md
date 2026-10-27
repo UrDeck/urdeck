@@ -27,6 +27,7 @@ dotnet test tests/UrDeck.Cli.Tests -c Release           # the tool's tests (Wind
 dotnet run --project tools/UrDeck.Cli -c Release -- preview render --theme rigline --background theme -o page.png   # sample data, any OS
 dotnet run --project tools/UrDeck.Cli -c Release -- preview render --widget urdeck.widgets.stats --widget-size 4x2 --frames 60 -o frames
 dotnet run --project tools/UrDeck.Cli -c Release -- catalog export -o catalog.json    # what the site's build reads
+dotnet run --project tools/UrDeck.Cli -c Release -- readings browse homeassistant --domain light   # a provider's readings and values; scripts/Start-HomeAssistantDemo.ps1 gives a disposable Home Assistant (CONTRIBUTING.md)
 ```
 
 `preview render` draws a configuration's page (the sample page, `src/UrDeck.Preview/SamplePage/urdeck-config.json`, by default) or one

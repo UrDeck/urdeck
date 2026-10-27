@@ -16,8 +16,6 @@ namespace UrDeck.Engine.Data;
 /// </summary>
 public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDisposable
 {
-    private static readonly TimeSpan Linger = TimeSpan.FromSeconds(5);
-
     private readonly ProviderRegistry _providers;
     private readonly TimeProvider _time;
     private readonly object _gate = new();
@@ -181,6 +179,8 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDispos
                 if (!ReadingId.TryParse(id, out string providerId, out string path, out _) || !_runtimes.TryGetValue(providerId, out var rt))
                     continue;
                 rt.Wanted.Remove(path);
+                if (!rt.Listed.Contains(path))
+                    DropRefined(rt, path);
                 if (rt.Wanted.Count == 0)
                     StartLinger(rt);
                 else

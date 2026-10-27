@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(UrDeckTfm)</TargetFramework>
+    <Description>First-party data provider for the states of a Home Assistant installation, and the services to change them.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- UrDeck.Sdk and SkiaSharp are provided by the host at runtime; don't copy them next to the plugin. -->
+    <ProjectReference Include="..\..\sdk\UrDeck.Sdk\UrDeck.Sdk.csproj" Private="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
+
+  <!-- Made-up entities for previews, the site and the host's demo mode (docs: "Sample files"). -->
+  <ItemGroup>
+    <EmbeddedResource Include="sample.json" LogicalName="urdeck.sample.homeassistant.json" />
+  </ItemGroup>
+
+</Project>

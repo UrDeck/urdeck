@@ -34,6 +34,18 @@ internal sealed class ProviderRuntime(ProviderDescriptor descriptor)
     /// <summary>The descriptions already made from a pattern, by the path that asked for them.</summary>
     public Dictionary<string, ReadingDescriptor> Instances { get; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// The descriptions the provider gave while running for concrete paths under its patterns, by path; only for paths in
+    /// <see cref="Wanted"/> or <see cref="Listed"/>.
+    /// </summary>
+    public Dictionary<string, ReadingDescriptor> Refined { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>The paths of the run's latest listing (<see cref="IReadingBrowser"/>); emptied when the run ends.</summary>
+    public HashSet<string> Listed { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Whether the provider reported an interruption and has published nothing since.</summary>
+    public bool Interrupted { get; set; }
+
     /// <summary>Paths with at least one subscriber (including paths the catalog turns out not to contain).</summary>
     public HashSet<string> Wanted { get; } = new(StringComparer.OrdinalIgnoreCase);
 

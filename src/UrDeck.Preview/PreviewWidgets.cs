@@ -4,6 +4,7 @@
 using UrDeck.Engine.Config;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Plugin;
+using UrDeck.Providers.HomeAssistant;
 using UrDeck.Providers.Machine;
 using UrDeck.Providers.Media;
 using UrDeck.Providers.Weather;
@@ -67,7 +68,7 @@ public static class PreviewWidgets
 public static class PreviewProviders
 {
     private static readonly Lazy<IReadOnlyList<(ProviderDescriptor Provider, SampleFile? Sample)>> All = new(() =>
-        new[] { typeof(MediaProvider), typeof(SystemProvider), typeof(WeatherProvider) }
+        new[] { typeof(HomeAssistantProvider), typeof(MediaProvider), typeof(SystemProvider), typeof(WeatherProvider) }
             .Select(type => ProviderDescriptor.TryCreate(type, out _)!)
             .Select(provider => (provider, ProviderSamples.Find(provider)))
             .OrderBy(p => p.provider.Id, StringComparer.Ordinal)

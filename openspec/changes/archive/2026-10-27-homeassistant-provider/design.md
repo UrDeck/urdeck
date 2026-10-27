@@ -106,3 +106,23 @@ images (#120); calendars; a widget.
 - [Every service allowed, including locks] → the user writes the configuration; page templates will show actions before
   import (BACKLOG item 15).
 - [Home Assistant changes its WebSocket messages] → fixtures pin today's shapes; the opt-in end-to-end tests catch drift.
+
+## Decided while applying
+
+- **A per-provider linger (`DataProviderAttribute.LingerMs`, default 5,000).** The pager unloads a page's widgets when it
+  leaves the screen, and the hub stopped every provider five seconds after its last subscriber, so the provider's own 30 s idle
+  close could never keep a connection across a page flip. Home Assistant declares 30,000; the hub stops it 30 s after the last
+  reading leaves, which closes the socket. The provider's own idle close (an empty demand for 30 s) stays for a demand that
+  empties while the provider runs. Additive, in the same SDK minor version.
+- **`unknown` publishes nothing.** The sink has no way to make a reading pending again, so a reading first reported `unknown`
+  stays pending (as specified) and one that had a value keeps it as ok until a real state arrives. A "pending again" sink member
+  is in BACKLOG item 3.
+- **"Did you mean" names only the ids at the smallest distance** (up to three, alphabetical), and only within a third of the
+  id's length: on the fixtures, `sensor.ofice_temperature` matched `sensor.basement_temperature` at a larger distance too.
+- **Listing uses REST `GET /api/states`**, one request, so `readings browse` and the editor work without the socket; the
+  "did you mean" listing uses `get_states` over the open socket, once per connection. `climate.set_temperature` reads the
+  installation's unit from the socket's `get_config`, else one `GET /api/config` per provider run.
+- **A listed description survives a later subscription.** Found by the end-to-end run against the `demo` integration: the hub
+  made the pattern's description when the reading was subscribed after a browse and overwrote the listed one.
+- **`readings browse` prints one decimal** of a number, temperature, speed or depth when the provider declares none, so `0.4 kWh`
+  does not read `0 kWh`.

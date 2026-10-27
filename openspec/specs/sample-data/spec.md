@@ -4,9 +4,7 @@
 
 Made-up but plausible readings that a data provider carries with it, so a page can be drawn the same way on any machine
 without sensors, network or personal data: for previews, pictures, tests and the host's demo mode.
-
 ## Requirements
-
 ### Requirement: Provider Sample File
 A data provider MAY carry a sample file. The sample file MUST travel inside the provider's assembly (not as a loose
 file), so that it is found wherever the provider is. It is a JSON document with:
@@ -124,3 +122,15 @@ The repository's tests MUST check this, on the platform where the provider's cat
 #### Scenario: A label that drifted
 - **WHEN** the system provider's label for `cpu/load` changes and the sample still has the old one
 - **THEN** a test fails, naming the reading and both labels
+
+### Requirement: Sample Descriptions Carry Action And Icon
+A reading in a sample file MAY have `action` (a path of an action of the same provider) and `icon` (a canonical icon key),
+which MUST become the description's natural action and icon (see data-providers, "Natural Action And Icon"). A sample still
+performs no actions (see provider-actions, "Demo And Sample Providers"): a widget that uses the natural action of a sample
+reading gets a failed result and draws it as it draws any failed action.
+
+#### Scenario: Sample light
+- **WHEN** a sample file describes `light.living_room` with `"action": "light.living_room/toggle"` and
+  `"icon": "home/light"`
+- **THEN** a widget showing it with sample data finds that action and icon in the description
+

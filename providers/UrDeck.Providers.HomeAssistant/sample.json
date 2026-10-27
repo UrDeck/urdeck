@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "readings": {
+    "light.living_room": { "kind": "onOff", "label": "Living room", "name": "light.living_room", "action": "light.living_room/toggle", "icon": "home/light", "value": true },
+    "light.living_room/brightness": { "kind": "percent", "label": "Living room brightness", "name": "light.living_room/brightness", "min": 0, "max": 100, "action": "light.living_room/turn_on", "icon": "home/light", "value": 70 },
+    "light.desk_strip": { "kind": "onOff", "label": "Desk strip", "name": "light.desk_strip", "action": "light.desk_strip/toggle", "icon": "home/light", "value": false },
+    "light.desk_strip/brightness": { "kind": "percent", "label": "Desk strip brightness", "name": "light.desk_strip/brightness", "min": 0, "max": 100, "action": "light.desk_strip/turn_on", "icon": "home/light", "value": 0 },
+    "switch.coffee_maker": { "kind": "onOff", "label": "Coffee maker", "name": "switch.coffee_maker", "action": "switch.coffee_maker/toggle", "icon": "home/outlet", "value": true },
+    "fan.bedroom": { "kind": "onOff", "label": "Bedroom fan", "name": "fan.bedroom", "action": "fan.bedroom/toggle", "icon": "home/fan", "value": false },
+    "lock.front_door": { "kind": "text", "label": "Front door", "name": "lock.front_door", "action": "lock.front_door/toggle", "icon": "home/lock", "value": "locked" },
+    "binary_sensor.back_door": { "kind": "onOff", "label": "Back door", "name": "binary_sensor.back_door", "icon": "home/door", "value": false },
+    "binary_sensor.hallway_motion": {
+      "kind": "onOff", "label": "Hallway motion", "name": "binary_sensor.hallway_motion", "icon": "home/motion",
+      "keys": [ { "at": 0, "value": false }, { "at": 4, "value": true }, { "at": 7, "value": false } ], "period": 12
+    },
+    "sensor.office_temperature": {
+      "kind": "temperature", "label": "Office temperature", "name": "sensor.office_temperature", "icon": "home/thermometer",
+      "keys": [ { "at": 0, "value": 21.4 }, { "at": 30, "value": 21.9 } ], "period": 60
+    },
+    "sensor.office_humidity": { "kind": "percent", "label": "Office humidity", "name": "sensor.office_humidity", "min": 0, "max": 100, "icon": "home/droplet", "value": 46 },
+    "sensor.desk_power": {
+      "kind": "number", "label": "Desk power", "name": "sensor.desk_power", "unit": "W", "icon": "home/bolt",
+      "keys": [ { "at": 0, "value": 431 }, { "at": 5, "value": 448 }, { "at": 10, "value": 425 } ], "period": 15
+    },
+    "sensor.phone_battery": { "kind": "percent", "label": "Phone battery", "name": "sensor.phone_battery", "min": 0, "max": 100, "icon": "home/battery", "value": 82 },
+    "sensor.wind_speed": { "kind": "speed", "label": "Wind speed", "name": "sensor.wind_speed", "icon": "home/entity", "value": 14 },
+    "sensor.rain_today": { "kind": "depth", "label": "Rain today", "name": "sensor.rain_today", "depthUnit": "millimetre", "icon": "home/entity", "value": 2.5 },
+    "sensor.last_backup": { "kind": "time", "label": "Last backup", "name": "sensor.last_backup", "icon": "home/entity", "value": "03:15" },
+    "sensor.washer_status": { "kind": "text", "label": "Washer", "name": "sensor.washer_status", "icon": "home/entity", "value": "Rinsing" },
+    "scene.movie_night": { "kind": "text", "label": "Movie night", "name": "scene.movie_night", "action": "scene.movie_night/toggle", "icon": "home/scene", "value": "2026-10-13T20:30:00+00:00" },
+    "media_player.living_room": { "kind": "text", "label": "Living room speaker", "name": "media_player.living_room", "action": "media_player.living_room/toggle", "icon": "media/play", "value": "playing" },
+    "sensor.garage_door_unavailable": { "kind": "text", "label": "Garage door", "name": "sensor.garage_door_unavailable", "icon": "home/garage", "unavailable": "unavailable in Home Assistant" },
+    "{entity}": { "kind": "text", "label": "{entity}", "name": "{entity}", "icon": "home/entity", "value": "on" },
+    "{entity}/{attribute}": { "kind": "text", "label": "{entity} {attribute}", "name": "{entity}/{attribute}", "value": "" }
+  }
+}

@@ -29,7 +29,7 @@
 
 ## 5. Host
 
-- [ ] 5.1 Settings window: the Providers section generated from the declarations (text, password, number, on/off), secret fields that show source and offer save and remove, Save per provider, Test connection with a 10 second limit, an empty state
+- [x] 5.1 Settings window: the Providers section generated from the declarations (text, password, number, on/off), secret fields that show source and offer save and remove, Save per provider, Test connection with a 10 second limit, an empty state
 - [x] 5.2 `ISettingsHost` gains what the section needs (declarations, current values, save, secret save and remove, test) without the window touching the engine directly
 - [x] 5.3 Velopack uninstall hook: delete every `UrDeck/*` credential after quitting the deck and removing the Run value
 - [x] 5.4 Check the settings window soak (`URDECK_SETTINGS_SOAK=1`) still releases memory with the new section, and update `docs/perf/settings-window.md` if the numbers move
@@ -43,5 +43,5 @@
 ## 7. Verify
 
 - [x] 7.1 `dotnet build urdeck.slnx -c Release` with 0 warnings, `dotnet test urdeck.slnx -c Release`, the engine coverage floor, `dotnet format urdeck.slnx --severity warn`, the Linux test projects, the site build, and `openspec validate --all --strict`
-- [ ] 7.2 Manual: enter a token in Settings, see the credential in Control Panel, restart and see the log line; paste a token into the file and see it moved; remove it; uninstall an installed copy and see the credential gone
-- [ ] 7.3 Close #109 from the pull request description
+- [x] 7.2 Manual: enter a token in Settings, see the credential in Control Panel, restart and see the log line; paste a token into the file and see it moved; remove it; uninstall an installed copy and see the credential gone
+- [x] 7.3 Close #109 from the pull request description

@@ -32,4 +32,10 @@ public sealed class DataProviderAttribute : Attribute
     /// provider and the setting.
     /// </summary>
     public string MissingSettingMessage { get; set; } = "";
+
+    /// <summary>
+    /// How long the provider keeps running after nothing subscribes to it, in milliseconds, so a page flipped away from and back
+    /// to does not start it again. A provider with a costly start (a connection to open) sets more than the default 5,000.
+    /// </summary>
+    public int LingerMs { get; set; } = 5000;
 }

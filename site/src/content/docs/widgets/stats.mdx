@@ -81,7 +81,9 @@ driver); on AMD and Intel they show a dash. `urdeck.log` names each GPU and the 
 first sampled, which is what a [hardware report](/tested-on/) should include.
 
 A reading that does not exist shows a dash and its id. A reading whose provider stopped answering keeps its last value in
-the dimmed text colour. A provider runs only while a shown widget uses it, and stops five seconds after the last one goes.
+the dimmed text colour. A provider runs only while a shown widget uses it, and stops five seconds after the last one goes
+(Home Assistant's after thirty, so that flipping to another page and back does not reconnect).
 
 The [weather](/docs/widgets/weather/) provider's readings can be shown here too, for example
-`weather:Tokyo/current/temperature`.
+`weather:Tokyo/current/temperature`, and so can [Home Assistant](/docs/home-assistant/)'s, for example
+`homeassistant:sensor.office_temperature`.
