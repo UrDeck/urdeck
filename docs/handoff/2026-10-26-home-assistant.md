@@ -139,7 +139,8 @@ an `mdi:` icon (filled style, clashes with outline themes); those not mapped fal
 the environment, and on Windows also from Credential Manager (used, never printed).
 
 **Sample and demo.** `sample.json`: concrete fictional entities for the sample page and the site, an `{entity}`
-fallback, and new `icon`/`action` fields in the sample format. In `--demo`, `…/toggle` flips the OnOff value in memory.
+fallback, and new `icon`/`action` fields in the sample format. (Dropped while writing the proposal: `--demo` taps flipping
+sample values. Samples stay a pure function of the moment and perform no actions, as the specs already say.)
 
 **Tests.** Internal seams `IHomeAssistantSocket` (JSON messages) and `IHomeAssistantRest`, scripted fakes,
 `FakeTimeProvider` for debounce, grace, ping and backoff; fixtures hand-written in the captured shapes. Opt-in only,
@@ -166,6 +167,20 @@ Widget `urdeck.widgets.control`, provider-agnostic (nothing in it knows Home Ass
 - Icons: the `home/` group in the built-in `outline` set (Lucide), added to the canonical key lists. One icon per
   entity, tinted by state; state-dependent icons (lock open/closed) are a backlog item.
 - Goldens: switch on, off, pending, failed; dimmer at a few levels. Site widget page; a sample page entry.
+
+## Decided while writing the proposals (2026-10-27)
+
+The three changes are in `openspec/changes/` (`provider-settings-and-secrets`, `homeassistant-provider`, `control-tile`).
+Where they go beyond or against the text above:
+
+- **An action starts its provider** (A, `provider-actions` "Order, Limits And Lifetime"). The spec said the hub never
+  starts a provider for an action, so a tile with an action and no reading (a scene button) would fail.
+- **A token typed into the JSON is moved** to Credential Manager with a log line (A), as recommended.
+- **The dimmer's level is explicit** (C): `level` is a reading id, and its action comes from that reading's description;
+  the Home Assistant provider names `light.x/turn_on` as the natural action of `light.x/brightness` (B). Deriving
+  `/brightness` from `reading` would have put a Home Assistant convention into the generic widget.
+- **No `--demo` toggling** (B), see above.
+- **On/off colours** come from the theme's accent and muted text; no new theme values (C).
 
 ## Backlog changes made with this handoff
 
