@@ -41,8 +41,11 @@
          Package 0.17.0 (provider-settings-and-secrets): IDataProvider.Start gained the provider's settings (breaking for a provider;
          the product has not shipped, so plugins are rebuilt). ProviderSettings (moved here from the engine, with actionTimeoutMs
          and actionWarnMs), DataProvider&lt;TSettings&gt;, IConnectionTest, SettingAttribute, SecretAttribute, SecretValue and
-         DataProviderAttribute.MissingSettingMessage arrived. The assembly version stays. -->
-    <Version>0.17.0</Version>
+         DataProviderAttribute.MissingSettingMessage arrived. The assembly version stays.
+         Package 0.18.0 (homeassistant-provider): IReadingSink.Interrupted and IReadingSink.Describe (default members),
+         ReadingDescriptor.Action and Icon, IReadingBrowser and DataProviderAttribute.LingerMs. All additive, so the assembly
+         version stays. -->
+    <Version>0.18.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

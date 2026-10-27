@@ -163,7 +163,7 @@ public sealed class PreviewCommandsTests : IDisposable
         Assert.Equal(ShaderStore.BuiltInNames.Order(StringComparer.Ordinal), Names(root.GetProperty("backgrounds"), "name"));
         Assert.Equal(["urdeck.widgets.clock", "urdeck.widgets.nowplaying", "urdeck.widgets.shortcut", "urdeck.widgets.stats", "urdeck.widgets.weather"],
             Names(root.GetProperty("widgets"), "typeId"));
-        Assert.Equal(["media", "system", "weather"], Names(root.GetProperty("providers"), "id"));
+        Assert.Equal(["homeassistant", "media", "system", "weather"], Names(root.GetProperty("providers"), "id"));
         Assert.All(root.GetProperty("providers").EnumerateArray(), p => Assert.True(p.GetProperty("sample").GetBoolean()));
 
         var rigline = root.GetProperty("themes").EnumerateArray().Single(t => t.GetProperty("name").GetString() == "rigline");
@@ -175,11 +175,15 @@ public sealed class PreviewCommandsTests : IDisposable
     }
 
     [Fact]
-    public void The_first_party_providers_declare_no_settings_beyond_the_base_ones()
+    public void Only_Home_Assistant_declares_settings_beyond_the_base_ones()
     {
         using var document = JsonDocument.Parse(Workspace.Invoke("catalog", "export").Out);
 
-        Assert.All(document.RootElement.GetProperty("providers").EnumerateArray(), p => Assert.Equal(0, p.GetProperty("settings").GetArrayLength()));
+        var providers = document.RootElement.GetProperty("providers").EnumerateArray().ToList();
+        Assert.All(providers.Where(p => p.GetProperty("id").GetString() != "homeassistant"), p => Assert.Equal(0, p.GetProperty("settings").GetArrayLength()));
+        var homeAssistant = providers.Single(p => p.GetProperty("id").GetString() == "homeassistant").GetProperty("settings");
+        Assert.Equal(["token", "url"], homeAssistant.EnumerateArray().Select(s => s.GetProperty("key").GetString()));
+        Assert.Equal("URDECK_SECRET_HOMEASSISTANT_TOKEN", homeAssistant[0].GetProperty("environmentVariable").GetString());
     }
 
     [Fact]

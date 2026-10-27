@@ -135,6 +135,42 @@ public class SdkContractTests
         Assert.False(default(ActionResult).Succeeded);
     }
 
+    [Fact]
+    public void ASinkWrittenBeforeInterruptionsAndRefinements_AcceptsBothAsNoOps()
+    {
+        // A sink that implements only the members of earlier SDKs (a test's own, another host's) still compiles and ignores them.
+        IReadingSink sink = new OldSink();
+
+        sink.Interrupted("connection lost");
+        sink.Describe("light.desk", new ReadingDescriptor("light.desk", ReadingKind.OnOff, "Desk", "light.desk"));
+    }
+
+    [Fact]
+    public void ADescriptorBuiltWithoutActionOrIcon_HasNeither()
+    {
+        var descriptor = new ReadingDescriptor("cpu/load", ReadingKind.Percent, "CPU", "CPU load");
+
+        Assert.Null(descriptor.Action);
+        Assert.Null(descriptor.Icon);
+    }
+
+    [Fact]
+    public void AProviderAttribute_LingersFiveSecondsUnlessItSaysOtherwise()
+    {
+        Assert.Equal(5000, new DataProviderAttribute("x", "X").LingerMs);
+    }
+
+    private sealed class OldSink : IReadingSink
+    {
+        public void Publish(string path, ReadingValue value)
+        {
+        }
+
+        public void Unavailable(string path, string reason)
+        {
+        }
+    }
+
     private sealed class Source : IReadingSource
     {
         public Reading Read(string id) => Reading.Ok(1);

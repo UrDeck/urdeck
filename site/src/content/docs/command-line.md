@@ -7,13 +7,15 @@ order: 2
 
 `urdeck-cli` is a small tool that works on the files UrDeck reads, without a deck: no window, no GPU, no network. It runs on
 Windows and on Linux, and it calls the same engine code the deck does, so it cannot disagree with the deck about what is wrong
-with a file. It never reads or writes the deck's configuration or log.
+with a file. It never writes the deck's configuration or log. The one command that talks to a service is `readings browse`,
+which asks a data provider of yours (Home Assistant) what readings it has, with the settings in your configuration.
 
 | Command | Does |
 |---|---|
 | `theme init`, `validate`, `render`, `schema` | Makes, checks and draws a theme folder. See [checking a theme](/docs/themes/checking/). |
 | `shader init`, `validate`, `render` | Makes, checks and draws a background folder. See [the shader tool](/docs/backgrounds/tool/). |
 | `preview render` | Draws a configuration's page, or one widget, in a theme over a background, from sample data. |
+| `readings browse` | Lists the readings a data provider can enumerate, with their current values, for finding an id. See [Home Assistant](/docs/home-assistant/#finding-an-entity-id). |
 | `catalog export` | Writes what the product ships (themes, backgrounds, widgets and their settings, finding codes) as JSON. This site's reference is built from it. |
 
 `--help` on the tool and on each command lists the options and the exit codes, and `--version` prints the version.

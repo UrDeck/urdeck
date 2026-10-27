@@ -36,6 +36,43 @@ change of state, not once per sample.
   never published
 - **THEN** the first is stale with its last value, the second is unavailable with the interruption's reason
 
+### Requirement: Demand-Driven Provider Lifetime
+A provider MUST exist and run only while it is needed.
+
+- A provider MUST NOT be instantiated at plugin load; it is created when a reading of it is first subscribed to, or
+  when its catalog is requested
+- A provider is told which of its readings are currently subscribed to, and again whenever that set changes
+- When the last subscription to a provider ends, the provider MUST be stopped after a linger period of 5 seconds, or the
+  longer period the provider declares (a provider with a costly start, such as a connection to open), unless a new
+  subscription arrives within it
+- A stopped provider MUST do no periodic work and hold no timer
+- On a plugin reload every provider MUST be stopped and released before its plugin is unloaded, without the linger
+  period
+
+#### Scenario: No data widgets
+- **WHEN** a page contains no widget that declares a reading
+- **THEN** no provider is instantiated and no sampling runs
+
+#### Scenario: First subscription starts the provider
+- **WHEN** the first widget that uses a `system` reading is shown
+- **THEN** the `system` provider is created and started, and it is told which readings are wanted
+
+#### Scenario: Last subscription ends
+- **WHEN** the only widget using a provider is removed and nothing subscribes again within 5 seconds
+- **THEN** the provider is stopped
+
+#### Scenario: Page rebuild does not restart the provider
+- **WHEN** a page is rebuilt and the same readings are subscribed to again within 5 seconds
+- **THEN** the provider keeps running and is not restarted
+
+#### Scenario: A provider that declares a longer linger
+- **WHEN** a provider declares a linger of 30 seconds and the user flips to a page without its readings and back after 20 seconds
+- **THEN** the provider keeps running and is not restarted
+
+#### Scenario: Two widgets share a reading
+- **WHEN** two shown widgets use the same reading
+- **THEN** the provider samples it once per interval and both widgets receive the same value
+
 ## ADDED Requirements
 
 ### Requirement: Interruptions

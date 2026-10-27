@@ -55,7 +55,10 @@ public sealed partial class ReadingHub
 
         var instance = Instantiate(best, segments, path);
         rt.Instances[path] = instance;
-        _descriptors[$"{rt.Descriptor.Id}:{path}"] = instance;
+
+        // A description the provider already gave (a listing came first) stays what the id is described as.
+        if (!rt.Refined.ContainsKey(path))
+            _descriptors[$"{rt.Descriptor.Id}:{path}"] = instance;
         return instance;
     }
 
@@ -78,6 +81,7 @@ public sealed partial class ReadingHub
         string label = pattern.Descriptor.Label;
         string name = pattern.Descriptor.Name;
         string? device = pattern.Descriptor.Device;
+        string? action = pattern.Descriptor.Action;
         for (int i = 0; i < segments.Length; i++)
         {
             if (!IsParameter(pattern.Segments[i]))
@@ -86,9 +90,10 @@ public sealed partial class ReadingHub
             label = label.Replace(parameter, segments[i], StringComparison.Ordinal);
             name = name.Replace(parameter, segments[i], StringComparison.Ordinal);
             device = device?.Replace(parameter, segments[i], StringComparison.Ordinal);
+            action = action?.Replace(parameter, segments[i], StringComparison.Ordinal);
         }
 
-        return pattern.Descriptor with { Path = path, Label = label, Name = name, Device = device };
+        return pattern.Descriptor with { Path = path, Label = label, Name = name, Device = device, Action = action };
     }
 
     private static bool IsParameter(string segment) => segment.Length > 2 && segment[0] == '{' && segment[^1] == '}';

@@ -138,8 +138,17 @@ internal sealed class ProvidersSection
 
         panel.Children.Add(buttons);
         panel.Children.Add(result);
-        return new Border { Padding = new Thickness(16), CornerRadius = new CornerRadius(8), Child = panel, BorderThickness = new Thickness(1), BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["CardStrokeColorDefaultBrush"] };
+        return new Border { Padding = new Thickness(16), CornerRadius = new CornerRadius(8), Child = panel, BorderThickness = new Thickness(1), BorderBrush = CardStroke() };
     }
+
+    /// <summary>
+    /// The card outline of the system theme when the application's resources hold it, else a neutral grey. App.xaml merges no
+    /// control resources, and a missing key throws from the indexer, which took the whole app down when a form was first shown.
+    /// </summary>
+    private static Microsoft.UI.Xaml.Media.Brush CardStroke() =>
+        Application.Current.Resources.TryGetValue("CardStrokeColorDefaultBrush", out object? value) && value is Microsoft.UI.Xaml.Media.Brush brush
+            ? brush
+            : new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.ColorHelper.FromArgb(0x40, 0x80, 0x80, 0x80));
 
     private StackPanel BuildSecretStatus(ProviderForm form, ProviderField field, TextBlock result)
     {

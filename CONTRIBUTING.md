@@ -416,10 +416,11 @@ public sealed class ExampleProvider : DataProvider<ProviderSettings>
   system for temperatures, speeds and depths together. A `Date` is a time value shown as a day. The range is what keeps a readout the same size while the value changes. `Warning` and `Critical` say from
   which value (canonical unit) the reading deserves attention; declare them only where a high value is a fault (a
   temperature), never for a load, and a gauge colours itself by them. It is called once, before `Start`, and
-  must not need `Start`. The catalog is fixed while the provider runs.
+  must not need `Start`. The catalog is fixed while the provider runs; a concrete reading under a pattern can be described
+  while running (see below).
 - **Lifetime and demand.** The engine creates the provider when a reading of it is first subscribed to (or its catalog is
   requested), calls `Start`, then `SetDemand` with the paths currently subscribed to, and again whenever that set changes.
-  Skip the work for readings nobody wants. It stops the provider five seconds after the last subscription ends (so a
+  Skip the work for readings nobody wants. It stops the provider five seconds (`LingerMs`) after the last subscription ends (so a
   page rebuild does not restart it) and calls `Shutdown`, after which a new instance is created if it is needed again.
 - **Sampling and threading.** The engine calls `SampleAsync` on a thread-pool thread, once at start, once more after 250 ms
   (so a provider that needs two samples for a rate, like CPU load, has a value after a quarter of a second) and then per
@@ -458,8 +459,23 @@ public sealed class ExampleProvider : DataProvider<ProviderSettings>
   `HttpClient` in `Start` and dispose it in `Shutdown` (nothing static, so the plugin can be unloaded), and log the first
   failure and the first success after it, not every attempt. Throw from `SampleAsync` on a failure: the engine marks the
   readings stale and retries with its own backoff.
+- **Pushed providers.** A provider that holds a connection (a WebSocket, MQTT) publishes from its own callbacks and has no
+  failing sample to make its readings stale. When the connection drops it calls `sink.Interrupted(reason)`: every subscribed
+  reading becomes stale with its last value (or unavailable with the reason when it has none) until it is published again.
+  Calling it again changes nothing. A provider with a costly start sets `LingerMs` on `[DataProvider]` (Home Assistant: 30,000)
+  so a page flipped away from and back does not open a new connection.
+- **Descriptions while running.** A pattern (`{entity}`) whose readings are only known from the source (an entity's unit
+  arrives with its state) is described honestly in the catalog (kind `Text`, "an entity's state"), and the provider describes
+  each concrete path once it knows: `sink.Describe("sensor.office_temperature", descriptor)`. Widgets showing it are redrawn;
+  describing it again (the unit changed) replaces it. The engine keeps a description only while the reading is shown or listed,
+  and ignores one for a path no pattern matches.
+- **Natural action and icon.** A description may name `Action`, the path of an action of the same provider that a generic
+  widget invokes on a tap (`light.desk/toggle`), and `Icon`, a canonical icon key (`home/light`). A sensor has neither.
+- **Listing.** A provider whose patterns stand for a finite set it can enumerate implements `IReadingBrowser`:
+  `BrowseAsync` returns one description per concrete reading, the same ones `Describe` would give when shown, without values.
+  The engine starts the provider for it, as for an action. `urdeck-cli readings browse <id>` and, later, the editor use it.
 - **Settings and secrets.** See "Settings and secrets" below.
-- **Not yet.** Image values and a catalog that changes while running come with the first provider that needs them.
+- **Not yet.** Image values, and new patterns while running, come with the first provider that needs them.
 
 ### Settings and secrets
 
@@ -579,7 +595,8 @@ runs as usual in demo mode. The file is `sample.json`, embedded in the provider'
 
 - **Readings.** Each key is a path below the provider, and each entry describes the reading as `Describe()` does (the field
   names of `ReadingDescriptor` in camelCase: `kind`, `label`, `name`, and where they apply `device`, `unit`, `displayUnit`,
-  `depthUnit`, `min`, `max`, `warning`, `critical`, `decimals`, `attribution`). `defaults` sets any of the optional fields for
+  `depthUnit`, `min`, `max`, `warning`, `critical`, `decimals`, `attribution`, and `action` and `icon`, the natural action and the icon
+  key; a sample still performs no action). `defaults` sets any of the optional fields but `action` and `icon` for
   every reading that does not set it. The file describes its readings itself because a catalog may depend on the machine
   (cores, adapters); make the sample a plausible machine.
 - **Values.** Give exactly one of `value` (fixed), `keys` (keyframes) or `unavailable` (a reason, to show how a widget draws a
@@ -597,6 +614,24 @@ runs as usual in demo mode. The file is `sample.json`, embedded in the provider'
   Add a test like `tests/UrDeck.Engine.Tests/ProviderSampleTests.cs`: the file parses without findings, and every path your
   `Describe()` can list has a sample with an equal description (for a catalog that depends on the machine, every family of
   paths, numbers made `#`). A reading the provider gains without a sample then fails the test, naming it.
+
+### Testing against a real Home Assistant
+
+The Home Assistant provider's tests run against a scripted fake (`tests/UrDeck.Engine.Tests/Support/FakeHomeAssistant.cs`, made-up
+entities in the message shapes of Home Assistant 2026.10) and never contact a real installation in CI. A few end-to-end checks
+(`HomeAssistantEndToEndTests`, marked `[HomeAssistantFact]`) run only when `URDECK_HA_E2E=1`, `URDECK_HA_URL` and
+`URDECK_SECRET_HOMEASSISTANT_TOKEN` are set. To get a disposable Home Assistant with the `demo` integration (Docker Desktop running),
+in a PowerShell session:
+
+```powershell
+./scripts/Start-HomeAssistantDemo.ps1      # pulls the pinned image, onboards a user, makes a token, sets the three variables here
+dotnet test tests/UrDeck.Engine.Tests -c Release --filter HomeAssistantEndToEnd
+dotnet run --project tools/UrDeck.Cli -c Release -- readings browse homeassistant --domain light --url $env:URDECK_HA_URL
+./scripts/Start-HomeAssistantDemo.ps1 -Stop  # removes the container and clears the variables
+```
+
+Run it with `./` in your session (not `pwsh scripts/...`): the variables are set in the PowerShell process that runs it. Never
+commit an entity id or a name from your own installation; fixtures use made-up ones.
 
 ### Adding a GPU vendor (AMD, Intel)
 

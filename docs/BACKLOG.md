@@ -328,7 +328,11 @@ is the first consumer. Left for later, each with the change or consumer that nee
 
 - Provider-defined settings and secrets (a Home Assistant URL and token): done in `provider-settings-and-secrets` (#109): typed
   `DataProvider<TSettings>`, `[Setting]` and `[Secret]`/`SecretValue`, a Providers section in the settings window, per-provider
-  action limits and an action that starts its provider. Next: `homeassistant-provider` (#110) and `control-tile` (#119); the decisions are in
+  action limits and an action that starts its provider. `homeassistant-provider` (#110) is built: the `homeassistant` provider
+  (readings over Home Assistant's WebSocket for the shown entities only, actions over REST, a 30 s linger so a page flip does not
+  reconnect), `IReadingSink.Interrupted` (a pushed provider's readings go stale), `IReadingSink.Describe` (a concrete reading under a
+  pattern described while running: the "catalog that changes while running" below, limited to that), `ReadingDescriptor.Action`
+  and `.Icon`, `IReadingBrowser` and `urdeck-cli readings browse`. Next: `control-tile` (#119); the decisions are in
   `docs/handoff/2026-10-26-home-assistant.md`. Secrets go to Windows Credential Manager (`UrDeck/<provider>/<setting>`,
   overridden by `URDECK_SECRET_<PROVIDER>_<SETTING>`) and the uninstaller deletes them. The weather location needs no
   provider settings: it is per widget and travels in the reading id (item 7).
@@ -339,7 +343,10 @@ is the first consumer. Left for later, each with the change or consumer that nee
   so `ILogger` stays parked until a widget needs to log.
 - Backing off when the PC is busy or on battery, which also gives `[RefreshAdaptive]` its meaning: the engine owns
   every provider's timer, so it is one place to change. Shared with the animation frame rate (item 14).
-- A per-card sampling rate, history buffers for charts, a catalog that changes while running, image values.
+- A per-card sampling rate, history buffers for charts, image values. A catalog that changes while running is done for concrete
+  readings under a pattern (`IReadingSink.Describe`, `homeassistant-provider`); new patterns while running are not.
+- A sink state for "pending again" (Home Assistant's `unknown` after a restart): today the provider publishes nothing, so a reading
+  that had a value keeps it as ok instead of becoming pending.
 - FPS: it comes from tracing the foreground game, not from hardware, and needs its own provider and rights.
 - An editor that lists the catalog with live values (item 11) is a subscriber that is not a shown widget.
 
@@ -845,15 +852,19 @@ Collected while the milestones were drawn up. Each names the milestone that need
   a widget is added; the marketplace manifest in item 13 already plans the same field. To list, as of
   `shortcut-and-tap`: the engine itself fetches site icons (only for a widget whose icon source is an `http(s)`
   address; the address, its web manifest and at most four icon candidates, which may be on another host over `https`;
-  at most once per address in 30 days; no cookies or credentials), beside the weather provider's requests.
+  at most once per address in 30 days; no cookies or credentials), beside the weather provider's requests, and the Home
+  Assistant provider's (only to the configured address: a WebSocket while a reading is shown, a request per action, a listing).
 - **More `system` readings.** Network throughput, disk use and activity, fan speeds, battery. Each is a few catalog
   entries once its source is known; do them when a user asks.
 - **More providers and widgets.** Calendar or agenda, an audio visualizer (named as a design target in item 14), a
-  timer. Home Assistant is planned (item 3).
+  timer. Home Assistant is done (item 3, `homeassistant-provider`); MQTT, push and Prometheus would reuse its interruptions and
+  listing.
 - **State-dependent icons.** A lock open or closed, a door open or shut: a descriptor icon that changes with the state
   (`home/lock` and `home/lock-open`). The control tile starts with one icon per entity, tinted by state.
 - **Page templates** (replaces "shared pages", 2026-10-26). A page and its theme exported to a file and imported by an
   explicit action of the user, never applied by something else on the machine. The import shows what the template does
   before applying it: its launch targets (a shortcut's `target` and `arguments` are trusted like a `.lnk` because the
   user wrote them), its provider actions (a tile labelled "Lamp" could call `lock.front_door/unlock`) and any web
-  address in an `icon` or `target`, which makes the app send a request.
+  address in an `icon` or `target`, which makes the app send a request. Since `homeassistant-provider` every Home Assistant
+  service is allowed, and a tile without an `action` uses its reading's natural action (`light.desk/toggle`), so the import must
+  show the action each tile resolves to, not only the ones written in the file.
