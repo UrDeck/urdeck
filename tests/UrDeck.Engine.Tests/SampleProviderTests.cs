@@ -134,7 +134,7 @@ public sealed class SampleProviderTests
     {
         var provider = new SampleProvider(SampleFile.Parse(Json, out _)!, () => Start, Start);
         var sink = new Sink();
-        provider.Start(sink);
+        provider.Start(sink, new ProviderSettings());
         provider.SetDemand(["cpu/load", "Bern/place", "nothing/here"]);
 
         await provider.SampleAsync(TestContext.Current.CancellationToken);

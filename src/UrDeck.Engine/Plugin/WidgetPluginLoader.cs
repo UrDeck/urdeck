@@ -6,6 +6,7 @@ using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Icons;
 using UrDeck.Engine.Launch;
+using UrDeck.Engine.Secrets;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Data;
 
@@ -35,10 +36,12 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     /// Demo mode (host-shell, "Demo Mode"): every provider whose assembly carries a sample is registered as its sample, read by
     /// this clock, and no site icon is fetched. Null runs the providers.
     /// </param>
-    public WidgetPluginLoader(TimeProvider? time = null, string? iconCacheFolder = null, SampleClock? demo = null)
+    /// <param name="secrets">The secret store of the providers; by default the system's (Credential Manager on Windows, the environment elsewhere).</param>
+    public WidgetPluginLoader(TimeProvider? time = null, string? iconCacheFolder = null, SampleClock? demo = null, ISecretStore? secrets = null)
     {
         _demo = demo;
-        _hub = new ReadingHub(_providers, time);
+        Secrets = secrets ?? SecretStores.CreateDefault();
+        _hub = new ReadingHub(_providers, time, secrets: Secrets);
         _icons = new IconService(iconCacheFolder ?? Path.Combine(Path.GetTempPath(), "urdeck-icons"), time) { SiteIcons = demo == null };
         _launcher = new Launcher(time);
         _registry.CreateServices = () => new WidgetServices(_hub, _launcher, _icons, _hub);
@@ -59,6 +62,9 @@ public sealed class WidgetPluginLoader : IPluginService, IDisposable
     public WidgetRegistry Registry => _registry;
 
     public ProviderRegistry Providers => _providers;
+
+    /// <summary>Where the providers' secret settings are looked up and kept.</summary>
+    public ISecretStore Secrets { get; }
 
     /// <summary>The readings of every provider; widgets created here are attached to it.</summary>
     public ReadingHub Readings => _hub;

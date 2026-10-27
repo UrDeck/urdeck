@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Secrets;
 using UrDeck.Engine.Startup;
 using Velopack;
 using Velopack.Locators;
@@ -111,6 +112,9 @@ public static class Program
             var autostart = new RunKeyAutostart();
             if (autostart.State is AutostartState.On or AutostartState.SwitchedOffInWindows)
                 autostart.SwitchOff();
+
+            // What UrDeck stored for services goes with it; the user's files stay.
+            new CredentialManagerBackend().DeleteAll();
         }
         catch (Exception ex)
         {

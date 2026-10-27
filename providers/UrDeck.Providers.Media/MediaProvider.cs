@@ -12,7 +12,7 @@ namespace UrDeck.Providers.Media;
 /// the art is read first when the track changed, so a widget never draws a new title beside the old cover.
 /// </summary>
 [DataProvider("media", "Media", DefaultIntervalMs = 60000, MinIntervalMs = 250)]
-public sealed class MediaProvider : IDataProvider, IActionProvider, IDisposable
+public sealed class MediaProvider : DataProvider<ProviderSettings>, IActionProvider, IDisposable
 {
     internal const string Status = "status";
     internal const string Title = "title";
@@ -60,7 +60,7 @@ public sealed class MediaProvider : IDataProvider, IActionProvider, IDisposable
         _time = time;
     }
 
-    public IReadOnlyList<ReadingDescriptor> Describe() =>
+    public override IReadOnlyList<ReadingDescriptor> Describe() =>
     [
         new(Status, ReadingKind.Text, "Status", "Playback status (playing, paused, stopped or none)"),
         new(Title, ReadingKind.Text, "Title", "Track title"),
@@ -85,7 +85,7 @@ public sealed class MediaProvider : IDataProvider, IActionProvider, IDisposable
         new("control/playpause", "Play/Pause", "Play or pause"),
     ];
 
-    public void Start(IReadingSink sink)
+    public override void Start(IReadingSink sink, ProviderSettings settings)
     {
         _sink = sink;
         _art.ClearLeftovers();
@@ -93,14 +93,14 @@ public sealed class MediaProvider : IDataProvider, IActionProvider, IDisposable
         Request(MediaChange.Session | MediaChange.Properties | MediaChange.Playback | MediaChange.Timeline);
     }
 
-    public void SetDemand(IReadOnlyCollection<string> paths)
+    public override void SetDemand(IReadOnlyCollection<string> paths)
     {
         // Everything is published whatever is subscribed to: the session's events are the only cost, and they are free to listen to.
     }
 
-    public Task SampleAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    public override Task SampleAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-    public void Shutdown()
+    public override void Shutdown()
     {
         lock (_gate)
         {

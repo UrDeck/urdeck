@@ -81,6 +81,22 @@ import Base from '../layouts/Base.astro';
     title, artist and cover are never written to the log. Without a now playing card the provider reads nothing.
   </p>
 
+  <h2 id="secrets">Tokens and passwords</h2>
+  <p>
+    A data provider that talks to a service of yours (a token for your home automation, a password) needs a secret. UrDeck keeps
+    it in <strong>Windows Credential Manager</strong>, as a credential named <code>UrDeck/&lt;provider&gt;/&lt;setting&gt;</code>
+    for your Windows user on this PC (it is not roamed to other PCs), and never in <code>urdeck-config.json</code> or in the log.
+    You can see and delete it in Control Panel. An environment variable <code>URDECK_SECRET_&lt;PROVIDER&gt;_&lt;SETTING&gt;</code>
+    takes its place when you prefer that. A secret goes only to the service it belongs to, the one whose address you set; UrDeck
+    sends it nowhere else, and not to urdeck.app, which has no server to send it to. A provider receives only its own secrets.
+  </p>
+  <p>
+    Credential Manager ties a secret to your Windows account; it does not hide it from a program that runs as you. Malicious code
+    running with your user's rights can read it, as it can read your browser's saved passwords, and UrDeck does not defend against
+    that. A <a href="#plugins">plugin</a> runs with your rights too. Uninstalling UrDeck from Windows' installed apps deletes every
+    credential whose name starts with <code>UrDeck/</code>; a copy you only unpacked leaves them until you delete them yourself.
+  </p>
+
   <h2 id="plugins">Plugins by other people</h2>
   <p>
     UrDeck can load widgets and data providers written by others. A plugin is a program that runs with your user's rights,

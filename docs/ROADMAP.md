@@ -102,7 +102,8 @@ install, then what makes it work for a stranger, then trust. The release decisio
 - `UrDeck.Sdk` on NuGet with the analyzer bundled, and the `dotnet new` template (item 13).
 - Benchmark mode and published tiers (item 4), so an author can state what a widget costs.
 - Provider settings and secrets (item 3), proven by one provider that needs them: pulled forward (2026-10-26) as
-  `provider-settings-and-secrets`, proven by `homeassistant-provider`.
+  `provider-settings-and-secrets` (built; the SDK contract, secrets in Credential Manager, the Providers settings section), proven by
+  `homeassistant-provider`.
 - Author documentation: a walkthrough from the template to a loaded widget.
 
 **6. UrDeck 1.0.** Winget manifest, final logo and branding (item 12; the installer and auto-update arrive in milestone 2);

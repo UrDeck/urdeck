@@ -323,11 +323,12 @@ What the exploration settled (it replaced the earlier "named topics with typed v
 
 The three changes are listed under "Suggested order". `provider-actions` (issue #108, 2026-10-25) adds the path back: a provider
 may implement `IActionProvider`, a widget calls `Actions.Invoke("provider:path", argument)` and gets a result (per-provider
-ordered queue of at most eight, 10 s limit, a failed result for every error, one log line per action); `now-playing` (item 7)
+ordered queue of at most eight, 10 s limit (`providers.<id>.actionTimeoutMs`, at least 1 s; `actionWarnMs` logs a slow one), a failed result for every error, one log line per action); `now-playing` (item 7)
 is the first consumer. Left for later, each with the change or consumer that needs it:
 
-- Provider-defined settings and secrets (a Home Assistant URL and token): planned (2026-10-26) as the change
-  `provider-settings-and-secrets` (#109), then `homeassistant-provider` (#110) and `control-tile` (#119); the decisions are in
+- Provider-defined settings and secrets (a Home Assistant URL and token): done in `provider-settings-and-secrets` (#109): typed
+  `DataProvider<TSettings>`, `[Setting]` and `[Secret]`/`SecretValue`, a Providers section in the settings window, per-provider
+  action limits and an action that starts its provider. Next: `homeassistant-provider` (#110) and `control-tile` (#119); the decisions are in
   `docs/handoff/2026-10-26-home-assistant.md`. Secrets go to Windows Credential Manager (`UrDeck/<provider>/<setting>`,
   overridden by `URDECK_SECRET_<PROVIDER>_<SETTING>`) and the uninstaller deletes them. The weather location needs no
   provider settings: it is per widget and travels in the reading id (item 7).

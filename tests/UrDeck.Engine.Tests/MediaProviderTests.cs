@@ -145,7 +145,7 @@ public sealed class MediaProviderTests : IDisposable
         new("Spotify.exe", title, artist, album, status, canPrevious, canNext, true, TimeSpan.FromSeconds(position), at ?? new DateTimeOffset(2026, 10, 25, 12, 0, 0, TimeSpan.Zero),
             TimeSpan.FromSeconds(duration), thumbnail ?? (cover == null ? null : _ => Task.FromResult<byte[]?>(cover)));
 
-    private void Start() => _provider.Start(_sink);
+    private void Start() => _provider.Start(_sink, new ProviderSettings());
 
     private static bool Settled(Func<bool> condition) => HubTestExtensions.WaitFor(condition);
 

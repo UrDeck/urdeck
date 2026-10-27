@@ -10,7 +10,8 @@ namespace UrDeck.Engine.Data;
 // thread pool, beside (not inside) the sampling loop. Every failure is a value; see the provider-actions spec.
 public sealed partial class ReadingHub
 {
-    private static readonly TimeSpan ActionLimit = TimeSpan.FromSeconds(10);
+    private const int DefaultActionTimeoutMs = 10_000;
+    private const int DefaultActionWarnMs = 2_000;
 
     private const int MaxWaitingActions = 8;
 
@@ -28,9 +29,11 @@ public sealed partial class ReadingHub
                 return Failed(id, "the host is shutting down", asked);
             if (_providers.Get(providerId) == null)
                 return Failed(id, $"no data provider '{providerId}' is registered", asked);
-            if (!_runtimes.TryGetValue(providerId, out var rt) || !rt.Started || rt.Instance == null)
+            var descriptor = _providers.Get(providerId)!;
+            var rt = GetOrCreateRuntime(descriptor);
+            if (_manual && !rt.Started)
                 return Failed(id, $"provider '{providerId}' is not running", asked);
-            if (rt.Instance is not IActionProvider)
+            if (!(rt.Instance != null ? rt.Instance is IActionProvider : descriptor.OffersActions))
                 return Failed(id, $"provider '{providerId}' offers no actions", asked);
             if (rt.Actions.Count >= MaxWaitingActions)
                 return Failed(id, $"provider '{providerId}' is busy", asked);
@@ -38,6 +41,13 @@ public sealed partial class ReadingHub
             pending = new PendingAction(id, path, argument, asked,
                 new TaskCompletionSource<ActionResult>(TaskCreationOptions.RunContinuationsAsynchronously));
             rt.Actions.Enqueue(pending);
+            if (!rt.Started)
+            {
+                // A tile that only acts has no reading to start the provider; the action does, and the provider lingers after it.
+                EnsureLoop(rt);
+                TouchLinger(rt);
+            }
+
             if (!rt.ActionPumpRunning)
             {
                 rt.ActionPumpRunning = true;
@@ -104,13 +114,15 @@ public sealed partial class ReadingHub
         return Task.FromResult(ActionResult.Failed(message));
     }
 
-    private void LogAction(string id, ActionResult result, long asked)
+    private void LogAction(string id, ActionResult result, long asked, int warnMs = DefaultActionWarnMs)
     {
         long ms = (long)_time.GetElapsedTime(asked).TotalMilliseconds;
         if (result.Succeeded)
             UrDeckLog.Info(result.Message.Length == 0 ? $"Action '{id}': done ({ms} ms)" : $"Action '{id}': done: {result.Message} ({ms} ms)");
         else
             UrDeckLog.Warn($"Action '{id}': failed: {result.Message} ({ms} ms)");
+        if (ms > warnMs)
+            UrDeckLog.Warn($"Action '{id}' took {ms / 1000.0:0.###} s, over the {warnMs / 1000.0:0.###} s warning threshold");
     }
 
     /// <summary>Under the gate: takes every waiting action of the run that is ending.</summary>
@@ -137,6 +149,7 @@ public sealed partial class ReadingHub
         {
             PendingAction? action;
             IActionProvider? provider;
+            Task<string?>? ready;
             lock (_gate)
             {
                 if (rt.Generation != generation)
@@ -147,25 +160,91 @@ public sealed partial class ReadingHub
                     return;
                 }
 
-                provider = rt.Instance as IActionProvider;
+                ready = rt.Started ? null : (rt.StartedSignal ??= ProviderRuntime.NewStartSignal()).Task;
             }
 
-            var result = provider == null
-                ? ActionResult.Failed($"provider '{rt.Descriptor.Id}' offers no actions")
-                : await RunActionAsync(provider, action, stop);
-            LogAction(action.Id, result, action.Asked);
+            var (timeout, warnMs) = ActionLimits(rt.Descriptor.Id);
+            string? why = ready == null ? null : await WaitForStartAsync(ready, timeout, stop);
+            ActionResult result;
+            if (why != null)
+            {
+                result = ActionResult.Failed($"provider '{rt.Descriptor.Id}': {why}");
+            }
+            else
+            {
+                lock (_gate)
+                    provider = rt.Instance as IActionProvider;
+                result = provider == null
+                    ? ActionResult.Failed($"provider '{rt.Descriptor.Id}' offers no actions")
+                    : await RunActionAsync(provider, action, timeout, stop);
+            }
+
+            LogAction(action.Id, result, action.Asked, warnMs);
             action.Completion.TrySetResult(result);
+            lock (_gate)
+            {
+                if (rt.Generation == generation)
+                    TouchLinger(rt);
+            }
         }
     }
 
-    private async Task<ActionResult> RunActionAsync(IActionProvider provider, PendingAction action, CancellationToken stop)
+    /// <summary>The provider's action time limit and warning threshold (<c>actionTimeoutMs</c>, <c>actionWarnMs</c>).</summary>
+    private (TimeSpan Timeout, int WarnMs) ActionLimits(string providerId)
+    {
+        ProviderSettings? raw;
+        lock (_gate)
+            raw = _rawSettings.GetValueOrDefault(providerId);
+
+        int timeoutMs = raw?.ActionTimeoutMs ?? DefaultActionTimeoutMs;
+        if (timeoutMs < ProviderSettings.MinActionTimeoutMs)
+        {
+            bool first;
+            lock (_gate)
+                first = _loggedSettings.Add($"providers.{providerId}.actionTimeoutMs {timeoutMs}");
+            if (first)
+                UrDeckLog.Warn($"providers.{providerId}.actionTimeoutMs {timeoutMs} is below the minimum; using {ProviderSettings.MinActionTimeoutMs} ms");
+            timeoutMs = ProviderSettings.MinActionTimeoutMs;
+        }
+
+        return (TimeSpan.FromMilliseconds(timeoutMs), Math.Max(raw?.ActionWarnMs ?? DefaultActionWarnMs, 0));
+    }
+
+    /// <summary>Waits for the run an action needs to start; null when it started, else why it did not.</summary>
+    private async Task<string?> WaitForStartAsync(Task<string?> ready, TimeSpan limit, CancellationToken stop)
+    {
+        try
+        {
+            return await ready.WaitAsync(limit, _time, stop);
+        }
+        catch (TimeoutException)
+        {
+            return $"did not start within {limit.TotalSeconds:0.#} s";
+        }
+        catch (OperationCanceledException) when (stop.IsCancellationRequested)
+        {
+            return "the provider stopped";
+        }
+    }
+
+    /// <summary>Under the gate: a provider nothing subscribes to lingers from now, so it stays up for an action and stops after it.</summary>
+    private void TouchLinger(ProviderRuntime rt)
+    {
+        if (rt.Wanted.Count > 0 || rt.Loop == null)
+            return;
+        rt.LingerTimer?.Dispose();
+        rt.LingerTimer = null;
+        StartLinger(rt);
+    }
+
+    private async Task<ActionResult> RunActionAsync(IActionProvider provider, PendingAction action, TimeSpan limit, CancellationToken stop)
     {
         using var actionCts = CancellationTokenSource.CreateLinkedTokenSource(stop);
         using var timeoutCts = new CancellationTokenSource();
 
         // On its own pool thread: a provider that blocks before returning its task must not take the queue's timeout with it.
         var run = Task.Run(() => provider.InvokeAsync(action.Path, action.Argument, actionCts.Token), CancellationToken.None);
-        var timeout = Task.Delay(ActionLimit, _time, timeoutCts.Token);
+        var timeout = Task.Delay(limit, _time, timeoutCts.Token);
         var first = await Task.WhenAny(run, timeout);
 
         if (first == run)
@@ -187,6 +266,6 @@ public sealed partial class ReadingHub
 
         await actionCts.CancelAsync();
         _ = run.ContinueWith(t => _ = t.Exception, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
-        return ActionResult.Failed($"did not finish within {ActionLimit.TotalSeconds:0.#} s");
+        return ActionResult.Failed($"did not finish within {limit.TotalSeconds:0.#} s");
     }
 }

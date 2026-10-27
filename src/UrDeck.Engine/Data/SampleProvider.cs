@@ -29,7 +29,7 @@ public sealed class SampleProvider : IDataProvider
 
     public IReadOnlyList<ReadingDescriptor> Describe() => _file.Describe();
 
-    public void Start(IReadingSink sink) => _sink = sink;
+    public void Start(IReadingSink sink, ProviderSettings settings) => _sink = sink;
 
     public void SetDemand(IReadOnlyCollection<string> paths) => Volatile.Write(ref _demand, [.. paths]);
 
@@ -98,5 +98,10 @@ public static class ProviderSamples
     /// <paramref name="file"/> at the seconds since <paramref name="start"/> by <paramref name="now"/>.
     /// </summary>
     public static ProviderDescriptor Replace(ProviderDescriptor provider, SampleFile file, Func<DateTime> now, DateTime start) =>
-        provider with { Factory = () => new SampleProvider(file, now, start) };
+        provider with
+        {
+            Factory = () => new SampleProvider(file, now, start),
+            // A sample needs no settings, so a provider that requires some still shows its sample.
+            SettingsTypeOverride = typeof(ProviderSettings),
+        };
 }

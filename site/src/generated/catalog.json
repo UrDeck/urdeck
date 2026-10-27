@@ -1206,17 +1206,20 @@
     {
       "id": "media",
       "name": "Media",
-      "sample": true
+      "sample": true,
+      "settings": []
     },
     {
       "id": "system",
       "name": "System",
-      "sample": true
+      "sample": true,
+      "settings": []
     },
     {
       "id": "weather",
       "name": "Weather",
-      "sample": true
+      "sample": true,
+      "settings": []
     }
   ],
   "themes": [
