@@ -527,7 +527,9 @@ product knows about what it ships:
   default configuration as it would appear in `urdeck-config.json`, and its settings: each setting's name in
   `urdeck-config.json`, its type (text, number, whole number, on/off, list, object, or the values it accepts) and its
   default for a widget written without it
-- `providers`: each first-party provider's id, name and whether it carries a sample
+- `providers`: each first-party provider's id, name, whether it carries a sample, and its settings beyond the base ones:
+  each setting's name in `urdeck-config.json`, its type, label, help text, default, and whether it is required or a
+  secret (a secret's environment variable name is listed; no value ever is)
 - `findings`: every theme and background finding code with its severity and a one-line summary of what it means
 
 Built-in themes and backgrounds are always listed; `--theme-dir` and `--background-dir` add a user's folders, as for
@@ -537,7 +539,8 @@ between runs.
 #### Scenario: What the site reads
 - **WHEN** `catalog export -o catalog.json` is run
 - **THEN** `catalog.json` lists the eleven built-in themes, the sixteen built-in backgrounds, the four first-party widgets
-  with their sizes, default configurations and settings, the two first-party providers and every finding code
+  with their sizes, default configurations and settings, the first-party providers with their settings and every finding
+  code
 
 #### Scenario: A widget's settings
 - **WHEN** the catalog is exported
@@ -546,3 +549,30 @@ between runs.
 #### Scenario: Stable output
 - **WHEN** `catalog export` is run twice with the same inputs
 - **THEN** both outputs are byte for byte the same
+
+#### Scenario: A provider's secret in the export
+- **WHEN** the catalog is exported and a first-party provider declares a secret `token`
+- **THEN** the provider's settings list `token` as a secret with its environment variable name, and no value
+
+### Requirement: Browsing Readings
+`urdeck-cli readings browse <provider> [--search <text>] [--domain <prefix>] [--url <address>] [--config <file>]
+[--format text|json]` MUST list the concrete readings a provider can enumerate (see data-providers, "Listing Concrete
+Readings"), one per line: the reading id, its kind, its current value with its unit, and its label.
+
+- The provider's settings come from `--config` (default: the configuration in the user's data folder), with `--url`
+  overriding an address; secrets from the environment and, on Windows, Credential Manager (see provider-secrets). A
+  secret is used, never printed
+- `--search` keeps readings whose id or label contains the text (case-insensitive); `--domain` keeps ids that start with
+  the prefix (`light` keeps `light.*`)
+- Values are read by subscribing for at most 5 seconds; a reading with none by then shows its state (pending)
+- A provider that cannot list, is not loaded or cannot start ends with exit code 2 and the reason
+
+#### Scenario: Find the basement temperature
+- **WHEN** `readings browse homeassistant --search basement --domain sensor` runs with the token in
+  `URDECK_SECRET_HOMEASSISTANT_TOKEN`
+- **THEN** the output lists `homeassistant:sensor.basement_temperature` with its kind, value and label, and no token
+
+#### Scenario: Provider without a listing
+- **WHEN** `readings browse weather` runs
+- **THEN** the exit code is 2 and the message says the provider cannot list its readings
+
