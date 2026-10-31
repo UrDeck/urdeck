@@ -375,32 +375,32 @@ that throws in `Render` shows a red error tile instead of taking the dashboard d
 ## Writing a data provider
 
 A data provider supplies readings (numbers, texts or on/off states) that any widget can show. It is a class implementing
-`IDataProvider` with `[DataProvider]`, in a plugin assembly that references only `UrDeck.Sdk` (a plugin may hold providers,
+`DataProvider<TSettings>` (or `IDataProvider`) with `[DataProvider]`, in a plugin assembly that references only `UrDeck.Sdk` (a plugin may hold providers,
 widgets or both; it loads from `plugins/` and hot-reloads like a widget). `providers/UrDeck.Providers.System` is the
 first-party example and uses the same contract.
 
 ```csharp
 [DataProvider("example", "Example", DefaultIntervalMs = 2000, MinIntervalMs = 500)]
-public sealed class ExampleProvider : IDataProvider
+public sealed class ExampleProvider : DataProvider<ProviderSettings>
 {
     private IReadingSink? _sink;
 
-    public IReadOnlyList<ReadingDescriptor> Describe() =>
+    public override IReadOnlyList<ReadingDescriptor> Describe() =>
     [
         new ReadingDescriptor("room/temperature", ReadingKind.Temperature, "Room", "Room temperature") { Device = "Sensor 1" },
     ];
 
-    public void Start(IReadingSink sink) => _sink = sink;
+    public override void Start(IReadingSink sink, ProviderSettings settings) => _sink = sink;
 
-    public void SetDemand(IReadOnlyCollection<string> paths) { /* remember what is wanted; skip work nobody needs */ }
+    public override void SetDemand(IReadOnlyCollection<string> paths) { /* remember what is wanted; skip work nobody needs */ }
 
-    public Task SampleAsync(CancellationToken cancellationToken)
+    public override Task SampleAsync(CancellationToken cancellationToken)
     {
         _sink!.Publish("room/temperature", 21.5);   // temperatures are always degrees Celsius
         return Task.CompletedTask;
     }
 
-    public void Shutdown() => _sink = null;
+    public override void Shutdown() => _sink = null;
 }
 ```
 
@@ -416,10 +416,11 @@ public sealed class ExampleProvider : IDataProvider
   system for temperatures, speeds and depths together. A `Date` is a time value shown as a day. The range is what keeps a readout the same size while the value changes. `Warning` and `Critical` say from
   which value (canonical unit) the reading deserves attention; declare them only where a high value is a fault (a
   temperature), never for a load, and a gauge colours itself by them. It is called once, before `Start`, and
-  must not need `Start`. The catalog is fixed while the provider runs.
+  must not need `Start`. The catalog is fixed while the provider runs; a concrete reading under a pattern can be described
+  while running (see below).
 - **Lifetime and demand.** The engine creates the provider when a reading of it is first subscribed to (or its catalog is
   requested), calls `Start`, then `SetDemand` with the paths currently subscribed to, and again whenever that set changes.
-  Skip the work for readings nobody wants. It stops the provider five seconds after the last subscription ends (so a
+  Skip the work for readings nobody wants. It stops the provider five seconds (`LingerMs`) after the last subscription ends (so a
   page rebuild does not restart it) and calls `Shutdown`, after which a new instance is created if it is needed again.
 - **Sampling and threading.** The engine calls `SampleAsync` on a thread-pool thread, once at start, once more after 250 ms
   (so a provider that needs two samples for a rate, like CPU load, has a value after a quarter of a second) and then per
@@ -428,7 +429,7 @@ public sealed class ExampleProvider : IDataProvider
   event) publishes from its own callbacks at any time and may leave `SampleAsync` empty. `IReadingSink` is thread-safe.
   Publish `sink.Unavailable(path, reason)` for a reading you cannot supply right now.
 - **Rate.** `DefaultIntervalMs` is used unless the user sets `providers.<id>.intervalMs`; a smaller value is raised to
-  `MinIntervalMs`. The provider never sees the setting.
+  `MinIntervalMs`. The provider never sees the setting. The same object carries `actionTimeoutMs` and `actionWarnMs` (see Actions).
 - **States.** Readings the engine shows are ok, pending (subscribed, nothing reported yet), stale (the last sample failed
   or timed out, or the provider reported other readings in three samples in a row but not this one) or unavailable. You do
   not model them; throwing from a member, or not answering, is how a failure is reported.
@@ -458,8 +459,64 @@ public sealed class ExampleProvider : IDataProvider
   `HttpClient` in `Start` and dispose it in `Shutdown` (nothing static, so the plugin can be unloaded), and log the first
   failure and the first success after it, not every attempt. Throw from `SampleAsync` on a failure: the engine marks the
   readings stale and retries with its own backoff.
-- **Not yet.** Provider settings and secrets (a URL, a token), image values and a catalog that changes while running
-  come with the first provider that needs them.
+- **Pushed providers.** A provider that holds a connection (a WebSocket, MQTT) publishes from its own callbacks and has no
+  failing sample to make its readings stale. When the connection drops it calls `sink.Interrupted(reason)`: every subscribed
+  reading becomes stale with its last value (or unavailable with the reason when it has none) until it is published again.
+  Calling it again changes nothing. A provider with a costly start sets `LingerMs` on `[DataProvider]` (Home Assistant: 30,000)
+  so a page flipped away from and back does not open a new connection.
+- **Descriptions while running.** A pattern (`{entity}`) whose readings are only known from the source (an entity's unit
+  arrives with its state) is described honestly in the catalog (kind `Text`, "an entity's state"), and the provider describes
+  each concrete path once it knows: `sink.Describe("sensor.office_temperature", descriptor)`. Widgets showing it are redrawn;
+  describing it again (the unit changed) replaces it. The engine keeps a description only while the reading is shown or listed,
+  and ignores one for a path no pattern matches.
+- **Natural action and icon.** A description may name `Action`, the path of an action of the same provider that a generic
+  widget invokes on a tap (`light.desk/toggle`), and `Icon`, a canonical icon key (`home/light`). A sensor has neither.
+- **Listing.** A provider whose patterns stand for a finite set it can enumerate implements `IReadingBrowser`:
+  `BrowseAsync` returns one description per concrete reading, the same ones `Describe` would give when shown, without values.
+  The engine starts the provider for it, as for an action. `urdeck-cli readings browse <id>` and, later, the editor use it.
+- **Settings and secrets.** See "Settings and secrets" below.
+- **Not yet.** Image values, and new patterns while running, come with the first provider that needs them.
+
+### Settings and secrets
+
+A provider that needs an address or a token derives from `DataProvider<TSettings>` with a settings class that derives from
+`ProviderSettings`. The engine binds the object `providers.<id>` of `urdeck-config.json` to it (the base keys `intervalMs`,
+`actionTimeoutMs` and `actionWarnMs` are bound for every provider) and passes it to `Start(sink, settings)`.
+
+```csharp
+public sealed class HomeAssistantSettings : ProviderSettings
+{
+    [Setting("Address", Help = "Where Home Assistant is, for example https://homeassistant.local:8123.", Required = true)]
+    public string? Url { get; set; }
+
+    [Setting("Access token", Help = "A long-lived access token from your Home Assistant profile.", Required = true)]
+    [Secret(ContextSetting = "url")]
+    public SecretValue? Token { get; set; }
+}
+
+[DataProvider("homeassistant", "Home Assistant", MissingSettingMessage = "Set up Home Assistant in Settings")]
+public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings> { /* ... */ }
+```
+
+- **Declaring.** `[Setting(label)]` puts a property in the settings window and the site's reference (text, whole or fractional
+  number, on/off; `Help` is one sentence, and the build of the site fails without it for a first-party provider). The key in the file is
+  the property's `[JsonPropertyName]`, else its name in camelCase. A value of the wrong type is logged once and the default stays.
+  `Required = true` keeps the provider from starting while the setting is missing; its readings (and a tile's action) then say
+  `MissingSettingMessage`, or name the provider and the setting.
+- **Secrets.** A token or password is a `SecretValue` property with `[Secret]` (and `[Setting]`). It is filled by the engine from the
+  environment variable `URDECK_SECRET_<PROVIDER>_<SETTING>` or from Windows Credential Manager (`UrDeck/<provider>/<setting>`),
+  never read from or written to the file, and never logged: `ToString()` is `•••` and the text comes only from `Reveal()`. Pass the
+  text to the service it belongs to and to nothing else, and do not log it or its length. `ContextSetting` names the setting the
+  secret was issued for; the engine keeps its value with the secret and logs when a copy is set up for another one. A provider
+  receives only its own secrets. Plugins run in process with the user's rights, so this is a convenience and a hygiene measure, not a
+  sandbox.
+- **Changes.** When the user saves other settings (or a secret), the engine calls `Shutdown` and starts a new run with the new
+  settings; only that provider restarts. A change to `intervalMs` alone does not restart it. Do not read settings after `Start`.
+- **Connection test.** Override `OffersConnectionTest` (return true) and `ValidateAsync(settings, token)` to give the settings window a
+  "Test connection" button. It runs on a provider that is not started, with the unsaved values; return one line (`Connected to
+  Home Assistant 2026.10`) or throw with the reason. It is cancelled after 10 seconds.
+- **Tests.** Use `InMemorySecretBackend` with `SecretStore` in an engine test; keep any real Credential Manager test under the target
+  prefix `UrDeckTest` (see `SecretStoreTests`).
 
 ### Actions
 
@@ -467,7 +524,7 @@ A provider that a widget should be able to *tell* something (skip a track, toggl
 beside `IDataProvider` and in the same class. A provider that does not is never asked and nothing else about it changes.
 
 ```csharp
-public sealed class ExampleProvider : IDataProvider, IActionProvider
+public sealed class ExampleProvider : DataProvider<ProviderSettings>, IActionProvider
 {
     public IReadOnlyList<ActionDescriptor> DescribeActions() =>
         [new ActionDescriptor("control/next", "Next", "Skip to the next track")];
@@ -479,7 +536,7 @@ public sealed class ExampleProvider : IDataProvider, IActionProvider
         await SkipAsync(cancellationToken);
         return ActionResult.Done;
     }
-    // ... the IDataProvider members
+    // ... the DataProvider members
 }
 ```
 
@@ -487,17 +544,19 @@ public sealed class ExampleProvider : IDataProvider, IActionProvider
   `homeassistant:switch.desk_lamp/toggle`), so a widget never names a provider type. The path and its grammar are yours.
   There is at most one optional argument, a `ReadingValue` (a volume, a brightness); a provider that needs two values makes
   two actions or puts one in the path. A widget calls `Actions.Invoke(id, argument)`.
-- **Validation is yours.** The engine checks that the id parses and that the provider is running and implements the
+- **Validation is yours.** The engine checks that the id parses and that the provider is registered and implements the
   interface; whether the path is one of your actions is for `InvokeAsync`, which answers `ActionResult.Failed(message)` when
   it is not. `DescribeActions` is for editors and documentation and must not need `Start`.
 - **Overlap with sampling.** `InvokeAsync` can run while `SampleAsync` runs, on another thread. Guard what they share. It is
   never called before `Start` or after `Shutdown`.
 - **Order and limits.** The actions of one provider run one at a time, in the order they were asked, on the thread pool; at
-  most eight wait (a ninth fails at once as busy). An action that does not finish within 10 seconds has its token cancelled
-  and fails as a timeout; the next one runs without waiting for you, so honour the token. When the provider stops (nothing
+  most eight wait (a ninth fails at once as busy). An action that does not finish within the provider's `actionTimeoutMs`
+  (default 10 seconds, at least 1) has its token cancelled and fails as a timeout; the next one runs without waiting for you, so
+  honour the token. One slower than `actionWarnMs` (default 2 seconds) leaves a warning in the log. When the provider stops (nothing
   subscribes to it any more, or a plugin reload), waiting actions fail.
-- **A running provider only.** The engine never starts a provider for an action. A widget that acts on a provider also
-  subscribes to one of its readings, which keeps it running while the widget is shown.
+- **Starting for an action.** An action for a provider that is not running starts it (so a tile that only acts, a scene button,
+  works) and the provider lingers afterwards like one whose last subscriber left. If it cannot start, because a required setting
+  is missing or `Start` throws, the action fails with that reason. `InvokeAsync` is still never called before `Start`.
 - **Results.** Return `ActionResult.Done` or `ActionResult.Failed(message)`; a thrown exception is a failed result with its
   message. Every action leaves one line in `urdeck.log`: `Action 'media:control/next': done (12 ms)` or `failed: <message>`.
   The argument's value is not logged. The effect of an action shows in the next reading; the SDK keeps no optimistic state.
@@ -536,7 +595,8 @@ runs as usual in demo mode. The file is `sample.json`, embedded in the provider'
 
 - **Readings.** Each key is a path below the provider, and each entry describes the reading as `Describe()` does (the field
   names of `ReadingDescriptor` in camelCase: `kind`, `label`, `name`, and where they apply `device`, `unit`, `displayUnit`,
-  `depthUnit`, `min`, `max`, `warning`, `critical`, `decimals`, `attribution`). `defaults` sets any of the optional fields for
+  `depthUnit`, `min`, `max`, `warning`, `critical`, `decimals`, `attribution`, and `action` and `icon`, the natural action and the icon
+  key; a sample still performs no action). `defaults` sets any of the optional fields but `action` and `icon` for
   every reading that does not set it. The file describes its readings itself because a catalog may depend on the machine
   (cores, adapters); make the sample a plausible machine.
 - **Values.** Give exactly one of `value` (fixed), `keys` (keyframes) or `unavailable` (a reason, to show how a widget draws a
@@ -554,6 +614,24 @@ runs as usual in demo mode. The file is `sample.json`, embedded in the provider'
   Add a test like `tests/UrDeck.Engine.Tests/ProviderSampleTests.cs`: the file parses without findings, and every path your
   `Describe()` can list has a sample with an equal description (for a catalog that depends on the machine, every family of
   paths, numbers made `#`). A reading the provider gains without a sample then fails the test, naming it.
+
+### Testing against a real Home Assistant
+
+The Home Assistant provider's tests run against a scripted fake (`tests/UrDeck.Engine.Tests/Support/FakeHomeAssistant.cs`, made-up
+entities in the message shapes of Home Assistant 2026.10) and never contact a real installation in CI. A few end-to-end checks
+(`HomeAssistantEndToEndTests`, marked `[HomeAssistantFact]`) run only when `URDECK_HA_E2E=1`, `URDECK_HA_URL` and
+`URDECK_SECRET_HOMEASSISTANT_TOKEN` are set. To get a disposable Home Assistant with the `demo` integration (Docker Desktop running),
+in a PowerShell session:
+
+```powershell
+./scripts/Start-HomeAssistantDemo.ps1      # pulls the pinned image, onboards a user, makes a token, sets the three variables here
+dotnet test tests/UrDeck.Engine.Tests -c Release --filter HomeAssistantEndToEnd
+dotnet run --project tools/UrDeck.Cli -c Release -- readings browse homeassistant --domain light --url $env:URDECK_HA_URL
+./scripts/Start-HomeAssistantDemo.ps1 -Stop  # removes the container and clears the variables
+```
+
+Run it with `./` in your session (not `pwsh scripts/...`): the variables are set in the PowerShell process that runs it. Never
+commit an entity id or a name from your own installation; fixtures use made-up ones.
 
 ### Adding a GPU vendor (AMD, Intel)
 

@@ -60,3 +60,22 @@ reading to the next (probably the animated weather icon and the readings that ar
 changes (the refresh timer runs once, 400 ms after a display change, and the Identify timer only while markers show),
 which is the reason to expect no cost, and the readings do not contradict it. The open reading was taken on a host
 restarted for it, so private bytes (131.5 MB open, 146 MB and 146 MB closed) are not comparable between the rows.
+
+## With the Providers section (2026-10-27, `provider-settings-and-secrets`)
+
+The window gained a Providers section built from the providers' declarations. No first-party provider declares settings yet, so
+the section shows its empty state; the cost of a populated form (a few text boxes, a password box and buttons per provider) is
+not measured. Same method as above on a copy of the Release build, with `display` set to a monitor that is not connected
+(Windows 11, three monitors).
+
+| | private | working set |
+|---|---|---|
+| baseline, before the first opening | 116.5 MB | 185.5 MB |
+| after the first cycle | 114.6 MB | 190.6 MB |
+| after cycle 10 | 108.3 MB | 185.8 MB |
+| after cycle 20 | 111.1 MB | 188.3 MB |
+| **settled, 5 s after the last close** | **107.7 MB (-8.8 against the baseline, -6.8 against cycle 1)** | **185.7 MB (+0.2, and -4.9 against cycle 1)** |
+
+The gate passes: memory does not climb from cycle to cycle and the settled value is below the baseline. The absolute numbers are
+higher than in the 2026-10-11 run because this build carries more (the media provider, the secret store and the editor are
+loaded) and the baseline was taken just after the start; they are not comparable with that run. No warning or error in the log.

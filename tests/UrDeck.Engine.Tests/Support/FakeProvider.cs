@@ -74,7 +74,7 @@ internal sealed class FakeProvider(TimeProvider time) : IDataProvider
         return Catalog;
     }
 
-    public void Start(IReadingSink sink)
+    public void Start(IReadingSink sink, ProviderSettings settings)
     {
         Record("start");
         if (StartError != null)

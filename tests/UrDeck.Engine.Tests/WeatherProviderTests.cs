@@ -426,7 +426,7 @@ public sealed class WeatherProviderTests : IDisposable
     {
         var provider = new WeatherProvider(() => _http, _time);
         _providers.Add(provider);
-        provider.Start(_sink);
+        provider.Start(_sink, new ProviderSettings());
         provider.SetDemand(demand);
         return provider;
     }

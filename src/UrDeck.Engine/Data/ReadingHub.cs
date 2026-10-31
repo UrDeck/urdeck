@@ -3,8 +3,8 @@
 
 using System.Collections.Concurrent;
 using System.Globalization;
-using UrDeck.Engine.Config;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Secrets;
 using UrDeck.Sdk.Data;
 
 namespace UrDeck.Engine.Data;
@@ -16,8 +16,6 @@ namespace UrDeck.Engine.Data;
 /// </summary>
 public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDisposable
 {
-    private static readonly TimeSpan Linger = TimeSpan.FromSeconds(5);
-
     private readonly ProviderRegistry _providers;
     private readonly TimeProvider _time;
     private readonly object _gate = new();
@@ -27,6 +25,9 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDispos
     private readonly Dictionary<string, ProviderRuntime> _runtimes = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _loggedBad = new(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, int> _intervals = new(StringComparer.OrdinalIgnoreCase);
+    private Dictionary<string, ProviderSettings> _rawSettings = new(StringComparer.OrdinalIgnoreCase);
+    private readonly HashSet<string> _loggedSettings = new(StringComparer.Ordinal);
+    private readonly ISecretStore? _secrets;
     private readonly bool _manual;
     private bool _disposed;
 
@@ -38,14 +39,17 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDispos
     /// <see cref="ReadingHubSampling.Manual"/> runs no sampling loop: providers start when first subscribed to and are sampled
     /// only by <see cref="SampleNow"/>. For previews, which set the moment of each drawing themselves; the host uses the loop.
     /// </param>
+    /// <param name="secrets">Where the providers' secret settings are looked up; null finds none.</param>
     public ReadingHub(
         ProviderRegistry providers,
         TimeProvider? time = null,
         bool? regionUsesFahrenheit = null,
         bool? regionUses24HourClock = null,
-        ReadingHubSampling sampling = ReadingHubSampling.Loop)
+        ReadingHubSampling sampling = ReadingHubSampling.Loop,
+        ISecretStore? secrets = null)
     {
         _providers = providers;
+        _secrets = secrets;
         _time = time ?? TimeProvider.System;
         _manual = sampling == ReadingHubSampling.Manual;
         RegionUsesFahrenheit = regionUsesFahrenheit ?? !RegionIsMetric();
@@ -175,6 +179,8 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDispos
                 if (!ReadingId.TryParse(id, out string providerId, out string path, out _) || !_runtimes.TryGetValue(providerId, out var rt))
                     continue;
                 rt.Wanted.Remove(path);
+                if (!rt.Listed.Contains(path))
+                    DropRefined(rt, path);
                 if (rt.Wanted.Count == 0)
                     StartLinger(rt);
                 else
@@ -183,14 +189,20 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDispos
         }
     }
 
-    /// <summary>Applies the <c>providers</c> section of the configuration; running providers change rate at once.</summary>
+    /// <summary>
+    /// Applies the <c>providers</c> section of the configuration. A running provider changes rate at once when only its
+    /// <c>intervalMs</c> changed; one whose other settings (or secrets) changed is restarted with the new ones and the others are
+    /// left alone.
+    /// </summary>
     public void ApplySettings(IReadOnlyDictionary<string, ProviderSettings>? settings)
     {
         var intervals = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var raw = new Dictionary<string, ProviderSettings>(StringComparer.OrdinalIgnoreCase);
         if (settings != null)
         {
             foreach (var (providerId, setting) in settings)
             {
+                raw[providerId] = setting;
                 if (setting.IntervalMs is { } ms)
                     intervals[providerId] = ms;
             }
@@ -199,6 +211,7 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDispos
         lock (_gate)
         {
             _intervals = intervals;
+            _rawSettings = raw;
             foreach (var rt in _runtimes.Values)
             {
                 int interval = ComputeInterval(rt);
@@ -210,7 +223,15 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDispos
                 rt.Signal.TrySetResult();
             }
         }
+
+        RestartChanged();
     }
+
+    /// <summary>
+    /// Tells the hub that a secret was saved or removed (or an environment variable changed): every running provider whose
+    /// secrets changed is restarted with them.
+    /// </summary>
+    public void SecretsChanged() => RestartChanged();
 
     /// <summary>
     /// Stops and releases every provider without the linger and drops all values, catalogs and subscriptions. Called
@@ -228,6 +249,7 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDispos
             _descriptors.Clear();
             _counts.Clear();
             _loggedBad.Clear();
+            _loggedSettings.Clear();
         }
 
         foreach (var stop in stops)
@@ -276,6 +298,9 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, IDispos
             var pending = Reading.Pending(had && existing.State != ReadingState.Unavailable ? existing.Value : null);
             Set(id, pending, changed);
         }
+
+        if (rt.MissingReason != null)
+            Set(id, Reading.Unavailable(rt.MissingReason), changed);
 
         if (rt.Catalog != null)
             CheckPath(rt, id, path, changed);

@@ -80,7 +80,7 @@ public sealed class WeatherPluginTests : IDisposable
     {
         var descriptor = _loader.Providers.Get("weather")!;
         var provider = (IDataProvider)Activator.CreateInstance(descriptor.ProviderType)!;
-        provider.Start(new Sink());
+        provider.Start(new Sink(), new ProviderSettings());
         provider.SetDemand([]);
         provider.SampleAsync(CancellationToken.None).GetAwaiter().GetResult();
         provider.Shutdown();

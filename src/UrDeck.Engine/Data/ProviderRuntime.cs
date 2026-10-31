@@ -34,6 +34,18 @@ internal sealed class ProviderRuntime(ProviderDescriptor descriptor)
     /// <summary>The descriptions already made from a pattern, by the path that asked for them.</summary>
     public Dictionary<string, ReadingDescriptor> Instances { get; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// The descriptions the provider gave while running for concrete paths under its patterns, by path; only for paths in
+    /// <see cref="Wanted"/> or <see cref="Listed"/>.
+    /// </summary>
+    public Dictionary<string, ReadingDescriptor> Refined { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>The paths of the run's latest listing (<see cref="IReadingBrowser"/>); emptied when the run ends.</summary>
+    public HashSet<string> Listed { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Whether the provider reported an interruption and has published nothing since.</summary>
+    public bool Interrupted { get; set; }
+
     /// <summary>Paths with at least one subscriber (including paths the catalog turns out not to contain).</summary>
     public HashSet<string> Wanted { get; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -53,6 +65,15 @@ internal sealed class ProviderRuntime(ProviderDescriptor descriptor)
     public object DemandLock { get; } = new();
 
     public int IntervalMs { get; set; }
+
+    /// <summary>The fingerprint of the settings this run was prepared with (see <c>BoundSettings</c>); null before the first preparation.</summary>
+    public string? Fingerprint { get; set; }
+
+    /// <summary>Why the provider is not started while a required setting is missing; null when it is not waiting for settings.</summary>
+    public string? MissingReason { get; set; }
+
+    /// <summary>Completed when the run starts (null) or cannot (the reason); actions wait on it. Replaced after a failure and on a stop.</summary>
+    public TaskCompletionSource<string?>? StartedSignal { get; set; }
 
     /// <summary>The configured interval last reported as raised, so a reload does not repeat the log line.</summary>
     public int? LoggedClampedFrom { get; set; }
@@ -82,4 +103,6 @@ internal sealed class ProviderRuntime(ProviderDescriptor descriptor)
     public List<ActionDescriptor>? ActionCatalog { get; set; }
 
     public static TaskCompletionSource NewSignal() => new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    public static TaskCompletionSource<string?> NewStartSignal() => new(TaskCreationOptions.RunContinuationsAsynchronously);
 }

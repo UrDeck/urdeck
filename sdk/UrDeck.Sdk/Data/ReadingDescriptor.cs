@@ -42,6 +42,18 @@ public sealed record ReadingDescriptor(string Path, ReadingKind Kind, string Lab
 
     /// <summary>The credit the reading's source requires wherever its data is shown; null when it requires none.</summary>
     public ReadingAttribution? Attribution { get; init; }
+
+    /// <summary>
+    /// The reading's natural action: the path of an action of the same provider (<c>light.desk/toggle</c>), what a widget that
+    /// acts on the reading without naming an action invokes. Null when the reading has none (a sensor is display-only).
+    /// </summary>
+    public string? Action { get; init; }
+
+    /// <summary>
+    /// A canonical icon key for the reading (<c>home/light</c>), what a widget that shows an icon for it without naming one draws.
+    /// Null when the reading has no icon of its own.
+    /// </summary>
+    public string? Icon { get; init; }
 }
 
 /// <summary>A source's credit: the text to draw, an optional shorter text for a narrow place and an optional link.</summary>

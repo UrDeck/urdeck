@@ -6,7 +6,7 @@ It is a .NET 10 WinUI 3 application (unpackaged, self-contained Windows App SDK)
 
 ## Status
 
-Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places, seven forecast days) and a Weather widget with animated icons, at 4x2 and at 4x4 with the forecast, are in too. Verified on the real 1100x3840 panel. Taps reach widgets, and a Shortcut widget shows the icon of an application, a folder or a web address and opens it on tap. A dock at the bottom of the screen keeps up to four widgets, normally shortcuts, in the same place on every page. A Now playing widget (4x2) shows the cover, title, artist and a progress bar of whatever Windows says is playing and skips or pauses it by touch, through a first-party `media` provider over the Windows media session; it reads what players publish to Windows, sends nothing anywhere and logs no titles (see the privacy page).
+Phase 1 (foundation) is implemented: widget SDK and Roslyn analyzer, hot-reloading plugin loader, grid layout, the WinUI 3 host with per-monitor DPI handling, JSON config with hot-reload, and a built-in Clock widget. Data providers are in as a second plugin kind, with a first-party `system` provider (CPU load per core and in total, memory load) and a Stats widget that shows any reading; a `weather` provider (Open-Meteo, any number of places, seven forecast days) and a Weather widget with animated icons, at 4x2 and at 4x4 with the forecast, are in too. Verified on the real 1100x3840 panel. Taps reach widgets, and a Shortcut widget shows the icon of an application, a folder or a web address and opens it on tap. A dock at the bottom of the screen keeps up to four widgets, normally shortcuts, in the same place on every page. A Now playing widget (4x2) shows the cover, title, artist and a progress bar of whatever Windows says is playing and skips or pauses it by touch, through a first-party `media` provider over the Windows media session; it reads what players publish to Windows, sends nothing anywhere and logs no titles (see the privacy page). A `homeassistant` provider shows the states of your own Home Assistant (temperatures in its own units, power, batteries, lights, any entity or attribute) over one WebSocket that follows what is on the screen, keeps the last values through an outage, and runs Home Assistant's services for a widget that switches something; it talks only to the address you set, with a token kept in Credential Manager ([Home Assistant](https://urdeck.app/docs/home-assistant/)).
 
 Not done yet: an editor UI, the other widgets, sensors that need administrator rights, the `[RefreshAdaptive]` load-based scaling (such widgets currently refresh at their minimum interval), a theme editor and a monitor picker. See `docs/ROADMAP.md` for the plan. The bar is "no worse than HYTE Nexus" on the same panel, and a page with nothing moving costs close to nothing: the WinUI 3 host measures about 101 MB private, 0% CPU and 0% GPU idle with one Clock (see `docs/perf/render-host-baseline.md` and `docs/perf/nexus-baseline.md`).
 
@@ -23,7 +23,7 @@ network and how to turn each off.
 - **Updating:** an installed copy checks the releases of this repository about a minute after it starts and then once a day,
   downloads a newer one in the background and offers **Restart to update to `<version>`** in the tray menu. An update you do not
   choose is applied when you quit. A copy on a stable version takes only stable releases. This check is the one request UrDeck
-  makes on its own besides the weather and site icons; `"updates": "off"` in `urdeck-config.json` turns it off. A copy that was
+  makes on its own besides the weather, site icons and a Home Assistant you set up; `"updates": "off"` in `urdeck-config.json` turns it off. A copy that was
   not installed (a build, a plain publish) never checks.
 - **Uninstalling:** use Windows' **Installed apps**. It closes the deck, removes Start with Windows and the application, and
   leaves `%APPDATA%\UrDeck`.
@@ -46,6 +46,7 @@ dotnet run --project src/UrDeck.Host -c Release
 dotnet test urdeck.slnx -c Release       # grid, config, plugin loader and analyzer tests
 dotnet run --project tools/UrDeck.Cli -c Release -- preview render --theme rigline --background theme -o page.png   # a picture with sample data
 dotnet run --project tools/UrDeck.Cli -c Release -- catalog export -o catalog.json   # themes, backgrounds, widgets, providers, finding codes
+dotnet run --project tools/UrDeck.Cli -c Release -- readings browse homeassistant --domain light   # a provider's readings with their values (your settings and token)
 ```
 
 The window covers the target monitor completely. Press Esc to close it. Diagnostics go to `urdeck.log` in the data folder (see below); a build is portable, so there it sits next to the executable.
@@ -110,9 +111,9 @@ the website's loops are made with it (`site/README.md`). `--page N` renders the 
 and exit code 1. `*.snapshot.png` files are git-ignored.
 
 `--demo` (with or without `--snapshot`) runs the deck on sample data: every data provider that carries a sample file (the
-first-party `system` and `weather` do) is replaced by it, and a shortcut to a web address draws its fallback instead of fetching
+first-party `system`, `weather`, `media` and `homeassistant` do) is replaced by it, and a shortcut to a web address draws its fallback instead of fetching
 the site's icon, so the deck shows the same made-up readings on any machine and makes no network request of its own. Everything
-else is as usual; the configuration is never written. The log says `Demo mode: sample data for media, system, weather`. With
+else is as usual; the configuration is never written. The log says `Demo mode: sample data for homeassistant, media, system, weather`. With
 `--snapshot` the samples are read at `--start`, so `--demo --snapshot out.png --size 1100x3840 --start 2026-10-13T21:47:32` gives
 the same picture every time. For pictures without Windows, use `urdeck-cli preview render`, which draws with the same samples. Pictures of every theme,
 widget size and background, drawn that way, are in the gallery at [urdeck.app/docs/themes](https://urdeck.app/docs/themes/) and on
@@ -153,7 +154,7 @@ A widget is a class deriving from `Widget<TConfig>` with a few attributes; the R
 | `src/UrDeck.Engine` | Plugin loader, config store, grid and dock layout, gesture recognition and hit testing, `PageRenderer`, the reading hub that runs the data providers, the launcher and the icon service |
 | `src/UrDeck.Host` | WinUI 3 application (`net10.0-windows10.0.19041.0`): window and monitor placement, one `SKXamlCanvas` layer per widget |
 | `src/UrDeck.Preview` | the preview renderer (a configuration's page or one widget, in a theme over a background, with sample data, as a picture or frames) and the sample page (`SamplePage/urdeck-config.json`), for `urdeck-cli theme render` and `preview render` and the golden tests; above the engine and the first-party widgets and providers |
-| `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather`, `providers/UrDeck.Providers.Media` | First-party data providers: `system` (CPU, memory and GPU readings), `weather` (Open-Meteo, any number of places) and `media` (what the current Windows media session plays, and its transport commands; the Windows Runtime projection is embedded in the plugin, see `docs/perf/now-playing.md`) |
+| `providers/UrDeck.Providers.System`, `providers/UrDeck.Providers.Weather`, `providers/UrDeck.Providers.Media`, `providers/UrDeck.Providers.HomeAssistant` | First-party data providers: `system` (CPU, memory and GPU readings), `weather` (Open-Meteo, any number of places), `media` (what the current Windows media session plays, and its transport commands; the Windows Runtime projection is embedded in the plugin, see `docs/perf/now-playing.md`) and `homeassistant` (your Home Assistant's entities over its WebSocket, its services over REST) |
 | `widgets/UrDeck.Widgets.Clock`, `widgets/UrDeck.Widgets.Stats`, `widgets/UrDeck.Widgets.Weather`, `widgets/UrDeck.Widgets.Shortcut`, `widgets/UrDeck.Widgets.NowPlaying` | Built-in plugins: Clock (`urdeck.widgets.clock`), Stats (`urdeck.widgets.stats`), Weather (`urdeck.widgets.weather`), Shortcut (`urdeck.widgets.shortcut`) and Now playing (`urdeck.widgets.nowplaying`) |
 | `tests/UrDeck.Engine.Tests`, `tests/UrDeck.Analyzer.Tests` | xUnit tests |
 | `site/` | The website at urdeck.app (Astro): landing page, the user documentation (`src/content/docs/`) and the theme cookbook (`cookbook/`), "Tested on"; see `site/README.md` |

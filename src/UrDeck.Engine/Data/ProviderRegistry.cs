@@ -22,6 +22,27 @@ public sealed partial record ProviderDescriptor(
 
     internal IDataProvider CreateInstance() => Factory?.Invoke() ?? (IDataProvider)Activator.CreateInstance(ProviderType)!;
 
+    /// <summary>The settings type to bind instead of the provider class's own; a sample that replaces a provider takes the base settings.</summary>
+    public Type? SettingsTypeOverride { get; init; }
+
+    /// <summary>What a reading says while a required setting is missing; empty to name the provider and the setting.</summary>
+    public string MissingSettingMessage { get; init; } = "";
+
+    /// <summary>The provider's settings type.</summary>
+    public Type SettingsType => SettingsTypeOverride ?? ProviderSchema.FindSettingsType(ProviderType);
+
+    /// <summary>The settings the provider declares; none for a type whose declarations cannot be read (<see cref="TryCreate"/> rejects those).</summary>
+    public ProviderSchema Schema => ProviderSchema.TryRead(SettingsType, out _) ?? ProviderSchema.Empty;
+
+    /// <summary>Whether the provider can be asked to do something.</summary>
+    public bool OffersActions => typeof(IActionProvider).IsAssignableFrom(ProviderType);
+
+    /// <summary>Whether the provider can list the concrete readings its patterns stand for.</summary>
+    public bool OffersBrowsing => typeof(IReadingBrowser).IsAssignableFrom(ProviderType);
+
+    /// <summary>How long the provider keeps running after nothing subscribes to it, in milliseconds.</summary>
+    public int LingerMs { get; init; } = 5000;
+
     public static ProviderDescriptor? TryCreate(Type type, out string? rejectReason)
     {
         rejectReason = null;
@@ -47,8 +68,14 @@ public sealed partial record ProviderDescriptor(
         if (meta.DefaultIntervalMs <= 0)
         { rejectReason = $"DefaultIntervalMs must be positive (was {meta.DefaultIntervalMs})"; return null; }
 
+        if (meta.LingerMs < 0)
+        { rejectReason = $"LingerMs must not be negative (was {meta.LingerMs})"; return null; }
+
         if (type.GetConstructor(Type.EmptyTypes) == null)
         { rejectReason = "no public parameterless constructor"; return null; }
+
+        if (ProviderSchema.TryRead(ProviderSchema.FindSettingsType(type), out string? schemaError) == null)
+        { rejectReason = schemaError; return null; }
 
         return new ProviderDescriptor(
             meta.Id,
@@ -56,7 +83,11 @@ public sealed partial record ProviderDescriptor(
             type,
             Math.Max(meta.DefaultIntervalMs, meta.MinIntervalMs),
             meta.MinIntervalMs,
-            type.Assembly.GetName().Name ?? "?");
+            type.Assembly.GetName().Name ?? "?")
+        {
+            MissingSettingMessage = meta.MissingSettingMessage ?? "",
+            LingerMs = meta.LingerMs,
+        };
     }
 
     [GeneratedRegex("^[a-z0-9.-]+$")]

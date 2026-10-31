@@ -26,4 +26,16 @@ public sealed class DataProviderAttribute : Attribute
 
     /// <summary>The fastest sampling the provider allows; a faster setting is raised to it.</summary>
     public int MinIntervalMs { get; set; } = 250;
+
+    /// <summary>
+    /// What a reading says while a required setting is missing ("Set up Home Assistant in Settings"). Empty: the engine names the
+    /// provider and the setting.
+    /// </summary>
+    public string MissingSettingMessage { get; set; } = "";
+
+    /// <summary>
+    /// How long the provider keeps running after nothing subscribes to it, in milliseconds, so a page flipped away from and back
+    /// to does not start it again. A provider with a costly start (a connection to open) sets more than the default 5,000.
+    /// </summary>
+    public int LingerMs { get; set; } = 5000;
 }

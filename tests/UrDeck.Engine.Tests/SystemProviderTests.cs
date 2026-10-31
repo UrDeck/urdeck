@@ -26,7 +26,7 @@ public class SystemProviderTests
     private static SystemProvider Started(Sink sink, params string[] demand)
     {
         var provider = new SystemProvider();
-        provider.Start(sink);
+        provider.Start(sink, new ProviderSettings());
         provider.SetDemand(demand);
         return provider;
     }

@@ -6,6 +6,7 @@ order: 0
 ---
 
 import BuiltinList from '../../components/BuiltinList.astro';
+import ProviderSettingsTable from '../../components/ProviderSettingsTable.astro';
 
 UrDeck is configured by one JSON file, `urdeck-config.json`, which lives in UrDeck's data folder, `%APPDATA%\UrDeck` (choose **Open data folder** in the tray menu to open it). There is no editor
 yet (it is planned); you edit the file in any text editor. UrDeck notices a saved change after about a second and applies
@@ -46,10 +47,51 @@ empty file named `urdeck.portable` next to `UrDeck.Host.exe` and restart; that f
 | `theme` | the name of a built-in theme (`default-dark` is the default) or of a folder under `themes/`. See [Themes](/docs/themes/). |
 | `background` | A moving background or a picture behind the cards. See [Backgrounds](/docs/backgrounds/). |
 | `monitorName` | Which monitor to choose when none is remembered yet. See [The monitor](#the-monitor). |
-| `providers` | Optional settings per data provider, for example `"providers": { "system": { "intervalMs": 500 } }` reads the `system` provider every 500 ms instead of every 2000 ms. A value below the provider's minimum is raised to it. |
+| `providers` | Optional settings per data provider, for example `"providers": { "system": { "intervalMs": 500 } }` reads the `system` provider every 500 ms instead of every 2000 ms. See [Data providers](#data-providers), which also explains secrets. |
 | `pager` | How the page indicator shows, see [Pages and the dock](/docs/pages-and-dock/#pages). |
 | `motion` | How much the deck may move: `"full"`, `"reduced"` or `"off"`. Without it the deck follows Windows' Animation effects setting (off means `off`, on means `full`) and a change of that setting applies without a restart. `"full"` overrides Windows: the deck moves even with its animations off. A theme can lower the level further. Below `full`, a theme's animated border and a moving background shader are drawn still; the page slide and the press feedback are not affected. The log says `Motion: <level> (<what decided it>)`. |
 | `updates` | Whether an installed copy looks for a newer release: `"auto"` (the default) or `"off"`, which makes no request. Another value is treated as `"auto"` with a warning in the log. See [Installing and updating](/docs/installing/#updating). |
+
+## Data providers
+
+A data provider reads something (your PC, the weather, a service of yours) for the widgets to show. Its settings are the object
+`providers.<id>` in `urdeck-config.json`. Every provider has three:
+
+| Setting | Meaning |
+|---|---|
+| `intervalMs` | How often the provider is read, in milliseconds. A value below the provider's minimum is raised to it. A change takes effect at once, without restarting the provider. |
+| `actionTimeoutMs` | How long an action (a button on a card) may run before it fails. Default `10000`; a value below `1000` is raised to it. |
+| `actionWarnMs` | An action slower than this is logged as a warning. Default `2000`. |
+
+A provider that talks to a service of yours has more: an address, a token. Saving them in the settings window (tray icon,
+Settings, Providers) writes the address to `urdeck-config.json` and the token to Windows Credential Manager. Changing a
+provider's settings restarts that provider only; the others keep running.
+
+<ProviderSettingsTable />
+
+### Secrets
+
+A token or password is a **secret** setting. It is never written to `urdeck-config.json` or to `urdeck.log`. UrDeck looks for it
+in this order and uses the first it finds:
+
+1. The environment variable `URDECK_SECRET_<PROVIDER>_<SETTING>`: the provider's id and the setting's name in capitals, joined by
+   `_`, with `.` and `-` written as `_`. The Home Assistant token is `URDECK_SECRET_HOMEASSISTANT_TOKEN`.
+2. Windows Credential Manager, as a generic credential named `UrDeck/<provider>/<setting>` (for example
+   `UrDeck/homeassistant/token`). It belongs to your Windows user on this PC; Control Panel's Credential Manager lists it and can
+   delete it.
+
+Every copy of UrDeck you run on the PC (installed, portable, a development build) shares the stored secrets. To give one copy a
+different token, set the environment variable for that copy. If a token was saved for one address and a copy is set up for
+another, the log says so (`Secret homeassistant/token: saved for https://ha.home, but url is ...`).
+
+If you paste a token into `urdeck-config.json` by hand, UrDeck moves it to Credential Manager the next time it reads the file and
+removes it from the file (the log says `Secret ...: moved from urdeck-config.json to Credential Manager`). A file from a newer
+version of UrDeck is never written, so its token stays where it is and is used for that run. Without Credential Manager (Linux)
+the environment variable is the only place for a secret.
+
+The log tells where each secret came from every time a provider starts, for example
+`Secret homeassistant/token: from Credential Manager`, and `missing; set it in Settings` when there is none. A secret is at most
+2,560 bytes. Uninstalling UrDeck deletes every credential named `UrDeck/...`.
 
 ## The widgets
 

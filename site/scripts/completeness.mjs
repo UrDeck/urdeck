@@ -3,7 +3,7 @@
 // (src/lib/reference.mjs); this compares it with what the product ships. Pure, so the test can feed it a fixture catalog.
 
 /**
- * @param catalog   the product's catalog (themes, backgrounds, widgets with settings, findings)
+ * @param catalog   the product's catalog (themes, backgrounds, providers with settings, widgets with settings, findings)
  * @param schemas   [{ name: 'v1/theme.json', paths: [...every key as a dotted path] }]
  * @param records   what the components rendered, or null when there is no record at all
  * @param troubleshooting  the text of the troubleshooting page
@@ -39,6 +39,17 @@ export function completenessProblems({ catalog, schemas, records, troubleshootin
       continue;
     }
     for (const s of widget.settings) if (!shown.has(s.name)) problems.push(`the setting "${s.name}" of ${widget.typeId} is not in its settings table`);
+  }
+
+  const providerSettings = new Map(records.filter((r) => r.kind === 'providerSettings').map((r) => [r.provider, new Set(r.names)]));
+  for (const provider of catalog.providers ?? []) {
+    if ((provider.settings ?? []).length === 0) continue;
+    const shown = providerSettings.get(provider.id);
+    if (!shown) {
+      problems.push(`the provider "${provider.id}" declares settings and no page shows them (a ProviderSettingsTable would)`);
+      continue;
+    }
+    for (const s of provider.settings) if (!shown.has(s.key)) problems.push(`the setting "${s.key}" of the provider "${provider.id}" is not in a provider settings table`);
   }
 
   const codes = named('findings', 'codes');

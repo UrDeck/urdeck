@@ -1,0 +1,44 @@
+---
+// The settings of the data providers that declare some of their own (an address, a token), from the catalog: the names, types,
+// labels, help and defaults come from the provider's declaration, so there is nothing to keep in step by hand. A setting with no
+// help text fails the build, as does a provider whose settings are not all shown. A secret's row names its environment variable;
+// no value is ever in the catalog.
+import catalog from '../generated/catalog.json';
+import { inline, record, settingDefault, settingValue } from '../lib/reference.mjs';
+
+type Setting = { key: string; type: string; label: string; help: string; default?: unknown; required: boolean; secret: boolean; environmentVariable?: string | null };
+const providers = (catalog.providers as { id: string; name: string; settings: Setting[] }[]).filter((p) => p.settings.length > 0);
+for (const p of providers) {
+  for (const s of p.settings) {
+    if (!s.help?.trim()) throw new Error(`ProviderSettingsTable: the setting "${s.key}" of the provider ${p.id} has no help text (Help on its [Setting])`);
+    if (!s.label?.trim()) throw new Error(`ProviderSettingsTable: the setting "${s.key}" of the provider ${p.id} has no label`);
+  }
+  record({ kind: 'providerSettings', provider: p.id, names: p.settings.map((s) => s.key) });
+}
+const valueOf = (s: Setting) => (s.secret ? 'secret (see below)' : settingValue(s));
+---
+{providers.map((p) => (
+  <>
+    <h3 id={`provider-${p.id}`}>{p.name}</h3>
+    <table class="ref">
+      <thead><tr><th>Setting</th><th>Value</th><th>Default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        {p.settings.map((s) => (
+          <tr id={`provider-${p.id}-${s.key}`}>
+            <td><code>providers.{p.id}.{s.key}</code></td>
+            <td set:html={inline(valueOf(s))} />
+            <td set:html={inline(s.secret ? '' : settingDefault(s))} />
+            <td>
+              <span set:html={inline(s.help)} />
+              {s.required && <span> Required.</span>}
+              {s.secret && (
+                <span> Never written to the file: set it in Settings, or with the environment variable <code>{s.environmentVariable}</code>.</span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </>
+))}
+{providers.length === 0 && <p>The providers that ship with UrDeck need no settings of their own beyond the three above.</p>}

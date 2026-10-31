@@ -106,7 +106,7 @@ public class GpuReadingsTests
     {
         var provider = new SystemProvider(platform);
         provider.Describe();
-        provider.Start(sink);
+        provider.Start(sink, new ProviderSettings());
         provider.SetDemand(demand);
         return provider;
     }
@@ -454,7 +454,7 @@ public class GpuReadingsTests
             return; // no hardware GPU adapter here: nothing to measure
 
         var sink = new Sink();
-        provider.Start(sink);
+        provider.Start(sink, new ProviderSettings());
         provider.SetDemand(["gpu/load", "gpu/temperature"]);
         Sample(provider);
         Thread.Sleep(250);

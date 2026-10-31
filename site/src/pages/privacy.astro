@@ -64,8 +64,25 @@ import Base from '../layouts/Base.astro';
         <td>A request for its front page and for the icons it names, the way a browser would.</td>
         <td>When a shortcut to a web address has no icon of its own and none is cached; a cached icon is refreshed after 30 days.</td>
       </tr>
+      <tr>
+        <th scope="row">Home Assistant states</th>
+        <td>Your Home Assistant, at the address you set (nobody else)</td>
+        <td>Your access token, and the ids of the entities on the screen. It answers with their states and changes.</td>
+        <td>One connection while a Home Assistant reading is on the screen, closed 30 seconds after the last one leaves. Only if you set it up.</td>
+      </tr>
+      <tr>
+        <th scope="row">Home Assistant actions and lists</th>
+        <td>Your Home Assistant, at the address you set (nobody else)</td>
+        <td>Your access token and the service to run on an entity (a light to toggle), or a request for the list of entities.</td>
+        <td>One request per tap on a widget that switches something; the list when a reading names an entity that does not exist, when you test the connection, or with <code>urdeck-cli readings browse</code>.</td>
+      </tr>
     </tbody>
   </table>
+
+  <p>
+    The requests to Home Assistant are encrypted when its address starts with <code>https://</code>; with <code>http://</code> they
+    travel unencrypted on your network, as they do for Home Assistant's own app.
+  </p>
 
   <p>
     Nothing else leaves your PC from UrDeck and its bundled plugins. UrDeck sends no readings of your system, no page layout, no log and no crash report.
@@ -79,6 +96,22 @@ import Base from '../layouts/Base.astro';
     keyboard's media keys do. None of it leaves your PC. The cover is written to a small folder under your temporary folder
     (<code>%TEMP%\UrDeck\media-art</code>, at most two pictures), cleared when UrDeck starts and removed when it stops, and the
     title, artist and cover are never written to the log. Without a now playing card the provider reads nothing.
+  </p>
+
+  <h2 id="secrets">Tokens and passwords</h2>
+  <p>
+    A data provider that talks to a service of yours (a token for your home automation, a password) needs a secret. UrDeck keeps
+    it in <strong>Windows Credential Manager</strong>, as a credential named <code>UrDeck/&lt;provider&gt;/&lt;setting&gt;</code>
+    for your Windows user on this PC (it is not roamed to other PCs), and never in <code>urdeck-config.json</code> or in the log.
+    You can see and delete it in Control Panel. An environment variable <code>URDECK_SECRET_&lt;PROVIDER&gt;_&lt;SETTING&gt;</code>
+    takes its place when you prefer that. A secret goes only to the service it belongs to, the one whose address you set; UrDeck
+    sends it nowhere else, and not to urdeck.app, which has no server to send it to. A provider receives only its own secrets.
+  </p>
+  <p>
+    Credential Manager ties a secret to your Windows account; it does not hide it from a program that runs as you. Malicious code
+    running with your user's rights can read it, as it can read your browser's saved passwords, and UrDeck does not defend against
+    that. A <a href="#plugins">plugin</a> runs with your rights too. Uninstalling UrDeck from Windows' installed apps deletes every
+    credential whose name starts with <code>UrDeck/</code>; a copy you only unpacked leaves them until you delete them yourself.
   </p>
 
   <h2 id="plugins">Plugins by other people</h2>
@@ -96,6 +129,7 @@ import Base from '../layouts/Base.astro';
     <li>Open-Meteo learns the places you ask the weather for, and so roughly where you are or care about, along with your IP address. The place search sends exactly what you typed.</li>
     <li>A site you put on a shortcut learns that someone at your IP address runs UrDeck and has that site on their deck.</li>
     <li>GitHub learns that your IP address asked for UrDeck's releases about once a day, which tells it that UrDeck is installed there.</li>
+    <li>Your Home Assistant learns which of its entities are on your deck and when the deck shows them, as its own app would. It is yours, so this stays in your house unless you put Home Assistant elsewhere.</li>
   </ul>
   <p>UrDeck does not combine these, keep a record of them or pass them on. Each goes straight from your PC to the service named.</p>
 
@@ -104,6 +138,7 @@ import Base from '../layouts/Base.astro';
     <li><strong>Update check:</strong> add <code>"updates": "off"</code> to <code>urdeck-config.json</code>. A copy you built yourself or ran from a folder never checks.</li>
     <li><strong>Place search and forecast:</strong> do not use a weather widget. Without one, the weather provider makes no request.</li>
     <li><strong>Site icons:</strong> give the shortcut an <code>icon</code> of its own (a local image file), or point it at something that is not a web address. A shortcut with its own icon makes no request.</li>
+    <li><strong>Home Assistant:</strong> do not set it up, or remove its readings from your pages. Without a Home Assistant reading on the screen, no connection is open.</li>
   </ul>
   <p>
     With all three off, UrDeck makes no network connection at all. Your firewall or a network monitor will confirm it.

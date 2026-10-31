@@ -14,8 +14,12 @@ public interface IDataProvider
     /// <summary>The catalog: every reading the provider offers. Called once; must not need <see cref="Start"/>.</summary>
     IReadOnlyList<ReadingDescriptor> Describe();
 
-    /// <summary>Begins work. Keep <paramref name="sink"/> to publish through.</summary>
-    void Start(IReadingSink sink);
+    /// <summary>
+    /// Begins work. Keep <paramref name="sink"/> to publish through. <paramref name="settings"/> is the user's settings bound to
+    /// the provider's settings type (see <see cref="DataProvider{TSettings}"/>; the base type for a provider that declares none).
+    /// A provider that derives from <see cref="DataProvider{TSettings}"/> receives the typed object in its own override.
+    /// </summary>
+    void Start(IReadingSink sink, ProviderSettings settings);
 
     /// <summary>The paths currently subscribed to; called after <see cref="Start"/> and whenever the set changes.</summary>
     void SetDemand(IReadOnlyCollection<string> paths);
@@ -59,6 +63,44 @@ public interface IReadingSink
     void Log(string message)
     {
     }
+
+    /// <summary>
+    /// Reports that the provider lost its source (a connection dropped) for <paramref name="reason"/>. Every subscribed reading of
+    /// the provider is then treated as after a failed sample: stale with its last value, or unavailable with the reason when it has
+    /// none. The next publication of a reading makes it ok again. For a provider that publishes from its own callbacks; reporting
+    /// it again changes nothing. The default does nothing.
+    /// </summary>
+    void Interrupted(string reason)
+    {
+    }
+
+    /// <summary>
+    /// Describes a concrete reading while the provider runs, when what it is (its kind, unit, label, range) is known only from the
+    /// source: <paramref name="path"/> must be matched by one of the catalog's patterns (<c>{entity}</c>). A widget asking for the
+    /// reading's description then gets <paramref name="descriptor"/> (its path is taken to be <paramref name="path"/>) instead of
+    /// the pattern's, and widgets showing it are redrawn; describing it again replaces it. The engine keeps it only while the
+    /// reading is subscribed or listed (<see cref="IReadingBrowser"/>), and ignores (and logs once) a path that no pattern matches.
+    /// The default does nothing.
+    /// </summary>
+    void Describe(string path, ReadingDescriptor descriptor)
+    {
+    }
+}
+
+/// <summary>
+/// A provider whose catalog patterns stand for a finite set it can enumerate (the entities of a home automation system) and that
+/// can list them. Implementing it beside <see cref="IDataProvider"/> is the declaration. The engine starts the provider for a
+/// listing, as for an action, and lets it linger afterwards; <see cref="BrowseAsync"/> is never called before
+/// <see cref="IDataProvider.Start"/> or after <see cref="IDataProvider.Shutdown"/>.
+/// </summary>
+public interface IReadingBrowser
+{
+    /// <summary>
+    /// Lists the concrete readings: one description per reading, each the same as the provider gives (through
+    /// <see cref="IReadingSink.Describe"/>) when the reading is shown. No values: they arrive through a subscription. Throw with a
+    /// message saying why when the source cannot be listed.
+    /// </summary>
+    Task<IReadOnlyList<ReadingDescriptor>> BrowseAsync(CancellationToken cancellationToken);
 }
 
 /// <summary>One entry of <see cref="IReadingSink.PublishBatch"/>: a value, or the reason the reading cannot be supplied.</summary>

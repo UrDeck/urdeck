@@ -17,6 +17,8 @@ using UrDeck.Engine.Layout;
 using UrDeck.Engine.Motion;
 using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Rendering;
+using UrDeck.Engine.Secrets;
+using UrDeck.Engine.Settings;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 using WinRT.Interop;
@@ -37,6 +39,7 @@ public sealed class MainWindow : Window, ISettingsHost
     private readonly WidgetPluginLoader _plugins;
     private readonly ThemeStore _themes;
     private readonly ShaderStore _shaders;
+    private readonly ProviderSettingsEditor _providerEditor;
     private readonly string _dataFolder;
     private readonly nint _hwnd;
     private readonly WindowFocus? _focus;
@@ -106,6 +109,7 @@ public sealed class MainWindow : Window, ISettingsHost
         _gate = new MotionGate(MotionLevel.Off);
         UpdateMotion();
         _hwnd = WindowNative.GetWindowHandle(this);
+        _providerEditor = new ProviderSettingsEditor(_configStore, _plugins.Providers, _plugins.Secrets, _plugins.Readings);
         _plugins.Readings.ApplySettings(_configStore.Config.Providers);
         _plugins.Readings.ReadingsChanged += OnReadingsChanged;
 
@@ -176,6 +180,7 @@ public sealed class MainWindow : Window, ISettingsHost
             _backgroundSettings = BackgroundSettings.Parse(_configStore.Config.Background);
             UpdateMotion();
             _navigator.Reload(PageNames());
+            SecretStores.MoveFromConfigAndSave(_configStore, _plugins.Providers, _plugins.Secrets);
             _plugins.Readings.ApplySettings(_configStore.Config.Providers);
             ApplyBackground();
             Signal(PlacementSignal.ConfigReloaded);
@@ -281,6 +286,16 @@ public sealed class MainWindow : Window, ISettingsHost
         if (signal != PlacementSignal.WindowChanged)
             SettingsChanged?.Invoke();
     }
+
+    IReadOnlyList<ProviderForm> ISettingsHost.GetProviderForms() => _providerEditor.GetForms();
+
+    EditorResult ISettingsHost.SaveProvider(string providerId, IReadOnlyDictionary<string, string> values, IReadOnlyDictionary<string, string> newSecrets) =>
+        _providerEditor.Save(providerId, values, newSecrets);
+
+    EditorResult ISettingsHost.RemoveProviderSecret(string providerId, string key) => _providerEditor.RemoveSecret(providerId, key);
+
+    Task<EditorResult> ISettingsHost.TestProviderAsync(string providerId, IReadOnlyDictionary<string, string> values, IReadOnlyDictionary<string, string> newSecrets, CancellationToken cancellationToken) =>
+        _providerEditor.TestAsync(providerId, values, newSecrets, cancellationToken);
 
     DisplayList ISettingsHost.GetDisplayList() => DisplayRows.Build(_configStore.Config, MonitorPlacement.GetDisplays());
 

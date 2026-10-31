@@ -1204,19 +1204,49 @@
   ],
   "providers": [
     {
+      "id": "homeassistant",
+      "name": "Home Assistant",
+      "sample": true,
+      "settings": [
+        {
+          "default": null,
+          "environmentVariable": "URDECK_SECRET_HOMEASSISTANT_TOKEN",
+          "help": "A long-lived access token, made on your Home Assistant profile page under Security.",
+          "key": "token",
+          "label": "Token",
+          "required": true,
+          "secret": true,
+          "type": "secret"
+        },
+        {
+          "default": null,
+          "environmentVariable": null,
+          "help": "The address you open Home Assistant at, for example http://homeassistant.local:8123.",
+          "key": "url",
+          "label": "Address",
+          "required": true,
+          "secret": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
       "id": "media",
       "name": "Media",
-      "sample": true
+      "sample": true,
+      "settings": []
     },
     {
       "id": "system",
       "name": "System",
-      "sample": true
+      "sample": true,
+      "settings": []
     },
     {
       "id": "weather",
       "name": "Weather",
-      "sample": true
+      "sample": true,
+      "settings": []
     }
   ],
   "themes": [

@@ -32,7 +32,7 @@ jobs:
           ref: main
 
       # v6.1.3. Installs with npm ci, runs `npm run build` (with the site's checks) and uploads the Pages artifact.
-      - uses: withastro/action@3eafd002e65cc31b4f0eae0bb05450d521562247
+      - uses: withastro/action@a8b97df764791eb61fbf3338ef713b0e61ae05c5
         with:
           path: site
         env:

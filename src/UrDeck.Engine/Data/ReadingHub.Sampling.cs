@@ -33,7 +33,7 @@ public sealed partial class ReadingHub
     {
         if (rt.Loop == null || rt.LingerTimer != null)
             return;
-        rt.LingerTimer = _time.CreateTimer(_ => OnLinger(rt), null, Linger, Timeout.InfiniteTimeSpan);
+        rt.LingerTimer = _time.CreateTimer(_ => OnLinger(rt), null, TimeSpan.FromMilliseconds(rt.Descriptor.LingerMs), Timeout.InfiniteTimeSpan);
     }
 
     private void MarkDemandDirty(ProviderRuntime rt)
@@ -69,6 +69,7 @@ public sealed partial class ReadingHub
         string providerId = rt.Descriptor.Id;
         var actionCts = rt.ActionCts;
         var dropped = DrainActions(rt);
+        var startSignal = rt.StartedSignal;
 
         rt.Instance = null;
         rt.Started = false;
@@ -83,6 +84,14 @@ public sealed partial class ReadingHub
         rt.Misses.Clear();
         rt.ActionCts = null;
         rt.ActionPumpRunning = false;
+        rt.StartedSignal = null;
+        rt.Fingerprint = null;
+        rt.MissingReason = null;
+        rt.Interrupted = false;
+        foreach (string path in rt.Listed.Where(p => !rt.Wanted.Contains(p)).ToList())
+            DropRefined(rt, path);
+        rt.Listed.Clear();
+        startSignal?.TrySetResult("the provider stopped");
 
         return () =>
         {
@@ -302,9 +311,16 @@ public sealed partial class ReadingHub
                 if (!started)
                 {
                     long attempt = _time.GetTimestamp();
-                    if (!TryStart(rt, generation, out string? error))
+                    if (!TryStart(rt, generation, out string? error, out bool waitingForSettings))
                     {
                         stop.ThrowIfCancellationRequested();
+                        if (waitingForSettings)
+                        {
+                            // A change to the settings restarts the run; until then there is nothing to try again.
+                            await Task.Delay(Timeout.InfiniteTimeSpan, stop);
+                            continue;
+                        }
+
                         FailProvider(rt, generation, error ?? "failed to start", null);
                         await WaitAsync(rt, attempt, () => Backoff(rt), stop);
                         continue;
@@ -333,21 +349,51 @@ public sealed partial class ReadingHub
         }
     }
 
-    private bool TryStart(ProviderRuntime rt, int generation, out string? error)
+    private bool TryStart(ProviderRuntime rt, int generation, out string? error, out bool waitingForSettings)
     {
+        waitingForSettings = false;
         var instance = EnsureInstance(rt, out error);
         if (instance == null)
         {
             error ??= "was stopped while starting";
+            CompleteStart(rt, generation, error);
             return false;
         }
 
         if (!CacheCatalog(rt, instance, out error))
+        {
+            CompleteStart(rt, generation, error);
             return false;
+        }
+
+        ProviderSettings? raw;
+        lock (_gate)
+            raw = _rawSettings.GetValueOrDefault(rt.Descriptor.Id);
+        var bound = ProviderSettingsBinder.Bind(rt.Descriptor, raw, _secrets);
+        lock (_gate)
+        {
+            if (rt.Generation != generation)
+            {
+                error = "was stopped while starting";
+                return false;
+            }
+
+            rt.Fingerprint = bound.Fingerprint;
+        }
+
+        LogSettings(bound);
+        if (bound.Missing.Count > 0)
+        {
+            waitingForSettings = true;
+            error = bound.MissingReason(rt.Descriptor);
+            MarkMissing(rt, generation, error);
+            CompleteStart(rt, generation, error);
+            return false;
+        }
 
         try
         {
-            instance.Start(new RuntimeSink(this, rt, generation));
+            instance.Start(new RuntimeSink(this, rt, generation), bound.Settings);
         }
         catch (Exception ex)
         {
@@ -360,6 +406,7 @@ public sealed partial class ReadingHub
             }
 
             StopInstance(rt.Descriptor.Id, instance);
+            CompleteStart(rt, generation, error);
             return false;
         }
 
@@ -372,13 +419,124 @@ public sealed partial class ReadingHub
             }
 
             rt.Started = true;
+            rt.MissingReason = null;
             rt.DemandDirty = true;
+            (rt.StartedSignal ??= ProviderRuntime.NewStartSignal()).TrySetResult(null);
         }
 
         // A preview's providers are not the deck's: its log says nothing of them.
         if (!_manual)
             UrDeckLog.Info($"Provider '{rt.Descriptor.Id}' started ({rt.IntervalMs} ms)");
         return true;
+    }
+
+    /// <summary>Tells the actions waiting for the run why it cannot start; the next attempt gets a fresh signal.</summary>
+    private void CompleteStart(ProviderRuntime rt, int generation, string? reason)
+    {
+        TaskCompletionSource<string?>? signal;
+        lock (_gate)
+        {
+            if (rt.Generation != generation)
+                return;
+            signal = rt.StartedSignal;
+            rt.StartedSignal = null;
+        }
+
+        signal?.TrySetResult(reason ?? "failed to start");
+    }
+
+    /// <summary>Logs what binding found: a wrong-typed value once, and at each start where each secret came from (never its value).</summary>
+    private void LogSettings(BoundSettings bound)
+    {
+        if (_manual)
+            return;
+        foreach (string warning in bound.Warnings)
+        {
+            bool first;
+            lock (_gate)
+                first = _loggedSettings.Add(warning);
+            if (first)
+                UrDeckLog.Warn(warning);
+        }
+
+        foreach (var secret in bound.Secrets)
+        {
+            UrDeckLog.Info(secret.Line);
+            if (secret.ContextNote != null)
+                UrDeckLog.Warn(secret.ContextNote);
+        }
+    }
+
+    /// <summary>The provider cannot start for lack of a required setting: its wanted readings say what to set.</summary>
+    private void MarkMissing(ProviderRuntime rt, int generation, string reason)
+    {
+        var changed = new List<string>();
+        lock (_gate)
+        {
+            if (rt.Generation != generation)
+                return;
+            rt.MissingReason = reason;
+            foreach (string path in rt.Wanted)
+                Set($"{rt.Descriptor.Id}:{path}", Reading.Unavailable(reason), changed);
+        }
+
+        if (!_manual)
+            UrDeckLog.Warn($"Provider '{rt.Descriptor.Id}' is not started: {reason}");
+        Raise(changed);
+    }
+
+    /// <summary>
+    /// Restarts each provider whose settings or secrets are no longer those it was prepared with; the others are not touched. A
+    /// restarted provider keeps its readings' last values, as pending, until it reports.
+    /// </summary>
+    private void RestartChanged()
+    {
+        List<(ProviderRuntime Runtime, ProviderSettings? Raw)> candidates;
+        lock (_gate)
+        {
+            if (_disposed)
+                return;
+            candidates = _runtimes.Values
+                .Where(rt => rt.Fingerprint != null)
+                .Select(rt => (rt, _rawSettings.GetValueOrDefault(rt.Descriptor.Id)))
+                .ToList();
+        }
+
+        foreach (var (rt, raw) in candidates)
+        {
+            var bound = ProviderSettingsBinder.Bind(rt.Descriptor, raw, _secrets);
+            Action stop;
+            var changed = new List<string>();
+            lock (_gate)
+            {
+                if (_disposed || rt.Fingerprint == null || rt.Fingerprint == bound.Fingerprint
+                    || !_runtimes.TryGetValue(rt.Descriptor.Id, out var current) || !ReferenceEquals(current, rt))
+                    continue;
+
+                UrDeckLog.Info($"Provider '{rt.Descriptor.Id}': its settings changed; restarting it");
+                stop = Detach(rt);
+                foreach (string path in rt.Wanted)
+                {
+                    string id = $"{rt.Descriptor.Id}:{path}";
+                    bool had = _store.TryGetValue(id, out var existing);
+                    Set(id, Reading.Pending(had && existing.State != ReadingState.Unavailable ? existing.Value : null), changed);
+                }
+            }
+
+            Raise(changed);
+            stop();
+            bool start;
+            lock (_gate)
+            {
+                start = !_disposed && rt.Loop == null && rt.Wanted.Count > 0
+                    && _runtimes.TryGetValue(rt.Descriptor.Id, out var current) && ReferenceEquals(current, rt);
+                if (start)
+                    EnsureLoop(rt);
+            }
+
+            if (start && _manual)
+                StartManual(rt);
+        }
     }
 
     /// <summary>The manual mode's start: on the caller's thread, once, with a failure recorded as the loop records it.</summary>
@@ -392,7 +550,7 @@ public sealed partial class ReadingHub
             generation = rt.Generation;
         }
 
-        if (!TryStart(rt, generation, out string? error))
+        if (!TryStart(rt, generation, out string? error, out bool waitingForSettings) && !waitingForSettings)
             FailProvider(rt, generation, error ?? "failed to start", null);
     }
 
@@ -654,10 +812,12 @@ public sealed partial class ReadingHub
     }
 
     /// <summary>Under the gate: stores what a provider published and, after a sample, counts who was left out.</summary>
-    private void CommitLocked(ProviderRuntime rt, IReadOnlyCollection<KeyValuePair<string, Publication>> items, bool isSample, List<string> changed)
+    private void CommitLocked(ProviderRuntime rt, KeyValuePair<string, Publication>[] items, bool isSample, List<string> changed)
     {
         string providerId = rt.Descriptor.Id;
         var reported = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (items.Length > 0)
+            rt.Interrupted = false;
         foreach (var (path, publication) in items)
         {
             // A path made from a pattern is resolved only when a widget asked for it, so a provider cannot grow the cache.
@@ -715,5 +875,11 @@ public sealed partial class ReadingHub
 
         public void Log(string message) =>
             UrDeckLog.Info($"Provider '{runtime.Descriptor.Id}': {message}");
+
+        public void Interrupted(string reason) =>
+            hub.InterruptFromProvider(runtime, generation, reason);
+
+        public void Describe(string path, ReadingDescriptor descriptor) =>
+            hub.RefineFromProvider(runtime, generation, path, descriptor);
     }
 }

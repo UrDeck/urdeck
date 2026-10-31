@@ -12,6 +12,7 @@
     <Project Path="tools/UrDeck.Cli/UrDeck.Cli.csproj" />
   </Folder>
   <Folder Name="/providers/">
+    <Project Path="providers/UrDeck.Providers.HomeAssistant/UrDeck.Providers.HomeAssistant.csproj" />
     <Project Path="providers/UrDeck.Providers.Media/UrDeck.Providers.Media.csproj" />
     <Project Path="providers/UrDeck.Providers.System/UrDeck.Providers.System.csproj" />
     <Project Path="providers/UrDeck.Providers.Weather/UrDeck.Providers.Weather.csproj" />

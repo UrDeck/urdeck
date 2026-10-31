@@ -17,19 +17,20 @@ namespace UrDeck.Host;
 
 /// <summary>
 /// The settings window: an ordinary window that takes focus and has a taskbar button while it is open. It has one page,
-/// the monitor picker. It talks to the host only through <see cref="ISettingsHost"/>, and the application drops every
+/// the monitor picker and the providers' settings. It talks to the host only through <see cref="ISettingsHost"/>, and the application drops every
 /// reference to it when it closes (a new one is made for each opening), so nothing of it stays behind.
 /// </summary>
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "The markers are disposed when the window closes.")]
 internal sealed class SettingsWindow : Window
 {
     private const double WidthDip = 560;
-    private const double HeightDip = 620;
+    private const double HeightDip = 720;
     private static readonly TimeSpan RefreshDelay = TimeSpan.FromMilliseconds(400);
     private static readonly TimeSpan IdentifyTime = TimeSpan.FromSeconds(2);
 
     private readonly ISettingsHost _host;
     private readonly StackPanel _rows = new() { Spacing = 8 };
+    private readonly ProvidersSection _providers;
     private readonly Button _identify = new() { Content = "Identify" };
     private readonly Button _automatic = new() { Content = "Choose automatically" };
     private readonly DispatcherQueueTimer _refreshTimer;
@@ -41,6 +42,7 @@ internal sealed class SettingsWindow : Window
     public SettingsWindow(ISettingsHost host, string iconPath)
     {
         _host = host;
+        _providers = new ProvidersSection(host);
         Title = "UrDeck Settings";
 
         var presenter = OverlappedPresenter.Create();
@@ -141,7 +143,10 @@ internal sealed class SettingsWindow : Window
         });
         root.Children.Add(header);
 
-        var scroll = new ScrollViewer { Content = _rows, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+        var content = new StackPanel { Spacing = 8 };
+        content.Children.Add(_rows);
+        content.Children.Add(_providers.Root);
+        var scroll = new ScrollViewer { Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
         Grid.SetRow(scroll, 1);
         root.Children.Add(scroll);
 
@@ -260,6 +265,7 @@ internal sealed class SettingsWindow : Window
         _identifyTimer.Stop();
         _markers.Dispose();
         _rows.Children.Clear();
+        _providers.Close();
         UrDeckLog.Info("Settings window closed");
     }
 }

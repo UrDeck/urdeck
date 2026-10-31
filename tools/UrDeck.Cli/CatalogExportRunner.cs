@@ -129,6 +129,7 @@ internal static class CatalogExportRunner
                 ["id"] = p.Id,
                 ["name"] = p.Name,
                 ["sample"] = PreviewProviders.HasSample(p.Id),
+                ["settings"] = Array(ProviderSettingsOf(p)),
             })),
             ["findings"] = Array(FindingCatalog.All.OrderBy(f => f.Code, StringComparer.Ordinal).Select(f => (JsonNode)new JsonObject
             {
@@ -143,6 +144,30 @@ internal static class CatalogExportRunner
             Sorted(document)!.WriteTo(writer);
         return Encoding.UTF8.GetString(buffer.ToArray()).ReplaceLineEndings("\n") + "\n";
     }
+
+    /// <summary>
+    /// A provider's declared settings beyond the base ones: key, type (text, number, wholeNumber, onOff or secret), label, help, default,
+    /// whether it is required, and for a secret the environment variable that sets it. Never a value.
+    /// </summary>
+    internal static IEnumerable<JsonNode> ProviderSettingsOf(UrDeck.Engine.Data.ProviderDescriptor provider) =>
+        provider.Schema.Settings.Select(s => (JsonNode)new JsonObject
+        {
+            ["key"] = s.Key,
+            ["type"] = s.Type switch
+            {
+                UrDeck.Engine.Data.SettingType.Text => "text",
+                UrDeck.Engine.Data.SettingType.WholeNumber => "wholeNumber",
+                UrDeck.Engine.Data.SettingType.Number => "number",
+                UrDeck.Engine.Data.SettingType.Toggle => "onOff",
+                _ => "secret",
+            },
+            ["label"] = s.Label,
+            ["help"] = s.Help,
+            ["default"] = s.IsSecret ? null : JsonSerializer.SerializeToNode(s.Default, s.Default?.GetType() ?? typeof(object), ConfigOptions),
+            ["required"] = s.Required,
+            ["secret"] = s.IsSecret,
+            ["environmentVariable"] = s.IsSecret ? UrDeck.Engine.Secrets.SecretStore.EnvironmentName(provider.Id, s.Key) : null,
+        }).OrderBy(s => (string)s["key"]!, StringComparer.Ordinal);
 
     private static JsonNode Widget(WidgetDescriptor descriptor)
     {
