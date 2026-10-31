@@ -63,7 +63,7 @@ public sealed class PreviewCommandsTests : IDisposable
         var run = Workspace.Invoke("preview", "render", "--widget", "example.unknown", "--widget-size", "1x1", "-o", "x.png");
 
         Assert.Equal(1, run.Code);
-        Assert.Contains("urdeck.widgets.clock, urdeck.widgets.nowplaying, urdeck.widgets.shortcut, urdeck.widgets.stats, urdeck.widgets.weather", run.Error);
+        Assert.Contains("urdeck.widgets.clock, urdeck.widgets.control, urdeck.widgets.nowplaying, urdeck.widgets.shortcut, urdeck.widgets.stats, urdeck.widgets.weather", run.Error);
         Assert.False(File.Exists("x.png"));
     }
 
@@ -161,7 +161,7 @@ public sealed class PreviewCommandsTests : IDisposable
         Assert.Equal(1, root.GetProperty("version").GetInt32());
         Assert.Equal(ThemeStore.BuiltInNames.Order(StringComparer.Ordinal), Names(root.GetProperty("themes"), "name"));
         Assert.Equal(ShaderStore.BuiltInNames.Order(StringComparer.Ordinal), Names(root.GetProperty("backgrounds"), "name"));
-        Assert.Equal(["urdeck.widgets.clock", "urdeck.widgets.nowplaying", "urdeck.widgets.shortcut", "urdeck.widgets.stats", "urdeck.widgets.weather"],
+        Assert.Equal(["urdeck.widgets.clock", "urdeck.widgets.control", "urdeck.widgets.nowplaying", "urdeck.widgets.shortcut", "urdeck.widgets.stats", "urdeck.widgets.weather"],
             Names(root.GetProperty("widgets"), "typeId"));
         Assert.Equal(["homeassistant", "media", "system", "weather"], Names(root.GetProperty("providers"), "id"));
         Assert.All(root.GetProperty("providers").EnumerateArray(), p => Assert.True(p.GetProperty("sample").GetBoolean()));
