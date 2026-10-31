@@ -763,6 +763,12 @@ open here: using the `icon` config field for the tray icon (moved from `urdeck-f
 - Cross-brand support: some case screens are Windows monitors (like the Y70), others are USB LCDs driven by vendor
   protocols. `PageRenderer` already renders a page to a bitmap, which is the basis for "display backends" that push
   frames to non-monitor devices.
+- **Specialized displays** (issue #144; proposed 2026-10-31). Windows Enterprise, Pro for Workstations and IoT
+  Enterprise can remove a monitor from the desktop; UrDeck then draws the deck on it directly (Display.Core, Skia on the
+  GPU), with touch read from the digitizer, from the same host. Three changes, in order:
+  `specialized-display-spikes` (go/no-go; touch is required), `deck-session` (refactor, the owner verifies on the
+  panel), `specialized-display-output`. Implemented and verified by a contributor with the hardware, since the owner's
+  edition lacks the feature. Decisions: [docs/handoff/2026-10-31-specialized-displays.md](handoff/2026-10-31-specialized-displays.md).
 
 ## 14. Animation and the rendering path (changes `render-path` and `animation`, both done)
 

@@ -115,6 +115,10 @@ first written for code signing in milestone 2, is complete.
 registry, display backends for USB LCDs, splitting the template and the SDK into their own repos (item 13), the camera
 widget (item 7).
 
+**Not tied to a milestone.** Specialized displays (item 13, issue #144): the deck drawn, with touch, on a monitor that
+Windows Enterprise or Pro for Workstations has removed from the desktop. It is built by a contributor who has that
+edition and a touch case display, and it starts with spikes that decide whether it is possible.
+
 ## Following along and helping
 
 - Progress per item, and what is being worked on now: "Current state" in [BACKLOG.md](BACKLOG.md).
