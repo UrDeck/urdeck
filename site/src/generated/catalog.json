@@ -1616,6 +1616,65 @@
       "typeId": "urdeck.widgets.clock"
     },
     {
+      "category": "Control",
+      "defaultConfig": {
+        "style": "switch",
+        "typeId": "urdeck.widgets.control"
+      },
+      "description": "Shows a reading's state and acts on it when tapped",
+      "name": "Control",
+      "settings": [
+        {
+          "default": null,
+          "name": "action",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "icon",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "label",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "level",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "levelAction",
+          "type": "text"
+        },
+        {
+          "default": null,
+          "name": "reading",
+          "type": "text"
+        },
+        {
+          "default": "switch",
+          "name": "style",
+          "type": "text"
+        }
+      ],
+      "sizes": [
+        {
+          "height": 1,
+          "preview": true,
+          "width": 1
+        },
+        {
+          "height": 1,
+          "preview": true,
+          "width": 2
+        }
+      ],
+      "typeId": "urdeck.widgets.control"
+    },
+    {
       "category": "Media",
       "defaultConfig": {
         "idleLabel": "Nothing playing",

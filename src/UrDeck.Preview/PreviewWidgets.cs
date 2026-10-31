@@ -13,6 +13,7 @@ using UrDeck.Sdk.Data;
 using UrDeck.Sdk.Icons;
 using UrDeck.Sdk.Launch;
 using UrDeck.Widgets.Clock;
+using UrDeck.Widgets.Control;
 using UrDeck.Widgets.NowPlaying;
 using UrDeck.Widgets.Shortcut;
 using UrDeck.Widgets.Stats;
@@ -27,7 +28,7 @@ namespace UrDeck.Preview;
 public static class PreviewWidgets
 {
     private static readonly Lazy<IReadOnlyList<WidgetDescriptor>> All = new(() =>
-        new[] { typeof(ClockWidget), typeof(StatsWidget), typeof(WeatherWidget), typeof(ShortcutWidget), typeof(NowPlayingWidget) }
+        new[] { typeof(ClockWidget), typeof(StatsWidget), typeof(WeatherWidget), typeof(ShortcutWidget), typeof(NowPlayingWidget), typeof(ControlWidget) }
             .Select(type => WidgetDescriptor.TryCreate(type, out _)!)
             .OrderBy(d => d.Id, StringComparer.Ordinal)
             .ToList());

@@ -27,9 +27,16 @@ public static class IconKeys
         "app/link", "app/cloud", "app/download", "app/star", "app/heart", "app/bolt", "app/chart",
     ];
 
+    public static IReadOnlyList<string> Home { get; } =
+    [
+        "home/light", "home/outlet", "home/switch", "home/fan", "home/lock", "home/door", "home/window", "home/blinds", "home/garage",
+        "home/motion", "home/leak", "home/thermometer", "home/droplet", "home/bolt", "home/battery", "home/scene", "home/script",
+        "home/button", "home/tv", "home/speaker", "home/entity",
+    ];
+
     public static IReadOnlyList<string> Media { get; } = ["media/play", "media/pause", "media/previous", "media/next"];
 
-    public static IReadOnlyList<string> All { get; } = [.. Weather, .. App, .. Media];
+    public static IReadOnlyList<string> All { get; } = [.. Weather, .. App, .. Home, .. Media];
 }
 
 /// <summary>An icon set read: its identity and the glyphs its manifest maps. The set is shared and read-only.</summary>

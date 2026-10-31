@@ -1,0 +1,97 @@
+---
+title: Control
+description: A tile that shows the state of a light, a switch, a lock or a player and acts on it when you tap it.
+section: Widgets
+order: 15
+settings:
+  reading: "The reading whose state the tile shows, written `provider:path` (`homeassistant:light.desk`). Without one the tile is neutral, neither on nor off: a button that only acts, such as a scene."
+  action: "What a tap does, written `provider:path` (`homeassistant:light.desk/toggle`). Left out, it is the reading's own action (a light's toggle). A path without `provider:` is taken under the reading's provider. `\"\"` makes the tile display-only: it takes no taps and shows no press."
+  label: "The name on the tile. Left out, it is the reading's label (a light's friendly name). Any text replaces it, and `\"\"` shows no name."
+  icon: "The icon, a key of the theme's icon set (`home/light`) or the path of an image file on this PC. Left out, it is the reading's own icon. `\"\"` shows no icon."
+  style: "`switch` (the default) shows the icon, the name and the state; `dimmer` adds a bar for a level and needs a 2x1 tile and `level`. Anything else is drawn as `switch`."
+  level: "`dimmer` only: the reading shown on the bar, 0 to 100 (`homeassistant:light.desk/brightness`). Without it a `dimmer` is drawn as a `switch`, and the log says so once."
+  levelAction: "`dimmer` only: what a tap on the bar does, with the level as its argument. Left out, it is the `level` reading's own action (a light's `turn_on`). Same rules as `action`."
+---
+
+import SettingsTable from '../../../components/SettingsTable.astro';
+import WidgetSizes from '../../../components/WidgetSizes.astro';
+
+`urdeck.widgets.control` is a tile that shows whether something is on and does something when you tap it: a lamp, a
+smart plug, a fan, a lock, the media player. It names no product. The tile reads a *reading* from any data provider and
+asks the same provider to act, so one widget serves [Home Assistant](/docs/home-assistant/), the media provider
+and whatever comes next. It comes in two sizes, 1x1 (also in the dock) and 2x1.
+
+<WidgetSizes widget="control" />
+
+With only a reading, a tile for a Home Assistant light is complete: the name, the icon and what a tap does all come from
+the reading.
+
+```json
+{ "typeId": "urdeck.widgets.control", "col": 0, "row": 0, "reading": "homeassistant:light.desk" }
+```
+
+## Settings
+
+<SettingsTable widget="control" />
+
+### Defaults
+
+`action`, `label`, `icon` and `levelAction` follow one rule. **Left out**, the value comes from the reading's description:
+its natural action, its label and its icon. **Any text** is used as written. **An empty text (`""`)** means none. So a
+shortened name is `"label": "Stair Underglow"`, a tile that only shows is `"action": ""`, and a tile without a picture is
+`"icon": ""`. A tile whose reading has no action of its own (a sensor) is display-only without any setting.
+
+## Examples
+
+A scene has no state to show, so the tile has an action and no reading. It is drawn neutral, in the text colour:
+
+```json
+{ "typeId": "urdeck.widgets.control", "col": 1, "row": 0,
+  "action": "homeassistant:scene.movie_night/turn_on", "label": "Movie night", "icon": "home/scene" }
+```
+
+A `dimmer` is a 2x1 tile: a button for on and off on the left and a bar for the brightness on the right.
+
+```json
+{ "typeId": "urdeck.widgets.control", "col": 0, "row": 1, "width": 2, "height": 1,
+  "reading": "homeassistant:light.desk", "style": "dimmer", "level": "homeassistant:light.desk/brightness" }
+```
+
+Tap the bar where you want the level: a tap at 70 % of its length asks for 70, and a tap in the last few percent at either
+end gives 0 or 100. Dragging a finger along the bar is not supported yet, because a horizontal drag on a deck is the swipe
+between pages.
+
+The same tile plays and pauses the media player. Its state is on while something plays:
+
+```json
+{ "typeId": "urdeck.widgets.control", "col": 2, "row": 0,
+  "reading": "media:status", "action": "media:control/playpause", "label": "Player", "icon": "media/play" }
+```
+
+## What it shows
+
+- **On, off:** an on/off reading is on when it is on. A text reading is on when it is `on`, `open`, `unlocked`, `playing` or
+  `home` (capitals do not matter) and off otherwise, so a lock that says `locked` is off. A number is on when it is above
+  zero. The icon and the state in the theme's accent colour mean on, in its muted text colour off, in its text colour
+  neutral (no reading).
+- **A reading that is not there:** an unavailable reading is drawn neutral with the reason in place of the state; a stale
+  one keeps its last state, drawn faded.
+- **The state line:** the reading as every widget formats it: `On`, `Off`, `22.5°`, `Playing`.
+
+## Touch
+
+A tap asks the provider to act. The tile then looks **pending**, with the icon in the dimmed accent and three dots in place
+of the state, until one of three things happens: the reading changes (the tile shows the new state), the action ends and a
+second passes without a change (a scene), or the action fails. A failed action turns the tile red with `Failed` for two
+seconds, and the reason is in `urdeck.log`. While pending the tile takes no taps, so a burst of taps sends one action, not
+thirty. The exception is the dimmer's bar: the latest tap on it is kept and sent when the first one is done.
+
+A provider that is not running is started by the tap. The tile draws no pressed state of its own; the whole card shrinks
+and dims while your finger is down, as for every card, unless the tile is display-only.
+
+## Looks
+
+The tile uses the theme's accent, muted text, text and critical colours and its icon values; it has none of its own, and
+draws no card. See [themes](/docs/themes/) and [icon sets](/docs/themes/icons/): the `home/` icons (`home/light`,
+`home/outlet`, `home/lock`, `home/scene` and the rest) are part of the built-in set, and a theme's own set that leaves them
+out gets the built-in ones.

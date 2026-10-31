@@ -306,7 +306,7 @@ public sealed class PreviewTests : IDisposable
             Theme = Theme("default-dark"),
         }));
 
-        Assert.Contains("urdeck.widgets.clock, urdeck.widgets.nowplaying, urdeck.widgets.shortcut, urdeck.widgets.stats, urdeck.widgets.weather", ex.Message);
+        Assert.Contains("urdeck.widgets.clock, urdeck.widgets.control, urdeck.widgets.nowplaying, urdeck.widgets.shortcut, urdeck.widgets.stats, urdeck.widgets.weather", ex.Message);
     }
 
     [Fact]
