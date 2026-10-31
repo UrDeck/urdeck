@@ -120,7 +120,7 @@ never in the log.
 
 ## Switching things
 
-A widget that acts on a reading (the control tile, coming soon) runs a service of Home Assistant on its entity. The action
+A widget that acts on a reading (the [control](/docs/widgets/control/) tile) runs a service of Home Assistant on its entity. The action
 `homeassistant:light.desk/toggle` is each kind of entity's natural tap: a light, switch, fan, cover, input boolean, automation or
 climate toggles; a scene or script runs; a button is pressed; a media player plays or pauses; a lock locks or unlocks (by its last
 state, so the lock must be on a page). Any other service works by its name, for example `homeassistant:light.desk/turn_off`, and

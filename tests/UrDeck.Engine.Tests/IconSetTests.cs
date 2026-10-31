@@ -143,6 +143,25 @@ public sealed class IconSetTests : IDisposable
     }
 
     [Fact]
+    public void Outline_HasTheHomeGlyphs_AndASetWithoutThemIsAnsweredByTheChain()
+    {
+        var set = IconSetStore.BuiltIn("outline")!;
+        Assert.Equal(21, IconKeys.Home.Count);
+        Assert.All(IconKeys.Home, key => Assert.StartsWith("home/", key));
+        foreach (string key in IconKeys.Home)
+        {
+            Assert.True(set.TryGet(key, out var glyph), key);
+            Assert.NotEmpty(glyph.Shapes);
+        }
+
+        MakeSet("mine", """{ "version": 1, "name": "m", "source": "s", "license": "l", "keys": { "weather/rain": "x.svg" } }""", ("x.svg", Rain));
+        using var theme = ThemeResolver.Resolve(LoadProbe("""{ "icons": { "set": "mine" } }"""), 275);
+
+        foreach (string key in IconKeys.Home)
+            Assert.True(theme.Icons.Set.TryGet(key, out _), key);
+    }
+
+    [Fact]
     public void Outline_ThunderstormsShareOneFileAndOneGlyph()
     {
         var set = IconSetStore.BuiltIn("outline")!;

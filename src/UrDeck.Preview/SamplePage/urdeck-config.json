@@ -16,7 +16,20 @@
         { "typeId": "urdeck.widgets.shortcut", "col": 3, "row": 4, "target": "https://example.invalid/files", "label": "Files" }
       ]
     },
-    { "name": "Second", "widgets": [] }
+    {
+      "name": "Second",
+      "widgets": [
+        { "typeId": "urdeck.widgets.control", "col": 0, "row": 0, "reading": "homeassistant:light.living_room" },
+        { "typeId": "urdeck.widgets.control", "col": 1, "row": 0, "reading": "homeassistant:light.desk_strip" },
+        { "typeId": "urdeck.widgets.control", "col": 2, "row": 0, "reading": "homeassistant:switch.coffee_maker" },
+        { "typeId": "urdeck.widgets.control", "col": 3, "row": 0, "reading": "homeassistant:fan.bedroom" },
+        { "typeId": "urdeck.widgets.control", "col": 0, "row": 1, "width": 2, "reading": "homeassistant:light.living_room", "style": "dimmer", "level": "homeassistant:light.living_room/brightness" },
+        { "typeId": "urdeck.widgets.control", "col": 2, "row": 1, "width": 2, "reading": "homeassistant:lock.front_door" },
+        { "typeId": "urdeck.widgets.control", "col": 0, "row": 2, "reading": "homeassistant:binary_sensor.back_door" },
+        { "typeId": "urdeck.widgets.control", "col": 1, "row": 2, "reading": "homeassistant:sensor.office_temperature" },
+        { "typeId": "urdeck.widgets.control", "col": 2, "row": 2, "width": 2, "reading": "homeassistant:light.desk_strip", "label": "Desk", "style": "dimmer", "level": "homeassistant:light.desk_strip/brightness" }
+      ]
+    }
   ],
   "dock": [
     { "typeId": "urdeck.widgets.shortcut", "target": "https://example.invalid/terminal", "label": "Terminal" },

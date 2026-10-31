@@ -332,7 +332,7 @@ is the first consumer. Left for later, each with the change or consumer that nee
   (readings over Home Assistant's WebSocket for the shown entities only, actions over REST, a 30 s linger so a page flip does not
   reconnect), `IReadingSink.Interrupted` (a pushed provider's readings go stale), `IReadingSink.Describe` (a concrete reading under a
   pattern described while running: the "catalog that changes while running" below, limited to that), `ReadingDescriptor.Action`
-  and `.Icon`, `IReadingBrowser` and `urdeck-cli readings browse`. Next: `control-tile` (#119); the decisions are in
+  and `.Icon`, `IReadingBrowser` and `urdeck-cli readings browse`. The control tile (`control-tile`, #119) is built; the decisions are in
   `docs/handoff/2026-10-26-home-assistant.md`. Secrets go to Windows Credential Manager (`UrDeck/<provider>/<setting>`,
   overridden by `URDECK_SECRET_<PROVIDER>_<SETTING>`) and the uninstaller deletes them. The weather location needs no
   provider settings: it is per widget and travels in the reading id (item 7).
@@ -584,7 +584,7 @@ before the page. Still open: routing scrolls and a long press to widgets (furthe
 beside `ITapTarget`; the recognizer already ends a vertical drag and a long hold without an event of their own),
 swiping over a web view, per-page backgrounds (item 9) and keyboard focus for a web view. Also open: `IDragTarget`
 in the SDK, a drag that a widget captures (a slider) so the pager never sees it as a swipe; until then the control
-tile's brightness bar is set by tapping a position (2026-10-26).
+tile's brightness bar is set by tapping a position (built in `control-tile`, 2026-10-31).
 
 Multiple pages with swipe navigation and a page indicator; tap/touch interaction routed to widgets (through the input
 layer of the host chosen in item 14; add an input API to the SDK). **Model:** Sonnet, Opus for the input API design.
@@ -860,7 +860,7 @@ Collected while the milestones were drawn up. Each names the milestone that need
   timer. Home Assistant is done (item 3, `homeassistant-provider`); MQTT, push and Prometheus would reuse its interruptions and
   listing.
 - **State-dependent icons.** A lock open or closed, a door open or shut: a descriptor icon that changes with the state
-  (`home/lock` and `home/lock-open`). The control tile starts with one icon per entity, tinted by state.
+  (`home/lock` and `home/lock-open`). The control tile (built) has one icon per entity, tinted by state.
 - **Page templates** (replaces "shared pages", 2026-10-26). A page and its theme exported to a file and imported by an
   explicit action of the user, never applied by something else on the machine. The import shows what the template does
   before applying it: its launch targets (a shortcut's `target` and `arguments` are trusted like a `.lnk` because the

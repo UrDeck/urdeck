@@ -6,5 +6,19 @@
       "showDate": true
     },
     "loopStart": 26.5
+  },
+  "urdeck.widgets.control": {
+    "config": {
+      "reading": "homeassistant:light.living_room"
+    },
+    "sizes": {
+      "2x1": {
+        "config": {
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer",
+          "level": "homeassistant:light.living_room/brightness"
+        }
+      }
+    }
   }
 }

@@ -7,7 +7,7 @@
         "public/generated/backgrounds/aurora.mp4"
       ],
       "id": "background:aurora",
-      "key": "3c9d3cd9413afa2d3a27ac29e2ac2b19cdef518bea2261e7c4cb67bfad699881",
+      "key": "9e04b92e16e3de5042663adf6c747620f39f41dfe692f75af6b30d0be147b6d1",
       "kind": "backgrounds",
       "settings": {
         "background": "aurora",
@@ -30,7 +30,7 @@
         "public/generated/backgrounds/contour.mp4"
       ],
       "id": "background:contour",
-      "key": "160a9fee37bf34c8791b4ece588446177f28057e6c999ac08f50b40d81f7cf9f",
+      "key": "ab3a26880c5485c7ee75a36d86842569a503c8250c8bae27bbe70ced01b998c5",
       "kind": "backgrounds",
       "settings": {
         "background": "contour",
@@ -53,7 +53,7 @@
         "public/generated/backgrounds/embers.mp4"
       ],
       "id": "background:embers",
-      "key": "9b5a75146732daa53efa6aaf73f018e64f8c229f17841137f194bcd9c2eba886",
+      "key": "691ac8e13599e5504b299e98df072866f55d632a67290f9f859bf036eab553c1",
       "kind": "backgrounds",
       "settings": {
         "background": "embers",
@@ -76,7 +76,7 @@
         "public/generated/backgrounds/equalizer.mp4"
       ],
       "id": "background:equalizer",
-      "key": "e31021b4dfdc27f47302a8493d7fa3e75d9653ce8932a79854f2e07bd5a48cf1",
+      "key": "58b05bdb386981fcfb0a3779a0f123590116ac1069c75d6d67f8e1917c301246",
       "kind": "backgrounds",
       "settings": {
         "background": "equalizer",
@@ -99,7 +99,7 @@
         "public/generated/backgrounds/gradient.mp4"
       ],
       "id": "background:gradient",
-      "key": "73817ff650c151fe25f361c003adea8dbbb83a78bce8552aea09a9fd7c1f4c95",
+      "key": "b9bb03d9f2a9b7eb92e1a05809fc564bfad072703a0f3aeba813c934953d7756",
       "kind": "backgrounds",
       "settings": {
         "background": "gradient",
@@ -122,7 +122,7 @@
         "public/generated/backgrounds/horizon.mp4"
       ],
       "id": "background:horizon",
-      "key": "a0e72a67789641b96551e49960a4493c1c7e135ed8e8b7bd2415ec6b7783cec2",
+      "key": "5c6db8ada9b9a581ed515f5bd1cb6b4a7f3b867a30651919a47a3cfa05f3ad63",
       "kind": "backgrounds",
       "settings": {
         "background": "horizon",
@@ -145,7 +145,7 @@
         "public/generated/backgrounds/julia.mp4"
       ],
       "id": "background:julia",
-      "key": "61747149f37ef98ca3a03030e27c2be09d64a8f34cff1cf87bdbe0c1799d84f3",
+      "key": "d7007a39d90a2e97bbed0907392b2ac3ac3453c7b41cfc9267801584c0f16e86",
       "kind": "backgrounds",
       "settings": {
         "background": "julia",
@@ -168,7 +168,7 @@
         "public/generated/backgrounds/nebula.mp4"
       ],
       "id": "background:nebula",
-      "key": "95ca6d1141dbdbe116994ad73b0c3a5855e7bf2eecccf459d2d8f26c54fb77f9",
+      "key": "4687b940331d9a797cd71801b27fb5b886d7c77b040015dc83e5fcb44ba756ad",
       "kind": "backgrounds",
       "settings": {
         "background": "nebula",
@@ -191,7 +191,7 @@
         "public/generated/backgrounds/plasma.mp4"
       ],
       "id": "background:plasma",
-      "key": "790e7c5a0b8c8b58ec94c7e51a7b77158b77687166122b53cc6dc54d122f2fcd",
+      "key": "d0ec82541dc867d4eb474d8b9f8c1fdb450520ae431c3eccdafe84b14452a7b3",
       "kind": "backgrounds",
       "settings": {
         "background": "plasma",
@@ -214,7 +214,7 @@
         "public/generated/backgrounds/plotter.mp4"
       ],
       "id": "background:plotter",
-      "key": "4c6b1c15d36bb5f523240268c785715f11a41750a5b40244399d0e9a34dc21cb",
+      "key": "40a62b1d03e6d1e0bfe8a5e0f1c26a0acdb0a01dd084f9c507a7605a32f9865a",
       "kind": "backgrounds",
       "settings": {
         "background": "plotter",
@@ -237,7 +237,7 @@
         "public/generated/backgrounds/ripple.mp4"
       ],
       "id": "background:ripple",
-      "key": "235fabae5c62d93b69e96bc84082e3affebe584fced51d1395f3cc3c001dfb85",
+      "key": "84cd6149de3ed694919d4dbadddc558e6fabc5f839540be1f806f2e559ac9dd3",
       "kind": "backgrounds",
       "settings": {
         "background": "ripple",
@@ -260,7 +260,7 @@
         "public/generated/backgrounds/shapes.mp4"
       ],
       "id": "background:shapes",
-      "key": "50033ec1826101996bbf3f8692b992a4bccff9e25505bd94cb53034a881951b9",
+      "key": "9e642c6ba94622b71ce682418a90e9c76430399f0c99dbe328ba5bbbe96c6710",
       "kind": "backgrounds",
       "settings": {
         "background": "shapes",
@@ -283,7 +283,7 @@
         "public/generated/backgrounds/spectrum.mp4"
       ],
       "id": "background:spectrum",
-      "key": "b8651d747456dee320c484139638bdc05b756eb60a28924e2c5c0f5572d5bad2",
+      "key": "fc3a61611d1f85ab07748c3e52e1f21ca200a30aa41f2d6c9d124b0709127410",
       "kind": "backgrounds",
       "settings": {
         "background": "spectrum",
@@ -306,7 +306,7 @@
         "public/generated/backgrounds/streams.mp4"
       ],
       "id": "background:streams",
-      "key": "03a2a68d0cdb2585c506fe20ebaf1d99cbd493655f1cd69b68a70c84707aa22f",
+      "key": "d9382ad7f903b7cbafcc188a48f7d8c314f6f873664f2145462f3f46b4926d4f",
       "kind": "backgrounds",
       "settings": {
         "background": "streams",
@@ -329,7 +329,7 @@
         "public/generated/backgrounds/vortex.mp4"
       ],
       "id": "background:vortex",
-      "key": "46663b5b6e8d80f89c6e0897a103829b225b70f9d9045937ab9424fc3c98ab9b",
+      "key": "f8522c37a8a97250b714198089364e87b3328521f51813fa1891f79f3943ce45",
       "kind": "backgrounds",
       "settings": {
         "background": "vortex",
@@ -352,7 +352,7 @@
         "public/generated/backgrounds/warpgate.mp4"
       ],
       "id": "background:warpgate",
-      "key": "d672b6940d64311fa9dc17ff0428cc1e1e5d6c8aa1c2788089395ef0729f5905",
+      "key": "3ddcc7128986cdc575c228f59988756d66b2eef07f29538f02dc8fb5d29f94e4",
       "kind": "backgrounds",
       "settings": {
         "background": "warpgate",
@@ -374,7 +374,7 @@
         "src/generated/cookbook/chamfered-cards.webp"
       ],
       "id": "cookbook:chamfered-cards",
-      "key": "60ec6535b545b44ec82d43d208dc4746235561c343c324d211297c69dfcf2445",
+      "key": "2743c84f2ff864ce56a814e2afb65d7a8bcb84374adfb55c769e2f8d68708dfc",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -397,7 +397,7 @@
         "src/generated/cookbook/circular-dock.webp"
       ],
       "id": "cookbook:circular-dock",
-      "key": "00bffe467f497c41fa3639bacd0e47f20f9e6225ca0e0a5c63b82927e29b09f4",
+      "key": "91db2ddcc04218297847ceb6cad6641a1dc1b9f0dc908a3bf77dd016d4a001f0",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -420,7 +420,7 @@
         "src/generated/cookbook/custom-icons.webp"
       ],
       "id": "cookbook:custom-icons",
-      "key": "d170a16bd225066da138683cb9f3eaa1264a92e759896c71c9a16107a63eaf52",
+      "key": "15eab1ae09f45c8f813fec92fe814ef7c0e83b106fb4412e4fa2bc83cf3aae0c",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -443,7 +443,7 @@
         "src/generated/cookbook/dotted-page.webp"
       ],
       "id": "cookbook:dotted-page",
-      "key": "04790acc4239b94e3503b5701bc1286b4dabf678768afca1d4470c94bfb76618",
+      "key": "b2f43d89d2311c00191f56bc82550f2c17d2684b262bb30e6f97376dae0a14bf",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -466,7 +466,7 @@
         "src/generated/cookbook/gradient-border.webp"
       ],
       "id": "cookbook:gradient-border",
-      "key": "20134c1803ea2cc39d22155ad322006ea300b9301be8c83cea40e3583d3d6de6",
+      "key": "ac61905647d3971023fe812b4797b57539039a5ea7cd01bd5362f89c314a25f7",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -489,7 +489,7 @@
         "src/generated/cookbook/hard-shadow.webp"
       ],
       "id": "cookbook:hard-shadow",
-      "key": "fbc2c863e44ad5d2da95266d876c7dd6332d13ee9543814cc7af733b112efbac",
+      "key": "7f280225ad432518c56d8ad2479ab58d5913e8f5c8f0e2a255bcca8e9017465b",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -512,7 +512,7 @@
         "src/generated/cookbook/led-bars.webp"
       ],
       "id": "cookbook:led-bars",
-      "key": "b0cd940b3a2a398cd9715e95dee285383f9110da1630f0e287fa5f9e92ab3a32",
+      "key": "e723d4e822ab5da77f589ad69d7cbf6af5881b5e2e44d92eb0a1bcaf518feba6",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -535,7 +535,7 @@
         "src/generated/cookbook/tach-redline.webp"
       ],
       "id": "cookbook:tach-redline",
-      "key": "622ed5cfa450157337429990c5a29929f0fd6c732216ca2908fca47901af43ec",
+      "key": "1d66c1e9e911b620dcfe218654b1327fa1152cbb7f5f52d55ac468629c929f09",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -559,7 +559,7 @@
         "public/generated/decks/blueprint.mp4"
       ],
       "id": "deck:blueprint",
-      "key": "f1d37172e17a55d8f9ff709110275731d88a361f146224bc2f87b50155ee71d8",
+      "key": "1c15258167fd0db264d70b85bb03da0d1a799b2baf4e77b6daa80175bc6fdc10",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -585,7 +585,7 @@
         "public/generated/decks/carbon.mp4"
       ],
       "id": "deck:carbon",
-      "key": "8260a072c2986c8bb4bfd45721fbbff5063c59c382ea7154f558f6d4d43c7e9e",
+      "key": "523da0f953ee04a59e63fdb59f89ab1924321384863ccb104c12bd829e9defe6",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -610,7 +610,7 @@
         "src/generated/decks/default-dark.webp"
       ],
       "id": "deck:default-dark",
-      "key": "17ba6d60f9fff4e0d354681099e0a7dfd0e3d31ac1abffe91a3bd9fec0e7e4c3",
+      "key": "fece36224e71d1d3cba05f3438bee0f62f12926f48a7f2ecc7f4d13f38d8e922",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -631,7 +631,7 @@
         "src/generated/decks/default-light.webp"
       ],
       "id": "deck:default-light",
-      "key": "effeed302f38adb7d3c572850816436f6656f0b17aadea640c07ccc8651c6ae1",
+      "key": "a100438bde975033fd89caa453a8fc9ad568a1150dd2f9c943055bca1748f493",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -653,7 +653,7 @@
         "public/generated/decks/ember.mp4"
       ],
       "id": "deck:ember",
-      "key": "701219fcf52affe7829d8c9e4d540def12bc9754151e302941465179eaa5baa0",
+      "key": "96b4668b6c91adee8f62260092ffecfc3b1d8505fb6f8221ff2aee5f5606a604",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -678,7 +678,7 @@
         "src/generated/decks/glass.webp"
       ],
       "id": "deck:glass",
-      "key": "b9c32344a8ad0823f52ee318927ec297357e8ce290e231910f4d1af931aeb8b6",
+      "key": "61ef4b028cbd8417a80687e34d6d42b629248e9e501992732bfb94db99bff5e9",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -700,7 +700,7 @@
         "public/generated/decks/obsidian.mp4"
       ],
       "id": "deck:obsidian",
-      "key": "15dcf6044891efa0cfeb88c3f2c88183178c5060d585b36a9e985b7971c3d1b3",
+      "key": "f2c3c676b294d2240464c6168e174280d1e5d72025ec6bac244adc2e0636c72c",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -726,7 +726,7 @@
         "public/generated/decks/paper.mp4"
       ],
       "id": "deck:paper",
-      "key": "5a2db928b44bc9ce4beea69eef17ef91648c7c5d0f2708539d47ae993f649332",
+      "key": "9130e23d8c853a6820ef1487123bf255dbb7c229718ba7920ee75a6d30ff6381",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -752,7 +752,7 @@
         "public/generated/decks/pop.mp4"
       ],
       "id": "deck:pop",
-      "key": "f1d64212f8f02c6c907cfd825f106e36b6f2808773bbd450fd8c2d7389cec2fb",
+      "key": "bf569a48e9b755d41cd022bea45ca8304b23c386221499a3a0937c28f3694792",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -778,7 +778,7 @@
         "public/generated/decks/prism.mp4"
       ],
       "id": "deck:prism",
-      "key": "7c207f3a1104e367af6563acc5d0497f5568afa82ba7bd2f0d3aa5112b414836",
+      "key": "feadb79e7e5f45e6c875c1e0a9394c3e7f8345b69da02c8da0a15a5d19cc7da0",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -804,7 +804,7 @@
         "public/generated/decks/rigline.mp4"
       ],
       "id": "deck:rigline",
-      "key": "5e026ba1f909e0b155be07e80703a9d4e4c34013df473228a2ed31b918682360",
+      "key": "8e180d58d28d430d7b6d8a3ffc9aae3d3ffad337975bc578a2d81746221cfdb7",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -830,7 +830,7 @@
         "public/generated/widgets/clock-1x1-blueprint.mp4"
       ],
       "id": "widget:clock-1x1-blueprint",
-      "key": "a033d0250d0b85b12aa11f06342c7d17ddf3a10fa9ff5cc2b31ef732ebf8008b",
+      "key": "9f04030b336f9fecf4c19d060a6d9a6e7e8632277ac683d74416cb62a55eba14",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -860,7 +860,7 @@
         "public/generated/widgets/clock-1x1-carbon.mp4"
       ],
       "id": "widget:clock-1x1-carbon",
-      "key": "3e74822f7408841e4b8407fff937a0bdf1da16baf14bedab8bbe64bf18a63449",
+      "key": "6c282f041ceac2e7d771e786286894aefbbdbfec46c24b97d4def101a5ce75ef",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -890,7 +890,7 @@
         "public/generated/widgets/clock-1x1-default-dark.mp4"
       ],
       "id": "widget:clock-1x1-default-dark",
-      "key": "9b9850d09cac0828ec7b099b3c0f5a360a8ecf52190093ec63510c6cd5d22e4a",
+      "key": "6a6384dedbd59f6fa06509b6674121e9b6bd1292f9541233d5bbe44bb5323140",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -920,7 +920,7 @@
         "public/generated/widgets/clock-1x1-default-light.mp4"
       ],
       "id": "widget:clock-1x1-default-light",
-      "key": "249bb8f42a2c82754f8b2838c0aa7b9d88aec9be62a1a75911a27c9defde963d",
+      "key": "2f9528a7e477f9f5f55fba8dda1e6000cc290e56de4eb0149f6e50ab44b3036c",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -950,7 +950,7 @@
         "public/generated/widgets/clock-1x1-ember.mp4"
       ],
       "id": "widget:clock-1x1-ember",
-      "key": "718e4143e4a88ac0169497672d83e75f87c197a653f19064541ca4f8f5d442a6",
+      "key": "72e894d749a2a94e583032b0890f74896c73cc458081094a70362b1d6644a2b0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -980,7 +980,7 @@
         "public/generated/widgets/clock-1x1-glass.mp4"
       ],
       "id": "widget:clock-1x1-glass",
-      "key": "6bef76f507828104713f0afeaf83cf49372de6787080f88e6ca6d8e0a6a66cf2",
+      "key": "380df540092e42d01584a34a72f20ee20cb35ac18445c94738478d231e992352",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1010,7 +1010,7 @@
         "public/generated/widgets/clock-1x1-obsidian.mp4"
       ],
       "id": "widget:clock-1x1-obsidian",
-      "key": "4edde32868c2ca4adf61ec43b763616c8d975c6b977533d30a438ec94b45fe2f",
+      "key": "77424b07875b4667589ee0851ab7f1d10f8c686a4be2491f20a8bfa8a0d84d58",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1040,7 +1040,7 @@
         "public/generated/widgets/clock-1x1-paper.mp4"
       ],
       "id": "widget:clock-1x1-paper",
-      "key": "8c2e8e9db9e594edd3ede809fb736c93d950193367a73888e9627419a8a56d6a",
+      "key": "faf4847a86fbf4f4b2cff2ac1eb38ad48fa5545e400f8f6d4f06645c49e6cead",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1070,7 +1070,7 @@
         "public/generated/widgets/clock-1x1-pop.mp4"
       ],
       "id": "widget:clock-1x1-pop",
-      "key": "178c82e5d7f8acf9c0d60c1f100597424f6e3815005298b7bc22ad4ee0278496",
+      "key": "7c70f3f99744e672ab85cdfa44922ac9eae695c35aa0490dd5a67d86430152ba",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1100,7 +1100,7 @@
         "public/generated/widgets/clock-1x1-prism.mp4"
       ],
       "id": "widget:clock-1x1-prism",
-      "key": "ac363e514bce0cc8a9bfc7a401a8ee0e420bbb72afa08b0651bb0897928a2293",
+      "key": "f6011dcd300fc565d3f54b73879edefd05a114c32d80b60fb9be1ff26ef62b73",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1130,7 +1130,7 @@
         "public/generated/widgets/clock-1x1-rigline.mp4"
       ],
       "id": "widget:clock-1x1-rigline",
-      "key": "9944294f1d3e1b4374fe7e0ffb524888f94e196eba4962504344891fef030068",
+      "key": "73c01d336ca59c05da961e23691e5f4f4850b701ab8ed63cff076b75f14dc378",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1160,7 +1160,7 @@
         "public/generated/widgets/clock-2x1-blueprint.mp4"
       ],
       "id": "widget:clock-2x1-blueprint",
-      "key": "63cbb36385458d29cccfbe82bf3364fce6cc39c159e63a037b62ca177e8912d8",
+      "key": "19f86b74d148935c52199cf1c078f605c58038e1a0d5d0ec25955eb1e3381d17",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1190,7 +1190,7 @@
         "public/generated/widgets/clock-2x1-carbon.mp4"
       ],
       "id": "widget:clock-2x1-carbon",
-      "key": "b901076f709342fa01219d61ba3c2bb60ac6efb97219347730c139c30bb45517",
+      "key": "a632ded75aa5fb554ae853c5473b5e35649a81e1e040cef53b721025b1a20171",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1220,7 +1220,7 @@
         "public/generated/widgets/clock-2x1-default-dark.mp4"
       ],
       "id": "widget:clock-2x1-default-dark",
-      "key": "c36bacfa8f620cb43130bbe3637a14add79bf0f299c11d3787a7d1370bbe6fb1",
+      "key": "e7ca80e41432d4bbcaa2495a86a6a3e6885d61e19422100458e268c4214add97",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1250,7 +1250,7 @@
         "public/generated/widgets/clock-2x1-default-light.mp4"
       ],
       "id": "widget:clock-2x1-default-light",
-      "key": "ce0a6e545f9b8540848eb8fdeb04b01ac6950f242576c56963c51030ece52d4a",
+      "key": "9052439a1dd5f5b8b28b3d3b128c686dbc0bfa99ec0b01f765e75a795d82283d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1280,7 +1280,7 @@
         "public/generated/widgets/clock-2x1-ember.mp4"
       ],
       "id": "widget:clock-2x1-ember",
-      "key": "b847830b6ea5035945c1608de59771ed7fbdcc840354aa80de4e26af186325b2",
+      "key": "f2afcc22300f59573c43776df7b7819dae532415ac3fead49c65f6d03611f1a3",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1310,7 +1310,7 @@
         "public/generated/widgets/clock-2x1-glass.mp4"
       ],
       "id": "widget:clock-2x1-glass",
-      "key": "5e550a2d684a15c20e49e54d2f7dd95021ebce2b4d41d18f1170484a487c3d85",
+      "key": "42532353df315fb492582ae29b1fbb2d29dfbf3a53116d4e6bd6b5ca49a5ca7f",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1340,7 +1340,7 @@
         "public/generated/widgets/clock-2x1-obsidian.mp4"
       ],
       "id": "widget:clock-2x1-obsidian",
-      "key": "38880fc82b07318731d4cc5cdf471f4bca9ebfc7626a893b1d0bc42b86e44ba6",
+      "key": "fdecda0a7fe8e72b3a62ddb5a2bc462351e225de53ea9f38015b8fef7c298abe",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1370,7 +1370,7 @@
         "public/generated/widgets/clock-2x1-paper.mp4"
       ],
       "id": "widget:clock-2x1-paper",
-      "key": "3efd4c8653a665ea45c0ccd50f916c5e2a459c253cfe3d9cca06bb6209cdbcb8",
+      "key": "b99e4bb06c9496d9943ae7ee037fe14bb666c8cd32d56697de356ea44be02b5a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1400,7 +1400,7 @@
         "public/generated/widgets/clock-2x1-pop.mp4"
       ],
       "id": "widget:clock-2x1-pop",
-      "key": "569b14e61925ea7a400d8066d36376a94ae6e4ae022daacd8a5078c6603435e0",
+      "key": "2d9ab9b0e2035e445e1250fecb17c2b008113ad6258fa4ea943f14ad3157bd45",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1430,7 +1430,7 @@
         "public/generated/widgets/clock-2x1-prism.mp4"
       ],
       "id": "widget:clock-2x1-prism",
-      "key": "094e3b3d143796f9ebc3861a7f7601c68191a2e7bf85f5a42ac9a3b89bfaa093",
+      "key": "4ef57a80bcd9aa523ecb976b00345a985340b6ba2b38c2358dce0314eebdd0f2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1460,7 +1460,7 @@
         "public/generated/widgets/clock-2x1-rigline.mp4"
       ],
       "id": "widget:clock-2x1-rigline",
-      "key": "0c2c527df4f399b7229311fc1064db69f06f80d566a3f6cd462599d4b325995a",
+      "key": "18279eec8f70b2fd8bc50ed7152fdd011fede0446fc84ac9c5742b51664a7b70",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1490,7 +1490,7 @@
         "public/generated/widgets/clock-4x1-blueprint.mp4"
       ],
       "id": "widget:clock-4x1-blueprint",
-      "key": "628c0e4f359474bb82ceee06a9373147f18f5468f514705db784ca3b95c18b37",
+      "key": "ba0af61e9045abb45a65ae6faaa6b1516f2dc7ce48beb2c27998c5115e8a1daa",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1520,7 +1520,7 @@
         "public/generated/widgets/clock-4x1-carbon.mp4"
       ],
       "id": "widget:clock-4x1-carbon",
-      "key": "8ae6fbc86423d559200278aff8a77a0790189476ed157bb7fd6c05980d31f410",
+      "key": "f27e1a775f6e9b106ea50c1f4cf5d1ed4dab96f5894bdd58e30c70999a31140b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1550,7 +1550,7 @@
         "public/generated/widgets/clock-4x1-default-dark.mp4"
       ],
       "id": "widget:clock-4x1-default-dark",
-      "key": "d1f0fef67a43c91977a726f9503b7f8a4b6b36a11afdb84ed2a9fa2e41031716",
+      "key": "4842a3ed040946ff4eb72860b82d17f19307fc638fc3acd54d548692e39c23e0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1580,7 +1580,7 @@
         "public/generated/widgets/clock-4x1-default-light.mp4"
       ],
       "id": "widget:clock-4x1-default-light",
-      "key": "554ba07409447e85f31f2a2aa3936cee5c98c72224d13b884e7cb6986bf1f49f",
+      "key": "3ea25da9be6fd77963920a1e4dfdb82f4e62ef757ca35c20d0109e801c24ccf1",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1610,7 +1610,7 @@
         "public/generated/widgets/clock-4x1-ember.mp4"
       ],
       "id": "widget:clock-4x1-ember",
-      "key": "501dedf07226d9253ec5277010acee59de62fcbcfde9acc586c54cfe37d088c0",
+      "key": "907115a5cdefb54c7d8b05694a352ef78d4de88cd91a02b9db2004ffcd722ebd",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1640,7 +1640,7 @@
         "public/generated/widgets/clock-4x1-glass.mp4"
       ],
       "id": "widget:clock-4x1-glass",
-      "key": "da77f9ecf8232694b7eba402f1f9d33c30d89bcd58b42a3f7b623f5b3d061ce5",
+      "key": "5e48a9d5ffc0b879d29a5fa87253f10ec358a50c21710915d674449ed9f54d28",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1670,7 +1670,7 @@
         "public/generated/widgets/clock-4x1-obsidian.mp4"
       ],
       "id": "widget:clock-4x1-obsidian",
-      "key": "7bba5b0b1d8c21a4b2b3d4c66c67fa18de6c8230c43ec8d9ac6087d554c4cdcd",
+      "key": "42daf64d6eeeb2fa32e2e0fce30f97a288071cb3a2b686c0f79bcfb82878cc51",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1700,7 +1700,7 @@
         "public/generated/widgets/clock-4x1-paper.mp4"
       ],
       "id": "widget:clock-4x1-paper",
-      "key": "daf6b56c16a9b53f7c4410e99585e1ad5509e722907596b0143c76be9c9d65ee",
+      "key": "15a2998f32766e1d7b485fcafa772c3c0fc9c7dcb00affce440dd4dbc704a986",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1730,7 +1730,7 @@
         "public/generated/widgets/clock-4x1-pop.mp4"
       ],
       "id": "widget:clock-4x1-pop",
-      "key": "643c3389a643670ae865e1014463aa7b5c7ff1a07dbd6116d9e37ff9a9b7c3c5",
+      "key": "6ae41bea15cddf6617d5acc73c729819ab64faa57f1194c58dbbcbaa81a1b518",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1760,7 +1760,7 @@
         "public/generated/widgets/clock-4x1-prism.mp4"
       ],
       "id": "widget:clock-4x1-prism",
-      "key": "0fa47512310fafe783d93b703f98e2cc043f7f6e4f69db78b5d9c874d3c37022",
+      "key": "26ebbf800bfd3d76738d04932df9e43c50939976ab228ad87b484f0b2d524703",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1790,7 +1790,7 @@
         "public/generated/widgets/clock-4x1-rigline.mp4"
       ],
       "id": "widget:clock-4x1-rigline",
-      "key": "c564e620ad1ff7b4fc3cd514588f5c06fe2ee1fb49a8da8325245cfe380410fa",
+      "key": "dfe537d205f1def3903857b9c2e2a2b953b34df81b2baf33579e67d3b8979ff9",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1820,7 +1820,7 @@
         "public/generated/widgets/clock-4x2-blueprint.mp4"
       ],
       "id": "widget:clock-4x2-blueprint",
-      "key": "f5aa5d0401fe24a5d35cdcec0c760d3ab2f93ea953c06658913dd2eb1d575a6c",
+      "key": "84855b80545efafc5598c36ae20ac2f4aa305e0337fe3143cd4b0464e685779c",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1850,7 +1850,7 @@
         "public/generated/widgets/clock-4x2-carbon.mp4"
       ],
       "id": "widget:clock-4x2-carbon",
-      "key": "1ebecb9b9a16e77433fc769f6f952192ee1f60749a6a2b0176a752034a1c820f",
+      "key": "63c90b6ba8e90d47396ddb0c46ef15fae413c12758393a43a36097297823b4ca",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1880,7 +1880,7 @@
         "public/generated/widgets/clock-4x2-default-dark.mp4"
       ],
       "id": "widget:clock-4x2-default-dark",
-      "key": "e10afadc8ba80537d1b59ceba758dd7620f4fbc7155f445a16cee96dbb3a4b34",
+      "key": "ed3a0d67a832cf367ca56af33163e282678af54e1dc42c4ab7531919a325aa2c",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1910,7 +1910,7 @@
         "public/generated/widgets/clock-4x2-default-light.mp4"
       ],
       "id": "widget:clock-4x2-default-light",
-      "key": "eea01961d2a84ae3440328c5ecb917bce8d1c339332e4494591ab6d1fdbe824c",
+      "key": "14c79715e7639cb748717d6161f063964fb5f5d2126e58ba43d83665956cdaa4",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1940,7 +1940,7 @@
         "public/generated/widgets/clock-4x2-ember.mp4"
       ],
       "id": "widget:clock-4x2-ember",
-      "key": "4cb537b8674465819f8937f89656d395d6f5556cfb9b882ba3a0cd432497fb8e",
+      "key": "1f2af8819166b18b2906c19681d4844671bc8f2bda7de311a88cf9d3588ff1b0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1970,7 +1970,7 @@
         "public/generated/widgets/clock-4x2-glass.mp4"
       ],
       "id": "widget:clock-4x2-glass",
-      "key": "921f80908ac4520edae81cf5a48535171ef67a365a29bbda9abfb1f74c789514",
+      "key": "1a3bf106463274e7c13ab70340217dcea9c682843bdad40ead86442dd8e3b207",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2000,7 +2000,7 @@
         "public/generated/widgets/clock-4x2-obsidian.mp4"
       ],
       "id": "widget:clock-4x2-obsidian",
-      "key": "aac74ac5c868e28867ff5eb66215ca4e0d2f5f8ced794a845f276efa670a6bdd",
+      "key": "ab93c45c17d546fb1f4f1f5d491f082bc0e04712856fe2c8b1ed705e1219cfab",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2030,7 +2030,7 @@
         "public/generated/widgets/clock-4x2-paper.mp4"
       ],
       "id": "widget:clock-4x2-paper",
-      "key": "a3d8b18d706bb868fa0565e708214d3c186392fbe4b67944c45a458269b6c85c",
+      "key": "c3c82244e99a85111aacdf5ffa963f008c8df77a67c0b04ed2cf4a297a6266fe",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2060,7 +2060,7 @@
         "public/generated/widgets/clock-4x2-pop.mp4"
       ],
       "id": "widget:clock-4x2-pop",
-      "key": "570babe7c08aac0bd6cef3c6ed97fa52e11a753629195217f554168f9b6a8f39",
+      "key": "b69b0a23cf31beeb6014ec4fc0471e4c5769fce6438bd40a0e4d37a05a3d2db1",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2090,7 +2090,7 @@
         "public/generated/widgets/clock-4x2-prism.mp4"
       ],
       "id": "widget:clock-4x2-prism",
-      "key": "d8321cc1fb6a139627fd0afca10692a44f30cb9636cbfffe4acf02a3d27cd818",
+      "key": "6cfb751c34fc18139a3ab02ba666df798d241fb82d53a080ed19b27bb6c20e3d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2120,7 +2120,7 @@
         "public/generated/widgets/clock-4x2-rigline.mp4"
       ],
       "id": "widget:clock-4x2-rigline",
-      "key": "d2c511ec4c45da98446b8341c73dea782fda7531c80627ccf7c0427a23cf9c4e",
+      "key": "c28cd4b3f184041d0bf18d1c4ec50a8240d4d3306680e4f09d563985212284e0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2146,10 +2146,560 @@
     {
       "background": "plotter",
       "files": [
+        "src/generated/widgets/control-1x1-blueprint.webp"
+      ],
+      "id": "widget:control-1x1-blueprint",
+      "key": "157e2654b2e75916a3e323cac0de9b98b86575742ef33a62f02fde3b9c49dcd8",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/control-1x1-carbon.webp"
+      ],
+      "id": "widget:control-1x1-carbon",
+      "key": "0bc60e3fff7d8bf0b7efc6db016a7a84d1476181b62731933a86a06dcb571366",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/control-1x1-default-dark.webp"
+      ],
+      "id": "widget:control-1x1-default-dark",
+      "key": "ef02694608bbe7f04808d4c67e8ce3829fb5d5880f22b43f8c3a0ebd12e12e59",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/control-1x1-default-light.webp"
+      ],
+      "id": "widget:control-1x1-default-light",
+      "key": "91ee03fc497b55a105ee4abd9a3f33c6641ddb2ea31918b7977b9c1a5b91bd78",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/control-1x1-ember.webp"
+      ],
+      "id": "widget:control-1x1-ember",
+      "key": "090671850e4ae650701b659d3fd3aa35b67ee0bac695ad97dfbbca87e11bf4c2",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/control-1x1-glass.webp"
+      ],
+      "id": "widget:control-1x1-glass",
+      "key": "442ebd01581e60ab5d3ba608a28d105d0cb5623fd364eadc531958ee6c0908e4",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/control-1x1-obsidian.webp"
+      ],
+      "id": "widget:control-1x1-obsidian",
+      "key": "ad8ec14f6050fb034245b381c4aeca1b13019c1342edd5b581b0178fe63b46fc",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/control-1x1-paper.webp"
+      ],
+      "id": "widget:control-1x1-paper",
+      "key": "ba19b3e7455667e0bb46be8e801ac167c0ec1b5756567f50c788a8fe5e325ec8",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/control-1x1-pop.webp"
+      ],
+      "id": "widget:control-1x1-pop",
+      "key": "b67007d6de00f91789d037e2bd7c8368f7e86e24abf4fdf009ba6dacbf92d304",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/control-1x1-prism.webp"
+      ],
+      "id": "widget:control-1x1-prism",
+      "key": "4cf3d5529fff2a81635e292f414c7d2b3e43137927393f202870fef1b102c534",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/control-1x1-rigline.webp"
+      ],
+      "id": "widget:control-1x1-rigline",
+      "key": "7fe69e4cb8ee77ad25a4838712a62b58a14ad9ea1c3d07459ee7ecc7315f9dbd",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "reading": "homeassistant:light.living_room"
+        },
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/control-2x1-blueprint.webp"
+      ],
+      "id": "widget:control-2x1-blueprint",
+      "key": "0684f05ee340ca900099a2422d52b91fa1a9aaa8f2f240080d3ceac8d2d23f95",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/control-2x1-carbon.webp"
+      ],
+      "id": "widget:control-2x1-carbon",
+      "key": "eb37be2629df6299c9d5d4eb1225cee5e99bac3949f2f6a541b96084287a3a44",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/control-2x1-default-dark.webp"
+      ],
+      "id": "widget:control-2x1-default-dark",
+      "key": "22c3014c4e79cfc08a7c7496e0a7b1f23d0ec40f908a1fb61b4bbfab55dcba0f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/control-2x1-default-light.webp"
+      ],
+      "id": "widget:control-2x1-default-light",
+      "key": "ab9c42467e6d30da84deca0f6306b5dad30ae5907923e8fca33ec99956befc74",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/control-2x1-ember.webp"
+      ],
+      "id": "widget:control-2x1-ember",
+      "key": "23ef488bd7da767ff27fe93621e8b77fa87ccff9ff47ba553b81747b38f605a0",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/control-2x1-glass.webp"
+      ],
+      "id": "widget:control-2x1-glass",
+      "key": "382f5ecfda6dfc72f49042b4b918036456e612da18b4c4e2de8da29bb0a6e6ff",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/control-2x1-obsidian.webp"
+      ],
+      "id": "widget:control-2x1-obsidian",
+      "key": "b3893662e37d2b6dde41343cb277aba7a25e27117e43d43d80ac055232f5a76c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/control-2x1-paper.webp"
+      ],
+      "id": "widget:control-2x1-paper",
+      "key": "e9ee69e9673f2ead6ac79e0d78e9b3d6e84c76ba44e7391b57b9223cfdf66c69",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/control-2x1-pop.webp"
+      ],
+      "id": "widget:control-2x1-pop",
+      "key": "1644583520b0ddb87fd4d1ef2b0c5dfed5b83f6a5c9e7b5877c0e419f17c77e3",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/control-2x1-prism.webp"
+      ],
+      "id": "widget:control-2x1-prism",
+      "key": "04bd16fb4d8e3d7ed6d3d90c2d21ee5a1f24e3badfc3c3b72acc0f982f0f2ef8",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/control-2x1-rigline.webp"
+      ],
+      "id": "widget:control-2x1-rigline",
+      "key": "ba21c34362a769da2b4fd1461645bb916f81a7ebdd1ae5746c55d85ad4d2f1af",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.control",
+        "widgetConfig": {
+          "level": "homeassistant:light.living_room/brightness",
+          "reading": "homeassistant:light.living_room",
+          "style": "dimmer"
+        },
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.control"
+    },
+    {
+      "background": "plotter",
+      "files": [
         "src/generated/widgets/nowplaying-4x2-blueprint.webp"
       ],
       "id": "widget:nowplaying-4x2-blueprint",
-      "key": "8a355069ea4f2a5b95aeeb2e5848aa40c193d885a08fd6b5844c7645a392592a",
+      "key": "49e83acb66632d3b20e0e7e632a7d30f16cfac1b4352fc4836907eca6dbd7125",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2171,7 +2721,7 @@
         "src/generated/widgets/nowplaying-4x2-carbon.webp"
       ],
       "id": "widget:nowplaying-4x2-carbon",
-      "key": "005a85a5cc755f79d66df7d229a1c586e284d90b97ec1675ffe03af15b132b06",
+      "key": "51374a8bd7bac1af87a375ff8b5b62db3565a22edc1d026add652bcf55ab8243",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2193,7 +2743,7 @@
         "src/generated/widgets/nowplaying-4x2-default-dark.webp"
       ],
       "id": "widget:nowplaying-4x2-default-dark",
-      "key": "386853844c513b11a684972e65cfd94a1f6cb69071de4ea8aef329a19a7ddcc6",
+      "key": "0ed76b48bcde79763c54d9d352ff973ae78185998add5f6888b22cf1ca47fa9e",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2215,7 +2765,7 @@
         "src/generated/widgets/nowplaying-4x2-default-light.webp"
       ],
       "id": "widget:nowplaying-4x2-default-light",
-      "key": "4bb57531a7b2415dfaa538c4f0381c33ff9e9c0236dffd98dd0553393be90551",
+      "key": "ef4a20ab017681077ba89f058484d08a1269ab58026e4a3c518adeb1b8afc3c5",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2237,7 +2787,7 @@
         "src/generated/widgets/nowplaying-4x2-ember.webp"
       ],
       "id": "widget:nowplaying-4x2-ember",
-      "key": "150b630d4d6197fcd542e90af3dcfca4d9e095eabea817ff27937aa79d2ac2c3",
+      "key": "171b38fd017dd6d2a85486437b0e29b61f5778a204c8b6a0b71f5edc94db07ff",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2259,7 +2809,7 @@
         "src/generated/widgets/nowplaying-4x2-glass.webp"
       ],
       "id": "widget:nowplaying-4x2-glass",
-      "key": "c024b14b867b382a948286818ee1decb0242511c16847fe1c02b4085d5de7348",
+      "key": "68c44055d397bfe57b525d617477d0349218b26810bc664ecaa04906258d01e0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2281,7 +2831,7 @@
         "src/generated/widgets/nowplaying-4x2-obsidian.webp"
       ],
       "id": "widget:nowplaying-4x2-obsidian",
-      "key": "39eafb895e9ceaed21c87dff83cda4907cfe186ccbac2ffa94d7cc0b7bed610a",
+      "key": "77755f4b69cc0e78e18aed1588a24c522824497087cdfeff4a40c905eb67c5ce",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2303,7 +2853,7 @@
         "src/generated/widgets/nowplaying-4x2-paper.webp"
       ],
       "id": "widget:nowplaying-4x2-paper",
-      "key": "195be92d00a0a539361008001a937f6d33311f9cd66ee44d34c2ad9c13f2ae53",
+      "key": "752e229379b7432b3c0decd7c21e1a5a7af5a0c73786865853b22288a23e6042",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2325,7 +2875,7 @@
         "src/generated/widgets/nowplaying-4x2-pop.webp"
       ],
       "id": "widget:nowplaying-4x2-pop",
-      "key": "e57078d507e391e6772a8331cf86bc194ee7e62d603b5bbde0ac9620c3fdc44b",
+      "key": "97ca22778065654ac9efea3afcbfeee9b7a8921f2c45cd3644c7c1bb857c65e9",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2347,7 +2897,7 @@
         "src/generated/widgets/nowplaying-4x2-prism.webp"
       ],
       "id": "widget:nowplaying-4x2-prism",
-      "key": "b696c7d21967e60bd2dcdd808c2aac33b9d147c8fa1f5edf255813ad97f0236c",
+      "key": "e8a7e60dab1ff147778057207882e8d0230f50d983aff27c548152daf59d2fc2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2369,7 +2919,7 @@
         "src/generated/widgets/nowplaying-4x2-rigline.webp"
       ],
       "id": "widget:nowplaying-4x2-rigline",
-      "key": "1218d605f87635d4c356439eb105f9308fff7c9b994fe99a370c269973df81e2",
+      "key": "cea2592010443aad7c0de37aa6669e64927dc4c884fc153a4386ef89981f72c8",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2391,7 +2941,7 @@
         "src/generated/widgets/shortcut-1x1-blueprint.webp"
       ],
       "id": "widget:shortcut-1x1-blueprint",
-      "key": "b0aadd8650f1fb13f0f23035e84102a8d118b0c4a3d6a026e1aa9388475ee0e3",
+      "key": "d24f31b4020df9d09d616215df10e8151e8530711fd1fb240e209c4ed44a5de2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2413,7 +2963,7 @@
         "src/generated/widgets/shortcut-1x1-carbon.webp"
       ],
       "id": "widget:shortcut-1x1-carbon",
-      "key": "18497b7cd33d17ebe78cb63169c71d81af1ae2b602f0e01a2f4ebc811de06f0e",
+      "key": "cbcf0d9ffbf9eaf3982ee0e3914b8207c199cfb9d3bb8eb496e5ad7ef1a6fd91",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2435,7 +2985,7 @@
         "src/generated/widgets/shortcut-1x1-default-dark.webp"
       ],
       "id": "widget:shortcut-1x1-default-dark",
-      "key": "fd6d4489225b6cb1aeed7944ea7940d5eb7c4469f4c8903f4c10d654c5ea401d",
+      "key": "ae4b5c100323ca21cdbb645314c0e5239925774d27edbf6d2ba37065ac95eef9",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2457,7 +3007,7 @@
         "src/generated/widgets/shortcut-1x1-default-light.webp"
       ],
       "id": "widget:shortcut-1x1-default-light",
-      "key": "7bf2a8f459810ccbf24459425cc3e5f61bd611294ef17fca74b783ffed84bf75",
+      "key": "fd277cc2503d83addbe1a093342797b9c4f465b600bac3c6c6482e15b6cf7a36",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2479,7 +3029,7 @@
         "src/generated/widgets/shortcut-1x1-ember.webp"
       ],
       "id": "widget:shortcut-1x1-ember",
-      "key": "c02ede2c3d0f1789b0b15136aab36d3918e7c9b8cd1cb10df3bfbe5a0d2f68e6",
+      "key": "2a66fc16a9cf2a9c96225ece08c0d463e07707d467b774fc100920aa382dbe57",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2501,7 +3051,7 @@
         "src/generated/widgets/shortcut-1x1-glass.webp"
       ],
       "id": "widget:shortcut-1x1-glass",
-      "key": "abdaa8344861f275cb576fd1e73d4aedaaf4b00e3eb05ce0d34f855466da13eb",
+      "key": "76f7d23c4784aad5a64663796601ca6df543e66a3a80fdb94bc9b654cfeb3d3b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2523,7 +3073,7 @@
         "src/generated/widgets/shortcut-1x1-obsidian.webp"
       ],
       "id": "widget:shortcut-1x1-obsidian",
-      "key": "f0d51d1ed5dc8a905fef58622516de8f80e7f68de0b32e75dbc6b98eb15d852c",
+      "key": "6e84cfa4cbaf721b5b3e14fc549d8cad95a42b78269527d3eca064f1f484a94e",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2545,7 +3095,7 @@
         "src/generated/widgets/shortcut-1x1-paper.webp"
       ],
       "id": "widget:shortcut-1x1-paper",
-      "key": "7c4ff6a13626465976131a5c4bacc9dafe50784c9f185f1815f2cdb6d289fdda",
+      "key": "eac992591dae7d7f93135ca4a119e3fa09ebbf246546d9d7a60e522f9adebc78",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2567,7 +3117,7 @@
         "src/generated/widgets/shortcut-1x1-pop.webp"
       ],
       "id": "widget:shortcut-1x1-pop",
-      "key": "bcda02bb5e5c8bbc260a2c4c338891b85ea7c86b9805121b3c3982ddd7492470",
+      "key": "ac0f6d53cbbf8fb081e4b6ecffe01367ed35a2a62253bf2cd6bd31ad2f35a2cd",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2589,7 +3139,7 @@
         "src/generated/widgets/shortcut-1x1-prism.webp"
       ],
       "id": "widget:shortcut-1x1-prism",
-      "key": "f695345c5f9b7414858b1ef50161ec960511c593f2e888674841213fab6aabc0",
+      "key": "7e34f06a441263f2ce88bf5d400de0fae6ab4c4614d6d25bf3beb4dca267296b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2611,7 +3161,7 @@
         "src/generated/widgets/shortcut-1x1-rigline.webp"
       ],
       "id": "widget:shortcut-1x1-rigline",
-      "key": "cdae924a63336d3ed7ac00286a29656ab8219b128ceb29d58e61cee7fb234e66",
+      "key": "3279d840bb1338bdb8b8bafd4904d185fe4d9e7af1a075d8ef318d7fbee1a94b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2634,7 +3184,7 @@
         "public/generated/widgets/stats-1x1-blueprint.mp4"
       ],
       "id": "widget:stats-1x1-blueprint",
-      "key": "9a0690e011dff63ac3c0e996e607ad372bc6318062818e19a2dd288aa0357dc5",
+      "key": "631ee05f0a53a8a618d475909416fe910b28a7ccf4e153a995cd30084f3fcacb",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2660,7 +3210,7 @@
         "public/generated/widgets/stats-1x1-carbon.mp4"
       ],
       "id": "widget:stats-1x1-carbon",
-      "key": "9bb6d9db8bd59dac0f5ebd398c84bf0283dea2097739c253a26ef9d0e311dabc",
+      "key": "c5ce0e40f5fa491f3d197f93f46e35b55d43a634dd3b856f96a9678ee8c118c3",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2686,7 +3236,7 @@
         "public/generated/widgets/stats-1x1-default-dark.mp4"
       ],
       "id": "widget:stats-1x1-default-dark",
-      "key": "b7fcba9b64d1e2505fc1660048382c3fbf8c390b10fe8da713ce873d4da57ba4",
+      "key": "4c54933e8f2a1319156e2ba321efba658b880272848708fbf31ea30e30b1d212",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2712,7 +3262,7 @@
         "public/generated/widgets/stats-1x1-default-light.mp4"
       ],
       "id": "widget:stats-1x1-default-light",
-      "key": "6ac10ba19ce3c0c730ae09ef3758c8a3c1bc419a2773c02642f52dc3ea088831",
+      "key": "d7e9d1505b2d5630f91b10db3f9f1ef78bc9c084e245f14bc2e0bc86efe4571a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2738,7 +3288,7 @@
         "public/generated/widgets/stats-1x1-ember.mp4"
       ],
       "id": "widget:stats-1x1-ember",
-      "key": "a80d36ab394fb38ae0599c88f0aaddc44c6e0c614466615c16a3b3a2edf9cadd",
+      "key": "0f928777eddff6b812823a12c780a286b3b41a5fb51b48c0375efd1761eea798",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2764,7 +3314,7 @@
         "public/generated/widgets/stats-1x1-glass.mp4"
       ],
       "id": "widget:stats-1x1-glass",
-      "key": "242147ec02d6348307af37a35a725447f5730951211ba8d22bacd4c59d1e4ca3",
+      "key": "56e7919e7227f76a98127c8eda92e57672ef8d4323b6898e4b190225bc93fc13",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2790,7 +3340,7 @@
         "public/generated/widgets/stats-1x1-obsidian.mp4"
       ],
       "id": "widget:stats-1x1-obsidian",
-      "key": "ea1365dfefbd5dc4c5592a9125e2ebab15b49bc076515d74b18537cff88974c9",
+      "key": "43c0ecb3185e52181a514a6010329a3bc292d8e07c47a82afad380c3b85cb23b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2816,7 +3366,7 @@
         "public/generated/widgets/stats-1x1-paper.mp4"
       ],
       "id": "widget:stats-1x1-paper",
-      "key": "b693fac827974bc5487b732a2bd2a2ccaf82a3f447d64b8f6c2e7c8f239c1836",
+      "key": "fae34f6e77437566109937429437c0bc1f3bbce2729e534dd0ab3825acd54b51",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2842,7 +3392,7 @@
         "public/generated/widgets/stats-1x1-pop.mp4"
       ],
       "id": "widget:stats-1x1-pop",
-      "key": "49f279dfddec1bb220e80a622d67a75251c91966ef539baf2ffffde110fdc43f",
+      "key": "1917277db24b8d66f1ef76cd6e2220fef3890e70af6f828d122cba17f0ac3bd2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2868,7 +3418,7 @@
         "public/generated/widgets/stats-1x1-prism.mp4"
       ],
       "id": "widget:stats-1x1-prism",
-      "key": "2d9d5aee5a56bc7b4ef708416c06474fdffbed4eccbb85a1fe289e7c0050dad7",
+      "key": "9556c936152a9abda9220639bfac8ac8bdbfce7446e4b19666b157bf0c414b1c",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2894,7 +3444,7 @@
         "public/generated/widgets/stats-1x1-rigline.mp4"
       ],
       "id": "widget:stats-1x1-rigline",
-      "key": "ccfff0d192529ffd32307037b1ceb201fbac9954357ec4798e80808ebed22d37",
+      "key": "b0ef301a3bb103921c793a7b08b2749b97d5e68e74e30a4b26273a886f23e3e0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2920,7 +3470,7 @@
         "public/generated/widgets/stats-2x2-blueprint.mp4"
       ],
       "id": "widget:stats-2x2-blueprint",
-      "key": "f5db554c7a730c0282aae2ca04e48dd05dc5f414d31d490eb81fae79b6adc223",
+      "key": "d87240b0d0ccab1b29094baf9c755c6c880e2c43fe31e6020875ea81525fe336",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2946,7 +3496,7 @@
         "public/generated/widgets/stats-2x2-carbon.mp4"
       ],
       "id": "widget:stats-2x2-carbon",
-      "key": "a10a42ad7a6432b0fcfd057cc1e4719bf9f48714fee0cc51f37639057555e6f1",
+      "key": "2ba0259f859b11fbed84a7d62c46c73165b16e3879363d358b120667b5e44cb1",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2972,7 +3522,7 @@
         "public/generated/widgets/stats-2x2-default-dark.mp4"
       ],
       "id": "widget:stats-2x2-default-dark",
-      "key": "6748966c18be5254c98e0f54374f5fa530e80f70770f0276ce08acb85f8a671a",
+      "key": "d2b90a286d0b5250913d5bffbfd05f22115b9e04fd3bf13d3f8fceafb4f901e2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2998,7 +3548,7 @@
         "public/generated/widgets/stats-2x2-default-light.mp4"
       ],
       "id": "widget:stats-2x2-default-light",
-      "key": "03ddcbe9cde6800b964f8e2cd04476889c783c51b253bbbf9edc01c8b11eaccb",
+      "key": "a24ab841079fd8bc7de4dfc9e205c97058935b8dd51e18ebfc7e06f58e91a7b7",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3024,7 +3574,7 @@
         "public/generated/widgets/stats-2x2-ember.mp4"
       ],
       "id": "widget:stats-2x2-ember",
-      "key": "90a32101483b836846f8e8f48ac34b0d06f87444c84292cf11c7c3432339829f",
+      "key": "ebb8a39f002327468de2aea0ca37c1a6f8b23bb559471b7adabe5b78947e45e4",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3050,7 +3600,7 @@
         "public/generated/widgets/stats-2x2-glass.mp4"
       ],
       "id": "widget:stats-2x2-glass",
-      "key": "6506a7b5784e61562ab7bb396c22dead87cd6ce844cf28c3ceef1ec5cbc055fc",
+      "key": "ecf954d8b72d1c1f5177f654681dd0c9c6e3954aff31f651c6ddd43dbfee383f",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3076,7 +3626,7 @@
         "public/generated/widgets/stats-2x2-obsidian.mp4"
       ],
       "id": "widget:stats-2x2-obsidian",
-      "key": "d6dee4040160e1dda8415e231dc8598e4a61a1f55bfabbba06aa06e6e711198a",
+      "key": "343f855ce896d71de6721f4c10c1c8eccf56fa1ebae066d1dbf6374694ca58d8",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3102,7 +3652,7 @@
         "public/generated/widgets/stats-2x2-paper.mp4"
       ],
       "id": "widget:stats-2x2-paper",
-      "key": "faa2d3be471e05a10738c8a382ee89a55af5dec0c10e49e7d6eccd1e08fb45c5",
+      "key": "8a5994b538284b1e2479f10f3db4f180df47394b409a88a6b5352107959f646b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3128,7 +3678,7 @@
         "public/generated/widgets/stats-2x2-pop.mp4"
       ],
       "id": "widget:stats-2x2-pop",
-      "key": "e59aa481bb0acfefe1a3a920ccd8c0c100e94117fa68fecead1d202cc07aadde",
+      "key": "e5f4ce33a0b4247fc7309a192381d740703030f1e6baef7a68c780dd03b35e87",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3154,7 +3704,7 @@
         "public/generated/widgets/stats-2x2-prism.mp4"
       ],
       "id": "widget:stats-2x2-prism",
-      "key": "1a6a8351fde6a2d17d76736258cf3d4ccead5e0b36aef12595a8f2b547579c62",
+      "key": "53a66d5309755f7b43f396ddfb4fbada26955a83ceffeb3fb8d9a3104f0674aa",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3180,7 +3730,7 @@
         "public/generated/widgets/stats-2x2-rigline.mp4"
       ],
       "id": "widget:stats-2x2-rigline",
-      "key": "99dfcfdadd97da34308b88ecf567aa5c2dcab8054f1585f6f36e7bd3b79ee151",
+      "key": "f9f9536694a8c7ddff835f9f9de4933b9833d916333dfd4bb0086f88e12e3e99",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3206,7 +3756,7 @@
         "public/generated/widgets/stats-4x2-blueprint.mp4"
       ],
       "id": "widget:stats-4x2-blueprint",
-      "key": "fd3b5b44aabc97afe151d2cf0c82d51e2d3a0d83ee69ee293b53c4c83be5658c",
+      "key": "8efa46ef884589fa655ef83d3eb24279b31984f60243707ea25e05905733a092",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3232,7 +3782,7 @@
         "public/generated/widgets/stats-4x2-carbon.mp4"
       ],
       "id": "widget:stats-4x2-carbon",
-      "key": "de295f93b1f4b5c6146b1f3e9b2f48acb79058019821b24926590129abe73843",
+      "key": "fcb2676de8579fe0242fa38c809fd08fb4a3ca0e61eb2e6e2d36899f8de048c7",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3258,7 +3808,7 @@
         "public/generated/widgets/stats-4x2-default-dark.mp4"
       ],
       "id": "widget:stats-4x2-default-dark",
-      "key": "3c5b586a129046b167c2831c6d837021af17f5b8f2f5a234e3d13c3332c19b18",
+      "key": "26d0e359e43bf51e93c2314c766c71e48fe298512cdc72967f1dc49d4dd588fa",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3284,7 +3834,7 @@
         "public/generated/widgets/stats-4x2-default-light.mp4"
       ],
       "id": "widget:stats-4x2-default-light",
-      "key": "1ec908bd3e3a3c7a16d6146a0bab6eacbe88d227462f3d74e02e8d323506536f",
+      "key": "f40a1ef5768a0ee953469704b3725071e6617b0370a1e6314141780b144ffd3c",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3310,7 +3860,7 @@
         "public/generated/widgets/stats-4x2-ember.mp4"
       ],
       "id": "widget:stats-4x2-ember",
-      "key": "b3b3ce798fd11e15c8247ea5d46470fc2c6da020ec0700836d37e35a397ddb45",
+      "key": "421ee367db7bc384518370f889ad46e87658af45788070dac76c992a56c8da3e",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3336,7 +3886,7 @@
         "public/generated/widgets/stats-4x2-glass.mp4"
       ],
       "id": "widget:stats-4x2-glass",
-      "key": "79aff7b7b1d6234b30e5d1612d948e4cf0ee76b183ef7bdab204a071bc9aebcd",
+      "key": "38de6ca2511ff648cf1540957ec3ad69740930ce68e5110af9a2529bbf4d16dd",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3362,7 +3912,7 @@
         "public/generated/widgets/stats-4x2-obsidian.mp4"
       ],
       "id": "widget:stats-4x2-obsidian",
-      "key": "604774b4c5accf08308742237ebead88e2feeae1797fee8e87e294d080289126",
+      "key": "fad2a60af334d43b9ba1bfb8e6827d0126e74c2a3d217c4d61ed62d3485a305c",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3388,7 +3938,7 @@
         "public/generated/widgets/stats-4x2-paper.mp4"
       ],
       "id": "widget:stats-4x2-paper",
-      "key": "83fd85e3c44bd3a0f387de87049dc37f0fca35e0d9bab3792a73d22dfffcf4f6",
+      "key": "25eda8d1b58b988faa87bde725f1cba844a2a1626c8fafa18e4a022cd0abd52b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3414,7 +3964,7 @@
         "public/generated/widgets/stats-4x2-pop.mp4"
       ],
       "id": "widget:stats-4x2-pop",
-      "key": "d21b111e21df10e8afa610483e7eec3bf4c11a04edb4d8f897c272095112b896",
+      "key": "160570becee941f727eb168efca354747bb175db6225c6a24ef1e47db84ef3a4",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3440,7 +3990,7 @@
         "public/generated/widgets/stats-4x2-prism.mp4"
       ],
       "id": "widget:stats-4x2-prism",
-      "key": "d1663baf8657afbeb35dc270dca458b8e77e3082cbc0b07413215bf2be3cc67a",
+      "key": "cba877c4dbd3ae3934d8c56fc4bf3b3d7250aeb2fb2923e9f4c8f3b57f6d83a2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3466,7 +4016,7 @@
         "public/generated/widgets/stats-4x2-rigline.mp4"
       ],
       "id": "widget:stats-4x2-rigline",
-      "key": "d31e150803ee2fb1f9ea5477cb204cd6551a66c9bb120d72bce4cfa36340481a",
+      "key": "488c0f8d61559fde3bf0630177e033d4fe8faec617bb58420dec5a362ccfd190",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3492,7 +4042,7 @@
         "public/generated/widgets/stats-4x4-blueprint.mp4"
       ],
       "id": "widget:stats-4x4-blueprint",
-      "key": "a266a6c7deda4dfd385de14dc1072ab6e3f8614bacc8db2ece81e20f220e23e2",
+      "key": "ca2f1ddf6c4af1e1a8975b04f5c0b5496b5f409b8348c586abdc2b2fbe91e2a5",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3518,7 +4068,7 @@
         "public/generated/widgets/stats-4x4-carbon.mp4"
       ],
       "id": "widget:stats-4x4-carbon",
-      "key": "e3fffd908d85c99aa6dd54760a48c83103cab96ed8bcaa8bba76fedeb7fe1745",
+      "key": "0cf7f1f89ebe12bc4d05aed38e3c7d240e5f8a4cfbc5086362e8ee467af75764",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3544,7 +4094,7 @@
         "public/generated/widgets/stats-4x4-default-dark.mp4"
       ],
       "id": "widget:stats-4x4-default-dark",
-      "key": "a7c96d28dd22750ad09b9bb4a7d1246739d2472f3b58b33ae00427e3603b1bc3",
+      "key": "d959eb2ad66def1994695f59b2d494eff73d565d70f237065b283636c55a8fc5",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3570,7 +4120,7 @@
         "public/generated/widgets/stats-4x4-default-light.mp4"
       ],
       "id": "widget:stats-4x4-default-light",
-      "key": "806f5b86c691cedb573ccbd2a773d0c9d6cb435c1c57f8b1ca2bff27206f3f21",
+      "key": "9d812dcab1d0b755033bcec3395632ee4568f0ba7e2f2af4503dbc15d50ee1da",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3596,7 +4146,7 @@
         "public/generated/widgets/stats-4x4-ember.mp4"
       ],
       "id": "widget:stats-4x4-ember",
-      "key": "aeda5bb3a18ea6a6e36bd30c54baa46bbd7928b04089365e11733600f39be937",
+      "key": "9deb3619dfcb965875cf5dcd7e880f958363b5ed1fabb9fff7b0f54a79067c28",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3622,7 +4172,7 @@
         "public/generated/widgets/stats-4x4-glass.mp4"
       ],
       "id": "widget:stats-4x4-glass",
-      "key": "27deb0dc8a7b9cddb27e6f16ad0a5fa6fae5a2d45f1f1f45d0cbf11e8cfa7763",
+      "key": "f6c538e8932dd5aa770c6fa3bdfc16a15a04e00590f30002bcef7c661d2b28fd",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3648,7 +4198,7 @@
         "public/generated/widgets/stats-4x4-obsidian.mp4"
       ],
       "id": "widget:stats-4x4-obsidian",
-      "key": "2f8ff2373a9e2777edbfd420935453596c2cd091a4797fe1864d29355fd8b161",
+      "key": "e2f433b57b1feac73dbfe80baca5ada6382d3c0221a6a2e6d8d08a453582864a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3674,7 +4224,7 @@
         "public/generated/widgets/stats-4x4-paper.mp4"
       ],
       "id": "widget:stats-4x4-paper",
-      "key": "f92bb2f68e555b55a68aeae693ff947ae5ced2dc28265e6752afc62b1e365f64",
+      "key": "d07d92642aaa212a356a65dac02e88b8bc28e80c617e390db2f93a077d2ae5a9",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3700,7 +4250,7 @@
         "public/generated/widgets/stats-4x4-pop.mp4"
       ],
       "id": "widget:stats-4x4-pop",
-      "key": "467fcbaf7526647c7e382ed246f8217e4f93724c317fc2feb7f8297f870f9691",
+      "key": "3a0a69b4428f5bacfda44ddeab3ff82c26cfcd2462c8feee4137763c3e42cbd9",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3726,7 +4276,7 @@
         "public/generated/widgets/stats-4x4-prism.mp4"
       ],
       "id": "widget:stats-4x4-prism",
-      "key": "dce78ca4168f928aae9dcf08a3ae847a6924a1dbfbc91242182648e5b71f0e75",
+      "key": "3fefefa3b892ec4327eabc7bd9156a605df870e122379d0533b30adf679c809d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3752,7 +4302,7 @@
         "public/generated/widgets/stats-4x4-rigline.mp4"
       ],
       "id": "widget:stats-4x4-rigline",
-      "key": "45f66a88f25d711d8cb2ade72463c5611691213e4baa083942b8f933dedef4b6",
+      "key": "1a9ab1e716a470d7eb280045cb5faf20004f240667d01227ea91db60a4881895",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3777,7 +4327,7 @@
         "src/generated/widgets/weather-4x2-blueprint.webp"
       ],
       "id": "widget:weather-4x2-blueprint",
-      "key": "cb8ac0d6eafc9d25ffb2315d983780fecde5ddad6f9e2b01b70b8375423e59a0",
+      "key": "1100b61459f62f32c476cb727ad808579bff4ac6f6529b09d06f927e3a152b4d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3799,7 +4349,7 @@
         "src/generated/widgets/weather-4x2-carbon.webp"
       ],
       "id": "widget:weather-4x2-carbon",
-      "key": "3ef0fe8482cbc22258f277ffc6ff3145816408c33a1b2d80cad5d852decb7085",
+      "key": "5f1b52716fc505f5ebde1e1fdf0c9323dec5d5f513352dd383437eb7ade257a2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3818,14 +4368,18 @@
     {
       "background": null,
       "files": [
-        "src/generated/widgets/weather-4x2-default-dark.webp"
+        "src/generated/widgets/weather-4x2-default-dark.webp",
+        "public/generated/widgets/weather-4x2-default-dark.mp4"
       ],
       "id": "widget:weather-4x2-default-dark",
-      "key": "bb72138bcc99f29f45909ce676fa7f2f408a1aa99ebcc156f41ff1b440dce225",
+      "key": "6824aa5eb20d11b0295c2f9501ccad840f90db2b07ee538176cd4f4223bd72e0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
-        "loop": null,
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
         "moment": "2026-10-13T21:47:32.000",
         "theme": "default-dark",
         "widget": "urdeck.widgets.weather",
@@ -3840,14 +4394,18 @@
     {
       "background": null,
       "files": [
-        "src/generated/widgets/weather-4x2-default-light.webp"
+        "src/generated/widgets/weather-4x2-default-light.webp",
+        "public/generated/widgets/weather-4x2-default-light.mp4"
       ],
       "id": "widget:weather-4x2-default-light",
-      "key": "add62db6c2b379f7411b643b2a7559fc64487942aba37667727efbb82eb35bc8",
+      "key": "e5597a82b074dc38624ecb8f390ee92f70a6cfc91501b50c705126d05185bed9",
       "kind": "widgets",
       "settings": {
         "background": "theme",
-        "loop": null,
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
         "moment": "2026-10-13T21:47:32.000",
         "theme": "default-light",
         "widget": "urdeck.widgets.weather",
@@ -3865,7 +4423,7 @@
         "src/generated/widgets/weather-4x2-ember.webp"
       ],
       "id": "widget:weather-4x2-ember",
-      "key": "dd74cf1796cb3db2d01ac4068a65c5f63b8fb85d660090229518eb8ac9e5abc7",
+      "key": "cca7a1ba7153df1fec1a62ac08207bfd48b1fa5204dc6624a2232dfd523bdb79",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3884,14 +4442,18 @@
     {
       "background": null,
       "files": [
-        "src/generated/widgets/weather-4x2-glass.webp"
+        "src/generated/widgets/weather-4x2-glass.webp",
+        "public/generated/widgets/weather-4x2-glass.mp4"
       ],
       "id": "widget:weather-4x2-glass",
-      "key": "9a73a266cf6a9f5deac17f686c356a983523f9ce0e603847a7b182a29b0a30c9",
+      "key": "3d4701b832231ebd50bdb321b59399761580198d1c3f0c53a880a3fce47649d1",
       "kind": "widgets",
       "settings": {
         "background": "theme",
-        "loop": null,
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
         "moment": "2026-10-13T21:47:32.000",
         "theme": "glass",
         "widget": "urdeck.widgets.weather",
@@ -3909,7 +4471,7 @@
         "src/generated/widgets/weather-4x2-obsidian.webp"
       ],
       "id": "widget:weather-4x2-obsidian",
-      "key": "22ae3b4f33be1d0e65c2499fd070e301f11c3a69ce4d1632e96091f702f91e47",
+      "key": "f8bddb1614e31254378c3bb9072ea3598589ac9a363d2fe21bed885af8c3e4d5",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3931,7 +4493,7 @@
         "src/generated/widgets/weather-4x2-paper.webp"
       ],
       "id": "widget:weather-4x2-paper",
-      "key": "f7db5bb961180abd304fde6c0f17539a0a9d63b66403486904e7e5ec26204862",
+      "key": "1c614ef2989d376bbaf0f684a212d1c7dc1344a22a4e2cb4b0637d938d19ead3",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3953,7 +4515,7 @@
         "src/generated/widgets/weather-4x2-pop.webp"
       ],
       "id": "widget:weather-4x2-pop",
-      "key": "50e1aa52c5b6edd1b57b91a3e5c1e3e3634896089c94d097f63a95f12e1ed2df",
+      "key": "0393de993fefb1f18a07baf47a7bd59fb7238fa22c9cd5216b34889473d4b809",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3975,7 +4537,7 @@
         "src/generated/widgets/weather-4x2-prism.webp"
       ],
       "id": "widget:weather-4x2-prism",
-      "key": "d5730d3422733522fd245493c41ab76ceecf3db762d93e6ede79ab0287b9f296",
+      "key": "cb51a6311b8cf7daa3d2ef86ca8cf9d7f7b4fc8e9704c7ad0d2af231ad7c279d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3997,7 +4559,7 @@
         "src/generated/widgets/weather-4x2-rigline.webp"
       ],
       "id": "widget:weather-4x2-rigline",
-      "key": "4b6b34314527613858b8a49c485b45f0d9c533bcfcf4ff81f1e0b0f72d31e3f6",
+      "key": "85b1e9013e2665a667f11ce9b58f02eb9e51b8339715ac102f42efeffb7640a6",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4019,7 +4581,7 @@
         "src/generated/widgets/weather-4x4-blueprint.webp"
       ],
       "id": "widget:weather-4x4-blueprint",
-      "key": "fe4140592538077bfbc7a60239f8b8950a2ea9724286450d4c7d3e08acd1074a",
+      "key": "c45ea5c5784ebb4deec736920071dff2d6a996bc7caade5cf79541b79cc61948",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4041,7 +4603,7 @@
         "src/generated/widgets/weather-4x4-carbon.webp"
       ],
       "id": "widget:weather-4x4-carbon",
-      "key": "9d194d534b06b476bc8bafb9ed1ab27ec70755ae3d09323515a1e0ad0239421f",
+      "key": "632aeef8913fff224779a4464acb35d70571eb83c3a1f54a8122c6a69af3513a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4060,14 +4622,18 @@
     {
       "background": null,
       "files": [
-        "src/generated/widgets/weather-4x4-default-dark.webp"
+        "src/generated/widgets/weather-4x4-default-dark.webp",
+        "public/generated/widgets/weather-4x4-default-dark.mp4"
       ],
       "id": "widget:weather-4x4-default-dark",
-      "key": "99cfb519ab25790b03f79caad8634b611bb3e8bdf5a7258026da9bc1da82a8da",
+      "key": "b860082d9c9d5c094c4d1730111d6370c093836ff1910d3089852bea68317bd3",
       "kind": "widgets",
       "settings": {
         "background": "theme",
-        "loop": null,
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
         "moment": "2026-10-13T21:47:32.000",
         "theme": "default-dark",
         "widget": "urdeck.widgets.weather",
@@ -4082,14 +4648,18 @@
     {
       "background": null,
       "files": [
-        "src/generated/widgets/weather-4x4-default-light.webp"
+        "src/generated/widgets/weather-4x4-default-light.webp",
+        "public/generated/widgets/weather-4x4-default-light.mp4"
       ],
       "id": "widget:weather-4x4-default-light",
-      "key": "98147222beecd991a927b7b0d8e76d3d51bf745b5e0be92d58568f398d969fc9",
+      "key": "37ecb2c009b3ea45d08e59bdaf7aa6eb8a09766c31f5876c0251702d03b8cb14",
       "kind": "widgets",
       "settings": {
         "background": "theme",
-        "loop": null,
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
         "moment": "2026-10-13T21:47:32.000",
         "theme": "default-light",
         "widget": "urdeck.widgets.weather",
@@ -4107,7 +4677,7 @@
         "src/generated/widgets/weather-4x4-ember.webp"
       ],
       "id": "widget:weather-4x4-ember",
-      "key": "f3ea3e141287018d98df52c473e5fb11b3ce6349e3861f54c963406c901afa3f",
+      "key": "2044ace30920e94697ef44fb0a271dd9009779f0ca8f68e9cfe744638058b9c3",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4126,14 +4696,18 @@
     {
       "background": null,
       "files": [
-        "src/generated/widgets/weather-4x4-glass.webp"
+        "src/generated/widgets/weather-4x4-glass.webp",
+        "public/generated/widgets/weather-4x4-glass.mp4"
       ],
       "id": "widget:weather-4x4-glass",
-      "key": "f8b9086be7aaa24ff7486872fa4aba16e90b42f81d505e8d728bfeaf9f5c9613",
+      "key": "04b1e67dcefd80531af8bd0cf62cb8d39c59139c3004855d970e3f338665c532",
       "kind": "widgets",
       "settings": {
         "background": "theme",
-        "loop": null,
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
         "moment": "2026-10-13T21:47:32.000",
         "theme": "glass",
         "widget": "urdeck.widgets.weather",
@@ -4151,7 +4725,7 @@
         "src/generated/widgets/weather-4x4-obsidian.webp"
       ],
       "id": "widget:weather-4x4-obsidian",
-      "key": "c3d9bdabe2546072b3a4711fbc44716ead3ca9b431950a68f431d67c185b403a",
+      "key": "0cd4671c83c34d00a9eb3e3072bf20de9a3a8abcb5d9806662b12b7efdf0ba26",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4173,7 +4747,7 @@
         "src/generated/widgets/weather-4x4-paper.webp"
       ],
       "id": "widget:weather-4x4-paper",
-      "key": "13b8672a2b38238ada10de5833e7b7c3c14d603508760e7ae24234125a2d6aab",
+      "key": "aaadb8f464ec0f826929d2412911dc36d040ea79de2314a3c36cc5f5fb866e54",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4195,7 +4769,7 @@
         "src/generated/widgets/weather-4x4-pop.webp"
       ],
       "id": "widget:weather-4x4-pop",
-      "key": "2122acbf96c1e486e4693a9af75d26376e40a70aa69e2fff2b2465faa8752ee5",
+      "key": "234a971fc9e09f6b85c1629893e9d9dfac4cfe3e51de0d71d05e466c93a0c157",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4217,7 +4791,7 @@
         "src/generated/widgets/weather-4x4-prism.webp"
       ],
       "id": "widget:weather-4x4-prism",
-      "key": "64be31f5598ab76bafcd151c2b3ed730a6e81d62ac0c540af562db4b5636c9dc",
+      "key": "a792425a91b259a72a7f7b1ea52c2ed6b728f332059f6852c19d5d5a238d2fb2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4239,7 +4813,7 @@
         "src/generated/widgets/weather-4x4-rigline.webp"
       ],
       "id": "widget:weather-4x4-rigline",
-      "key": "f0f41f764a85be03795b888d5ae74d7966bd105b076b8bb051080483d1524493",
+      "key": "70a0a76efb4f1b4785716a12206ad3f720232cf55ceda2a14fe816268eb22487",
       "kind": "widgets",
       "settings": {
         "background": "theme",
