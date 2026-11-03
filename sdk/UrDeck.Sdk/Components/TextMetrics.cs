@@ -57,6 +57,94 @@ internal static class TextMetrics
             yield return e.GetTextElement();
     }
 
+    /// <summary>The ellipsis character text is ended with when it is cut.</summary>
+    public const string Ellipsis = "…";
+
+    /// <summary>
+    /// <paramref name="text"/> cut between user-perceived characters so that it and an ellipsis fit <paramref name="maxWidth"/>, or
+    /// <paramref name="text"/> itself when it fits. An empty string when not even the ellipsis fits.
+    /// </summary>
+    public static string Ellipsize(SKFont font, string text, float trackingEm, float maxWidth)
+    {
+        if (Measure(font, text, trackingEm) <= maxWidth)
+            return text;
+        string[] elements = Elements(text).ToArray();
+        int low = 0;
+        int high = elements.Length - 1;
+        while (low < high)
+        {
+            int mid = (low + high + 1) / 2;
+            if (Measure(font, Cut(elements, mid), trackingEm) <= maxWidth)
+                low = mid;
+            else
+                high = mid - 1;
+        }
+
+        string cut = Cut(elements, low);
+        return Measure(font, cut, trackingEm) <= maxWidth ? cut : "";
+    }
+
+    private static string Cut(string[] elements, int count) => string.Concat(elements.Take(count)).TrimEnd() + Ellipsis;
+
+    /// <summary>
+    /// <paramref name="text"/> broken into lines no wider than <paramref name="width"/>: at line feeds, then at spaces, then
+    /// (for a word wider than a line) between characters.
+    /// </summary>
+    public static List<string> Break(SKFont font, string text, float trackingEm, float width)
+    {
+        var lines = new List<string>();
+        foreach (string paragraph in text.Replace("\r\n", "\n").Split('\n'))
+        {
+            string current = "";
+            foreach (string word in paragraph.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                string candidate = current.Length == 0 ? word : current + " " + word;
+                if (Measure(font, candidate, trackingEm) <= width)
+                {
+                    current = candidate;
+                    continue;
+                }
+
+                if (current.Length > 0)
+                    lines.Add(current);
+                current = "";
+                if (Measure(font, word, trackingEm) <= width)
+                {
+                    current = word;
+                    continue;
+                }
+
+                // A word wider than a line: fill lines with as many characters as fit.
+                string piece = "";
+                foreach (string element in Elements(word))
+                {
+                    if (piece.Length > 0 && Measure(font, piece + element, trackingEm) > width)
+                    {
+                        lines.Add(piece);
+                        piece = "";
+                    }
+
+                    piece += element;
+                }
+
+                current = piece;
+            }
+
+            lines.Add(current);
+        }
+
+        return lines;
+    }
+
+    /// <summary>Draws one line at <paramref name="baseline"/>, character by character when it has letter spacing.</summary>
+    public static void DrawLine(SKCanvas canvas, string text, float x, float baseline, SKFont font, SKPaint paint, float trackingEm)
+    {
+        if (trackingEm == 0)
+            canvas.DrawText(text, x, baseline, SKTextAlign.Left, font, paint);
+        else
+            DrawTracked(canvas, text, x, baseline, font, paint, trackingEm);
+    }
+
     /// <summary>The widest advance among the digits 0-9, so every digit can take the same width.</summary>
     public static float DigitAdvance(SKFont font)
     {

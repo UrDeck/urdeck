@@ -198,6 +198,23 @@ Widgets draw no card or background and name no font or fixed size: the theme own
 (see the [theme reference](https://urdeck.app/docs/themes/reference/)). Use `Readout` for a big value with a unit and label, `TextLine` for a line of
 text at the theme's label, body or title size, `ImageTile` for an icon or a picture, and `context.Theme` for colours.
 
+Text that does not fit one line has components too, so no widget measures text itself:
+
+- `TextLine` shrinks a line that is too wide (the default: right for a short label). Pass `overflow:` for another answer:
+  `Ellipsis` (cut at a character and end in `…`; right for a title or a name), `Clip`, or `Marquee` (the line scrolls and rests
+  at each end; give it `time: context.Time` and `motion: context.Motion`, and return `TextLine.IsMoving(...)` from
+  `IsAnimating`). Below full motion a marquee is an ellipsis that stands still.
+- `TextBlock` wraps text to the rectangle's width, with an optional line limit; the last line ends in `…` when text is cut. It
+  never shrinks the text.
+- `TextList` is a scrolling list of items (a feed, a carousel of headlines), clipped to its rectangle. It is the one text
+  component that keeps state: create it in the widget, feed it with `Add`/`Replace`/`SetItems`, draw it with
+  `Draw(canvas, theme, rect, context.Time, context.Motion)`, and drop it with the widget. `Mode = Follow` keeps the newest
+  item in view, `Rotate` shows one item (or `RotateCount`) at a time; return `IsMoving` from `IsAnimating` and `NextChangeAt`
+  from `NextAnimationAt`. `ItemAt(point)` says which item a tap hit, for a widget that is an `ITapTarget`. Touch scrolling
+  by the user is not routed to widgets yet.
+
+Layout is cached per text, step and width, so repainting with the same text measures nothing.
+
 Rules enforced at compile time by the analyzer and again by the loader:
 
 - `[Widget]` is required; `Id` is the stable `typeId` used in the config (it defaults to `Name`, so set it explicitly).

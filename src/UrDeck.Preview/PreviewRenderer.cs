@@ -11,6 +11,7 @@ using UrDeck.Engine.Motion;
 using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
+using MotionLevel = UrDeck.Engine.Motion.MotionLevel;
 
 namespace UrDeck.Preview;
 

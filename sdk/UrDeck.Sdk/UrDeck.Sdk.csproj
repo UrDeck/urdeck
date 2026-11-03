@@ -44,8 +44,11 @@
          DataProviderAttribute.MissingSettingMessage arrived. The assembly version stays.
          Package 0.18.0 (homeassistant-provider): IReadingSink.Interrupted and IReadingSink.Describe (default members),
          ReadingDescriptor.Action and Icon, IReadingBrowser and DataProviderAttribute.LingerMs. All additive, so the assembly
-         version stays. -->
-    <Version>0.18.0</Version>
+         version stays.
+         Package 0.19.0 (text-layout): MotionLevel and WidgetRenderContext.Motion, TextOverflow and the overflow, time and motion
+         parameters of TextLine (with TextLine.IsMoving), TextBlock, and TextList with TextListItem and TextListMode. All
+         additive, so the assembly version stays. -->
+    <Version>0.19.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 
