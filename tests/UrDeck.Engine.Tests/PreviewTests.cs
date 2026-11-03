@@ -4,7 +4,6 @@
 using System.Diagnostics;
 using SkiaSharp;
 using UrDeck.Engine.Data;
-using UrDeck.Engine.Motion;
 using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
@@ -13,6 +12,7 @@ using UrDeck.Sdk;
 using UrDeck.Sdk.Data;
 using UrDeck.Widgets.Stats;
 using Xunit;
+using MotionLevel = UrDeck.Engine.Motion.MotionLevel;
 
 namespace UrDeck.Engine.Tests;
 

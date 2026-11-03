@@ -51,6 +51,14 @@ public readonly record struct MotionDecision(MotionLevel Effective, MotionLevel 
 /// </summary>
 public static class MotionPolicy
 {
+    /// <summary>The SDK's level for an engine level, for the widgets' render context.</summary>
+    public static UrDeck.Sdk.MotionLevel ToWidget(MotionLevel level) => level switch
+    {
+        MotionLevel.Full => UrDeck.Sdk.MotionLevel.Full,
+        MotionLevel.Reduced => UrDeck.Sdk.MotionLevel.Reduced,
+        _ => UrDeck.Sdk.MotionLevel.Off,
+    };
+
     /// <summary>
     /// Reads a level name (trimmed, any case). Null for absent; an unknown value is absent too, with a warning when
     /// <paramref name="warn"/> is set.

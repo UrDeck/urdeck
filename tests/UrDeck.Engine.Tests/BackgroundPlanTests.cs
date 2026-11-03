@@ -9,6 +9,7 @@ using UrDeck.Engine.Tests.Support;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 using Xunit;
+using MotionLevel = UrDeck.Engine.Motion.MotionLevel;
 
 namespace UrDeck.Engine.Tests;
 

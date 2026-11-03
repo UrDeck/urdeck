@@ -418,6 +418,12 @@ deleted and replaced.
 
 ## 7. Default widget set
 
+**Status (2026-11-03):** text that does not fit is solved in the SDK (`text-layout`, #106): `TextLine` overflow (ellipsis, clip,
+marquee), `TextBlock` (wrap, line limit) and the stateful `TextList` (follow, rotate, item at a point), with the effective
+motion level in `WidgetRenderContext.Motion`. No widget uses them yet; the label overflow in stats and control is next, then the
+feed widgets (RSS #121, calendar #122, tickers #127). Open: right-to-left and complex scripts (measured, not shaped: see the
+change's design), inline images such as emotes.
+
 Clock (done), weather, performance, shortcuts, media/now-playing. Each widget is its own change, must meet its
 performance budget (item 4), takes its whole look from the theme (item 5) and brings the shared components it is the
 first to need. The goal is the same features as the owner's HYTE Nexus page with a deliberately different look, not a
@@ -580,7 +586,7 @@ via a keyless API such as Open-Meteo; Meteocons (MIT, full-colour, Lottie) is a 
 done (`shortcut-and-tap`): a widget opts in with `UrDeck.Sdk.Input.ITapTarget`, the host finds the widget under the
 pointer, shows the press from pointer-down with the theme's `press` values and delivers the tap on release; a swipe, a
 vertical drag and a long hold never tap. Taps and presses also reach the widgets of the dock (`dock`), which is asked
-before the page. Still open: routing scrolls and a long press to widgets (further interfaces
+before the page. `TextList` (`text-layout`) has the offset and `ScrollBy` a scroll interface will drive. Still open: routing scrolls and a long press to widgets (further interfaces
 beside `ITapTarget`; the recognizer already ends a vertical drag and a long hold without an event of their own),
 swiping over a web view, per-page backgrounds (item 9) and keyboard focus for a web view. Also open: `IDragTarget`
 in the SDK, a drag that a widget captures (a slider) so the pager never sees it as a swipe; until then the control

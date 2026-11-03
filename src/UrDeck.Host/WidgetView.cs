@@ -26,6 +26,7 @@ internal sealed class WidgetView : SKXamlCanvas, IFrameClient, IDisposable
     private IWidget? _widget;
     private readonly Theme _theme;
     private readonly CardLook _look;
+    private readonly Func<UrDeck.Sdk.MotionLevel> _motion;
     private readonly FrameClock _frameClock;
     private readonly DispatcherQueueTimer? _timer;
     private DispatcherQueueTimer? _wake;
@@ -51,8 +52,10 @@ internal sealed class WidgetView : SKXamlCanvas, IFrameClient, IDisposable
         CardLook look,
         PressStyle press,
         FrameClock frameClock,
-        ReadingHub readings)
+        ReadingHub readings,
+        Func<UrDeck.Sdk.MotionLevel>? motion = null)
     {
+        _motion = motion ?? (() => UrDeck.Sdk.MotionLevel.Full);
         _widget = widget;
         _tap = widget as ITapTarget;
         _services = services;
@@ -277,7 +280,8 @@ internal sealed class WidgetView : SKXamlCanvas, IFrameClient, IDisposable
             _theme,
             _look,
             DateTime.Now,
-            _cts.Token);
+            _cts.Token,
+            _motion());
         _hasPainted = true;
 
         // Membership only changes here; the frame clock's next tick does the invalidating.

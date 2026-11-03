@@ -199,7 +199,7 @@ public static class PageRenderer
         int save = canvas.Save();
         canvas.Translate(item.Position.X, item.Position.Y);
         canvas.ClipRect(SKRect.Create(item.Size.Width, item.Size.Height));
-        WidgetPainter.Paint(widget, canvas, item.Size, theme, new CardLook(border == null ? style : style.WithoutBorder(), index), time, CancellationToken.None);
+        WidgetPainter.Paint(widget, canvas, item.Size, theme, new CardLook(border == null ? style : style.WithoutBorder(), index), time, CancellationToken.None, Motion.MotionPolicy.ToWidget(motion?.Level ?? Motion.MotionLevel.Full));
         if (border is { } step)
             BorderFrame.Draw(canvas, style, item.Size, step);
         canvas.RestoreToCount(save);

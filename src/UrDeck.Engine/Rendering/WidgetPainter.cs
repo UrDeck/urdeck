@@ -14,7 +14,7 @@ namespace UrDeck.Engine.Rendering;
 /// </summary>
 public static class WidgetPainter
 {
-    /// <summary>As <see cref="Paint(IWidget, SKCanvas, System.Drawing.Size, Theme, CardLook?, DateTime, CancellationToken)"/> with the plain card.</summary>
+    /// <summary>As <see cref="Paint(IWidget, SKCanvas, System.Drawing.Size, Theme, CardLook?, DateTime, CancellationToken, MotionLevel)"/> with the plain card.</summary>
     public static void Paint(
         IWidget widget,
         SKCanvas canvas,
@@ -37,14 +37,15 @@ public static class WidgetPainter
         Theme theme,
         CardLook? look,
         DateTime time,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        MotionLevel motion = MotionLevel.Full)
     {
         var chrome = look is { Style: { IsPlain: false } style } ? style.For(look.Value.Index, size) : null;
         int save = CardChrome.DrawBack(canvas, size, theme, chrome);
         try
         {
             var context = new WidgetRenderContext(
-                canvas, time, size, theme, ContentRect(size, theme), widget.Config, cancellationToken);
+                canvas, time, size, theme, ContentRect(size, theme), widget.Config, cancellationToken, motion);
             widget.Render(context);
         }
         catch (Exception ex)

@@ -16,6 +16,12 @@ public class WidgetRenderContext
     public WidgetConfig Config { get; }
     public CancellationToken CancellationToken { get; }
 
+    /// <summary>
+    /// The effective motion level. <see cref="MotionLevel.Full"/> where the host has no level to report. Below it, stop
+    /// motion of your own content (the text components do).
+    /// </summary>
+    public MotionLevel Motion { get; }
+
     public WidgetRenderContext(
         SKCanvas canvas,
         DateTime time,
@@ -23,7 +29,8 @@ public class WidgetRenderContext
         Theme theme,
         SKRect contentRect,
         WidgetConfig config,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        MotionLevel motion = MotionLevel.Full)
     {
         Canvas = canvas;
         Time = time;
@@ -32,5 +39,6 @@ public class WidgetRenderContext
         ContentRect = contentRect;
         Config = config;
         CancellationToken = cancellationToken;
+        Motion = motion;
     }
 }

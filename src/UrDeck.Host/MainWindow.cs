@@ -22,6 +22,7 @@ using UrDeck.Engine.Settings;
 using UrDeck.Engine.Themes;
 using UrDeck.Sdk;
 using WinRT.Interop;
+using MotionLevel = UrDeck.Engine.Motion.MotionLevel;
 
 namespace UrDeck.Host;
 
@@ -242,6 +243,8 @@ public sealed class MainWindow : Window, ISettingsHost
         if (!first && (decision.Effective != before.Effective || decision.User != before.User))
             ScheduleRebuild();
     }
+
+    private UrDeck.Sdk.MotionLevel WidgetMotion() => MotionPolicy.ToWidget(_motion.Effective);
 
     private bool ThemeAnimatesBorders => _loadedTheme.Definition.Card?.BorderAnimate is { Mode: "spin" or "pulse" };
 
@@ -472,7 +475,7 @@ public sealed class MainWindow : Window, ISettingsHost
                 var entries = DockLayout.Select(config.Dock, _plugins.GetDescriptor);
                 var page = new PageConfig { Name = "Dock", Widgets = entries.Select(e => e.Config).ToList() };
                 var slots = DockLayout.Compute(chrome.Dock, entries, gap);
-                return new PageHost(page, slots, _plugins, dockTheme, dockCardStyle, CardOrder.Dock(slots.Count), press, _frameClock, scale, borderMotion, chrome.Dock);
+                return new PageHost(page, slots, _plugins, dockTheme, dockCardStyle, CardOrder.Dock(slots.Count), press, _frameClock, scale, borderMotion, chrome.Dock, WidgetMotion);
             };
         }
 
@@ -486,7 +489,7 @@ public sealed class MainWindow : Window, ISettingsHost
                 var page = config.Pages[index];
                 var layout = new GridLayoutManager(screen.Width, screen.Height, gap, chrome.Grid.Height)
                     .RenderWidgetLayout(page.Widgets, screen);
-                return new PageHost(page, layout, _plugins, theme, cardStyle, CardOrder.Assign(layout), press, _frameClock, scale, borderMotion);
+                return new PageHost(page, layout, _plugins, theme, cardStyle, CardOrder.Assign(layout), press, _frameClock, scale, borderMotion, null, WidgetMotion);
             },
             buildDock));
     }

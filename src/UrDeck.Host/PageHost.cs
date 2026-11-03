@@ -37,7 +37,8 @@ internal sealed class PageHost : Canvas, IDisposable
         FrameClock frameClock,
         double scale,
         MotionGate? borderMotion = null,
-        System.Drawing.Rectangle? underlayClip = null)
+        System.Drawing.Rectangle? underlayClip = null,
+        Func<UrDeck.Sdk.MotionLevel>? motion = null)
     {
         _layout = layout;
         var placed = new List<(WidgetLayoutItem, WidgetView, ResolvedCardStyle)>();
@@ -66,7 +67,7 @@ internal sealed class PageHost : Canvas, IDisposable
             try
             {
                 var widget = plugins.CreateWidget(config, out var services)!;
-                var view = new WidgetView(widget, services, descriptor, theme, new CardLook(animated ? style.WithoutBorder() : style, cardIndex[i]), press, frameClock, plugins.Readings)
+                var view = new WidgetView(widget, services, descriptor, theme, new CardLook(animated ? style.WithoutBorder() : style, cardIndex[i]), press, frameClock, plugins.Readings, motion)
                 {
                     Width = item.Size.Width,
                     Height = item.Size.Height,
