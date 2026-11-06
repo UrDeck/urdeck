@@ -31,12 +31,14 @@ did not change.
 Suggested model per item is noted as **Model**. Items marked Opus involve architecture decisions or hard debugging;
 everything else should be fine on Sonnet.
 
-## Current state (2026-11-05)
+## Current state (2026-11-06)
 
-- **Next: the editor (milestone 3, item 11), designed first.** Decided 2026-11-05: the design brief ([docs/handoff/2026-11-05-editor-design-brief.md](handoff/2026-11-05-editor-design-brief.md)) goes to
-  Claude Design, which builds clickable mock-ups of the editor; that design is the baseline for the OpenSpec proposals. The
-  widget half of the settings metadata (item 15) is designed with it. The SDK input model and the hosted (web page) widget
-  kind wait for milestone 4. The widget template repo waits for a stable SDK.
+- **Next: apply the editor's changes (milestone 3, item 11)** in the order under "Suggested order" below. Proposed
+  2026-11-06 in one docs PR: eight OpenSpec changes plus an amendment of `deck-session`, from the design handoff
+  ([docs/handoff/2026-11-06-editor-design.md](handoff/2026-11-06-editor-design.md), see its "Decisions after review").
+  Decided in that review: the editor is the product's front door and hand-edited JSON is not a design constraint (keys the
+  host does not know are still never lost). The SDK input model and the hosted (web page) widget kind wait for milestone 4.
+  The widget template repo waits for a stable SDK.
 - **Milestone 2 is done** (2026-11-05): a user outside the project installed 0.1.0 from GitHub and runs it on their HYTE
   case. Their hardware is the first report for the compatibility table (item 15, "Hardware reports").
 - **Since 2026-10-24** (all archived under `openspec/changes/archive/`): 0.1.0 is released (2026-10-25, from
@@ -144,12 +146,28 @@ everything else should be fine on Sonnet.
 
 ### Suggested order
 
-Item numbers are identifiers, not a sequence. Updated 2026-11-05; the order that rebuilt the owner's Nexus page (items 14,
-3, 7, 8 and 10) is done.
+Item numbers are identifiers, not a sequence. Updated 2026-11-06; the order that rebuilt the owner's Nexus page (items 14,
+3, 7, 8 and 10) and the editor's design are done.
 
-1. **The editor's design** (item 11): the design brief ([docs/handoff/2026-11-05-editor-design-brief.md](handoff/2026-11-05-editor-design-brief.md)), Claude Design's mock-ups, then the OpenSpec proposals in one docs PR.
-2. **The editor's changes**, each useful by itself: a widget's settings in a form with a live preview (brings the widget
-   settings metadata, item 15), the theme and background pickers, arranging pages and the dock, the reading picker.
+1. **The editor's changes** (item 11), one fresh session and one PR each (/opsx:apply <change>). A change may start only
+   when every change it depends on is merged and archived. The model column is the one to start the session with:
+
+   | Step | Change | Depends on | Model | What the user gets |
+   |---|---|---|---|---|
+   | 1a | settings-metadata | nothing | Sonnet (Opus review of the SDK API) | nothing visible yet; every setting declared, help text on the site from the code, Clock's 	extColor/ontSize gone, Stats 2x1 declared |
+   | 1b | config-document | nothing | Sonnet | no more rewrite on exit; edits by path with undo (used from step 2) |
+   | 1c | deck-session (amended: no longer gated on the spikes) | nothing | Opus | nothing visible (refactor); the preview's foundation |
+   | 2 | ditor-shell | 1b, 1c | Opus | the editor window: preview, pages, add/size/remove, start page, undo, General |
+   | 3 | ditor-forms | 1a, 2 | Sonnet | every widget setting editable in the editor |
+   | 4a | ditor-reading-picker | 3 | Sonnet | searchable readings with live values; Readings section |
+   | 4b | ditor-theme-background | 3 | Sonnet | Theme and background section, ackground.dim |
+   | 4c | ditor-arrange | 2 | Sonnet | drag to move and resize, the dock, the page list |
+   | 4d | ditor-states | 3 | Sonnet | first-run welcome, broken and missing plugins, undeclared sizes |
+
+   1a, 1b and 1c can run in parallel; 4a–4d can run in parallel once their dependency is merged (4c only needs 2).
+   Milestone 3 is done when steps 1–4 are merged and a new user builds a page without opening the file.
+2. **After the editor**: the site's documentation leads with the editor rather than the JSON (each change updates its own
+   pages; a final pass rewrites "getting started" around the editor).
 3. Alongside, when a user asks: a default page for a landscape monitor (item 15, milestone 2) and the feature issues that
    fit the current SDK.
 4. **Milestone 4:** the SDK input model (scroll, long press, drag) and the hosted widget kind, designed together, with the
@@ -699,6 +717,11 @@ Designed 2026-11-06: [docs/handoff/2026-11-06-editor-design.md](handoff/2026-11-
 (the settings window grows into the editor; live readings with a sample switch; changes apply as you edit, with undo) and
 defines the twelve setting kinds the generated forms are built from. The mock-ups' source is in `docs/handoff/editor-design/`.
 
+Proposed 2026-11-06: `settings-metadata`, `config-document`, `editor-shell`, `editor-forms`,
+`editor-reading-picker`, `editor-theme-background`, `editor-arrange`, `editor-states`, and an amendment of
+`deck-session`; the order, dependencies and models are under "Suggested order". Decisions taken while writing them are in
+the handoff's "Decisions after review" section.
+
 ## 12. Packaging and distribution
 
 Installer, start with Windows, auto-update, logo and branding, winget manifest and GitHub release automation, and a third-party notices file
@@ -784,7 +807,8 @@ open here: using the `icon` config field for the tray icon (moved from `urdeck-f
   Enterprise can remove a monitor from the desktop; UrDeck then draws the deck on it directly (Display.Core, Skia on the
   GPU), with touch read from the digitizer, from the same host. Three changes, in order:
   `specialized-display-spikes` (go/no-go; touch is required), `deck-session` (refactor, the owner verifies on the
-  panel), `specialized-display-output`. Implemented and verified by a contributor with the hardware, since the owner's
+  panel), `specialized-display-output`. Since 2026-11-06 `deck-session` is no longer gated on the spikes: the editor
+  needs it first (its preview is a second presenter), so it is step 1c of the editor's order. Implemented and verified by a contributor with the hardware, since the owner's
   edition lacks the feature. Decisions: [docs/handoff/2026-10-31-specialized-displays.md](handoff/2026-10-31-specialized-displays.md).
 
 ## 14. Animation and the rendering path (changes `render-path` and `animation`, both done)

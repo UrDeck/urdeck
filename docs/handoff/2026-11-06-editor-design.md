@@ -17,7 +17,7 @@ and this page gets a line saying so.
 | Live readings or sample data in the preview? | **Live by default**, with a Live / Sample switch under the preview. Sample is the providers' `sample.json`, as `PreviewRenderer` already uses. A provider that is not connected shows its sample values in the preview, and the form says why. |
 | Apply as you edit, or on Save? Undo? | **As you edit.** Each change writes `urdeck-config.json` (debounced) and the deck reloads as today. Undo and Redo in the window's header, covering every edit in the session. There is no Save button; a small "Deck is up to date" status in the navigation pane says where the deck is shown. |
 | A file edited by hand while the editor is open | The editor reloads it and says so in an `InfoBar` ("changed outside the editor"), keeping the undo history so the reload itself can be undone. |
-| How a save keeps the user's JSON | Not designed visually; the design assumes the editor edits the JSON tree in place: key order kept, keys it does not know (from plugins, or newer versions) kept untouched, only changed values rewritten. |
+| How a save keeps the user's JSON | Not designed visually; the design assumes the editor edits the JSON tree in place: key order kept, keys it does not know (from plugins, or newer versions) kept untouched, only changed values rewritten. **Superseded** (see "Decisions after review"): unknown keys are kept, but the file is written whole and hand formatting is not a goal. |
 | How a 1100x3840 portrait page is shown on a landscape desktop | **A scrolling column at "Fit width"** (cells about 92 px), with "Whole page" as the other zoom. The page sits in a dark bezel. A cell grid overlay (toggle) shows the four columns and twelve rows. |
 | Landscape monitor (item 15) | Suggested: **cells stay square, the page gets more columns** (7 by 4 at 16:9), the dock moves to the right edge. The alternative (four columns, huge cells, scrolling) is shown as the second option. Still open. |
 
@@ -103,7 +103,8 @@ Each is useful on its own, in the brief's priority order:
 
 1. **Settings metadata in the SDK** (the kinds and modifiers above), with the built-in widgets declaring theirs.
 2. **Editor shell**: the settings window becomes the editor (navigation, Pages section, the preview through
-   `PreviewRenderer`, selection, Live / Sample), writing the configuration as you edit, with undo.
+   `PreviewRenderer`, selection, Live / Sample), writing the configuration as you edit, with undo. **Superseded:** the
+   preview is a second presenter of `deck-session`, not `PreviewRenderer` (see "Decisions after review").
 3. **Generated forms** from (1), including the list of positions and the size buttons.
 4. **Reading picker** over `IReadingBrowser`, with the live values.
 5. **Theme and background** over `ThemeCatalog`, `BackgroundCatalog` and `PairingIndex`.
@@ -117,3 +118,40 @@ Each is useful on its own, in the brief's priority order:
 `class Component extends DCLogic` script. They do not run outside the canvas (they need its runtime and its uploaded
 pictures, the `/_blob/...` addresses), but they read as plain source. The pictures they show are the repository's own:
 `tests/UrDeck.Engine.Tests/Goldens/<theme>-page.png` and `src/UrDeck.Engine/Backgrounds/Builtin/<name>/sample.png`.
+
+## Decisions after review (2026-11-06)
+
+An exploration session reviewed this page and the six artboards against the code and wrote the OpenSpec changes. Where
+this section and the text above disagree, this section (and the changes) win.
+
+**The editor is the product's front door.** Hand-edited JSON is not a design constraint: no effort goes into keeping
+comments, formatting or key order. Data is still never lost: keys of plugins that are not installed and of newer versions
+survive every write.
+
+| Topic | Decision | Change |
+|---|---|---|
+| Preview | A second presenter of a deck session (the deck's own widgets, readings, theme, background and layout for the deck's display), not `PreviewRenderer`, which draws stills with statically referenced widgets. `deck-session` is no longer gated on the specialized-display spikes. | `deck-session` (amended), `editor-shell` |
+| Saving | A configuration document in the engine: a JSON tree in memory, edits by path, snapshot undo (100 steps), changes applied in the process first, the whole file written 0.5 s after the last change, own writes recognised by content (not a 2 s window), no write on exit. | `config-document` |
+| Settings metadata | One attribute family for widgets and providers (`UrDeck.Sdk.Settings`); help text lives in the code and the site reads it from the catalog; analyzer rule URDECK006 for undeclared settings; providers answer suggestion queries (Weather: places), so the editor never calls a web service itself. | `settings-metadata` |
+| Clock `textColor` / `fontSize` | Removed. `fontSize` could only shrink the time; `textColor` switched off a theme's value fill. The size comes from the card, the look from the theme. | `settings-metadata` |
+| Three-state text (Stats label: absent, empty, text) | An "allows none" modifier, shown as a "Show a label" switch above the box. | `settings-metadata`, `editor-forms` |
+| Thresholds in °F | Shown and typed in the display unit, stored canonical; the SDK exposes the conversion. | `settings-metadata`, `editor-forms` |
+| Stats 2x1 | Declared (the sample page uses it; the widget already draws it). | `settings-metadata` |
+| Mock-up keys | The mock-up's `SCHEMA` keys drifted from the code (`hour` vs `format`, a free-text `header`); the code's keys win. | `settings-metadata` (inventory, design D9) |
+| Unit of a slot | A 13th kind, "Unit": a choice filled from the chosen reading's display units, hidden for single-unit readings. | `settings-metadata` |
+| Start page | Pages get stable ids; `startPage` (an id) replaces `activePage` (an index); a missing start page means the first page and the editor says so; deleting the start page moves it in the same undo step. The deck follows pages by id. | `editor-shell` |
+| Deck and editor | While the editor is open the deck shows the editor's page (never written); a swipe on the panel moves the editor's tab; closing leaves the deck where it is. | `editor-shell` |
+| Navigation | Pages, Theme and background, Readings, Providers, Display, General (version, updates, start with Windows, show the file, open the log). "Open the file" moves into General. | `editor-shell`, `editor-reading-picker`, `editor-theme-background` |
+| Display section | No resolution shown (the monitor picker spec changes accordingly). | `editor-shell` |
+| Unused `icon` key | Removed from the configuration model: nothing reads it. | `editor-shell` |
+| Reading picker | Each provider's listing loaded once per editor session and filtered in memory (no search request per keystroke); live values only for rows on screen; readings carry an area and a category (Home Assistant from its registries); `system` lists its readings; a cache of the readings in use for providers that are not connected. | `editor-reading-picker` |
+| "Dim behind cards" | Had no setting behind it (the scrim is the theme's). New `background.dim` (0–0.7) overrides the scrim's strength. | `editor-theme-background` |
+| Theme pictures | Rendered in the app from the user's own page in each theme and cached (the goldens are test assets and show the sample page). | `editor-theme-background` |
+| Motion level | In Theme and background. | `editor-theme-background` |
+| Broken plugins | A plugin load report and a memory of which plugin provided which widget type tell "did not load" from "not installed". "Find the plugin" is left out until there is a marketplace. | `editor-states` |
+| First run | Opens the editor with the welcome (sample page or empty page). | `editor-states` |
+| Landscape grids | Left to backlog item 15; the editor reads the grid's size from the engine and never assumes 4 by 12. | `editor-shell` |
+| Localisation | English only for now. | `settings-metadata` |
+
+The order the changes are applied in, their dependencies and the model for each session are in
+[`docs/BACKLOG.md`](../BACKLOG.md), "Suggested order".
