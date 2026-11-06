@@ -5,27 +5,29 @@ UrDeck is a lightweight, extensible widget dashboard for secondary and case disp
 read the source of, low resource use, great visuals, a modular widget SDK, a WYSIWYG editor, and touch.
 
 This page is the plan in outcomes. The work items behind it, with their design notes and status, are in
-[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-10-24.
+[BACKLOG.md](BACKLOG.md); "item N" below is a section there. Last updated 2026-11-05.
 
 ## Where it is today
 
 The foundation is in place and runs on the real panel: a WinUI 3 host that composites each widget on the GPU, a plugin
 SDK with hot reload, themes, animation, data providers, pages you swipe between, a dock, and the Clock, Stats,
-Weather (4x2 and 4x4) and Shortcut widgets. There is no
-downloadable release and no editor yet: you build from source and edit a JSON file. See the [README](../README.md).
+Weather (4x2 and 4x4), Shortcut, Now playing and Control tile widgets, and the `system`, `weather`, `media` and
+`homeassistant` providers. UrDeck 0.1.0 is on GitHub (2026-10-25): a per-user installer that updates itself, and a portable
+zip, and it has its first outside user. There is no editor yet: a page is a JSON file you edit by hand, which is what milestone 3 is about. See the
+[README](../README.md).
 
 ## Milestones
 
 A milestone is an outcome somebody can check, not a list of features, and none has a date: this is a spare-time
-project. They are listed in the planned order. Milestones 3 and 4 can swap. The one fixed rule is that the SDK is
+project. They are listed in the planned order; the editor (milestone 3) is next. The one fixed rule is that the SDK is
 frozen last (milestone 5), because the editor and the web page widget both still change its public API.
 
 | # | Milestone | Done when | Status |
 |---|---|---|---|
 | 0 | Foundation | Plugins, themes, GPU host, animation and data providers work on the panel | done |
 | 1 | Daily driver | The owner's PC runs UrDeck in place of HYTE Nexus for two weeks, sleep and resume included | done |
-| 2 | Downloadable preview (0.1) | Somebody else with a case display downloads a release from GitHub and has a working page in five minutes, without the .NET SDK | not started |
-| 3 | Editor (0.5, beta) | A new user builds and changes a page without opening a file | not started |
+| 2 | Downloadable preview (0.1) | Somebody else with a case display downloads a release from GitHub and has a working page in five minutes, without the .NET SDK | done |
+| 3 | Editor (0.5, beta) | A new user builds and changes a page without opening a file | next: UI design |
 | 4 | Living page | A page with a video background, a web view and an animated icon runs within the Nexus bar (no more memory, CPU or GPU than HYTE Nexus) | not started |
 | 5 | SDK 1.0 for authors | A widget and a provider built outside this repo, from the template and the NuGet package alone, load in a release build | not started |
 | 6 | UrDeck 1.0 | Installs, updates and migrates its config by itself; the SDK and the config format are covered by a compatibility promise | not started |
@@ -49,22 +51,25 @@ host-drawn card (item 5), the WinUI 3 host and the frame clock (item 14), data p
 **2. Downloadable preview (0.1).** For people who are willing to edit a JSON file. Its purpose is hardware variety: every
 measurement so far is from one panel and one NVIDIA GPU, and that is the largest unknown in the project. An installer on
 GitHub comes first, and the same signed installer is then listed in the Microsoft Store, so the order is: something to
-install, then what makes it work for a stranger, then trust. The release decisions of 2026-10-24 are in item 12.
+install, then what makes it work for a stranger, then trust. The release decisions of 2026-10-24 are in item 12. 0.1.0 was
+released on 2026-10-25, and the milestone is done: a user outside the project installed it from GitHub and runs it on their
+HYTE case (reported 2026-11-05). The open items below (a landscape first run, README screenshots, Discussions, the
+compatibility table) carry on without blocking the editor.
 
-*A. A releasable build (first).*
+*A. A releasable build (done).*
 - Config, themes, user plugins and the log in `%APPDATA%\UrDeck` instead of next to the executable, with a portable mode
-  kept (item 15, the `per-user-data-folder` change). It comes first because the installer replaces the application
-  folder on every update.
-- A release workflow (`release-pipeline`): started by hand with a version, it builds the self-contained app with that
-  version, runs the tests and attaches a per-user Velopack installer (no administrator rights; it updates itself from
-  the GitHub releases) and a portable zip, with the third-party notices, to a draft release the owner publishes (item 12).
-  Versions are 0.x until 1.0.
-- The website's download button points at the latest release (`landing-site` left it open).
+  kept (item 15; done in `per-user-data-folder`).
+- A release workflow (item 12; done in `release-pipeline`): started by hand with a version, it builds the self-contained
+  app, runs the tests and attaches a per-user Velopack installer (no administrator rights; it updates itself from the
+  GitHub releases) and a portable zip, with the third-party notices, to a draft release the owner publishes. Versions are
+  0.x until 1.0. 0.1.0 shipped from it.
+- The website's download button points at the latest release (done in `site-download-link`).
 
 *B. Works for somebody else.*
-- A config format version and a first migration (item 15).
-- A first run that produces a sensible page on any monitor, including a landscape one (item 15).
-- A tray icon with Quit (item 12; shipped in `tray-icon`), later the entry that opens the config editor.
+- A config format version and the migration mechanism (item 15; done in `per-user-data-folder`, no migration needed yet).
+- A first run that produces a sensible page on any monitor, including a landscape one (item 15; open: the first run copies
+  the portrait sample page whatever the monitor).
+- A tray icon with Quit (item 12; done in `tray-icon`), later the entry that opens the config editor.
 
 *C. Trust and feedback.*
 - **Deferred:** code signing through SignPath Foundation (`signing-and-store`), so the download is not blocked by SmartScreen
@@ -75,9 +80,14 @@ install, then what makes it work for a stranger, then trust. The release decisio
 - The privacy page (live): everything the app sends over the network, and the promise that it collects nothing.
 - A compatibility table: AMD and Intel GPUs, other panels (item 15). The hardware report issue template and the first "Tested on" page are done (`landing-site`); the table grows with reports.
 - The website at urdeck.app (live: landing page, user documentation, theme gallery, "Tested on").
-- Screenshots and a short clip in the README (the site's media pipeline renders them), issue templates, Discussions.
+- Issue templates (done). Still open: screenshots and a short clip in the README (the site's media pipeline renders
+  them) and GitHub Discussions (not enabled).
 
-**3. Editor (0.5, beta).** Item 11, plus what it needs from the rest:
+**3. Editor (0.5, beta).** Item 11, plus what it needs from the rest. Next after 0.1 (decided 2026-11-05). The editor's
+UI is designed first, as clickable mock-ups made from a design brief
+([docs/handoff/2026-11-05-editor-design-brief.md](handoff/2026-11-05-editor-design-brief.md)), and that design is the baseline
+for the OpenSpec proposals that build it. It is also where the widget half of the SDK's settings metadata is designed:
+the controls the forms need decide what the metadata must say.
 - Settings metadata in the SDK, so the editor can build a form from a widget's config type (item 15). This is public
   SDK API and the main reason milestone 5 comes after this one.
 - The reading picker with live values (item 3) and the theme picker.
@@ -88,7 +98,8 @@ install, then what makes it work for a stranger, then trust. The release decisio
 
 **4. Living page.** What makes the page worth looking at, and the reason composition moved to the GPU.
 - Backgrounds: image, video, painted visualization (item 9). Image and painted (shader) backgrounds are implemented in
-  `backgrounds`; a video file, per-page backgrounds and a guard for heavy shaders are still open.
+  `backgrounds`; a video file and a guard for heavy shaders are still open. One background for the whole deck is the
+  design: per-page backgrounds are not planned (decided 2026-11-05).
   Backgrounds as folders with a manifest, a lint and the `urdeck-cli` tool are planned next (item 9).
   The tool also checks themes (`theme validate`, `render`, `init`, `schema`); a later `urdeck-cli check <repository>` that classifies and checks a whole repository of themes, backgrounds and plugins is a direction, not planned work (`openspec/changes/theme-cli/design.md`).
 - The web page widget, a hosted widget kind (item 7). Also public SDK API.

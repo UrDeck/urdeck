@@ -31,14 +31,24 @@ did not change.
 Suggested model per item is noted as **Model**. Items marked Opus involve architecture decisions or hard debugging;
 everything else should be fine on Sonnet.
 
-## Current state (2026-10-24)
+## Current state (2026-11-05)
 
-- `per-user-data-folder` (item 15) is implemented on `feat/per-user-data-folder`: one resolver (`DataFolder`) decides the data folder
+- **Next: the editor (milestone 3, item 11), designed first.** Decided 2026-11-05: the design brief ([docs/handoff/2026-11-05-editor-design-brief.md](handoff/2026-11-05-editor-design-brief.md)) goes to
+  Claude Design, which builds clickable mock-ups of the editor; that design is the baseline for the OpenSpec proposals. The
+  widget half of the settings metadata (item 15) is designed with it. The SDK input model and the hosted (web page) widget
+  kind wait for milestone 4. The widget template repo waits for a stable SDK.
+- **Milestone 2 is done** (2026-11-05): a user outside the project installed 0.1.0 from GitHub and runs it on their HYTE
+  case. Their hardware is the first report for the compatibility table (item 15, "Hardware reports").
+- **Since 2026-10-24** (all archived under `openspec/changes/archive/`): 0.1.0 is released (2026-10-25, from
+  `release-pipeline`; the download button is `site-download-link`), `provider-actions` (a path from widgets to providers),
+  `now-playing` (the `media` provider and the 4x2 widget), `provider-settings-and-secrets`, `homeassistant-provider`,
+  `control-tile` and `text-layout` (SDK 0.19.0). The specialized display changes are proposed (item 13, issue #144).
+- `per-user-data-folder` (item 15) is done and archived (2026-10-24): one resolver (`DataFolder`) decides the data folder
   (`%APPDATA%\UrDeck`, or the application folder when `urdeck.portable` sits next to the executable; the build output has the
   marker, a publish has none), the host's files move there, plugins load from the application folder then the data folder (the
   first wins), the first run seeds the configuration from `urdeck-config.default.json`, the configuration has a `version` with
   migrations, the single-instance key is the data folder and the tray has "Open data folder". `Install-Local.ps1` moves an old
-  installation's files once. Remaining: the owner's daily copy is migrated by running the script (task 7.5).
+  installation's files once.
 - `urdeck-framework` (Phase 1 foundation) is complete and archived: SDK, analyzer, plugin loader with hot-reload
   (collectible AssemblyLoadContext), grid layout, WPF host with per-monitor DPI placement, Clock widget, tests, placeholder
   icon and render skipping (`NeedsRender`).
@@ -127,36 +137,23 @@ everything else should be fine on Sonnet.
 - Next: milestone 2 is reshaped as a *downloadable* preview, releasable build first (see the roadmap and item 12).
   The release decisions of 2026-10-24 (item 12) settle the shape: 0.x versions from the git tag, a per-user Velopack
   installer, data in `%APPDATA%\UrDeck`, SignPath signing from the release after 0.1, and the same installer listed in the
-  Microsoft Store. First change: `per-user-data-folder` (done), then `release-pipeline` (implemented, 0.1 not released yet).
+  Microsoft Store. `per-user-data-folder` and `release-pipeline` are done, and 0.1.0 was released on 2026-10-25.
 - Memory: the WinUI 3 host is ~101 MB private / ~135 MB working set (Release, one Clock), 0% CPU and GPU idle
   (`docs/perf/render-host-baseline.md`). The WPF host it replaced was ~66 MB (`docs/perf/memory-investigation.md`).
   The bar is "no worse than Nexus" (`docs/perf/nexus-baseline.md`), see item 4.
 
 ### Suggested order
 
-Item numbers are identifiers, not a sequence. The order below gets the owner's current first page (clock, weather,
-performance, shortcuts, dock, page indicator) rebuilt with the fewest blocked steps:
+Item numbers are identifiers, not a sequence. Updated 2026-11-05; the order that rebuilt the owner's Nexus page (items 14,
+3, 7, 8 and 10) is done.
 
-1. **Item 14, rendering path and animation.** First because it replaces the host every widget is drawn in. The render
-   host spike is done; next is the `render-path` change (`openspec/changes/archive/2026-10-04-render-path`, the WinUI 3 host), then the
-   `animation` change (frame requests and an animation clock, with a split-flap Clock style as first consumer).
-2. **Item 3, data providers**, as four changes:
-   1. `data-providers` (done): providers as a plugin kind, readings, the `system` provider (CPU and memory load,
-      no elevation) and the stats widget at 1x1 and 2x2. Gives the row of per-core cards.
-   2. `stats-gauges` (done): the gauge component and the stats widget's 4x2 and 4x4 compositions (the performance
-      widget of item 7).
-   3. `gpu-readings` (done): GPU load and temperature for any vendor through Windows, GPU power and clock through
-      the vendor library (NVIDIA first), all without elevation.
-   4. Sensors that need elevation (CPU temperature and what else needs a kernel driver) through an opt-in helper.
-3. **Weather** (item 7) as a provider plus a widget, which brings animated colour icons (Lottie), the first network
-   provider, per-widget locations and a time reading. Needs item 14 and the first `data-providers` change. The first
-   change (the 4x2 widget) and the second (the 4x4 widget, `weather-4x4-forecast`) are done. It goes before the
-   elevated-sensors change.
-4. **Pages and touch** (item 8; pages done in `pages-and-pager`, taps in `shortcut-and-tap`), then **shortcuts**
-   (item 7; done in `shortcut-and-tap`, which brought the image tile) and the **dock** (item 10; done in `dock`).
-
-Display targeting (item 6) is split into `display-recovery` (implemented) and `settings-window`
-(the picker).
+1. **The editor's design** (item 11): the design brief ([docs/handoff/2026-11-05-editor-design-brief.md](handoff/2026-11-05-editor-design-brief.md)), Claude Design's mock-ups, then the OpenSpec proposals in one docs PR.
+2. **The editor's changes**, each useful by itself: a widget's settings in a form with a live preview (brings the widget
+   settings metadata, item 15), the theme and background pickers, arranging pages and the dock, the reading picker.
+3. Alongside, when a user asks: a default page for a landscape monitor (item 15, milestone 2) and the feature issues that
+   fit the current SDK.
+4. **Milestone 4:** the SDK input model (scroll, long press, drag) and the hosted widget kind, designed together, with the
+   web page widget as the consumer.
 
 ---
 
@@ -588,7 +585,7 @@ pointer, shows the press from pointer-down with the theme's `press` values and d
 vertical drag and a long hold never tap. Taps and presses also reach the widgets of the dock (`dock`), which is asked
 before the page. `TextList` (`text-layout`) has the offset and `ScrollBy` a scroll interface will drive. Still open: routing scrolls and a long press to widgets (further interfaces
 beside `ITapTarget`; the recognizer already ends a vertical drag and a long hold without an event of their own),
-swiping over a web view, per-page backgrounds (item 9) and keyboard focus for a web view. Also open: `IDragTarget`
+swiping over a web view and keyboard focus for a web view. Also open: `IDragTarget`
 in the SDK, a drag that a widget captures (a slider) so the pager never sees it as a swipe; until then the control
 tile's brightness bar is set by tapping a position (built in `control-tile`, 2026-10-31).
 
@@ -602,7 +599,9 @@ scrolls natively (a chat, a list) needs pan gestures with inertia from the host 
 
 ## 9. Backgrounds
 
-Static image, video, and generative visualizations per page (the `pages[].background` config field exists but is unused).
+Static image, video, and generative visualizations behind the whole deck. One background for every page is the design:
+per-page backgrounds are not planned (decided 2026-11-05). The engine still reads a page's `background` only to log that it
+is not supported; that field can be dropped from `PageConfig` with the next change that touches the configuration.
 Video is expensive: gate it behind the performance budget and measure. **Model:** Sonnet.
 
 **Status (2026-10-12):** the image and the painted (shader) background are implemented in `backgrounds`
@@ -614,7 +613,7 @@ display is off, and the background in `--snapshot`. Checked by build, tests, sna
 second, no restart on an unrelated config save, plugin hot-reload leaves it running; the owner checked the look, swipes,
 sleep/wake and display-off recovery on the panel. A dotted diagonal line under translucent cards was fixed by giving the
 deck window square corners (`WindowCorners`); the cost table is in `docs/perf/backgrounds.md` (within budget, 23.8 fps
-beside a game). **Open:** `FrameClock` runs at about 21 fps, not 30 (see Current state); per-page backgrounds (`pages[].background` stays unused), a video file, a guard for a heavy
+beside a game). **Open:** `FrameClock` runs at about 21 fps, not 30 (see Current state); a video file, a guard for a heavy
 user shader, backgrounds that react to readings, blur behind translucent cards.
 
 Confirmed 2026-10-04 as a platform goal: a custom image, a video file, and a painted visualization (OpenGL or
@@ -688,6 +687,14 @@ Planned 2026-10-26: the settings window's bare "Providers" section (`provider-se
 first piece, generated from the providers' declared settings. A reading picker comes from `IReadingBrowser`
 (`homeassistant-provider`): a search over the concrete readings a provider can list, with a "copy id" per row.
 
+Decided 2026-11-05: the editor is milestone 3 and comes next. Its UI is designed first, by Claude Design from a brief
+([docs/handoff/2026-11-05-editor-design-brief.md](handoff/2026-11-05-editor-design-brief.md)) (the data model, what is fixed, what is open), as clickable mock-ups; the OpenSpec proposals take that
+design as their baseline. Pieces that already exist for it: the settings window (WinUI 3, the monitor picker and the
+Providers section), `PreviewRenderer` for the preview, `ThemeCatalog`, `BackgroundCatalog` and `PairingIndex` for the
+pickers, `IReadingBrowser` for the reading picker, and the host's reload on a config change. Open for the design: whether it
+grows the settings window or is its own window, live readings or sample data in the preview, apply as you edit or on save,
+undo, and how a save keeps the user's JSON (key order, keys from plugins).
+
 ## 12. Packaging and distribution
 
 Installer, start with Windows, auto-update, logo and branding, winget manifest and GitHub release automation, and a third-party notices file
@@ -751,8 +758,8 @@ Microsoft Store listing). The winget manifest stays milestone 6.
 `release-pipeline` is implemented on its branch (2026-10-24; the openspec tasks say what is verified): the stamped version
 (`UrDeckAppVersion`), `VelopackApp` in `Program.Main` with the uninstall hook, the `updates` key and `UpdateService` with the
 tray's "Restart to update" entry, the portable release's data folder, the notices and licence texts in the published folder,
-`scripts/Pack-Release.ps1`, and `.github/workflows/release.yml` (ends in a draft). What still needs the owner's hands: the
-install, update and uninstall checks on a real PC, the `v*` tag ruleset, a dry run with `0.0.1-rc.1`, and releasing `0.1.0`.
+`scripts/Pack-Release.ps1`, and `.github/workflows/release.yml` (ends in a draft). It is archived, and 0.1.0 was released
+from it on 2026-10-25.
 Observed while packing: the published folder is about 490 MB and the installer and portable zip about 105 MB each, mostly the
 Windows App SDK (`onnxruntime.dll`, `DirectML.dll`, the AI projections) and 240 MB of native `.pdb` files that `vpk` leaves out of the package.
 
@@ -855,7 +862,8 @@ Collected while the milestones were drawn up. Each names the milestone that need
   GPUs and the source of each reading), and a compatibility table in the docs fed from them.
 - **Settings metadata in the SDK** (milestone 3). Labels, ranges, choices and "this is a reading id" or "this is a
   colour" on a widget's config type, so the editor can build its form. Decide between attributes on the config type
-  and a description the widget returns; either is public API.
+  and a description the widget returns; either is public API. Providers already declare theirs with `SettingAttribute`
+  (`provider-settings-and-secrets`); widgets should follow the same approach. Designed with the editor (item 11, 2026-11-05).
 - **Pause when nobody can see the page** (milestone 4). Stop the frame clock and the providers while the session is
   locked or the display is off, following "the user pays only for what they switch on". Shares the busy and battery
   back-off parked in items 3 and 14.
