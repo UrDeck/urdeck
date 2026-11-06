@@ -1,0 +1,78 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Arrange.dc.html": {
+      "h": 900,
+      "title": "3 · Arrange pages and the dock",
+      "w": 1440,
+      "x": 0,
+      "y": 2380
+    },
+    "ControlKit.dc.html": {
+      "h": 1240,
+      "title": "Generated settings: the control kit",
+      "w": 1440,
+      "x": 0,
+      "y": 1026
+    },
+    "Main.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "1 · Edit a widget, live preview (Play to try it)",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "ReadingPicker.dc.html": {
+      "h": 900,
+      "title": "4 · Reading picker and provider states",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "States.dc.html": {
+      "h": 1240,
+      "title": "States: first run, broken plugins, landscape",
+      "w": 1440,
+      "x": 1520,
+      "y": 2380
+    },
+    "ThemeBackground.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "2 · Theme and background",
+      "w": 1440,
+      "x": 1520,
+      "y": 1020
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-11-06T12:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "title": {
+      "kind": "title1",
+      "maxW": 2960,
+      "text": "UrDeck editor: one desktop window, live preview",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "ReadingPicker.dc.html",
+    "ControlKit.dc.html",
+    "ThemeBackground.dc.html",
+    "Arrange.dc.html",
+    "States.dc.html"
+  ],
+  "pages": [],
+  "title": "UrDeck Configuration Editor"
+}

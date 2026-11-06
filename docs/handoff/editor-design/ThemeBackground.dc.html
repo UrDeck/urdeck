@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Theme and background</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#60cdff}a:hover{color:#98e0ff}
+button,input{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="width:1440px;height:900px;display:flex;background:#1c1c1c;color:#ffffff;font-family:'Segoe UI Variable Text','Segoe UI',Inter,system-ui,sans-serif;font-size:14px;overflow:hidden">
+
+  <nav aria-label="Sections" style="width:232px;flex-shrink:0;display:flex;flex-direction:column;gap:2px;padding:44px 8px 12px">
+    <a href="Main.dc.html" style="display:flex;align-items:center;gap:14px;height:38px;padding:0 12px;border-radius:5px;color:#fff;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="18" height="7" rx="1.5"></rect></svg>Pages</a>
+    <a href="#" aria-current="page" style="position:relative;display:flex;align-items:center;gap:14px;height:38px;padding:0 12px;border-radius:5px;background:rgba(255,255,255,.07);color:#fff;text-decoration:none"><span style="position:absolute;left:0;top:11px;width:3px;height:16px;border-radius:2px;background:#60cdff"></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.9 1.2-1.8-.5-1-.1-2.2 1.2-2.2H17a4 4 0 0 0 4-4c0-5.5-4-10-9-10z"></path></svg>Theme and background</a>
+    <a href="ReadingPicker.dc.html" style="display:flex;align-items:center;gap:14px;height:38px;padding:0 12px;border-radius:5px;color:#fff;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"></path></svg>Readings</a>
+    <a href="States.dc.html" style="display:flex;align-items:center;gap:14px;height:38px;padding:0 12px;border-radius:5px;color:#fff;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"></rect><path d="M8 20h8M12 16v4"></path></svg>Display</a>
+  </nav>
+
+  <main style="flex:1;min-width:0;display:flex;background:#262626;border-left:1px solid #3a3a3a;border-top:1px solid #3a3a3a;border-top-left-radius:8px;margin-top:40px">
+    <div style="flex:1;min-width:0;padding:20px 28px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+      <h1 style="margin:0;font-size:28px;font-weight:600;font-family:'Segoe UI Variable Display','Segoe UI',Inter,sans-serif">Theme and background</h1>
+
+      <div style="display:flex;align-items:baseline;gap:10px"><h2 style="margin:0;font-size:16px;font-weight:600">Theme</h2><span style="font-size:12px;color:#a3a3a3">Colours, fonts, cards, gauges and icons for the whole deck. Pictures are the real renderer.</span></div>
+      <div role="radiogroup" aria-label="Theme" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px">
+        <sc-for list="{{themes}}" as="t" hint-placeholder-count="11">
+          <button type="button" role="radio" aria-checked="{{t.on}}" onClick="{{t.pick}}" style="{{t.st}}">
+            <img src="{{t.img}}" alt="" style="display:block;width:100%;aspect-ratio:330/414;object-fit:cover;object-position:top;border-radius:4px">
+            <span style="display:flex;align-items:center;gap:6px;padding:6px 2px 2px;font-size:12.5px"><span style="flex:1;text-align:left">{{t.name}}</span><sc-if value="{{t.on}}" hint-placeholder-val="{{false}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60cdff" stroke-width="3" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg></sc-if></span>
+          </button>
+        </sc-for>
+        <button type="button" style="border-radius:6px;border:1px dashed #555;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#d0d0d0;padding:8px;font-size:12.5px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>Your own theme folder…</button>
+      </div>
+
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px"><h2 style="margin:0;font-size:16px;font-weight:600">Background</h2><span style="font-size:12px;color:#a3a3a3">Drawn with {{themeName}}'s palette.</span></div>
+      <div role="radiogroup" aria-label="Background" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{specials}}" as="b" hint-placeholder-count="3">
+            <button type="button" role="radio" aria-checked="{{b.on}}" onClick="{{b.pick}}" style="{{b.st}}"><span style="font-weight:600">{{b.name}}</span><span style="font-size:11.5px;color:#a3a3a3">{{b.sub}}</span></button>
+          </sc-for>
+        </div>
+        <sc-if value="{{isPicture}}" hint-placeholder-val="{{false}}">
+          <sc-if value="{{picEmpty}}" hint-placeholder-val="{{true}}">
+            <div style="display:flex;align-items:center;gap:16px;padding:16px;border-radius:8px;border:1px dashed #60cdff;background:rgba(96,205,255,.06)">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#60cdff" stroke-width="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="m21 16-5-5-8 9"></path></svg>
+              <div style="flex:1"><div style="font-weight:600">Drop a picture here</div><div style="font-size:12.5px;color:#d0d0d0">PNG, JPEG or WebP. Portrait pictures fit the panel best; others are cropped to fill it.</div></div>
+              <button type="button" onClick="{{choosePic}}" style="height:32px;padding:0 14px;border-radius:5px;border:1px solid #60cdff;background:#60cdff;color:#000;font-weight:600;cursor:pointer">Choose a picture…</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{picChosen}}" hint-placeholder-val="{{false}}">
+            <div style="display:flex;align-items:center;gap:16px;padding:12px 16px;border-radius:8px;border:1px solid #3f3f3f;background:#2f2f2f">
+              <img src="{{picImg}}" alt="" style="width:45px;height:80px;object-fit:cover;border-radius:4px">
+              <div style="flex:1;min-width:0"><div style="font-weight:600">night-sky.jpg</div><div style="font-size:12px;color:#a3a3a3;font-family:'Cascadia Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">C:\Users\Pat\Pictures\night-sky.jpg</div><div style="font-size:12.5px;color:#d0d0d0;margin-top:2px">Cropped to fill the screen. If the file moves, the deck falls back to the theme's background and says so here.</div></div>
+              <button type="button" onClick="{{choosePic}}" style="height:32px;padding:0 12px;border-radius:5px;border:1px solid #3f3f3f;background:#262626;cursor:pointer">Change…</button>
+            </div>
+          </sc-if>
+        </sc-if>
+        <sc-if value="{{hasRecs}}" hint-placeholder-val="{{true}}">
+          <div style="font-size:13px;font-weight:600;color:#d0d0d0">Suggested for {{themeName}}</div>
+          <div style="display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px">
+            <sc-for list="{{recBgs}}" as="b" hint-placeholder-count="3">
+              <button type="button" role="radio" aria-checked="{{b.on}}" aria-label="{{b.name}}" onClick="{{b.pick}}" style="{{b.st}}">
+                <img src="{{b.img}}" alt="" style="display:block;width:100%;aspect-ratio:9/12;object-fit:cover;border-radius:4px">
+                <span style="display:block;padding:4px 2px 0;font-size:12px;text-align:left">{{b.name}}</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <div style="font-size:13px;font-weight:600;color:#d0d0d0">{{allLabel}}</div>
+        <div style="display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px">
+          <sc-for list="{{otherBgs}}" as="b" hint-placeholder-count="13">
+            <button type="button" role="radio" aria-checked="{{b.on}}" aria-label="{{b.name}}" onClick="{{b.pick}}" style="{{b.st}}">
+              <img src="{{b.img}}" alt="" style="display:block;width:100%;aspect-ratio:9/12;object-fit:cover;border-radius:4px">
+              <span style="display:block;padding:4px 2px 0;font-size:12px;text-align:left">{{b.name}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: preview + generated form -->
+    <aside aria-label="Preview and options" style="width:360px;flex-shrink:0;border-left:1px solid #3a3a3a;background:#2b2b2b;padding:20px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+      <div style="display:flex;justify-content:center">
+        <div style="padding:8px;border-radius:14px;background:#050505;box-shadow:0 0 0 1px rgba(255,255,255,.08)">
+          <div style="position:relative;width:200px;height:300px;overflow:hidden;border-radius:5px;background:{{previewBg}}">
+            <sc-if value="{{bgImg}}" hint-placeholder-val="{{true}}"><img src="{{bgImg}}" alt="" style="{{bgImgSt}}"></sc-if>
+            <div style="{{scrimSt}}"></div>
+            <img src="{{themeImg}}" alt="{{previewAlt}}" style="{{themeImgSt}}">
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11.5px;color:#a3a3a3;text-align:center;margin-top:-8px">{{previewNote}}</div>
+
+      <sc-if value="{{paneNote}}" hint-placeholder-val="{{false}}">
+        <div style="padding:10px 12px;border-radius:6px;background:#2f2f2f;border:1px solid #3a3a3a;font-size:12.5px;line-height:1.45;color:#d0d0d0">{{paneNote}}</div>
+      </sc-if>
+      <sc-if value="{{isShader}}" hint-placeholder-val="{{true}}">
+      <div>
+        <div style="margin-bottom:6px">Motion</div>
+        <div role="radiogroup" aria-label="Motion" style="display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{motion}}" as="o" hint-placeholder-count="2">
+            <button type="button" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" disabled="{{o.dis}}" style="display:flex;align-items:center;gap:8px;min-height:30px;border:0;background:transparent;padding:0;cursor:pointer;text-align:left"><span style="width:20px;height:20px;flex-shrink:0;border-radius:10px;box-sizing:border-box;{{o.dotSt}}"></span><span>{{o.l}} <span style="color:#a3a3a3;font-size:12px">{{o.sub}}</span></span></button>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{hasParams}}" hint-placeholder-val="{{true}}">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;gap:8px"><span>{{bgName}} options</span><span style="font-size:11.5px;color:#a3a3a3">generated from its manifest</span><span style="flex:1"></span><button type="button" onClick="{{resetParams}}" style="border:0;background:transparent;color:#60cdff;cursor:pointer;font-size:12.5px;padding:0">Reset</button></div>
+          <sc-for list="{{params}}" as="p" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px"><label for="{{p.uid}}" style="width:96px;font-size:13px;color:#d0d0d0">{{p.label}}</label><input id="{{p.uid}}" type="range" min="{{p.min}}" max="{{p.max}}" step="{{p.step}}" value="{{p.value}}" onChange="{{p.set}}" style="flex:1;accent-color:#60cdff"><span style="width:40px;text-align:right;font-size:13px;font-variant-numeric:tabular-nums">{{p.shown}}</span></div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;align-items:center;gap:12px"><label for="p-scrim" style="width:86px;font-size:13px;color:#d0d0d0">Dim behind cards</label><input id="p-scrim" type="range" min="0" max="70" value="{{scrim}}" onChange="{{setScrim}}" style="flex:1;accent-color:#60cdff"><span style="width:40px;text-align:right;font-size:13px">{{scrim}}%</span></div>
+      <sc-if value="{{moving}}" hint-placeholder-val="{{false}}">
+        <div style="display:flex;gap:10px;padding:10px 12px;border-radius:6px;background:#24323d;font-size:12.5px;line-height:1.45"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60cdff" stroke-width="1.8" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6M12 7.5v.01"></path></svg><span>A moving background draws 30 frames a second while the display is on. Still keeps the look at no cost.</span></div>
+      </sc-if>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+const IMG = {
+  'default-dark':'/_blob/4fe69081a35a435a55a73a84b28fb4e5', 'default-light':'/_blob/124a1bac9b01f3f5e288f2a15f21199b', 'glass':'/_blob/b1296465874f37cc34e316d4c158cab1',
+  'carbon':'/_blob/b660933b3338218a34161e4aa0dddc1e', 'paper':'/_blob/0d48908b6b547d9bd431e66f88a9440c', 'ember':'/_blob/088f26b1adb84639263f37c0b3fc6067',
+  'blueprint':'/_blob/b39b4835fcdabf8a863d4d0b3856c11a', 'prism':'/_blob/25605e866aaeb462f303ca424be948f6', 'obsidian':'/_blob/77f57beab78e81b8143cd3e5c502ded6',
+  'pop':'/_blob/1af6427739f840c793b9595a41b4df3a', 'rigline':'/_blob/90a76150d81f9abdda0cb0adbb322fb2'
+};
+const BG = {
+  aurora:'/_blob/f1aff6ddf70cafcc90b7165fb209ea9d', contour:'/_blob/30978a3169e23147b8ba6381b62e1320', embers:'/_blob/abb47b3bccab042b2a185420cc9b8754',
+  equalizer:'/_blob/bbc9bf33e79055cd6590a2e8ce110cfb', gradient:'/_blob/75f390af3fe3ff851f160ec8086c1797', horizon:'/_blob/867c390ae53946eafc2b5a25ae9c0fb3',
+  julia:'/_blob/0ab5d35fa460356d04c2f25d90cb2720', nebula:'/_blob/129a20ba019cb5fbe3d40e058ee46208', plasma:'/_blob/85da11c63ecef28f8cba10ca9bb4a34b',
+  plotter:'/_blob/8c8a29f1bbde4807d8e588c9998b232b', ripple:'/_blob/288eee840510407709f17e905954a139', shapes:'/_blob/b3d0109cc28b7c0690f1bcde4ffa1181',
+  spectrum:'/_blob/81db361a6685ad747c66123e3fbc4469', streams:'/_blob/55a4d3bc94b3122c0ce94f09b97149aa', vortex:'/_blob/5073db6c507d40e9a020bfb5c6e9452f',
+  warpgate:'/_blob/d1752ad3953bb90f871b2d883ffd759b'
+};
+// [id, name, light, colour, theme's background.default (or null), shaders whose manifest pairsWith lists it]
+const THEMES = [
+  ['default-dark','Default Dark',false,'#0f0f1a',null,[]], ['default-light','Default Light',true,'#e9ebf2',null,[]],
+  ['glass','Glass',false,'#1b2760',null,[]], ['carbon','Carbon',false,'#090b0e','contour',['nebula','plotter','streams','warpgate']],
+  ['paper','Paper',true,'#e9e7e0','contour',['plotter','ripple','shapes']], ['ember','Ember',false,'#0b0806','embers',['equalizer','warpgate']],
+  ['blueprint','Blueprint',false,'#0c2d52','plotter',['contour','streams']], ['prism','Prism',false,'#10163a','nebula',['horizon','ripple','spectrum','vortex']],
+  ['obsidian','Obsidian',false,'#0a0908','nebula',['vortex','warpgate']], ['pop','Pop',true,'#f6f0e0','shapes',['ripple']],
+  ['rigline','Rigline',false,'#07060d','horizon',['embers','equalizer','spectrum','streams','vortex','warpgate']]
+];
+// from each built-in's manifest.json "parameters"
+const PARAMS = {
+  aurora:[['intensity','Intensity',0,3]], contour:[['density','Density',4,40],['lineWidth','Line width',0.3,3],['relief','Relief',0.3,2]],
+  embers:[['density','Density',0.2,2],['heat','Heat',0,2]], equalizer:[['bars','Bars',4,40],['reach','Reach',0.2,0.9],['gap','Gap',0,0.7]],
+  gradient:[['angle','Angle',0,360]], horizon:[['gridDensity','Grid density',0.4,3],['sunSize','Sun size',0.4,1.8],['horizon','Horizon',0.3,0.8]],
+  julia:[['zoom','Zoom',0.25,4],['radius','Radius',0.5,1]], nebula:[['zoom','Zoom',0.5,2.5],['starDensity','Star density',0,3],['starClustering','Star clustering',0,1],['twinkle','Twinkle',0,2]],
+  plasma:[['angle','Angle',0,360],['zoom','Zoom',0.5,10]], plotter:[['cells','Cells',6,40],['ringRate','Ring size',0.3,2],['scan','Scan line',0,2]],
+  ripple:[['ripples','Ripple density',0.4,3],['sharpness','Sharpness',0.3,2.5]], shapes:[['count','Count',2,12],['outline','Outline',0,3]],
+  spectrum:[['saturation','Saturation',0,1.5],['intensity','Intensity',0,2],['hueShift','Hue shift',0,1],['vignette','Vignette',0,1]],
+  streams:[['density','Density',0.3,3],['trail','Trail',0.3,3]], vortex:[['arms','Arms',3,24],['twist','Twist',0,3],['core','Core',0.3,3]],
+  warpgate:[['streaks','Streaks',0.2,2],['ringRate','Ring size',0.3,2],['coreSize','Core size',0.4,2.5],['swirl','Swirl',0,3]]
+};
+const designed = (mn, mx) => mn <= 1 && mx >= 1 && mx <= 3 ? 1 : Math.round((mn + mx) / 2);
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = {theme: 'rigline', bg: 'theme', still: false, scrim: 15, pv: {}, pic: false}; }
+  renderVals() {
+    const st = this.state;
+    const T = THEMES.find(t => t[0] === st.theme);
+    const recs = (T[4] ? [T[4]] : []).concat(T[5]);
+    const card = on => 'position:relative;padding:4px;border-radius:6px;cursor:pointer;' + (on ? 'border:2px solid #60cdff;background:rgba(96,205,255,.1);' : 'border:2px solid transparent;background:#2f2f2f;');
+    const themes = THEMES.map(([k, name]) => ({name, img: IMG[k], on: st.theme === k, pick: () => this.setState({theme: k, bg: 'theme'}), st: card(st.theme === k)}));
+    const tile = b => ({name: cap(b), img: BG[b], on: st.bg === b, pick: () => this.setState({bg: b}), st: card(st.bg === b)});
+    const recBgs = recs.map(tile);
+    const otherBgs = Object.keys(BG).filter(b => !recs.includes(b)).map(tile);
+    const chip = on => 'height:48px;padding:0 14px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;border-radius:6px;cursor:pointer;' + (on ? 'border:2px solid #60cdff;background:rgba(96,205,255,.1);' : 'border:1px solid #3f3f3f;background:#2f2f2f;');
+    const specials = [
+      ['theme', "Theme's choice", T[4] ? cap(T[4]) + ', still or moving' : 'Its colour (this theme names no shader)'],
+      ['none', 'None', 'The theme colour only'],
+      ['picture', 'Picture…', st.pic ? 'night-sky.jpg' : 'A file of your own']
+    ].map(([k, name, sub]) => ({name, sub, on: st.bg === k, pick: () => this.setState({bg: k}), st: chip(st.bg === k)}));
+    const bgKey = st.bg === 'theme' ? (T[4] || 'none') : st.bg;
+    const isShader = !!BG[bgKey];
+    const isPicture = st.bg === 'picture';
+    const picImg = BG.nebula;
+    const still = st.still || !isShader;
+    const pv = st.pv[bgKey] || {};
+    const params = (PARAMS[bgKey] || []).map(([k, label, mn, mx]) => {
+      const v = pv[k] != null ? pv[k] : designed(mn, mx);
+      const step = mx - mn > 20 ? 1 : 0.05;
+      return {uid: 'p-' + k, label, min: mn, max: mx, step, value: v, shown: step === 1 ? String(Math.round(v)) : Number(v).toFixed(2),
+        set: e => this.setState({pv: Object.assign({}, st.pv, {[bgKey]: Object.assign({}, pv, {[k]: Number(e.target.value)})})})};
+    });
+    const p0 = params[0];
+    const strength = p0 ? (p0.value - p0.min) / (p0.max - p0.min) : 0.5;
+    return {
+      params, resetParams: () => this.setState({pv: Object.assign({}, st.pv, {[bgKey]: {}})}),
+      themes, recBgs, otherBgs, hasRecs: recs.length > 0, allLabel: recs.length ? 'All backgrounds' : T[1] + ' suggests no backgrounds · all backgrounds', specials, themeName: T[1],
+      previewBg: T[3],
+      bgImg: isShader ? BG[bgKey] : (isPicture && st.pic ? picImg : ''),
+      isShader, isPicture, picEmpty: isPicture && !st.pic, picChosen: isPicture && st.pic, picImg,
+      choosePic: () => this.setState({pic: true}),
+      paneNote: bgKey === 'none' ? 'Plain ' + T[1] + ' colour. Nothing moves, so there is no GPU cost.' : isPicture ? (st.pic ? 'A picture never moves. Dim behind cards keeps text readable over a busy photo.' : 'Choose a picture to see it here.') : '',
+      bgImgSt: 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:' + (0.45 + strength * 0.55) + ';transform:scale(' + (1 + strength * 0.25) + ');',
+      scrimSt: 'position:absolute;inset:0;background:rgba(0,0,0,' + (st.scrim / 100) + ');',
+      themeImg: IMG[st.theme],
+      themeImgSt: 'position:absolute;left:0;top:0;width:100%;mix-blend-mode:' + (isShader || (isPicture && st.pic) ? (T[2] ? 'multiply' : 'screen') : 'normal') + ';',
+      previewAlt: T[1] + ' theme over the ' + (isShader ? cap(bgKey) : 'plain') + ' background',
+      previewNote: isShader || (isPicture && st.pic) ? 'Blended mock-up; the editor uses the deck renderer.' : 'Real render.',
+      bgName: cap(bgKey), hasParams: isShader, moving: isShader && !still,
+      motion: [['moving', 'Moving', '30 frames a second'], ['still', 'Still', 'one frame, no GPU cost']].map(([k, l, sub]) => {
+        const on = k === 'still' ? still : !still;
+        return {l, sub, on, dis: !isShader, pick: () => this.setState({still: k === 'still'}), dotSt: on ? 'border:5px solid #60cdff;background:#000;' : 'border:1px solid #d0d0d0;background:transparent;'};
+      }),
+      still, scrim: st.scrim,
+      setScrim: e => this.setState({scrim: Number(e.target.value)})
+    };
+  }
+}
+</script>
+</body>
+</html>
