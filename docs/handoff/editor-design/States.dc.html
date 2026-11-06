@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Editor states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#60cdff}a:hover{color:#98e0ff}
+button,input{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="width:1440px;height:1240px;box-sizing:border-box;padding:40px 48px;background:#141414;color:#ffffff;font-family:'Segoe UI Variable Text','Segoe UI',Inter,system-ui,sans-serif;font-size:14px;display:flex;flex-direction:column;gap:28px">
+
+  <!-- Row 1: first run -->
+  <div style="display:flex;gap:28px;height:520px">
+    <div style="flex:1.25;display:flex;flex-direction:column;gap:12px;min-width:0">
+      <div style="font-size:13px;color:#a3a3a3;font-weight:600;letter-spacing:.04em">FIRST RUN · NO CONFIGURATION YET</div>
+      <div style="flex:1;border-radius:8px;background:#262626;border:1px solid #3a3a3a;padding:28px;display:flex;gap:28px;align-items:center">
+        <div style="flex:1;display:flex;flex-direction:column;gap:14px">
+          <div style="font-size:26px;font-weight:600;font-family:'Segoe UI Variable Display','Segoe UI',Inter,sans-serif">Welcome to UrDeck</div>
+          <div style="color:#d0d0d0;line-height:1.55">Your deck is showing on <b>HYTE Y70 Touch</b>. Pick a start; you can change everything afterwards.</div>
+          <button type="button" style="display:flex;gap:14px;align-items:center;padding:14px;border-radius:8px;border:2px solid #60cdff;background:rgba(96,205,255,.1);cursor:pointer;text-align:left">
+            <img src="/_blob/4fe69081a35a435a55a73a84b28fb4e5" alt="The sample page: clock, CPU and GPU, weather, shortcuts" style="width:64px;height:80px;object-fit:cover;object-position:top;border-radius:4px">
+            <span style="display:flex;flex-direction:column;gap:3px"><b>Start with the sample page</b><span style="font-size:13px;color:#d0d0d0">A clock, CPU and GPU, the weather and four shortcuts. The fastest way to see what a page can do.</span></span>
+          </button>
+          <button type="button" style="display:flex;gap:14px;align-items:center;padding:14px;border-radius:8px;border:1px solid #3f3f3f;background:#2f2f2f;cursor:pointer;text-align:left">
+            <span style="width:64px;height:80px;border-radius:4px;border:1px dashed #666;display:flex;align-items:center;justify-content:center;color:#8a8a8a;font-size:22px">+</span>
+            <span style="display:flex;flex-direction:column;gap:3px"><b>Start with an empty page</b><span style="font-size:13px;color:#d0d0d0">Add widgets one at a time.</span></span>
+          </button>
+          <div style="font-size:12px;color:#a3a3a3">Prefer the file? It is <a href="#">urdeck-config.json</a>; the editor and the file always agree.</div>
+        </div>
+        <div style="padding:8px;border-radius:14px;background:#050505;box-shadow:0 0 0 1px rgba(255,255,255,.08)">
+          <img src="/_blob/4fe69081a35a435a55a73a84b28fb4e5" alt="" style="display:block;width:240px;height:300px;object-fit:cover;object-position:top;border-radius:5px">
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0">
+      <div style="font-size:13px;color:#a3a3a3;font-weight:600;letter-spacing:.04em">EMPTY PAGE</div>
+      <div style="flex:1;border-radius:8px;background:#141414;border:1px solid #3a3a3a;display:flex;gap:20px;padding:20px;align-items:flex-start">
+        <div style="padding:8px;border-radius:14px;background:#050505;box-shadow:0 0 0 1px rgba(255,255,255,.08)">
+          <div style="position:relative;width:216px;height:446px;border-radius:5px;background:#0f0f1a;background-image:linear-gradient(to right,rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.07) 1px,transparent 1px);background-size:54px 54px">
+            <div style="position:absolute;left:3px;top:3px;width:210px;height:102px;border-radius:6px;border:2px dashed #60cdff;background:rgba(96,205,255,.08);display:flex;align-items:center;justify-content:center;color:#60cdff;font-size:24px;font-weight:300">+</div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:12px;padding-top:6px">
+          <div style="position:relative;padding:16px;border-radius:8px;background:#2b2b2b;border:1px solid #3a3a3a;box-shadow:0 12px 32px rgba(0,0,0,.45)">
+            <div style="position:absolute;left:-8px;top:34px;width:14px;height:14px;background:#2b2b2b;border-left:1px solid #3a3a3a;border-bottom:1px solid #3a3a3a;transform:rotate(45deg)"></div>
+            <div style="font-weight:600;margin-bottom:6px">Add your first widget</div>
+            <div style="font-size:13px;color:#d0d0d0;line-height:1.5">Click any empty cell, or Add widget. Each widget takes a few cells; the page has room for about a dozen rows.</div>
+            <div style="display:flex;gap:8px;margin-top:12px"><span style="height:30px;display:flex;align-items:center;padding:0 12px;border-radius:5px;background:#60cdff;color:#000;font-weight:600">Add a clock</span><span style="height:30px;display:flex;align-items:center;padding:0 12px;border-radius:5px;border:1px solid #3f3f3f">Got it</span></div>
+          </div>
+          <div style="font-size:12px;color:#a3a3a3;line-height:1.5">TeachingTip pointing at the first row. The deck itself shows the theme's background and an empty page dot.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2 -->
+  <div style="flex:1;display:flex;gap:28px;min-height:0">
+
+    <!-- Broken and file states -->
+    <div style="width:560px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#a3a3a3;font-weight:600;letter-spacing:.04em">WHEN THE FILE AND THE PLUGINS DISAGREE</div>
+      <div style="display:flex;gap:16px">
+        <div style="padding:8px;border-radius:14px;background:#050505;box-shadow:0 0 0 1px rgba(255,255,255,.08);align-self:flex-start">
+          <div style="position:relative;width:200px;height:300px;border-radius:5px;background:#0f0f1a">
+            <div style="position:absolute;left:2px;top:2px;width:196px;height:46px;border-radius:5px;background:rgba(26,26,46,.9);display:flex;align-items:center;justify-content:center;font:600 22px Inter,sans-serif">21:47</div>
+            <div style="position:absolute;left:2px;top:52px;width:96px;height:96px;border-radius:5px;box-sizing:border-box;border:2px solid #ff99a4;background:repeating-linear-gradient(135deg,rgba(255,90,77,.1) 0 6px,transparent 6px 12px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff99a4" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg><span style="font-size:10px;color:#ffc2c8">Focus timer<br>did not load</span></div>
+            <div style="position:absolute;left:102px;top:52px;width:96px;height:96px;border-radius:5px;box-sizing:border-box;border:1px dashed #8a8a8a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:6px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" stroke-width="1.8" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg><span style="font-size:10px;color:#d0d0d0">Ticker<br>not installed</span></div>
+            <div style="position:absolute;left:2px;top:152px;width:96px;height:46px;border-radius:5px;box-sizing:border-box;border:2px solid #fce100;background:rgba(26,26,46,.9);display:flex;align-items:center;justify-content:center;font:600 18px Inter,sans-serif">68<span style="font-size:9px;vertical-align:top">%</span></div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:0">
+          <div style="display:flex;gap:10px;padding:12px;border-radius:6px;background:#442726;font-size:13px;line-height:1.45">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff99a4" stroke-width="1.8" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg>
+            <div><b>Focus timer did not load.</b> Its plugin, Focus Tools 1.2, failed to start. Its settings are kept and the deck leaves the space empty.<div style="margin-top:6px;display:flex;gap:12px"><a href="#">Show in the log</a><a href="#">Remove</a></div></div>
+          </div>
+          <div style="display:flex;gap:10px;padding:12px;border-radius:6px;background:#2b2b2b;border:1px solid #3a3a3a;font-size:13px;line-height:1.45">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d0d0d0" stroke-width="1.8" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg>
+            <div><b>Ticker is not installed.</b> The file has a <code style="font:12px 'Cascadia Mono','JetBrains Mono',monospace">acme.widgets.ticker</code> widget here. It stays in the file untouched; the form is read-only text.<div style="margin-top:6px;display:flex;gap:12px"><a href="#">Find the plugin</a><a href="#">Remove</a></div></div>
+          </div>
+          <div style="display:flex;gap:10px;padding:12px;border-radius:6px;background:#433519;font-size:13px;line-height:1.45">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fce100" stroke-width="1.8" aria-hidden="true" style="flex-shrink:0;margin-top:2px"><path d="M12 3 2 21h20z"></path><path d="M12 10v5M12 18v.01"></path></svg>
+            <div><b>2x1 is not a Stats size.</b> The file asks for 2x1 (the sample page does this today); Stats comes in 1x1, 2x2, 4x2 and 4x4. Nothing changes until you choose.<div style="margin-top:6px;display:flex;gap:12px"><a href="#">Make it 2x2</a><a href="#">Make it 1x1</a></div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;padding:12px;border-radius:6px;background:#24323d;font-size:13px;line-height:1.45">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60cdff" stroke-width="1.8" aria-hidden="true" style="flex-shrink:0"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg>
+        <div style="flex:1"><b>urdeck-config.json changed outside the editor.</b> The editor took the new file; your last undo step is kept.</div>
+        <a href="#" style="white-space:nowrap">Undo the reload</a>
+      </div>
+    </div>
+
+    <!-- Landscape display -->
+    <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0">
+      <div style="font-size:13px;color:#a3a3a3;font-weight:600;letter-spacing:.04em">DISPLAY · A LANDSCAPE MONITOR</div>
+      <div style="flex:1;border-radius:8px;background:#262626;border:1px solid #3a3a3a;padding:22px;display:flex;flex-direction:column;gap:16px;min-height:0">
+        <div style="display:flex;gap:10px">
+          <div style="flex:1;display:flex;gap:12px;align-items:center;padding:12px;border-radius:8px;border:1px solid #3f3f3f;background:#2f2f2f">
+            <div style="width:22px;height:38px;border-radius:3px;border:2px solid #a3a3a3"></div>
+            <div style="flex:1"><div style="font-weight:600">HYTE Y70 Touch</div><div style="font-size:12px;color:#a3a3a3">Portrait · display 2</div></div>
+          </div>
+          <div style="flex:1;display:flex;gap:12px;align-items:center;padding:12px;border-radius:8px;border:2px solid #60cdff;background:rgba(96,205,255,.1)">
+            <div style="width:40px;height:24px;border-radius:3px;border:2px solid #60cdff"></div>
+            <div style="flex:1"><div style="font-weight:600">DELL P2422H</div><div style="font-size:12px;color:#a3a3a3">Landscape · display 3</div></div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60cdff" stroke-width="2.6" aria-hidden="true"><path d="m5 12 5 5L20 7"></path></svg>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="height:30px;display:flex;align-items:center;padding:0 12px;border-radius:5px;border:1px solid #3f3f3f;background:#2f2f2f;font-size:13px">Identify</span>
+            <span style="height:30px;display:flex;align-items:center;padding:0 12px;border-radius:5px;border:1px solid #3f3f3f;background:#2f2f2f;font-size:13px">Choose automatically</span>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:20px;flex:1;min-height:0">
+          <div style="flex:1;display:flex;flex-direction:column;gap:10px;min-width:0">
+            <div style="padding:8px;border-radius:12px;background:#050505;box-shadow:0 0 0 1px rgba(255,255,255,.08)">
+              <div style="position:relative;width:100%;aspect-ratio:16/9;border-radius:5px;background:#0f0f1a;background-image:linear-gradient(to right,rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.07) 1px,transparent 1px);background-size:calc(100% / 7) 25%;overflow:hidden">
+                <div style="position:absolute;left:0.4%;top:1%;width:56.3%;height:23%;border-radius:6px;background:rgba(26,26,46,.9);display:flex;align-items:center;justify-content:center;font:600 34px Inter,sans-serif">21:47</div>
+                <div style="position:absolute;left:57.5%;top:1%;width:27.8%;height:48%;border-radius:6px;background:rgba(26,26,46,.9);display:flex;align-items:center;justify-content:center;font:600 30px Inter,sans-serif">68<span style="font-size:13px;vertical-align:top">%</span></div>
+                <div style="position:absolute;left:0.4%;top:26%;width:56.3%;height:48%;border-radius:6px;background:rgba(26,26,46,.9);display:flex;align-items:center;justify-content:center;font:600 46px Inter,sans-serif">18°</div>
+                <div style="position:absolute;left:0.4%;top:76%;width:13.5%;height:23%;border-radius:6px;background:rgba(26,26,46,.9)"></div>
+                <div style="position:absolute;left:14.7%;top:76%;width:13.5%;height:23%;border-radius:6px;background:rgba(26,26,46,.9)"></div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:#a3a3a3;text-align:center">Seven square columns by four rows on a 16:9 screen; the dock sits on the right edge.</div>
+          </div>
+          <div style="width:300px;display:flex;flex-direction:column;gap:10px">
+            <div style="font-weight:600">Pages on a wide screen</div>
+            <div role="radiogroup" aria-label="Pages on a wide screen" style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:8px;align-items:flex-start"><span style="width:20px;height:20px;flex-shrink:0;border-radius:10px;box-sizing:border-box;border:5px solid #60cdff;background:#000"></span><span><b style="font-weight:600">Fill the width</b> (suggested)<br><span style="font-size:12.5px;color:#d0d0d0;line-height:1.45">Cells stay square and the same size as four columns would give a portrait panel of this height; the page gets more columns, not bigger cards.</span></span></div>
+              <div style="display:flex;gap:8px;align-items:flex-start"><span style="width:20px;height:20px;flex-shrink:0;border-radius:10px;box-sizing:border-box;border:1px solid #d0d0d0"></span><span>Four columns<br><span style="font-size:12.5px;color:#d0d0d0;line-height:1.45">Very large cells; only about two rows fit. The page scrolls on touch screens.</span></span></div>
+            </div>
+            <div style="padding:10px 12px;border-radius:6px;background:#24323d;font-size:12.5px;line-height:1.45">Open question for item 15. A page made for portrait keeps its positions; the extra columns start empty.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1240}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

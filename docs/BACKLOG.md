@@ -695,6 +695,10 @@ pickers, `IReadingBrowser` for the reading picker, and the host's reload on a co
 grows the settings window or is its own window, live readings or sample data in the preview, apply as you edit or on save,
 undo, and how a save keeps the user's JSON (key order, keys from plugins).
 
+Designed 2026-11-06: [docs/handoff/2026-11-06-editor-design.md](handoff/2026-11-06-editor-design.md) answers the brief
+(the settings window grows into the editor; live readings with a sample switch; changes apply as you edit, with undo) and
+defines the twelve setting kinds the generated forms are built from. The mock-ups' source is in `docs/handoff/editor-design/`.
+
 ## 12. Packaging and distribution
 
 Installer, start with Windows, auto-update, logo and branding, winget manifest and GitHub release automation, and a third-party notices file

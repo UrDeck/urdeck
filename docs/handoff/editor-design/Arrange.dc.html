@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Arrange pages and the dock</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#60cdff}a:hover{color:#98e0ff}
+button,input{font:inherit;color:inherit}
+</style>
+</helmet>
+<div style="width:1440px;height:900px;box-sizing:border-box;padding:40px 48px;background:#141414;color:#ffffff;font-family:'Segoe UI Variable Text','Segoe UI',Inter,system-ui,sans-serif;font-size:14px;display:flex;gap:28px">
+
+  <!-- Pages list -->
+  <div style="width:250px;display:flex;flex-direction:column;gap:12px">
+    <div style="font-size:13px;color:#a3a3a3;font-weight:600;letter-spacing:.04em">A · PAGES</div>
+    <div style="font-size:12.5px;color:#d0d0d0;line-height:1.5">The tabs above the preview can also open as this list (wide enough to drag). Drag to reorder; double-click to rename.</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <sc-for list="{{pageList}}" as="p" hint-placeholder-count="3">
+        <div style="{{p.st}}">
+          <span aria-hidden="true" style="color:#8a8a8a;letter-spacing:-2px">⋮⋮</span>
+          <div style="{{p.thumbSt}}"><sc-for list="{{p.blocks}}" as="b" hint-placeholder-count="3"><span style="{{b}}"></span></sc-for></div>
+          <div style="flex:1;min-width:0">
+            <sc-if value="{{p.editing}}" hint-placeholder-val="{{false}}"><input type="text" aria-label="Page name" value="Lights" style="width:100%;box-sizing:border-box;height:28px;padding:0 8px;border-radius:4px;border:1px solid #3f3f3f;border-bottom:2px solid #60cdff;background:#1f1f1f"></sc-if>
+            <sc-if value="{{p.plain}}" hint-placeholder-val="{{true}}"><div style="font-weight:600">{{p.name}}</div></sc-if>
+            <div style="font-size:12px;color:#a3a3a3">{{p.sub}}</div>
+          </div>
+          <span aria-hidden="true" style="color:#a3a3a3">⋯</span>
+        </div>
+      </sc-for>
+      <button type="button" style="height:36px;display:flex;align-items:center;gap:8px;padding:0 12px;border-radius:6px;border:1px dashed #555;background:transparent;color:#d0d0d0;cursor:pointer">+ Add a page</button>
+    </div>
+    <div style="margin-top:6px;padding:10px 12px;border-radius:6px;background:#2b2b2b;border:1px solid #3a3a3a;font-size:12.5px;line-height:1.5">
+      <b>⋯ menu</b>: Rename · Duplicate · Move earlier / later · Delete. Deleting a page with widgets asks first and can be undone.
+    </div>
+  </div>
+
+  <!-- Move -->
+  <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0">
+    <div style="font-size:13px;color:#a3a3a3;font-weight:600;letter-spacing:.04em">B · MOVE: SNAPS TO CELLS</div>
+    <div style="{{bezel}}"><div style="{{pageSt}}">
+      <div style="{{gridSt}}"></div>
+      <sc-for list="{{moveCards}}" as="c" hint-placeholder-count="6"><div style="{{c.st}}"><span style="{{c.labSt}}">{{c.l}}</span></div></sc-for>
+      <div style="{{moveTarget}}"></div>
+      <div style="{{moveGhost}}"><span style="{{ghostLab}}">Stats 2x2</span></div>
+      <div style="{{cursor1}}">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 8-6 2-3 6z" fill="#fff" stroke="#000" stroke-width="1.2"></path></svg>
+      </div>
+    </div></div>
+    <div style="font-size:12.5px;color:#d0d0d0;line-height:1.5">The card lifts and follows the pointer; a <span style="color:#3ddc84">green outline</span> shows the cells it will take. Other widgets never move by themselves.</div>
+    <div style="display:flex;gap:10px;padding:10px 12px;border-radius:6px;background:#433519;font-size:12.5px;line-height:1.45">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fce100" stroke-width="1.8" aria-hidden="true" style="flex-shrink:0;margin-top:1px"><path d="M12 3 2 21h20z"></path><path d="M12 10v5M12 18v.01"></path></svg>
+      <span><b>Over a taken space</b> the outline turns orange: "Weather is in the way." Releasing there swaps the two if they are the same size; otherwise the card goes back.</span>
+    </div>
+  </div>
+
+  <!-- Resize -->
+  <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-width:0">
+    <div style="font-size:13px;color:#a3a3a3;font-weight:600;letter-spacing:.04em">C · RESIZE: ONLY DECLARED SIZES</div>
+    <div style="{{bezel}}"><div style="{{pageSt}}">
+      <div style="{{gridSt}}"></div>
+      <sc-for list="{{resizeCards}}" as="c" hint-placeholder-count="4"><div style="{{c.st}}"><span style="{{c.labSt}}">{{c.l}}</span></div></sc-for>
+      <sc-for list="{{stops}}" as="s" hint-placeholder-count="4"><div style="{{s.st}}"><span style="{{s.labSt}}">{{s.l}}</span></div></sc-for>
+      <div style="{{handle}}"></div>
+      <div style="{{cursor2}}"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4l16 16M4 4v7M4 4h7M20 20v-7M20 20h-7" fill="none" stroke="#fff" stroke-width="2"></path></svg></div>
+    </div></div>
+    <div style="font-size:12.5px;color:#d0d0d0;line-height:1.5">Dragging the corner handle shows the widget's sizes as dashed stops (Stats: 1x1, 2x2, 4x2, 4x4) and snaps to the nearest one that fits. A stop that does not fit is drawn struck through. The Size buttons in the form do the same without dragging.</div>
+  </div>
+
+  <!-- Dock -->
+  <div style="width:300px;display:flex;flex-direction:column;gap:12px">
+    <div style="font-size:13px;color:#a3a3a3;font-weight:600;letter-spacing:.04em">D · THE DOCK</div>
+    <div style="font-size:12.5px;color:#d0d0d0;line-height:1.5">Pinned under every page in the preview. Drag a 1x1 widget onto it, drag along it to reorder, drag off it to remove.</div>
+    <div style="padding:14px;border-radius:12px;background:#0f0f1a;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+      <sc-for list="{{dock}}" as="d" hint-placeholder-count="4">
+        <div style="{{d.st}}"><span style="{{d.tile}}">{{d.letter}}</span><span style="font-size:10px;color:rgba(255,255,255,.72)">{{d.label}}</span></div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:13px">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:#2b2b2b;border:1px solid #3a3a3a"><span style="color:#8a8a8a">⋮⋮</span><span style="flex:1">Terminal</span><span style="font-size:12px;color:#a3a3a3">Shortcut</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:#2b2b2b;border:2px solid #60cdff"><span style="color:#8a8a8a">⋮⋮</span><span style="flex:1">Desk strip</span><span style="font-size:12px;color:#a3a3a3">Control</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:#2b2b2b;border:1px solid #3a3a3a"><span style="color:#8a8a8a">⋮⋮</span><span style="flex:1">Music</span><span style="font-size:12px;color:#a3a3a3">Shortcut</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;border:1px dashed #555;color:#a3a3a3">Empty slot · Add…</div>
+    </div>
+    <div style="padding:10px 12px;border-radius:6px;background:#24323d;font-size:12.5px;line-height:1.45">Keyboard: every move here has a menu equivalent (Move to the dock, Move earlier / later) so nothing needs a mouse.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+const C = 72;
+const card = (col, row, w, h, extra) => 'position:absolute;left:' + (col * C + 3) + 'px;top:' + (row * C + 3) + 'px;width:' + (w * C - 6) + 'px;height:' + (h * C - 6) + 'px;border-radius:6px;background:rgba(26,26,46,.9);display:flex;align-items:center;justify-content:center;box-sizing:border-box;' + (extra || '');
+const lab = 'font-size:10.5px;color:rgba(255,255,255,.72);font-family:Inter,sans-serif;';
+class Component extends DCLogic {
+  renderVals() {
+    const base = [[0,0,4,1,'Clock 4x1'],[0,3,4,2,'Weather 4x2'],[0,5,1,1,'Desk'],[1,5,1,1,'Coffee'],[2,5,2,1,'Living room'],[0,6,4,2,'Stats 4x2']];
+    const blocks = (list) => list.map(b => 'position:absolute;left:' + (b[0] * 9 + 1) + 'px;top:' + (b[1] * 9 + 1) + 'px;width:' + (b[2] * 9 - 2) + 'px;height:' + (b[3] * 9 - 2) + 'px;border-radius:1.5px;background:rgba(255,255,255,.35);');
+    return {
+      pageList: [
+        {name: 'Main', sub: '7 widgets', blocks: blocks(base), plain: true, editing: false, st: 'display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,.07);border:2px solid #60cdff;'},
+        {name: 'Lights', sub: 'renaming', blocks: blocks([[0,0,1,1],[1,0,1,1],[2,0,2,1],[0,1,2,2]]), plain: false, editing: true, st: 'display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:#2b2b2b;border:1px solid #3a3a3a;'},
+        {name: 'Performance', sub: '2 widgets', blocks: blocks([[0,0,4,4],[0,4,4,2]]), plain: true, editing: false, st: 'display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;background:#2b2b2b;border:1px solid #3a3a3a;transform:translate(8px,4px) rotate(-1.5deg);box-shadow:0 10px 24px rgba(0,0,0,.5);'}
+      ].map(p => Object.assign(p, {thumbSt: 'position:relative;width:38px;height:62px;flex-shrink:0;border-radius:4px;background:#0f0f1a;overflow:hidden;'})),
+      bezel: 'padding:8px;border-radius:14px;background:#050505;box-shadow:0 0 0 1px rgba(255,255,255,.08);align-self:center;',
+      pageSt: 'position:relative;width:' + (4 * C) + 'px;height:' + (8.4 * C) + 'px;background:#0f0f1a;overflow:hidden;border-radius:5px;',
+      gridSt: 'position:absolute;inset:0;background-image:linear-gradient(to right,rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.07) 1px,transparent 1px);background-size:' + C + 'px ' + C + 'px;',
+      moveCards: base.map(b => ({l: b[4], labSt: lab, st: card(b[0], b[1], b[2], b[3])})).concat([{l: '', labSt: lab, st: card(0, 1, 2, 2, 'background:transparent;border:1px dashed rgba(255,255,255,.25);')}]),
+      moveTarget: card(2, 1, 2, 2, 'background:rgba(61,220,132,.12);border:2px solid #3ddc84;'),
+      moveGhost: card(1.62, 1.28, 2, 2, 'background:rgba(40,40,70,.95);box-shadow:0 18px 36px rgba(0,0,0,.6);transform:rotate(-1.5deg);border:1px solid rgba(255,255,255,.2);'),
+      ghostLab: lab + 'font-size:12px;color:#fff;',
+      cursor1: 'position:absolute;left:' + (2.6 * C) + 'px;top:' + (2.2 * C) + 'px;',
+      resizeCards: [[0,0,4,1,'Clock 4x1'],[0,3,4,2,'Weather 4x2'],[0,5,1,1,'Desk'],[1,5,1,1,'Coffee'],[2,5,2,1,'Living room']].map(b => ({l: b[4], labSt: lab, st: card(b[0], b[1], b[2], b[3])}))
+        .concat([{l: 'Stats', labSt: lab + 'color:#fff;', st: card(0, 1, 4, 2, 'background:rgba(74,158,255,.18);border:2px solid #60cdff;align-items:flex-start;justify-content:flex-start;padding:8px;')}]),
+      stops: [
+        {l: '1x1', st: card(0, 1, 1, 1, 'background:transparent;border:1px dashed rgba(255,255,255,.45);align-items:flex-end;justify-content:flex-end;padding:4px;'), labSt: lab},
+        {l: '2x2', st: card(0, 1, 2, 2, 'background:transparent;border:1px dashed rgba(255,255,255,.45);align-items:flex-end;justify-content:flex-end;padding:4px;'), labSt: lab},
+        {l: '4x2 · snaps here', st: card(0, 1, 4, 2, 'background:transparent;border:0;align-items:flex-end;justify-content:flex-end;padding:4px;'), labSt: lab + 'color:#60cdff;font-weight:600;'},
+        {l: '4x4 · Weather is in the way', st: card(0, 1, 4, 4, 'background:repeating-linear-gradient(135deg,transparent 0 8px,rgba(255,176,32,.08) 8px 10px);border:1px dashed #ffb020;align-items:flex-end;justify-content:flex-end;padding:4px;'), labSt: lab + 'color:#ffb020;'}
+      ],
+      handle: 'position:absolute;left:' + (4 * C - 10) + 'px;top:' + (3 * C - 10) + 'px;width:12px;height:12px;border-radius:3px;background:#fff;border:2px solid #60cdff;',
+      cursor2: 'position:absolute;left:' + (4 * C - 26) + 'px;top:' + (3 * C + 2) + 'px;',
+      dock: [['T', 'Terminal', ''], ['D', 'Desk', 'outline:2px solid #60cdff;outline-offset:2px;'], ['M', 'Music', ''], ['+', 'Add', 'background:transparent;border:1px dashed rgba(255,255,255,.3);']].map(([letter, label, extra]) => ({letter, label,
+        st: 'aspect-ratio:1/0.9;border-radius:8px;background:rgba(26,26,46,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;' + extra,
+        tile: 'width:26px;height:26px;border-radius:6px;background:' + (letter === '+' ? 'transparent' : '#2c4a7a') + ';display:flex;align-items:center;justify-content:center;font:600 14px Inter,sans-serif;'}))
+    };
+  }
+}
+</script>
+</body>
+</html>
