@@ -2,130 +2,53 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using Microsoft.UI.Xaml.Controls;
-using UrDeck.Engine.Config;
-using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Deck;
 using UrDeck.Engine.Layout;
-using UrDeck.Engine.Plugin;
-using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Themes;
-using UrDeck.Sdk;
 
 namespace UrDeck.Host;
 
 /// <summary>
-/// The widgets of one page, or of the dock: a canvas of <see cref="WidgetView"/>s, owning its reading-to-view map, and under them
-/// the <see cref="UnderlayView"/> when the theme draws outside its cards. Disposing it releases every view (readings unsubscribed,
-/// frame-clock entries removed), so a page that is not shown costs nothing.
+/// The surfaces of one page, or of the dock (<see cref="PageSlots"/>): a canvas of <see cref="WidgetView"/>s, under them the
+/// <see cref="UnderlayView"/> when the theme draws outside its cards, and the moving borders' sprites. Disposing it drops
+/// every surface; the page's slots are the session's and are disposed by it right after.
 /// </summary>
 internal sealed class PageHost : Canvas, IDisposable
 {
     private readonly List<WidgetView> _views = new();
-    private readonly Dictionary<string, List<WidgetView>> _viewsByReading = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<int, WidgetView> _viewsByIndex = new();
-    private readonly IReadOnlyList<WidgetLayoutItem> _layout;
     private readonly UnderlayView? _underlay;
     private readonly BorderMotion? _borders;
 
-    public PageHost(
-        PageConfig page,
-        IReadOnlyList<WidgetLayoutItem> layout,
-        WidgetPluginLoader plugins,
-        Theme theme,
-        ResolvedCardStyle cardStyle,
-        IReadOnlyList<int> cardIndex,
-        PressStyle press,
-        FrameClock frameClock,
-        double scale,
-        MotionGate? borderMotion = null,
-        System.Drawing.Rectangle? underlayClip = null,
-        Func<UrDeck.Sdk.MotionLevel>? motion = null)
+    public PageHost(PageSlots page)
     {
-        _layout = layout;
         var placed = new List<(WidgetLayoutItem, WidgetView, ResolvedCardStyle)>();
-        for (int i = 0; i < page.Widgets.Count; i++)
+        foreach (var card in page.Cards)
         {
-            var config = page.Widgets[i];
-            if (!config.IsVisible)
-                continue;
-
-            var item = layout[i];
-            if (!item.Placed)
-                continue;
-
-            var style = cardStyle.ForCard(item);
-            // A moving border is a sprite over the card, so its back is painted without the ring. Below the full motion
-            // level there is no gate and the card is drawn as it is for a theme without borderAnimate.
-            bool animated = borderMotion != null && style.BorderAnimation != null;
-            var descriptor = plugins.GetDescriptor(config.WidgetTypeId);
-            if (descriptor == null)
+            var item = card.Item;
+            var view = new WidgetView(card.Slot)
             {
-                UrDeckLog.Warn($"Widget type '{config.WidgetTypeId}' is not registered; leaving its cell empty. " +
-                              $"Registered: [{string.Join(", ", plugins.GetRegisteredWidgetTypes())}]");
-                continue;
+                Width = item.Size.Width,
+                Height = item.Size.Height,
+            };
+            SetLeft(view, item.Position.X);
+            SetTop(view, item.Position.Y);
+            Children.Add(view);
+            if (card.AnimatedBorder)
+            {
+                _borders ??= new BorderMotion(page.BorderMotion!, page.Name);
+                _borders.Attach(view, card.Style, item.Size, page.Scale);
             }
 
-            try
-            {
-                var widget = plugins.CreateWidget(config, out var services)!;
-                var view = new WidgetView(widget, services, descriptor, theme, new CardLook(animated ? style.WithoutBorder() : style, cardIndex[i]), press, frameClock, plugins.Readings, motion)
-                {
-                    Width = item.Size.Width,
-                    Height = item.Size.Height,
-                };
-                SetLeft(view, item.Position.X);
-                SetTop(view, item.Position.Y);
-                Children.Add(view);
-                if (animated)
-                {
-                    _borders ??= new BorderMotion(borderMotion!, page.Name);
-                    _borders.Attach(view, style, item.Size, scale);
-                }
-
-                _views.Add(view);
-                _viewsByIndex[i] = view;
-                placed.Add((item, view, style));
-                foreach (string reading in view.Subscriptions)
-                {
-                    if (!_viewsByReading.TryGetValue(reading, out var users))
-                        _viewsByReading[reading] = users = [];
-                    users.Add(view);
-                }
-
-                UrDeckLog.Info($"Placed '{config.WidgetTypeId}' at grid ({config.Col},{config.Row}) {config.Width}x{config.Height} " +
-                              $"-> {item.Position.X},{item.Position.Y} {item.Size.Width}x{item.Size.Height} DIPs");
-            }
-            catch (Exception ex)
-            {
-                UrDeckLog.Error($"Failed to create widget '{config.WidgetTypeId}'", ex);
-            }
+            _views.Add(view);
+            placed.Add((item, view, card.Style));
         }
 
         // First, so it lies under every card; the dock's is cut to its band, so it never lies over the page.
-        _underlay = UnderlayView.Create(placed, scale, underlayClip, page.Name);
+        _underlay = page.HasUnderlay ? UnderlayView.Create(placed, page.Scale, page.UnderlayClip, page.Name) : null;
         if (_underlay != null)
             Children.Insert(0, _underlay);
 
         _borders?.Begin();
-    }
-
-    /// <summary>How many widgets are shown.</summary>
-    public int ViewCount => _views.Count;
-
-    /// <summary>The views that declared <paramref name="reading"/>.</summary>
-    public IReadOnlyList<WidgetView> ViewsFor(string reading) =>
-        _viewsByReading.TryGetValue(reading, out var users) ? users : [];
-
-    /// <summary>
-    /// The view whose card contains the point (in the page's DIPs), and the point relative to that card; null in a gap,
-    /// on an empty cell and on a widget that could not be created. The decision is the engine's.
-    /// </summary>
-    public WidgetView? FindView(double x, double y, out System.Drawing.PointF local)
-    {
-        local = default;
-        if (WidgetHitTest.Find(_layout, x, y) is not { } hit || !_viewsByIndex.TryGetValue(hit.Index, out var view))
-            return null;
-        local = new System.Drawing.PointF((float)hit.X, (float)hit.Y);
-        return view;
     }
 
     public void Dispose()
@@ -133,8 +56,6 @@ internal sealed class PageHost : Canvas, IDisposable
         foreach (var view in _views)
             view.Dispose();
         _views.Clear();
-        _viewsByIndex.Clear();
-        _viewsByReading.Clear();
         _borders?.Dispose();
         _underlay?.Dispose();
         Children.Clear();

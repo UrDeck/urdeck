@@ -136,7 +136,7 @@ public class UrDeckConfig
 /// Loads the configuration file (first run, migration) into a <see cref="ConfigDocument"/> and is the typed view of it for the
 /// deck. The document is the only writer; this class never writes except to create a missing file.
 /// </summary>
-public sealed class ConfigStore : IDisposable
+public sealed class ConfigStore : IDisposable, Deck.IDeckConfigSource
 {
     /// <summary>The configuration format version this build reads and writes.</summary>
     public const int CurrentVersion = 1;

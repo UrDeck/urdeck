@@ -67,7 +67,8 @@ sdk/UrDeck.Sdk       MIT. The plugin contract: attributes, Widget<T>, WidgetConf
 sdk/UrDeck.Analyzer  MIT. Roslyn analyzer (URDECK001-005), netstandard2.0
 src/UrDeck.Engine     GPL. Plugin loader, config store, grid and dock layout, display identity and placement, gestures and hit testing, PageRenderer, ReadingHub (runs the
                       providers), per-widget WidgetServices, Launcher, IconService (shell, file and site icons), Backgrounds (settings, shader store,
-                      palette, image cover-fit, DeckBackground), logging
+                      palette, image cover-fit, DeckBackground), Deck (DeckSession: what the deck shows, without XAML; WidgetSlot, PageSlots,
+                      PagerState, the IDeckPresenter/IPagerView seam, IDeckScheduler and IFrameSource), logging
 tools/UrDeck.Cli      GPL. `urdeck-cli`, a portable dotnet tool (DotMake.CommandLine): `shader init|validate|render` on a background folder, `preview render` (sample data) and `catalog export` (JSON for the site), and
                       `theme validate|render|init|schema` on a theme folder (findings are `THEME
                       uses only the engine's public API (not in its InternalsVisibleTo), runs on Windows and Linux, exit codes 0/1/2
@@ -132,7 +133,7 @@ See the README license map before moving code between projects: it can change th
   capture, or ask the user to look.
 - In Git Bash, MSYS rewrites `/p:Foo` style switches as paths; use `-p:Foo`.
 - Plugins load from a shadow copy in a collectible `AssemblyLoadContext`. A removed `SKXamlCanvas` can stay
-  alive after it leaves the tree, so `WidgetView.Dispose` drops its widget reference (without that, old plugin contexts
+  alive after it leaves the tree, so `WidgetView.Dispose` drops its slot and `WidgetSlot.Dispose` its widget (without that, old plugin contexts
   were not collected); keep plugin types out of long-lived static caches.
 - The tracked sample is `src/UrDeck.Host/urdeck-config.default.json`; the build copies it next to the exe as
   `urdeck-config.default.json` and never touches a working `urdeck-config.json`. The first start copies it when there is no
