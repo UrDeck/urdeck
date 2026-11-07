@@ -276,7 +276,7 @@ public sealed class ProviderSettingsEditor
 
         return setting.Default switch
         {
-            null => setting.Type == SettingType.Toggle ? "false" : "",
+            null => setting.Kind == SettingKinds.Toggle ? "false" : "",
             bool on => on ? "true" : "false",
             IFormattable number => number.ToString(null, CultureInfo.InvariantCulture),
             var other => other.ToString() ?? "",
@@ -304,7 +304,7 @@ public sealed class ProviderSettingsEditor
         element = null;
         problem = null;
         text = text.Trim();
-        if (setting.Type == SettingType.Toggle)
+        if (setting.Kind == SettingKinds.Toggle)
         {
             bool on = string.Equals(text, "true", StringComparison.OrdinalIgnoreCase);
             element = JsonSerializer.SerializeToElement(on);
@@ -314,19 +314,19 @@ public sealed class ProviderSettingsEditor
         if (text.Length == 0)
             return true;
 
-        switch (setting.Type)
+        switch (setting.Kind)
         {
-            case SettingType.WholeNumber when long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out long whole):
+            case SettingKinds.Number when setting.Number is { WholeNumber: true } && long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out long whole):
                 element = JsonSerializer.SerializeToElement(whole);
                 return true;
-            case SettingType.Number when double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double number):
+            case SettingKinds.Number when setting.Number is not { WholeNumber: true } && double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double number):
                 element = JsonSerializer.SerializeToElement(number);
                 return true;
-            case SettingType.Text:
+            case SettingKinds.Text:
                 element = JsonSerializer.SerializeToElement(text);
                 return true;
             default:
-                problem = $"{setting.Label} must be {(setting.Type == SettingType.WholeNumber ? "a whole number" : "a number")}.";
+                problem = $"{setting.Label} must be {(setting.Number is { WholeNumber: true } ? "a whole number" : "a number")}.";
                 return false;
         }
     }

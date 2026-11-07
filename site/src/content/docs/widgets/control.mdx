@@ -3,14 +3,6 @@ title: Control
 description: A tile that shows the state of a light, a switch, a lock or a player and acts on it when you tap it.
 section: Widgets
 order: 15
-settings:
-  reading: "The reading whose state the tile shows, written `provider:path` (`homeassistant:light.desk`). Without one the tile is neutral, neither on nor off: a button that only acts, such as a scene."
-  action: "What a tap does, written `provider:path` (`homeassistant:light.desk/toggle`). Left out, it is the reading's own action (a light's toggle). A path without `provider:` is taken under the reading's provider. `\"\"` makes the tile display-only: it takes no taps and shows no press."
-  label: "The name on the tile. Left out, it is the reading's label (a light's friendly name). Any text replaces it, and `\"\"` shows no name."
-  icon: "The icon, a key of the theme's icon set (`home/light`) or the path of an image file on this PC. Left out, it is the reading's own icon. `\"\"` shows no icon."
-  style: "`switch` (the default) shows the icon, the name and the state; `dimmer` adds a bar for a level and needs a 2x1 tile and `level`. Anything else is drawn as `switch`."
-  level: "`dimmer` only: the reading shown on the bar, 0 to 100 (`homeassistant:light.desk/brightness`). Without it a `dimmer` is drawn as a `switch`, and the log says so once."
-  levelAction: "`dimmer` only: what a tap on the bar does, with the level as its argument. Left out, it is the `level` reading's own action (a light's `turn_on`). Same rules as `action`."
 ---
 
 import SettingsTable from '../../../components/SettingsTable.astro';

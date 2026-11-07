@@ -2,7 +2,9 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using System.Globalization;
+using System.Text.Json.Nodes;
 using UrDeck.Sdk.Data;
+using UrDeck.Sdk.Settings;
 
 namespace UrDeck.Providers.Weather;
 
@@ -13,7 +15,7 @@ namespace UrDeck.Providers.Weather;
 /// widget whose location was just edited shows values in seconds. Nothing is held while no reading is shown.
 /// </summary>
 [DataProvider("weather", "Weather", DefaultIntervalMs = 900000, MinIntervalMs = 300000)]
-public sealed class WeatherProvider : DataProvider<ProviderSettings>, IDisposable
+public sealed class WeatherProvider : DataProvider<ProviderSettings>, ISuggestionSource, IDisposable
 {
     /// <summary>A place fetched this recently is not fetched again, so a sample right after a new place's fetch makes no second request.</summary>
     private static readonly TimeSpan FreshFor = TimeSpan.FromSeconds(30);
@@ -58,6 +60,32 @@ public sealed class WeatherProvider : DataProvider<ProviderSettings>, IDisposabl
     }
 
     public override IReadOnlyList<ReadingDescriptor> Describe() => WeatherCatalog.Describe();
+
+    /// <inheritdoc />
+    public IReadOnlyList<string> SuggestionKinds { get; } = ["place"];
+
+    /// <summary>Finds places by the text typed, with the same geocoding service a widget's location is looked up with.</summary>
+    public async Task<IReadOnlyList<Suggestion>> SuggestAsync(string kind, string text, CancellationToken cancellationToken)
+    {
+        var geocoding = _geocoding;
+        if (kind != "place" || geocoding == null || string.IsNullOrWhiteSpace(text))
+            return [];
+
+        var places = await geocoding.SearchAsync(text.Trim(), cancellationToken).ConfigureAwait(false);
+        return [.. places.Select(place =>
+        {
+            int comma = place.Name.IndexOf(", ", StringComparison.Ordinal);
+            return new Suggestion(
+                comma < 0 ? place.Name : place.Name[..comma],
+                comma < 0 ? null : place.Name[(comma + 2)..],
+                new Dictionary<string, JsonNode?>
+                {
+                    ["location"] = place.Name,
+                    ["latitude"] = place.Latitude,
+                    ["longitude"] = place.Longitude,
+                });
+        })];
+    }
 
     public override void Start(IReadingSink sink, ProviderSettings settings)
     {

@@ -40,6 +40,9 @@ public sealed partial record ProviderDescriptor(
     /// <summary>Whether the provider can list the concrete readings its patterns stand for.</summary>
     public bool OffersBrowsing => typeof(IReadingBrowser).IsAssignableFrom(ProviderType);
 
+    /// <summary>Whether the provider can answer what a user types into a picker (<see cref="UrDeck.Sdk.Settings.ISuggestionSource"/>).</summary>
+    public bool OffersSuggestions => typeof(UrDeck.Sdk.Settings.ISuggestionSource).IsAssignableFrom(ProviderType);
+
     /// <summary>How long the provider keeps running after nothing subscribes to it, in milliseconds.</summary>
     public int LingerMs { get; init; } = 5000;
 

@@ -169,7 +169,7 @@ public sealed class PreviewCommandsTests : IDisposable
         var rigline = root.GetProperty("themes").EnumerateArray().Single(t => t.GetProperty("name").GetString() == "rigline");
         Assert.Equal("horizon", rigline.GetProperty("defaultBackground").GetString());
         var stats = root.GetProperty("widgets").EnumerateArray().Single(w => w.GetProperty("typeId").GetString() == "urdeck.widgets.stats");
-        Assert.Equal(4, stats.GetProperty("sizes").GetArrayLength());
+        Assert.Equal(5, stats.GetProperty("sizes").GetArrayLength());
         Assert.Equal(4, stats.GetProperty("defaultConfig").GetProperty("slots").GetArrayLength());
         Assert.False(stats.GetProperty("defaultConfig").TryGetProperty("width", out _));
     }
@@ -182,8 +182,8 @@ public sealed class PreviewCommandsTests : IDisposable
         var providers = document.RootElement.GetProperty("providers").EnumerateArray().ToList();
         Assert.All(providers.Where(p => p.GetProperty("id").GetString() != "homeassistant"), p => Assert.Equal(0, p.GetProperty("settings").GetArrayLength()));
         var homeAssistant = providers.Single(p => p.GetProperty("id").GetString() == "homeassistant").GetProperty("settings");
-        Assert.Equal(["token", "url"], homeAssistant.EnumerateArray().Select(s => s.GetProperty("key").GetString()));
-        Assert.Equal("URDECK_SECRET_HOMEASSISTANT_TOKEN", homeAssistant[0].GetProperty("environmentVariable").GetString());
+        Assert.Equal(["url", "token"], homeAssistant.EnumerateArray().Select(s => s.GetProperty("name").GetString()));
+        Assert.Equal("URDECK_SECRET_HOMEASSISTANT_TOKEN", homeAssistant[1].GetProperty("environmentVariable").GetString());
     }
 
     [Fact]
@@ -193,15 +193,15 @@ public sealed class PreviewCommandsTests : IDisposable
 
         var settings = CatalogExportRunner.ProviderSettingsOf(descriptor).Select(s => s.AsObject()).ToList();
 
-        Assert.Equal(["token", "url"], settings.Select(s => (string)s["key"]!));
-        var token = settings[0];
+        Assert.Equal(["url", "token"], settings.Select(s => (string)s["name"]!));
+        var token = settings[1];
         Assert.Equal("secret", (string)token["type"]!);
         Assert.True((bool)token["secret"]!);
         Assert.True((bool)token["required"]!);
         Assert.Equal("URDECK_SECRET_SECRETS_TOKEN", (string)token["environmentVariable"]!);
         Assert.Null(token["default"]);
         Assert.Equal("Issued by the service.", (string)token["help"]!);
-        var url = settings[1];
+        var url = settings[0];
         Assert.Equal("text", (string)url["type"]!);
         Assert.False((bool)url["secret"]!);
         Assert.Null(url["environmentVariable"]);
@@ -229,11 +229,11 @@ public sealed class PreviewCommandsTests : IDisposable
 
     private sealed class SecretSettings : UrDeck.Sdk.Data.ProviderSettings
     {
-        [UrDeck.Sdk.Data.Setting("Address", Help = "Where the service is.", Required = true)]
+        [UrDeck.Sdk.Settings.Setting("Address", Help = "Where the service is.", Required = true)]
         public string? Url { get; set; }
 
-        [UrDeck.Sdk.Data.Setting("Token", Help = "Issued by the service.", Required = true)]
-        [UrDeck.Sdk.Data.Secret(ContextSetting = "url")]
+        [UrDeck.Sdk.Settings.Setting("Token", Help = "Issued by the service.", Required = true)]
+        [UrDeck.Sdk.Settings.Secret(ContextSetting = "url")]
         public UrDeck.Sdk.Data.SecretValue? Token { get; set; }
     }
 
@@ -250,7 +250,8 @@ public sealed class PreviewCommandsTests : IDisposable
         Assert.Equal("24h", settings["format"].GetProperty("default").GetString());
         Assert.Equal("onOff", settings["showDate"].GetProperty("type").GetString());
         Assert.True(settings["showDate"].GetProperty("default").GetBoolean());
-        Assert.Equal(JsonValueKind.Null, settings["textColor"].GetProperty("default").ValueKind);
+        Assert.False(settings.ContainsKey("textColor"));
+        Assert.False(settings.ContainsKey("fontSize"));
     }
 
     [Fact]

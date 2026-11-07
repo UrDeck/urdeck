@@ -10,3 +10,4 @@ URDECK002 | Usage | Error | Widget class must have [WidgetSize]
 URDECK003 | Usage | Error | Widget must have a refresh strategy attribute
 URDECK004 | Usage | Error | Widget must have only one refresh strategy attribute
 URDECK005 | Usage | Error | Invalid [WidgetSize] dimensions
+URDECK006 | Usage | Warning | A settings property is not declared as a setting, or a declared setting has no kind

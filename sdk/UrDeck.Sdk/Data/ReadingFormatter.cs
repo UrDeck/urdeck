@@ -56,15 +56,12 @@ public static class ReadingFormatter
             ReadingValueType.Time => ReadingKind.Time,
             _ => ReadingKind.Number,
         };
-        (string? unitText, UnitPlacement placement) = kind switch
+        string? unitText = DisplayUnits.UnitText(kind, unit, descriptor);
+        var placement = kind switch
         {
-            ReadingKind.Percent => ("%", UnitPlacement.Raised),
-            ReadingKind.Temperature => ("°", UnitPlacement.Raised),
-            ReadingKind.Number when !string.IsNullOrEmpty(descriptor?.Unit) => (descriptor!.Unit, UnitPlacement.Baseline),
-            ReadingKind.Speed => (unit == DisplayUnit.Fahrenheit ? "mph" : "km/h", UnitPlacement.Baseline),
-            ReadingKind.Depth when unit == DisplayUnit.Fahrenheit => ("\"", UnitPlacement.Raised),
-            ReadingKind.Depth => (CanonicalDepth(descriptor) == DepthUnit.Centimetre ? "cm" : "mm", UnitPlacement.Baseline),
-            _ => (null, UnitPlacement.Baseline),
+            ReadingKind.Percent or ReadingKind.Temperature => UnitPlacement.Raised,
+            ReadingKind.Depth when unit == DisplayUnit.Fahrenheit => UnitPlacement.Raised,
+            _ => UnitPlacement.Baseline,
         };
 
         bool hasValue = reading.State != ReadingState.Unavailable && reading.Value.HasValue;
@@ -146,8 +143,6 @@ public static class ReadingFormatter
         return points[(int)Math.Floor((normalised + 22.5) / 45) % 8];
     }
 
-    private static DepthUnit CanonicalDepth(ReadingDescriptor? descriptor) => descriptor?.DepthUnit ?? DepthUnit.Millimetre;
-
     private static DisplayUnit ResolveDisplayUnit(ReadingFormatOptions options, ReadingDescriptor? descriptor, IReadingSource source) =>
         options.DisplayUnit
         ?? descriptor?.DisplayUnit
@@ -163,30 +158,16 @@ public static class ReadingFormatter
 
     private static string Number(double number, ReadingKind kind, int decimals, int? explicitDecimals, DisplayUnit unit, ReadingDescriptor? descriptor)
     {
-        bool imperial = unit == DisplayUnit.Fahrenheit;
-        switch (kind)
-        {
-            case ReadingKind.Temperature when imperial:
-                number = number * 9 / 5 + 32;
-                break;
-            case ReadingKind.Speed when imperial:
-                number /= KilometresPerMile;
-                break;
-            case ReadingKind.Depth:
-                return Depth(number, imperial, explicitDecimals, descriptor);
-        }
+        if (kind == ReadingKind.Depth)
+            return Depth(DisplayUnits.ToDisplay(kind, number, unit, descriptor), explicitDecimals);
 
+        number = DisplayUnits.ToDisplay(kind, number, unit, descriptor);
         number = Math.Round(number, decimals, MidpointRounding.AwayFromZero);
         return number.ToString("F" + decimals.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
     }
 
-    private const double KilometresPerMile = 1.609344;
-
-    private static string Depth(double number, bool imperial, int? explicitDecimals, ReadingDescriptor? descriptor)
+    private static string Depth(double number, int? explicitDecimals)
     {
-        if (imperial)
-            number /= CanonicalDepth(descriptor) == DepthUnit.Centimetre ? 2.54 : 25.4;
-
         if (number <= 0)
             return "0";
 

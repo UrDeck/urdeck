@@ -1010,6 +1010,34 @@ public sealed class WeatherProviderTests : IDisposable
     }
 
     [Fact]
+    public async Task Suggestions_ForAPlace_ListTheMatchesWithTheirCoordinates()
+    {
+        WeatherProvider provider = Started();
+
+        var suggestions = await provider.SuggestAsync("place", "Springfield", CancellationToken.None);
+
+        Assert.Equal(GeocodingClient.Candidates, suggestions.Count);
+        var first = suggestions[0];
+        Assert.False(string.IsNullOrEmpty(first.Label));
+        Assert.Equal(first.Label + ", " + first.Detail, first.Values["location"]!.GetValue<string>());
+        Assert.NotNull(first.Values["latitude"]);
+        Assert.NotNull(first.Values["longitude"]);
+        Assert.Equal(["place"], provider.SuggestionKinds);
+    }
+
+    [Fact]
+    public async Task Suggestions_ForNoMatch_AreEmpty_AndAnErrorPropagates()
+    {
+        WeatherProvider provider = Started();
+
+        Assert.Empty(await provider.SuggestAsync("place", "qqqq", CancellationToken.None));
+        Assert.Empty(await provider.SuggestAsync("colour", "Zurich", CancellationToken.None));
+
+        _http.Failure = new HttpRequestException("offline");
+        await Assert.ThrowsAsync<HttpRequestException>(() => provider.SuggestAsync("place", "Zurich", CancellationToken.None));
+    }
+
+    [Fact]
     public async Task TheRealClient_RefusesAnUnencryptedAddress()
     {
         using var http = new WeatherHttp();

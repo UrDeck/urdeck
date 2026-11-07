@@ -135,13 +135,26 @@ export const readCatalog = (root = siteRoot()) => JSON.parse(readFileSync(join(r
 
 /** The type column of a widget setting, from the catalog's type names. Backticks mark code. */
 export function settingValue(setting) {
+  const bounds = (word) => {
+    const { min, max } = setting;
+    if (typeof min === 'number' && typeof max === 'number') return `${word} from ${min} to ${max}`;
+    if (typeof min === 'number') return `${word}, at least ${min}`;
+    if (typeof max === 'number') return `${word}, at most ${max}`;
+    return word;
+  };
   switch (setting.type) {
     case 'onOff': return 'true or false';
-    case 'number': return 'number';
-    case 'wholeNumber': return 'whole number';
+    case 'number': return bounds('number');
+    case 'wholeNumber': return bounds('whole number');
     case 'text': return 'text';
     case 'list': return 'list';
-    case 'values': return (setting.values ?? []).map((v) => code(v)).join(', ');
+    case 'values': return (setting.values ?? []).filter((v) => v !== '').map((v) => code(v)).join(', ');
+    case 'reading': return 'a reading id, `provider:path`';
+    case 'action': return 'an action id, `provider:path`';
+    case 'unit': return code('celsius') + ', ' + code('fahrenheit');
+    case 'place': return 'a place name';
+    case 'launchTarget': return 'an application, file, folder or address';
+    case 'icon': return 'a theme icon key or an image file';
     default: return setting.type;
   }
 }

@@ -66,7 +66,7 @@ test('no record at all is a problem of its own', () => {
 
 test('a provider that declares settings and no page shows them fails, one that is shown does not', () => {
   const c = catalog();
-  c.providers = [{ id: 'homeassistant', settings: [{ key: 'url' }, { key: 'token' }] }, { id: 'system', settings: [] }];
+  c.providers = [{ id: 'homeassistant', settings: [{ name: 'url' }, { name: 'token' }] }, { id: 'system', settings: [] }];
   assert.match(check({ catalog: c }).join(), /provider "homeassistant" declares settings and no page shows them/);
 
   const shown = [...records(), { kind: 'providerSettings', provider: 'homeassistant', names: ['url'] }];

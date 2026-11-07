@@ -10,8 +10,7 @@
           "width": 4,
           "height": 2,
           "format": "24h",
-          "showDate": true,
-          "fontSize": 1.0
+          "showDate": true
         },
         {
           "typeId": "urdeck.widgets.stats",

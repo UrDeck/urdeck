@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
-using System.Collections;
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -11,9 +8,10 @@ using System.Text.Json.Serialization;
 using UrDeck.Engine.Backgrounds;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Plugin;
+using UrDeck.Engine.Settings;
 using UrDeck.Engine.Themes;
 using UrDeck.Preview;
-using UrDeck.Sdk;
+using UrDeck.Sdk.Settings;
 
 namespace UrDeck.Cli;
 
@@ -146,28 +144,16 @@ internal static class CatalogExportRunner
     }
 
     /// <summary>
-    /// A provider's declared settings beyond the base ones: key, type (text, number, wholeNumber, onOff or secret), label, help, default,
-    /// whether it is required, and for a secret the environment variable that sets it. Never a value.
+    /// A provider's declared settings beyond the base ones, written like a widget's (<see cref="SettingsOf"/>), plus for a secret the
+    /// environment variable that sets it. Never a value.
     /// </summary>
     internal static IEnumerable<JsonNode> ProviderSettingsOf(UrDeck.Engine.Data.ProviderDescriptor provider) =>
-        provider.Schema.Settings.Select(s => (JsonNode)new JsonObject
+        provider.Schema.Settings.Select(s =>
         {
-            ["key"] = s.Key,
-            ["type"] = s.Type switch
-            {
-                UrDeck.Engine.Data.SettingType.Text => "text",
-                UrDeck.Engine.Data.SettingType.WholeNumber => "wholeNumber",
-                UrDeck.Engine.Data.SettingType.Number => "number",
-                UrDeck.Engine.Data.SettingType.Toggle => "onOff",
-                _ => "secret",
-            },
-            ["label"] = s.Label,
-            ["help"] = s.Help,
-            ["default"] = s.IsSecret ? null : JsonSerializer.SerializeToNode(s.Default, s.Default?.GetType() ?? typeof(object), ConfigOptions),
-            ["required"] = s.Required,
-            ["secret"] = s.IsSecret,
-            ["environmentVariable"] = s.IsSecret ? UrDeck.Engine.Secrets.SecretStore.EnvironmentName(provider.Id, s.Key) : null,
-        }).OrderBy(s => (string)s["key"]!, StringComparer.Ordinal);
+            var node = SettingNode(s);
+            node["environmentVariable"] = s.IsSecret ? UrDeck.Engine.Secrets.SecretStore.EnvironmentName(provider.Id, s.Key) : null;
+            return (JsonNode)node;
+        });
 
     private static JsonNode Widget(WidgetDescriptor descriptor)
     {
@@ -193,70 +179,107 @@ internal static class CatalogExportRunner
             ["category"] = descriptor.Category,
             ["sizes"] = Array(sizes),
             ["defaultConfig"] = defaults,
-            ["settings"] = Array(Settings(descriptor.ConfigType)),
+            ["settings"] = Array(SettingsOf(descriptor.Settings)),
         };
     }
 
     /// <summary>
-    /// The settings of a configuration type beyond <see cref="WidgetConfig"/>'s own: its name in <c>urdeck-config.json</c>, its
-    /// type (or the values it accepts) and its default for a widget written without it (<c>new TConfig()</c>).
+    /// The declared settings of a schema (a widget's configuration, a provider's settings or a list item), in display order: its
+    /// name in <c>urdeck-config.json</c>, kind, label, help, group, sizes, options, limits, fallback, default and, for a list of
+    /// positions, the positions per size and the item's settings. The one writer for widgets and providers.
     /// </summary>
-    internal static IEnumerable<JsonNode> Settings(Type configType)
-    {
-        object fresh = Activator.CreateInstance(configType)!;
-        return configType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.DeclaringType != typeof(WidgetConfig) && p.CanWrite && p.CanRead && p.GetIndexParameters().Length == 0
-                && p.GetCustomAttribute<JsonExtensionDataAttribute>() == null && p.GetCustomAttribute<JsonIgnoreAttribute>() == null)
-            .Select(p =>
-            {
-                var setting = new JsonObject
-                {
-                    ["name"] = p.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? JsonNamingPolicy.CamelCase.ConvertName(p.Name),
-                    ["type"] = TypeOf(p, out var values),
-                    ["default"] = JsonSerializer.SerializeToNode(p.GetValue(fresh), p.PropertyType, ConfigOptions),
-                };
-                if (values != null)
-                    setting["values"] = values;
-                if (p.GetCustomAttribute<RangeAttribute>() is { } range)
-                {
-                    setting["min"] = JsonValue.Create(Convert.ToDouble(range.Minimum, System.Globalization.CultureInfo.InvariantCulture));
-                    setting["max"] = JsonValue.Create(Convert.ToDouble(range.Maximum, System.Globalization.CultureInfo.InvariantCulture));
-                }
+    internal static IEnumerable<JsonNode> SettingsOf(SettingSchema schema) => schema.Settings.Select(s => (JsonNode)SettingNode(s));
 
-                return (JsonNode)setting;
-            })
-            .OrderBy(s => (string)s["name"]!, StringComparer.Ordinal);
-    }
-
-    /// <summary>text, number, wholeNumber, onOff, list, object, values (the accepted values follow) or any.</summary>
-    private static string TypeOf(PropertyInfo property, out JsonArray? values)
+    private static JsonObject SettingNode(SettingDescriptor s)
     {
-        values = null;
-        var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-        if (property.GetCustomAttribute<AllowedValuesAttribute>() is { } allowed)
+        var node = new JsonObject
         {
-            if (allowed.Values.All(v => v is bool))
-                return "onOff";
-            values = new JsonArray([.. allowed.Values.Select(v => JsonValue.Create(Convert.ToString(v, System.Globalization.CultureInfo.InvariantCulture)))]);
-            return "values";
+            ["name"] = s.Key,
+            ["kind"] = s.Kind,
+            ["type"] = LegacyType(s),
+            ["label"] = s.Label,
+            ["help"] = s.Help,
+            ["default"] = s.IsSecret ? null : JsonSerializer.SerializeToNode(s.Default, s.Default?.GetType() ?? typeof(object), ConfigOptions),
+            ["required"] = s.Required,
+            ["secret"] = s.IsSecret,
+        };
+        if (s.Group != null)
+            node["group"] = s.Group;
+        if (s.Sizes is { Count: > 0 })
+            node["sizes"] = Strings(s.Sizes);
+        if (s.When != null)
+            node["shownWhen"] = new JsonObject { ["key"] = s.When.Key, ["values"] = Strings(s.When.Values) };
+        if (s.Fallback.Text != null || s.Fallback.From != FallbackSource.None)
+        {
+            node["fallback"] = new JsonObject
+            {
+                ["text"] = s.Fallback.Text,
+                ["from"] = JsonNamingPolicy.CamelCase.ConvertName(s.Fallback.From.ToString()),
+                ["reading"] = s.Fallback.ReadingSetting,
+            };
         }
 
-        if (property.GetCustomAttribute<RangeAttribute>() is { Minimum: int, Maximum: int })
-            return "wholeNumber";
-        if (type == typeof(string))
-            return "text";
-        if (type == typeof(bool))
-            return "onOff";
-        if (type == typeof(int) || type == typeof(long))
-            return "wholeNumber";
-        if (type == typeof(double) || type == typeof(float) || type == typeof(decimal))
-            return "number";
-        if (type == typeof(JsonElement))
-            return "any";
-        if (typeof(IEnumerable).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type))
-            return "list";
-        return "object";
+        if (s.AllowsNone)
+            node["allowsNone"] = true;
+        if (s.Options.Count > 0)
+        {
+            node["values"] = Strings(s.Options.Select(o => o.Value));
+            node["options"] = Array(s.Options.Select(o => (JsonNode)new JsonObject { ["value"] = o.Value, ["label"] = o.Label }));
+        }
+
+        if (s.Number != null)
+        {
+            node["min"] = s.Number.Min;
+            node["max"] = s.Number.Max;
+            if (s.Number.Step > 0)
+                node["step"] = s.Number.Step;
+            if (s.Number.Unit != null)
+                node["unit"] = s.Number.Unit;
+            if (s.Number.UnitFromReading != null)
+                node["unitFromReading"] = s.Number.UnitFromReading;
+        }
+
+        if (s.Reading != null)
+        {
+            node["reading"] = new JsonObject
+            {
+                ["filter"] = s.Reading.Filter.ToString(),
+                ["provider"] = s.Reading.Provider,
+            };
+        }
+
+        if (s.OwnerReading != null)
+            node["readingSetting"] = s.OwnerReading;
+        if (s.Place != null)
+            node["place"] = new JsonObject { ["source"] = s.Place.Source, ["latitude"] = s.Place.LatitudeSetting, ["longitude"] = s.Place.LongitudeSetting };
+        if (s.Launch != null)
+            node["launch"] = s.Launch.Value.ToString();
+        if (s.DisabledInRoles.Count > 0)
+        {
+            node["disabledInRoles"] = Strings(s.DisabledInRoles);
+            node["disabledHelp"] = s.DisabledHelp;
+        }
+
+        if (s.Positions != null)
+        {
+            node["positions"] = Array(s.Positions.Sizes.Select(p => (JsonNode)new JsonObject { ["size"] = p.Size, ["roles"] = Strings(p.Roles) }));
+            node["item"] = Array(SettingsOf(s.Item!));
+        }
+
+        return node;
     }
+
+    /// <summary>The older description of a setting's type: text, number, wholeNumber, onOff, values (the accepted values follow), list, secret or the kind.</summary>
+    private static string LegacyType(SettingDescriptor s) => s.Kind switch
+    {
+        SettingKinds.Toggle => "onOff",
+        SettingKinds.Choice => "values",
+        SettingKinds.Text => "text",
+        SettingKinds.Number or SettingKinds.Range => s.Number is { WholeNumber: true } ? "wholeNumber" : "number",
+        SettingKinds.Secret => "secret",
+        SettingKinds.Positions => "list",
+        var other => other,
+    };
 
     private static JsonObject Parameters(IReadOnlyDictionary<string, ManifestParameter> parameters)
     {

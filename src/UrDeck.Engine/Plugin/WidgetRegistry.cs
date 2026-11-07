@@ -4,6 +4,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using UrDeck.Engine.Config;
+using UrDeck.Engine.Settings;
 using UrDeck.Sdk;
 
 namespace UrDeck.Engine.Plugin;
@@ -31,6 +32,9 @@ public sealed record WidgetDescriptor(
         get => _previewSizes ?? SupportedSizes;
         init => _previewSizes = value;
     }
+
+    /// <summary>The settings the widget's configuration type declares (see settings-metadata); empty when it declares none.</summary>
+    public SettingSchema Settings { get; init; } = null!;
 
     public static WidgetDescriptor? TryCreate(Type type, out string? rejectReason)
     {
@@ -64,6 +68,13 @@ public sealed record WidgetDescriptor(
         if (configType == null)
         { rejectReason = "cannot determine config type"; return null; }
 
+        if (!SettingSchema.TryRead(configType, typeof(WidgetConfig), out var schema, out string? schemaError))
+        { rejectReason = schemaError; return null; }
+
+        rejectReason = CheckSizes(schema!, sizes);
+        if (rejectReason != null)
+            return null;
+
         RefreshStrategy refresh;
         TimeSpan? interval = null;
         if (tick != null)
@@ -94,7 +105,30 @@ public sealed record WidgetDescriptor(
             interval)
         {
             PreviewSizes = declared.Where(s => s.Preview).Select(s => new System.Drawing.Size(s.Width, s.Height)).ToArray(),
+            Settings = schema!,
         };
+    }
+
+    /// <summary>The reason a declaration names a size the widget does not support; null when every size is one of its own.</summary>
+    private static string? CheckSizes(SettingSchema schema, System.Drawing.Size[] sizes)
+    {
+        var known = sizes.Select(s => $"{s.Width}x{s.Height}").ToHashSet(StringComparer.Ordinal);
+        foreach (var setting in schema.Settings)
+        {
+            foreach (string size in setting.Sizes ?? [])
+            {
+                if (!known.Contains(size))
+                    return $"setting '{setting.Key}' applies at the size {size}, which the widget does not support";
+            }
+
+            foreach (var positions in setting.Positions?.Sizes ?? [])
+            {
+                if (!known.Contains(positions.Size))
+                    return $"setting '{setting.Key}' declares positions for the size {positions.Size}, which the widget does not support";
+            }
+        }
+
+        return null;
     }
 
     private static Type? FindConfigType(Type type) =>

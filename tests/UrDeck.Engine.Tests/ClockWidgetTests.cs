@@ -86,17 +86,6 @@ public class ClockWidgetTests
     }
 
     [Fact]
-    public void TextColorOverride_ColoursTheTime()
-    {
-        var clock = new ClockWidget();
-        clock.Configure(new ClockConfig { TextColor = "#ff0000", ShowDate = false });
-        using var bitmap = Paint(clock, NoonOnTheMinute);
-
-        Assert.True(HasPixel(bitmap, c => c.Red > 200 && c.Green < 40 && c.Blue < 40 && c.Alpha > 200));
-        Assert.False(HasPixel(bitmap, c => c.Alpha > 200 && c.Red > 200 && c.Green > 200 && c.Blue > 200));
-    }
-
-    [Fact]
     public void HiddenDate_DrawsLessThanWithDate()
     {
         var withDate = new ClockWidget();
@@ -110,16 +99,21 @@ public class ClockWidgetTests
     }
 
     [Fact]
-    public void FontSizeBelowOne_DrawsSmallerTime()
+    public void OldStylingKeys_AreIgnoredAndKept()
     {
-        var full = new ClockWidget();
-        var half = new ClockWidget();
-        full.Configure(new ClockConfig { ShowDate = false });
-        half.Configure(new ClockConfig { ShowDate = false, FontSize = 0.5 });
-        using var a = Paint(full, NoonOnTheMinute);
-        using var b = Paint(half, NoonOnTheMinute);
+        // textColor and fontSize were removed: the time is drawn from the theme at the size it fits, and both keys stay in the file.
+        var plain = new ClockWidget();
+        var old = new ClockWidget();
+        plain.Configure(new ClockConfig { ShowDate = false });
+        var config = System.Text.Json.JsonSerializer.Deserialize<ClockConfig>(
+            """{ "showDate": false, "textColor": "#ff0000", "fontSize": 0.5 }""", System.Text.Json.JsonSerializerOptions.Web)!;
+        old.Configure(config);
+        using var a = Paint(plain, NoonOnTheMinute);
+        using var b = Paint(old, NoonOnTheMinute);
 
-        Assert.InRange(InkRows(b) / (double)InkRows(a), 0.4, 0.6);
+        Assert.Equal(a.Bytes, b.Bytes);
+        Assert.True(config.ExtensionData!.ContainsKey("textColor"));
+        Assert.True(config.ExtensionData.ContainsKey("fontSize"));
     }
 
     [Fact]

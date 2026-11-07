@@ -46,7 +46,7 @@ internal static class FlapDisplay
     /// <summary>The characters of the four tiles for a frame: <see cref="From"/> to <see cref="To"/> at <see cref="Progress"/>, or at rest on <see cref="To"/>.</summary>
     internal readonly record struct Flip(string From, string To, float? Progress);
 
-    public static Layout Fit(Theme theme, SKRect slot, bool withSuffix, float scale, string? widestSuffix = null)
+    public static Layout Fit(Theme theme, SKRect slot, bool withSuffix, string? widestSuffix = null)
     {
         using var valueFont = new SKFont(theme.GetTypeface(TextRole.Value), ReferenceSize);
         using var unitFont = new SKFont(theme.GetTypeface(TextRole.Unit), ReferenceSize);
@@ -59,7 +59,7 @@ internal static class FlapDisplay
             : 0f;
         float widthPerHeight = 4 * TileAspect + 2 * TileGap + ColonWidth + suffixPerHeight;
 
-        float height = Math.Min(slot.Height, slot.Width / widthPerHeight) * Math.Clamp(scale, 0.1f, 1f);
+        float height = Math.Min(slot.Height, slot.Width / widthPerHeight);
         height = Math.Max(1f, height);
         float width = widthPerHeight * height;
         return new Layout(

@@ -459,7 +459,9 @@ and hand it to the provider when it starts; a provider that declares none receiv
 - A property MAY be marked required. While a required setting is missing (absent, empty, or a secret with no value; see
   provider-secrets), the provider is not started and each of its readings is unavailable with a reason that names what
   to set (the provider's own text, or a default naming the provider and the setting)
-- Each property carries a label and a help text for the settings window and the generated reference
+- Each setting is declared as settings-metadata, "Declared Settings", describes, with the same kinds and modifiers as a
+  widget's settings; a secret is a Secret setting. The label and help text are used by the editor and the generated
+  reference
 
 #### Scenario: Address reaches the provider
 - **WHEN** the configuration has `"providers": {"homeassistant": {"url": "https://ha.home"}}`
@@ -469,6 +471,11 @@ and hand it to the provider when it starts; a provider that declares none receiv
 - **WHEN** a widget shows a Home Assistant reading and `providers.homeassistant.url` is absent
 - **THEN** the provider is not started and the reading is unavailable with a reason that says to set up Home Assistant
   in Settings
+
+#### Scenario: Same declaration as widgets
+- **WHEN** the schema of the Home Assistant provider's settings is read
+- **THEN** `url` is a required text setting and `token` a secret setting whose context is `url`, described the same way
+  a widget's settings are
 
 ### Requirement: A Settings Change Restarts Only Its Provider
 On configuration reload, and when a secret is saved or removed, the engine MUST restart a running provider whose settings
@@ -530,4 +537,3 @@ MUST be the same as those it would give when the readings are shown.
 #### Scenario: A provider without a listing
 - **WHEN** the readings of `weather` are listed
 - **THEN** the answer says the provider cannot list its readings
-

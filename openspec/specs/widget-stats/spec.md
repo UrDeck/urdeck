@@ -6,8 +6,8 @@ Defines the first-party stats widget, which shows readings from any provider. It
 grows into the performance widget by adding sizes and presentations.
 ## Requirements
 ### Requirement: Stats Widget Identity
-UrDeck MUST ship a widget with the type id `urdeck.widgets.stats` that supports the sizes 1x1, 2x2, 4x2 and 4x4. It
-shows one reading at 1x1 and 2x2, up to five at 4x2 and up to seven at 4x4 (see "Stats Compositions"). It MUST
+UrDeck MUST ship a widget with the type id `urdeck.widgets.stats` that supports the sizes 1x1, 2x1, 2x2, 4x2 and 4x4.
+It shows one reading at 1x1, 2x1 and 2x2, up to five at 4x2 and up to seven at 4x4 (see "Stats Compositions"). It MUST
 reference only the widget SDK, MUST NOT reference any provider's assembly, and MUST be refreshed by reading changes
 only (no timer).
 
@@ -21,7 +21,11 @@ only (no timer).
 
 #### Scenario: Larger sizes are offered
 - **WHEN** the registry lists the sizes of `urdeck.widgets.stats`
-- **THEN** they are 1x1, 2x2, 4x2 and 4x4
+- **THEN** they are 1x1, 2x1, 2x2, 4x2 and 4x4
+
+#### Scenario: The sample page's 2x1 cards
+- **WHEN** the sample page, which has two Stats widgets at 2x1, is drawn
+- **THEN** each shows one reading, exactly as before the size was declared
 
 ### Requirement: Slot Configuration
 The widget's settings MUST be a list named `slots`. Each slot describes one reading on the card:
@@ -278,4 +282,3 @@ fraction has no status.
 #### Scenario: No fraction
 - **WHEN** a gauge position has a reading with no fraction
 - **THEN** no status is drawn
-

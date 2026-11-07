@@ -9,7 +9,7 @@ namespace UrDeck.Sdk.Data;
 /// <summary>
 /// The user's settings for one data provider: the object <c>providers.&lt;id&gt;</c> of <c>urdeck-config.json</c>. A provider
 /// that needs more (an address, a token) derives from <see cref="DataProvider{TSettings}"/> with a subclass of this and marks
-/// each property with <see cref="SettingAttribute"/>; the engine binds the file to it and hands it over at
+/// each property with <see cref="Settings.SettingAttribute"/>; the engine binds the file to it and hands it over at
 /// <see cref="IDataProvider.Start"/>. Keys the engine does not know are kept in the file for the provider.
 /// </summary>
 public class ProviderSettings
