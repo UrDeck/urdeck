@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "futureTopLevel": {
+    "kept": true
+  },
+  "pages": [
+    {
+      "name": "Main",
+      "widgets": [
+        {
+          "typeId": "urdeck.widgets.clock",
+          "col": 0,
+          "row": 0,
+          "width": 2,
+          "height": 1,
+          "format": "12h"
+        },
+        {
+          "typeId": "acme.widgets.ticker",
+          "col": 2,
+          "row": 0,
+          "width": 2,
+          "height": 1,
+          "symbols": [
+            "A",
+            "B"
+          ]
+        }
+      ]
+    }
+  ],
+  "theme": "default-dark"
+}

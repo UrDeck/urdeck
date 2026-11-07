@@ -17,10 +17,11 @@ public static class SecretMover
 {
     /// <summary>
     /// Moves each text value found under a key that a provider declares secret. Returns true when the configuration changed and
-    /// must be saved. A configuration newer than the host is never written, so its values stay (used for this run and said so in
+    /// must be saved; <paramref name="moved"/>, when given, receives the provider id and the file's own spelling of each key moved. A configuration newer than the host is never written, so its values stay (used for this run and said so in
     /// the log), and where nothing can be stored they stay too, in plain text.
     /// </summary>
-    public static bool MoveFromConfig(UrDeckConfig config, IEnumerable<ProviderDescriptor> providers, ISecretStore store, bool configIsNewerThanHost)
+    public static bool MoveFromConfig(UrDeckConfig config, IEnumerable<ProviderDescriptor> providers, ISecretStore store, bool configIsNewerThanHost,
+        List<(string ProviderId, string Key)>? moved = null)
     {
         if (config.Providers == null)
             return false;
@@ -65,6 +66,7 @@ public static class SecretMover
                 }
 
                 settings.ExtensionData.Remove(key);
+                moved?.Add((descriptor.Id, key));
                 changed = true;
                 UrDeckLog.Info($"Secret {name}: moved from urdeck-config.json to Credential Manager");
             }

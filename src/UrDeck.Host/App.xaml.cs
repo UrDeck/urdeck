@@ -53,7 +53,7 @@ public partial class App : Application
             Program.Data,
             saveConfiguration: !demo,
             demo: demo ? new SampleClock(() => DateTime.Now, DateTime.Now) : null);
-        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Shaders, _host.Data.Root, _host.SaveConfiguration);
+        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Shaders, _host.Data.Root, _host.RememberDisplay);
         _window.Closed += (_, _) =>
         {
             // Quitting closes Settings too: it holds the host, which is disposed next.

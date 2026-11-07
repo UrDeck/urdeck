@@ -131,10 +131,18 @@ public class UrDeckConfig
         Pages.Count == 0 ? null : Pages[Math.Clamp(ActivePage, 0, Pages.Count - 1)];
 }
 
+
+/// <summary>
+/// Loads the configuration file (first run, migration) into a <see cref="ConfigDocument"/> and is the typed view of it for the
+/// deck. The document is the only writer; this class never writes except to create a missing file.
+/// </summary>
 public sealed class ConfigStore : IDisposable
 {
     /// <summary>The configuration format version this build reads and writes.</summary>
     public const int CurrentVersion = 1;
+
+    /// <summary>The deck reloads this long after the last change, so a burst (dragging a slider) rebuilds it a few times, not for each step.</summary>
+    public static readonly TimeSpan CoalesceDelay = TimeSpan.FromMilliseconds(150);
 
     private static readonly IReadOnlyList<(int From, Action<JsonObject> Apply)> NoMigrations = Array.Empty<(int, Action<JsonObject>)>();
 
@@ -143,121 +151,150 @@ public sealed class ConfigStore : IDisposable
     private readonly bool _create;
     private readonly int _currentVersion;
     private readonly IReadOnlyList<(int From, Action<JsonObject> Apply)> _migrations;
-    private FileSystemWatcher? _watcher;
-    private Timer? _debounce;
-    private DateTime _ignoreChangesUntil;
-    private int? _migratedFrom;
-    private byte[]? _originalBytes;
-    private bool _newerThanHost;
-    private bool _newerNoted;
+    private readonly TimeProvider _time;
+    private readonly Action<Action> _post;
+    private ITimer? _coalesce;
+    private bool _disposed;
 
-    /// <summary>Raised on a thread-pool thread after the file changed on disk and was reloaded.</summary>
+    /// <summary>Raised on the owner thread 150 ms after the last change to the document that matters to the deck (not the host's own edits).</summary>
     public event Action<UrDeckConfig>? ConfigChanged;
 
     /// <param name="configPath">The configuration file.</param>
     /// <param name="samplePath">The sample page that seeds a missing file; without it (or when it is missing) a configuration with one empty page is used.</param>
     /// <param name="createIfMissing">
-    /// True (the deck) writes the missing file. False (<c>--snapshot</c>, <c>--demo</c>) reads the sample in memory and writes nothing.
+    /// True (the deck) writes the missing file and keeps the document writable. False (<c>--snapshot</c>, <c>--demo</c>) reads the
+    /// sample in memory, watches nothing and writes nothing: the document is read-only.
     /// </param>
     public ConfigStore(string configPath, string? samplePath = null, bool createIfMissing = true)
         : this(configPath, samplePath, createIfMissing, CurrentVersion, NoMigrations)
     {
     }
 
-    /// <summary>Tests give their own current version and migrations; version 1 has none.</summary>
+    /// <summary>Tests give their own current version, migrations, clock and way of reaching the owner thread; version 1 has no migrations.</summary>
     internal ConfigStore(string configPath, string? samplePath, bool createIfMissing, int currentVersion,
-        IReadOnlyList<(int From, Action<JsonObject> Apply)> migrations)
+        IReadOnlyList<(int From, Action<JsonObject> Apply)> migrations, TimeProvider? time = null, Action<Action>? post = null)
     {
         _configPath = configPath;
         _samplePath = samplePath;
         _create = createIfMissing;
         _currentVersion = currentVersion;
         _migrations = migrations;
-        Load();
-        WatchForConfigChanges();
+        _time = time ?? TimeProvider.System;
+        var context = SynchronizationContext.Current;
+        Action<Action>? owner = post ?? (context == null ? null : action => context.Post(_ => action(), null));
+        _post = owner ?? (static action => action());
+        Document = Load(owner);
+        _ = Document.Typed; // a file that cannot be bound fails here, as it always did
+        Document.Changed += OnDocumentChanged;
     }
 
-    public UrDeckConfig Config { get; private set; } = new UrDeckConfig();
+    /// <summary>The configuration as a document: edit it by path, undo, flush.</summary>
+    public ConfigDocument Document { get; }
+
+    /// <summary>The configuration the deck uses; a new object after every change.</summary>
+    public UrDeckConfig Config => Document.Typed;
 
     /// <summary>Whether the file's <c>version</c> is newer than this build's: it is read and never written.</summary>
-    public bool IsNewerThanHost => _newerThanHost;
+    public bool IsNewerThanHost => Document.IsNewerThanHost;
 
-    public void Load()
+    /// <summary>
+    /// Remembers <see cref="Config"/>'s <c>display</c> (set or cleared in place by placement or the settings window) as a host
+    /// edit: the document then holds it and writes it. Does nothing in a read-only document.
+    /// </summary>
+    public void CommitDisplay()
     {
-        _migratedFrom = null;
-        _originalBytes = null;
-        _newerThanHost = false;
-
-        if (!File.Exists(_configPath))
-        {
-            LoadMissing();
-            return;
-        }
-
-        byte[] bytes = ReadShared(_configPath);
-        string text = new StreamReader(new MemoryStream(bytes), Encoding.UTF8).ReadToEnd();
-        Config = ParseVersioned(text, bytes);
+        var display = Config.Display;
+        JsonNode? node = display == null ? null : JsonSerializer.SerializeToNode(display, UrDeckJson.Options);
+        Document.Edit("Remember the display", e => e.Set("/display", node), EditOrigin.Host);
     }
 
-    // First run (data-folder spec): the sample page when there is one, otherwise a configuration with one empty page.
-    private void LoadMissing()
+    private ConfigDocument Load(Action<Action>? post)
     {
-        bool hasSample = _samplePath != null && File.Exists(_samplePath);
-        if (!_create)
-        {
-            Config = hasSample ? ParseSample() : new UrDeckConfig();
-            return;
-        }
+        var disk = new DiskConfigFileSystem(_configPath, watch: _create);
+        byte[]? bytes = disk.Read();
+        ParsedConfig parsed;
 
-        string? dir = Path.GetDirectoryName(Path.GetFullPath(_configPath));
-        if (!string.IsNullOrEmpty(dir))
-            Directory.CreateDirectory(dir);
-
-        _ignoreChangesUntil = DateTime.UtcNow.AddSeconds(2);
-        if (hasSample)
+        if (bytes == null)
         {
-            File.Copy(_samplePath!, _configPath);
-            Config = ParseVersioned(File.ReadAllText(_configPath), null);
-            UrDeckLog.Info($"Configuration created at {_configPath} from the sample page");
+            bool hasSample = _samplePath != null && File.Exists(_samplePath);
+            if (!_create)
+            {
+                disk.Dispose();
+                var root = hasSample ? ParseSample() : DefaultRoot();
+                return new ConfigDocument(root, readOnly: true, time: _time, post: post, currentVersion: _currentVersion);
+            }
+
+            // First run (data-folder spec): the sample page when there is one, otherwise a configuration with one empty page.
+            string? dir = Path.GetDirectoryName(Path.GetFullPath(_configPath));
+            if (!string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
+
+            if (hasSample)
+            {
+                File.Copy(_samplePath!, _configPath);
+                bytes = disk.Read()!;
+                parsed = Prepare(ReadText(bytes), null);
+                UrDeckLog.Info($"Configuration created at {_configPath} from the sample page");
+            }
+            else
+            {
+                parsed = new ParsedConfig(DefaultRoot(), false, null, null);
+                bytes = Encoding.UTF8.GetBytes(parsed.Root.ToJsonString(UrDeckJson.Options) + "\n");
+                disk.Write(bytes);
+                UrDeckLog.Info($"Configuration created at {_configPath} with an empty page");
+            }
         }
         else
         {
-            Config = new UrDeckConfig();
-            Save();
-            UrDeckLog.Info($"Configuration created at {_configPath} with an empty page");
+            parsed = Prepare(ReadText(bytes), bytes);
         }
+
+        if (!_create)
+        {
+            disk.Dispose();
+            return new ConfigDocument(parsed.Root, readOnly: true, time: _time, post: post, currentVersion: _currentVersion, newerThanHost: parsed.NewerThanHost);
+        }
+
+        var document = new ConfigDocument(parsed.Root, readOnly: false, disk, Prepare, _time, post, _currentVersion, parsed.NewerThanHost);
+        document.NoteFileContent(bytes);
+        if (parsed.MigratedFrom is { } from && parsed.Original is { } original)
+            document.NoteMigration(from, original);
+        return document;
     }
 
-    private UrDeckConfig ParseSample()
+    private static string ReadText(byte[] bytes) => new StreamReader(new MemoryStream(bytes), Encoding.UTF8).ReadToEnd();
+
+    private static JsonObject DefaultRoot() => (JsonObject)JsonSerializer.SerializeToNode(new UrDeckConfig(), UrDeckJson.Options)!;
+
+    private JsonObject ParseSample()
     {
         try
         {
-            return ParseVersioned(File.ReadAllText(_samplePath!), null);
+            return Prepare(File.ReadAllText(_samplePath!), null).Root;
         }
         catch (Exception ex) when (ex is JsonException or IOException)
         {
             UrDeckLog.Warn($"Could not read the sample page {_samplePath}: {ex.Message}");
-            return new UrDeckConfig();
+            return DefaultRoot();
         }
     }
 
     // The version is read from the JSON before it is bound, so a migration can reshape the file.
-    private UrDeckConfig ParseVersioned(string text, byte[]? original)
+    private ParsedConfig Prepare(string text, byte[]? original)
     {
         var options = new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
         if (JsonNode.Parse(text, documentOptions: options) is not JsonObject root)
-            return Parse(text, warn: true);
+            throw new JsonException("The configuration must be a JSON object.");
 
         int version = ReadVersion(root);
         if (version > _currentVersion)
         {
-            _newerThanHost = true;
             UrDeckLog.Warn($"{_configPath} has configuration version {version}, newer than this build's {_currentVersion}: reading it as well as possible, never writing it.");
-            return Parse(text, warn: true);
+            return new ParsedConfig(root, true, null, null);
         }
 
         if (version == _currentVersion)
-            return Parse(root.ToJsonString(), warn: true);
+            return new ParsedConfig(root, false, null, null);
 
         int from = version;
         while (version < _currentVersion)
@@ -269,9 +306,7 @@ public sealed class ConfigStore : IDisposable
             UrDeckLog.Info($"Configuration migrated from version {version - 1} to {version}");
         }
 
-        _migratedFrom = from;
-        _originalBytes = original;
-        return Parse(root.ToJsonString(), warn: true);
+        return new ParsedConfig(root, false, from, original);
     }
 
     private int ReadVersion(JsonObject root)
@@ -286,7 +321,7 @@ public sealed class ConfigStore : IDisposable
     }
 
     /// <summary>
-    /// Reads a configuration from its text as <see cref="Load"/> does, without a file, a watcher or a write: absent sections
+    /// Reads a configuration from its text without a file, a watcher or a write: absent sections
     /// are filled in and a configuration without pages gets one. With <paramref name="warn"/> its unknown values are logged.
     /// Throws <see cref="JsonException"/> on text that is not a configuration.
     /// </summary>
@@ -309,94 +344,25 @@ public sealed class ConfigStore : IDisposable
         return config;
     }
 
-    public void Save()
+    private void OnDocumentChanged(ConfigChange change)
     {
-        if (_newerThanHost)
-        {
-            if (!_newerNoted)
-            {
-                _newerNoted = true;
-                UrDeckLog.Warn($"{_configPath} is from a newer version of UrDeck and is left as it is; nothing is saved.");
-            }
-
-            return;
-        }
-
-        _ignoreChangesUntil = DateTime.UtcNow.AddSeconds(2);
-        if (_migratedFrom is { } from && _originalBytes is { } original)
-        {
-            string backup = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(_configPath))!, $"urdeck-config.v{from}.json");
-            File.WriteAllBytes(backup, original);
-            UrDeckLog.Info($"Configuration version {from} kept as {backup}");
-            _migratedFrom = null;
-            _originalBytes = null;
-        }
-
-        Config.Version = _currentVersion;
-        File.WriteAllText(_configPath, JsonSerializer.Serialize(Config, UrDeckJson.Options));
+        if (change.Origin == EditOrigin.Host || _disposed)
+            return; // the host's own edits (the remembered display, a moved secret) change nothing the deck shows
+        _coalesce ??= _time.CreateTimer(_ => _post(RaiseConfigChanged), null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+        _coalesce.Change(CoalesceDelay, Timeout.InfiniteTimeSpan);
     }
 
-    private static byte[] ReadShared(string path)
+    private void RaiseConfigChanged()
     {
-        // Editors often hold the file briefly while saving; retry a few times.
-        for (int attempt = 0; ; attempt++)
-        {
-            try
-            {
-                using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                using var buffer = new MemoryStream();
-                stream.CopyTo(buffer);
-                return buffer.ToArray();
-            }
-            catch (IOException) when (attempt < 5)
-            {
-                Thread.Sleep(100);
-            }
-        }
-    }
-
-    private void WatchForConfigChanges()
-    {
-        string? dir = Path.GetDirectoryName(Path.GetFullPath(_configPath));
-        if (string.IsNullOrEmpty(dir))
-            return;
-
-        _debounce = new Timer(_ => ReloadFromDisk());
-        _watcher = new FileSystemWatcher(dir, Path.GetFileName(_configPath))
-        {
-            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
-        };
-        _watcher.Changed += OnFileEvent;
-        _watcher.Created += OnFileEvent;
-        _watcher.Renamed += OnFileEvent;
-        _watcher.EnableRaisingEvents = true;
-    }
-
-    private void OnFileEvent(object sender, FileSystemEventArgs e)
-    {
-        if (DateTime.UtcNow < _ignoreChangesUntil)
-            return; // our own Save()
-        _debounce?.Change(TimeSpan.FromSeconds(1), Timeout.InfiniteTimeSpan);
-    }
-
-    private void ReloadFromDisk()
-    {
-        try
-        {
-            Load();
-            UrDeckLog.Info($"Config reloaded from {_configPath}");
+        if (!_disposed)
             ConfigChanged?.Invoke(Config);
-        }
-        catch (Exception ex)
-        {
-            // Keep running on the last good config (e.g. a half-typed JSON edit).
-            UrDeckLog.Warn($"Config reload failed, keeping previous config: {ex.Message}");
-        }
     }
 
     public void Dispose()
     {
-        _watcher?.Dispose();
-        _debounce?.Dispose();
+        _disposed = true;
+        _coalesce?.Dispose();
+        Document.Changed -= OnDocumentChanged;
+        Document.Dispose();
     }
 }
