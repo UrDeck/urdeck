@@ -91,6 +91,30 @@ Move one piece at a time, each a green build with the window behaving the same: 
 `WidgetView` delegating to it) → `PageSlots` → `PagerState` → `DeckSession` (with `MainWindow` delegating). Each step
 keeps the log lines byte-for-byte where the tests or docs refer to them.
 
+### D4. A second presenter in the same process (added 2026-11-06 for the editor)
+
+The editor's preview (`editor-shell`, design D2) is a `DeckSession` of its own with a presenter in the settings window.
+Build the session so that this needs no second refactor:
+
+- **No process-wide state in the session.** Several sessions may live at once on the deck's UI thread; nothing static
+  holds a session, a slot or a widget (the collectible-context rule applies to each).
+- **Injected inputs**: the configuration source (the typed config and its change event), the readings source (an
+  interface over what `ReadingHub` gives a widget: read, describe, subscribe; the preview passes a sample or composite
+  source), the theme and background inputs, the scheduler and the frame source. The window presenter's session gets
+  today's objects.
+- **Page chosen from outside**: `ShowPage(index or id)` moves the navigator with the normal settle; the deck's window
+  session exposes it for "the deck follows the editor" and raises `PageChanged` when a swipe settles.
+- **Input optional**: a session whose presenter feeds no input samples has no pager gestures and no taps; nothing in the
+  session assumes input exists.
+- **Layout exposed**: the current layout (each slot's card and cell rectangles in surface units, the dock's, the
+  indicator's) is readable, so a presenter can hit-test and draw overlays.
+- **Shown/hidden** already in `IDeckPresenter` stops subscriptions and frames; the preview uses it when minimised.
+- **One paint path for "all slots into one canvas"**: a helper that paints every visible slot of the current page and
+  the dock into one `SKCanvas` in z-order (what the direct presenter needs too); the window presenter keeps one canvas per
+  slot.
+
+Tests: two sessions with fake presenters on the same fake scheduler (independent pages, a reading change dirties slots in
+both, a plugin reload releases slots in both), a session with no input, and `ShowPage`.
 ## Risks / Trade-offs
 
 - [A subtle timing change (refresh, wake, frame registration) shows as a widget that stops updating or an idle cost

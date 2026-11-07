@@ -17,8 +17,14 @@
 - [ ] 3.3 `IDeckPresenter`; `MainWindow` becomes the window presenter with placement, delegating everything else to the session
 - [ ] 3.4 Tests with a fake presenter: config reload rebuilds once, unrelated reload keeps the background key, hidden deck holds no slots, page change keeps one page alive at rest, swipe builds the neighbour, reading change dirties only its slots
 
-## 4. Verify
+## 4. Second presenter (amendment of 2026-11-06, design D4)
 
-- [ ] 4.1 `dotnet build urdeck.slnx -c Release` with 0 warnings, `dotnet test urdeck.slnx -c Release`, the engine coverage floor, `dotnet format urdeck.slnx --severity warn`, the Linux test projects; goldens unchanged
-- [ ] 4.2 Owner, on the panel: a full page for ten minutes (values update, clock flips, weather moves), swipe and dot tap, a shortcut tap, edit the config and a theme while running, hot-reload a plugin, sleep and resume, unplug and replug the panel, the settings window's picker; the log matches the previous build's lines
-- [ ] 4.3 Idle and moving CPU and GPU on the panel within the numbers in `docs/perf/` (record them in the pull request)
+- [ ] 4.1 No static state holding sessions, slots or widgets; configuration, readings, theme/background inputs, scheduler and frame source injected
+- [ ] 4.2 `ShowPage` and `PageChanged`; input optional; layout rectangles readable; a helper painting all visible slots of a page and the dock into one canvas
+- [ ] 4.3 Tests: two sessions on one fake scheduler (independent pages, a reading change dirties both, plugin reload releases both), a session without input, `ShowPage`
+
+## 5. Verify
+
+- [ ] 5.1 `dotnet build urdeck.slnx -c Release` with 0 warnings, `dotnet test urdeck.slnx -c Release`, the engine coverage floor, `dotnet format urdeck.slnx --severity warn`, the Linux test projects; goldens unchanged
+- [ ] 5.2 Owner, on the panel: a full page for ten minutes (values update, clock flips, weather moves), swipe and dot tap, a shortcut tap, edit the config and a theme while running, hot-reload a plugin, sleep and resume, unplug and replug the panel, the settings window's picker; the log matches the previous build's lines
+- [ ] 5.3 Idle and moving CPU and GPU on the panel within the numbers in `docs/perf/` (record them in the pull request)

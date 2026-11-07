@@ -27,7 +27,7 @@ frozen last (milestone 5), because the editor and the web page widget both still
 | 0 | Foundation | Plugins, themes, GPU host, animation and data providers work on the panel | done |
 | 1 | Daily driver | The owner's PC runs UrDeck in place of HYTE Nexus for two weeks, sleep and resume included | done |
 | 2 | Downloadable preview (0.1) | Somebody else with a case display downloads a release from GitHub and has a working page in five minutes, without the .NET SDK | done |
-| 3 | Editor (0.5, beta) | A new user builds and changes a page without opening a file | next: UI design |
+| 3 | Editor (0.5, beta) | A new user builds and changes a page without opening a file | next: designed and proposed; apply the changes |
 | 4 | Living page | A page with a video background, a web view and an animated icon runs within the Nexus bar (no more memory, CPU or GPU than HYTE Nexus) | not started |
 | 5 | SDK 1.0 for authors | A widget and a provider built outside this repo, from the template and the NuGet package alone, load in a release build | not started |
 | 6 | UrDeck 1.0 | Installs, updates and migrates its config by itself; the SDK and the config format are covered by a compatibility promise | not started |
@@ -87,7 +87,10 @@ compatibility table) carry on without blocking the editor.
 UI is designed first, as clickable mock-ups made from a design brief
 ([docs/handoff/2026-11-05-editor-design-brief.md](handoff/2026-11-05-editor-design-brief.md)), and that design is the baseline
 for the OpenSpec proposals that build it. It is also where the widget half of the SDK's settings metadata is designed:
-the controls the forms need decide what the metadata must say.
+the controls the forms need decide what the metadata must say. Designed and proposed 2026-11-06: the handoff
+([docs/handoff/2026-11-06-editor-design.md](handoff/2026-11-06-editor-design.md)) and eight OpenSpec changes, applied in the
+order in [BACKLOG.md](BACKLOG.md) ("Suggested order"). The editor is the product's front door: hand-edited JSON is no longer
+a design constraint.
 - Settings metadata in the SDK, so the editor can build a form from a widget's config type (item 15). This is public
   SDK API and the main reason milestone 5 comes after this one.
 - The reading picker with live values (item 3) and the theme picker.
