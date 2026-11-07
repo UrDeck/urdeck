@@ -127,7 +127,7 @@ public sealed class StatsWidgetTests : IDisposable
     }
 
     [Fact]
-    public void ItDeclaresNoTimer_AndTheFourSizes()
+    public void ItDeclaresNoTimer_AndTheFiveSizes()
     {
         var descriptor = Engine.Plugin.WidgetDescriptor.TryCreate(typeof(StatsWidget), out _)!;
 
@@ -135,7 +135,7 @@ public sealed class StatsWidgetTests : IDisposable
         Assert.Null(descriptor.RefreshInterval);
         Assert.Equal("urdeck.widgets.stats", descriptor.Id);
         Assert.Equal(
-            [new System.Drawing.Size(1, 1), new System.Drawing.Size(2, 2), new System.Drawing.Size(4, 2), new System.Drawing.Size(4, 4)],
+            [new System.Drawing.Size(1, 1), new System.Drawing.Size(2, 1), new System.Drawing.Size(2, 2), new System.Drawing.Size(4, 2), new System.Drawing.Size(4, 4)],
             descriptor.SupportedSizes);
     }
 

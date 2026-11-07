@@ -63,7 +63,7 @@ public sealed class ProviderSettingsEditorTests : IDisposable
 
         Assert.Equal("typed", form.ProviderId);
         Assert.Equal(["url", "token", "retries", "secure"], form.Fields.Select(f => f.Setting.Key));
-        Assert.Equal(SettingType.Secret, form.Fields[1].Setting.Type);
+        Assert.Equal(SettingKinds.Secret, form.Fields[1].Setting.Kind);
         Assert.True(form.OffersConnectionTest);
         Assert.Equal("3", form.Fields[2].Value);
         Assert.Equal("true", form.Fields[3].Value);

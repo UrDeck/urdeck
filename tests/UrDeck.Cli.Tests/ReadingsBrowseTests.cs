@@ -6,6 +6,7 @@ using UrDeck.Cli.Tests.Support;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Secrets;
 using UrDeck.Sdk.Data;
+using UrDeck.Sdk.Settings;
 using Xunit;
 
 namespace UrDeck.Cli.Tests;

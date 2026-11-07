@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using UrDeck.Engine.Secrets;
+using UrDeck.Engine.Settings;
 using UrDeck.Sdk.Data;
 
 namespace UrDeck.Engine.Data;
@@ -135,10 +136,10 @@ internal static class ProviderSettingsBinder
     private static bool IsMissing(SettingDescriptor setting, ProviderSettings typed, Dictionary<string, JsonElement> bag)
     {
         object? value = setting.Property.GetValue(typed);
-        return setting.Type switch
+        return setting.Kind switch
         {
-            SettingType.Secret => value is not SecretValue { IsEmpty: false },
-            SettingType.Text => string.IsNullOrWhiteSpace(value as string),
+            SettingKinds.Secret => value is not SecretValue { IsEmpty: false },
+            SettingKinds.Text => string.IsNullOrWhiteSpace(value as string),
             _ => !bag.TryGetValue(setting.Key, out var element) || element.ValueKind is JsonValueKind.Null or JsonValueKind.Undefined,
         };
     }

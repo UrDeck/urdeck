@@ -47,8 +47,12 @@
          version stays.
          Package 0.19.0 (text-layout): MotionLevel and WidgetRenderContext.Motion, TextOverflow and the overflow, time and motion
          parameters of TextLine (with TextLine.IsMoving), TextBlock, and TextList with TextListItem and TextListMode. All
-         additive, so the assembly version stays. -->
-    <Version>0.19.0</Version>
+         additive, so the assembly version stays.
+         Package 0.20.0 (settings-metadata): Settings namespace: SettingAttribute and SecretAttribute moved here from Data (breaking;
+         the product has not shipped), with Group, Order, Sizes, Fallback, AllowsNone and more; ShownWhen, Option, SettingPart,
+         Positions, the kind attributes (Number, Slider, Reading, Action, Unit, Place, LaunchTarget, Icon), ISuggestionSource and
+         Suggestion. Data.DisplayUnits (ToDisplay, FromDisplay, UnitText). The assembly version stays. -->
+    <Version>0.20.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

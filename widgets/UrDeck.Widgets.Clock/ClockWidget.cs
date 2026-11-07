@@ -74,8 +74,6 @@ public class ClockWidget : Widget<ClockConfig>
             WidestValue = WidestTime,
             WidestUnit = WidestSuffix(is12h),
             Vertical = VerticalAlign.Bottom,
-            ValueColor = Config.TextColor != null && SKColor.TryParse(Config.TextColor, out var custom) ? custom : null,
-            Scale = (float)Config.FontSize,
         };
 
         // Time above date, the pair centered in the content rectangle: measure the date, give the time what is left,
@@ -156,12 +154,11 @@ public class ClockWidget : Widget<ClockConfig>
         }
 
         var tileSlot = new SKRect(content.Left, content.Top, content.Right, Math.Max(content.Top + 1, content.Bottom - dateHeight - gap));
-        var layout = FlapDisplay.Fit(theme, tileSlot, is12h || Config.ShowSeconds, (float)Config.FontSize, WidestSuffix(is12h));
+        var layout = FlapDisplay.Fit(theme, tileSlot, is12h || Config.ShowSeconds, WidestSuffix(is12h));
         float top = content.Top + (content.Height - (layout.TileHeight + gap + dateHeight)) / 2f;
 
-        var color = Config.TextColor != null && SKColor.TryParse(Config.TextColor, out var custom) ? custom : theme.Text;
         var flip = new FlapDisplay.Flip(_flipping ? _flipFrom : tiles, tiles, progress);
-        FlapDisplay.Draw(canvas, theme, layout, top, flip, color, context.PixelSize.Height, Suffix(context.Time, is12h), SeparatorVisible(context.Time));
+        FlapDisplay.Draw(canvas, theme, layout, top, flip, theme.Text, context.PixelSize.Height, Suffix(context.Time, is12h), SeparatorVisible(context.Time));
 
         if (dateBelow)
         {

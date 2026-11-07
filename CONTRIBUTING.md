@@ -73,9 +73,9 @@ pull request: the site is the one home of the user documentation, and `docs/them
 notes for adding a built-in theme or background.
 
 **The reference is generated.** The tables of theme keys and background manifest keys come from the published schemas
-(`docs/schemas/`), a widget's settings table from the catalog (`urdeck-cli catalog export`) with the meanings in the front
-matter of its page, the findings tables and the lists of built-in themes, backgrounds and widgets from the catalog. So a new key
-needs a `description` in the schema, a new setting needs a line under `settings:` in its widget's page, and a new finding needs a
+(`docs/schemas/`), a widget's settings table from the catalog (`urdeck-cli catalog export`), the meanings being the `Help` text
+declared on each setting in code, the findings tables and the lists of built-in themes, backgrounds and widgets from the catalog. So a new key
+needs a `description` in the schema, a new setting needs a `[Setting]` with a `Help` text, and a new finding needs a
 summary in `FindingCatalog`; the site's build fails, naming the gap, when one is missing, and when a built-in or a code is on no
 page. After a change that alters the catalog, run `npm run media` (it rewrites `site/src/generated/catalog.json`).
 
@@ -193,6 +193,31 @@ public class HelloWidget : Widget<HelloConfig>
     }
 }
 ```
+
+Every setting of a widget is declared on its property, so that the editor can build a control for it and the site can document it
+(`UrDeck.Sdk.Settings`; the analyzer warns, URDECK006, about a public settable property without a declaration):
+
+```csharp
+public class HelloConfig : WidgetConfig
+{
+    [Setting("Greeting", Help = "The words on the card.", Fallback = "Hello, UrDeck")]
+    public string Text { get; set; } = "Hello, UrDeck";
+
+    [Setting("Layout", Help = "How the words are set.")]
+    [Option("big", "Big")]
+    [Option("small", "Small")]
+    public string Layout { get; set; } = "big";
+}
+```
+
+`[Setting(label)]` takes `Help` (one sentence), `Group`, `Order`, `Sizes` (only at some widget sizes), `Fallback`, `FallbackFrom` and
+`AllowsNone`; `[ShownWhen("other", "value")]` hides it until another setting has a value. The kind of control comes from the
+property's type (`bool` a switch, `string` a text box, a number a number box, `[Option]`s a choice) or from a kind attribute:
+`[Number]`, `[Slider]`, `[Reading]`, `[Action]`, `[Unit]`, `[Place]`, `[LaunchTarget]`, `[Icon]` or `[Toggle]` for a `JsonElement?`,
+and `[Positions("4x2", "gauge", "text")]` for a list of items (each item type is declared the same way). A property another setting's
+control writes, such as a place's coordinates, is `[SettingPart("place")]`. A provider can answer a picker's search by implementing
+`ISuggestionSource` (Weather answers `place`). `DisplayUnits.ToDisplay` / `FromDisplay` convert a reading's canonical value to the
+unit a card shows.
 
 Widgets draw no card or background and name no font or fixed size: the theme owns the look of every widget on the page
 (see the [theme reference](https://urdeck.app/docs/themes/reference/)). Use `Readout` for a big value with a unit and label, `TextLine` for a line of
@@ -515,8 +540,8 @@ public sealed class HomeAssistantSettings : ProviderSettings
 public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings> { /* ... */ }
 ```
 
-- **Declaring.** `[Setting(label)]` puts a property in the settings window and the site's reference (text, whole or fractional
-  number, on/off; `Help` is one sentence, and the build of the site fails without it for a first-party provider). The key in the file is
+- **Declaring.** `[Setting(label)]` (in `UrDeck.Sdk.Settings`, the same attribute a widget's settings use) puts a property in the settings
+  window and the site's reference (text, whole or fractional number, on/off; `Help` is one sentence, and the build of the site fails without it for a first-party provider). The key in the file is
   the property's `[JsonPropertyName]`, else its name in camelCase. A value of the wrong type is logged once and the default stays.
   `Required = true` keeps the provider from starting while the setting is missing; its readings (and a tile's action) then say
   `MissingSettingMessage`, or name the provider and the setting.

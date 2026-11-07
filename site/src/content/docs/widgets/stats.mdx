@@ -3,8 +3,6 @@ title: Stats
 description: Show readings from the system or the weather as numbers and gauges.
 section: Widgets
 order: 11
-settings:
-  slots: "The readings to show, a list of slots that fill the positions of the card's size in order. See the table below."
 ---
 
 import SettingsTable from '../../../components/SettingsTable.astro';
@@ -17,7 +15,7 @@ a gauge. Its settings are a list of `slots` that fill the positions of the card'
 
 | Size | Positions |
 |---|---|
-| 1x1, 2x2 | one reading (slot 1) |
+| 1x1, 2x1, 2x2 | one reading (slot 1) |
 | 4x2 | two gauges side by side (slots 1 and 2) above three text stats (slots 3 to 5) |
 | 4x4 | four gauges in two rows (slots 1 to 4) above three text stats (slots 5 to 7) |
 
@@ -41,17 +39,8 @@ power and clock, and the CPU's first core):
 
 <SettingsTable widget="stats" />
 
-### A slot
-
-| Field | Meaning |
-|---|---|
-| `reading` | The reading's id, `provider:path`. With no slot the widget shows `system:cpu/load`. |
-| `label` | Absent: the label the provider declares (for example `Core 2`). A text: shown instead. `""`: no label. |
-| `unit` | `celsius` or `fahrenheit` for readings that have several units (otherwise the reading's default, then the region's). |
-| `decimals` | Number of decimals to show (default 0). |
-| `style` | `plain`, `gauge` (the theme's default gauge), `ring`, `bar`, `verticalBar`, `meter`, `tach`, `marker` or `thickbar`. Absent: plain at 1x1 and 2x2, the theme's gauge style in a gauge position. Text positions are always plain, and so is a reading with no range to measure against. |
-| `min`, `max` | The gauge's range, replacing the one the provider declares (a percentage is 0 to 100). |
-| `warning`, `critical` | From these values on the gauge is drawn in the theme's warning or critical colour. In the reading's canonical unit (degrees Celsius for a temperature). |
+Each slot is an object with the settings in the table headed "Each item of slots" (`reading`, `label`, `unit`, `decimals`, `style`, `min`, `max`,
+`warning` and `critical`). With no slot the widget shows `system:cpu/load`.
 
 The fill eases to a new value over about 300 ms; the number and the colour change at once.
 

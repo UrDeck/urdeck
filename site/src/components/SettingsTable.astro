@@ -1,8 +1,7 @@
 ---
-// A widget's settings: names, types and defaults from the catalog (the widget's configuration type), meanings from the
-// `settings` map in the front matter of the widget's page. A setting without a meaning, or a meaning for a setting the
-// product no longer has, fails the build.
-import { getEntry } from 'astro:content';
+// A widget's settings, all from the catalog: the key, the kind of value, the default and the meaning, which is the help text the
+// widget declares on the setting in code. A setting without help or a label fails the build. A list of positions (Stats' `slots`)
+// is followed by a table of the settings of each item.
 import catalog from '../generated/catalog.json';
 import { inline, record, settingDefault, settingValue } from '../lib/reference.mjs';
 
@@ -11,20 +10,56 @@ interface Props {
   widget: string;
 }
 
+type Setting = {
+  name: string;
+  type: string;
+  kind: string;
+  label: string;
+  help: string;
+  group?: string;
+  sizes?: string[];
+  values?: string[];
+  options?: { value: string; label: string }[];
+  default?: unknown;
+  min?: number | null;
+  max?: number | null;
+  shownWhen?: { key: string; values: string[] };
+  fallback?: { text?: string | null; from: string };
+  allowsNone?: boolean;
+  disabledInRoles?: string[];
+  disabledHelp?: string;
+  positions?: { size: string; roles: string[] }[];
+  item?: Setting[];
+};
+
 const { widget } = Astro.props;
 const typeId = `urdeck.widgets.${widget}`;
 const product = catalog.widgets.find((w) => w.typeId === typeId);
 if (!product) throw new Error(`SettingsTable: the catalog has no widget ${typeId}`);
-const page = await getEntry('docs', `widgets/${widget}`);
-const meanings: Record<string, string> = page?.data.settings ?? {};
-const settings = product.settings as { name: string; type: string; values?: string[]; default?: unknown }[];
-for (const s of settings) {
-  if (!meanings[s.name]?.trim()) throw new Error(`SettingsTable: the setting "${s.name}" of ${typeId} has no description in the front matter of widgets/${widget}.md`);
+const settings = product.settings as Setting[];
+
+function check(list: Setting[], owner: string) {
+  for (const s of list) {
+    if (!s.help?.trim()) throw new Error(`SettingsTable: the setting "${s.name}" of ${owner} has no help text (Help on its [Setting])`);
+    if (!s.label?.trim()) throw new Error(`SettingsTable: the setting "${s.name}" of ${owner} has no label`);
+    if (s.item) check(s.item, `${owner} ${s.name}`);
+  }
 }
-for (const name of Object.keys(meanings)) {
-  if (!settings.some((s) => s.name === name)) throw new Error(`SettingsTable: widgets/${widget}.md describes "${name}", which ${typeId} does not have`);
-}
+check(settings, typeId);
 record({ kind: 'settings', widget: typeId, names: settings.map((s) => s.name) });
+
+/** What the table adds to the help: where it applies and what an empty value means. */
+function notes(s: Setting): string {
+  const tick = (v: string) => '`' + v + '`';
+  const parts: string[] = [];
+  if (s.sizes?.length) parts.push('Only at ' + s.sizes.join(', ') + '.');
+  if (s.shownWhen) parts.push('Applies when ' + tick(s.shownWhen.key) + ' is ' + s.shownWhen.values.map(tick).join(' or ') + '.');
+  if (s.fallback?.text) parts.push('Left out: ' + s.fallback.text + '.');
+  if (s.disabledInRoles?.length) parts.push((s.disabledHelp ?? 'No effect') + ' (' + s.disabledInRoles.join(', ') + ' positions).');
+  return parts.join(' ');
+}
+
+const meaning = (s: Setting) => [s.help, notes(s)].filter(Boolean).join(' ');
 ---
 <table class="ref">
   <thead><tr><th>Setting</th><th>Value</th><th>Default</th><th>Meaning</th></tr></thead>
@@ -34,8 +69,26 @@ record({ kind: 'settings', widget: typeId, names: settings.map((s) => s.name) })
         <td><code>{s.name}</code></td>
         <td set:html={inline(settingValue(s))} />
         <td set:html={inline(settingDefault(s))} />
-        <td set:html={inline(meanings[s.name])} />
+        <td set:html={inline(meaning(s))} />
       </tr>
     ))}
   </tbody>
 </table>
+{settings.filter((s) => s.item).map((list) => (
+  <>
+    <h3 id={`setting-${list.name}-items`}>Each item of <code>{list.name}</code></h3>
+    <table class="ref">
+      <thead><tr><th>Setting</th><th>Value</th><th>Default</th><th>Meaning</th></tr></thead>
+      <tbody>
+        {(list.item ?? []).map((s) => (
+          <tr id={`setting-${list.name}-${s.name}`}>
+            <td><code>{s.name}</code></td>
+            <td set:html={inline(settingValue(s))} />
+            <td set:html={inline(settingDefault(s))} />
+            <td set:html={inline(meaning(s))} />
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </>
+))}

@@ -4,7 +4,6 @@
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Secrets;
 using UrDeck.Engine.Settings;
@@ -82,14 +81,14 @@ internal sealed class ProvidersSection
         foreach (var field in form.Fields)
         {
             panel.Children.Add(new TextBlock { Text = field.Setting.Label + (field.Setting.Required ? " *" : ""), Margin = new Thickness(0, 4, 0, 0) });
-            switch (field.Setting.Type)
+            switch (field.Setting.Kind)
             {
-                case SettingType.Toggle:
+                case SettingKinds.Toggle:
                     var toggle = new ToggleSwitch { IsOn = field.Value == "true" };
                     texts[field.Setting.Key] = () => toggle.IsOn ? "true" : "false";
                     panel.Children.Add(toggle);
                     break;
-                case SettingType.Secret:
+                case SettingKinds.Secret:
                     var box = new PasswordBox
                     {
                         PlaceholderText = field.Secret!.HasValue ? "Leave empty to keep the current value" : "Enter a value",

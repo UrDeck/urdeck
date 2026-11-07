@@ -124,18 +124,19 @@ Reference that the product already defines MUST be built from it, never typed by
 
 - The theme format's keys (name, type, allowed values or range, default, description) from the published theme schema
 - The background manifest's keys from the published manifest schema
-- Each first-party widget's settings (name, type, default) from the product's catalog, with a description kept beside
-  the page
+- Each first-party widget's and provider's settings (name, label, kind, allowed values with their labels, default,
+  sizes it applies at, and description) from the product's catalog, the description being the setting's declared help
+  text (see settings-metadata); a list of positions lists its item settings under it
 - The theme and background finding codes (code, severity, what it means) from the product's catalog
 - The lists of built-in themes, backgrounds and widgets from the product's catalog, with their pictures from the media
   manifest in the chosen theme
 
-The site's build MUST fail when a schema key, a widget setting or a finding code has no description, or when a built-in
-theme, background or widget, or a finding code, does not appear in the documentation.
+The site's build MUST fail when a schema key, a widget or provider setting or a finding code has no description, or when
+a built-in theme, background or widget, or a finding code, does not appear in the documentation.
 
 #### Scenario: Finding a widget's settings
 - **WHEN** a visitor opens the configuration section and chooses a first-party widget
-- **THEN** the page lists that widget's settings with their types, defaults and descriptions, an example, and the
+- **THEN** the page lists that widget's settings with their labels, types, defaults and descriptions, an example, and the
   widget at each of its sizes in the chosen theme
 
 #### Scenario: From the README
@@ -153,6 +154,10 @@ theme, background or widget, or a finding code, does not appear in the documenta
 #### Scenario: A new finding code
 - **WHEN** the product gains a finding code and the catalog is regenerated
 - **THEN** the troubleshooting page lists it, or the build fails when it has no description
+
+#### Scenario: A new widget setting
+- **WHEN** a first-party widget gains a declared setting with a help text and the catalog is regenerated
+- **THEN** the widget's page lists it with that help text, with no page edited
 
 ### Requirement: Tested On Page
 The site MUST hold a page listing the hardware UrDeck has been run on. Each entry gives the display, its resolution,
@@ -245,4 +250,3 @@ recipe that stops working fails a pull request.
 #### Scenario: A broken recipe
 - **WHEN** a pull request renames a theme key a recipe uses
 - **THEN** CI fails on that recipe's validation
-

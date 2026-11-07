@@ -65,13 +65,13 @@ The documentation does not repeat what the product already says. These component
 | Component | Reads | Fails the build when |
 |---|---|---|
 | `SchemaTable` (`<SchemaTable schema="v2/theme.json" path="card" />`) | A published schema (`docs/schemas/`): a group and its keys, nested groups and `$ref`s followed. Key, value (type, names or range), default, meaning. | A key has no `description` of its own, or the path is not in the schema. |
-| `SettingsTable` (`<SettingsTable widget="clock" />`) | The widget's settings from `catalog.json` (name, type, default); the meanings from `settings:` in the front matter of `widgets/<id>`. | A setting has no meaning there, or a meaning is for a setting the widget no longer has. |
+| `SettingsTable` (`<SettingsTable widget="clock" />`) | The widget's settings from `catalog.json`: name, kind, default and meaning, the meaning being the `Help` the widget declares on the setting in code (`[Setting("Label", Help = "...")]`); a list of positions is followed by a table of its items' settings. | A setting has no help text or label. |
 | `FindingsTable` (`<FindingsTable prefix="THEME" />`) | The finding codes of `catalog.json` (`THEME` or `SHADER`), with severity and summary. | A code has no summary. |
 | `BuiltinList` (`kind="themes"`, `"backgrounds"` or `"widgets"`) | Every built-in of the catalog, with its picture from the media manifest when there is one. | (The completeness check fails when a page that should list a kind does not.) |
 | `WidgetSizes` (`<WidgetSizes widget="clock" />`) | A widget at every size the catalog previews, in the visitor's theme (`ProductMedia`). | |
 
 A new theme key therefore needs a `description` in `docs/schemas/v1/theme.json` and nothing else on the site; a new widget
-setting needs one line under `settings:` in its page; a new finding code needs a summary in `FindingCatalog`.
+setting needs a `[Setting]` with a `Help` text in its configuration type; a new finding code needs a summary in `FindingCatalog`.
 `catalog.json` is `urdeck-cli catalog export` (`npm run media` refreshes it).
 
 ## The cookbook

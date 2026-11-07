@@ -3,6 +3,7 @@
 
 using UrDeck.Engine.Data;
 using UrDeck.Sdk.Data;
+using UrDeck.Sdk.Settings;
 
 namespace UrDeck.Engine.Tests.Support;
 

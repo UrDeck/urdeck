@@ -10,6 +10,7 @@ namespace UrDeck.Widgets.Stats;
 
 [Widget("Stats", "Shows readings from any data provider", Id = "urdeck.widgets.stats")]
 [WidgetSize(1, 1)]
+[WidgetSize(2, 1)]
 [WidgetSize(2, 2)]
 [WidgetSize(4, 2)]
 [WidgetSize(4, 4)]
@@ -23,13 +24,13 @@ public class StatsWidget : Widget<StatsConfig>
     /// <summary>The text row's height in grid cells; the same at 4x2 and 4x4.</summary>
     private const float TextRowCells = 0.5f;
 
-    private enum PositionKind { Single, Gauge, Text }
+    internal enum PositionKind { Single, Gauge, Text }
 
     /// <summary>What a slot asks of the gauge, before the theme and the reading have their say.</summary>
     private enum StyleRequest { Absent, Plain, ThemeDefault, Ring, Bar, VerticalBar, Meter, Tach, Marker, ThickBar }
 
     /// <summary>One place on the card and the slot (or the default reading, when null) that fills it.</summary>
-    private readonly record struct Position(PositionKind Kind, int Cell, StatsSlot? Slot);
+    internal readonly record struct Position(PositionKind Kind, int Cell, StatsSlot? Slot);
 
     /// <summary>What a paint puts on a position at rest; two equal values draw the same pixels.</summary>
     private readonly record struct Shown(ReadingText Text, string? Label, float? Fraction, GaugeLevel Level, string? Credit);
@@ -206,7 +207,7 @@ public class StatsWidget : Widget<StatsConfig>
         ease.Drawn = progress >= 1 ? target : (float)(ease.From!.Value + (target.Value - ease.From.Value) * eased);
     }
 
-    private Position[] Compose()
+    internal Position[] Compose()
     {
         var slots = Config.Slots;
         var result = new List<Position>();

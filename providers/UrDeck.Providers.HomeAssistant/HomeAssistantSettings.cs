@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using UrDeck.Sdk.Data;
+using UrDeck.Sdk.Settings;
 
 namespace UrDeck.Providers.HomeAssistant;
 

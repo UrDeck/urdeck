@@ -3,11 +3,6 @@ title: Shortcut
 description: A tappable icon that opens an application, a folder, a file or a web address.
 section: Widgets
 order: 13
-settings:
-  arguments: "Arguments for a file target. Ignored, with a warning in the log, for an address. They are never written to the log."
-  icon: "Where the icon comes from instead of `target`: a local image file (PNG, JPEG, WebP, BMP, GIF or ICO), anything else that could be a target, or `theme:KEY` for a glyph of the theme's icon set (`theme:app/terminal`)."
-  label: "A text under the icon. Absent or `\"\"`: no label, and the icon takes the whole card."
-  target: "What to open. A rooted path to an executable, a `.lnk`, a document or a folder (`%NAME%` environment variables are expanded); a bare name Windows resolves itself (`notepad`); a `shell:` item; a web address (`http` or `https`); or any other address Windows has an application for (`steam://open/main`, `ms-settings:display`). A relative path is refused. With no target the card shows an empty placeholder and does not react."
 ---
 
 import SettingsTable from '../../../components/SettingsTable.astro';

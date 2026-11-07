@@ -3,16 +3,6 @@ title: Weather
 description: A weather card with animated or outline icons and a forecast, for any place.
 section: Widgets
 order: 12
-settings:
-  animateForecast: "4x4 only: `true` lets the forecast icons move as `motion` says. Off by default: each moving icon costs about 2.7 MB of memory. No effect under a theme that names an icon set."
-  days: "4x4 only: how many forecast days, 1 to 7 (default 5)."
-  label: "Absent: the place's resolved name. A text: shown instead. `\"\"`: no place is shown."
-  latitude: "Decimal degrees. When both `latitude` and `longitude` are set they replace `location` and no search is made."
-  location: "The place as text: a city (`Zurich`), `City, ST` (`Portland, OR`), `City, State` (`Portland, Oregon`), a postal code (`90210`), optionally with a country code after a comma (`Paris, FR`). It is looked up once per run and the first match is used; `urdeck.log` lists the other matches, so an ambiguous name (`Springfield`) can be fixed by adding a state or by giving coordinates. There is no default: with none the card shows dashes."
-  longitude: "Decimal degrees. See `latitude`."
-  motion: "`periodic` (the default) plays the icon's loop once a minute and rests on its first frame in between; `full` loops it all the time; `off` shows only the first frame. No effect under a theme that names an icon set, whose icons do not move."
-  periodSeconds: "Seconds between loops in the `periodic` mode (default 60). No effect under a theme that names an icon set."
-  unit: "`celsius` or `fahrenheit`. Absent: the region's. It chooses the system of the whole card: Celsius is kilometres per hour, millimetres and centimetres; Fahrenheit is miles per hour and inches."
 ---
 
 import SettingsTable from '../../../components/SettingsTable.astro';

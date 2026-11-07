@@ -49,7 +49,7 @@ export function completenessProblems({ catalog, schemas, records, troubleshootin
       problems.push(`the provider "${provider.id}" declares settings and no page shows them (a ProviderSettingsTable would)`);
       continue;
     }
-    for (const s of provider.settings) if (!shown.has(s.key)) problems.push(`the setting "${s.key}" of the provider "${provider.id}" is not in a provider settings table`);
+    for (const s of provider.settings) if (!shown.has(s.name)) problems.push(`the setting "${s.name}" of the provider "${provider.id}" is not in a provider settings table`);
   }
 
   const codes = named('findings', 'codes');
