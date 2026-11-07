@@ -3,6 +3,7 @@
 
 using Microsoft.UI.Dispatching;
 using SkiaSharp.Views.Windows;
+using UrDeck.Engine.Deck;
 using UrDeck.Engine.Rendering;
 
 namespace UrDeck.Host;
@@ -137,7 +138,7 @@ internal sealed class IndicatorView : SKXamlCanvas, IFrameClient
 
         PageIndicator.Paint(canvas, new System.Drawing.RectangleF(0, 0, e.Info.Width, e.Info.Height), _count, _position, (float)opacity, _floating, _style);
 
-        // Membership only changes here, as in WidgetView; the frame clock's next tick does the invalidating.
+        // Membership only changes here, as in WidgetSlot; the frame clock's next tick does the invalidating.
         if (_moving || _fading)
             _clock.Add(this);
         else

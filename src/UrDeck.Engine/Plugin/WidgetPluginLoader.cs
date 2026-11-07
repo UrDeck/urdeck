@@ -12,7 +12,7 @@ using UrDeck.Sdk.Data;
 
 namespace UrDeck.Engine.Plugin;
 
-public sealed class WidgetPluginLoader : IPluginService, IDisposable
+public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDisposable
 {
     private readonly WidgetRegistry _registry = new();
     private readonly ProviderRegistry _providers = new();

@@ -2,25 +2,17 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using Microsoft.UI.Dispatching;
+using UrDeck.Engine.Deck;
 using UrDeck.Engine.Diagnostics;
 
 namespace UrDeck.Host;
 
-/// <summary>Something the <see cref="FrameClock"/> repaints while it animates.</summary>
-internal interface IFrameClient
-{
-    /// <summary>The time between frames it asks for; zero is the clock's own rate.</summary>
-    TimeSpan FrameInterval { get; }
-
-    void Invalidate();
-}
-
 /// <summary>
-/// The one shared frame source. It repaints the views (widgets, the page indicator) that report they are animating about 30 times a second,
+/// The one shared frame source. It repaints the clients (widget slots, the page indicator) that report they are animating about 30 times a second,
 /// and exists only while there is at least one: the timer starts with the first view and stops when the last one leaves.
 /// A frame only invalidates; it never refreshes widget data.
 /// </summary>
-internal sealed class FrameClock
+internal sealed class FrameClock : IFrameSource
 {
     private static readonly TimeSpan FrameInterval = TimeSpan.FromSeconds(1.0 / 30);
 

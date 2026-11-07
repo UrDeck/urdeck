@@ -7,6 +7,7 @@ using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
 using UrDeck.Engine.Diagnostics;
+using UrDeck.Engine.Motion;
 using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Themes;
 

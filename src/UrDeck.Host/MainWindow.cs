@@ -11,18 +11,14 @@ using Microsoft.Win32;
 using SkiaSharp;
 using UrDeck.Engine.Backgrounds;
 using UrDeck.Engine.Config;
+using UrDeck.Engine.Deck;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Display;
-using UrDeck.Engine.Layout;
-using UrDeck.Engine.Motion;
 using UrDeck.Engine.Plugin;
-using UrDeck.Engine.Rendering;
 using UrDeck.Engine.Secrets;
 using UrDeck.Engine.Settings;
 using UrDeck.Engine.Themes;
-using UrDeck.Sdk;
 using WinRT.Interop;
-using MotionLevel = UrDeck.Engine.Motion.MotionLevel;
 
 namespace UrDeck.Host;
 
@@ -31,10 +27,12 @@ namespace UrDeck.Host;
 /// <see cref="PlacementController"/>: this class tells it what happened and does what it asks. Its content is an ordered stack of layers composited by the GPU:
 /// a background layer (the theme's background colour, and over it the configured shader or picture, see
 /// <see cref="BackgroundLayer"/>), and a canvas holding one surface per widget. Later changes add layers (hosted views
-/// such as a web view) to the same stack.
+/// such as a web view) to the same stack. What the deck shows is decided by its <see cref="DeckSession"/>; this window is
+/// the session's presenter (<see cref="IDeckPresenter"/>): it reports its surface and whether it is shown, and draws what
+/// the session says.
 /// </summary>
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "The background layer and the power watcher are disposed when the window closes (OnClosed).")]
-public sealed class MainWindow : Window, ISettingsHost
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "The session, the background layer and the power watcher are disposed when the window closes (OnClosed).")]
+public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
 {
     private readonly ConfigStore _configStore;
     private readonly WidgetPluginLoader _plugins;
@@ -46,38 +44,18 @@ public sealed class MainWindow : Window, ISettingsHost
     private readonly WindowFocus? _focus;
     private readonly DisplayPowerWatcher? _power;
     private readonly WindowsAnimationWatcher? _animations;
-    private readonly MotionGate _gate;
-    private bool _windowsAnimations;
-    private MotionDecision _motion;
-    private bool _motionDecided;
     private readonly BackgroundLayer _backgroundLayer;
-    private BackgroundSettings _backgroundSettings;
     private readonly Grid _root = new();
     private readonly Grid _background = new();
     private readonly PatternLayer _pattern = new();
     private readonly Canvas _surface = new();
     private readonly Canvas _overlay = new();
-    private readonly PageNavigator _navigator;
     private readonly PagerController _pager;
-    private readonly object _changedGate = new();
-    private HashSet<string> _changedReadings = new(StringComparer.OrdinalIgnoreCase);
-    private bool _changedQueued;
     private readonly FrameClock _frameClock;
+    private readonly DeckSession _session;
     private readonly Action _saveDisplay;
     private readonly PlacementController _placement;
     private readonly DispatcherQueueTimer _placementTimer;
-    private bool _pageHeld = true;
-    private bool _rebuildPending;
-    private LoadedTheme _loadedTheme;
-    private Theme? _theme;
-    private Theme? _dockTheme;
-    private ResolvedCardStyle? _cardStyle;
-    private ResolvedCardStyle? _dockCardStyle;
-    private LayoutKey _lastLayout;
-
-    /// <summary>What a built page depends on: the window size, the display scaling, the active theme and the dock's size.</summary>
-    private readonly record struct LayoutKey(
-        System.Drawing.Size Screen, double Scale, LoadedTheme? Theme, IndicatorMode Mode, int PageCount, int DockCount, bool AnimateBorders);
 
     /// <summary>The placement state changed (UI thread); the name is the remembered display's, if there is one.</summary>
     internal event Action<PlacementState, string?>? PlacementChanged;
@@ -100,19 +78,17 @@ public sealed class MainWindow : Window, ISettingsHost
         _shaders = shaders;
         _dataFolder = dataFolder;
         _backgroundLayer = new BackgroundLayer(_background);
-        _backgroundSettings = BackgroundSettings.Parse(_configStore.Config.Background);
         _saveDisplay = saveDisplay;
         _frameClock = new FrameClock(DispatcherQueue);
-        _navigator = new PageNavigator(PageNames(), _configStore.Config.ActivePage);
-        _pager = new PagerController(_root, _surface, _overlay, _frameClock, _navigator);
-        _loadedTheme = LoadTheme();
-        _windowsAnimations = WindowsAnimationWatcher.Read();
-        _gate = new MotionGate(MotionLevel.Off);
-        UpdateMotion();
+        _pager = new PagerController(_root, _surface, _overlay, _frameClock);
+        _session = new DeckSession(
+            new DeckSessionInputs(_configStore, _themes.Load, _plugins, _plugins.Readings, new DispatcherDeckScheduler(DispatcherQueue), _frameClock,
+                WindowsAnimationWatcher.Read()),
+            this);
+        _pager.Attach(_session.Pager);
         _hwnd = WindowNative.GetWindowHandle(this);
         _providerEditor = new ProviderSettingsEditor(_configStore, _plugins.Providers, _plugins.Secrets, _plugins.Readings);
         _plugins.Readings.ApplySettings(_configStore.Config.Providers);
-        _plugins.Readings.ReadingsChanged += OnReadingsChanged;
 
         Title = "UrDeck";
         var presenter = OverlappedPresenter.Create();
@@ -149,17 +125,13 @@ public sealed class MainWindow : Window, ISettingsHost
         if (_power != null)
         {
             _power.DisplayStateChanged += _backgroundLayer.SetDisplayOn;
-            _power.DisplayStateChanged += _gate.SetDisplayOn;
+            _power.DisplayStateChanged += _session.SetDisplayOn;
         }
 
         _animations = WindowsAnimationWatcher.Start(_hwnd);
         if (_animations != null)
         {
-            _animations.Changed += on =>
-            {
-                _windowsAnimations = on;
-                UpdateMotion();
-            };
+            _animations.Changed += _session.SetWindowsAnimations;
         }
 
         // One timer drives placement: the controller says after each call when it wants the next one.
@@ -174,26 +146,14 @@ public sealed class MainWindow : Window, ISettingsHost
         _root.Loaded += (_, _) => _root.XamlRoot.Changed += (_, _) => Signal(PlacementSignal.WindowChanged);
         _root.SizeChanged += (_, _) => Signal(PlacementSignal.WindowChanged);
 
-        _configStore.ConfigChanged += _ => DispatcherQueue.TryEnqueue(() =>
+        // The session has taken the reload (theme, background, motion, pages) and rebuilds the page after this.
+        _session.ConfigReloaded += () =>
         {
-            // Themes are re-read on every config reload, so editing a theme and saving the config applies it.
-            _loadedTheme = LoadTheme();
-            _backgroundSettings = BackgroundSettings.Parse(_configStore.Config.Background);
-            UpdateMotion();
-            _navigator.Reload(PageNames());
             SecretStores.MoveFromConfigAndSave(_configStore, _plugins.Providers, _plugins.Secrets);
             _plugins.Readings.ApplySettings(_configStore.Config.Providers);
             ApplyBackground();
             Signal(PlacementSignal.ConfigReloaded);
-            ScheduleRebuild(force: true);
-        });
-        _plugins.PluginsChanged += () => DispatcherQueue.TryEnqueue(() =>
-        {
-            // Drop views holding old plugin instances now (not at the next idle rebuild) so the old plugin contexts
-            // can be collected.
-            _pager.Release();
-            ScheduleRebuild(force: true);
-        });
+        };
 
         // Monitors can come back from sleep/hot-plug in any order and settle their DPI late; placement waits for
         // them and checks its result instead of trusting the first event.
@@ -208,45 +168,13 @@ public sealed class MainWindow : Window, ISettingsHost
         Closed += (_, _) => OnClosed();
     }
 
-    private List<string> PageNames() => _configStore.Config.Pages.Select(p => p.Name).ToList();
-
-    private LoadedTheme LoadTheme()
-    {
-        var loaded = _themes.Load(_configStore.Config.Theme);
-        UrDeckLog.Info($"Theme '{loaded.Name}' selected");
-        return loaded;
-    }
-
     private void ApplyBackground()
     {
-        var c = SKColor.Parse(_loadedTheme.Definition.Colors!.Background);
+        var c = SKColor.Parse(_session.Theme.Definition.Colors!.Background);
         var brush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, c.Red, c.Green, c.Blue));
         _root.Background = brush;
         _background.Background = brush;
     }
-
-    /// <summary>
-    /// Decides the motion level again from the configuration, Windows' setting and the theme's ceiling. Logs only when the
-    /// effective level changes; a change that matters (the level the borders obey, or the one the background obeys) asks for a
-    /// rebuild, which rebuilds the page only when its animated borders change and the background only when its key does.
-    /// </summary>
-    private void UpdateMotion()
-    {
-        var before = _motion;
-        var decision = MotionPolicy.Decide(_configStore.Config.Motion, _windowsAnimations, _loadedTheme.Definition.Motion?.Level);
-        bool first = !_motionDecided;
-        _motion = decision;
-        _motionDecided = true;
-        if (first || decision.Effective != before.Effective)
-            UrDeckLog.Info($"Motion: {decision}");
-        _gate.SetLevel(decision.Effective);
-        if (!first && (decision.Effective != before.Effective || decision.User != before.User))
-            ScheduleRebuild();
-    }
-
-    private UrDeck.Sdk.MotionLevel WidgetMotion() => MotionPolicy.ToWidget(_motion.Effective);
-
-    private bool ThemeAnimatesBorders => _loadedTheme.Definition.Card?.BorderAnimate is { Mode: "spin" or "pulse" };
 
     private double Scale => _root.XamlRoot?.RasterizationScale ?? 1;
 
@@ -346,25 +274,22 @@ public sealed class MainWindow : Window, ISettingsHost
         else
             Activate();
         _backgroundLayer.SetVisible(true);
-        _gate.SetDeckShown(true);
+        _session.SetShown(true);
     }
 
     private void HideDeck()
     {
-        _pageHeld = true;
         _backgroundLayer.SetVisible(false);
-        _gate.SetDeckShown(false);
+        _session.SetShown(false);
         AppWindow.Hide();
     }
 
     /// <summary>Drops the page of a hidden deck: its widgets stop and their providers follow after the linger period.</summary>
     private void ReleasePage()
     {
-        _pager.Release();
+        _session.ReleasePage();
         _backgroundLayer.Release();
         _pattern.Release();
-        DisposeThemes();
-        _lastLayout = default;
     }
 
     /// <summary>What the placement controller sees of this window, and what it asks of it.</summary>
@@ -384,11 +309,7 @@ public sealed class MainWindow : Window, ISettingsHost
 
         public void Hide() => window.HideDeck();
 
-        public void RebuildPage(bool force)
-        {
-            window._pageHeld = false;
-            window.ScheduleRebuild(force);
-        }
+        public void RebuildPage(bool force) => window._session.RequestPage(force);
 
         public void ReleasePage() => window.ReleasePage();
 
@@ -401,176 +322,32 @@ public sealed class MainWindow : Window, ISettingsHost
         }
     }
 
-    /// <summary>Coalesces layout rebuilds (resize, scale and placement changes arrive in bursts).</summary>
-    private void ScheduleRebuild(bool force = false)
+    DeckSurface IDeckPresenter.Surface => new(new System.Drawing.Size((int)_root.ActualWidth, (int)_root.ActualHeight), Scale);
+
+    IPagerView IDeckPresenter.Pages => _pager;
+
+    void IDeckPresenter.ShowBackground(BackgroundPlan plan, LoadedTheme theme, DeckSurface surface)
     {
-        if (force)
-            _lastLayout = default;
-        if (_rebuildPending)
-            return;
-        _rebuildPending = true;
-        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
-        {
-            _rebuildPending = false;
-            RebuildLayout();
-        });
-    }
-
-    private void RebuildLayout()
-    {
-        // A hidden deck has no page, and a deck that was just shown gets one when placement has settled and asks for it.
-        if (_pageHeld)
-            return;
-
-        var screen = new System.Drawing.Size((int)_root.ActualWidth, (int)_root.ActualHeight);
-        double scale = Scale;
-
-        // Before the layout comparison: an unrelated reload keeps the running background, but a changed one must apply
-        // even when the page itself is as it was.
-        if (screen.Width >= 16 && screen.Height >= 16)
-        {
-            ApplyBackgroundLayer(screen, scale);
-            _pattern.Apply(_loadedTheme, screen, scale);
-        }
-
-        var config = _configStore.Config;
-        var mode = config.Pager.GetIndicatorMode();
-        var key = new LayoutKey(screen, scale, _loadedTheme, mode, config.Pages.Count, config.Dock.Count,
-            _motion.Effective == MotionLevel.Full && ThemeAnimatesBorders);
-        if (key == _lastLayout)
-            return;
-        _lastLayout = key;
-
-        // Views first, so nothing still paints with the old theme's typefaces when they are released.
-        _pager.Release();
-        DisposeThemes();
-
-        if (config.Pages.Count == 0 || screen.Width < 16 || screen.Height < 16)
-            return;
-
-        // Layout is computed in DIPs; each surface then renders at the monitor's physical resolution, so the theme
-        // is resolved against the physical size of one grid cell.
-        float cellPx = (float)(screen.Width * scale / 4);
-        _theme = ThemeResolver.Resolve(_loadedTheme, cellPx);
-        var cardStyle = _cardStyle = ResolvedCardStyle.Resolve(_loadedTheme, cellPx);
-        // Whether there is a dock is the configuration's decision alone, so the layout does not depend on the plugins.
-        var chrome = ChromeLayout.Compute(screen, mode, config.Pages.Count, _loadedTheme.Definition.Indicator!.BandHeight!.Value,
-            config.Dock.Count > 0 ? _loadedTheme.Definition.Dock!.Height!.Value : 0);
-        var theme = _theme;
-        var press = PressStyle.Resolve(_loadedTheme);
-        // Below the full level a theme's moving border is drawn still, with the card, exactly as without borderAnimate.
-        var borderMotion = key.AnimateBorders ? _gate : null;
-        double gap = _loadedTheme.Definition.Card!.Gap!.Value;
-        UrDeckLog.Info($"Pages: {config.Pages.Count}, showing '{_navigator.Name}'; indicator {chrome.Mode}, {chrome.Rows} grid rows");
-
-        // A dock slot is a small grid cell: a second theme resolved for the slot's size makes its card a miniature.
-        Func<PageHost?> buildDock = () => null;
-        int slot = DockLayout.SlotSide(chrome.Dock);
-        if (slot > 0)
-        {
-            var dockTheme = _dockTheme = ThemeResolver.Resolve(_loadedTheme, (float)(slot * scale), compact: true);
-            var dockCardStyle = _dockCardStyle = ResolvedCardStyle.Resolve(_loadedTheme, (float)(slot * scale));
-            buildDock = () =>
-            {
-                var entries = DockLayout.Select(config.Dock, _plugins.GetDescriptor);
-                var page = new PageConfig { Name = "Dock", Widgets = entries.Select(e => e.Config).ToList() };
-                var slots = DockLayout.Compute(chrome.Dock, entries, gap);
-                return new PageHost(page, slots, _plugins, dockTheme, dockCardStyle, CardOrder.Dock(slots.Count), press, _frameClock, scale, borderMotion, chrome.Dock, WidgetMotion);
-            };
-        }
-
-        _pager.Rebuild(new PagerSetup(
-            screen,
-            scale,
-            chrome,
-            IndicatorStyle.Resolve(_loadedTheme, cellPx),
-            index =>
-            {
-                var page = config.Pages[index];
-                var layout = new GridLayoutManager(screen.Width, screen.Height, gap, chrome.Grid.Height)
-                    .RenderWidgetLayout(page.Widgets, screen);
-                return new PageHost(page, layout, _plugins, theme, cardStyle, CardOrder.Assign(layout), press, _frameClock, scale, borderMotion, null, WidgetMotion);
-            },
-            buildDock));
-    }
-
-    private void ApplyBackgroundLayer(System.Drawing.Size screen, double scale)
-    {
-        var settings = _backgroundSettings;
-        var theme = _loadedTheme;
-        var plan = BackgroundPlan.Resolve(settings, theme, _motion.User);
         _backgroundLayer.Apply(
             plan.RequestKey(_shaders, _dataFolder),
             first => plan.Build(_shaders, _dataFolder, first),
-            screen,
-            scale,
+            surface.Size,
+            surface.Scale,
             SKColor.Parse(theme.Definition.Colors!.Background));
+        _pattern.Apply(theme, surface.Size, surface.Scale);
     }
-
-    private void DisposeThemes()
-    {
-        _theme?.Dispose();
-        _theme = null;
-        _dockTheme?.Dispose();
-        _dockTheme = null;
-        _cardStyle?.Dispose();
-        _cardStyle = null;
-        _dockCardStyle?.Dispose();
-        _dockCardStyle = null;
-    }
-
-    /// <summary>Runs on a sampling thread: collects the ids and asks the UI thread, once, to look at them.</summary>
-    private void OnReadingsChanged(IReadOnlyCollection<string> ids)
-    {
-        lock (_changedGate)
-        {
-            _changedReadings.UnionWith(ids);
-            if (_changedQueued)
-                return;
-            _changedQueued = true;
-        }
-
-        DispatcherQueue.TryEnqueue(RepaintChangedReadings);
-    }
-
-    private void RepaintChangedReadings()
-    {
-        HashSet<string> ids;
-        lock (_changedGate)
-        {
-            ids = _changedReadings;
-            _changedReadings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            _changedQueued = false;
-        }
-
-        // Only the views that declared a changed reading are asked, each once.
-        var asked = new HashSet<WidgetView>();
-        foreach (var page in _pager.LivePages)
-        {
-            foreach (string id in ids)
-            {
-                foreach (var view in page.ViewsFor(id))
-                {
-                    if (asked.Add(view))
-                        view.OnReadingsChanged();
-                }
-            }
-        }
-    }
-
     private void OnClosed()
     {
         // SystemEvents are static; unsubscribe or the window leaks.
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         SystemEvents.PowerModeChanged -= OnPowerModeChanged;
-        _plugins.Readings.ReadingsChanged -= OnReadingsChanged;
         _placementTimer.Stop();
         _pager.Shutdown();
+        _session.Dispose();
         _frameClock.Shutdown();
         _power?.Dispose();
         _animations?.Dispose();
         _backgroundLayer.Dispose();
         _pattern.Dispose();
-        DisposeThemes();
     }
 }
