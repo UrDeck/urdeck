@@ -14,14 +14,24 @@ public static class SecretStores
         new SecretStore(OperatingSystem.IsWindows() ? new CredentialManagerBackend() : null);
 
     /// <summary>
-    /// Moves the secrets typed into the configuration (see <see cref="SecretMover"/>) and saves the file when that changed it.
-    /// Returns whether the file was changed.
+    /// Moves the secrets typed into the configuration (see <see cref="SecretMover"/>) and removes their keys from the
+    /// configuration document as a host edit (not an undo step; the file is written behind it). Returns whether the
+    /// document was changed.
     /// </summary>
     public static bool MoveFromConfigAndSave(ConfigStore config, ProviderRegistry providers, ISecretStore store)
     {
-        if (!SecretMover.MoveFromConfig(config.Config, providers.Descriptors, store, config.IsNewerThanHost))
+        var moved = new List<(string ProviderId, string Key)>();
+        if (!SecretMover.MoveFromConfig(config.Config, providers.Descriptors, store, config.IsNewerThanHost, moved) || moved.Count == 0)
             return false;
-        config.Save();
-        return true;
+
+        return config.Document.Edit("Move secrets out of the file", editor =>
+        {
+            foreach (var (providerId, key) in moved)
+            {
+                string? provider = editor.FindKey("/providers", providerId);
+                if (provider != null)
+                    editor.Remove("/providers/" + JsonPointer.Escape(provider) + "/" + JsonPointer.Escape(key));
+            }
+        }, EditOrigin.Host);
     }
 }

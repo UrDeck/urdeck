@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using UrDeck.Engine.Config;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
@@ -99,21 +100,6 @@ public sealed class ProviderSettingsEditor
             parsed[setting.Key] = element;
         }
 
-        _config.Config.Providers ??= new Dictionary<string, ProviderSettings>(StringComparer.OrdinalIgnoreCase);
-        if (!_config.Config.Providers.TryGetValue(providerId, out var settings))
-            _config.Config.Providers[providerId] = settings = new ProviderSettings();
-        settings.ExtensionData ??= new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase);
-        foreach (var (key, element) in parsed)
-        {
-            RemoveKey(settings, key);
-            if (element is { } value)
-                settings.ExtensionData[key] = value;
-        }
-
-        // A secret may never stay in the file, however it got there.
-        foreach (var secret in descriptor.Schema.Secrets)
-            RemoveKey(settings, secret.Key);
-
         foreach (var secret in descriptor.Schema.Secrets)
         {
             if (newSecrets.GetValueOrDefault(secret.Key) is not { Length: > 0 } text)
@@ -130,7 +116,31 @@ public sealed class ProviderSettingsEditor
             UrDeckLog.Info($"Settings: secret {providerId}/{secret.Key} saved");
         }
 
-        _config.Save();
+        // One user transaction: the non-secret keys, and no secret key in the file however it got there.
+        _config.Document.Edit($"Save {descriptor.Name} settings", editor =>
+        {
+            string provider = editor.FindKey("/providers", providerId) ?? providerId;
+            string basePath = "/providers/" + JsonPointer.Escape(provider);
+            if (editor.Get(basePath) is not JsonObject)
+                editor.Set(basePath, new JsonObject());
+
+            foreach (var (key, element) in parsed)
+            {
+                string? existing = editor.FindKey(basePath, key);
+                if (existing != null && (element is null || existing != key))
+                    editor.Remove(basePath + "/" + JsonPointer.Escape(existing));
+                if (element is { } value)
+                    editor.Set(basePath + "/" + JsonPointer.Escape(key), JsonValue.Create(value));
+            }
+
+            foreach (var secret in descriptor.Schema.Secrets)
+            {
+                if (editor.FindKey(basePath, secret.Key) is { } existing)
+                    editor.Remove(basePath + "/" + JsonPointer.Escape(existing));
+            }
+        });
+
+        _config.Document.Flush(); // an explicit Save: the file has it when this returns
         _hub.ApplySettings(_config.Config.Providers);
         _hub.SecretsChanged();
         UrDeckLog.Info($"Settings: {descriptor.Name} saved");
@@ -288,14 +298,6 @@ public sealed class ProviderSettingsEditor
         if (secret.ContextKey != null && parsed.TryGetValue(secret.ContextKey, out var value) && value is { ValueKind: JsonValueKind.String } text)
             return text.GetString();
         return null;
-    }
-
-    private static void RemoveKey(ProviderSettings settings, string key)
-    {
-        if (settings.ExtensionData == null)
-            return;
-        foreach (string existing in settings.ExtensionData.Keys.Where(k => string.Equals(k, key, StringComparison.OrdinalIgnoreCase)).ToList())
-            settings.ExtensionData.Remove(existing);
     }
 
     /// <summary>Reads a field's text into the JSON value the file keeps; null removes the key (an empty field).</summary>

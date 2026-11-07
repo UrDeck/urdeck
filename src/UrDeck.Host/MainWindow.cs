@@ -91,7 +91,7 @@ public sealed class MainWindow : Window, ISettingsHost
 
     private event Action? SettingsChanged;
 
-    /// <summary><paramref name="saveDisplay"/> writes the configuration after the remembered display was set or updated.</summary>
+    /// <summary><paramref name="saveDisplay"/> remembers the display after it was set or updated (a host edit of the configuration document).</summary>
     internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, ShaderStore shaders, string dataFolder, Action saveDisplay)
     {
         _configStore = configStore;

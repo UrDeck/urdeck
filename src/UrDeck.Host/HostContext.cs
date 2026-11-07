@@ -71,19 +71,29 @@ internal sealed class HostContext : IDisposable
         Target = DisplaySelector.Select(Config.Config, Displays).Display;
     }
 
-    /// <summary>Writes the configuration: on exit, and when the remembered display was set or updated.</summary>
-    public void SaveConfiguration()
+    /// <summary>Remembers the display placement or the settings window set on the configuration, as a host edit; the document writes it.</summary>
+    public void RememberDisplay()
     {
         if (!_saveConfiguration)
             return;
         try
-        { Config.Save(); }
+        { Config.CommitDisplay(); }
+        catch (Exception ex) { UrDeckLog.Warn($"Could not remember the display: {ex.Message}"); }
+    }
+
+    /// <summary>Writes a configuration change that is still waiting for its half second; a host that changed nothing writes nothing.</summary>
+    private void FlushConfiguration()
+    {
+        if (!_saveConfiguration)
+            return;
+        try
+        { Config.Document.Flush(); }
         catch (Exception ex) { UrDeckLog.Warn($"Could not save the configuration: {ex.Message}"); }
     }
 
     public void Dispose()
     {
-        SaveConfiguration();
+        FlushConfiguration();
         Config.Dispose();
         Plugins.Dispose();
     }
