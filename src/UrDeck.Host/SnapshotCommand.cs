@@ -4,6 +4,7 @@
 using System.Globalization;
 using SkiaSharp;
 using UrDeck.Engine.Backgrounds;
+using UrDeck.Engine.Config;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Layout;
@@ -17,7 +18,7 @@ namespace UrDeck.Host;
 
 /// <summary>
 /// <c>--snapshot out.png [--size WxH] [--theme name] [--page N] [--frames N [--fps F]] [--start time] [--demo]</c>: renders a page (default: the one at
-/// <c>activePage</c>) off-screen with the same layout and
+/// <c>startPage</c>) off-screen with the same layout and
 /// widget code as the live window, and the configured <c>background</c> (a shader at a fixed time, in the palette of the
 /// theme in effect; a picture covering the page), writes a PNG and exits. Defaults to the target monitor's resolution, to the primary
 /// monitor's when the target is not connected. It uses the engine alone, runs before the XAML application starts and
@@ -87,7 +88,7 @@ internal static class SnapshotCommand
                 requested = int.Parse(args[pageArg + 1], CultureInfo.InvariantCulture);
 
             var config = host.Config.Config;
-            if (!PageSelection.TryChoose(config.Pages.Count, config.ActivePage, requested, out int pageIndex, out string? pageError))
+            if (!PageSelection.TryChoose(config.Pages.Count, StartPageResolver.Resolve(config, log: true), requested, out int pageIndex, out string? pageError))
             {
                 UrDeckLog.Error($"Snapshot failed: {pageError}");
                 return 1;

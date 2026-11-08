@@ -68,7 +68,7 @@ public sealed class DeckSession : IDisposable
         _presenter = presenter;
         _scheduler = inputs.Scheduler;
         _backgroundSettings = BackgroundSettings.Parse(Config.Background);
-        _navigator = new PageNavigator(PageNames(), Config.ActivePage);
+        _navigator = new PageNavigator(PageKeys(), inputs.StartPage ?? StartPageResolver.Resolve(Config, log: true));
         _pager = new PagerState(_navigator, presenter.Pages, _scheduler);
         _pager.PageChanged += index => PageChanged?.Invoke(index);
         _loadedTheme = LoadTheme();
@@ -127,7 +127,7 @@ public sealed class DeckSession : IDisposable
         }
     }
 
-    private List<string> PageNames() => Config.Pages.Select(p => p.Name).ToList();
+    private List<PageKey> PageKeys() => Config.Pages.Select(p => new PageKey(p.Id, p.Name)).ToList();
 
     private LoadedTheme LoadTheme()
     {
@@ -144,7 +144,7 @@ public sealed class DeckSession : IDisposable
         _loadedTheme = LoadTheme();
         _backgroundSettings = BackgroundSettings.Parse(Config.Background);
         UpdateMotion();
-        _navigator.Reload(PageNames());
+        _navigator.Reload(PageKeys());
         ConfigReloaded?.Invoke();
         ScheduleRebuild(force: true);
     });
@@ -201,11 +201,26 @@ public sealed class DeckSession : IDisposable
     /// <summary>Slides to the page at <paramref name="index"/> with the normal settle; false when it is outside the pages or shown.</summary>
     public bool ShowPage(int index) => _pager.ShowPage(index);
 
-    /// <summary>Slides to the first page named <paramref name="name"/>; false when there is none or it is shown.</summary>
-    public bool ShowPage(string name)
+    /// <summary>Slides to the page with the id <paramref name="pageId"/>; false when there is none or it is shown.</summary>
+    public bool ShowPage(string pageId)
     {
-        int index = PageNames().IndexOf(name);
+        int index = _navigator.IndexOf(pageId);
         return index >= 0 && _pager.ShowPage(index);
+    }
+
+    /// <summary>
+    /// Shows the page with the id <paramref name="pageId"/> at once, without the settle (the preview, which jumps from tab to
+    /// tab); false when there is none or it is shown.
+    /// </summary>
+    public bool JumpToPage(string pageId)
+    {
+        int index = _navigator.IndexOf(pageId);
+        if (index < 0 || index == _navigator.Index)
+            return false;
+        _navigator.Settle(index);
+        ScheduleRebuild(force: true);
+        PageChanged?.Invoke(index);
+        return true;
     }
 
     /// <summary>

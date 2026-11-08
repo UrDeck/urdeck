@@ -1,6 +1,7 @@
 {
   "pages": [
     {
+"id": "p-main01",
       "name": "Default",
       "widgets": [
         {
@@ -39,7 +40,7 @@
       ]
     }
   ],
-  "activePage": 0,
+  "startPage": "p-main01",
   "dock": [
     {
       "typeId": "urdeck.widgets.shortcut",

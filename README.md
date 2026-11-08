@@ -107,7 +107,7 @@ dotnet run --project src/UrDeck.Host -c Release -- --snapshot out.png --size 110
 (`frame-0000.png` ... into the folder given as the output) F per second (default 30) apart in the time the widgets draw from,
 starting at `--start` (default now), so a split-flap clock flips and the weather icons move from one picture to the next;
 the website's loops are made with it (`site/README.md`). `--page N` renders the page at index N (0-based, default
-`activePage`) with the band and the indicator showing that page; an index outside the page list fails with a logged reason
+the `startPage`) with the band and the indicator showing that page; an index outside the page list fails with a logged reason
 and exit code 1. `*.snapshot.png` files are git-ignored.
 
 `--demo` (with or without `--snapshot`) runs the deck on sample data: every data provider that carries a sample file (the
@@ -121,14 +121,18 @@ the widget pages; they are regenerated from the product (`site/README.md`, "Medi
 
 ## Configuration
 
-UrDeck is configured by `urdeck-config.json` in the data folder (`%APPDATA%\UrDeck`, or next to the executable in a
+UrDeck is configured in its editor: left-click the tray icon. Its Pages section shows the page as the deck draws it (the deck's
+own renderer, laid out for the deck's display) and adds, sizes and removes widgets and manages pages, with undo; Providers,
+Display (the monitor picker) and General hold the rest. Every change reaches the deck at once and is saved as it is made.
+
+What the editor changes is kept in `urdeck-config.json` in the data folder (`%APPDATA%\UrDeck`, or next to the executable in a
 build; **Open data folder** in the tray menu opens it). The tracked sample is `src/UrDeck.Host/urdeck-config.default.json`: it
 ships next to the executable, and the first start copies it to the data folder when there is no configuration. The build never
 overwrites a working configuration. The file has a `"version"` (1); a file from a newer version is read but never written. The file is hot-reloaded about a second after saving; an invalid edit is ignored
 and the last good config is kept.
 
 The user documentation lives on the website, at [urdeck.app/docs](https://urdeck.app/docs/), and nowhere else: the config
-file, [pages and the dock](https://urdeck.app/docs/pages-and-dock/), the monitor and the settings window, each widget
+file, [pages and the dock](https://urdeck.app/docs/pages-and-dock/), the monitor and the editor, each widget
 ([Clock](https://urdeck.app/docs/widgets/clock/), [Stats](https://urdeck.app/docs/widgets/stats/),
 [Weather](https://urdeck.app/docs/widgets/weather/), [Shortcut](https://urdeck.app/docs/widgets/shortcut/),
 [Now playing](https://urdeck.app/docs/widgets/nowplaying/), [Control](https://urdeck.app/docs/widgets/control/)),

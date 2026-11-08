@@ -16,15 +16,16 @@ namespace UrDeck.Engine.Tests;
 
 public class PageNavigatorTests
 {
-    private static readonly string[] Three = ["Home", "Games", "Work"];
+    private static readonly PageKey[] Three = [new("p-home", "Home"), new("p-games", "Games"), new("p-work", "Work")];
 
     [Fact]
-    public void StartsOnTheActivePage()
+    public void StartsOnTheStartPage()
     {
         var nav = new PageNavigator(Three, 1);
 
         Assert.Equal(1, nav.Index);
         Assert.Equal("Games", nav.Name);
+        Assert.Equal("p-games", nav.Id);
         Assert.Equal(3, nav.Count);
     }
 
@@ -46,22 +47,33 @@ public class PageNavigatorTests
     }
 
     [Fact]
-    public void Reload_KeepsThePageByName_EvenWhenItMoved()
+    public void Reload_KeepsThePageById_AfterAReorder()
     {
         var nav = new PageNavigator(Three, 1);
 
-        nav.Reload(["Work", "Home", "Games"]);
+        nav.Reload([Three[2], Three[0], Three[1]]);
 
         Assert.Equal(2, nav.Index);
-        Assert.Equal("Games", nav.Name);
+        Assert.Equal("p-games", nav.Id);
     }
 
     [Fact]
-    public void Reload_WithRepeatedNames_UsesTheFirst()
+    public void Reload_KeepsThePageById_AfterARename()
     {
-        var nav = new PageNavigator(["A", "B", "B"], 2);
+        var nav = new PageNavigator(Three, 1);
 
-        nav.Reload(["A", "B", "B"]);
+        nav.Reload([Three[0], new("p-games", "Play"), Three[2]]);
+
+        Assert.Equal(1, nav.Index);
+        Assert.Equal("Play", nav.Name);
+    }
+
+    [Fact]
+    public void Reload_WithRepeatedNames_FollowsTheId()
+    {
+        var nav = new PageNavigator([new("p-a", "A"), new("p-b1", "B"), new("p-b2", "B")], 2);
+
+        nav.Reload([new("p-a", "A"), new("p-b2", "B"), new("p-b1", "B")]);
 
         Assert.Equal(1, nav.Index);
     }
@@ -71,7 +83,7 @@ public class PageNavigatorTests
     {
         var nav = new PageNavigator(Three, 2);
 
-        nav.Reload(["Home", "Games"]);
+        nav.Reload([Three[0], Three[1]]);
 
         Assert.Equal(1, nav.Index);
     }
@@ -79,14 +91,15 @@ public class PageNavigatorTests
     [Fact]
     public void SinglePage_AndEmptyList_AreSafe()
     {
-        var one = new PageNavigator(["Only"], 3);
+        var one = new PageNavigator([new("p-only", "Only")], 3);
         Assert.Equal(0, one.Index);
 
         var none = new PageNavigator([], 0);
         Assert.Equal(0, none.Index);
         Assert.Equal("", none.Name);
+        Assert.Null(none.Id);
         none.Settle(4);
-        none.Reload(["A"]);
+        none.Reload([new("p-a", "A")]);
         Assert.Equal(0, none.Index);
     }
 }
@@ -694,7 +707,7 @@ public class PagerConfigTests : IDisposable
     [Fact]
     public void Absent_MeansAuto_AndAnOlderFileLoads()
     {
-        using var store = Store("""{ "pages": [ { "name": "A", "widgets": [] } ], "activePage": 0 }""");
+        using var store = Store("""{ "pages": [ { "name": "A", "widgets": [] } ] }""");
 
         Assert.Equal(IndicatorMode.Auto, store.Config.Pager.GetIndicatorMode());
     }

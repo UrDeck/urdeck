@@ -427,7 +427,7 @@ public sealed class DeckSessionTests : IDisposable
         using var rig = new DeckRig(config).Show();
         var dock = rig.Session.Pager.Dock!;
 
-        rig.Session.ShowPage("P2");
+        rig.Session.ShowPage("p-2");
         rig.Presenter.Settle();
 
         Assert.Same(dock, rig.Session.Pager.Dock);
@@ -484,8 +484,8 @@ public sealed class DeckSessionTests : IDisposable
         rig.Session.PageChanged += changes.Add;
 
         // Before anything is built the navigator moves at once.
-        Assert.True(rig.Session.ShowPage("P2"));
-        Assert.False(rig.Session.ShowPage("P2"));
+        Assert.True(rig.Session.ShowPage("p-2"));
+        Assert.False(rig.Session.ShowPage("p-2"));
         Assert.False(rig.Session.ShowPage("nope"));
         Assert.False(rig.Session.ShowPage(7));
         rig.Show();
@@ -497,6 +497,72 @@ public sealed class DeckSessionTests : IDisposable
         rig.Presenter.Settle();
         Assert.Equal([1, 0], changes);
         Assert.Equal("P1", rig.Session.Pager.Current!.Name);
+    }
+
+    [Fact]
+    public void TheFramePainter_DrawsTheThemeColour_TheCards_AndTheIndicator()
+    {
+        var fill = DeckRig.Probe(0, 0);
+        fill.Parameters["fill"] = "#ff0000";
+        using var rig = new DeckRig(DeckRig.Pages([fill], [DeckRig.Probe(0, 0)])).Show();
+        var setup = rig.Session.Pager.Setup!;
+        using var bitmap = new SkiaSharp.SKBitmap(setup.Screen.Width, setup.Screen.Height);
+        using var canvas = new SkiaSharp.SKCanvas(bitmap);
+        using var painter = new DeckFramePainter();
+
+        painter.Paint(canvas, rig.Session, null, TimeSpan.Zero, animate: false);
+
+        var card = rig.Session.Pager.Current!.Cards[0].Item;
+        Assert.Equal(SkiaSharp.SKColors.Red, bitmap.GetPixel(card.Position.X + card.Size.Width / 2, card.Position.Y + card.Size.Height / 2));
+        Assert.Equal(SkiaSharp.SKColor.Parse(DeckRig.Dark.Definition.Colors!.Background), bitmap.GetPixel(setup.Screen.Width / 2, setup.Chrome.Grid.Height / 2));
+        var band = setup.Chrome.Indicator;
+        Assert.NotEqual(UrDeck.Engine.Layout.IndicatorMode.Off, setup.Chrome.Mode);
+        Assert.Contains(Enumerable.Range(band.X, band.Width), x => bitmap.GetPixel(x, band.Y + band.Height / 2) != bitmap.GetPixel(1, band.Y + band.Height / 2));
+    }
+
+    [Fact]
+    public void TheSession_StartsOnTheStartPage_ById()
+    {
+        var config = TwoPages();
+        config.StartPage = "p-2";
+
+        using var rig = new DeckRig(config).Show();
+
+        Assert.Equal("P2", rig.Session.Pager.Current!.Name);
+    }
+
+    [Fact]
+    public void AReload_KeepsThePageById_AfterARenameAndAReorder()
+    {
+        using var rig = new DeckRig(TwoPages());
+        rig.Session.ShowPage("p-2");
+        rig.Show();
+
+        var next = TwoPages();
+        next.Pages[1].Name = "Games";
+        next.Pages.Reverse();
+        rig.Config.Reload(next);
+        rig.Scheduler.RunPosted();
+
+        Assert.Equal(0, rig.Session.Navigator.Index);
+        Assert.Equal("Games", rig.Session.Pager.Current!.Name);
+    }
+
+    [Fact]
+    public void JumpToPage_ShowsThePageAtOnce_WithoutASettle()
+    {
+        using var rig = new DeckRig(TwoPages()).Show();
+        var changes = new List<int>();
+        rig.Session.PageChanged += changes.Add;
+
+        Assert.True(rig.Session.JumpToPage("p-2"));
+        Assert.False(rig.Session.JumpToPage("p-2"));
+        Assert.False(rig.Session.JumpToPage("nope"));
+        rig.Scheduler.RunPosted();
+
+        Assert.Null(rig.Presenter.PendingSettle);
+        Assert.Equal("P2", rig.Session.Pager.Current!.Name);
+        Assert.Equal([1], changes);
     }
 
     [Fact]

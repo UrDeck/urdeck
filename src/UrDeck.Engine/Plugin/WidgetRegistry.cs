@@ -197,7 +197,10 @@ public class WidgetRegistry
     /// Creates a widget as <see cref="CreateWidget(WidgetConfig)"/> does and hands out its host services, for a caller
     /// that shows the widget: it listens for repaint requests and disposes the services with the view.
     /// </summary>
-    public IWidget? CreateWidget(WidgetConfig config, out WidgetServices? services)
+    public IWidget? CreateWidget(WidgetConfig config, out WidgetServices? services) => CreateWidget(config, CreateServices, out services);
+
+    /// <summary>Creates a widget as <see cref="CreateWidget(WidgetConfig, out WidgetServices?)"/> does, attached to services <paramref name="makeServices"/> makes.</summary>
+    internal IWidget? CreateWidget(WidgetConfig config, Func<WidgetServices>? makeServices, out WidgetServices? services)
     {
         services = null;
         var descriptor = GetDescriptor(config.WidgetTypeId);
@@ -205,7 +208,7 @@ public class WidgetRegistry
             return null;
 
         var widget = (IWidget)Activator.CreateInstance(descriptor.WidgetType)!;
-        services = CreateServices?.Invoke();
+        services = makeServices?.Invoke();
         if (services != null)
             widget.Attach(services);
         widget.Configure(config.ToConcrete(descriptor.ConfigType));

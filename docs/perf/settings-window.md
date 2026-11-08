@@ -79,3 +79,73 @@ not measured. Same method as above on a copy of the Release build, with `display
 The gate passes: memory does not climb from cycle to cycle and the settled value is below the baseline. The absolute numbers are
 higher than in the 2026-10-11 run because this build carries more (the media provider, the secret store and the editor are
 loaded) and the baseline was taken just after the start; they are not comparable with that run. No warning or error in the log.
+
+## The editor (2026-11-07, `editor-shell`)
+
+The settings window became the editor: a `NavigationView` with Pages (a live preview of the page, a second deck session
+painted on a software canvas), Providers, Display and General. The cost requirement now separates the deck's running cost
+once the window is closed (what matters) from the window's own cost while it is open (it must stay usable). Release build,
+Windows 11, the owner's PC; the deck on the 1100x3840 panel with the owner's page (clock, weather, stats 4x4, dock of three)
+and the theme's moving background.
+
+### Leak found and fixed
+
+The first soak of the editor leaked every window: private bytes rose about 5 MB per opening (+104 MB after 20) and the
+managed heap with them. `dotnet-gcdump` showed every closed editor's controls, preview session and sample readings alive;
+ClrMD found no managed root, only native references to the closed `EditorWindow`. Bisection (an empty `Window` does not
+leak; the editor without its Pages section still did) and the referrer chain pointed at handlers native code holds that
+lead back to the window: the `NavigationView` events and the window's own `Closed` handlers (the editor's and `App`'s).
+`Window` is not a XAML element, so the reference tracker does not see through that cycle. They are now named handlers,
+detached when the window closes (and the `NavigationView`'s content, footer and items cleared); `App` detaches its `Closed`
+handler when it runs. The dispatcher timers the editor and the preview make are detached too
+(`DispatcherDeckScheduler.Dispose`, `FrameClock.Shutdown`). After the fix no `EditorWindow` is left after the soak.
+
+### Open and close twenty times
+
+`URDECK_SETTINGS_SOAK=1`, as above. First on a copy of the build whose remembered display is not connected (no deck runs):
+
+| | private | working set | gc heap |
+|---|---|---|---|
+| baseline | 119.2 MB | 191.2 MB | 4.6 MB |
+| after cycle 1 | 152.3 MB | 264.5 MB | 5.9 MB |
+| after cycle 10 | 169.3 MB | 287.5 MB | 6.4 MB |
+| after cycle 20 | 171.8 MB | 291.6 MB | 6.8 MB |
+| settled | 171.5 MB | 290.8 MB | 6.7 MB |
+
+Without a deck the first opening also loads what a running deck already holds (the theme, fonts, Skia), so the one-time
+step is large here (+33 MB). From cycle 10 to cycle 20: +2.5 MB, inside the 10 MB of the requirement.
+
+With the deck running on the panel (the case that matters):
+
+| | private | working set | gc heap |
+|---|---|---|---|
+| baseline | 218.0 MB | 304.7 MB | 5.7 MB |
+| after cycle 1 | 230.0 MB | 329.7 MB | 6.1 MB |
+| after cycle 10 | 240.2 MB | 342.3 MB | 6.1 MB |
+| after cycle 20 | 243.4 MB | 346.5 MB | 6.1 MB |
+| **settled** | **233.8 MB (+15.8 once)** | **336.8 MB** | **5.7 MB (the baseline's)** |
+
+### CPU
+
+Process CPU time over 20 s readings, % of one core:
+
+| | readings |
+|---|---|
+| deck, editor never opened (fresh start) | 9.45, 9.69; another start 8.52, 10.0 |
+| deck, after the editor was opened and closed 20 times | 7.58, 8.12 |
+| editor open on Pages, preview Live (still background) | 8.59, 7.89 |
+| editor open on Display | 7.03, 8.91 |
+
+Every reading is within the deck's own spread from one reading to the next; most of the deck's cost is its moving
+background (30 frames a second). Neither the closed editor nor the open preview is measurable above it.
+
+The first preview painted the moving background's shader, the pattern and the shadows on its software canvas at 30 frames
+a second, and the editor was unusable (slow clicks, choppy dragging, owner on the panel). The preview now paints those once
+into a picture and shows the background and moving borders still (`DeckFramePainter.PaintCached`); a frame paints the cards.
+
+### Typing a page name
+
+Typing 11 characters into a page's name at about six keys a second (scripted, 160 ms apart): 9 rebuilds of the deck's page
+and 9 of the preview's (18 `Pages:` lines). The configuration's 150 ms coalescing is shorter than the time between keys, so
+the deck rebuilds about once per key while someone types; each edit is one undo step (merged by the page). Acceptable for
+now: a rebuild of this page is quick and the deck follows the editor. A longer coalescing delay would cut it if needed.

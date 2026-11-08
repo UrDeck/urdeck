@@ -7,11 +7,11 @@ namespace UrDeck.Engine.Layout;
 public static class PageSelection
 {
     /// <summary>
-    /// The page to render: <paramref name="requested"/> when given (it must be inside the list), otherwise the
-    /// page at <paramref name="activePage"/>, clamped like the window does at startup.
+    /// The page to render: <paramref name="requested"/> when given (it must be inside the list), otherwise
+    /// <paramref name="startIndex"/>, the start page as <c>StartPageResolver</c> resolved it.
     /// </summary>
     /// <returns>False with a reason in <paramref name="error"/> when the requested page does not exist.</returns>
-    public static bool TryChoose(int pageCount, int activePage, int? requested, out int index, out string? error)
+    public static bool TryChoose(int pageCount, int startIndex, int? requested, out int index, out string? error)
     {
         error = null;
         if (requested is { } page)
@@ -23,7 +23,7 @@ public static class PageSelection
             return false;
         }
 
-        index = pageCount == 0 ? 0 : Math.Clamp(activePage, 0, pageCount - 1);
+        index = pageCount == 0 ? 0 : Math.Clamp(startIndex, 0, pageCount - 1);
         return true;
     }
 }

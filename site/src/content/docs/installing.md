@@ -31,7 +31,7 @@ version.
 
 A copy on a stable version takes only stable releases. A copy on a release candidate (`0.2.0-rc.1`) also takes release
 candidates. A check that fails (no network, say) is logged as a warning in `urdeck.log` and tried again at the next check;
-the deck is never interrupted. The settings window and the first lines of the log say which version you are running.
+the deck is never interrupted. The editor's General section and the first lines of the log say which version you are running.
 
 A copy you built yourself, or ran from a folder rather than installed, never checks.
 

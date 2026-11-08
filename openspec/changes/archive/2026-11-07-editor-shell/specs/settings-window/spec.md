@@ -109,19 +109,28 @@ The settings window's Display section MUST show every connected display and let 
 - **THEN** the list loses that row without being reopened, or shows it as waiting if it is the remembered display
 
 ### Requirement: Cost Of The Settings Window
-Opening and closing the settings window MUST NOT raise the host's idle cost, and while it is open its preview MUST cost
-about what a second deck showing the same page costs.
+Opening and closing the settings window MUST NOT raise the deck's running cost once it is closed, and while it is open its
+preview MUST cost about what a second deck showing the same page costs. The deck's cost after the window closes matters
+more than the window's own cost while it is open, as long as the window stays usable.
 
-- With the window closed, the host's idle CPU and GPU use are those of the deck without a settings window
-- After the window is opened and closed 20 times and the host has run a garbage collection, its private bytes
-  are within 10 MB of what they were before the first opening, and do not keep rising from one cycle to the next
+- With the window closed, the host's idle CPU and GPU use are those of the deck without a settings window, also after the
+  window was opened and closed
+- The first opening may keep a one-time cost (WinUI's control styles and caches). After that, memory does not keep rising
+  from one opening to the next: after the window is opened and closed 20 times and the host has run a garbage collection,
+  its private bytes after the 20th cycle are within 10 MB of what they were after the 10th, and nothing of a closed window
+  stays in memory
 - While the window is open on a section other than Pages, or minimised, it uses no measurable CPU
 - While the Pages section is open, the preview draws only when the page changes or something on it animates
 - The measured numbers are recorded in `docs/perf/settings-window.md`
 
 #### Scenario: Open and close twenty times
 - **WHEN** the window is opened and closed 20 times
-- **THEN** the host's private bytes after a garbage collection are within 10 MB of the starting value
+- **THEN** the host's private bytes after a garbage collection are within 10 MB of their value after the tenth cycle,
+  and no closed window remains in memory
+
+#### Scenario: The deck after the window closed
+- **WHEN** the window was opened and closed and the deck keeps running
+- **THEN** the deck's CPU use is that of a deck whose settings window was never opened
 
 #### Scenario: Idle while open
 - **WHEN** the window is open on the Display section and no display changes

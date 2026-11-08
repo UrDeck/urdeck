@@ -8,9 +8,15 @@ order: 0
 import BuiltinList from '../../components/BuiltinList.astro';
 import ProviderSettingsTable from '../../components/ProviderSettingsTable.astro';
 
-UrDeck is configured by one JSON file, `urdeck-config.json`, which lives in UrDeck's data folder, `%APPDATA%\UrDeck` (choose **Open data folder** in the tray menu to open it). There is no editor
-yet (it is planned); you edit the file in any text editor. UrDeck notices a saved change after about a second and applies
-it without a restart. A file that is not valid JSON is ignored and the last good configuration stays in use; the reason is
+You build your deck in the **editor**: left-click the tray icon (or right-click it and choose **Settings**). Its **Pages** section
+shows the page as the deck draws it; add widgets, change their size, remove them, and add, rename, reorder and delete pages there.
+Every change reaches the deck at once and is saved as you make it; **Undo** (Ctrl+Z) takes back the last one. See
+[Pages and the dock](/docs/pages-and-dock/).
+
+Everything the editor changes is kept in one JSON file, `urdeck-config.json`, which lives in UrDeck's data folder, `%APPDATA%\UrDeck`
+(choose **Open data folder** in the tray menu, or **Show the configuration file** in the editor's General section). You can also edit
+it in any text editor: UrDeck notices a saved change after about a second and applies it without a restart, and an open editor shows
+it with an **Undo the reload** button. A file that is not valid JSON is ignored and the last good configuration stays in use; the reason is
 written to `urdeck.log`, next to the file. The first start creates the file from the sample page. The file's `"version"` is 1; a file written by a newer UrDeck is read as well as possible but never changed.
 
 Everything you own sits in that folder, so reinstalling or updating UrDeck never touches it: the configuration, the log, `themes/`,
@@ -23,13 +29,14 @@ empty file named `urdeck.portable` next to `UrDeck.Host.exe` and restart; that f
 {
   "pages": [
     {
+      "id": "p-main01",
       "name": "Default",
       "widgets": [
         { "typeId": "urdeck.widgets.clock", "col": 0, "row": 0, "width": 4, "height": 2, "format": "24h", "showDate": true }
       ]
     }
   ],
-  "activePage": 0,
+  "startPage": "p-main01",
   "dock": [
     { "typeId": "urdeck.widgets.shortcut", "target": "https://github.com", "label": "GitHub" }
   ],
@@ -40,9 +47,10 @@ empty file named `urdeck.portable` next to `UrDeck.Host.exe` and restart; that f
 
 | Field | Meaning |
 |---|---|
-| `pages` | The pages. Each has a `name` and a list of `widgets`. |
+| `pages` | The pages. Each has an `id`, a `name` and a list of `widgets`. |
+| `pages[].id` | The page's identity: `p-` and six letters or digits, unique in the file. It never changes when the page is renamed or moved; UrDeck gives a page without one an id and writes it. |
 | `pages[].widgets[]` | A widget. `typeId` says which one; `col` (0 to 3), `row`, `width` (1 to 4) and `height` are in grid cells. A value out of range is clamped and a warning is logged; an unknown `typeId` leaves its place empty. Every other property is a setting of that widget (see the widget pages). |
-| `activePage` | The index of the page shown at startup. Swiping does not change the file. |
+| `startPage` | The `id` of the page shown at startup; without it, or when no page has that id, the first page. Swiping does not change the file. An older `activePage` key is not read. |
 | `dock` | Up to four widgets kept at the bottom of every page. See [Pages and the dock](/docs/pages-and-dock/#the-dock). |
 | `theme` | the name of a built-in theme (`default-dark` is the default) or of a folder under `themes/`. See [Themes](/docs/themes/). |
 | `background` | A moving background or a picture behind the cards. See [Backgrounds](/docs/backgrounds/). |
@@ -63,8 +71,7 @@ A data provider reads something (your PC, the weather, a service of yours) for t
 | `actionTimeoutMs` | How long an action (a button on a card) may run before it fails. Default `10000`; a value below `1000` is raised to it. |
 | `actionWarnMs` | An action slower than this is logged as a warning. Default `2000`. |
 
-A provider that talks to a service of yours has more: an address, a token. Saving them in the settings window (tray icon,
-Settings, Providers) writes the address to `urdeck-config.json` and the token to Windows Credential Manager. Changing a
+A provider that talks to a service of yours has more: an address, a token. Saving them in the editor (tray icon, Providers) writes the address to `urdeck-config.json` and the token to Windows Credential Manager. Changing a
 provider's settings restarts that provider only; the others keep running.
 
 <ProviderSettingsTable />
@@ -114,10 +121,10 @@ UrDeck stays on one physical monitor. The first time it starts it chooses one by
 (most pixels), or a device name such as `"DISPLAY1"`. `monitor` is a 1-based index used when the name matches nothing.
 
 You do not edit `display`. To make UrDeck choose again, for example because the first start picked the wrong monitor
-while yours was switched off, remove `display` from the file or use **Choose automatically** in Settings.
+while yours was switched off, remove `display` from the file or use **Choose automatically** in the editor's Display section.
 
-Left-click the tray icon, or right-click it and choose **Settings**, to open the settings window. It lists every
-connected monitor with its name, resolution, orientation and a number, and the one the deck is on says "Deck is here".
+The editor's **Display** section lists every connected monitor with its name, orientation, its position and a number, and the one
+the deck is on says "Deck is here".
 Click a monitor to move the deck there and keep it there. **Identify** shows each monitor's number in its corner for two
 seconds.
 

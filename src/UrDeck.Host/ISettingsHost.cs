@@ -1,18 +1,107 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using UrDeck.Engine.Config;
+using UrDeck.Engine.Data;
+using UrDeck.Engine.Deck;
 using UrDeck.Engine.Display;
+using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Settings;
 
 namespace UrDeck.Host;
 
+/// <summary>An installed widget type as the editor's palette lists it.</summary>
+/// <param name="Descriptor">The type: id, name, description, sizes.</param>
+/// <param name="PluginName">The assembly that provides it.</param>
+/// <param name="PluginVersion">Its version.</param>
+/// <param name="FirstParty">Whether it ships with UrDeck (no plugin line in the palette).</param>
+internal sealed record WidgetTypeInfo(WidgetDescriptor Descriptor, string PluginName, string PluginVersion, bool FirstParty);
+
+/// <summary>Where the deck is: shown on a display, or waiting for the remembered one.</summary>
+/// <param name="Shown">The deck is on its display.</param>
+/// <param name="DisplayName">The display it is on, or the one it waits for; null when none is known.</param>
+internal sealed record DeckState(bool Shown, string? DisplayName);
+
+/// <summary>The editor's preview: a deck session of its own over the preview's readings. Disposing it releases both.</summary>
+internal sealed class PreviewDeck(DeckSession session, PreviewReadings readings, Action release) : IDisposable
+{
+    public DeckSession Session { get; } = session;
+
+    public PreviewReadings Readings { get; } = readings;
+
+    public void Dispose()
+    {
+        Session.Dispose();
+        release();
+        Readings.Dispose();
+    }
+}
+
 /// <summary>
-/// Everything the settings window asks of the host, and nothing else: it never sees the deck window. The seam is what
-/// lets the window move to a process of its own, with an implementation that reads and writes the configuration file.
-/// All members are used on the UI thread.
+/// Everything the settings window (the editor) asks of the host, and nothing else: it never sees the deck window. The seam
+/// is what lets the window move to a process of its own, with an implementation that reads and writes the configuration
+/// file. All members are used on the UI thread.
 /// </summary>
 internal interface ISettingsHost
 {
+    /// <summary>The configuration as a document: what the editor shows, edits, undoes.</summary>
+    ConfigDocument Document { get; }
+
+    /// <summary>The configuration file's full path.</summary>
+    string ConfigPath { get; }
+
+    /// <summary>The log file's full path.</summary>
+    string LogPath { get; }
+
+    /// <summary>
+    /// The surface the deck lays its page out for: the deck's display while it is shown, else the last one it was on, else
+    /// 1100x3840 at scale 1. The preview is laid out for it, so text fits and wraps as on the deck.
+    /// </summary>
+    DeckSurface DeckSurface { get; }
+
+    /// <summary>
+    /// A deck session for the editor's preview, shown by <paramref name="presenter"/>: the deck's configuration, theme,
+    /// background and widgets, on the page <paramref name="pageId"/>, with its own readings (live, or the samples), animated by
+    /// <paramref name="frames"/>, without input.
+    /// </summary>
+    PreviewDeck CreatePreview(IDeckPresenter presenter, IFrameSource frames, string? pageId);
+
+    /// <summary>The background of a plan for the preview, prepared for the surface; null for the theme's colour.</summary>
+    Engine.Backgrounds.DeckBackground? BuildBackground(Engine.Backgrounds.BackgroundPlan plan, DeckSurface surface);
+
+    /// <summary>The background's key, so the preview builds it only when it changed.</summary>
+    string? BackgroundKey(Engine.Backgrounds.BackgroundPlan plan);
+
+    /// <summary>The page the deck shows now (its id); null without pages.</summary>
+    string? DeckPageId { get; }
+
+    /// <summary>Moves the deck to the page with the normal settle (the deck follows the editor); nothing is written.</summary>
+    void ShowPageOnDeck(string pageId);
+
+    /// <summary>The deck settled on another page (a swipe on the panel, or <see cref="ShowPageOnDeck"/>).</summary>
+    event Action<string?>? DeckPageChanged;
+
+    /// <summary>Where the deck is now.</summary>
+    DeckState DeckState { get; }
+
+    /// <summary>The installed widget types, by name.</summary>
+    IReadOnlyList<WidgetTypeInfo> WidgetTypes { get; }
+
+    /// <summary>An installed widget type; null when it is not installed.</summary>
+    WidgetDescriptor? DescribeWidget(string typeId);
+
+    /// <summary>A reading's label (for the names of widgets in messages); null when it is unknown.</summary>
+    string? ReadingLabel(string readingId);
+
+    /// <summary>The providers whose readings are in use that cannot start because a required setting is missing.</summary>
+    IReadOnlyList<string> ProvidersWaitingForSettings { get; }
+
+    /// <summary>Whether this copy starts with Windows; null when it cannot tell.</summary>
+    bool StartsWithWindows { get; }
+
+    /// <summary>Turns starting with Windows on or off, as the tray entry does.</summary>
+    void SetStartWithWindows(bool on);
+
     /// <summary>The displays now connected as picker rows, with the deck's display marked.</summary>
     DisplayList GetDisplayList();
 

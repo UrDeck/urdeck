@@ -47,7 +47,7 @@ export function createRenderer({ repo, site, canRender = true }) {
     if (Object.keys(entry.config).length > 0) {
       mkdirSync(dir, { recursive: true });
       const config = join(dir, 'widget-config.json');
-      writeFileSync(config, JSON.stringify({ pages: [{ name: 'Media', widgets: [{ typeId: entry.widget, col: 0, row: 0, width: cols, height: rows, ...entry.config }] }], activePage: 0 }));
+      writeFileSync(config, JSON.stringify({ pages: [{ name: 'Media', widgets: [{ typeId: entry.widget, col: 0, row: 0, width: cols, height: rows, ...entry.config }] }]}));
       args.push('--config', config);
     }
     return args;
@@ -70,7 +70,7 @@ export function createRenderer({ repo, site, canRender = true }) {
     }
     mkdirSync(dir, { recursive: true });
     const config = join(dir, 'empty-page.json');
-    writeFileSync(config, JSON.stringify({ pages: [{ name: 'Media', widgets: [] }], activePage: 0 }));
+    writeFileSync(config, JSON.stringify({ pages: [{ name: 'Media', widgets: [] }]}));
     return ['preview', 'render', '--config', config, '--page', '0', ...common, '--background', entry.background, '--size', POSTER_SIZE];
   }
 

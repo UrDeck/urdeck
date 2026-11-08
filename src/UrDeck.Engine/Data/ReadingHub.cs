@@ -91,6 +91,23 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, Deck.ID
     public ReadingDescriptor? Describe(string id) =>
         _descriptors.TryGetValue(id, out var descriptor) ? descriptor : null;
 
+    /// <summary>Whether the provider was asked for readings and cannot start because a required setting is missing.</summary>
+    public bool IsWaitingForSettings(string providerId)
+    {
+        lock (_gate)
+            return _runtimes.TryGetValue(providerId, out var rt) && rt.MissingReason != null;
+    }
+
+    /// <summary>The providers whose readings are in use and that cannot start because a required setting is missing, by id.</summary>
+    public IReadOnlyList<string> ProvidersWaitingForSettings
+    {
+        get
+        {
+            lock (_gate)
+                return [.. _runtimes.Values.Where(rt => rt.MissingReason != null && rt.Wanted.Count > 0).Select(rt => rt.Descriptor.Id).Order(StringComparer.Ordinal)];
+        }
+    }
+
     /// <summary>Whether any of the readings is pending (used by <c>--snapshot</c> to know when to paint).</summary>
     public bool AnyPending(IEnumerable<string> ids) =>
         ids.Any(id => _store.TryGetValue(id, out var r) && r.State == ReadingState.Pending);

@@ -51,6 +51,7 @@ public interface IDeckReadings
 /// <param name="Scheduler">The deck's thread.</param>
 /// <param name="Frames">The frames animating widgets are repainted at.</param>
 /// <param name="WindowsAnimations">Windows' "animation effects" setting at the start.</param>
+/// <param name="StartPage">The index of the page to start on; null starts on the configuration's start page (and logs how it was found).</param>
 public sealed record DeckSessionInputs(
     IDeckConfigSource Config,
     Func<string?, LoadedTheme> LoadTheme,
@@ -58,4 +59,5 @@ public sealed record DeckSessionInputs(
     IDeckReadings Readings,
     IDeckScheduler Scheduler,
     IFrameSource Frames,
-    bool WindowsAnimations = true);
+    bool WindowsAnimations = true,
+    int? StartPage = null);

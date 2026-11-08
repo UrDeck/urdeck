@@ -1,9 +1,10 @@
 {
   "theme": "default-dark",
   "pager": { "indicator": "always" },
-  "activePage": 0,
+  "startPage": "p-sample",
   "pages": [
     {
+"id": "p-sample",
       "name": "Sample",
       "widgets": [
         { "typeId": "urdeck.widgets.clock", "col": 0, "row": 0, "width": 4, "height": 1 },
@@ -17,6 +18,7 @@
       ]
     },
     {
+"id": "p-second",
       "name": "Second",
       "widgets": [
         { "typeId": "urdeck.widgets.control", "col": 0, "row": 0, "reading": "homeassistant:light.living_room" },

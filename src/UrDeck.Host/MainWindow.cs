@@ -40,6 +40,7 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
     private readonly ShaderStore _shaders;
     private readonly ProviderSettingsEditor _providerEditor;
     private readonly string _dataFolder;
+    private readonly Engine.Startup.DataFolder _data;
     private readonly nint _hwnd;
     private readonly WindowFocus? _focus;
     private readonly DisplayPowerWatcher? _power;
@@ -56,6 +57,19 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
     private readonly Action _saveDisplay;
     private readonly PlacementController _placement;
     private readonly DispatcherQueueTimer _placementTimer;
+    private PlacementState _placementState = PlacementState.Starting;
+    private string? _placementDisplay;
+    private DeckSurface _lastSurface = new(new System.Drawing.Size(1100, 3840), 1);
+
+    /// <summary>Whether this copy starts with Windows, and how to change it: the application's (the tray entry's).</summary>
+    internal Func<bool>? AutostartOn { get; set; }
+
+    internal Action<bool>? SetAutostart { get; set; }
+
+    private event Action<string?>? DeckPageChangedEvent;
+
+    private string? _wantedPage;
+    private DispatcherQueueTimer? _followTimer;
 
     /// <summary>The placement state changed (UI thread); the name is the remembered display's, if there is one.</summary>
     internal event Action<PlacementState, string?>? PlacementChanged;
@@ -70,13 +84,14 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
     private event Action? SettingsChanged;
 
     /// <summary><paramref name="saveDisplay"/> remembers the display after it was set or updated (a host edit of the configuration document).</summary>
-    internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, ShaderStore shaders, string dataFolder, Action saveDisplay)
+    internal MainWindow(ConfigStore configStore, WidgetPluginLoader plugins, ThemeStore themes, ShaderStore shaders, Engine.Startup.DataFolder data, Action saveDisplay)
     {
         _configStore = configStore;
         _plugins = plugins;
         _themes = themes;
         _shaders = shaders;
-        _dataFolder = dataFolder;
+        _data = data;
+        _dataFolder = data.Root;
         _backgroundLayer = new BackgroundLayer(_background);
         _saveDisplay = saveDisplay;
         _frameClock = new FrameClock(DispatcherQueue);
@@ -86,6 +101,7 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
                 WindowsAnimationWatcher.Read()),
             this);
         _pager.Attach(_session.Pager);
+        _session.PageChanged += _ => DeckPageChangedEvent?.Invoke(_session.Navigator.Id);
         _hwnd = WindowNative.GetWindowHandle(this);
         _providerEditor = new ProviderSettingsEditor(_configStore, _plugins.Providers, _plugins.Secrets, _plugins.Readings);
         _plugins.Readings.ApplySettings(_configStore.Config.Providers);
@@ -218,6 +234,107 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
             SettingsChanged?.Invoke();
     }
 
+    ConfigDocument ISettingsHost.Document => _configStore.Document;
+
+    string ISettingsHost.ConfigPath => _data.ConfigPath;
+
+    string ISettingsHost.LogPath => UrDeckLog.LogPath;
+
+    // The deck's surface while it is shown; the last one it was shown on otherwise (a hidden window keeps a size of its own).
+    DeckSurface ISettingsHost.DeckSurface => _session.IsPageHeld ? _lastSurface : CurrentSurface();
+
+    PreviewDeck ISettingsHost.CreatePreview(IDeckPresenter presenter, IFrameSource frames, string? pageId)
+    {
+        var readings = new Engine.Data.PreviewReadings(_plugins.Readings, () => _plugins.Providers.Descriptors);
+        Action reload = readings.ReloadSamples;
+        // Before the session subscribes: the sample hub takes the new plugins' samples before the session rebuilds its page.
+        _plugins.PluginsChanged += reload;
+        int start = _configStore.Config.Pages.FindIndex(p => p.Id == pageId);
+        var scheduler = new DispatcherDeckScheduler(DispatcherQueue);
+        var session = new DeckSession(
+            new DeckSessionInputs(_configStore, _themes.Load, _plugins.WithReadings(readings), readings, scheduler, frames,
+                WindowsAnimationWatcher.Read(), StartPage: Math.Max(0, start)),
+            presenter);
+        return new PreviewDeck(session, readings, () =>
+        {
+            _plugins.PluginsChanged -= reload;
+            // Its timers' handlers lead back to the session: detached, the closed editor's preview can go.
+            scheduler.Dispose();
+        });
+    }
+
+    DeckBackground? ISettingsHost.BuildBackground(BackgroundPlan plan, DeckSurface surface) =>
+        plan.BuildPrepared(_shaders, _dataFolder, Math.Max(1, (int)Math.Round(surface.Size.Width * surface.Scale)), Math.Max(1, (int)Math.Round(surface.Size.Height * surface.Scale)));
+
+    string? ISettingsHost.BackgroundKey(BackgroundPlan plan) => plan.RequestKey(_shaders, _dataFolder);
+
+    string? ISettingsHost.DeckPageId => _session.Navigator.Id;
+
+    void ISettingsHost.ShowPageOnDeck(string pageId)
+    {
+        _wantedPage = pageId;
+        FollowWantedPage();
+    }
+
+    // A page asked for while the deck slides (or before a reload has the page) is asked for again shortly: the last one wins.
+    private void FollowWantedPage()
+    {
+        if (_wantedPage is not { } pageId || _session.Navigator.Id == pageId)
+        {
+            _wantedPage = null;
+            return;
+        }
+
+        if (_session.ShowPage(pageId) || _session.Navigator.IndexOf(pageId) < 0)
+        {
+            _wantedPage = null;
+            return;
+        }
+
+        _followTimer ??= CreateFollowTimer();
+        _followTimer.Stop();
+        _followTimer.Start();
+    }
+
+    private DispatcherQueueTimer CreateFollowTimer()
+    {
+        var timer = DispatcherQueue.CreateTimer();
+        timer.IsRepeating = false;
+        timer.Interval = PagerState.SettleTime + TimeSpan.FromMilliseconds(50);
+        timer.Tick += (_, _) => FollowWantedPage();
+        return timer;
+    }
+
+    event Action<string?>? ISettingsHost.DeckPageChanged
+    {
+        add => DeckPageChangedEvent += value;
+        remove => DeckPageChangedEvent -= value;
+    }
+
+    DeckState ISettingsHost.DeckState =>
+        new(_placementState is not (PlacementState.Absent or PlacementState.Starting), _placementDisplay ?? _configStore.Config.Display?.Name);
+
+    IReadOnlyList<WidgetTypeInfo> ISettingsHost.WidgetTypes =>
+        _plugins.Registry.Descriptors
+            .Select(d =>
+            {
+                var name = d.WidgetType.Assembly.GetName();
+                string assembly = name.Name ?? "";
+                return new WidgetTypeInfo(d, assembly, name.Version?.ToString(3) ?? "", assembly.StartsWith("UrDeck.Widgets.", StringComparison.Ordinal));
+            })
+            .OrderBy(t => t.Descriptor.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+    Engine.Plugin.WidgetDescriptor? ISettingsHost.DescribeWidget(string typeId) => _plugins.GetDescriptor(typeId);
+
+    string? ISettingsHost.ReadingLabel(string readingId) => _plugins.Readings.Describe(readingId)?.Label;
+
+    IReadOnlyList<string> ISettingsHost.ProvidersWaitingForSettings => _plugins.Readings.ProvidersWaitingForSettings;
+
+    bool ISettingsHost.StartsWithWindows => AutostartOn?.Invoke() ?? false;
+
+    void ISettingsHost.SetStartWithWindows(bool on) => SetAutostart?.Invoke(on);
+
     IReadOnlyList<ProviderForm> ISettingsHost.GetProviderForms() => _providerEditor.GetForms();
 
     EditorResult ISettingsHost.SaveProvider(string providerId, IReadOnlyDictionary<string, string> values, IReadOnlyDictionary<string, string> newSecrets) =>
@@ -317,12 +434,26 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
 
         public void StateChanged(PlacementState state, string? displayName)
         {
+            window._placementState = state;
+            window._placementDisplay = displayName;
             window.PlacementChanged?.Invoke(state, displayName);
             window.SettingsChanged?.Invoke();
         }
     }
 
-    DeckSurface IDeckPresenter.Surface => new(new System.Drawing.Size((int)_root.ActualWidth, (int)_root.ActualHeight), Scale);
+    DeckSurface IDeckPresenter.Surface
+    {
+        get
+        {
+            // Asked when the session builds a page, so only while the deck is shown: remember it for the editor's preview.
+            var surface = CurrentSurface();
+            if (surface.IsUsable)
+                _lastSurface = surface;
+            return surface;
+        }
+    }
+
+    private DeckSurface CurrentSurface() => new(new System.Drawing.Size((int)_root.ActualWidth, (int)_root.ActualHeight), Scale);
 
     IPagerView IDeckPresenter.Pages => _pager;
 
@@ -342,6 +473,7 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         SystemEvents.PowerModeChanged -= OnPowerModeChanged;
         _placementTimer.Stop();
+        _followTimer?.Stop();
         _pager.Shutdown();
         _session.Dispose();
         _frameClock.Shutdown();

@@ -1,0 +1,506 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Patrick Bigler
+
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using UrDeck.Engine.Config;
+using UrDeck.Engine.Deck;
+using UrDeck.Engine.Layout;
+using UrDeck.Engine.Plugin;
+using UrDeck.Engine.Themes;
+using UrDeck.Sdk;
+
+namespace UrDeck.Engine.Editor;
+
+/// <summary>A page's grid: how many columns and whole rows the deck's layout gives it.</summary>
+public readonly record struct GridSize(int Columns, int Rows)
+{
+    /// <summary>The grid of a layout the deck made.</summary>
+    public static GridSize From(ChromeLayoutResult chrome) => new(GridLayoutManager.Columns, chrome.Rows);
+
+    /// <summary>
+    /// The grid the deck's layout gives a page of <paramref name="config"/> on <paramref name="surface"/> with
+    /// <paramref name="theme"/>: the rows left by the dock and the page indicator, as the deck session computes them.
+    /// </summary>
+    public static GridSize For(DeckSurface surface, UrDeckConfig config, ThemeDefinition theme)
+    {
+        var chrome = ChromeLayout.Compute(surface.Size, config.Pager.GetIndicatorMode(), config.Pages.Count, theme.Indicator!.BandHeight!.Value,
+            config.Dock.Count > 0 ? theme.Dock!.Height!.Value : 0);
+        return From(chrome);
+    }
+}
+
+/// <summary>A cell of the grid: column and row from the top left, 0-based.</summary>
+public readonly record struct Cell(int Col, int Row);
+
+/// <summary>
+/// A widget of the configuration: the page it is on (by id) and its index there, or a slot of the dock. Resolved fresh
+/// against the configuration each time it is used.
+/// </summary>
+public sealed record WidgetRef(string PageId, int Index, bool InDock = false)
+{
+    public static WidgetRef Dock(int index) => new("", index, InDock: true);
+}
+
+/// <summary>
+/// The editor's selection: a widget and what it was (its type, and its cell or dock slot), so that after an undo or a change
+/// from outside it is found again when it still exists, at its index or elsewhere on its page.
+/// </summary>
+public sealed record WidgetSelection(WidgetRef Ref, string Key)
+{
+    /// <summary>The selection of the widget at <paramref name="widget"/>; null when there is none.</summary>
+    public static WidgetSelection? Of(UrDeckConfig config, WidgetRef widget) =>
+        PageEditing.Widget(config, widget) is { } found ? new WidgetSelection(widget, KeyOf(found, widget)) : null;
+
+    /// <summary>This selection in <paramref name="config"/>: the same widget, perhaps at another index; null when it is gone.</summary>
+    public WidgetSelection? Resolve(UrDeckConfig config)
+    {
+        if (PageEditing.Widget(config, Ref) is { } same && KeyOf(same, Ref) == Key)
+            return this;
+        if (Ref.InDock)
+            return null;
+        int page = PageEditing.PageIndex(config, Ref.PageId);
+        if (page < 0)
+            return null;
+        var widgets = config.Pages[page].Widgets;
+        for (int i = 0; i < widgets.Count; i++)
+        {
+            var candidate = Ref with { Index = i };
+            if (KeyOf(widgets[i], candidate) == Key)
+                return new WidgetSelection(candidate, Key);
+        }
+
+        return null;
+    }
+
+    private static string KeyOf(WidgetConfig widget, WidgetRef at) =>
+        at.InDock ? $"{widget.WidgetTypeId}#{at.Index}" : $"{widget.WidgetTypeId}@{widget.Col},{widget.Row}";
+}
+
+/// <summary>Why a size does not fit where a widget is: what is in the way (or that it runs past the bottom) and where it would fit.</summary>
+/// <param name="Size">The size asked for, as <c>4x4</c>.</param>
+/// <param name="Blocker">The display name of the widget in the way; null when nothing is (past the bottom).</param>
+/// <param name="PastBottom">The size would run past the bottom of the page.</param>
+/// <param name="FirstFree">The first free space of that size on the page; null when there is none.</param>
+public sealed record FitProblem(string Size, string? Blocker, bool PastBottom, Cell? FirstFree)
+{
+    /// <summary>"4x4 does not fit here."</summary>
+    public string Title => $"{Size} does not fit here.";
+
+    /// <summary>"Weather is in the way." / "It would run past the bottom of the page.", and when there is no room at all, that too.</summary>
+    public string Message
+    {
+        get
+        {
+            string why = PastBottom ? "It would run past the bottom of the page." : Blocker != null ? $"{Blocker} is in the way." : "";
+            return FirstFree == null ? $"{why} There is no free {Size} space on this page.".Trim() : why;
+        }
+    }
+}
+
+/// <summary>What an editing operation did: the widget it made or changed, or why it did nothing.</summary>
+public sealed record EditOutcome(bool Applied, WidgetRef? Widget = null, FitProblem? Problem = null, string? Message = null, string? PageId = null)
+{
+    public static readonly EditOutcome Nothing = new(false);
+}
+
+/// <summary>
+/// The editor's operations on the configuration: each is one transaction of the document (one undo step, labelled as the
+/// editor's Undo says it), written behind and applied to the deck. They never place a widget where it does not fit and never
+/// move another widget. Owner thread only, like the document.
+/// </summary>
+public sealed class PageEditing
+{
+    private readonly ConfigDocument _document;
+    private readonly Func<string, WidgetDescriptor?> _describe;
+    private readonly Func<string, string?>? _readingLabel;
+
+    /// <param name="document">The configuration.</param>
+    /// <param name="describe">The installed widget types, by id.</param>
+    /// <param name="readingLabel">A reading's label for the display names of widgets (a Stats card's first reading); optional.</param>
+    public PageEditing(ConfigDocument document, Func<string, WidgetDescriptor?> describe, Func<string, string?>? readingLabel = null)
+    {
+        _document = document;
+        _describe = describe;
+        _readingLabel = readingLabel;
+    }
+
+    private UrDeckConfig Config => _document.Typed;
+
+    // ---------------- reading the configuration ----------------
+
+    /// <summary>The index of the page with <paramref name="pageId"/>, or -1.</summary>
+    public static int PageIndex(UrDeckConfig config, string? pageId) =>
+        pageId == null ? -1 : config.Pages.FindIndex(p => string.Equals(p.Id, pageId, StringComparison.Ordinal));
+
+    /// <summary>The widget at <paramref name="widget"/>; null when there is none.</summary>
+    public static WidgetConfig? Widget(UrDeckConfig config, WidgetRef widget)
+    {
+        if (widget.InDock)
+            return widget.Index >= 0 && widget.Index < config.Dock.Count ? config.Dock[widget.Index] : null;
+        int page = PageIndex(config, widget.PageId);
+        if (page < 0)
+            return null;
+        var widgets = config.Pages[page].Widgets;
+        return widget.Index >= 0 && widget.Index < widgets.Count ? widgets[widget.Index] : null;
+    }
+
+    /// <summary>The cells a widget takes, clamped as the deck's layout clamps them.</summary>
+    public static (int Col, int Row, int Width, int Height) Area(WidgetConfig widget)
+    {
+        int width = Math.Clamp(widget.Width, 1, GridLayoutManager.Columns);
+        return (Math.Clamp(widget.Col, 0, GridLayoutManager.Columns - width), Math.Max(0, widget.Row), width, Math.Max(1, widget.Height));
+    }
+
+    /// <summary>Whether a <paramref name="w"/>x<paramref name="h"/> widget at the cell is inside the grid and overlaps no widget but <paramref name="except"/>.</summary>
+    public static bool Fits(IReadOnlyList<WidgetConfig> widgets, int? except, int col, int row, int w, int h, GridSize grid) =>
+        col >= 0 && row >= 0 && col + w <= grid.Columns && row + h <= grid.Rows && BlockerIndex(widgets, except, col, row, w, h) < 0;
+
+    /// <summary>The index of the first widget but <paramref name="except"/> that a <paramref name="w"/>x<paramref name="h"/> widget at the cell would overlap, or -1.</summary>
+    public static int BlockerIndex(IReadOnlyList<WidgetConfig> widgets, int? except, int col, int row, int w, int h)
+    {
+        for (int i = 0; i < widgets.Count; i++)
+        {
+            if (i == except)
+                continue;
+            var (oc, or, ow, oh) = Area(widgets[i]);
+            if (col < oc + ow && oc < col + w && row < or + oh && or < row + h)
+                return i;
+        }
+
+        return -1;
+    }
+
+    /// <summary>The first cell, scanning rows from the top and columns from the left, where the size fits; null when there is none.</summary>
+    public static Cell? FirstFree(IReadOnlyList<WidgetConfig> widgets, int w, int h, GridSize grid, int? except = null)
+    {
+        for (int row = 0; row + h <= grid.Rows; row++)
+        {
+            for (int col = 0; col + w <= grid.Columns; col++)
+            {
+                if (Fits(widgets, except, col, row, w, h, grid))
+                    return new Cell(col, row);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>The empty cells of a page: the cells no widget takes.</summary>
+    public static IReadOnlyList<Cell> EmptyCells(IReadOnlyList<WidgetConfig> widgets, GridSize grid)
+    {
+        var cells = new List<Cell>();
+        for (int row = 0; row < grid.Rows; row++)
+        {
+            for (int col = 0; col < grid.Columns; col++)
+            {
+                if (BlockerIndex(widgets, null, col, row, 1, 1) < 0)
+                    cells.Add(new Cell(col, row));
+            }
+        }
+
+        return cells;
+    }
+
+    /// <summary>The type's name, or its id when it is not installed.</summary>
+    public string TypeName(WidgetConfig widget) => _describe(widget.WidgetTypeId)?.Name ?? widget.WidgetTypeId;
+
+    /// <summary>
+    /// The widget as a message names it: its type and, when it has one, the first label-like value in quotes (its <c>label</c>,
+    /// its first reading's label, or its target's file name): <c>Stats "CPU load"</c>.
+    /// </summary>
+    public string Describe(WidgetConfig widget)
+    {
+        string name = TypeName(widget);
+        return LabelOf(widget) is { Length: > 0 } label ? $"{name} \"{label}\"" : name;
+    }
+
+    private string? LabelOf(WidgetConfig widget)
+    {
+        var extra = widget.ExtensionData;
+        if (extra == null)
+            return null;
+        if (Text(extra, "label") is { } label)
+            return label;
+        if (Get(extra, "slots") is { ValueKind: JsonValueKind.Array } slots && slots.GetArrayLength() > 0 && slots[0].ValueKind == JsonValueKind.Object)
+        {
+            var first = slots[0];
+            if (first.TryGetProperty("label", out var l) && l.ValueKind == JsonValueKind.String && l.GetString() is { Length: > 0 } slotLabel)
+                return slotLabel;
+            if (first.TryGetProperty("reading", out var r) && r.ValueKind == JsonValueKind.String && r.GetString() is { Length: > 0 } reading)
+                return _readingLabel?.Invoke(reading) ?? reading;
+        }
+
+        if (Text(extra, "reading") is { } control)
+            return _readingLabel?.Invoke(control) ?? control;
+        if (Text(extra, "target") is { } target)
+        {
+            if (Uri.TryCreate(target, UriKind.Absolute, out var uri) && uri.Host.Length > 0)
+                return uri.Host;
+            // A target is a Windows path; split on both separators so the name is the same on every system.
+            string trimmed = target.TrimEnd('\\', '/');
+            string last = trimmed[(trimmed.LastIndexOfAny(['\\', '/']) + 1)..];
+            string file = Path.GetFileNameWithoutExtension(last);
+            return file.Length > 0 ? file : target;
+        }
+
+        return null;
+    }
+
+    private static JsonElement? Get(Dictionary<string, JsonElement> extra, string key) =>
+        extra.FirstOrDefault(p => string.Equals(p.Key, key, StringComparison.OrdinalIgnoreCase)) is { Key: not null } pair ? pair.Value : null;
+
+    private static string? Text(Dictionary<string, JsonElement> extra, string key) =>
+        Get(extra, key) is { ValueKind: JsonValueKind.String } value && value.GetString() is { Length: > 0 } text ? text : null;
+
+    // ---------------- widgets ----------------
+
+    /// <summary>
+    /// Adds a widget of <paramref name="typeId"/> with its default settings at its default size: at <paramref name="at"/> (its
+    /// column moved left as far as needed) when it fits there, else at the first free space. "Add Stats".
+    /// </summary>
+    public EditOutcome AddWidget(string pageId, string typeId, GridSize grid, Cell? at = null)
+    {
+        var config = Config;
+        int page = PageIndex(config, pageId);
+        if (page < 0 || _describe(typeId) is not { } descriptor)
+            return EditOutcome.Nothing;
+
+        var size = WidgetDefaults.Size(descriptor);
+        var widgets = config.Pages[page].Widgets;
+        Cell? spot = null;
+        if (at is { } cell)
+        {
+            int col = Math.Min(cell.Col, grid.Columns - size.Width);
+            if (Fits(widgets, null, col, cell.Row, size.Width, size.Height, grid))
+                spot = new Cell(col, cell.Row);
+        }
+
+        spot ??= FirstFree(widgets, size.Width, size.Height, grid);
+        if (spot is not { } place)
+            return new EditOutcome(false, Message: $"This page has no free {size.Width}x{size.Height} space. Add a page, or remove a widget first.");
+
+        var node = WidgetDefaults.Node(descriptor, place.Col, place.Row, size);
+        int index = widgets.Count;
+        bool applied = _document.Edit($"Add {descriptor.Name}", e =>
+        {
+            if (e.Get($"/pages/{page}/widgets") is not JsonArray)
+                e.Set($"/pages/{page}/widgets", new JsonArray());
+            e.Insert($"/pages/{page}/widgets", index, node);
+        });
+        return applied ? new EditOutcome(true, new WidgetRef(pageId, index)) : EditOutcome.Nothing;
+    }
+
+    /// <summary>
+    /// Makes the widget <paramref name="w"/>x<paramref name="h"/> in place: the same row, its column moved left as far as needed.
+    /// When that does not fit nothing changes and the outcome says why. "Make Stats 4x2".
+    /// </summary>
+    public EditOutcome Resize(WidgetRef widget, int w, int h, GridSize grid)
+    {
+        var config = Config;
+        if (widget.InDock || Widget(config, widget) is not { } current)
+            return EditOutcome.Nothing;
+        int page = PageIndex(config, widget.PageId);
+        var widgets = config.Pages[page].Widgets;
+        var (col, row, _, _) = Area(current);
+        col = Math.Min(col, grid.Columns - w);
+        string size = $"{w}x{h}";
+        if (!Fits(widgets, widget.Index, col, row, w, h, grid))
+        {
+            bool past = row + h > grid.Rows;
+            int blocker = past ? -1 : BlockerIndex(widgets, widget.Index, col, row, w, h);
+            var free = FirstFree(widgets, w, h, grid, widget.Index);
+            return new EditOutcome(false, widget, new FitProblem(size, blocker >= 0 ? Describe(widgets[blocker]) : null, past, free));
+        }
+
+        bool applied = _document.Edit($"Make {TypeName(current)} {size}", e => Place(e, $"/pages/{page}/widgets/{widget.Index}", col, row, w, h));
+        return new EditOutcome(applied, widget);
+    }
+
+    /// <summary>Moves the widget to <paramref name="cell"/> at <paramref name="w"/>x<paramref name="h"/> when it fits there: "Move Stats".</summary>
+    public EditOutcome MoveTo(WidgetRef widget, Cell cell, int w, int h, GridSize grid)
+    {
+        var config = Config;
+        if (widget.InDock || Widget(config, widget) is not { } current)
+            return EditOutcome.Nothing;
+        int page = PageIndex(config, widget.PageId);
+        if (!Fits(config.Pages[page].Widgets, widget.Index, cell.Col, cell.Row, w, h, grid))
+            return new EditOutcome(false, widget);
+        bool applied = _document.Edit($"Move {TypeName(current)}", e => Place(e, $"/pages/{page}/widgets/{widget.Index}", cell.Col, cell.Row, w, h));
+        return new EditOutcome(applied, widget);
+    }
+
+    /// <summary>Removes the widget, from its page or the dock: "Remove Stats".</summary>
+    public EditOutcome RemoveWidget(WidgetRef widget)
+    {
+        var config = Config;
+        if (Widget(config, widget) is not { } current)
+            return EditOutcome.Nothing;
+        string path = widget.InDock ? $"/dock/{widget.Index}" : $"/pages/{PageIndex(config, widget.PageId)}/widgets/{widget.Index}";
+        bool applied = _document.Edit($"Remove {TypeName(current)}", e => e.Remove(path));
+        return new EditOutcome(applied);
+    }
+
+    private static void Place(ConfigEditor e, string path, int col, int row, int w, int h)
+    {
+        e.Set(Key(e, path, "col"), col);
+        e.Set(Key(e, path, "row"), row);
+        e.Set(Key(e, path, "width"), w);
+        e.Set(Key(e, path, "height"), h);
+    }
+
+    // The file is read case-insensitively: write the key the file already uses.
+    private static string Key(ConfigEditor e, string objectPath, string key) => $"{objectPath}/{JsonPointer.Escape(e.FindKey(objectPath, key) ?? key)}";
+
+    // ---------------- pages ----------------
+
+    /// <summary>Adds an empty page named "Page N" after the page <paramref name="afterPageId"/> (at the end without one): "Add a page".</summary>
+    public EditOutcome AddPage(string? afterPageId)
+    {
+        var config = Config;
+        int after = PageIndex(config, afterPageId);
+        int at = after < 0 ? config.Pages.Count : after + 1;
+        var names = config.Pages.Select(p => p.Name).ToHashSet(StringComparer.CurrentCultureIgnoreCase);
+        int n = config.Pages.Count + 1;
+        while (names.Contains($"Page {n}"))
+            n++;
+        string id = PageIds.New(TakenIds(config));
+        var node = new JsonObject { ["id"] = id, ["name"] = $"Page {n}", ["widgets"] = new JsonArray() };
+        bool applied = _document.Edit("Add a page", e => InsertPage(e, at, node));
+        return new EditOutcome(applied, PageId: applied ? id : null);
+    }
+
+    /// <summary>Renames the page; typing into the name is one undo step (merged by the page). "Rename Page 2".</summary>
+    public bool RenamePage(string pageId, string name)
+    {
+        var config = Config;
+        int page = PageIndex(config, pageId);
+        if (page < 0 || config.Pages[page].Name == name)
+            return false;
+        return _document.Edit($"Rename {config.Pages[page].Name}", e => e.Set(Key(e, $"/pages/{page}", "name"), name), mergeKey: $"page-name:{pageId}");
+    }
+
+    /// <summary>Copies the page after itself, named "&lt;name&gt; copy", with a new id: "Duplicate Main".</summary>
+    public EditOutcome DuplicatePage(string pageId)
+    {
+        var config = Config;
+        int page = PageIndex(config, pageId);
+        if (page < 0 || _document.Root["pages"] is not JsonArray pages || pages[page] is not JsonObject source)
+            return EditOutcome.Nothing;
+        string id = PageIds.New(TakenIds(config));
+        var copy = (JsonObject)source.DeepClone();
+        foreach (string key in copy.Select(p => p.Key).Where(k => string.Equals(k, "id", StringComparison.OrdinalIgnoreCase) || string.Equals(k, "name", StringComparison.OrdinalIgnoreCase)).ToList())
+            copy.Remove(key);
+        copy.Insert(0, "id", id);
+        copy.Insert(1, "name", config.Pages[page].Name + " copy");
+        bool applied = _document.Edit($"Duplicate {config.Pages[page].Name}", e => InsertPage(e, page + 1, copy));
+        return new EditOutcome(applied, PageId: applied ? id : null);
+    }
+
+    /// <summary>Moves the page one place to the left among the tabs (<paramref name="by"/> -1) or to the right (+1): "Move Main right".</summary>
+    public bool MovePage(string pageId, int by)
+    {
+        var config = Config;
+        int from = PageIndex(config, pageId);
+        int to = from + by;
+        if (from < 0 || to < 0 || to >= config.Pages.Count || by == 0)
+            return false;
+        return _document.Edit($"Move {config.Pages[from].Name} {(by < 0 ? "left" : "right")}", e => e.Move("/pages", from, to));
+    }
+
+    /// <summary>
+    /// The page that becomes the start page when <paramref name="pageId"/>, the start page, is deleted: the one after it, or the
+    /// one before for the last page. Null when the page is not the start page (or is the only one).
+    /// </summary>
+    public string? NextStartPage(string pageId)
+    {
+        var config = Config;
+        int page = PageIndex(config, pageId);
+        if (page < 0 || config.Pages.Count < 2 || StartPageResolver.Resolve(config) != page || !StartPageResolver.IsSet(config))
+            return null;
+        return config.Pages[page + 1 < config.Pages.Count ? page + 1 : page - 1].Id;
+    }
+
+    /// <summary>
+    /// Deletes the page; when it is the start page, the same step makes <see cref="NextStartPage"/> the start page. The last page
+    /// cannot be deleted. "Delete Main".
+    /// </summary>
+    public bool DeletePage(string pageId)
+    {
+        var config = Config;
+        int page = PageIndex(config, pageId);
+        if (page < 0 || config.Pages.Count < 2)
+            return false;
+        string? next = NextStartPage(pageId);
+        return _document.Edit($"Delete {config.Pages[page].Name}", e =>
+        {
+            e.Remove($"/pages/{page}");
+            if (next != null)
+                e.Set(Key(e, "", "startPage"), next);
+        });
+    }
+
+    /// <summary>Makes the page the one the deck starts on: "Make Home the start page".</summary>
+    public bool SetStartPage(string pageId)
+    {
+        var config = Config;
+        int page = PageIndex(config, pageId);
+        if (page < 0 || (StartPageResolver.IsSet(config) && config.StartPage == pageId))
+            return false;
+        return _document.Edit($"Make {config.Pages[page].Name} the start page", e => e.Set(Key(e, "", "startPage"), pageId));
+    }
+
+    /// <summary>Sets the page indicator's mode for every page (<c>auto</c> removes the key): "Page dots: Always".</summary>
+    public bool SetIndicator(IndicatorMode mode)
+    {
+        string? value = mode switch
+        {
+            IndicatorMode.Always => "always",
+            IndicatorMode.Fade => "fade",
+            IndicatorMode.Off => "off",
+            _ => null,
+        };
+        if (Config.Pager.GetIndicatorMode() == mode && (value != null || Config.Pager.Indicator == null))
+            return false;
+        string label = mode switch
+        {
+            IndicatorMode.Always => "Always",
+            IndicatorMode.Fade => "Show then fade",
+            IndicatorMode.Off => "Off",
+            _ => "Automatic",
+        };
+        return _document.Edit($"Page dots: {label}", e =>
+        {
+            string pager = Key(e, "", "pager");
+            if (value == null)
+                e.Remove($"{pager}/{JsonPointer.Escape(e.FindKey(pager, "indicator") ?? "indicator")}");
+            else
+                e.Set($"{pager}/{JsonPointer.Escape(e.FindKey(pager, "indicator") ?? "indicator")}", value);
+        });
+    }
+
+    /// <summary>Turns the automatic update check on (the key removed) or off: "Turn off update checks".</summary>
+    public bool SetUpdates(bool on)
+    {
+        // On is the absent key; off is "off" (any value that is not "off" already checks).
+        if (on ? Config.Updates == null : !UpdatesSetting.IsEnabled(Config.Updates))
+            return false;
+        return _document.Edit(on ? "Turn on update checks" : "Turn off update checks", e =>
+        {
+            if (on)
+                e.Remove(Key(e, "", "updates"));
+            else
+                e.Set(Key(e, "", "updates"), "off");
+        });
+    }
+
+    private static void InsertPage(ConfigEditor e, int at, JsonObject node)
+    {
+        if (e.Get("/pages") is not JsonArray)
+            e.Set("/pages", new JsonArray());
+        e.Insert("/pages", at, node);
+    }
+
+    private static HashSet<string> TakenIds(UrDeckConfig config) =>
+        config.Pages.Select(p => p.Id).OfType<string>().ToHashSet(StringComparer.Ordinal);
+}
