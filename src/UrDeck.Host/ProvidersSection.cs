@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using System.Globalization;
+using System.Text.Json.Nodes;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Secrets;
 using UrDeck.Engine.Settings;
+using UrDeck.Host.Editor.Forms;
+using UrDeck.Sdk.Data;
 
 namespace UrDeck.Host;
 
@@ -20,13 +24,16 @@ namespace UrDeck.Host;
 internal sealed class ProvidersSection
 {
     private readonly ISettingsHost _host;
+    private readonly Window _owner;
+    private readonly List<FormView> _views = [];
     private readonly StackPanel _root = new() { Spacing = 12 };
     private readonly Dictionary<string, string> _messages = new(StringComparer.Ordinal);
     private CancellationTokenSource? _closing = new();
 
-    public ProvidersSection(ISettingsHost host)
+    public ProvidersSection(ISettingsHost host, Window owner)
     {
         _host = host;
+        _owner = owner;
         Rebuild();
     }
 
@@ -39,6 +46,7 @@ internal sealed class ProvidersSection
         _closing = null;
         closing?.Cancel();
         closing?.Dispose();
+        DisposeViews();
         _root.Children.Clear();
     }
 
@@ -47,6 +55,7 @@ internal sealed class ProvidersSection
         if (_closing == null)
             return;
 
+        DisposeViews();
         _root.Children.Clear();
         _root.Children.Add(new TextBlock { Text = "Providers", FontSize = 20, FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 12, 0, 0) });
         _root.Children.Add(new TextBlock
@@ -72,43 +81,36 @@ internal sealed class ProvidersSection
         var panel = new StackPanel { Spacing = 8 };
         panel.Children.Add(new TextBlock { Text = form.Name, FontWeight = FontWeights.SemiBold });
 
-        var texts = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
         var secrets = new Dictionary<string, PasswordBox>(StringComparer.Ordinal);
         var result = new TextBlock { TextWrapping = TextWrapping.Wrap, Opacity = 0.85 };
         if (_messages.TryGetValue(form.ProviderId, out string? message))
             result.Text = message;
 
-        foreach (var field in form.Fields)
-        {
-            panel.Children.Add(new TextBlock { Text = field.Setting.Label + (field.Setting.Required ? " *" : ""), Margin = new Thickness(0, 4, 0, 0) });
-            switch (field.Setting.Kind)
+        // The same controls as a widget's form, over a detached object that Save writes (nothing is applied before).
+        var staging = new JsonObject();
+        foreach (var field in form.Fields.Where(f => f.Setting.Kind != SettingKinds.Secret))
+            Stage(staging, field);
+        var fields = form.Fields.ToDictionary(f => f.Setting.Key, StringComparer.OrdinalIgnoreCase);
+        var target = new StagedTarget(staging);
+        var readings = new PreviewEditorReadings(_host.Readings, _host.Readings, _host.Readings, _owner.DispatcherQueue);
+        var builder = new FormBuilder(new FormContext(_host.Document, null, readings, new NoIconCatalog(), _owner, new ReadingChooserDialog(() => _root.XamlRoot, readings)));
+        var view = builder.BuildStaged(
+            SettingSchema.Of(typeof(ProviderSettings), form.Fields.Select(f => f.Setting).ToList()),
+            target,
+            setting =>
             {
-                case SettingKinds.Toggle:
-                    var toggle = new ToggleSwitch { IsOn = field.Value == "true" };
-                    texts[field.Setting.Key] = () => toggle.IsOn ? "true" : "false";
-                    panel.Children.Add(toggle);
-                    break;
-                case SettingKinds.Secret:
-                    var box = new PasswordBox
-                    {
-                        PlaceholderText = field.Secret!.HasValue ? "Leave empty to keep the current value" : "Enter a value",
-                    };
-                    secrets[field.Setting.Key] = box;
-                    panel.Children.Add(box);
-                    panel.Children.Add(BuildSecretStatus(form, field, result));
-                    break;
-                default:
-                    var text = new TextBox { Text = field.Value };
-                    texts[field.Setting.Key] = () => text.Text;
-                    panel.Children.Add(text);
-                    break;
-            }
+                var field = fields[setting.Key];
+                var box = new PasswordBox { PlaceholderText = field.Secret!.HasValue ? "Leave empty to keep the current value" : "Enter a value" };
+                secrets[setting.Key] = box;
+                var secretPanel = new StackPanel { Spacing = 4 };
+                secretPanel.Children.Add(box);
+                secretPanel.Children.Add(BuildSecretStatus(form, field, result));
+                return secretPanel;
+            });
+        _views.Add(view);
+        panel.Children.Add(view.Root);
 
-            if (field.Setting.Help.Length > 0)
-                panel.Children.Add(new TextBlock { Text = field.Setting.Help, Opacity = 0.7, FontSize = 12, TextWrapping = TextWrapping.Wrap });
-        }
-
-        Dictionary<string, string> Values() => texts.ToDictionary(t => t.Key, t => t.Value(), StringComparer.Ordinal);
+        Dictionary<string, string> Values() => form.Fields.Where(f => f.Setting.Kind != SettingKinds.Secret).ToDictionary(f => f.Setting.Key, f => TextOf(staging, f.Setting), StringComparer.Ordinal);
         Dictionary<string, string> NewSecrets() => secrets.Where(s => s.Value.Password.Length > 0).ToDictionary(s => s.Key, s => s.Value.Password, StringComparer.Ordinal);
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Margin = new Thickness(0, 8, 0, 0) };
@@ -138,6 +140,41 @@ internal sealed class ProvidersSection
         panel.Children.Add(buttons);
         panel.Children.Add(result);
         return new Border { Padding = new Thickness(16), CornerRadius = new CornerRadius(8), Child = panel, BorderThickness = new Thickness(1), BorderBrush = CardStroke() };
+    }
+
+    private void DisposeViews()
+    {
+        foreach (var view in _views)
+            view.Dispose();
+        _views.Clear();
+    }
+
+    /// <summary>The value the form starts from: what the file holds (else the default), as the kind types it.</summary>
+    private static void Stage(JsonObject staging, ProviderField field)
+    {
+        var setting = field.Setting;
+        string text = field.Value;
+        if (setting.Kind == SettingKinds.Toggle)
+            staging[setting.Key] = string.Equals(text, "true", StringComparison.OrdinalIgnoreCase);
+        else if (text.Length == 0)
+            return;
+        else if (setting.Kind == SettingKinds.Number && double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out double number))
+            staging[setting.Key] = setting.Number is { WholeNumber: true } ? JsonValue.Create((long)number) : JsonValue.Create(number);
+        else
+            staging[setting.Key] = text;
+    }
+
+    /// <summary>The text Save takes for a field: what the form holds now (a switch never left alone is off).</summary>
+    private static string TextOf(JsonObject staging, SettingDescriptor setting)
+    {
+        var node = staging.FirstOrDefault(p => string.Equals(p.Key, setting.Key, StringComparison.OrdinalIgnoreCase)).Value;
+        return node switch
+        {
+            null => setting.Kind == SettingKinds.Toggle ? "false" : "",
+            JsonValue value when value.TryGetValue<bool>(out bool on) => on ? "true" : "false",
+            JsonValue value when value.TryGetValue<string>(out string? s) => s ?? "",
+            _ => node.ToJsonString(),
+        };
     }
 
     /// <summary>

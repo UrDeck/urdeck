@@ -84,6 +84,9 @@ internal interface ISettingsHost
     /// <summary>Where the deck is now.</summary>
     DeckState DeckState { get; }
 
+    /// <summary>The host's readings: actions and suggestions come from its providers, as the deck's own widgets use them.</summary>
+    Engine.Data.ReadingHub Readings { get; }
+
     /// <summary>The installed widget types, by name.</summary>
     IReadOnlyList<WidgetTypeInfo> WidgetTypes { get; }
 

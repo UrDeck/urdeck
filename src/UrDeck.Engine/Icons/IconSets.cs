@@ -292,6 +292,8 @@ internal static class IconSetReader
 /// <summary>An answer made of several sets: the first that has the key.</summary>
 internal sealed class IconChain(IReadOnlyList<IIconSet> sets) : IIconSet
 {
+    public IReadOnlyList<IIconSet> Sets => sets;
+
     public bool TryGet(string key, out IconGlyph glyph)
     {
         foreach (var set in sets)
@@ -395,5 +397,34 @@ public static partial class IconSetStore
         if (BuiltIn(BuiltInName) is { } outline && !sets.Contains(outline))
             sets.Add(outline);
         return new ResolvedIcons(sets.Count == 1 ? sets[0] : new IconChain(sets), names);
+    }
+}
+
+/// <summary>Lists what an icon set holds, for an editor's glyph grid.</summary>
+public static class IconSets
+{
+    /// <summary>
+    /// The keys a resolved set answers, the product's own keys first in their declared order and any others after them, each once.
+    /// The set is a theme's (<see cref="IconTheme.Set"/>): the theme's own set, then <c>outline</c> behind it.
+    /// </summary>
+    public static IReadOnlyList<string> KeysOf(IIconSet set)
+    {
+        var all = new HashSet<string>(StringComparer.Ordinal);
+        Collect(set, all);
+        return [.. IconKeys.All.Where(all.Contains), .. all.Except(IconKeys.All).Order(StringComparer.Ordinal)];
+    }
+
+    private static void Collect(IIconSet set, HashSet<string> into)
+    {
+        switch (set)
+        {
+            case IconSet own:
+                into.UnionWith(own.Keys);
+                break;
+            case IconChain chain:
+                foreach (var part in chain.Sets)
+                    Collect(part, into);
+                break;
+        }
     }
 }

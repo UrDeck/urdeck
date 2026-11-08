@@ -108,6 +108,36 @@ public sealed partial class ReadingHub
         }
     }
 
+    /// <summary>
+    /// The actions an editor offers for a reading: its natural action first (<see cref="ReadingDescriptor.Action"/>), then the
+    /// provider's other actions that belong to it, which are the ones under the reading's own path or under its entity (the part
+    /// before the first <c>/</c>: <c>light.desk/brightness</c> takes <c>light.desk/turn_on</c>). Empty when the reading is unknown,
+    /// its provider offers no actions or cannot describe them.
+    /// </summary>
+    /// <param name="readingId">The reading's id (<c>homeassistant:light.desk</c>).</param>
+    public IReadOnlyList<ActionDescriptor> ActionsFor(string readingId)
+    {
+        if (!ReadingId.TryParse(readingId, out string providerId, out string path, out _))
+            return [];
+        var catalog = GetActionCatalog(providerId);
+        if (catalog == null)
+            return [];
+
+        int slash = path.IndexOf('/', StringComparison.Ordinal);
+        string entity = slash < 0 ? path : path[..slash];
+        bool Belongs(string action) =>
+            string.Equals(action, path, StringComparison.OrdinalIgnoreCase)
+            || action.StartsWith(path + "/", StringComparison.OrdinalIgnoreCase)
+            || action.StartsWith(entity + "/", StringComparison.OrdinalIgnoreCase);
+
+        string? natural = (Describe(readingId) ?? GetCatalog(providerId)?.FirstOrDefault(r => string.Equals(r.Path, path, StringComparison.OrdinalIgnoreCase)))?.Action;
+        var result = new List<ActionDescriptor>();
+        if (natural != null && catalog.FirstOrDefault(a => string.Equals(a.Path, natural, StringComparison.OrdinalIgnoreCase)) is { } first)
+            result.Add(first);
+        result.AddRange(catalog.Where(a => Belongs(a.Path) && !result.Contains(a)));
+        return result;
+    }
+
     private Task<ActionResult> Failed(string id, string message, long asked)
     {
         LogAction(id, ActionResult.Failed(message), asked);

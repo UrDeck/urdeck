@@ -65,8 +65,8 @@ internal sealed class EditorWindow : Window
         if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
             SystemBackdrop = new MicaBackdrop();
 
-        _pages = new PagesSection(host, _editing, DispatcherQueue);
-        _providers = new ProvidersSection(host);
+        _pages = new PagesSection(host, _editing, DispatcherQueue, this);
+        _providers = new ProvidersSection(host, this);
         _display = new DisplaySection(host, DispatcherQueue);
         _general = new GeneralSection(host, _editing);
         _status = new DeckStatusCard(host);

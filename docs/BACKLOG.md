@@ -722,6 +722,11 @@ Proposed 2026-11-06: `settings-metadata`, `config-document`, `editor-shell`, `ed
 `deck-session`; the order, dependencies and models are under "Suggested order". Decisions taken while writing them are in
 the handoff's "Decisions after review" section.
 
+Built 2026-11-08: `editor-forms`. Known gaps: the Launch target's "App…" list reads the Start menu with PowerShell's
+`Get-StartApps` and shows no icons (the design's `IShellItem` enumeration over AppsFolder is not done); number fields have no
+spinner (it left no room to type; the arrow keys step instead); the reading chooser is the minimal id dialog until
+`editor-reading-picker`.
+
 ## 12. Packaging and distribution
 
 Installer, start with Windows, auto-update, logo and branding, winget manifest and GitHub release automation, and a third-party notices file
