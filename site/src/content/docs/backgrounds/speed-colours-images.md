@@ -17,7 +17,7 @@ under 1 % of the GPU, plus about 25 MB of memory.
 - Frames stop while the deck is hidden (its display is disconnected) and while Windows has switched the display off, and
   continue from where they stopped. `urdeck.log` says `Background frames started (...)` and `Background frames stopped (...): N
   frames in S s`.
-- A background that does not move (an image, `speed` 0, a shader that does not use `iTime`) is drawn once and costs nothing
+- A background that does not move (an image, `speed` 0 (*Still* in the editor), a shader that does not use `iTime`) is drawn once and costs nothing
   afterwards.
 - Time wraps to 0 after four hours of scaled time (`speed` times the seconds shown), so motion stays smooth after weeks of uptime.
   A shader that is not periodic over that span jumps once at the wrap: the first four built-ins are slow enough that it is hard to
@@ -50,4 +50,4 @@ cropped.
   (rotation) is applied.
 - The picture is decoded once at the panel's size; the decoded original is released. While it loads the theme colour shows. Edit
   the file and save the config to load it again.
-- Keys other than `type` and `path` are logged and ignored.
+- `dim` (0 to 0.7) darkens the picture behind the cards; see [theme backgrounds](/docs/backgrounds/#theme-backgrounds). Other keys than `type`, `path` and `dim` are logged and ignored.

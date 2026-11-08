@@ -40,6 +40,13 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
     private string? _requestKey;
     private Func<int, DeckBackground?>? _create;
     private FrameworkElement? _element;
+
+    /// <summary>
+    /// The GPU panel, made once and kept (collapsed) while the background is still or none. Making a second one in a running
+    /// process crashed the host in native GL setup when the editor was open (a fast fail in ntdll, seen on main too), so a moving
+    /// background after another reuses this one; it goes with <see cref="Release"/> and <see cref="Dispose"/>.
+    /// </summary>
+    private SKSwapChainPanel? _panel;
     private Action? _invalidate;
     private SKColor _themeColor;
     private System.Drawing.Size _screen;
@@ -136,6 +143,7 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
     public void Release()
     {
         Discard("released");
+        DropPanel();
         _requestKey = null;
         _create = null;
     }
@@ -143,6 +151,7 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
     public void Dispose()
     {
         Discard("window closed");
+        DropPanel();
         _requestKey = null;
         _create = null;
     }
@@ -154,10 +163,20 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
             FrameworkElement element;
             if (background.IsMoving)
             {
-                var panel = new SKSwapChainPanel { EnableRenderLoop = false };
-                panel.PaintSurface += (_, e) => OnPaint(e.Surface.Canvas, e.Info);
+                bool reused = _panel != null;
+                var panel = _panel ??= NewPanel();
                 _invalidate = panel.Invalidate;
+                panel.Visibility = Visibility.Visible;
                 element = panel;
+                if (reused)
+                {
+                    _element = element;
+                    Resize(background);
+                    _surfaceLogged = false;
+                    _clock.Reset();
+                    _invalidate();
+                    return;
+                }
             }
             else
             {
@@ -180,8 +199,16 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
         catch (Exception ex)
         {
             UrDeckLog.Warn($"Background: could not create the surface for {background.Describe}: {ex.Message}");
+            DropPanel();
             Discard("surface failed");
         }
+    }
+
+    private SKSwapChainPanel NewPanel()
+    {
+        var panel = new SKSwapChainPanel { EnableRenderLoop = false };
+        panel.PaintSurface += (_, e) => OnPaint(e.Surface.Canvas, e.Info);
+        return panel;
     }
 
     /// <summary>The element covers the panel at the background's scale; the compositor stretches it back (see the class remarks).</summary>
@@ -325,6 +352,14 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
         _invalidate?.Invoke();
     }
 
+    /// <summary>Takes the kept GPU panel out of the window (and with it its GL context).</summary>
+    private void DropPanel()
+    {
+        if (_panel != null)
+            host.Children.Remove(_panel);
+        _panel = null;
+    }
+
     /// <summary>Stops the frames and removes and disposes the element and the background.</summary>
     private void Discard(string reason)
     {
@@ -333,7 +368,11 @@ internal sealed class BackgroundLayer(Grid host) : IDisposable
 
         if (_element != null)
         {
-            host.Children.Remove(_element);
+            // The GPU panel stays in the window, collapsed, for the next moving background (see _panel).
+            if (ReferenceEquals(_element, _panel))
+                _panel.Visibility = Visibility.Collapsed;
+            else
+                host.Children.Remove(_element);
             _element = null;
         }
 

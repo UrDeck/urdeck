@@ -122,7 +122,7 @@ the widget pages; they are regenerated from the product (`site/README.md`, "Medi
 ## Configuration
 
 UrDeck is configured in its editor: left-click the tray icon. Its Pages section shows the page as the deck draws it (the deck's
-own renderer, laid out for the deck's display) and adds, sizes and removes widgets and manages pages, with undo; Providers,
+own renderer, laid out for the deck's display) and adds, sizes and removes widgets and manages pages, with undo; Theme and background chooses the look (the themes as pictures of your own page, the backgrounds with their samples, Moving or Still, the dimming and the motion level); Providers,
 Display (the monitor picker) and General hold the rest. Every change reaches the deck at once and is saved as it is made.
 
 What the editor changes is kept in `urdeck-config.json` in the data folder (`%APPDATA%\UrDeck`, or next to the executable in a

@@ -247,4 +247,25 @@ public sealed class BackgroundSettingsTests : IDisposable
 
         Assert.Contains("a page's own 'background' is not supported", _fixture.Log);
     }
+
+    [Theory]
+    [InlineData("0.4", 0.4)]
+    [InlineData("0", 0.0)]
+    [InlineData("0.9", 0.7)]
+    [InlineData("-1", 0.0)]
+    public void Dim_is_an_own_key_clamped_to_zero_to_seven_tenths(string dim, double expected)
+    {
+        var settings = BackgroundFixture.Parse($"{{ \"type\": \"shader\", \"name\": \"a\", \"dim\": {dim} }}");
+
+        Assert.Equal(expected, settings.Dim);
+        Assert.Empty(settings.Parameters);
+    }
+
+    [Fact]
+    public void Dim_that_is_not_a_number_is_ignored_and_a_picture_may_have_one()
+    {
+        Assert.Null(BackgroundFixture.Parse("{ \"type\": \"shader\", \"name\": \"a\", \"dim\": \"much\" }").Dim);
+        Assert.Equal(0.2, BackgroundFixture.Parse("{ \"type\": \"image\", \"path\": \"a.png\", \"dim\": 0.2 }").Dim);
+        Assert.Null(BackgroundFixture.Parse("{ \"type\": \"shader\", \"name\": \"a\" }").Dim);
+    }
 }

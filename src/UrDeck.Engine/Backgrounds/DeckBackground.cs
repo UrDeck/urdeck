@@ -67,17 +67,27 @@ public sealed class DeckBackground : IDisposable
     public SKColor? Scrim => _scrim;
 
     /// <summary>Records where a plan found this background and the scrim of the theme that is drawn over it.</summary>
-    internal void Adopt(BackgroundOrigin origin, int candidateIndex, LoadedTheme theme)
+    internal void Adopt(BackgroundOrigin origin, int candidateIndex, LoadedTheme theme, double? dim = null)
     {
         Origin = origin;
         CandidateIndex = candidateIndex;
-        _scrim = ScrimColor(theme);
-        _scrimKey = ScrimKey(theme);
+        _scrim = ScrimColor(theme, dim);
+        _scrimKey = ScrimKey(theme, dim);
     }
 
     /// <summary>The scrim's colour with its alpha multiplied by <c>background.scrim.alpha</c>, or null when the theme has no usable scrim.</summary>
-    internal static SKColor? ScrimColor(LoadedTheme theme)
+    internal static SKColor? ScrimColor(LoadedTheme theme, double? dim = null)
     {
+        if (dim is { } strength)
+        {
+            // The user's dim replaces the scrim's alpha; its colour is the theme's, or black.
+            var tint = theme.Definition.Background?.Scrim?.Color is { } tintText && BackgroundSettings.TryParseColor(tintText, out var themed)
+                ? themed
+                : SKColors.Black;
+            byte veil = (byte)Math.Round(Math.Clamp(strength, 0, BackgroundSettings.MaxDim) * 255);
+            return veil == 0 ? null : tint.WithAlpha(veil);
+        }
+
         if (theme.Definition.Background?.Scrim is not { Color: { } text, Alpha: { } alpha })
             return null;
         if (!BackgroundSettings.TryParseColor(text, out var color))
@@ -87,8 +97,8 @@ public sealed class DeckBackground : IDisposable
         return combined == 0 ? null : color.WithAlpha(combined);
     }
 
-    internal static string ScrimKey(LoadedTheme theme) =>
-        ScrimColor(theme) is { } scrim ? $"|scrim={scrim}" : "";
+    internal static string ScrimKey(LoadedTheme theme, double? dim = null) =>
+        ScrimColor(theme, dim) is { } scrim ? $"|scrim={scrim}" : "";
 
     public double Speed => _settings.Speed;
 

@@ -35,9 +35,10 @@ public sealed partial class BackgroundSettings
     public const double MinScale = 0.1;
     public const double MaxScale = 1;
     public const int MaxColors = 4;
+    public const double MaxDim = 0.7;
 
     /// <summary>The setting's own keys; any other key of a shader background is a parameter of the shader.</summary>
-    private static readonly string[] OwnKeys = ["type", "name", "path", "speed", "scale", "colors"];
+    private static readonly string[] OwnKeys = ["type", "name", "path", "speed", "scale", "colors", "dim"];
 
     /// <summary>No choice: the configuration has no <c>background</c> (or <c>null</c>), so the theme chooses.</summary>
     public static BackgroundSettings None { get; } = new();
@@ -51,7 +52,7 @@ public sealed partial class BackgroundSettings
     /// <summary>A shader named by a theme's <c>background.default</c>: the shader's own defaults for everything else.</summary>
     internal static BackgroundSettings ForThemeShader(string name) => new() { Kind = BackgroundKind.Shader, Name = name };
 
-    /// <summary>True for one of the setting's own keys (<c>type</c>, <c>name</c>, <c>path</c>, <c>speed</c>, <c>scale</c>, <c>colors</c>).</summary>
+    /// <summary>True for one of the setting's own keys (<c>type</c>, <c>name</c>, <c>path</c>, <c>speed</c>, <c>scale</c>, <c>colors</c>, <c>dim</c>).</summary>
     internal static bool IsOwnKey(string key) => OwnKeys.Contains(key, StringComparer.OrdinalIgnoreCase);
 
     private BackgroundSettings()
@@ -74,6 +75,7 @@ public sealed partial class BackgroundSettings
             Speed = speed,
             Scale = Scale,
             Colors = Colors,
+            Dim = Dim,
             Parameters = Parameters,
         };
 
@@ -96,6 +98,9 @@ public sealed partial class BackgroundSettings
 
     public double Speed { get; private init; } = DefaultSpeed;
     public double Scale { get; private init; } = DefaultScale;
+
+    /// <summary>The scrim's strength over the background from 0 to <see cref="MaxDim"/>, or null to use the theme's own scrim.</summary>
+    public double? Dim { get; private init; }
 
     /// <summary>The configuration's palette (one to four colour strings), or null to use the theme's.</summary>
     public IReadOnlyList<string>? Colors { get; private init; }
@@ -186,6 +191,7 @@ public sealed partial class BackgroundSettings
             Speed = Number(members, "speed", DefaultSpeed, 0, MaxSpeed),
             Scale = Number(members, "scale", DefaultScale, MinScale, MaxScale),
             Colors = ParseColors(Own(members, "colors")),
+            Dim = ParseDim(members),
             Parameters = parameters,
         };
     }
@@ -200,10 +206,11 @@ public sealed partial class BackgroundSettings
         }
 
         foreach (string key in members.Keys)
-            if (!key.Equals("type", StringComparison.OrdinalIgnoreCase) && !key.Equals("path", StringComparison.OrdinalIgnoreCase))
+            if (!key.Equals("type", StringComparison.OrdinalIgnoreCase) && !key.Equals("path", StringComparison.OrdinalIgnoreCase)
+                && !key.Equals("dim", StringComparison.OrdinalIgnoreCase))
                 Warn($"'{key}' has no meaning for an image background and is ignored.");
 
-        return new BackgroundSettings { Kind = BackgroundKind.Image, IsExplicit = true, Path = path };
+        return new BackgroundSettings { Kind = BackgroundKind.Image, IsExplicit = true, Path = path, Dim = ParseDim(members) };
     }
 
     private static JsonElement? Own(Dictionary<string, JsonElement> members, string key)
@@ -225,6 +232,19 @@ public sealed partial class BackgroundSettings
 
         Warn($"'{key}' {element.GetRawText()} must be a number from {Format(min)} to {Format(max)}; using {Format(fallback)}.");
         return fallback;
+    }
+
+    /// <summary>A number clamped to 0 to <see cref="MaxDim"/>; a value that is not a number is a warning and no override.</summary>
+    private static double? ParseDim(Dictionary<string, JsonElement> members)
+    {
+        if (Own(members, "dim") is not { } element || element.ValueKind == JsonValueKind.Null)
+            return null;
+
+        if (element.ValueKind == JsonValueKind.Number && element.TryGetDouble(out double number) && double.IsFinite(number))
+            return Math.Clamp(number, 0, MaxDim);
+
+        Warn($"'dim' {element.GetRawText()} must be a number from 0 to {Format(MaxDim)}; using the theme's scrim.");
+        return null;
     }
 
     private static string Format(double value) => value.ToString(CultureInfo.InvariantCulture);

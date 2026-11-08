@@ -62,15 +62,28 @@ internal interface ISettingsHost
     /// <summary>
     /// A deck session for the editor's preview, shown by <paramref name="presenter"/>: the deck's configuration, theme,
     /// background and widgets, on the page <paramref name="pageId"/>, with its own readings (live, or the samples), animated by
-    /// <paramref name="frames"/>, without input.
+    /// <paramref name="frames"/>, without input. With <paramref name="config"/> the session shows that configuration (it never
+    /// changes) instead of the deck's: a theme's picture of the user's page.
     /// </summary>
-    PreviewDeck CreatePreview(IDeckPresenter presenter, IFrameSource frames, string? pageId);
+    PreviewDeck CreatePreview(IDeckPresenter presenter, IFrameSource frames, string? pageId, UrDeckConfig? config = null);
 
     /// <summary>The background of a plan for the preview, prepared for the surface; null for the theme's colour.</summary>
     Engine.Backgrounds.DeckBackground? BuildBackground(Engine.Backgrounds.BackgroundPlan plan, DeckSurface surface);
 
     /// <summary>The background's key, so the preview builds it only when it changed.</summary>
     string? BackgroundKey(Engine.Backgrounds.BackgroundPlan plan);
+
+    /// <summary>The installed themes (built-in and the user's folders): the Theme and background section lists them.</summary>
+    Engine.Themes.ThemeStore Themes { get; }
+
+    /// <summary>The installed backgrounds.</summary>
+    Engine.Backgrounds.ShaderStore Shaders { get; }
+
+    /// <summary>The data folder: relative picture paths and the editor's cache resolve against it.</summary>
+    string DataFolder { get; }
+
+    /// <summary>Which background the deck shows now and, if the configured one could not be shown, why. Reads no pictures and compiles nothing.</summary>
+    Engine.Backgrounds.BackgroundStatus BackgroundStatus();
 
     /// <summary>The page the deck shows now (its id); null without pages.</summary>
     string? DeckPageId { get; }

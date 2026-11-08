@@ -46,6 +46,15 @@ public sealed record BackgroundCandidate(BackgroundOrigin Origin, BackgroundSett
 }
 
 /// <summary>
+/// What the deck shows behind its cards and why, for an editor: where the shown background came from and, when the
+/// configured one could not be shown, the reason.
+/// </summary>
+/// <param name="Shown">Where the background that is shown came from; <see cref="BackgroundOrigin.ThemeColour"/> when it is only the colour.</param>
+/// <param name="ShownText">What it is (<c>shader 'nebula'</c>, <c>image 'C:\wall.jpg'</c>, <c>the theme's colour</c>).</param>
+/// <param name="ConfiguredProblem">Why the configured background is not shown (<c>the picture C:\wall.jpg does not exist.</c>); null when it is, or when nothing was configured.</param>
+public sealed record BackgroundStatus(BackgroundOrigin Shown, string ShownText, string? ConfiguredProblem);
+
+/// <summary>
 /// What the deck shows behind its cards, decided in one place: the candidates in the order they are tried, and the first
 /// that can be built is shown. The order is the configuration's <c>background</c>, the theme's default, the theme's still
 /// background and the plain background colour, with these rules:
@@ -61,11 +70,18 @@ public sealed record BackgroundCandidate(BackgroundOrigin Origin, BackgroundSett
 /// </summary>
 public sealed class BackgroundPlan
 {
-    private BackgroundPlan(LoadedTheme theme, IReadOnlyList<BackgroundCandidate> candidates)
+    private readonly bool _unreadable;
+
+    private BackgroundPlan(LoadedTheme theme, IReadOnlyList<BackgroundCandidate> candidates, double? dim, bool unreadable)
     {
+        _unreadable = unreadable;
         Theme = theme;
         Candidates = candidates;
+        Dim = dim;
     }
+
+    /// <summary>The configuration's <c>background.dim</c>: the scrim's strength over whatever is shown, or null for the theme's own.</summary>
+    public double? Dim { get; }
 
     public LoadedTheme Theme { get; }
 
@@ -95,7 +111,7 @@ public sealed class BackgroundPlan
         }
 
         candidates.Add(new BackgroundCandidate(BackgroundOrigin.ThemeColour, null, null));
-        return new BackgroundPlan(theme, candidates);
+        return new BackgroundPlan(theme, candidates, settings.IsDisabled ? null : settings.Dim, settings.IsInvalid);
     }
 
     private static BackgroundSettings Slowed(BackgroundSettings settings, double? speed) => speed is { } s ? settings.WithSpeed(s) : settings;
@@ -120,7 +136,7 @@ public sealed class BackgroundPlan
             parts.Add($"{candidate.Origin}{theme}:{key}");
         }
 
-        return parts.Count == 0 ? null : string.Join(" > ", parts) + DeckBackground.ScrimKey(Theme);
+        return parts.Count == 0 ? null : string.Join(" > ", parts) + DeckBackground.ScrimKey(Theme, Dim);
     }
 
     /// <summary>
@@ -143,7 +159,7 @@ public sealed class BackgroundPlan
             if (background == null)
                 continue;
 
-            background.Adopt(candidate.Origin, index, Theme);
+            background.Adopt(candidate.Origin, index, Theme, Dim);
             return background;
         }
 
@@ -168,6 +184,46 @@ public sealed class BackgroundPlan
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Which candidate is shown and, if the configured one is not, why, without compiling a shader or decoding a picture: a
+    /// shader that is found, a picture that exists and a still that can be made count as shown. Logs nothing, changes nothing.
+    /// </summary>
+    public BackgroundStatus Status(ShaderStore store, string appDirectory)
+    {
+        string? problem = _unreadable ? "the background setting could not be read; the log says why." : null;
+        foreach (var candidate in Candidates)
+        {
+            if (candidate.IsColour)
+                return new BackgroundStatus(candidate.Origin, "the theme's colour", problem);
+
+            string? failure;
+            string text;
+            if (candidate.Settings is { Kind: BackgroundKind.Image } image)
+            {
+                string path = BackgroundImage.ResolvePath(image.Path!, appDirectory);
+                failure = File.Exists(path) ? null : $"the picture {path} does not exist.";
+                text = $"image '{path}'";
+            }
+            else if (candidate.Settings is { } shader)
+            {
+                failure = store.TryLoad(shader.Name!).Failure;
+                text = $"shader '{shader.Name}'";
+            }
+            else
+            {
+                using var still = DeckBackground.TryCreateStill(candidate.Still!, Theme, out failure);
+                text = "the theme's still background";
+            }
+
+            if (failure == null)
+                return new BackgroundStatus(candidate.Origin, text, problem);
+            if (candidate.Origin == BackgroundOrigin.Configuration)
+                problem = failure;
+        }
+
+        return new BackgroundStatus(BackgroundOrigin.ThemeColour, "the theme's colour", problem);
     }
 
     private DeckBackground? CreateStill(ThemeBackgroundStaticDefinition still)
