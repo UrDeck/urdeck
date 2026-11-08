@@ -108,11 +108,18 @@ See the README license map before moving code between projects: it can change th
   in code crashes). Widget types are never XAML types.
 - The deck window has `WS_EX_NOACTIVATE`: it never takes focus, so Escape does not close it. Close it from the tray icon (right-click, Quit; Windows 11 may hide it in the overflow flyout), or
   start it with `URDECK_ACTIVATABLE=1` (the deck window can take focus and Escape closes it) when developing.
-- The deck is not the only window: a left click on the tray icon (or its Settings entry) opens the settings window
-  (`SettingsWindow`, one page, the monitor picker), an ordinary activatable window with a taskbar button while it is
-  open. It talks to the host only through `ISettingsHost`, and `App` keeps one reference that it drops on close (a new
-  window per opening, so nothing lingers). Quit closes it first. `URDECK_SETTINGS_SOAK=1` opens and closes it 20 times at
-  startup and logs memory (`Soak ...` lines; the numbers are in `docs/perf/settings-window.md`). To try the window without a
+- The deck is not the only window: a left click on the tray icon (or its Settings entry) opens the editor
+  (`src/UrDeck.Host/Editor/EditorWindow`, a resizable activatable window with a taskbar button while it is open, sections in a
+  `NavigationView`: Pages, Providers, Display, General, the deck status in the pane's footer). It talks to the host only through
+  `ISettingsHost`, and `App` keeps one reference that it drops on close (a new window per opening, so nothing lingers). Quit
+  closes it first. The Pages preview is a second `DeckSession` (`ISettingsHost.CreatePreview`) over `PreviewReadings` (live, or
+  the providers' samples), painted on one `SKXamlCanvas` by `DeckFramePainter` (`PreviewPresenter`); it holds no page while
+  another section is shown or the window is minimised. Every edit is a `ConfigDocument` transaction through
+  `Engine/Editor/PageEditing` (tested on Linux). While the editor is open the deck follows its page tab
+  (`ShowPageOnDeck`) and the tab follows a swipe (`DeckPageChanged`). The WinUI control styles come from
+  `XamlControlsResources` in `App.xaml`; without it the editor's controls crash the process (`0xc000027b` in
+  `CoreMessagingXP.dll`). `URDECK_SETTINGS_SOAK=1` opens and closes it 20 times at startup and logs memory (`Soak ...` lines;
+  the numbers are in `docs/perf/settings-window.md`); `=hold` opens it once and leaves it open. To try the window without a
   deck on a screen, copy the build output elsewhere and give its config a `display` that is not connected.
 - Launching `UrDeck.Host.exe` (not `--snapshot`) blocks the shell. Start it detached and read `urdeck.log` (next to the exe for a build, `%APPDATA%\UrDeck` for an installed copy);
   it logs monitors, target vs. actual content area, placed widgets, reloads and warnings.

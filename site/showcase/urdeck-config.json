@@ -1,6 +1,7 @@
 {
   "pages": [
     {
+"id": "p-overvw",
       "name": "Overview",
       "widgets": [
         {
@@ -84,7 +85,7 @@
       ]
     }
   ],
-  "activePage": 0,
+  "startPage": "p-overvw",
   "dock": [
     {
       "typeId": "urdeck.widgets.shortcut",

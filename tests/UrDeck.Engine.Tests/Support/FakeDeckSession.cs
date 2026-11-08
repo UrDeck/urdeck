@@ -360,7 +360,7 @@ internal sealed class DeckRig : IDisposable
     public static UrDeckConfig Pages(params WidgetConfig[][] pages) => new()
     {
         Theme = ThemeStore.DefaultName,
-        Pages = pages.Select((widgets, i) => new PageConfig { Name = $"P{i + 1}", Widgets = [.. widgets] }).ToList(),
+        Pages = pages.Select((widgets, i) => new PageConfig { Id = $"p-{i + 1}", Name = $"P{i + 1}", Widgets = [.. widgets] }).ToList(),
     };
 
     public void Dispose() => Session.Dispose();

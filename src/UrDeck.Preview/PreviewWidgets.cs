@@ -43,15 +43,7 @@ public static class PreviewWidgets
     /// The configuration a widget of the type gets when it is added without settings (<c>DefaultConfig</c>), with its type id
     /// set; its place and size are the caller's.
     /// </summary>
-    public static WidgetConfig DefaultConfig(WidgetDescriptor descriptor)
-    {
-        object widget = Activator.CreateInstance(descriptor.WidgetType)!;
-        System.Reflection.PropertyInfo property = typeof(IWidget<>).MakeGenericType(descriptor.ConfigType).GetProperty(nameof(IWidget<WidgetConfig>.DefaultConfig))!;
-        var config = (WidgetConfig)property.GetValue(widget)!;
-        config.WidgetTypeId = descriptor.Id;
-        (widget as IDisposable)?.Dispose();
-        return config;
-    }
+    public static WidgetConfig DefaultConfig(WidgetDescriptor descriptor) => WidgetDefaults.Config(descriptor);
 
     /// <summary>A widget of the configuration's type, attached to <paramref name="host"/> and configured; null for a type this does not know.</summary>
     internal static IWidget? Create(WidgetConfig config, IWidgetHost host)

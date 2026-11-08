@@ -177,9 +177,9 @@ public class ConfigDocumentTests
     {
         var document = Open("""{ "pages": [] }""");
 
-        Assert.ThrowsAny<JsonException>(() => document.Edit("bad", e => e.Set("/activePage", "not a number")));
+        Assert.ThrowsAny<JsonException>(() => document.Edit("bad", e => e.Set("/monitor", "not a number")));
 
-        Assert.Null(document.Root["activePage"]);
+        Assert.Null(document.Root["monitor"]);
         Assert.Equal(0, document.Revision);
     }
 

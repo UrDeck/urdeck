@@ -78,6 +78,10 @@
   - **Theme, background, motion**: the deck's, from the same configuration; the background is drawn (moving if the
     deck's is) so the preview shows the real look; it stops when the window is minimised or hidden (presenter
     `IsShown` false).
+- The canvas is a software one: painting the moving background's shader, the pattern and the shadows at 30 fps made the
+  editor unusable (measured on the panel, 2026-11-07). The preview therefore paints the background, pattern and underlays
+  once into a picture (`DeckFramePainter.PaintCached`) and shows the background and moving borders **still**; a frame paints
+  only the cards and the indicator. This answers the open question below.
 - `PreviewPresenter` (host): one `SKXamlCanvas` for the whole page (not one per widget: the preview is small and one
   canvas is cheaper), inside a `ScrollViewer`. It paints the session's slots in z-order through a canvas scaled from
   the surface to the canvas size (`canvas.Scale(previewPx / surfacePx)`); the background is painted by the same
@@ -86,7 +90,7 @@
 - Overlays are XAML on top of the canvas, positioned from the session's layout rectangles (converted to DIPs): the
   selection outline with a label ("Stats · 4x2"), the grid overlay (cell lines and a "+" button per empty cell when the
   grid is on), the bezel. The overlays are not drawn into the page, so the page pixels equal the deck's.
-- Zoom: **Fit width**: the page is scaled to the stage width minus margins, with a cell at most 120 DIP; the stage
+- Zoom (opens on **Whole page**, the owner's choice on the panel, 2026-11-07): **Fit width**: the page is scaled to the stage width minus margins, with a cell at most 120 DIP; the stage
   scrolls vertically. **Whole page**: scaled so the whole page (dock and indicator included) fits the stage. The
   choice and the Grid toggle are remembered for the session only.
 - Selection hit test: `WidgetHitTest` (engine) on the session's layout, in surface coordinates.
@@ -230,5 +234,4 @@ the user picks one.
 
 ## Open Questions
 
-- Whether the preview's moving background is worth its cost on low-end GPUs, or should show a still frame by default.
-  Measurable after implementation without changing the specs (the presenter can paint the still frame).
+- (Answered: the preview shows a still background; see D2.)

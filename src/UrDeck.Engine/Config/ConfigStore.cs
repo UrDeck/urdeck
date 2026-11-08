@@ -15,6 +15,13 @@ namespace UrDeck.Engine.Config;
 
 public class PageConfig
 {
+    /// <summary>
+    /// The page's identity, unique in the file and never changed by a rename or a move (<c>p-</c> and six base-36
+    /// characters, see <see cref="PageIds"/>). The host gives a page without one an id on load.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
     [JsonPropertyName("name")]
     public string Name { get; set; } = "Default";
 
@@ -65,8 +72,12 @@ public class UrDeckConfig
         new PageConfig { Name = "Default" }
     };
 
-    [JsonPropertyName("activePage")]
-    public int ActivePage { get; set; } = 0;
+    /// <summary>
+    /// The <see cref="PageConfig.Id"/> of the page shown at startup; absent, or naming no page, means the first page
+    /// (<see cref="StartPageResolver"/>). The older <c>activePage</c> index is not read.
+    /// </summary>
+    [JsonPropertyName("startPage")]
+    public string? StartPage { get; set; }
 
     [JsonPropertyName("pager")]
     public PagerConfig Pager { get; set; } = new PagerConfig();
@@ -80,9 +91,6 @@ public class UrDeckConfig
 
     [JsonPropertyName("theme")]
     public string Theme { get; set; } = "default-dark";
-
-    [JsonPropertyName("icon")]
-    public string? Icon { get; set; }
 
     /// <summary>
     /// What the deck shows behind its cards: a shader or an image. Kept raw; <c>BackgroundSettings.Parse</c> reads it
@@ -125,10 +133,6 @@ public class UrDeckConfig
     /// <summary>Per-provider settings keyed by provider id; absent from a default configuration.</summary>
     [JsonPropertyName("providers")]
     public Dictionary<string, ProviderSettings>? Providers { get; set; }
-
-    [JsonIgnore]
-    public PageConfig? CurrentPage =>
-        Pages.Count == 0 ? null : Pages[Math.Clamp(ActivePage, 0, Pages.Count - 1)];
 }
 
 
@@ -154,6 +158,7 @@ public sealed class ConfigStore : IDisposable, Deck.IDeckConfigSource
     private readonly TimeProvider _time;
     private readonly Action<Action> _post;
     private ITimer? _coalesce;
+    private bool _loaded;
     private bool _disposed;
 
     /// <summary>Raised on the owner thread 150 ms after the last change to the document that matters to the deck (not the host's own edits).</summary>
@@ -185,6 +190,9 @@ public sealed class ConfigStore : IDisposable, Deck.IDeckConfigSource
         _post = owner ?? (static action => action());
         Document = Load(owner);
         _ = Document.Typed; // a file that cannot be bound fails here, as it always did
+        // Pages without an id get one now, as a host edit: written once, never an undo step (page-navigation).
+        PageIds.Assign(Document);
+        _loaded = true;
         Document.Changed += OnDocumentChanged;
     }
 
@@ -285,6 +293,11 @@ public sealed class ConfigStore : IDisposable, Deck.IDeckConfigSource
         var options = new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true };
         if (JsonNode.Parse(text, documentOptions: options) is not JsonObject root)
             throw new JsonException("The configuration must be a JSON object.");
+
+        // A file changed outside whose pages lack ids gets them as part of the new content (a host edit replayed on the
+        // undo snapshots would put them on the wrong pages); they are written with the next write.
+        if (_loaded && _create)
+            PageIds.AssignInPlace(root);
 
         int version = ReadVersion(root);
         if (version > _currentVersion)

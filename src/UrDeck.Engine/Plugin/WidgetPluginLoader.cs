@@ -424,6 +424,28 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
 
     public IWidget? CreateWidget(WidgetConfig config, out WidgetServices? services) => _registry.CreateWidget(config, out services);
 
+    /// <summary>
+    /// The widget types of this loader for a deck session whose widgets read from <paramref name="readings"/> (the editor's
+    /// preview) and invoke no action: the same plugins, launcher and icons, and the same <see cref="PluginsChanged"/>.
+    /// </summary>
+    public Deck.IDeckWidgets WithReadings(IReadingSource readings) => new RoutedWidgets(this, readings);
+
+    private sealed class RoutedWidgets(WidgetPluginLoader loader, IReadingSource readings) : Deck.IDeckWidgets
+    {
+        public event Action? PluginsChanged
+        {
+            add => loader.PluginsChanged += value;
+            remove => loader.PluginsChanged -= value;
+        }
+
+        public WidgetDescriptor? GetDescriptor(string typeId) => loader.GetDescriptor(typeId);
+
+        public IReadOnlyList<string> GetRegisteredWidgetTypes() => loader.GetRegisteredWidgetTypes();
+
+        public IWidget? CreateWidget(WidgetConfig config, out WidgetServices? services) =>
+            loader._registry.CreateWidget(config, () => new WidgetServices(readings, loader._launcher, loader._icons), out services);
+    }
+
     public void Dispose()
     {
         foreach (var watcher in _watchers)

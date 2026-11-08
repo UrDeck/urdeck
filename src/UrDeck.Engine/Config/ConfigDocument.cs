@@ -109,6 +109,12 @@ public sealed class ConfigDocument : IDisposable
     /// <summary>Raised for a change from outside that could not be read and for a write that failed.</summary>
     public event Action<ConfigProblem>? Problem;
 
+    /// <summary>Raised on the owner thread after the pending change was written (or found to be what the file holds).</summary>
+    public event Action? Written;
+
+    /// <summary>Whether a change is waiting to be written (its half second, or a retry after a failure).</summary>
+    public bool IsWritePending => _writePending;
+
     /// <summary>The SHA-256 of what the file is believed to hold: what was last written or read.</summary>
     internal byte[]? FileHash => _fileHash;
 
@@ -226,6 +232,7 @@ public sealed class ConfigDocument : IDisposable
         if (_fileHash != null && hash.AsSpan().SequenceEqual(_fileHash))
         {
             _writePending = false;
+            Written?.Invoke();
             return;
         }
 
@@ -259,6 +266,7 @@ public sealed class ConfigDocument : IDisposable
         _fileHash = hash;
         _writePending = false;
         _failures = 0;
+        Written?.Invoke();
     }
 
     // A loaded file without the current version gets it as the first key before its first write; the tree changes silently

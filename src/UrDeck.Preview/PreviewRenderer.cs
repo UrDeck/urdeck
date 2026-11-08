@@ -175,7 +175,7 @@ public sealed class PreviewRenderer(ThemeStore themes, ShaderStore shaders, stri
     {
         if (request.Widget is not { } alone)
         {
-            if (!PageSelection.TryChoose(source.Pages.Count, source.ActivePage, request.Page, out int index, out string? error))
+            if (!PageSelection.TryChoose(source.Pages.Count, StartPageResolver.Resolve(source), request.Page, out int index, out string? error))
                 throw new PreviewException(error!);
             return (source, index, null);
         }

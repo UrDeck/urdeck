@@ -8,6 +8,9 @@ namespace UrDeck.Engine.Layout;
 
 public class GridLayoutManager
 {
+    /// <summary>How many columns a page has: a cell is a quarter of the width.</summary>
+    public const int Columns = 4;
+
     public double ScreenWidth { get; private set; }
     public double ScreenHeight { get; private set; }
     public double ColumnWidth => ScreenWidth / 4;

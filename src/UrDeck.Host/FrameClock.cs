@@ -21,13 +21,15 @@ internal sealed class FrameClock : IFrameSource
     private readonly HashSet<IFrameClient> _views = new();
     private readonly Dictionary<IFrameClient, long> _last = new();
     private readonly DispatcherQueueTimer _timer;
+    private readonly Windows.Foundation.TypedEventHandler<DispatcherQueueTimer, object> _tick;
 
     public FrameClock(DispatcherQueue queue)
     {
         _timer = queue.CreateTimer();
         _timer.Interval = FrameInterval;
         _timer.IsRepeating = true;
-        _timer.Tick += (_, _) => OnTick();
+        _tick = (_, _) => OnTick();
+        _timer.Tick += _tick;
     }
 
     public bool IsRunning => _timer.IsRunning;
@@ -47,12 +49,16 @@ internal sealed class FrameClock : IFrameSource
             Stop();
     }
 
-    /// <summary>Stops the clock and forgets every view (the window is closing).</summary>
+    /// <summary>
+    /// Stops the clock, forgets every view and lets go of the timer's handler (the window is closing): a timer holds its
+    /// handler from native code, so a handler left attached keeps the clock and its owner alive.
+    /// </summary>
     public void Shutdown()
     {
         _views.Clear();
         _last.Clear();
         Stop();
+        _timer.Tick -= _tick;
     }
 
     private void Stop()

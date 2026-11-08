@@ -18,7 +18,7 @@ public partial class App : Application
     private HostContext? _host;
     private MainWindow? _window;
     private TrayIcon? _tray;
-    private SettingsWindow? _settings;
+    private Editor.EditorWindow? _settings;
     private SettingsSoak? _soak;
     private DispatcherQueueTimer? _memTimer;
     private readonly RunKeyAutostart _autostart = new();
@@ -53,7 +53,15 @@ public partial class App : Application
             Program.Data,
             saveConfiguration: !demo,
             demo: demo ? new SampleClock(() => DateTime.Now, DateTime.Now) : null);
-        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Shaders, _host.Data.Root, _host.RememberDisplay);
+        _window = new MainWindow(_host.Config, _host.Plugins, _host.Themes, _host.Shaders, _host.Data, _host.RememberDisplay)
+        {
+            AutostartOn = () => _autostart.State == AutostartState.On,
+            SetAutostart = on =>
+            {
+                if ((_autostart.State == AutostartState.On) != on)
+                    ToggleAutostart();
+            },
+        };
         _window.Closed += (_, _) =>
         {
             // Quitting closes Settings too: it holds the host, which is disposed next.
@@ -140,12 +148,16 @@ public partial class App : Application
             return;
         }
 
-        var settings = new SettingsWindow(_window, Path.Combine(AppContext.BaseDirectory, "urdeck.ico"));
-        settings.Closed += (_, _) =>
+        var settings = new Editor.EditorWindow(_window, Path.Combine(AppContext.BaseDirectory, "urdeck.ico"));
+        // Detached when it runs: the window holds its handlers from native code, and this one leads back to the window.
+        Windows.Foundation.TypedEventHandler<object, WindowEventArgs>? closed = null;
+        closed = (_, _) =>
         {
+            settings.Closed -= closed;
             if (ReferenceEquals(_settings, settings))
                 _settings = null;
         };
+        settings.Closed += closed;
         _settings = settings;
         settings.Open();
     }

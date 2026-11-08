@@ -238,7 +238,7 @@ public class ConfigDocumentFileTests
     {
         var h = new Harness("""{ "version": 1, "theme": "a" }""");
 
-        h.Files.SaveOutside("""{ "version": 1, "activePage": "two" }""");
+        h.Files.SaveOutside("""{ "version": 1, "monitor": "two" }""");
 
         Assert.Equal("a", h.Document.Typed.Theme);
         Assert.Single(h.Problems);

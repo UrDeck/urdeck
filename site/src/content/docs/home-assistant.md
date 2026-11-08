@@ -16,7 +16,7 @@ It talks only to your Home Assistant, at the address you give it, and only while
 
 1. In Home Assistant, open your profile (your name at the bottom of the sidebar), then the **Security** tab. Under
    **Long-lived access tokens**, choose **Create token**, name it `UrDeck`, and copy the token. Home Assistant shows it only once.
-2. In UrDeck, open the settings window (click the tray icon). Under **Providers**, **Home Assistant**, enter the **Address** you
+2. In UrDeck, open the editor (click the tray icon). Under **Providers**, **Home Assistant**, enter the **Address** you
    open Home Assistant at (for example `http://homeassistant.local:8123`) and paste the **Token**. **Test connection** says which
    version of Home Assistant answered and how many entities it has. Then **Save**.
 

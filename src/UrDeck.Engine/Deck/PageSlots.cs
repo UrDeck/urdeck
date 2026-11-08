@@ -17,7 +17,11 @@ namespace UrDeck.Engine.Deck;
 /// <param name="Slot">The widget.</param>
 /// <param name="Style">The card's style, with its border (a moving border's card back is painted without it).</param>
 /// <param name="AnimatedBorder">True when the border is a moving sprite over the card (the full motion level and a moving theme border).</param>
-public sealed record DeckCard(int Index, WidgetLayoutItem Item, WidgetSlot Slot, ResolvedCardStyle Style, bool AnimatedBorder);
+public sealed record DeckCard(int Index, WidgetLayoutItem Item, WidgetSlot Slot, ResolvedCardStyle Style, bool AnimatedBorder)
+{
+    /// <summary>The card's number for the theme's per-card variations (<see cref="CardOrder"/>).</summary>
+    public int Order { get; init; }
+}
 
 /// <summary>What a page (or the dock) is built with; one per layout, shared by its pages.</summary>
 /// <param name="Theme">The resolved theme the widgets draw with.</param>
@@ -68,6 +72,7 @@ public sealed class PageSlots : IDisposable
         System.Drawing.Rectangle? underlayClip = null)
     {
         Name = page.Name;
+        PageId = page.Id;
         Scale = build.Scale;
         BorderMotion = build.BorderMotion;
         UnderlayClip = underlayClip;
@@ -99,7 +104,7 @@ public sealed class PageSlots : IDisposable
                 var widget = widgets.CreateWidget(config, out var services)!;
                 var slot = new WidgetSlot(widget, services, descriptor, build.Theme, new CardLook(animated ? style.WithoutBorder() : style, cardIndex[i]),
                     build.Press, scheduler, frames, readings, build.Motion);
-                var card = new DeckCard(i, item, slot, style, animated);
+                var card = new DeckCard(i, item, slot, style, animated) { Order = cardIndex[i] };
                 _cards.Add(card);
                 _cardsByIndex[i] = card;
                 foreach (string reading in slot.Subscriptions)
@@ -121,6 +126,9 @@ public sealed class PageSlots : IDisposable
 
     /// <summary>The page's name (the dock's is "Dock"), for log lines.</summary>
     public string Name { get; }
+
+    /// <summary>The id of the page these slots show; null for the dock and a page without one.</summary>
+    public string? PageId { get; }
 
     /// <summary>Surface units to physical pixels.</summary>
     public double Scale { get; }
