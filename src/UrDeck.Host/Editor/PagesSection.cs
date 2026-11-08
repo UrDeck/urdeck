@@ -35,6 +35,7 @@ internal sealed partial class PagesSection
     private const double BezelPadding = 12;
 
     private readonly ISettingsHost _host;
+    private readonly Window _owner;
     private readonly PageEditing _editing;
     private readonly DispatcherQueue _queue;
     private readonly PreviewPresenter _preview;
@@ -63,19 +64,27 @@ internal sealed partial class PagesSection
     private string? _paletteMessage;
     private (WidgetRef Widget, int W, int H, FitProblem Problem)? _fit;
     private string? _paneKey;
+    private readonly Forms.IEditorReadings _readings;
+    private readonly Forms.IIconCatalog _icons;
+    private readonly Forms.IReadingChooser _chooser;
+    private Forms.FormView? _form;
     private TextBox? _nameBox;
     private double _factor = 1;
     private bool _active;
 
-    public PagesSection(ISettingsHost host, PageEditing editing, DispatcherQueue queue)
+    public PagesSection(ISettingsHost host, PageEditing editing, DispatcherQueue queue, Window owner)
     {
         _host = host;
+        _owner = owner;
         _editing = editing;
         _queue = queue;
         _pageId = host.DeckPageId ?? host.Document.Typed.Pages.FirstOrDefault()?.Id;
         _preview = new PreviewPresenter(host, queue, _pageId);
         _preview.LayoutChanged += OnLayoutChanged;
         _preview.Reloaded += () => _queue.TryEnqueue(DispatcherQueuePriority.Low, FollowPage);
+        _readings = new Forms.PreviewEditorReadings(_preview.Readings, _preview.Readings, host.Readings, queue);
+        _icons = new Forms.ThemeIconCatalog(() => _preview.Session.Theme);
+        _chooser = new Forms.ReadingChooserDialog(() => _root.XamlRoot, _readings);
 
         _outsideBar = new InfoBar { Severity = InfoBarSeverity.Informational, IsClosable = true, Message = $"{FileName} changed outside the editor. The editor took the new file." };
         var undoReload = new Button { Content = "Undo the reload" };
@@ -958,6 +967,8 @@ internal sealed partial class PagesSection
 
     public void Close()
     {
+        _form?.Dispose();
+        _form = null;
         _host.Document.Changed -= OnDocumentChanged;
         _host.Document.Problem -= OnProblem;
         _host.Document.History.StateChanged -= UpdateUndo;

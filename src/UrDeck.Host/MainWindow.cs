@@ -325,6 +325,8 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
             .OrderBy(t => t.Descriptor.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
+    Engine.Data.ReadingHub ISettingsHost.Readings => _plugins.Readings;
+
     Engine.Plugin.WidgetDescriptor? ISettingsHost.DescribeWidget(string typeId) => _plugins.GetDescriptor(typeId);
 
     string? ISettingsHost.ReadingLabel(string readingId) => _plugins.Readings.Describe(readingId)?.Label;

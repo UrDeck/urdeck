@@ -142,6 +142,9 @@ public sealed class SettingSchema
     public static string KeyOf(PropertyInfo property) =>
         property.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? JsonNamingPolicy.CamelCase.ConvertName(property.Name);
 
+    /// <summary>A schema over settings that were declared elsewhere (a provider's), for a form to build from.</summary>
+    public static SettingSchema Of(Type type, IReadOnlyList<SettingDescriptor> settings) => new(type, settings, []);
+
     /// <summary>Reads <paramref name="type"/>; throws <see cref="InvalidOperationException"/> with the reason when a declaration is invalid.</summary>
     /// <param name="type">The type to read.</param>
     /// <param name="stopAt">A base type whose properties are not settings (<c>WidgetConfig</c>, <c>ProviderSettings</c>); null for none.</param>

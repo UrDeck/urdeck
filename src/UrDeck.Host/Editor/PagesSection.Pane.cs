@@ -32,6 +32,8 @@ internal sealed partial class PagesSection
 
         _paneKey = key;
         _nameBox = null;
+        _form?.Dispose();
+        _form = null;
         var panel = new StackPanel { Spacing = 12 };
         if (_paletteOpen)
             BuildPalette(panel);
@@ -120,7 +122,22 @@ internal sealed partial class PagesSection
         }
 
         if (descriptor != null)
-            panel.Children.Add(Sections.Caption("Settings for this widget appear here in a later version."));
+        {
+            panel.Children.Add(Sections.Label("Settings"));
+            if (descriptor.Settings.Settings.Count == 0)
+            {
+                panel.Children.Add(Sections.Caption("This widget has no settings."));
+            }
+            else
+            {
+                // The dock draws a slot as 1x1 whatever its configuration says (settings for other sizes are dimmed accordingly).
+                string sizeKey = at.InDock ? "1x1" : $"{widget.Width}x{widget.Height}";
+                var context = new Forms.FormContext(_host.Document, sizeKey, _readings, _icons, _owner, _chooser);
+                _form = new Forms.FormBuilder(context).Build(descriptor.Settings, ObjectPath(at));
+                panel.Children.Add(_form.Root);
+            }
+        }
+
         var remove = new Button
         {
             Content = "Remove",
@@ -132,6 +149,10 @@ internal sealed partial class PagesSection
         remove.Click += (_, _) => RemoveSelected();
         panel.Children.Add(remove);
     }
+
+    /// <summary>The widget's object in the configuration document (<c>/pages/0/widgets/3</c>, <c>/dock/1</c>).</summary>
+    private string ObjectPath(WidgetRef widget) =>
+        widget.InDock ? $"/dock/{widget.Index}" : $"/pages/{PageEditing.PageIndex(Config, widget.PageId)}/widgets/{widget.Index}";
 
     private string SizeOf(WidgetRef widget) => PageEditing.Widget(Config, widget) is { } w ? $"{w.Width}x{w.Height}" : "";
 

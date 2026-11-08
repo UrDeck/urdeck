@@ -168,15 +168,15 @@ more than the window's own cost while it is open, as long as the window stays us
 
 ### Requirement: Providers Section
 The settings window MUST have a Providers section listing each loaded provider that declares settings beyond the base
-ones, with one field per declared setting, generated from the declaration: a text box for text, a password box for a
-secret, a number box for a number and a switch for on/off, each with the setting's label and help text.
+ones, with one control per declared setting, generated from the declaration by the same rules as a widget's settings
+form (see editor-forms), each with the setting's label and help text.
 
 - A secret's field never shows a stored value. It says whether a value is stored and where it comes from (Credential
   Manager or the environment variable, named), and offers to save a new value or remove the stored one. While the
   environment variable is set, the field says it overrides the stored value
 - Nothing is applied until the user saves the provider's settings. Saving writes non-secret settings to the configuration
-  file and secrets to the secret store (see provider-secrets), and restarts that provider (see data-providers, "A
-  Settings Change Restarts Only Its Provider")
+  as one undo step and secrets to the secret store (see provider-secrets), and restarts that provider (see
+  data-providers, "A Settings Change Restarts Only Its Provider")
 - A provider MAY offer a connection test. The section then shows a Test connection button that runs it with the values
   in the form, without saving them, and shows its one-line result or failure under the button; the test is cancelled
   after 10 seconds or when the window closes
@@ -194,3 +194,8 @@ secret, a number box for a number and a switch for on/off, each with the setting
 #### Scenario: No configurable providers
 - **WHEN** no loaded provider declares settings beyond the base ones
 - **THEN** the Providers section says so and shows no fields
+
+#### Scenario: Same controls as widgets
+- **WHEN** a provider declares a whole number setting with a minimum and a maximum
+- **THEN** the Providers section shows it as the same number box a widget's form uses, with that range
+

@@ -292,9 +292,11 @@ public sealed class WeatherWidget : Widget<WeatherConfig>, IDisposable
         float rightWidth = body.Width - half;
         if (Config.Label != "")
         {
-            string place = Config.Label ?? shown.Place.Value;
+            // A place chosen in the editor keeps its name beside its coordinates; the coordinates alone have no name to show.
+            string? named = Config is { Latitude: not null, Longitude: not null } && !string.IsNullOrWhiteSpace(Config.Location) ? Config.Location.Trim() : null;
+            string place = Config.Label ?? named ?? shown.Place.Value;
             TextLine.Draw(canvas, theme, SKRect.Create(rightLeft, top, rightWidth, titleLine), place, small,
-                Config.Label != null || shown.Place.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Right, VerticalAlign.Middle);
+                Config.Label != null || named != null || shown.Place.IsCurrent ? TextEmphasis.Primary : TextEmphasis.Muted, HorizontalAlign.Right, VerticalAlign.Middle);
         }
 
         // Sunset is placed from the right edge, sunrise before it; each has a small glyph to its left.
