@@ -23,6 +23,9 @@ public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings>,
     private readonly Func<double> _random;
     private readonly object _gate = new();
     private IReadingSink? _sink;
+    private Uri? _address;
+    private string _token = "";
+    private bool _registriesLogged;
     private HomeAssistantConnection? _connection;
     private IHomeAssistantRest? _rest;
     private string? _settingsError;
@@ -68,6 +71,8 @@ public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings>,
             return;
         }
 
+        _address = address;
+        _token = token;
         lock (_gate)
             _rest = _clients.CreateRest(address, token);
         _connection = new HomeAssistantConnection(address, token, _clients, sink, _time, _random);
@@ -166,8 +171,35 @@ public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings>,
             rest = _rest;
         if (rest == null)
             throw new InvalidOperationException("Home Assistant is not set up");
-        var states = await StatesAsync(rest, cancellationToken);
-        return states.Select(s => EntityMapping.Describe(s)).OrderBy(d => d.Path, StringComparer.Ordinal).ToList();
+        var statesTask = StatesAsync(rest, cancellationToken);
+        var registriesTask = ReadRegistriesAsync(cancellationToken);
+        var states = await statesTask;
+        var registries = await registriesTask;
+        return states
+            .Select(s => EntityMapping.Describe(s) with { Area = registries?.AreaOf(s.Id), Category = EntityMapping.CategoryOf(EntityState.DomainOf(s.Id)) })
+            .OrderBy(d => d.Path, StringComparer.Ordinal)
+            .ToList();
+    }
+
+    /// <summary>The registries for the areas; null (with one log line for the run) when they cannot be read.</summary>
+    private async Task<Registries?> ReadRegistriesAsync(CancellationToken cancellationToken)
+    {
+        if (_address == null)
+            return null;
+        try
+        {
+            return await Registries.ReadAsync(_clients, _address, _token, cancellationToken);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or InvalidDataException or IOException or System.Net.WebSockets.WebSocketException or JsonException)
+        {
+            if (!_registriesLogged)
+            {
+                _registriesLogged = true;
+                _sink?.Log($"Home Assistant: the areas cannot be read ({ex.GetBaseException().Message}); entities are listed without them");
+            }
+
+            return null;
+        }
     }
 
     public override bool OffersConnectionTest => true;

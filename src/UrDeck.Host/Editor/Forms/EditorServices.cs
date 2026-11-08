@@ -54,6 +54,34 @@ internal sealed class PreviewEditorReadings(IReadingSource preview, UrDeck.Engin
         });
     }
 
+    public IDisposable WatchMany(IReadOnlyCollection<string> ids, Action<IReadOnlyCollection<string>> changed)
+    {
+        string[] watched = [.. ids];
+        var wanted = new HashSet<string>(watched, StringComparer.OrdinalIgnoreCase);
+        void OnChanged(IReadOnlyCollection<string> changedIds)
+        {
+            string[] mine = [.. changedIds.Where(wanted.Contains)];
+            if (mine.Length > 0)
+                queue.TryEnqueue(() => changed(mine));
+        }
+
+        subscriptions.Subscribe(watched);
+        subscriptions.ReadingsChanged += OnChanged;
+        return new Disposer(() =>
+        {
+            subscriptions.ReadingsChanged -= OnChanged;
+            subscriptions.Unsubscribe(watched);
+        });
+    }
+
+    public string RowValue(string id, ReadingDescriptor described)
+    {
+        var text = ReadingFormatter.Format(preview.Read(id), described, null, preview);
+        return text.Unit is { Length: > 0 } unit ? $"{text.Value} {unit}" : text.Value;
+    }
+
+    public bool ProviderNeedsSetup(string providerId) => hub.IsWaitingForSettings(providerId);
+
     public IReadOnlyList<ActionDescriptor> ActionsFor(string id) => hub.ActionsFor(id);
 
     public Task<SuggestionResult> SuggestAsync(string providerId, string kind, string text, CancellationToken cancellationToken) =>

@@ -41,6 +41,7 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
     private readonly ProviderSettingsEditor _providerEditor;
     private readonly string _dataFolder;
     private readonly Engine.Startup.DataFolder _data;
+    private Engine.Editor.ReadingDescriptionCache? _readingCache;
     private readonly nint _hwnd;
     private readonly WindowFocus? _focus;
     private readonly DisplayPowerWatcher? _power;
@@ -326,6 +327,10 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
             .ToList();
 
     Engine.Data.ReadingHub ISettingsHost.Readings => _plugins.Readings;
+
+    IReadOnlyCollection<Engine.Data.ProviderDescriptor> ISettingsHost.ProviderDescriptors => _plugins.Providers.Descriptors;
+
+    Engine.Editor.ReadingDescriptionCache ISettingsHost.ReadingCache => _readingCache ??= new Engine.Editor.ReadingDescriptionCache(_data.ReadingCachePath);
 
     Engine.Plugin.WidgetDescriptor? ISettingsHost.DescribeWidget(string typeId) => _plugins.GetDescriptor(typeId);
 

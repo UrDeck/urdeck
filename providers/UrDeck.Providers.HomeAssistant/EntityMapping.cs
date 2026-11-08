@@ -26,6 +26,23 @@ internal static class EntityMapping
 
     private static readonly Func<double, double> Same = x => x;
 
+    /// <summary>The category an entity is listed under in the editor, from its domain (<c>light</c> is "Lights").</summary>
+    public static string CategoryOf(string domain) => domain switch
+    {
+        "light" => "Lights",
+        "switch" => "Switches",
+        "sensor" or "binary_sensor" => "Sensors",
+        "climate" => "Climate",
+        "cover" => "Covers",
+        "fan" => "Fans",
+        "lock" => "Locks",
+        "media_player" => "Media",
+        "scene" => "Scenes",
+        "script" => "Scripts",
+        "" => "Other",
+        _ => char.ToUpperInvariant(domain[0]) + domain[1..],
+    };
+
     /// <summary>The description of an entity (<paramref name="attribute"/> null) or of one of its attributes.</summary>
     public static ReadingDescriptor Describe(EntityState entity, string? attribute = null)
     {

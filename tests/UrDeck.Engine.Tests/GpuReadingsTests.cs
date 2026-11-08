@@ -117,6 +117,22 @@ public class GpuReadingsTests
         new SystemProvider(platform).Describe().Where(d => d.Path.StartsWith("gpu/", StringComparison.Ordinal)).ToList();
 
     [WindowsFact]
+    public async Task Browsing_ListsTheMachinesReadingsWithCategories_WithoutTheMainGpuAliases()
+    {
+        var provider = new SystemProvider(new FakePlatform(Discrete));
+
+        var listed = await provider.BrowseAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal("CPU", listed.Single(d => d.Path == "cpu/load").Category);
+        Assert.Equal("CPU", listed.Single(d => d.Path == "cpu/core/1/load").Category);
+        Assert.Equal("Memory", listed.Single(d => d.Path == "memory/load").Category);
+        var gpu = listed.Where(d => d.Path.StartsWith("gpu/", StringComparison.Ordinal)).ToList();
+        Assert.Equal(["gpu/1/load", "gpu/1/temperature", "gpu/1/power", "gpu/1/clock"], gpu.Select(d => d.Path));
+        Assert.All(gpu, d => Assert.Equal("GPU", d.Category));
+        Assert.True(listed.Count(d => d.Path.StartsWith("cpu/core/", StringComparison.Ordinal)) >= Environment.ProcessorCount);
+    }
+
+    [WindowsFact]
     public void TheCatalog_ListsFourMainPathsAndFourPerAdapter()
     {
         var catalog = GpuCatalog(new FakePlatform(Discrete));

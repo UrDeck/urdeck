@@ -74,6 +74,18 @@ public class SystemProviderTests
     }
 
     [WindowsFact]
+    public async Task Browsing_ListsAtLeastTheCpuLoadAndMemoryOnThisMachine_WithoutSampling()
+    {
+        var provider = new SystemProvider();
+
+        var listed = await provider.BrowseAsync(TestContext.Current.CancellationToken);
+
+        Assert.Contains(listed, d => d.Path == "cpu/load" && d.Category == "CPU");
+        Assert.Contains(listed, d => d.Path == "memory/load" && d.Category == "Memory");
+        Assert.Equal(0, provider.CpuQueries + provider.MemoryQueries);
+    }
+
+    [WindowsFact]
     public void ALoadNeedsTwoSamples_AndIsAPercentageThen()
     {
         var sink = new Sink();

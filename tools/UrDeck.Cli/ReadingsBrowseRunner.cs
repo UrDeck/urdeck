@@ -66,7 +66,7 @@ internal static class ReadingsBrowseRunner
         return ExitCodes.Ok;
     }
 
-    private sealed record BrowseRow(string Id, string Kind, string State, string Value, string? Unit, string Label, string? Action, string? Icon);
+    private sealed record BrowseRow(string Id, string Kind, string State, string Value, string? Unit, string Label, string? Action, string? Icon, string? Area, string? Category);
 
     /// <summary>
     /// The providers' settings: the configuration given (else the user's, when it exists), with <c>--url</c> in place of the
@@ -142,7 +142,7 @@ internal static class ReadingsBrowseRunner
         }
 
         string kind = descriptor.Kind.ToString();
-        return new BrowseRow(id, char.ToLowerInvariant(kind[0]) + kind[1..], state, value, unit, descriptor.Label, descriptor.Action, descriptor.Icon);
+        return new BrowseRow(id, char.ToLowerInvariant(kind[0]) + kind[1..], state, value, unit, descriptor.Label, descriptor.Action, descriptor.Icon, descriptor.Area, descriptor.Category);
     }
 
     private static string Text(List<BrowseRow> rows)
@@ -160,7 +160,9 @@ internal static class ReadingsBrowseRunner
         int valueWidth = values.Max(v => v.Length);
         for (int i = 0; i < rows.Count; i++)
         {
-            text.Append((rows[i].Id.PadRight(idWidth) + "  " + rows[i].Kind.PadRight(kindWidth) + "  " + values[i].PadRight(valueWidth) + "  " + rows[i].Label).TrimEnd());
+            string where = string.Join(" · ", new[] { rows[i].Category, rows[i].Area }.Where(w => !string.IsNullOrEmpty(w)));
+            string label = where.Length == 0 ? rows[i].Label : $"{rows[i].Label}  [{where}]";
+            text.Append((rows[i].Id.PadRight(idWidth) + "  " + rows[i].Kind.PadRight(kindWidth) + "  " + values[i].PadRight(valueWidth) + "  " + label).TrimEnd());
             text.Append('\n');
         }
 
@@ -182,6 +184,8 @@ internal static class ReadingsBrowseRunner
                 ["label"] = row.Label,
                 ["action"] = row.Action,
                 ["icon"] = row.Icon,
+                ["area"] = row.Area,
+                ["category"] = row.Category,
             });
         }
 
