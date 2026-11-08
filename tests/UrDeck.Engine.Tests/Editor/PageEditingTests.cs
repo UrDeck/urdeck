@@ -411,4 +411,107 @@ public class PageEditingTests
         Assert.True(tall.Rows > short_.Rows);
         Assert.InRange(tall.Rows, 10, 14);
     }
+
+    private static string PageWith(params string[] widgets) =>
+        $$"""{ "version": 1, "pages": [ { "id": "p-main", "name": "Main", "widgets": [ {{string.Join(",", widgets)}} ] } ] }""";
+
+    private static string W(string type, int col, int row, int w, int h) =>
+        $$"""{ "typeId": "urdeck.widgets.{{type}}", "col": {{col}}, "row": {{row}}, "width": {{w}}, "height": {{h}} }""";
+
+    [Fact]
+    public void PlacementIssues_AnUndeclaredSize_OffersTheTwoNearestDeclaredSizesThatFit()
+    {
+        var (document, editing) = Open(PageWith(W("stats", 0, 0, 3, 1)));
+
+        var issue = Assert.Single(editing.PlacementIssues(document.Typed.Pages[0].Widgets, Grid));
+
+        Assert.Equal(PlacementIssueKind.UndeclaredSize, issue.Kind);
+        Assert.Equal("3x1 is not a Stats size. Stats comes in 1x1, 2x1, 2x2, 4x2, 4x4. Nothing changes until you choose.", issue.Message);
+        Assert.Equal(new[] { "2x1", "2x2" }, issue.Suggestions.Select(s => s.Label));
+        Assert.All(issue.Suggestions, s => Assert.False(s.Moves));
+    }
+
+    [Fact]
+    public void PlacementIssues_OnlyTheSizesThatFitHereAreOffered()
+    {
+        var (document, editing) = Open(PageWith(W("stats", 0, 0, 3, 1), W("shortcut", 1, 0, 1, 1)));
+
+        var issue = Assert.Single(editing.PlacementIssues(document.Typed.Pages[0].Widgets, Grid), i => i.Kind == PlacementIssueKind.UndeclaredSize);
+
+        Assert.Equal(new[] { "1x1" }, issue.Suggestions.Select(s => s.Label));
+    }
+
+    [Fact]
+    public void PlacementIssues_WhenNoDeclaredSizeFitsHere_TheNearestIsOfferedAtTheFirstFreeSpace()
+    {
+        var (document, editing) = Open(PageWith(W("stats", 0, 0, 3, 1), W("shortcut", 0, 0, 1, 1)));
+
+        var issue = Assert.Single(editing.PlacementIssues(document.Typed.Pages[0].Widgets, Grid), i => i.Kind == PlacementIssueKind.UndeclaredSize);
+
+        var suggestion = Assert.Single(issue.Suggestions);
+        Assert.Equal("2x1", suggestion.Label);
+        Assert.Equal(new Cell(1, 0), suggestion.At);
+        Assert.True(suggestion.Moves);
+    }
+
+    [Fact]
+    public void PlacementIssues_ADeclaredSize_AndAnUninstalledType_AreNotIssues()
+    {
+        var (document, editing) = Open(PageWith(W("stats", 0, 0, 2, 2), W("nosuch", 2, 0, 2, 3)));
+
+        Assert.Empty(editing.PlacementIssues(document.Typed.Pages[0].Widgets, Grid));
+    }
+
+    [Fact]
+    public void PlacementIssues_Overlap_NamesBoth_AndMoveToFirstFreeMovesTheLaterOne()
+    {
+        var (document, editing) = Open(PageWith(W("weather", 0, 0, 4, 2), W("stats", 1, 0, 2, 2)));
+
+        var issue = Assert.Single(editing.PlacementIssues(document.Typed.Pages[0].Widgets, Grid));
+        Assert.Equal(PlacementIssueKind.Overlap, issue.Kind);
+        Assert.Equal("Two widgets overlap: Weather and Stats.", issue.Message);
+        Assert.Equal((1, 0), (issue.Index, issue.OtherIndex));
+
+        var outcome = editing.MoveToFirstFree(new WidgetRef("p-main", 1), Grid);
+
+        Assert.True(outcome.Applied);
+        Assert.Equal(new[] { 2, 0 }, new[] { document.Typed.Pages[0].Widgets[1].Row, document.Typed.Pages[0].Widgets[1].Col });
+        Assert.Empty(editing.PlacementIssues(document.Typed.Pages[0].Widgets, Grid));
+        Assert.True(document.History.CanUndo);
+    }
+
+    [Fact]
+    public void PlacementIssues_OffGrid_IsReported_AndIssuesAreOrderedByRow()
+    {
+        var (document, editing) = Open(PageWith(W("stats", 0, 11, 2, 2), W("stats", 3, 0, 2, 2)));
+
+        var issues = editing.PlacementIssues(document.Typed.Pages[0].Widgets, Grid);
+
+        Assert.Equal(new[] { 1, 0 }, issues.Select(i => i.Index));
+        Assert.All(issues, i => Assert.Equal(PlacementIssueKind.OffGrid, i.Kind));
+        Assert.Equal("Stats is outside the page.", issues[0].Message);
+    }
+
+    [Fact]
+    public void StartWithEmptyPage_LeavesOneEmptyStartPageAndNoDock_AsOneUndoStep()
+    {
+        var (document, editing) = Open(Main);
+        string before = Json(document);
+
+        var outcome = editing.StartWithEmptyPage();
+
+        Assert.True(outcome.Applied);
+        var config = document.Typed;
+        var page = Assert.Single(config.Pages);
+        Assert.Equal("Main", page.Name);
+        Assert.Empty(page.Widgets);
+        Assert.Equal(outcome.PageId, page.Id);
+        Assert.Equal(page.Id, config.StartPage);
+        Assert.Empty(config.Dock);
+        Assert.Equal("Start with an empty page", document.History.UndoLabel);
+
+        document.History.Undo();
+
+        Assert.Equal(before, Json(document));
+    }
 }

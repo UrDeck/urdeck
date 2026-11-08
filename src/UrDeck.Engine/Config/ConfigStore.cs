@@ -199,6 +199,9 @@ public sealed class ConfigStore : IDisposable, Deck.IDeckConfigSource
     /// <summary>The configuration as a document: edit it by path, undo, flush.</summary>
     public ConfigDocument Document { get; }
 
+    /// <summary>True when this start created the configuration file (the first run: the sample page or an empty page was written); false when a file existed, and in a read-only document.</summary>
+    public bool CreatedOnFirstRun { get; private set; }
+
     /// <summary>The configuration the deck uses; a new object after every change.</summary>
     public UrDeckConfig Config => Document.Typed;
 
@@ -237,6 +240,7 @@ public sealed class ConfigStore : IDisposable, Deck.IDeckConfigSource
             if (!string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);
 
+            CreatedOnFirstRun = true;
             if (hasSample)
             {
                 File.Copy(_samplePath!, _configPath);

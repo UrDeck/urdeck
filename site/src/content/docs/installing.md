@@ -9,7 +9,7 @@ order: -1
 
 Download `UrDeck-win-Setup.exe` from the [latest release](https://github.com/UrDeck/urdeck/releases/latest) and run it. It
 installs UrDeck for you alone, without administrator rights, into `%LocalAppData%\UrDeck`, adds **UrDeck** to the Start menu
-(no desktop shortcut) and starts the deck. Your first page is the sample page; the [getting started](/docs/) page says how to
+(no desktop shortcut) and starts the deck. Your first page is the sample page, and the editor opens with a welcome where you can keep it or start with an empty page; the [getting started](/docs/) page says how to
 change it. A page should be on your display within five minutes of starting the download.
 
 `UrDeck-win-Setup.exe --silent` installs without showing a window. Installing a newer version over an installed one keeps

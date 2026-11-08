@@ -344,6 +344,8 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
 
     Engine.Plugin.WidgetDescriptor? ISettingsHost.DescribeWidget(string typeId) => _plugins.GetDescriptor(typeId);
 
+    Engine.Plugin.WidgetUnavailable? ISettingsHost.ClassifyWidget(string typeId) => _plugins.Classify(typeId);
+
     string? ISettingsHost.ReadingLabel(string readingId) => _plugins.Readings.Describe(readingId)?.Label;
 
     IReadOnlyList<string> ISettingsHost.ProvidersWaitingForSettings => _plugins.Readings.ProvidersWaitingForSettings;

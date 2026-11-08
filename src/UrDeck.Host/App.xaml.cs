@@ -80,7 +80,7 @@ public partial class App : Application
         var window = _window;
         var dispatcher = DispatcherQueue.GetForCurrentThread();
         // Opening a window is queued, not done inside the tray's window procedure or the menu's message loop.
-        void OpenSettingsLater() => dispatcher.TryEnqueue(OpenSettings);
+        void OpenSettingsLater() => dispatcher.TryEnqueue(() => OpenSettings());
         _tray = new TrayIcon(
             [
                 new TrayMenuEntry(
@@ -110,12 +110,16 @@ public partial class App : Application
             state == PlacementState.Absent ? $"UrDeck: waiting for {display ?? "a display"}" : "UrDeck");
         window.Start();
 
+        // First run (data-folder, "First Run"): the deck shows the sample page; the editor opens with the welcome.
+        if (_host.Config.CreatedOnFirstRun)
+            dispatcher.TryEnqueue(() => OpenSettings(welcome: true));
+
         // Opt-in measurement: URDECK_SETTINGS_SOAK=1 opens and closes the settings window 20 times and logs memory;
         // =hold opens it once, five seconds after start, and leaves it open.
         string? soak = Environment.GetEnvironmentVariable("URDECK_SETTINGS_SOAK");
         if (soak is "1" or "hold")
         {
-            _soak = new SettingsSoak(dispatcher, OpenSettings, () => _settings?.Close(), cycles: soak == "1" ? 20 : 0);
+            _soak = new SettingsSoak(dispatcher, () => OpenSettings(), () => _settings?.Close(), cycles: soak == "1" ? 20 : 0);
             _soak.Start();
         }
     }
@@ -138,7 +142,7 @@ public partial class App : Application
     private void RestartToUpdate() => _updates?.ApplyAndRestart();
 
     /// <summary>Opens the settings window, or brings the open one forward: there is at most one.</summary>
-    private void OpenSettings()
+    private void OpenSettings(bool welcome = false)
     {
         if (_window is null)
             return;
@@ -160,6 +164,8 @@ public partial class App : Application
         settings.Closed += closed;
         _settings = settings;
         settings.Open();
+        if (welcome)
+            settings.ShowWelcome();
     }
 
     /// <summary>Shows the data folder in File Explorer, creating it first if it is missing; a failure is logged.</summary>

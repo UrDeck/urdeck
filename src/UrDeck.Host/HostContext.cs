@@ -62,6 +62,8 @@ internal sealed class HostContext : IDisposable
         // First-party plugins come with the application, the user's from the data folder. A context that writes nothing
         // does not create the user folder, and so not the data folder either.
         Plugins = new WidgetPluginLoader(iconCacheFolder: data.IconCacheFolder, demo: demo);
+        if (saveConfiguration)
+            Plugins.WidgetTypeMemoryPath = data.WidgetTypeMemoryPath;
         Plugins.ScanAndLoadPlugins(saveConfiguration ? data.PluginFolders : data.PluginFolders.Where(Directory.Exists).ToList());
 
         // A token typed into the file by hand goes to Credential Manager before any provider starts.

@@ -555,4 +555,79 @@ public class ActionWidget : Widget<ActionCfg>, ITapTarget
 
         Assert.Equal(new[] { "test.widget" }, _loader.GetRegisteredWidgetTypes());
     }
+
+    [Fact]
+    public void LoadReport_NamesEachFile_AndWhyOneFailed()
+    {
+        File.WriteAllText(Path.Combine(_dir, "bad.dll"), "this is not a .NET assembly");
+        WritePlugin("test.widget", "good.dll");
+
+        _loader.ScanAndLoadPlugins(_dir);
+
+        var report = _loader.LoadReport;
+        var bad = Assert.Single(report, f => f.FileName == "bad.dll");
+        Assert.Equal(PluginFileStatus.Failed, bad.Status);
+        Assert.False(string.IsNullOrWhiteSpace(bad.Reason));
+        var good = Assert.Single(report, f => f.FileName == "good.dll");
+        Assert.Equal(PluginFileStatus.Loaded, good.Status);
+        Assert.Equal(new[] { "test.widget" }, good.WidgetTypes);
+    }
+
+    [Fact]
+    public void LoadReport_ARejectedDuplicate_IsListedWithItsReason()
+    {
+        WritePlugin("dup.widget", "a.dll");
+        WritePlugin("dup.widget", "b.dll");
+
+        _loader.ScanAndLoadPlugins(_dir);
+
+        var b = Assert.Single(_loader.LoadReport, f => f.FileName == "b.dll");
+        Assert.Equal(PluginFileStatus.Skipped, b.Status);
+        Assert.Equal("dup.widget", Assert.Single(b.Rejected).Id);
+    }
+
+    [Fact]
+    public void Classify_TellsDidNotLoad_Removed_AndNotInstalled()
+    {
+        string memory = Path.Combine(_dir, "cache", "widget-types.json");
+        _loader.WidgetTypeMemoryPath = memory;
+        string plugin = WritePlugin("test.widget", "good.dll");
+        _loader.ScanAndLoadPlugins(_dir);
+        Assert.True(File.Exists(memory));
+        Assert.Null(_loader.Classify("test.widget"));
+
+        // The plugin is replaced by a broken file: known, present, failed.
+        File.WriteAllText(plugin, "this is not a .NET assembly");
+        _loader.ReloadPlugins();
+        var failed = _loader.Classify("test.widget")!;
+        Assert.Equal(WidgetUnavailableKind.DidNotLoad, failed.Kind);
+        Assert.Equal("good.dll", failed.PluginFile);
+        Assert.Equal("T", failed.Name);
+        Assert.False(string.IsNullOrWhiteSpace(failed.Reason));
+
+        // The file is deleted: known, gone.
+        File.Delete(plugin);
+        _loader.ReloadPlugins();
+        var removed = _loader.Classify("test.widget")!;
+        Assert.Equal(WidgetUnavailableKind.Removed, removed.Kind);
+        Assert.Contains("good.dll", removed.Reason);
+
+        // Never provided.
+        Assert.Equal(WidgetUnavailableKind.NotInstalled, _loader.Classify("acme.widgets.ticker")!.Kind);
+    }
+
+    [Fact]
+    public void TheWidgetTypeMemory_IsReadAgainByANewLoader()
+    {
+        string memory = Path.Combine(_dir, "cache", "widget-types.json");
+        _loader.WidgetTypeMemoryPath = memory;
+        WritePlugin("test.widget", "good.dll");
+        _loader.ScanAndLoadPlugins(_dir);
+
+        using var next = new WidgetPluginLoader { WidgetTypeMemoryPath = memory };
+        var remembered = next.Classify("test.widget")!;
+
+        Assert.Equal(WidgetUnavailableKind.Removed, remembered.Kind); // nothing loaded in this loader: its file is not in the report
+        Assert.Equal("good.dll", remembered.PluginFile);
+    }
 }

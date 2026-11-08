@@ -29,6 +29,47 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
     private readonly SampleClock? _demo;
     private readonly List<string> _sampled = [];
     private static int StaleCleaned;
+    private readonly List<PluginFileReport> _reports = [];
+    private readonly List<(string TypeId, string File, string Name, string[] Sizes)> _provided = [];
+    private FileReportBuilder? _current;
+    private WidgetTypeMemory? _memory;
+
+    /// <summary>Where the widget types plugins provided are remembered (<c>cache/widget-types.json</c>); null remembers nothing.</summary>
+    public string? WidgetTypeMemoryPath { get; set; }
+
+    /// <summary>What the latest load made of each plugin file, in load order; rebuilt on every (re)load.</summary>
+    public IReadOnlyList<PluginFileReport> LoadReport
+    {
+        get
+        {
+            lock (_gate)
+                return [.. _reports];
+        }
+    }
+
+    /// <summary>
+    /// Why a widget of <paramref name="typeId"/> cannot be shown: its plugin failed (<c>DidNotLoad</c>), is gone (<c>Removed</c>)
+    /// or was never installed. Null when the type is registered.
+    /// </summary>
+    public WidgetUnavailable? Classify(string typeId)
+    {
+        lock (_gate)
+        {
+            if (_registry.GetDescriptor(typeId) != null)
+                return null;
+            _memory ??= WidgetTypeMemory.Load(WidgetTypeMemoryPath);
+            return _memory.Classify(typeId, _reports);
+        }
+    }
+
+    private sealed class FileReportBuilder(string path)
+    {
+        public string Path { get; } = path;
+        public List<string> Widgets { get; } = [];
+        public List<string> Providers { get; } = [];
+        public List<RejectedType> Rejected { get; } = [];
+        public string? Note { get; set; }
+    }
 
     /// <param name="time">The clock of the readings, the launcher's repeat guard and the icon cache's age.</param>
     /// <param name="iconCacheFolder">Where fetched site icons are kept; by default the system's temp folder, so that nothing is written beside the executable.</param>
@@ -126,12 +167,42 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
 
     private void LoadAll()
     {
+        _reports.Clear();
+        _provided.Clear();
         // Folders in priority order, and in each one by file name, so that which of two plugins claims an id does not depend on the file system.
         foreach (string folder in _pluginDirectories)
         {
             if (Directory.Exists(folder))
                 LoadFolder(folder);
         }
+
+        RememberWidgetTypes();
+    }
+
+    private void RememberWidgetTypes()
+    {
+        if (WidgetTypeMemoryPath is not { } path)
+            return;
+        _memory ??= WidgetTypeMemory.Load(path);
+        bool changed = false;
+        foreach (var (typeId, file, name, sizes) in _provided)
+            changed |= _memory.Remember(typeId, file, name, sizes);
+        if (changed || !File.Exists(path))
+            _memory.Save(path);
+    }
+
+    private static PluginFileReport Finish(FileReportBuilder builder, Exception? failure)
+    {
+        if (failure != null)
+            return new PluginFileReport(builder.Path, PluginFileStatus.Failed, failure.Message, [], [], builder.Rejected);
+        if (builder.Widgets.Count + builder.Providers.Count == 0)
+        {
+            string reason = builder.Rejected.Count > 0 ? string.Join("; ", builder.Rejected.Select(r => $"{r.Id}: {r.Reason}"))
+                : builder.Note ?? "It has no widgets or providers.";
+            return new PluginFileReport(builder.Path, PluginFileStatus.Skipped, reason, [], [], builder.Rejected);
+        }
+
+        return new PluginFileReport(builder.Path, PluginFileStatus.Loaded, null, builder.Widgets, builder.Providers, builder.Rejected);
     }
 
     private void LoadFolder(string pluginDirectory)
@@ -140,6 +211,8 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
         {
             string? shadowDir = null;
             PluginLoadContext? context = null;
+            var builder = _current = new FileReportBuilder(dllPath);
+            Exception? failure = null;
             try
             {
                 // Load from a copy so the original stays unlocked and can be overwritten by a rebuild.
@@ -162,6 +235,7 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
             }
             catch (Exception ex)
             {
+                failure = ex;
                 UrDeckLog.Warn($"Failed to load plugin {Path.GetFileName(dllPath)}: {ex.Message}");
                 // A context created for a failed plugin (e.g. not a .NET assembly) stays tracked and is unloaded on the next reload.
                 if (context == null && shadowDir != null)
@@ -170,6 +244,8 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
             finally
             {
                 _loadingFile = null;
+                _current = null;
+                _reports.Add(Finish(builder, failure));
             }
         }
     }
@@ -333,7 +409,11 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
         }
 
         if (foreignSdk)
+        {
+            if (_current != null)
+                _current.Note = "It was built against a different UrDeck.Sdk than this version; rebuild it and do not ship UrDeck.Sdk.dll with it.";
             UrDeckLog.Warn($"{assembly.GetName().Name} has widgets or providers built against a different UrDeck.Sdk than the host's; rebuild it against this version and don't ship UrDeck.Sdk.dll with it.");
+        }
         else if (found == 0)
             UrDeckLog.Warn($"No widgets or providers found in {assembly.GetName().Name} (not a plugin, or built against an incompatible UrDeck.Sdk?).");
     }
@@ -344,14 +424,20 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
         if (descriptor == null)
         {
             UrDeckLog.Warn($"Skipping widget {type.FullName}: {reason}");
+            _current?.Rejected.Add(new RejectedType(type.FullName ?? type.Name, reason ?? "invalid widget"));
             return false;
         }
 
         if (!_registry.TryRegister(descriptor, out var existing))
         {
             UrDeckLog.Warn($"Widget '{descriptor.Id}' from {_loadingFile ?? type.Assembly.GetName().Name} rejected: {existing!.WidgetType.Assembly.GetName().Name} already provides it");
+            _current?.Rejected.Add(new RejectedType(descriptor.Id, $"{existing.WidgetType.Assembly.GetName().Name} already provides it"));
             return false;
         }
+
+        _current?.Widgets.Add(descriptor.Id);
+        _provided.Add((descriptor.Id, _loadingFile != null ? Path.GetFileName(_loadingFile) : type.Assembly.GetName().Name + ".dll",
+            descriptor.Name, descriptor.SupportedSizes.Select(s => $"{s.Width}x{s.Height}").ToArray()));
 
         UrDeckLog.Info($"Registered widget '{descriptor.Id}' ({type.FullName}, {descriptor.Refresh} {descriptor.RefreshInterval})");
         return true;
@@ -363,6 +449,7 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
         if (descriptor == null)
         {
             UrDeckLog.Warn($"Skipping provider {type.FullName}: {reason}");
+            _current?.Rejected.Add(new RejectedType(type.FullName ?? type.Name, reason ?? "invalid provider"));
             return false;
         }
 
@@ -372,8 +459,11 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
         if (!_providers.TryRegister(registered, out var existing))
         {
             UrDeckLog.Warn($"Provider '{descriptor.Id}' from {_loadingFile ?? descriptor.AssemblyName} rejected: {existing!.AssemblyName} already provides it");
+            _current?.Rejected.Add(new RejectedType(descriptor.Id, $"{existing.AssemblyName} already provides it"));
             return false;
         }
+
+        _current?.Providers.Add(descriptor.Id);
 
         if (sample != null)
         {

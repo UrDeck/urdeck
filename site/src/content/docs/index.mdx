@@ -17,7 +17,15 @@ Everything the editor changes is kept in one JSON file, `urdeck-config.json`, wh
 (choose **Open data folder** in the tray menu, or **Show the configuration file** in the editor's General section). You can also edit
 it in any text editor: UrDeck notices a saved change after about a second and applies it without a restart, and an open editor shows
 it with an **Undo the reload** button. A file that is not valid JSON is ignored and the last good configuration stays in use; the reason is
-written to `urdeck.log`, next to the file. The first start creates the file from the sample page. The file's `"version"` is 1; a file written by a newer UrDeck is read as well as possible but never changed.
+written to `urdeck.log`, next to the file. The first start creates the file from the sample page and opens the editor with a welcome (see below). The file's `"version"` is 1; a file written by a newer UrDeck is read as well as possible but never changed.
+
+### The first start
+
+The first time UrDeck starts, the deck already shows the sample page on its display, and the editor opens with a welcome that names
+that display. Choose **Start with the sample page** to keep it and change it as you like, or **Start with an empty page** for one empty
+page called Main and an empty dock; **Undo** brings the sample page back. Closing the welcome (Escape) keeps the sample page. It appears only
+when UrDeck has just created the configuration file; an existing file never opens the editor by itself. On an empty page the editor
+points at the first row with a tip, **Add your first widget**, whose **Add a clock** button adds a Clock there.
 
 Everything you own sits in that folder, so reinstalling or updating UrDeck never touches it: the configuration, the log, `themes/`,
 `backgrounds/`, `plugins/` (plugins you add) and `cache/`. To keep it beside the program instead (on a USB stick, say), put an

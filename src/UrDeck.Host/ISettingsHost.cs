@@ -112,6 +112,12 @@ internal interface ISettingsHost
     /// <summary>An installed widget type; null when it is not installed.</summary>
     WidgetDescriptor? DescribeWidget(string typeId);
 
+    /// <summary>
+    /// Why a widget of this type cannot be shown: its plugin failed to load, was removed, or was never installed. Null when the
+    /// type is installed.
+    /// </summary>
+    WidgetUnavailable? ClassifyWidget(string typeId);
+
     /// <summary>A reading's label (for the names of widgets in messages); null when it is unknown.</summary>
     string? ReadingLabel(string readingId);
 
