@@ -5,29 +5,46 @@ Defines how a user moves between the pages of a configuration: which page is sho
 what stays alive while it changes, and the page indicator that shows where the user is.
 ## Requirements
 ### Requirement: Current Page Is Runtime State
-The host MUST keep the page being shown as runtime state, separate from the configuration:
+The host MUST keep the page being shown as runtime state, separate from the configuration. Pages are identified by
+their `id`, not by their position or name:
 
-- On startup the page at index `activePage` is shown; an index outside the page list is clamped to the nearest page
+- On startup the page whose `id` equals `startPage` is shown. When `startPage` is absent or names no page, the first
+  page is shown and the log says so once
+- A page without an `id`, or with an `id` another page already has, is given a new unique one, which the host writes
+  to the file once; this is not an undo step
 - Changing page never writes the configuration file
-- When the configuration is reloaded the host MUST keep showing the page the user is on: the page with the same name
-  as before; if no page has that name, the same index clamped to the page list
-- When the page list has several pages with the same name the first one with that name is used
+- When the configuration is reloaded the host MUST keep showing the page the user is on: the page with the same `id`
+  as before; if no page has that id, the same index clamped to the page list
+- While the editor is open, the deck shows the page selected in the editor (see editor), and the editor shows the page
+  the deck moves to when the user swipes on the deck. Closing the editor leaves the deck on the page it shows
 
 #### Scenario: Start page
-- **WHEN** the configuration has three pages and `activePage` is `1`
+- **WHEN** the configuration has three pages and `startPage` is the id of the second
 - **THEN** the second page is shown on startup
+
+#### Scenario: Start page missing
+- **WHEN** `startPage` names an id no page has
+- **THEN** the first page is shown on startup and the log says the start page was not found
+
+#### Scenario: Reordering keeps the start page
+- **WHEN** the start page is moved from first to third place
+- **THEN** it is still the page shown on the next startup
 
 #### Scenario: Swiping leaves the file alone
 - **WHEN** the user swipes from the first page to the second
-- **THEN** `urdeck-config.json` is not modified and `activePage` is unchanged
+- **THEN** `urdeck-config.json` is not modified
 
 #### Scenario: Reload keeps the page
-- **WHEN** the user is on the page named "Games" and the configuration is saved after an edit to a widget
-- **THEN** the page named "Games" is still shown after the reload, not the page at `activePage`
+- **WHEN** the user is on the page with id `p-games` and the configuration changes
+- **THEN** the page with id `p-games` is still shown after the reload, also when it was renamed
 
 #### Scenario: Current page was removed
-- **WHEN** the user is on the third page and a reload leaves only two pages, none with the old page's name
+- **WHEN** the user is on the third page and a reload leaves only two pages, none with the old page's id
 - **THEN** the second page is shown
+
+#### Scenario: Deck follows the editor
+- **WHEN** the editor is open and the user selects the "Home" tab
+- **THEN** the deck shows the Home page, and after the editor closes the deck still shows it
 
 ### Requirement: Swipe Changes Page
 A horizontal swipe on the page MUST change the page, using one gesture path for mouse, touch and pen:
@@ -195,4 +212,3 @@ The indicator MUST have a mode setting in the configuration with the values `alw
 #### Scenario: Auto with a dock on the tall panel
 - **WHEN** the mode is `auto`, the configuration has two pages and a dock, and the screen is 1100x3840
 - **THEN** the behaviour is that of `always` and the grid keeps 13 whole rows
-

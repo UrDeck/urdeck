@@ -226,8 +226,11 @@ The host MUST manage configuration via `urdeck-config.json`:
 - A file whose `version` is higher than the host's is read as well as possible, a warning says that it was written by
   a newer UrDeck, and the host never writes it while it runs (it does not remember a display), so settings the host
   does not know are not lost
-- `activePage` is the index of the page shown on startup. It is not updated while the host runs, and a reload does not
-  move the user to it (see page-navigation)
+- Each page has an `id`, unique in the file, that never changes when the page is renamed or moved; the host gives a
+  page without one an id and writes it (see page-navigation)
+- `startPage` is the `id` of the page shown on startup; absent or naming no page means the first page. It is not
+  updated while the host runs, and a reload does not move the user to it (see page-navigation). The older `activePage`
+  key is not read; it is kept in the file as an unknown key
 - `pager.indicator` is the page indicator's mode: `always`, `fade`, `off` or `auto`; absent means `auto`
 - `dock` is a list of widget objects shown in the dock (see dock, "Dock Configuration"); absent or empty means no
   dock. Widget-specific settings on its entries are preserved across load and write like those of a page's widgets
@@ -302,6 +305,14 @@ The host MUST manage configuration via `urdeck-config.json`:
 - **WHEN** the host runs with a configuration that has comments and nothing changes before it quits
 - **THEN** the file is byte for byte unchanged, comments included
 
+#### Scenario: Start page by id
+- **WHEN** the file has two pages with ids `p-main` and `p-home` and `"startPage": "p-home"`
+- **THEN** the deck starts on the page `p-home`
+
+#### Scenario: Pages without ids
+- **WHEN** the file's pages have no `id`
+- **THEN** the host gives each a unique id and the file has them after the host's next write
+
 ### Requirement: Application Entry Point
 The host MUST provide the application entry point with:
 
@@ -315,7 +326,7 @@ The host MUST provide the application entry point with:
 - `--snapshot out.png [--size WxH] [--theme name] [--page N]`: renders a page off-screen via `PageRenderer` with the
   same layout, card and widget code, including the reserved band and the page indicator as the configuration says,
   writes a PNG (default size = target monitor resolution, default theme = the configured theme, default page = the
-  page at `activePage`) and exits with 0 on success, 1 on failure. `--page` is the 0-based index of the page, and an
+  start page, `startPage`) and exits with 0 on success, 1 on failure. `--page` is the 0-based index of the page, and an
   index outside the page list is a failure with a logged reason. The indicator shows page N as the current page.
   `--snapshot` never creates or writes the configuration: it does not remember a display, and with no configuration it
   draws the sample page (see data-folder, "First Run"). When the target monitor is absent and `--size` is not given,
@@ -579,4 +590,3 @@ a snapshot with `--start` shows the readings of that moment.
 #### Scenario: Without demo mode
 - **WHEN** the host is started without `--demo`
 - **THEN** every provider runs as before
-
