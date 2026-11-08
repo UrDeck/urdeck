@@ -1,10 +1,9 @@
-## Purpose
+# editor-arrange Specification
 
+## Purpose
 Arranging a page in the editor by direct manipulation: moving and resizing widgets by dragging, moving widgets on and
 off the dock, and reordering pages, always with a keyboard or menu equivalent.
-
-## ADDED Requirements
-
+## Requirements
 ### Requirement: Moving A Widget By Dragging
 The user MUST be able to drag a widget in the preview to another place on the page. While dragging, the editor shows the
 cells the widget would take, snapped to the grid, and whether it fits:
@@ -56,6 +55,27 @@ add a widget that supports 1x1.
 - **WHEN** the dock has four slots and the user selects a page widget that supports 1x1
 - **THEN** Move to the dock is disabled and dragging onto the dock shows no place to drop
 
+### Requirement: Moving A Widget To Another Page
+The user MUST be able to move a page widget to another page from the properties pane (Move to page, listing the other
+pages). The widget keeps its size and settings and takes the first free space of that size on the target page; the editor
+then shows that page with the widget selected. When no space fits, nothing changes and the pane says so.
+
+#### Scenario: Weather to another page
+- **WHEN** the user chooses Move to page, Other, for a 4x2 Weather widget and Other has room
+- **THEN** Weather is on Other at its first free 4x2 space, no longer on the first page, and one Undo reverses it
+
+#### Scenario: No room
+- **WHEN** the target page has no free space of the widget's size
+- **THEN** nothing changes and the pane says there is no free space on that page
+
+### Requirement: Adding Into A Tight Page
+When the editor adds a widget and its default size has no free space on the page, it MUST use the largest other size the
+widget declares that fits, and refuse only when none does.
+
+#### Scenario: A 4x1 row is left
+- **WHEN** the user adds a Clock whose default is 4x2 to a page with one free 4x1 row
+- **THEN** the Clock is added at 4x1 in that row
+
 ### Requirement: Page List
 The editor MUST offer the pages as a list with a small picture of each page's layout, where pages can be reordered by
 dragging and renamed in place, as an alternative to the tabs.
@@ -71,3 +91,4 @@ say what is in the way. In the dock, Ctrl with Left or Right moves the slot earl
 #### Scenario: Nudge
 - **WHEN** a 1x1 widget is selected and the cell to its right is free and the user presses Ctrl+Right
 - **THEN** the widget moves one column to the right
+

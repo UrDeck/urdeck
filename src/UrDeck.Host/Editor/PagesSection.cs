@@ -60,6 +60,8 @@ internal sealed partial class PagesSection
     private WidgetSelection? _selection;
     private bool _wholePage;
     private bool _paletteOpen;
+    private bool _paletteDock;
+    private string? _arrangeMessage;
     private Cell? _paletteAt;
     private string? _paletteMessage;
     private (WidgetRef Widget, int W, int H, FitProblem Problem)? _fit;
@@ -109,6 +111,7 @@ internal sealed partial class PagesSection
         };
 
         BuildLayout();
+        ApplyListMode();
 
         host.Document.Changed += OnDocumentChanged;
         host.Document.Problem += OnProblem;
@@ -181,17 +184,23 @@ internal sealed partial class PagesSection
         var tabsRow = new Grid { Margin = new Thickness(0, 8, 24, 8) };
         tabsRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         tabsRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        tabsRow.Children.Add(new ScrollViewer
+        tabsRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        _tabsScroll.Content = _tabs;
+        _listToggle.Content = new FontIcon { Glyph = "", FontSize = 14 };
+        _listToggle.IsChecked = ListMode;
+        _listToggle.Click += (_, _) =>
         {
-            Content = _tabs,
-            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
-            HorizontalScrollMode = ScrollMode.Auto,
-            VerticalScrollMode = ScrollMode.Disabled,
-        });
+            ListMode = _listToggle.IsChecked == true;
+            ApplyListMode();
+        };
+        AutomationProperties.SetName(_listToggle, "Show the pages as a list");
+        ToolTipService.SetToolTip(_listToggle, "Pages as a list, with a picture of each");
+        Grid.SetColumn(_listToggle, 1);
+        tabsRow.Children.Add(_listToggle);
+        tabsRow.Children.Add(_tabsScroll);
         _addWidget.Click += (_, _) => OpenPalette(null);
         _addWidget.Style = (Style)Application.Current.Resources["AccentButtonStyle"];
-        Grid.SetColumn(_addWidget, 1);
+        Grid.SetColumn(_addWidget, 2);
         tabsRow.Children.Add(_addWidget);
         Grid.SetRow(tabsRow, 2);
         _root.Children.Add(tabsRow);
@@ -208,17 +217,22 @@ internal sealed partial class PagesSection
         _stage.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         _stage.Background = (Brush)Application.Current.Resources["LayerFillColorDefaultBrush"];
         _stage.CornerRadius = new CornerRadius(8, 0, 0, 0);
-        body.Children.Add(_stage);
+        BuildStageHost();
+        body.Children.Add(_stageHost);
 
         _page.Children.Add(_preview.Canvas);
         _focusTarget.Content = _overlay;
         _page.Children.Add(_focusTarget);
+        _page.Children.Add(_dragLayer);
         _bezel.Child = _page;
         _scroll.Content = _bezel;
         _stage.Children.Add(_scroll);
         _stage.SizeChanged += (_, _) => Resize();
 
         _overlay.PointerPressed += OnPreviewPressed;
+        _overlay.PointerMoved += OnOverlayMoved;
+        _overlay.PointerReleased += OnOverlayReleased;
+        _overlay.PointerCaptureLost += OnOverlayCaptureLost;
         _focusTarget.KeyDown += OnPreviewKey;
         AutomationProperties.SetName(_focusTarget, "Page preview");
 
@@ -432,6 +446,7 @@ internal sealed partial class PagesSection
         UpdateUndo();
         _themeSwitch.Refresh();
         BuildTabs();
+        BuildPageList();
         BuildOverlay();
         BuildPane();
     }
@@ -609,6 +624,8 @@ internal sealed partial class PagesSection
         _overlay.Children.Clear();
         _overlay.Width = _page.Width;
         _overlay.Height = _page.Height;
+        _dragLayer.Width = _page.Width;
+        _dragLayer.Height = _page.Height;
         if (_preview.Session.Layout is not { } layout || _pageId == null)
             return;
 
@@ -710,12 +727,15 @@ internal sealed partial class PagesSection
             Canvas.SetLeft(label, rect.X * f - 3);
             Canvas.SetTop(label, Math.Max(0, rect.Y * f - 26));
             _overlay.Children.Add(label);
+            AddResizeHandle(layout, selection);
             AutomationProperties.SetName(_focusTarget, $"Page preview. {AccessibleName(selection.Ref)}");
         }
         else
         {
             AutomationProperties.SetName(_focusTarget, "Page preview. Nothing selected");
         }
+
+        AddDockAffordance(layout, f);
     }
 
     /// <summary>A widget's rectangle in surface units: its card on the page, or its slot in the dock.</summary>
@@ -762,7 +782,10 @@ internal sealed partial class PagesSection
     {
         _focusTarget.Focus(FocusState.Pointer);
         var point = e.GetCurrentPoint(_overlay).Position;
-        Select(HitTest(point.X / _factor, point.Y / _factor));
+        var hit = HitTest(point.X / _factor, point.Y / _factor);
+        Select(hit);
+        if (hit != null)
+            BeginPotentialDrag(hit, e);
         e.Handled = true;
     }
 
@@ -787,6 +810,7 @@ internal sealed partial class PagesSection
     {
         _selection = widget == null ? null : WidgetSelection.Of(Config, widget);
         _fit = null;
+        _arrangeMessage = null;
         _paletteOpen = false;
         BuildOverlay();
         BuildPane();
@@ -819,6 +843,20 @@ internal sealed partial class PagesSection
 
     private void OnPreviewKey(object sender, KeyRoutedEventArgs e)
     {
+        if (e.Key == VirtualKey.Escape && (_drag?.Active == true || _resize != null))
+        {
+            CancelDrag();
+            e.Handled = true;
+            return;
+        }
+
+        if (e.Key is VirtualKey.Left or VirtualKey.Right or VirtualKey.Up or VirtualKey.Down && IsCtrlDown())
+        {
+            NudgeSelected(e.Key);
+            e.Handled = true;
+            return;
+        }
+
         var all = SelectableWidgets();
         switch (e.Key)
         {
@@ -898,11 +936,12 @@ internal sealed partial class PagesSection
 
     // ---------------- actions ----------------
 
-    private void OpenPalette(Cell? at)
+    private void OpenPalette(Cell? at, bool dock = false)
     {
         if (!Editable)
             return;
         _paletteOpen = true;
+        _paletteDock = dock;
         _paletteAt = at;
         _paletteMessage = null;
         BuildPane();
@@ -912,10 +951,10 @@ internal sealed partial class PagesSection
     {
         if (_pageId == null)
             return;
-        var outcome = _editing.AddWidget(_pageId, typeId, CellGrid, _paletteAt);
+        var outcome = _paletteDock ? _editing.AddToDock(typeId) : _editing.AddWidget(_pageId, typeId, CellGrid, _paletteAt);
         if (!outcome.Applied)
         {
-            _paletteMessage = outcome.Message;
+            _paletteMessage = outcome.Message ?? (_paletteDock ? "The dock is full." : null);
             _paneKey = null;
             BuildPane();
             return;
