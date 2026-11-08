@@ -98,6 +98,43 @@ public sealed record FitProblem(string Size, string? Blocker, bool PastBottom, C
     }
 }
 
+/// <summary>What dropping a dragged widget at a cell would do.</summary>
+public enum DropKind
+{
+    /// <summary>The cells are free: the widget moves there.</summary>
+    Free,
+
+    /// <summary>One widget of the same size is there: the two exchange places.</summary>
+    Swap,
+
+    /// <summary>Something is in the way, or the widget would leave the grid: nothing happens.</summary>
+    Blocked,
+}
+
+/// <summary>The result of <see cref="PageEditing.DropTarget"/>.</summary>
+/// <param name="Kind">What a drop would do.</param>
+/// <param name="Cell">The cell the widget would take (its column clamped to the grid).</param>
+/// <param name="Other">The widget to swap with (<see cref="DropKind.Swap"/>).</param>
+/// <param name="Blocker">The display name of the widget in the way or to swap with; null when none is (past the bottom).</param>
+/// <param name="PastBottom">The widget would run past the bottom of the page.</param>
+public sealed record DropTarget(DropKind Kind, Cell Cell, WidgetRef? Other = null, string? Blocker = null, bool PastBottom = false)
+{
+    /// <summary>The text the editor shows while the pointer is over this target.</summary>
+    public string Message => Kind switch
+    {
+        DropKind.Free => "",
+        DropKind.Swap => $"Release to swap with {Blocker}",
+        _ => PastBottom ? "It would run past the bottom of the page" : $"{Blocker} is in the way",
+    };
+}
+
+/// <summary>One declared size of a widget as a resize stop: whether it fits where the widget is, and what is in the way if not.</summary>
+public sealed record ResizeStop(int Width, int Height, bool Fits, string? Blocker, bool PastBottom)
+{
+    /// <summary>"4x2".</summary>
+    public string Label => $"{Width}x{Height}";
+}
+
 /// <summary>What an editing operation did: the widget it made or changed, or why it did nothing.</summary>
 public sealed record EditOutcome(bool Applied, WidgetRef? Widget = null, FitProblem? Problem = null, string? Message = null, string? PageId = null)
 {
@@ -257,7 +294,8 @@ public sealed class PageEditing
 
     /// <summary>
     /// Adds a widget of <paramref name="typeId"/> with its default settings at its default size: at <paramref name="at"/> (its
-    /// column moved left as far as needed) when it fits there, else at the first free space. "Add Stats".
+    /// column moved left as far as needed) when it fits there, else at the first free space. When the default size has no room, the largest
+    /// declared size that fits is used. "Add Stats".
     /// </summary>
     public EditOutcome AddWidget(string pageId, string typeId, GridSize grid, Cell? at = null)
     {
@@ -266,19 +304,32 @@ public sealed class PageEditing
         if (page < 0 || _describe(typeId) is not { } descriptor)
             return EditOutcome.Nothing;
 
-        var size = WidgetDefaults.Size(descriptor);
         var widgets = config.Pages[page].Widgets;
+        var preferred = WidgetDefaults.Size(descriptor);
+        // The default size first, then the other declared sizes from the largest down: a page with only a 4x1 row left still takes a clock.
+        var sizes = new List<System.Drawing.Size> { preferred };
+        sizes.AddRange(descriptor.SupportedSizes.Where(z => z != preferred).OrderByDescending(z => z.Width * z.Height).ThenByDescending(z => z.Width));
+        System.Drawing.Size size = preferred;
         Cell? spot = null;
-        if (at is { } cell)
+        foreach (var candidate in sizes)
         {
-            int col = Math.Min(cell.Col, grid.Columns - size.Width);
-            if (Fits(widgets, null, col, cell.Row, size.Width, size.Height, grid))
-                spot = new Cell(col, cell.Row);
+            if (at is { } cell)
+            {
+                int col = Math.Min(cell.Col, grid.Columns - candidate.Width);
+                if (Fits(widgets, null, col, cell.Row, candidate.Width, candidate.Height, grid))
+                    spot = new Cell(col, cell.Row);
+            }
+
+            spot ??= FirstFree(widgets, candidate.Width, candidate.Height, grid);
+            if (spot != null)
+            {
+                size = candidate;
+                break;
+            }
         }
 
-        spot ??= FirstFree(widgets, size.Width, size.Height, grid);
         if (spot is not { } place)
-            return new EditOutcome(false, Message: $"This page has no free {size.Width}x{size.Height} space. Add a page, or remove a widget first.");
+            return new EditOutcome(false, Message: "This page has no free space for it. Add a page, or remove a widget first.");
 
         var node = WidgetDefaults.Node(descriptor, place.Col, place.Row, size);
         int index = widgets.Count;
@@ -328,6 +379,217 @@ public sealed class PageEditing
             return new EditOutcome(false, widget);
         bool applied = _document.Edit($"Move {TypeName(current)}", e => Place(e, $"/pages/{page}/widgets/{widget.Index}", cell.Col, cell.Row, w, h));
         return new EditOutcome(applied, widget);
+    }
+
+    /// <summary>
+    /// What dropping the page widget <paramref name="widget"/> with its top-left corner over <paramref name="cell"/> would do: its
+    /// column is moved left as far as needed to stay in the grid. Free when it fits; Swap when exactly one widget of its own size
+    /// is under it; otherwise Blocked, with the widget in the way or that it runs past the bottom.
+    /// </summary>
+    public DropTarget DropTarget(WidgetRef widget, Cell cell, GridSize grid)
+    {
+        var config = Config;
+        if (widget.InDock || Widget(config, widget) is not { } current)
+            return new DropTarget(DropKind.Blocked, cell);
+        var widgets = config.Pages[PageIndex(config, widget.PageId)].Widgets;
+        var (_, _, w, h) = Area(current);
+        var at = new Cell(Math.Clamp(cell.Col, 0, Math.Max(0, grid.Columns - w)), Math.Max(0, cell.Row));
+        if (at.Row + h > grid.Rows)
+            return new DropTarget(DropKind.Blocked, at, PastBottom: true);
+
+        var hit = new List<int>();
+        for (int i = 0; i < widgets.Count; i++)
+        {
+            if (i == widget.Index)
+                continue;
+            var (oc, or, ow, oh) = Area(widgets[i]);
+            if (at.Col < oc + ow && oc < at.Col + w && at.Row < or + oh && or < at.Row + h)
+                hit.Add(i);
+        }
+
+        if (hit.Count == 0)
+            return new DropTarget(DropKind.Free, at);
+        var (_, _, bw, bh) = Area(widgets[hit[0]]);
+        if (hit.Count == 1 && bw == w && bh == h)
+            return new DropTarget(DropKind.Swap, at, widget with { Index = hit[0] }, Describe(widgets[hit[0]]));
+        return new DropTarget(DropKind.Blocked, at, Blocker: Describe(widgets[hit[0]]));
+    }
+
+    /// <summary>Exchanges the places of two page widgets of the same size in one step: "Swap Stats and Weather".</summary>
+    public EditOutcome Swap(WidgetRef a, WidgetRef b)
+    {
+        var config = Config;
+        if (a.InDock || b.InDock || a.PageId != b.PageId || a.Index == b.Index
+            || Widget(config, a) is not { } first || Widget(config, b) is not { } second)
+            return EditOutcome.Nothing;
+        var (ac, ar, aw, ah) = Area(first);
+        var (bc, br, bw, bh) = Area(second);
+        if (aw != bw || ah != bh)
+            return EditOutcome.Nothing;
+        int page = PageIndex(config, a.PageId);
+        bool applied = _document.Edit($"Swap {TypeName(first)} and {TypeName(second)}", e =>
+        {
+            Place(e, $"/pages/{page}/widgets/{a.Index}", bc, br, aw, ah);
+            Place(e, $"/pages/{page}/widgets/{b.Index}", ac, ar, bw, bh);
+        });
+        return new EditOutcome(applied, a);
+    }
+
+    /// <summary>The widget's declared sizes as stops anchored at its top-left, each with whether it fits (as <see cref="Resize"/> places it).</summary>
+    public IReadOnlyList<ResizeStop> ResizeStops(WidgetRef widget, GridSize grid)
+    {
+        var config = Config;
+        if (widget.InDock || Widget(config, widget) is not { } current || _describe(current.WidgetTypeId) is not { } descriptor)
+            return [];
+        var widgets = config.Pages[PageIndex(config, widget.PageId)].Widgets;
+        var (col, row, _, _) = Area(current);
+        var stops = new List<ResizeStop>();
+        foreach (var size in descriptor.SupportedSizes)
+        {
+            int c = Math.Min(col, grid.Columns - size.Width);
+            bool past = row + size.Height > grid.Rows;
+            int blocker = past || c < 0 ? -1 : BlockerIndex(widgets, widget.Index, c, row, size.Width, size.Height);
+            stops.Add(new ResizeStop(size.Width, size.Height, !past && c >= 0 && blocker < 0, blocker >= 0 ? Describe(widgets[blocker]) : null, past));
+        }
+
+        return stops;
+    }
+
+    /// <summary>Whether the widget's type supports 1x1, the size of a dock slot.</summary>
+    public bool SupportsDock(WidgetConfig widget) => _describe(widget.WidgetTypeId)?.SupportedSizes.Contains(new System.Drawing.Size(1, 1)) == true;
+
+    /// <summary>
+    /// Moves the page widget into the dock at <paramref name="index"/> (clamped): removed from the page, its object kept as it is.
+    /// Nothing when the dock is full or the type has no 1x1. "Move Stats to the dock".
+    /// </summary>
+    public EditOutcome MoveToDock(WidgetRef widget, int index)
+    {
+        var config = Config;
+        if (widget.InDock || Widget(config, widget) is not { } current || !SupportsDock(current) || config.Dock.Count >= DockLayout.MaxSlots)
+            return EditOutcome.Nothing;
+        int page = PageIndex(config, widget.PageId);
+        if (_document.Root["pages"] is not JsonArray pages || pages[page]?["widgets"] is not JsonArray list || list[widget.Index] is not { } node)
+            return EditOutcome.Nothing;
+        int at = Math.Clamp(index, 0, config.Dock.Count);
+        var copy = node.DeepClone();
+        bool applied = _document.Edit($"Move {TypeName(current)} to the dock", e =>
+        {
+            e.Remove($"/pages/{page}/widgets/{widget.Index}");
+            if (e.Get("/dock") is not JsonArray)
+                e.Set("/dock", new JsonArray());
+            e.Insert("/dock", at, copy);
+        });
+        return applied ? new EditOutcome(true, WidgetRef.Dock(at)) : EditOutcome.Nothing;
+    }
+
+    /// <summary>Adds a widget of the type with its default settings at 1x1 as the dock's last slot; the type must support 1x1 and the dock have room. "Add Shortcut to the dock".</summary>
+    public EditOutcome AddToDock(string typeId)
+    {
+        var config = Config;
+        if (_describe(typeId) is not { } descriptor || !descriptor.SupportedSizes.Contains(new System.Drawing.Size(1, 1)) || config.Dock.Count >= DockLayout.MaxSlots)
+            return EditOutcome.Nothing;
+        var node = WidgetDefaults.Node(descriptor, 0, 0, new System.Drawing.Size(1, 1));
+        int index = config.Dock.Count;
+        bool applied = _document.Edit($"Add {descriptor.Name} to the dock", e =>
+        {
+            if (e.Get("/dock") is not JsonArray)
+                e.Set("/dock", new JsonArray());
+            e.Insert("/dock", index, node);
+        });
+        return applied ? new EditOutcome(true, WidgetRef.Dock(index)) : EditOutcome.Nothing;
+    }
+
+    /// <summary>Moves a dock slot to <paramref name="to"/> among the slots: "Move Shortcut earlier" / "later" / "in the dock".</summary>
+    public EditOutcome MoveInDock(int from, int to)
+    {
+        var config = Config;
+        if (from < 0 || from >= config.Dock.Count || to < 0 || to >= config.Dock.Count || from == to)
+            return EditOutcome.Nothing;
+        string where = Math.Abs(from - to) == 1 ? (to < from ? "earlier" : "later") : "in the dock";
+        bool applied = _document.Edit($"Move {TypeName(config.Dock[from])} {where}", e => e.Move("/dock", from, to));
+        return applied ? new EditOutcome(true, WidgetRef.Dock(to)) : EditOutcome.Nothing;
+    }
+
+    /// <summary>
+    /// Moves a dock slot onto the page <paramref name="pageId"/>: at <paramref name="cell"/> or, without one, the first free space.
+    /// It takes the size it had on the page when the type supports it and it fits, else 1x1. Nothing (with a message) when no
+    /// space fits. "Move Shortcut to the page".
+    /// </summary>
+    public EditOutcome MoveToPage(int slot, string pageId, GridSize grid, Cell? cell = null)
+    {
+        var config = Config;
+        int page = PageIndex(config, pageId);
+        if (page < 0 || slot < 0 || slot >= config.Dock.Count || _document.Root["dock"] is not JsonArray dock || dock[slot] is not { } node)
+            return EditOutcome.Nothing;
+        var current = config.Dock[slot];
+        var widgets = config.Pages[page].Widgets;
+        var one = new System.Drawing.Size(1, 1);
+        var kept = new System.Drawing.Size(current.Width, current.Height);
+        var sizes = kept != one && _describe(current.WidgetTypeId)?.SupportedSizes.Contains(kept) == true ? new[] { kept, one } : new[] { one };
+
+        Cell? spot = null;
+        var chosen = one;
+        foreach (var size in sizes)
+        {
+            if (cell is { } c)
+            {
+                int col = Math.Min(c.Col, grid.Columns - size.Width);
+                if (Fits(widgets, null, col, c.Row, size.Width, size.Height, grid))
+                    spot = new Cell(col, c.Row);
+            }
+            else
+            {
+                spot = FirstFree(widgets, size.Width, size.Height, grid);
+            }
+
+            if (spot != null)
+            {
+                chosen = size;
+                break;
+            }
+        }
+
+        if (spot is not { } place)
+            return new EditOutcome(false, Message: "There is no free space for it on this page.");
+        var copy = node.DeepClone();
+        int index = widgets.Count;
+        bool applied = _document.Edit($"Move {TypeName(current)} to the page", e =>
+        {
+            e.Remove($"/dock/{slot}");
+            if (e.Get($"/pages/{page}/widgets") is not JsonArray)
+                e.Set($"/pages/{page}/widgets", new JsonArray());
+            e.Insert($"/pages/{page}/widgets", index, copy);
+            Place(e, $"/pages/{page}/widgets/{index}", place.Col, place.Row, chosen.Width, chosen.Height);
+        });
+        return applied ? new EditOutcome(true, new WidgetRef(pageId, index)) : EditOutcome.Nothing;
+    }
+
+    /// <summary>
+    /// Moves a page widget to the first free space of the same size on another page, keeping its size and settings.
+    /// Nothing (with a message) when that page has no such space. "Move Stats to Other".
+    /// </summary>
+    public EditOutcome MoveWidgetToPage(WidgetRef widget, string targetPageId, GridSize grid)
+    {
+        var config = Config;
+        int from = PageIndex(config, widget.PageId);
+        int to = PageIndex(config, targetPageId);
+        if (widget.InDock || from < 0 || to < 0 || from == to || Widget(config, widget) is not { } current
+            || _document.Root["pages"] is not JsonArray pages || pages[from]?["widgets"] is not JsonArray list || list[widget.Index] is not { } node)
+            return EditOutcome.Nothing;
+        var target = config.Pages[to];
+        if (FirstFree(target.Widgets, current.Width, current.Height, grid) is not { } spot)
+            return new EditOutcome(false, Message: $"There is no free {current.Width}x{current.Height} space on {target.Name}.");
+        var copy = node.DeepClone();
+        int index = target.Widgets.Count;
+        bool applied = _document.Edit($"Move {TypeName(current)} to {target.Name}", e =>
+        {
+            e.Remove($"/pages/{from}/widgets/{widget.Index}");
+            if (e.Get($"/pages/{to}/widgets") is not JsonArray)
+                e.Set($"/pages/{to}/widgets", new JsonArray());
+            e.Insert($"/pages/{to}/widgets", index, copy);
+            Place(e, $"/pages/{to}/widgets/{index}", spot.Col, spot.Row, current.Width, current.Height);
+        });
+        return applied ? new EditOutcome(true, new WidgetRef(targetPageId, index)) : EditOutcome.Nothing;
     }
 
     /// <summary>Removes the widget, from its page or the dock: "Remove Stats".</summary>

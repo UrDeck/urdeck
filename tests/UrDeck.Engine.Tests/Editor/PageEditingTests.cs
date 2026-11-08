@@ -103,10 +103,10 @@ public class PageEditingTests
         var (document, editing) = Open(Main);
         string before = Json(document);
 
-        var outcome = editing.AddWidget("p-main", "urdeck.widgets.stats", new GridSize(4, 1));
+        var outcome = editing.AddWidget("p-main", "urdeck.widgets.weather", new GridSize(4, 1));
 
         Assert.False(outcome.Applied);
-        Assert.Contains("no free 2x2 space", outcome.Message);
+        Assert.Contains("no free space", outcome.Message);
         Assert.Equal(before, Json(document));
         Assert.False(document.History.CanUndo);
     }

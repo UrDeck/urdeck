@@ -19,8 +19,8 @@ internal sealed partial class PagesSection
     private void BuildPane()
     {
         var config = Config;
-        string key = _paletteOpen ? $"palette|{_paletteAt}|{_paletteMessage}"
-            : _selection is { } s ? $"widget|{s.Ref}|{s.Key}|{SizeOf(s.Ref)}|{_fit?.W}x{_fit?.H}|{Editable}"
+        string key = _paletteOpen ? $"palette|{_paletteAt}|{_paletteMessage}|{_paletteDock}"
+            : _selection is { } s ? $"widget|{s.Ref}|{s.Key}|{SizeOf(s.Ref)}|{_fit?.W}x{_fit?.H}|{Editable}|{config.Dock.Count}|{_arrangeMessage}"
             : $"page|{_pageId}|{config.Pages.Count}|{config.StartPage}|{config.Pager.Indicator}|{config.Dock.Count}|{PageEditing.PageIndex(config, _pageId)}|{Editable}";
         if (key == _paneKey)
         {
@@ -49,7 +49,7 @@ internal sealed partial class PagesSection
         var head = new Grid();
         head.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         head.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        head.Children.Add(new TextBlock { Text = "Add a widget", FontSize = 20, FontWeight = FontWeights.SemiBold });
+        head.Children.Add(new TextBlock { Text = _paletteDock ? "Add to the dock" : "Add a widget", FontSize = 20, FontWeight = FontWeights.SemiBold });
         var close = new Button { Content = new SymbolIcon(Symbol.Cancel) };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(close, "Close");
         close.Click += (_, _) => CloseTransient();
@@ -59,9 +59,13 @@ internal sealed partial class PagesSection
         if (_paletteMessage != null)
             panel.Children.Add(new InfoBar { Severity = InfoBarSeverity.Warning, IsOpen = true, IsClosable = false, Message = _paletteMessage });
 
+        if (_paletteDock)
+            panel.Children.Add(Sections.Caption("A dock slot is 1x1 and the same on every page, so only widgets with a 1x1 size are listed."));
         foreach (var type in _host.WidgetTypes)
         {
             var d = type.Descriptor;
+            if (_paletteDock && !d.SupportedSizes.Contains(new System.Drawing.Size(1, 1)))
+                continue;
             var text = new StackPanel { Spacing = 2 };
             text.Children.Add(new TextBlock { Text = d.Name, FontWeight = FontWeights.SemiBold });
             text.Children.Add(Sections.Caption(d.Description));
@@ -122,6 +126,9 @@ internal sealed partial class PagesSection
         }
 
         if (descriptor != null)
+            BuildArrangeEntries(panel, at, widget);
+
+        if (descriptor != null)
         {
             panel.Children.Add(Sections.Label("Settings"));
             if (descriptor.Settings.Settings.Count == 0)
@@ -148,6 +155,89 @@ internal sealed partial class PagesSection
         };
         remove.Click += (_, _) => RemoveSelected();
         panel.Children.Add(remove);
+    }
+
+    /// <summary>The menu equivalents of the drags (D4): to the dock and back, and along the dock.</summary>
+    private void BuildArrangeEntries(StackPanel panel, WidgetRef at, Sdk.WidgetConfig widget)
+    {
+        var config = Config;
+        panel.Children.Add(Sections.Label("Arrange"));
+        var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+        if (at.InDock)
+        {
+            var toPage = new Button { Content = "Move to the page", IsEnabled = Editable && _pageId != null };
+            toPage.Click += (_, _) => ArrangeResult(_editing.MoveToPage(at.Index, _pageId!, CellGrid));
+            var earlier = new Button { Content = "Move earlier", IsEnabled = Editable && at.Index > 0 };
+            earlier.Click += (_, _) => ArrangeResult(_editing.MoveInDock(at.Index, at.Index - 1));
+            var later = new Button { Content = "Move later", IsEnabled = Editable && at.Index < config.Dock.Count - 1 };
+            later.Click += (_, _) => ArrangeResult(_editing.MoveInDock(at.Index, at.Index + 1));
+            row.Children.Add(toPage);
+            row.Children.Add(earlier);
+            row.Children.Add(later);
+        }
+        else
+        {
+            bool supports = _editing.SupportsDock(widget);
+            bool room = config.Dock.Count < DockLayout.MaxSlots;
+            var toDock = new Button { Content = "Move to the dock", IsEnabled = Editable && supports && room };
+            toDock.Click += (_, _) => ArrangeResult(_editing.MoveToDock(at, config.Dock.Count));
+            row.Children.Add(toDock);
+            var others = config.Pages.Where(p => p.Id is not null && p.Id != at.PageId).ToList();
+            var toPage = new DropDownButton { Content = "Move to page", IsEnabled = Editable && others.Count > 0 };
+            var menu = new MenuFlyout();
+            foreach (var page in others)
+            {
+                string id = page.Id!;
+                var item = new MenuFlyoutItem { Text = page.Name };
+                item.Click += (_, _) => MoveToOtherPage(at, id);
+                menu.Items.Add(item);
+            }
+
+            toPage.Flyout = menu;
+            row.Children.Add(toPage);
+        }
+
+        panel.Children.Add(row);
+        if (!at.InDock && !_editing.SupportsDock(widget))
+            panel.Children.Add(Sections.Caption("This widget has no 1x1 size, so it cannot go in the dock."));
+        else if (!at.InDock && config.Dock.Count >= DockLayout.MaxSlots)
+            panel.Children.Add(Sections.Caption("The dock is full."));
+        if (_arrangeMessage != null)
+            panel.Children.Add(new InfoBar { Severity = InfoBarSeverity.Warning, IsOpen = true, IsClosable = false, Message = _arrangeMessage });
+        panel.Children.Add(Sections.Caption("You can also drag a card, or hold Ctrl and press an arrow key."));
+    }
+
+    // The editor follows the widget to its new page and selects it there.
+    private void MoveToOtherPage(WidgetRef at, string pageId)
+    {
+        var outcome = _editing.MoveWidgetToPage(at, pageId, CellGrid);
+        if (outcome.Applied && outcome.Widget != null)
+        {
+            _arrangeMessage = null;
+            SelectPage(pageId);
+            _selection = WidgetSelection.Of(Config, outcome.Widget);
+            Refresh();
+        }
+        else
+        {
+            ArrangeResult(outcome);
+        }
+    }
+
+    private void ArrangeResult(EditOutcome outcome)
+    {
+        if (outcome.Applied && outcome.Widget != null)
+        {
+            _selection = WidgetSelection.Of(Config, outcome.Widget);
+            _arrangeMessage = null;
+            Refresh();
+        }
+        else
+        {
+            _arrangeMessage = outcome.Message ?? "That does not fit there.";
+            _paneKey = null;
+            BuildPane();
+        }
     }
 
     /// <summary>The widget's object in the configuration document (<c>/pages/0/widgets/3</c>, <c>/dock/1</c>).</summary>
@@ -260,6 +350,9 @@ internal sealed partial class PagesSection
 
         panel.Children.Add(Sections.Label("Dock"));
         panel.Children.Add(new TextBlock { Text = $"{Math.Min(config.Dock.Count, DockLayout.MaxSlots)} of {DockLayout.MaxSlots} slots" });
+        var addToDock = new Button { Content = "Add to the dock…", IsEnabled = Editable && config.Dock.Count < DockLayout.MaxSlots };
+        addToDock.Click += (_, _) => OpenPalette(null, dock: true);
+        panel.Children.Add(addToDock);
 
         var duplicate = new Button { Content = "Duplicate this page", IsEnabled = Editable, Margin = new Thickness(0, 8, 0, 0) };
         duplicate.Click += (_, _) =>
