@@ -20,6 +20,24 @@ The place to look is `urdeck.log` in the data folder (**Open data folder** in th
 - With the monitor the deck remembers (`display`) not connected, there is no window at all, only the tray icon. Remove `display`
   from the file, or choose **Choose automatically** in Settings. See [the monitor](/docs/#the-monitor).
 
+## A widget the editor cannot show
+
+The editor never changes a widget it does not understand: the widget's settings stay in the file untouched, and the only thing it
+can do to it is **Remove** it as a whole (which **Undo** takes back). In the Pages section the widget is a dashed placeholder where it
+sits on the page (or in the dock), and selecting it explains why.
+
+- **"Focus timer did not load".** A plugin that provided this widget before is still in the plugin folders but failed to start, was built
+  against another version of UrDeck, or no longer offers the widget. The pane names the plugin file and the reason, and **Show in
+  the log** opens `urdeck.log`, where the same reason is written once. Fix or replace the plugin file; UrDeck loads it again by
+  itself and the widget returns with its settings. The deck leaves the space empty meanwhile.
+- **"acme.widgets.ticker is not installed".** No plugin provides this widget type: it was never installed, or its plugin file was
+  removed (the pane then names the file that provided it). The pane shows the widget's settings as read-only text. Install the plugin
+  and the widget returns, or Remove it.
+- **"3x1 is not a Stats size".** A widget placed at a size its type does not declare. The deck draws it anyway; the editor marks it
+  with a badge, lists the sizes the widget comes in, and offers the nearest ones that fit as buttons. Nothing changes until you press one.
+- **"Two widgets overlap" or "is outside the page".** A hand-edited file placed widgets on the same cells or beyond the grid. The editor
+  names them above the preview and offers **Move it to the first free space**.
+
 ## A theme
 
 - **A value is ignored.** The log has one warning naming the theme, the key and the value, and the default is used instead:

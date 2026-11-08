@@ -177,6 +177,7 @@ internal sealed partial class PagesSection
         bars.Children.Add(_outsideBar);
         bars.Children.Add(_invalidBar);
         bars.Children.Add(_newerBar);
+        bars.Children.Add(_placementBars);
         Grid.SetRow(bars, 1);
         _root.Children.Add(bars);
 
@@ -447,6 +448,7 @@ internal sealed partial class PagesSection
         _themeSwitch.Refresh();
         BuildTabs();
         BuildPageList();
+        UpdatePlacementBars();
         BuildOverlay();
         BuildPane();
     }
@@ -675,32 +677,13 @@ internal sealed partial class PagesSection
             }
         }
 
-        // A widget whose type is not installed is drawn by nobody: an outlined empty card says it is there.
-        if (CurrentPage is { } current)
-        {
-            for (int i = 0; i < current.Layout.Count && i < widgets.Count; i++)
-            {
-                var item = current.Layout[i];
-                if (!item.Placed || _host.DescribeWidget(widgets[i].WidgetTypeId) != null)
-                    continue;
-                var box = new Rectangle
-                {
-                    Width = item.Size.Width * f,
-                    Height = item.Size.Height * f,
-                    Stroke = new SolidColorBrush(ColorHelper.FromArgb(160, 255, 255, 255)),
-                    StrokeDashArray = [4, 3],
-                    StrokeThickness = 1.5,
-                    RadiusX = 6,
-                    RadiusY = 6,
-                    IsHitTestVisible = false,
-                };
-                Canvas.SetLeft(box, item.Position.X * f);
-                Canvas.SetTop(box, item.Position.Y * f);
-                _overlay.Children.Add(box);
-            }
-        }
+        // A widget drawn by nobody (its plugin did not load, or is not installed) is a placeholder; a size its type does not declare is badged.
+        AddStateCards(f, grid);
+        AddSizeBadges(f, cell);
+        UpdatePlacementBars();
+        UpdateEmptyTip(widgets.Count, grid, cell);
 
-        if (_selection is { } selection && RectOf(layout, selection.Ref) is { } rect)
+        if (_selection is { } selection && RectOf(selection.Ref) is { } rect)
         {
             var outline = new Rectangle
             {
@@ -757,6 +740,8 @@ internal sealed partial class PagesSection
         // Not drawn (its type is not installed): where the layout put it.
         if (!widget.InDock && CurrentPage is { } page && widget.Index < page.Layout.Count && page.Layout[widget.Index].Placed)
             return new System.Drawing.Rectangle(page.Layout[widget.Index].Position, page.Layout[widget.Index].Size);
+        if (widget.InDock && _preview.Session.Pager.Dock is { } dock && widget.Index < dock.Layout.Count && _host.ClassifyWidget(PageEditing.Widget(Config, widget)?.WidgetTypeId ?? "") != null)
+            return new System.Drawing.Rectangle(dock.Layout[widget.Index].Position, dock.Layout[widget.Index].Size);
         return null;
     }
 
@@ -798,7 +783,16 @@ internal sealed partial class PagesSection
         {
             var card = layout.Dock.FirstOrDefault(c => c.Item.Position.X <= x && x < c.Item.Position.X + c.Item.Size.Width
                 && c.Item.Position.Y <= y && y < c.Item.Position.Y + c.Item.Size.Height);
-            return card == null ? null : WidgetRef.Dock(card.Index);
+            if (card != null)
+                return WidgetRef.Dock(card.Index);
+            // A slot with a placeholder (its plugin did not load, or is not installed) can be selected too.
+            foreach (var (widget, _, _, rect) in UnavailableWidgets())
+            {
+                if (widget.InDock && rect.X <= x && x < rect.Right && rect.Y <= y && y < rect.Bottom)
+                    return widget;
+            }
+
+            return null;
         }
 
         if (CurrentPage is { } page && WidgetHitTest.Find(page.Layout, x, y) is { } hit)
@@ -1020,6 +1014,7 @@ internal sealed partial class PagesSection
     public void Close()
     {
         _themeSwitch.Close();
+        CloseStates();
         _form?.Dispose();
         _form = null;
         _host.Document.Changed -= OnDocumentChanged;

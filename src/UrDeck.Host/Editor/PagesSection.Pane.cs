@@ -20,7 +20,7 @@ internal sealed partial class PagesSection
     {
         var config = Config;
         string key = _paletteOpen ? $"palette|{_paletteAt}|{_paletteMessage}|{_paletteDock}"
-            : _selection is { } s ? $"widget|{s.Ref}|{s.Key}|{SizeOf(s.Ref)}|{_fit?.W}x{_fit?.H}|{Editable}|{config.Dock.Count}|{_arrangeMessage}"
+            : _selection is { } s ? $"widget|{s.Ref}|{s.Key}|{SizeOf(s.Ref)}|{PlacementKey(s.Ref)}|{_host.ClassifyWidget(PageEditing.Widget(config, s.Ref)?.WidgetTypeId ?? "")?.Kind}|{_fit?.W}x{_fit?.H}|{Editable}|{config.Dock.Count}|{_arrangeMessage}"
             : $"page|{_pageId}|{config.Pages.Count}|{config.StartPage}|{config.Pager.Indicator}|{config.Dock.Count}|{PageEditing.PageIndex(config, _pageId)}|{Editable}";
         if (key == _paneKey)
         {
@@ -84,7 +84,13 @@ internal sealed partial class PagesSection
     private void BuildWidgetPane(StackPanel panel, WidgetRef at, Sdk.WidgetConfig widget)
     {
         var descriptor = _host.DescribeWidget(widget.WidgetTypeId);
-        panel.Children.Add(new TextBlock { Text = descriptor?.Name ?? "Not installed", FontSize = 20, FontWeight = FontWeights.SemiBold });
+        if (descriptor == null)
+        {
+            BuildUnavailablePane(panel, at, widget);
+            return;
+        }
+
+        panel.Children.Add(new TextBlock { Text = descriptor.Name, FontSize = 20, FontWeight = FontWeights.SemiBold });
         panel.Children.Add(new TextBlock { Text = widget.WidgetTypeId, FontFamily = new FontFamily("Consolas"), FontSize = 12, Opacity = 0.7 });
         if (descriptor != null && at.InDock)
             panel.Children.Add(Sections.Caption("In the dock: the same on every page, drawn smaller, always 1x1."));
@@ -101,6 +107,8 @@ internal sealed partial class PagesSection
             }
 
             panel.Children.Add(sizes);
+            if (UndeclaredSizeOf(at) is { } undeclared)
+                AddUndeclaredSizeBar(panel, at, undeclared);
             if (_fit is { } fit && fit.Widget == at)
             {
                 var bar = new InfoBar { Severity = InfoBarSeverity.Warning, IsOpen = true, IsClosable = false, Title = fit.Problem.Title, Message = fit.Problem.Message };

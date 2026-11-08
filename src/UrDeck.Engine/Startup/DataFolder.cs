@@ -65,6 +65,9 @@ public sealed class DataFolder
     /// <summary>The descriptions of the readings the pages use (<c>ReadingDescriptionCache</c>).</summary>
     public string ReadingCachePath => Path.Combine(Root, "cache", "readings.json");
 
+    /// <summary>The widget types plugins have provided (<c>WidgetTypeMemory</c>).</summary>
+    public string WidgetTypeMemoryPath => Path.Combine(Root, "cache", "widget-types.json");
+
     /// <summary>Where the migration backup of a configuration version is kept.</summary>
     public string BackupPath(int fromVersion) => Path.Combine(Root, $"urdeck-config.v{fromVersion}.json");
 

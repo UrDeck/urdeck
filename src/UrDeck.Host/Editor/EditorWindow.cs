@@ -174,6 +174,30 @@ internal sealed class EditorWindow : Window
         UrDeckLog.Info($"Settings window size after showing: {AppWindow.Size.Width}x{AppWindow.Size.Height} at {AppWindow.Position.X},{AppWindow.Position.Y}");
     }
 
+    /// <summary>
+    /// The first run: once the window is up, offers the welcome. "Start with an empty page" is one transaction (one Undo);
+    /// dismissing the dialog keeps the sample page.
+    /// </summary>
+    public void ShowWelcome()
+    {
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, async () =>
+        {
+            if (_closed || Content.XamlRoot is not { } root)
+                return;
+            try
+            {
+                var choice = await WelcomeDialog.ShowAsync(root, _host, DispatcherQueue);
+                UrDeckLog.Info($"Welcome: {(choice == WelcomeChoice.Empty ? "start with an empty page" : "keep the sample page")}");
+                if (choice == WelcomeChoice.Empty && !_closed)
+                    _editing.StartWithEmptyPage();
+            }
+            catch (Exception ex)
+            {
+                UrDeckLog.Warn($"Welcome dialog failed: {ex.Message}");
+            }
+        });
+    }
+
     /// <summary>The window is already open: restore it if it was minimised, bring it to the front and give it focus.</summary>
     public void BringForward()
     {

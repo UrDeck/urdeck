@@ -108,6 +108,26 @@ public sealed class ConfigStoreDocumentTests : IDisposable
     }
 
     [Fact]
+    public void CreatedOnFirstRun_IsTrueForANewFile_AndFalseForAnExistingOne()
+    {
+        using (var first = new ConfigStore(ConfigPath, null, true, ConfigStore.CurrentVersion, [], _time, action => action()))
+        {
+            Assert.True(first.CreatedOnFirstRun);
+            Assert.True(File.Exists(ConfigPath));
+        }
+
+        using var second = new ConfigStore(ConfigPath, null, true, ConfigStore.CurrentVersion, [], _time, action => action());
+        Assert.False(second.CreatedOnFirstRun);
+    }
+
+    [Fact]
+    public void CreatedOnFirstRun_IsFalseInAReadOnlyDocument()
+    {
+        using var store = new ConfigStore(ConfigPath, null, createIfMissing: false);
+        Assert.False(store.CreatedOnFirstRun);
+    }
+
+    [Fact]
     public void ADocumentOpenedWithoutCreating_IsReadOnly_AndWritesNothing()
     {
         using var store = new ConfigStore(ConfigPath, null, createIfMissing: false);

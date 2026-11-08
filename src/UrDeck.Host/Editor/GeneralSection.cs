@@ -80,7 +80,7 @@ internal sealed class GeneralSection
         }
     }
 
-    private static void Start(string file, string? arguments)
+    internal static void Start(string file, string? arguments)
     {
         try
         {

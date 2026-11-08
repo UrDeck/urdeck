@@ -141,6 +141,37 @@ public sealed record EditOutcome(bool Applied, WidgetRef? Widget = null, FitProb
     public static readonly EditOutcome Nothing = new(false);
 }
 
+public enum PlacementIssueKind
+{
+    /// <summary>The widget's size is not one its type declares.</summary>
+    UndeclaredSize,
+
+    /// <summary>The widget lies on cells an earlier widget of the page takes.</summary>
+    Overlap,
+
+    /// <summary>The widget lies partly or wholly outside the page's grid.</summary>
+    OffGrid,
+}
+
+/// <summary>A declared size offered for a widget at <see cref="At"/>; <see cref="Moves"/> when that is not where the widget is.</summary>
+public sealed record SizeSuggestion(int Width, int Height, Cell At, bool Moves)
+{
+    public string Label => $"{Width}x{Height}";
+}
+
+/// <summary>
+/// One thing wrong with a widget's placement: <paramref name="Index"/> is the widget (the later one of an overlap, which
+/// is also the one to move), <paramref name="OtherIndex"/> the earlier one it overlaps.
+/// </summary>
+public sealed record PlacementIssue(
+    PlacementIssueKind Kind,
+    int Index,
+    int? OtherIndex,
+    string Message,
+    string Size,
+    IReadOnlyList<string> DeclaredSizes,
+    IReadOnlyList<SizeSuggestion> Suggestions);
+
 /// <summary>
 /// The editor's operations on the configuration: each is one transaction of the document (one undo step, labelled as the
 /// editor's Undo says it), written behind and applied to the deck. They never place a widget where it does not fit and never
@@ -415,6 +446,81 @@ public sealed class PageEditing
         return new DropTarget(DropKind.Blocked, at, Blocker: Describe(widgets[hit[0]]));
     }
 
+    /// <summary>
+    /// What is wrong with the placement of the widgets of a page (a hand-edited file can hold all of it), ordered by row then
+    /// column: a widget at a size its type does not declare (installed types only), two widgets on the same cells (reported on
+    /// the later one) and a widget outside the grid. Nothing is changed.
+    /// </summary>
+    public IReadOnlyList<PlacementIssue> PlacementIssues(IReadOnlyList<WidgetConfig> widgets, GridSize grid)
+    {
+        var issues = new List<PlacementIssue>();
+        for (int i = 0; i < widgets.Count; i++)
+        {
+            var widget = widgets[i];
+            var (col, row, w, h) = Area(widget);
+            if (widget.Col < 0 || widget.Row < 0 || widget.Width > grid.Columns || widget.Col + widget.Width > grid.Columns || widget.Row + widget.Height > grid.Rows)
+                issues.Add(new PlacementIssue(PlacementIssueKind.OffGrid, i, null, $"{Describe(widget)} is outside the page.", $"{widget.Width}x{widget.Height}", [], []));
+
+            for (int j = 0; j < i; j++)
+            {
+                var (oc, or, ow, oh) = Area(widgets[j]);
+                if (col < oc + ow && oc < col + w && row < or + oh && or < row + h)
+                    issues.Add(new PlacementIssue(PlacementIssueKind.Overlap, i, j, $"Two widgets overlap: {Describe(widgets[j])} and {Describe(widget)}.", $"{w}x{h}", [], []));
+            }
+
+            if (_describe(widget.WidgetTypeId) is { } descriptor && !descriptor.SupportedSizes.Contains(new System.Drawing.Size(w, h)))
+            {
+                string declared = string.Join(", ", descriptor.SupportedSizes.Select(s => $"{s.Width}x{s.Height}"));
+                issues.Add(new PlacementIssue(PlacementIssueKind.UndeclaredSize, i, null,
+                    $"{w}x{h} is not a {descriptor.Name} size. {descriptor.Name} comes in {declared}. Nothing changes until you choose.",
+                    $"{w}x{h}", [.. descriptor.SupportedSizes.Select(s => $"{s.Width}x{s.Height}")], NearestSizes(widgets, i, descriptor, grid)));
+            }
+        }
+
+        return [.. issues.OrderBy(x => Area(widgets[x.Index]).Row).ThenBy(x => Area(widgets[x.Index]).Col).ThenBy(x => x.Index)];
+    }
+
+    // Up to two declared sizes that fit where the widget is, nearest first (difference in cell count, then the same width); when none fits, the nearest that fits at the first free space.
+    private static List<SizeSuggestion> NearestSizes(IReadOnlyList<WidgetConfig> widgets, int index, WidgetDescriptor descriptor, GridSize grid)
+    {
+        var (col, row, w, h) = Area(widgets[index]);
+        var ordered = descriptor.SupportedSizes
+            .OrderBy(s => Math.Abs(s.Width * s.Height - w * h))
+            .ThenBy(s => Math.Abs(s.Width - w))
+            .ThenBy(s => s.Width)
+            .ThenBy(s => s.Height)
+            .ToList();
+        var here = ordered
+            .Select(s => (Size: s, Col: Math.Min(col, grid.Columns - s.Width)))
+            .Where(s => s.Col >= 0 && Fits(widgets, index, s.Col, row, s.Size.Width, s.Size.Height, grid))
+            .Take(2)
+            .Select(s => new SizeSuggestion(s.Size.Width, s.Size.Height, new Cell(s.Col, row), Moves: false))
+            .ToList();
+        if (here.Count > 0)
+            return here;
+        foreach (var size in ordered)
+        {
+            if (FirstFree(widgets, size.Width, size.Height, grid, index) is { } free)
+                return [new SizeSuggestion(size.Width, size.Height, free, Moves: true)];
+        }
+
+        return [];
+    }
+
+    /// <summary>
+    /// Moves a page widget to the first free space for its size, as one step: "Move Stats". Nothing changes when the grid has no
+    /// room for it.
+    /// </summary>
+    public EditOutcome MoveToFirstFree(WidgetRef widget, GridSize grid)
+    {
+        var config = Config;
+        if (widget.InDock || Widget(config, widget) is not { } current)
+            return EditOutcome.Nothing;
+        var widgets = config.Pages[PageIndex(config, widget.PageId)].Widgets;
+        var (_, _, w, h) = Area(current);
+        return FirstFree(widgets, w, h, grid, widget.Index) is { } free ? MoveTo(widget, free, w, h, grid) : EditOutcome.Nothing;
+    }
+
     /// <summary>Exchanges the places of two page widgets of the same size in one step: "Swap Stats and Weather".</summary>
     public EditOutcome Swap(WidgetRef a, WidgetRef b)
     {
@@ -629,6 +735,22 @@ public sealed class PageEditing
         string id = PageIds.New(TakenIds(config));
         var node = new JsonObject { ["id"] = id, ["name"] = $"Page {n}", ["widgets"] = new JsonArray() };
         bool applied = _document.Edit("Add a page", e => InsertPage(e, at, node));
+        return new EditOutcome(applied, PageId: applied ? id : null);
+    }
+
+    /// <summary>
+    /// The first run's "Start with an empty page": the pages become one empty page called Main, the start page, and the dock
+    /// is emptied, as one undo step (back to what was there).
+    /// </summary>
+    public EditOutcome StartWithEmptyPage()
+    {
+        string id = PageIds.New(new HashSet<string>(StringComparer.Ordinal));
+        bool applied = _document.Edit("Start with an empty page", e =>
+        {
+            e.Set("/pages", new JsonArray(new JsonObject { ["id"] = id, ["name"] = "Main", ["widgets"] = new JsonArray() }));
+            e.Set("/startPage", id);
+            e.Set("/dock", new JsonArray());
+        });
         return new EditOutcome(applied, PageId: applied ? id : null);
     }
 
