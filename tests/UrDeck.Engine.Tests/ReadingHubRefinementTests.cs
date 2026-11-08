@@ -77,6 +77,20 @@ public sealed class ReadingHubRefinementTests : IDisposable
     }
 
     [Fact]
+    public void ALease_CountsAsDemandUntilItIsDisposed_AndDisposingTwiceReleasesOnce()
+    {
+        var first = Hub.Lease(["fake:a"]);
+        var second = Hub.Lease(["fake:a", "fake:b"]);
+        Assert.True(Wait(() => Provider.Demand.SequenceEqual(["a", "b"])));
+
+        second.Dispose();
+        second.Dispose();
+        Assert.True(Wait(() => Provider.Demand.SequenceEqual(["a"])));
+        // Two disposals of the second lease released its readings once: the first lease still holds "a".
+        first.Dispose();
+    }
+
+    [Fact]
     public void AnInterruption_MakesAReadingWithAValueStale_AndOneWithoutUnavailableWithTheReason()
     {
         Hub.Subscribe(["fake:a", "fake:b"]);

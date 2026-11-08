@@ -87,6 +87,12 @@ internal interface ISettingsHost
     /// <summary>The host's readings: actions and suggestions come from its providers, as the deck's own widgets use them.</summary>
     Engine.Data.ReadingHub Readings { get; }
 
+    /// <summary>The loaded providers, for the reading picker and the Readings section.</summary>
+    IReadOnlyCollection<Engine.Data.ProviderDescriptor> ProviderDescriptors { get; }
+
+    /// <summary>The descriptions of the readings the pages use, kept for when a provider cannot list its readings.</summary>
+    Engine.Editor.ReadingDescriptionCache ReadingCache { get; }
+
     /// <summary>The installed widget types, by name.</summary>
     IReadOnlyList<WidgetTypeInfo> WidgetTypes { get; }
 

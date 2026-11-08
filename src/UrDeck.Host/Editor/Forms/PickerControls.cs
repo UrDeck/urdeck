@@ -52,10 +52,29 @@ internal sealed partial class FormBuilder
         content.Children.Add(value);
         var button = new Button { Content = content, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Stretch };
 
+        // A reading whose provider is missing a required setting says so above the button (reading-picker D5).
+        var bar = new InfoBar
+        {
+            Severity = InfoBarSeverity.Warning,
+            IsOpen = true,
+            IsClosable = false,
+            Visibility = Visibility.Collapsed,
+            Title = "This reading's provider is not set up.",
+            Message = "Until then this widget shows \"Set up\" on the deck.",
+        };
+        string barProvider = "";
+        if (scope.Context.SetUpProvider is { } setUp)
+        {
+            var setUpButton = new Button { Content = "Set up" };
+            setUpButton.Click += (_, _) => setUp(barProvider);
+            bar.ActionButton = setUpButton;
+        }
+
         var readings = scope.Context.Readings;
         void Show()
         {
             string current = scope.Current() as string ?? "";
+            bar.Visibility = Visibility.Collapsed;
             if (current.Length == 0)
             {
                 name.Text = "Choose a reading…";
@@ -63,6 +82,12 @@ internal sealed partial class FormBuilder
                 value.Text = "";
                 id.Visibility = Visibility.Collapsed;
                 return;
+            }
+
+            if (UrDeck.Engine.Data.ReadingId.TryParse(current, out string provider, out _, out _) && readings.ProviderNeedsSetup(provider))
+            {
+                barProvider = provider;
+                bar.Visibility = Visibility.Visible;
             }
 
             name.Text = readings.Describe(current)?.Label ?? current;
@@ -84,7 +109,10 @@ internal sealed partial class FormBuilder
             watcher.Set(scope.Current() as string);
             Show();
         });
-        return button;
+        var column = new StackPanel { Spacing = 6 };
+        column.Children.Add(bar);
+        column.Children.Add(button);
+        return column;
     }
 
     private static UIElement ActionControl(RowScope scope)

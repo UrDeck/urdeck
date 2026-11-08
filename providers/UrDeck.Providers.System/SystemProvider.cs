@@ -13,7 +13,7 @@ namespace UrDeck.Providers.Machine;
 /// </summary>
 [SupportedOSPlatform("windows")]
 [DataProvider("system", "System", DefaultIntervalMs = 2000, MinIntervalMs = 250)]
-public sealed class SystemProvider : DataProvider<ProviderSettings>
+public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBrowser
 {
     /// <summary>What the subscribers want; replaced whole so a sample reads a consistent set.</summary>
     private sealed record Demand(bool Total, bool[] Cores, string[] MissingCores, bool Memory, GpuWant[] Gpu, string[] MissingGpu)
@@ -54,6 +54,25 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>
         _gpu.Describe(catalog);
         return catalog;
     }
+
+    /// <summary>
+    /// The concrete readings of this machine (provider-system spec, "Listing System Readings"): what the catalog holds, without the
+    /// main-GPU aliases that repeat the first adapter's, each with its category. Reads the device enumeration only; nothing is sampled.
+    /// </summary>
+    public Task<IReadOnlyList<ReadingDescriptor>> BrowseAsync(CancellationToken cancellationToken)
+    {
+        var listed = Describe()
+            .Where(d => !(GpuReadings.TryParse(d.Path, out _, out _, out bool alias) && alias))
+            .Select(d => d with { Category = CategoryOf(d.Path) })
+            .ToList();
+        return Task.FromResult<IReadOnlyList<ReadingDescriptor>>(listed);
+    }
+
+    private static string? CategoryOf(string path) =>
+        path.StartsWith("cpu/", StringComparison.Ordinal) ? "CPU"
+        : path.StartsWith("memory/", StringComparison.Ordinal) ? "Memory"
+        : path.StartsWith("gpu/", StringComparison.Ordinal) ? "GPU"
+        : null;
 
     public override void Start(IReadingSink sink, ProviderSettings settings)
     {

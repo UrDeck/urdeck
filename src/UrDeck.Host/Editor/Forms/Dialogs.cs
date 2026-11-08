@@ -117,15 +117,19 @@ internal static class AppPicker
 }
 
 /// <summary>
-/// The minimal reading chooser (editor-forms D10): type an id, see what it is and its value. The reading picker replaces it.
+/// The "type an id by hand" dialog (editor-forms D10, reading-picker D6): type an id, see what it is and its value. The reading
+/// picker opens it from its footer, or for a template with the pattern filled in; a form with no picker uses it directly.
 /// </summary>
 internal sealed class ReadingChooserDialog(Func<XamlRoot?> root, IEditorReadings readings) : IReadingChooser
 {
-    public async Task<string?> ChooseAsync(ReadingSpec? filter, string? current)
+    public Task<string?> ChooseAsync(ReadingSpec? filter, string? current) => ChooseTypedAsync(filter, current ?? "", selectPlaceholder: false);
+
+    /// <summary>Asks for an id typed by hand, starting from <paramref name="initial"/>; with <paramref name="selectPlaceholder"/> the first <c>{name}</c> in it is selected.</summary>
+    public async Task<string?> ChooseTypedAsync(ReadingSpec? filter, string initial, bool selectPlaceholder)
     {
         if (root() is not { } xamlRoot)
             return null;
-        var id = new TextBox { Text = current ?? "", PlaceholderText = "provider:path, for example system:cpu/load" };
+        var id = new TextBox { Text = initial, PlaceholderText = "provider:path, for example system:cpu/load" };
         var info = new TextBlock { TextWrapping = TextWrapping.Wrap };
         var content = new StackPanel { Spacing = 8, Width = 380 };
         content.Children.Add(id);
@@ -150,6 +154,13 @@ internal sealed class ReadingChooserDialog(Func<XamlRoot?> root, IEditorReadings
             {
                 info.Text = text.Length == 0 ? "" : problem ?? "";
                 dialog.IsPrimaryButtonEnabled = text.Length == 0;
+                return;
+            }
+
+            if (text.Contains('{', StringComparison.Ordinal))
+            {
+                info.Text = "Replace the {…} part with the name or number you mean.";
+                dialog.IsPrimaryButtonEnabled = false;
                 return;
             }
 
@@ -184,6 +195,16 @@ internal sealed class ReadingChooserDialog(Func<XamlRoot?> root, IEditorReadings
         };
         watcher.Set(id.Text.Trim());
         Check();
+        dialog.Opened += (_, _) =>
+        {
+            id.Focus(FocusState.Programmatic);
+            int open = id.Text.IndexOf('{', StringComparison.Ordinal);
+            int close = id.Text.IndexOf('}', StringComparison.Ordinal);
+            if (selectPlaceholder && open >= 0 && close > open)
+                id.Select(open, close - open + 1);
+            else
+                id.SelectionStart = id.Text.Length;
+        };
         try
         {
             var result = await dialog.ShowAsync();

@@ -175,6 +175,28 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, Deck.ID
             StartManual(rt);
     }
 
+    /// <summary>
+    /// Subscribes to the readings for someone who is not a shown widget (the editor's picker): the readings count as demand, so their
+    /// providers start and linger by the normal rules, until the lease is disposed. Disposing again does nothing.
+    /// </summary>
+    public IDisposable Lease(IEnumerable<string> ids)
+    {
+        string[] leased = [.. ids];
+        Subscribe(leased);
+        return new ReadingLease(this, leased);
+    }
+
+    private sealed class ReadingLease(ReadingHub hub, string[] ids) : IDisposable
+    {
+        private int _released;
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _released, 1) == 0)
+                hub.Unsubscribe(ids);
+        }
+    }
+
     /// <summary>Counts one subscriber less for each id; an id nobody is subscribed to is ignored.</summary>
     public void Unsubscribe(IEnumerable<string> ids)
     {

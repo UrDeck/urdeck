@@ -32,6 +32,16 @@ internal sealed class FakeHomeAssistant : IHomeAssistantClients
     /// <summary>Thrown by a connect: the address cannot be reached.</summary>
     public Exception? ConnectError { get; set; }
 
+    /// <summary>The registries, in the shape of Home Assistant's <c>config/*_registry/list</c> results.</summary>
+    public JsonArray Areas { get; set; } = [];
+
+    public JsonArray Devices { get; set; } = [];
+
+    public JsonArray EntityRegistry { get; set; } = [];
+
+    /// <summary>The registry requests fail, as for a token without the rights or an older Home Assistant.</summary>
+    public bool RegistriesFail { get; set; }
+
     public FakeRest Rest { get; } = new();
 
     public List<(Uri Address, string Token)> RestClients { get; } = [];
@@ -239,6 +249,19 @@ internal sealed class FakeHomeAssistantSocket(FakeHomeAssistant server) : IHomeA
                 break;
             case "get_states":
                 Enqueue(Result(id, server.FullStates()));
+                break;
+            case "config/area_registry/list":
+            case "config/device_registry/list":
+            case "config/entity_registry/list":
+                var registry = (string?)message["type"] switch
+                {
+                    "config/area_registry/list" => server.Areas,
+                    "config/device_registry/list" => server.Devices,
+                    _ => server.EntityRegistry,
+                };
+                Enqueue(server.RegistriesFail
+                    ? new JsonObject { ["id"] = id, ["type"] = "result", ["success"] = false, ["error"] = new JsonObject { ["code"] = "unauthorized", ["message"] = "Unauthorized" } }
+                    : Result(id, JsonNode.Parse(registry.ToJsonString())));
                 break;
             case "get_config":
                 Enqueue(Result(id, server.Config()));

@@ -23,6 +23,18 @@ internal interface IEditorReadings
     /// <summary>Counts a user of the reading so it has a value; <paramref name="changed"/> runs on the UI thread when it changes. Dispose to stop.</summary>
     IDisposable Watch(string id, Action changed);
 
+    /// <summary>
+    /// Counts a user of each reading so that rows of a list have values; <paramref name="changed"/> runs on the UI thread with the
+    /// ids that changed. Dispose to release them. Honours the preview's Live/Sample choice.
+    /// </summary>
+    IDisposable WatchMany(IReadOnlyCollection<string> ids, Action<IReadOnlyCollection<string>> changed);
+
+    /// <summary>The value of a listed reading as a row shows it, formatted by the listing's own description; a dash when there is none.</summary>
+    string RowValue(string id, ReadingDescriptor described);
+
+    /// <summary>Whether the provider cannot start because a required setting is missing.</summary>
+    bool ProviderNeedsSetup(string providerId);
+
     /// <summary>The actions the reading offers (natural action first).</summary>
     IReadOnlyList<ActionDescriptor> ActionsFor(string id);
 
@@ -62,7 +74,8 @@ internal interface IReadingChooser
 /// <param name="Icons">The theme's glyphs.</param>
 /// <param name="Owner">The window that owns the pickers.</param>
 /// <param name="Chooser">The reading chooser.</param>
-internal sealed record FormContext(ConfigDocument Document, string? SizeKey, IEditorReadings Readings, IIconCatalog Icons, Window Owner, IReadingChooser Chooser);
+/// <param name="SetUpProvider">Opens the Providers section on a provider; null where there is none.</param>
+internal sealed record FormContext(ConfigDocument Document, string? SizeKey, IEditorReadings Readings, IIconCatalog Icons, Window Owner, IReadingChooser Chooser, Action<string>? SetUpProvider = null);
 
 /// <summary>The object a form edits: the configuration at a path, or a detached object (a provider's staged values).</summary>
 internal abstract class FormTarget

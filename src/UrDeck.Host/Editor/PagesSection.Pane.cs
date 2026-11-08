@@ -132,7 +132,7 @@ internal sealed partial class PagesSection
             {
                 // The dock draws a slot as 1x1 whatever its configuration says (settings for other sizes are dimmed accordingly).
                 string sizeKey = at.InDock ? "1x1" : $"{widget.Width}x{widget.Height}";
-                var context = new Forms.FormContext(_host.Document, sizeKey, _readings, _icons, _owner, _chooser);
+                var context = new Forms.FormContext(_host.Document, sizeKey, _readings, _icons, _owner, _chooser, _setUp);
                 _form = new Forms.FormBuilder(context).Build(descriptor.Settings, ObjectPath(at));
                 panel.Children.Add(_form.Root);
             }

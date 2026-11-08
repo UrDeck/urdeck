@@ -62,6 +62,9 @@ public sealed class DataFolder
 
     public string IconCacheFolder => Path.Combine(Root, "cache", "icons");
 
+    /// <summary>The descriptions of the readings the pages use (<c>ReadingDescriptionCache</c>).</summary>
+    public string ReadingCachePath => Path.Combine(Root, "cache", "readings.json");
+
     /// <summary>Where the migration backup of a configuration version is kept.</summary>
     public string BackupPath(int fromVersion) => Path.Combine(Root, $"urdeck-config.v{fromVersion}.json");
 

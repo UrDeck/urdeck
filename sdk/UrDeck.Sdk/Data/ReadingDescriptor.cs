@@ -54,6 +54,15 @@ public sealed record ReadingDescriptor(string Path, ReadingKind Kind, string Lab
     /// Null when the reading has no icon of its own.
     /// </summary>
     public string? Icon { get; init; }
+
+    /// <summary>
+    /// The area (room) the reading belongs to, for example <c>Office</c>. Only for finding readings in the editor: it does not change
+    /// how a reading is shown. Null when the source assigns none, or when the reading is not listed.
+    /// </summary>
+    public string? Area { get; init; }
+
+    /// <summary>A category in plain words (<c>Lights</c>, <c>CPU</c>), for grouping and filtering in the editor. Null when there is none.</summary>
+    public string? Category { get; init; }
 }
 
 /// <summary>A source's credit: the text to draw, an optional shorter text for a narrow place and an optional link.</summary>

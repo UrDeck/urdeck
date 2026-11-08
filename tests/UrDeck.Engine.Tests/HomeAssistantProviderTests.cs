@@ -834,9 +834,81 @@ public sealed class HomeAssistantProviderTests : IDisposable
 
         var listed = await provider.BrowseAsync(TestContext.Current.CancellationToken);
 
-        Assert.Equal(_sink.Described("sensor.office_temperature"), listed.Single(d => d.Path == "sensor.office_temperature"));
-        Assert.Equal(_sink.Described("light.desk_strip"), listed.Single(d => d.Path == "light.desk_strip"));
+        // Area and category are only filled when listing.
+        Assert.Equal(_sink.Described("sensor.office_temperature"), listed.Single(d => d.Path == "sensor.office_temperature") with { Area = null, Category = null });
+        Assert.Equal(_sink.Described("light.desk_strip"), listed.Single(d => d.Path == "light.desk_strip") with { Area = null, Category = null });
     }
+
+    private void FillRegistries()
+    {
+        _ha.Areas = JsonNode.Parse("""
+            [{"area_id":"office","name":"Office","picture":null,"aliases":[],"floor_id":null,"labels":[]},
+             {"area_id":"kitchen","name":"Kitchen","picture":null,"aliases":[],"floor_id":null,"labels":[]}]
+            """)!.AsArray();
+        _ha.Devices = JsonNode.Parse("""
+            [{"id":"dev_strip","area_id":"kitchen","name":"Desk strip controller","name_by_user":null,"manufacturer":"Acme"},
+             {"id":"dev_meter","area_id":null,"name":"Power meter","name_by_user":null}]
+            """)!.AsArray();
+        _ha.EntityRegistry = JsonNode.Parse("""
+            [{"entity_id":"light.desk","area_id":"office","device_id":null,"platform":"acme"},
+             {"entity_id":"light.desk_strip","area_id":null,"device_id":"dev_strip","platform":"acme"},
+             {"entity_id":"sensor.desk_power","area_id":null,"device_id":"dev_meter","platform":"acme"}]
+            """)!.AsArray();
+    }
+
+    [Fact]
+    public async Task Browsing_AssignsAreasFromTheRegistries_AndCategoriesFromTheDomain()
+    {
+        FillRegistries();
+        var provider = Provider();
+        provider.Start(_sink, Settings());
+
+        var listed = await provider.BrowseAsync(TestContext.Current.CancellationToken);
+
+        var desk = listed.Single(d => d.Path == "light.desk");
+        Assert.Equal(("Office", "Lights"), (desk.Area, desk.Category));
+        Assert.Equal(("Sensors", null), (listed.Single(d => d.Path == "sensor.desk_power").Category, listed.Single(d => d.Path == "sensor.desk_power").Area));
+        Assert.Equal(["config/area_registry/list", "config/device_registry/list", "config/entity_registry/list"],
+            _ha.Sockets.Single().Sent.Select(m => (string?)m["type"]).Where(t => t!.StartsWith("config/", StringComparison.Ordinal)));
+    }
+
+    [Fact]
+    public async Task Browsing_TakesTheAreaOfTheDevice_WhenTheEntityHasNone()
+    {
+        FillRegistries();
+        var provider = Provider();
+        provider.Start(_sink, Settings());
+
+        var listed = await provider.BrowseAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal("Kitchen", listed.Single(d => d.Path == "light.desk_strip").Area);
+    }
+
+    [Fact]
+    public async Task Browsing_WithoutRegistries_ListsEntitiesWithoutAreas_AndLogsOnce()
+    {
+        FillRegistries();
+        _ha.RegistriesFail = true;
+        var provider = Provider();
+        provider.Start(_sink, Settings());
+
+        var first = await provider.BrowseAsync(TestContext.Current.CancellationToken);
+        var second = await provider.BrowseAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(5, first.Count);
+        Assert.All(first, d => Assert.Null(d.Area));
+        Assert.Equal("Lights", first.Single(d => d.Path == "light.desk").Category);
+        Assert.Equal(5, second.Count);
+        Assert.Single(_sink.Logs, l => l.Contains("areas cannot be read", StringComparison.Ordinal));
+    }
+
+    [Theory]
+    [InlineData("light", "Lights")]
+    [InlineData("binary_sensor", "Sensors")]
+    [InlineData("media_player", "Media")]
+    [InlineData("input_boolean", "Input_boolean")]
+    public void TheCategory_ComesFromTheDomain(string domain, string category) =>
+        Assert.Equal(category, EntityMapping.CategoryOf(domain));
 
     // Sample data
 

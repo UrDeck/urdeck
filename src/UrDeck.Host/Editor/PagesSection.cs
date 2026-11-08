@@ -67,12 +67,13 @@ internal sealed partial class PagesSection
     private readonly Forms.IEditorReadings _readings;
     private readonly Forms.IIconCatalog _icons;
     private readonly Forms.IReadingChooser _chooser;
+    private readonly Action<string> _setUp;
     private Forms.FormView? _form;
     private TextBox? _nameBox;
     private double _factor = 1;
     private bool _active;
 
-    public PagesSection(ISettingsHost host, PageEditing editing, DispatcherQueue queue, Window owner)
+    public PagesSection(ISettingsHost host, PageEditing editing, DispatcherQueue queue, Window owner, Forms.ReadingCatalog catalog, Action<string> setUp)
     {
         _host = host;
         _owner = owner;
@@ -84,7 +85,9 @@ internal sealed partial class PagesSection
         _preview.Reloaded += () => _queue.TryEnqueue(DispatcherQueuePriority.Low, FollowPage);
         _readings = new Forms.PreviewEditorReadings(_preview.Readings, _preview.Readings, host.Readings, queue);
         _icons = new Forms.ThemeIconCatalog(() => _preview.Session.Theme);
-        _chooser = new Forms.ReadingChooserDialog(() => _root.XamlRoot, _readings);
+        _setUp = setUp;
+        var typed = new Forms.ReadingChooserDialog(() => _root.XamlRoot, _readings);
+        _chooser = new Forms.ReadingPickerDialog(() => _root.XamlRoot, _readings, catalog, queue, typed, setUp);
 
         _outsideBar = new InfoBar { Severity = InfoBarSeverity.Informational, IsClosable = true, Message = $"{FileName} changed outside the editor. The editor took the new file." };
         var undoReload = new Button { Content = "Undo the reload" };
@@ -113,6 +116,9 @@ internal sealed partial class PagesSection
     }
 
     public UIElement Root => _root;
+
+    /// <summary>The readings the forms show, which the Readings section lists with.</summary>
+    public Forms.IEditorReadings Readings => _readings;
 
     private string FileName => System.IO.Path.GetFileName(_host.ConfigPath);
 

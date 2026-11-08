@@ -19,6 +19,7 @@ namespace UrDeck.Host.Editor;
 /// status. It talks to the host only through <see cref="ISettingsHost"/>; the application makes one per opening and drops it
 /// when it closes, so nothing of it stays behind.
 /// </summary>
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001", Justification = "The catalog is disposed when the window closes (OnClosed).")]
 internal sealed class EditorWindow : Window
 {
     private const double WidthDip = 1280;
@@ -40,11 +41,14 @@ internal sealed class EditorWindow : Window
     private readonly NavigationViewItem _pagesItem = Item("Pages", "");
     private readonly NavigationViewItem _providersItem = Item("Providers", "");
     private readonly NavigationViewItem _displayItem = Item("Display", "");
+    private readonly NavigationViewItem _readingsItem = Item("Readings", "");
     private readonly NavigationViewItem _generalItem = Item("General", "");
     private readonly InfoBadge _badge = new();
     private readonly PagesSection _pages;
     private readonly ProvidersSection _providers;
     private readonly DisplaySection _display;
+    private readonly Forms.ReadingCatalog _catalog;
+    private readonly ReadingsSection _readingsSection;
     private readonly GeneralSection _general;
     private readonly DeckStatusCard _status;
     private readonly Microsoft.UI.Dispatching.DispatcherQueueTimer _badgeTimer;
@@ -65,7 +69,9 @@ internal sealed class EditorWindow : Window
         if (Microsoft.UI.Composition.SystemBackdrops.MicaController.IsSupported())
             SystemBackdrop = new MicaBackdrop();
 
-        _pages = new PagesSection(host, _editing, DispatcherQueue, this);
+        _catalog = new Forms.ReadingCatalog(host, DispatcherQueue);
+        _pages = new PagesSection(host, _editing, DispatcherQueue, this, _catalog, ShowProviders);
+        _readingsSection = new ReadingsSection(_catalog, _pages.Readings, DispatcherQueue, ShowProviders);
         _providers = new ProvidersSection(host, this);
         _display = new DisplaySection(host, DispatcherQueue);
         _general = new GeneralSection(host, _editing);
@@ -75,6 +81,7 @@ internal sealed class EditorWindow : Window
         _nav.MenuItems.Add(_pagesItem);
         _nav.MenuItems.Add(_providersItem);
         _nav.MenuItems.Add(_displayItem);
+        _nav.MenuItems.Add(_readingsItem);
         _nav.MenuItems.Add(_generalItem);
         _nav.PaneFooter = _status.Root;
         // Named handlers, detached when the window closes: the navigation view holds them from native code, and a handler
@@ -189,6 +196,7 @@ internal sealed class EditorWindow : Window
             return;
         _nav.Content = item == _providersItem ? _providers.Root
             : item == _displayItem ? _display.Root
+            : item == _readingsItem ? _readingsSection.Root
             : item == _generalItem ? _general.Root
             : _pages.Root;
         if (item == _generalItem)
@@ -198,7 +206,18 @@ internal sealed class EditorWindow : Window
     }
 
     /// <summary>The preview draws only while Pages is shown and the window is not minimised.</summary>
-    private void UpdateActive() => _pages.SetActive(!_closed && !_minimised && (ReferenceEquals(_nav.SelectedItem, _pagesItem) || _nav.SelectedItem == null));
+    private void UpdateActive()
+    {
+        _pages.SetActive(!_closed && !_minimised && (ReferenceEquals(_nav.SelectedItem, _pagesItem) || _nav.SelectedItem == null));
+        _readingsSection.SetActive(!_closed && !_minimised && ReferenceEquals(_nav.SelectedItem, _readingsItem));
+    }
+
+    /// <summary>"Set up" in the picker or a form: shows the Providers section.</summary>
+    private void ShowProviders(string providerId)
+    {
+        if (!_closed)
+            _nav.SelectedItem = _providersItem;
+    }
 
     private void OnAppWindowChanged(AppWindow sender, AppWindowChangedEventArgs args)
     {
@@ -267,6 +286,8 @@ internal sealed class EditorWindow : Window
         _host.Changed -= OnHostChanged;
         AppWindow.Changed -= OnAppWindowChanged;
         _pages.Close();
+        _readingsSection.Close();
+        _catalog.Dispose();
         _providers.Close();
         _display.Close();
         _nav.SelectionChanged -= OnNavSelectionChanged;
