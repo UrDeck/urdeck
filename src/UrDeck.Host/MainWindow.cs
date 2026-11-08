@@ -244,16 +244,17 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
     // The deck's surface while it is shown; the last one it was shown on otherwise (a hidden window keeps a size of its own).
     DeckSurface ISettingsHost.DeckSurface => _session.IsPageHeld ? _lastSurface : CurrentSurface();
 
-    PreviewDeck ISettingsHost.CreatePreview(IDeckPresenter presenter, IFrameSource frames, string? pageId)
+    PreviewDeck ISettingsHost.CreatePreview(IDeckPresenter presenter, IFrameSource frames, string? pageId, UrDeckConfig? config)
     {
         var readings = new Engine.Data.PreviewReadings(_plugins.Readings, () => _plugins.Providers.Descriptors);
         Action reload = readings.ReloadSamples;
         // Before the session subscribes: the sample hub takes the new plugins' samples before the session rebuilds its page.
         _plugins.PluginsChanged += reload;
-        int start = _configStore.Config.Pages.FindIndex(p => p.Id == pageId);
+        int start = (config ?? _configStore.Config).Pages.FindIndex(p => p.Id == pageId);
+        IDeckConfigSource source = config == null ? _configStore : new StaticConfigSource(config);
         var scheduler = new DispatcherDeckScheduler(DispatcherQueue);
         var session = new DeckSession(
-            new DeckSessionInputs(_configStore, _themes.Load, _plugins.WithReadings(readings), readings, scheduler, frames,
+            new DeckSessionInputs(source, _themes.Load, _plugins.WithReadings(readings), readings, scheduler, frames,
                 WindowsAnimationWatcher.Read(), StartPage: Math.Max(0, start)),
             presenter);
         return new PreviewDeck(session, readings, () =>
@@ -266,6 +267,15 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
 
     DeckBackground? ISettingsHost.BuildBackground(BackgroundPlan plan, DeckSurface surface) =>
         plan.BuildPrepared(_shaders, _dataFolder, Math.Max(1, (int)Math.Round(surface.Size.Width * surface.Scale)), Math.Max(1, (int)Math.Round(surface.Size.Height * surface.Scale)));
+
+    Engine.Themes.ThemeStore ISettingsHost.Themes => _themes;
+
+    ShaderStore ISettingsHost.Shaders => _shaders;
+
+    string ISettingsHost.DataFolder => _dataFolder;
+
+    BackgroundStatus ISettingsHost.BackgroundStatus() =>
+        BackgroundPlan.Resolve(_session.BackgroundSettings, _session.Theme, _session.Motion.User).Status(_shaders, _dataFolder);
 
     string? ISettingsHost.BackgroundKey(BackgroundPlan plan) => plan.RequestKey(_shaders, _dataFolder);
 

@@ -69,12 +69,14 @@ internal sealed partial class PagesSection
     private readonly Forms.IReadingChooser _chooser;
     private readonly Action<string> _setUp;
     private Forms.FormView? _form;
+    private readonly ThemeQuickSwitch _themeSwitch;
     private TextBox? _nameBox;
     private double _factor = 1;
     private bool _active;
 
-    public PagesSection(ISettingsHost host, PageEditing editing, DispatcherQueue queue, Window owner, Forms.ReadingCatalog catalog, Action<string> setUp)
+    public PagesSection(ISettingsHost host, PageEditing editing, DispatcherQueue queue, Window owner, Forms.ReadingCatalog catalog, Action<string> setUp, Action showThemes)
     {
+        _themeSwitch = new ThemeQuickSwitch(host, new BackgroundEditing(host.Document), showThemes);
         _host = host;
         _owner = owner;
         _editing = editing;
@@ -120,6 +122,9 @@ internal sealed partial class PagesSection
     /// <summary>The readings the forms show, which the Readings section lists with.</summary>
     public Forms.IEditorReadings Readings => _readings;
 
+    /// <summary>What a form needs beyond its settings, for the other sections that show one.</summary>
+    public Forms.FormContext FormContext() => new(_host.Document, null, _readings, _icons, _owner, _chooser, _setUp);
+
     private string FileName => System.IO.Path.GetFileName(_host.ConfigPath);
 
     private UrDeckConfig Config => _host.Document.Typed;
@@ -158,6 +163,7 @@ internal sealed partial class PagesSection
         _redo.Click += (_, _) => _host.Document.History.Redo();
         AutomationProperties.SetName(_undo, "Undo");
         AutomationProperties.SetName(_redo, "Redo");
+        history.Children.Add(_themeSwitch.Button);
         history.Children.Add(_undo);
         history.Children.Add(_redo);
         Grid.SetColumn(history, 1);
@@ -424,6 +430,7 @@ internal sealed partial class PagesSection
         _newerBar.IsOpen = _host.Document.IsNewerThanHost;
         _addWidget.IsEnabled = Editable && _pageId != null;
         UpdateUndo();
+        _themeSwitch.Refresh();
         BuildTabs();
         BuildOverlay();
         BuildPane();
@@ -973,6 +980,7 @@ internal sealed partial class PagesSection
 
     public void Close()
     {
+        _themeSwitch.Close();
         _form?.Dispose();
         _form = null;
         _host.Document.Changed -= OnDocumentChanged;

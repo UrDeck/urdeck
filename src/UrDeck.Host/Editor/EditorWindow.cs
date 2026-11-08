@@ -39,12 +39,14 @@ internal sealed class EditorWindow : Window
         OpenPaneLength = 240,
     };
     private readonly NavigationViewItem _pagesItem = Item("Pages", "");
+    private readonly NavigationViewItem _themeItem = Item("Theme and background", "");
     private readonly NavigationViewItem _providersItem = Item("Providers", "");
     private readonly NavigationViewItem _displayItem = Item("Display", "");
     private readonly NavigationViewItem _readingsItem = Item("Readings", "");
     private readonly NavigationViewItem _generalItem = Item("General", "");
     private readonly InfoBadge _badge = new();
     private readonly PagesSection _pages;
+    private readonly ThemeBackgroundSection _themeSection;
     private readonly ProvidersSection _providers;
     private readonly DisplaySection _display;
     private readonly Forms.ReadingCatalog _catalog;
@@ -70,7 +72,8 @@ internal sealed class EditorWindow : Window
             SystemBackdrop = new MicaBackdrop();
 
         _catalog = new Forms.ReadingCatalog(host, DispatcherQueue);
-        _pages = new PagesSection(host, _editing, DispatcherQueue, this, _catalog, ShowProviders);
+        _pages = new PagesSection(host, _editing, DispatcherQueue, this, _catalog, ShowProviders, ShowThemes);
+        _themeSection = new ThemeBackgroundSection(host, DispatcherQueue, this, _pages.FormContext, host.DeckPageId);
         _readingsSection = new ReadingsSection(_catalog, _pages.Readings, DispatcherQueue, ShowProviders);
         _providers = new ProvidersSection(host, this);
         _display = new DisplaySection(host, DispatcherQueue);
@@ -79,6 +82,7 @@ internal sealed class EditorWindow : Window
 
         _providersItem.InfoBadge = _badge;
         _nav.MenuItems.Add(_pagesItem);
+        _nav.MenuItems.Add(_themeItem);
         _nav.MenuItems.Add(_providersItem);
         _nav.MenuItems.Add(_displayItem);
         _nav.MenuItems.Add(_readingsItem);
@@ -194,7 +198,8 @@ internal sealed class EditorWindow : Window
     {
         if (_closed)
             return;
-        _nav.Content = item == _providersItem ? _providers.Root
+        _nav.Content = item == _themeItem ? _themeSection.Root
+            : item == _providersItem ? _providers.Root
             : item == _displayItem ? _display.Root
             : item == _readingsItem ? _readingsSection.Root
             : item == _generalItem ? _general.Root
@@ -210,6 +215,14 @@ internal sealed class EditorWindow : Window
     {
         _pages.SetActive(!_closed && !_minimised && (ReferenceEquals(_nav.SelectedItem, _pagesItem) || _nav.SelectedItem == null));
         _readingsSection.SetActive(!_closed && !_minimised && ReferenceEquals(_nav.SelectedItem, _readingsItem));
+        _themeSection.SetActive(!_closed && !_minimised && ReferenceEquals(_nav.SelectedItem, _themeItem));
+    }
+
+    /// <summary>"All themes and backgrounds…" in the Pages header: shows the Theme and background section.</summary>
+    private void ShowThemes()
+    {
+        if (!_closed)
+            _nav.SelectedItem = _themeItem;
     }
 
     /// <summary>"Set up" in the picker or a form: shows the Providers section.</summary>
@@ -287,6 +300,7 @@ internal sealed class EditorWindow : Window
         AppWindow.Changed -= OnAppWindowChanged;
         _pages.Close();
         _readingsSection.Close();
+        _themeSection.Close();
         _catalog.Dispose();
         _providers.Close();
         _display.Close();

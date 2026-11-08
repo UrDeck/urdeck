@@ -22,6 +22,7 @@ A top-level object in `urdeck-config.json`. It applies when the file is saved, w
 ```json
 "background": { "type": "shader", "name": "aurora", "speed": 0.5, "angle": 30 }
 "background": { "type": "shader", "name": "plasma", "colors": ["#0f1a4d", "#8c268c", "#fa9e40"] }
+"background": { "type": "image", "path": "D:/Pictures/wall.jpg", "dim": 0.4 }
 "background": { "type": "shader", "name": "my-thing", "scale": 0.25, "density": 3.0, "glow": "#ff8800" }
 "background": { "type": "image", "path": "D:/Pictures/wall.jpg" }
 "background": { "type": "none" }
@@ -34,12 +35,16 @@ A top-level object in `urdeck-config.json`. It applies when the file is saved, w
 | `speed` | shader | Multiplies time: 2 is twice as fast, 0 stops it | `1` | 0 to 10 |
 | `scale` | shader | The resolution it is drawn at, as a fraction of the panel's | `0.5` | 0.1 to 1 |
 | `colors` | shader | Replaces the theme's palette | the theme's | 1 to 4 colours |
+| `dim` | shader, image | How strongly the [scrim](#theme-backgrounds) darkens the background behind the cards | the theme's own scrim | 0 to 0.7 |
 | `path` | image | The picture | required | see [images](/docs/backgrounds/speed-colours-images/#images) |
 | any other key | shader | A parameter of that shader | the shader's default | |
 
 A configuration with no `background`, or with `"background": null`, leaves the choice to the theme. A value that is wrong (not an
 object, an unknown `type`, a missing `name` or `path`) is logged and the deck shows what a failed background shows: the theme's
 still background if it has one, else its background colour. A `speed` or `scale` out of range is logged and the default is used.
+
+The editor's **Theme and background** section (left-click the tray icon) chooses all of this without the file: the theme's choice, none,
+a picture or any background shown with its sample, Moving or Still (`speed` 0), the shader's own options with *Reset*, and the dimming.
 A page's own `background` is not supported: it is ignored, and `urdeck.log` says so; set the top-level one.
 
 ## Theme backgrounds
@@ -65,6 +70,11 @@ nothing else, no still background and no scrim. Deleting the `background` key br
 The **scrim** (`background.scrim`, a colour and an alpha from 0 to 1) is a veil drawn over the shader, the picture or the still
 background, whoever chose it, so text keeps its contrast over a bright or busy one. It is not drawn over the plain background
 colour, and not when the background is `none`.
+
+**`dim`** in the configuration's `background` overrides how strong it is: the scrim is then drawn in the theme's scrim colour
+(black when the theme has none) with `dim` as its alpha, from 0 (no veil) to 0.7. A value outside that range is clamped; a value
+that is not a number is logged and the theme's own scrim is used. Without `dim` the theme's scrim applies. The editor's
+*Dim behind cards* slider writes it.
 
 The theme's `motion.level` does not change the background: a moving default moves. The user's [motion level](/docs/themes/motion/)
 does: when the configuration's `motion` is `reduced` or `off`, or the configuration has none and Windows' *Animation effects*

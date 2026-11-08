@@ -422,6 +422,83 @@ public sealed class BackgroundPlanTests : IDisposable
         Assert.NotNull(background.Scrim);
     }
 
+    [Fact]
+    public void Dim_replaces_the_themes_scrim_alpha_and_keeps_its_colour()
+    {
+        var theme = _fixture.WriteTheme("dimmed", """{ "background": { "scrim": { "color": "#102030", "alpha": 0.2 } } }""");
+        var plan = BackgroundPlan.Resolve(BackgroundFixture.Parse("""{ "type": "shader", "name": "mine", "dim": 0.5 }"""), theme);
+        using var background = plan.Build(_fixture.Store, _fixture.Root)!;
+
+        Assert.Equal(new SKColor(0x10, 0x20, 0x30, 128), background.Scrim);
+    }
+
+    [Fact]
+    public void Dim_without_a_theme_scrim_veils_in_black_and_over_a_picture_too()
+    {
+        var theme = _fixture.WriteTheme("plain-dim", """{ "background": { } }""");
+        var plan = BackgroundPlan.Resolve(BackgroundFixture.Parse("""{ "type": "shader", "name": "mine", "dim": 0.3 }"""), theme);
+        using var background = plan.Build(_fixture.Store, _fixture.Root)!;
+
+        Assert.Equal(SKColors.Black.WithAlpha(76), background.Scrim);
+
+        string picture = Path.Combine(_fixture.Root, "dim.png");
+        using (var bitmap = new SKBitmap(4, 4))
+        using (var data = SKImage.FromBitmap(bitmap).Encode(SKEncodedImageFormat.Png, 100))
+            File.WriteAllBytes(picture, data.ToArray());
+        string json = System.Text.Json.JsonSerializer.Serialize(new { type = "image", path = picture, dim = 0.3 });
+        using var image = BackgroundPlan.Resolve(BackgroundFixture.Parse(json), theme).Build(_fixture.Store, _fixture.Root)!;
+        Assert.Equal(SKColors.Black.WithAlpha(76), image.Scrim);
+    }
+
+    [Fact]
+    public void Dim_zero_draws_no_scrim_and_a_dim_change_changes_the_key()
+    {
+        var theme = _fixture.WriteTheme("zero-dim", """{ "background": { "scrim": { "color": "#000000", "alpha": 0.5 } } }""");
+        string Key(string dim) => BackgroundPlan.Resolve(BackgroundFixture.Parse($$"""{ "type": "shader", "name": "mine"{{dim}} }"""), theme)
+            .RequestKey(_fixture.Store, _fixture.Root)!;
+
+        using var none = BackgroundPlan.Resolve(BackgroundFixture.Parse("""{ "type": "shader", "name": "mine", "dim": 0 }"""), theme)
+            .Build(_fixture.Store, _fixture.Root)!;
+        Assert.Null(none.Scrim);
+        Assert.NotEqual(Key(""), Key(""","dim": 0.4"""));
+        Assert.NotEqual(Key(""), Key(""","dim": 0"""));
+    }
+
+    [Fact]
+    public void Dim_is_not_drawn_with_none()
+    {
+        var theme = _fixture.WriteTheme("none-dim", """{ "background": { } }""");
+        var plan = BackgroundPlan.Resolve(BackgroundFixture.Parse("""{ "type": "none", "dim": 0.5 }"""), theme);
+
+        Assert.Null(plan.Dim);
+        Assert.Null(plan.Build(_fixture.Store, _fixture.Root));
+    }
+
+    [Fact]
+    public void The_status_names_what_is_shown_and_why_the_configured_picture_is_not()
+    {
+        var theme = _fixture.WriteTheme("status", """{ "background": { "static": { "color": "#c8c8c8" } } }""");
+        string missing = Path.Combine(_fixture.Root, "gone.png");
+        string json = System.Text.Json.JsonSerializer.Serialize(new { type = "image", path = missing });
+
+        var status = BackgroundPlan.Resolve(BackgroundFixture.Parse(json), theme).Status(_fixture.Store, _fixture.Root);
+
+        Assert.Equal(BackgroundOrigin.ThemeStill, status.Shown);
+        Assert.Contains("does not exist", status.ConfiguredProblem);
+
+        var fine = BackgroundPlan.Resolve(BackgroundFixture.Parse("""{ "type": "shader", "name": "mine" }"""), theme).Status(_fixture.Store, _fixture.Root);
+        Assert.Equal(BackgroundOrigin.Configuration, fine.Shown);
+        Assert.Null(fine.ConfiguredProblem);
+
+        var unknown = BackgroundPlan.Resolve(BackgroundFixture.Parse("""{ "type": "shader", "name": "nothing-here" }"""), theme).Status(_fixture.Store, _fixture.Root);
+        Assert.Equal(BackgroundOrigin.ThemeStill, unknown.Shown);
+        Assert.NotNull(unknown.ConfiguredProblem);
+
+        var themeOnly = BackgroundPlan.Resolve(BackgroundSettings.None, theme).Status(_fixture.Store, _fixture.Root);
+        Assert.Equal(BackgroundOrigin.ThemeStill, themeOnly.Shown);
+        Assert.Null(themeOnly.ConfiguredProblem);
+    }
+
     // 3.4 Snapshots draw what the deck draws, and 3.5 motion
 
     [Fact]
