@@ -1,6 +1,6 @@
 ---
 title: Getting started
-description: Where the config file is, what it holds, the grid, the monitor and the widgets that ship with UrDeck.
+description: Build your deck in the editor, with pages, widgets, themes and the monitor, and where UrDeck keeps what you make.
 section: Start
 order: 0
 ---
@@ -14,9 +14,10 @@ Every change reaches the deck at once and is saved as you make it; **Undo** (Ctr
 [Pages and the dock](/docs/pages-and-dock/).
 
 Everything the editor changes is kept in one JSON file, `urdeck-config.json`, which lives in UrDeck's data folder, `%APPDATA%\UrDeck`
-(choose **Open data folder** in the tray menu, or **Show the configuration file** in the editor's General section). You can also edit
-it in any text editor: UrDeck notices a saved change after about a second and applies it without a restart, and an open editor shows
-it with an **Undo the reload** button. A file that is not valid JSON is ignored and the last good configuration stays in use; the reason is
+(choose **Open data folder** in the tray menu, or **Show the configuration file** in the editor's General section). You never need to
+open it: it is plain JSON you can back up or copy to another PC, and [the reference below](#the-configuration-file) lists what it holds. If something
+else changes it while UrDeck runs (a sync tool, a restored backup), UrDeck applies the change after about a second and an open editor
+offers an **Undo the reload** button. A file that is not valid JSON is ignored and the last good configuration stays in use; the reason is
 written to `urdeck.log`, next to the file. The first start creates the file from the sample page and opens the editor with a welcome (see below). The file's `"version"` is 1; a file written by a newer UrDeck is read as well as possible but never changed.
 
 ### The first start
@@ -31,7 +32,9 @@ Everything you own sits in that folder, so reinstalling or updating UrDeck never
 `backgrounds/`, `plugins/` (plugins you add) and `cache/`. To keep it beside the program instead (on a USB stick, say), put an
 empty file named `urdeck.portable` next to `UrDeck.Host.exe` and restart; that folder is then the data folder. The release's portable zip does this for itself; see [Installing and updating](/docs/installing/#the-portable-zip).
 
-## The file
+## The configuration file
+
+This is a reference for what the editor writes, for backing it up or sharing a deck. Each row says where in the editor to change it.
 
 ```json
 {
@@ -71,7 +74,7 @@ empty file named `urdeck.portable` next to `UrDeck.Host.exe` and restart; that f
 ## Data providers
 
 A data provider reads something (your PC, the weather, a service of yours) for the widgets to show. Its settings are the object
-`providers.<id>` in `urdeck-config.json`. Every provider has three:
+`providers.<id>` in the file. Every provider has three:
 
 | Setting | Meaning |
 |---|---|
@@ -79,7 +82,7 @@ A data provider reads something (your PC, the weather, a service of yours) for t
 | `actionTimeoutMs` | How long an action (a button on a card) may run before it fails. Default `10000`; a value below `1000` is raised to it. |
 | `actionWarnMs` | An action slower than this is logged as a warning. Default `2000`. |
 
-A provider that talks to a service of yours has more: an address, a token. Saving them in the editor (tray icon, Providers) writes the address to `urdeck-config.json` and the token to Windows Credential Manager. Changing a
+Choose **Providers** in the editor to change them; a provider that talks to a service of yours has more: an address, a token. Saving them there writes the address to `urdeck-config.json` and the token to Windows Credential Manager. Changing a
 provider's settings restarts that provider only; the others keep running.
 
 <ProviderSettingsTable />

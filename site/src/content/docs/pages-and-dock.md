@@ -48,7 +48,7 @@ An indicator shows where you are: one dot per page, the current one a pill. Tap 
 ## The dock
 
 The dock is a row of up to four widgets at the very bottom of the screen, the same on every page and not moving while a
-page slides. It is the `dock` list of the file. An entry is a widget like those on a page, without a position: its place
+page slides. In the editor, the dock is the strip under the preview on **Pages**: add a widget there, drag to reorder, select one to change its settings. In the file it is the `dock` list. An entry is a widget like those on a page, without a position: its place
 is its index in the list, the first at the left.
 
 ```json

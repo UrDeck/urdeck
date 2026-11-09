@@ -19,7 +19,7 @@ zip, and it has its first outside user. There is no editor yet: a page is a JSON
 ## Milestones
 
 A milestone is an outcome somebody can check, not a list of features, and none has a date: this is a spare-time
-project. They are listed in the planned order; the editor (milestone 3) is next. The one fixed rule is that the SDK is
+project. They are listed in the planned order; the editor (milestone 3) is done (0.2.0); the next is in BACKLOG.md. The one fixed rule is that the SDK is
 frozen last (milestone 5), because the editor and the web page widget both still change its public API.
 
 | # | Milestone | Done when | Status |
