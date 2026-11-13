@@ -6,25 +6,25 @@
 
   <ItemGroup>
     <!-- Skottie (Lottie) is versioned in lockstep with SkiaSharp itself: keep them equal. -->
-    <PackageVersion Include="SkiaSharp" Version="4.153.1" />
-    <PackageVersion Include="SkiaSharp.Skottie" Version="4.153.1" />
-    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.153.1" />
+    <PackageVersion Include="SkiaSharp" Version="4.155.0" />
+    <PackageVersion Include="SkiaSharp.Skottie" Version="4.155.0" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.155.0" />
     <!-- The vpk tool in dotnet-tools.json must be the same version as this package (release-process spec); bump both together. -->
     <PackageVersion Include="Velopack" Version="1.2.161" />
     <PackageVersion Include="DotMake.CommandLine" Version="3.7.0" />
-    <PackageVersion Include="SkiaSharp.Views.WinUI" Version="4.153.1" />
+    <PackageVersion Include="SkiaSharp.Views.WinUI" Version="4.155.0" />
     <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
-    <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="11.0.0" />
     <!-- The media provider embeds the Windows Runtime projection in its own assembly (docs/perf/now-playing.md). The winmd files come
          from the SDK reference package, so the build does not depend on an installed Windows SDK. -->
     <PackageVersion Include="Microsoft.Windows.CsWinRT" Version="2.1.6" />
     <PackageVersion Include="Microsoft.Windows.SDK.NET.Ref" Version="10.0.19041.57" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.9.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.1" />
     <PackageVersion Include="coverlet.msbuild" Version="10.1.0" />
-    <PackageVersion Include="JsonSchema.Net" Version="9.5.0" />
-    <PackageVersion Include="xunit.v3" Version="4.0.2" />
+    <PackageVersion Include="JsonSchema.Net" Version="9.6.0" />
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
   </ItemGroup>
 
