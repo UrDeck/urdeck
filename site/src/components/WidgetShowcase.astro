@@ -48,6 +48,8 @@ const seconds = Math.max(40, (total + 1) * 8);
     ))}
   </div>
 
+  <div class="marquee-row">
+  <button type="button" class="marquee-nav" data-nav="-1" aria-label="Show earlier widgets" hidden>&larr;</button>
   <div class="marquee">
     <div class="marquee-track" style={`animation-duration: ${seconds}s`}>
       {[false, true].map((dup) => (
@@ -63,6 +65,8 @@ const seconds = Math.max(40, (total + 1) * 8);
       ))}
     </div>
   </div>
+  <button type="button" class="marquee-nav" data-nav="1" aria-label="Show later widgets" hidden>&rarr;</button>
+  </div>
 </div>
 
 <script>
@@ -72,7 +76,6 @@ const seconds = Math.max(40, (total + 1) * 8);
     const chips = [...root.querySelectorAll<HTMLButtonElement>('[data-pick]')];
     let widget = 0;
     let size = 0;
-    let timer: number | undefined;
     // With reduce-motion the pictures stay still: no video plays and the tour does not start.
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -95,42 +98,177 @@ const seconds = Math.max(40, (total + 1) * 8);
       chips.forEach((c) => c.setAttribute('aria-pressed', String(Number(c.dataset.pick) === widget)));
     };
 
-    const stop = () => {
-      if (timer !== undefined) window.clearInterval(timer);
-      timer = undefined;
-    };
-
-    // Step through every widget and size until the visitor picks one.
-    const steps = panels.flatMap((p, i) => [...p.querySelectorAll('[data-media]')].map((_, j) => [i, j] as const));
-    const start = () => {
-      if (timer !== undefined || steps.length < 2) return;
-      timer = window.setInterval(() => {
-        const at = steps.findIndex(([i, j]) => i === widget && j === size);
-        [widget, size] = steps[(at + 1) % steps.length];
-        render();
-      }, 5000);
-    };
-
     // A theme change may have replaced a picture by a loop (or back): start the visible loops again.
     (window as unknown as { urdeckTheme?: { on(cb: () => void): void } }).urdeckTheme?.on(() => render());
 
+    const marquee = root.querySelector<HTMLElement>('.marquee');
+    const half = marquee?.querySelector<HTMLElement>('.marquee-half');
+    const navs = [...root.querySelectorAll<HTMLButtonElement>('[data-nav]')];
+
+    // The size buttons only change the size of the widget on show.
     root.addEventListener('click', (event) => {
-      const target = (event.target as HTMLElement).closest<HTMLElement>('[data-pick], [data-size]');
+      const target = (event.target as HTMLElement).closest<HTMLElement>('[data-size]');
       if (!target) return;
-      stop();
-      steps.length = 0; // a choice ends the automatic tour for good
-      if (target.dataset.pick !== undefined) {
-        widget = Number(target.dataset.pick);
-        size = 0;
-      } else {
-        size = Number(target.dataset.size);
-      }
+      size = Number(target.dataset.size);
       render();
     });
 
-    if (!reduced && 'IntersectionObserver' in window) {
-      // Only tour while the showcase is on screen.
-      new IntersectionObserver(([entry]) => (entry.isIntersecting ? start() : stop()), { threshold: 0.3 }).observe(root);
+    if (marquee && half) {
+      // The list drifts by script, and the widget on show is the one at its centre: a choice, a button or the drift
+      // all move the list, and the list decides. Without script the CSS animation runs and the buttons stay hidden.
+      marquee.classList.add('is-scripted');
+      navs.forEach((b) => (b.hidden = false));
+      const span = () => half.offsetWidth; // one copy of the list; the second copy makes the wrap seamless
+      const perSecond = () => span() / Math.max(40, (panels.length + 1) * 8);
+      let pos = 0;
+      let held = false;
+      let seeking = false; // a chosen chip is on its way to the centre: the widgets it passes do not count
+      let last = 0;
+
+      const wrap = () => {
+        if (marquee.scrollLeft >= span()) marquee.scrollLeft -= span();
+      };
+      // The distance from the middle of the list to the middle of a chip (positive: the chip is to the right).
+      const offCentre = (el: HTMLElement) => {
+        const m = marquee.getBoundingClientRect();
+        const c = el.getBoundingClientRect();
+        return c.left + c.width / 2 - (m.left + m.width / 2);
+      };
+      const nearest = () => {
+        let best: HTMLButtonElement | undefined;
+        let gap = Infinity;
+        marquee.querySelectorAll<HTMLButtonElement>('[data-pick]').forEach((c) => {
+          const d = Math.abs(offCentre(c));
+          if (d < gap) {
+            gap = d;
+            best = c;
+          }
+        });
+        // "More to come" (or the space beside it) in the middle leaves the preview as it is.
+        return best && gap < best.offsetWidth / 2 ? Number(best.dataset.pick) : undefined;
+      };
+      const follow = () => {
+        if (seeking) return;
+        const at = nearest();
+        if (at !== undefined && at !== widget) {
+          widget = at;
+          size = 0;
+          render();
+        }
+      };
+      let queued = false;
+      const onScroll = () => {
+        if (!anim) wrap();
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+          queued = false;
+          follow();
+        });
+      };
+
+      // The browser's smooth scrolling is cancelled by any other write to scrollLeft (the wrap, the drift) and says nothing
+      // when it stops, so the list is moved by hand: one easing, started and finished here.
+      let anim: { from: number; delta: number; t0: number; dur: number } | undefined;
+      const maxScroll = () => marquee.scrollWidth - marquee.clientWidth;
+      const slide = (delta: number) => {
+        pos = marquee.scrollLeft;
+        if (reduced || Math.abs(delta) < 2) {
+          marquee.scrollLeft = Math.min(maxScroll(), Math.max(0, pos + delta));
+          pos = marquee.scrollLeft;
+          seeking = false;
+          wrap();
+          follow();
+          return;
+        }
+        seeking = true;
+        anim = { from: pos, delta, t0: performance.now(), dur: Math.min(700, 300 + Math.abs(delta) * 0.4) };
+      };
+      const stepAnim = (now: number) => {
+        if (!anim) return;
+        const t = Math.min(1, (now - anim.t0) / anim.dur);
+        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        pos = anim.from + anim.delta * eased;
+        marquee.scrollLeft = pos;
+        if (t >= 1) {
+          anim = undefined;
+          seeking = false;
+          pos = marquee.scrollLeft;
+          wrap(); // the second copy looks exactly like the first: back to the first, unseen
+          pos = marquee.scrollLeft;
+          follow();
+        }
+      };
+      // The two copies look the same, so the list may sit in either: before a move of `d`, step one copy over (unseen)
+      // if the track would run out, so the move never has to go the long way round.
+      const fit = (d: number) => {
+        if (marquee.scrollLeft + d > maxScroll()) marquee.scrollLeft -= span();
+        else if (marquee.scrollLeft + d < 0) marquee.scrollLeft += span();
+      };
+      const centre = (index: number, smooth: boolean) => {
+        const chip = marquee.querySelector<HTMLElement>(`[data-pick="${index}"]`);
+        if (!chip) return;
+        const w = span();
+        // The shortest way, forwards or back, in a list that wraps.
+        const d = ((((offCentre(chip) % w) + w + w / 2) % w) - w / 2);
+        fit(d);
+        if (smooth) slide(d);
+        else {
+          marquee.scrollLeft += d;
+          pos = marquee.scrollLeft;
+        }
+      };
+
+      const frame = (now: number) => {
+        const dt = Math.min(now - last, 100) / 1000;
+        last = now;
+        if (anim) stepAnim(now);
+        else if (!held && !reduced) {
+          // scrollLeft is rounded by the browser, so keep the fractional position here and only take the browser's
+          // when something else (a button, a drag) moved the list.
+          if (Math.abs(marquee.scrollLeft - Math.round(pos)) > 1) pos = marquee.scrollLeft;
+          pos += perSecond() * dt;
+          if (pos >= span()) pos -= span();
+          marquee.scrollLeft = pos;
+        }
+        requestAnimationFrame(frame);
+      };
+
+      marquee.addEventListener('scroll', onScroll, { passive: true });
+      marquee.addEventListener('pointerenter', () => (held = true));
+      marquee.addEventListener('pointerleave', () => (held = false));
+      marquee.addEventListener('focusin', () => (held = true));
+      marquee.addEventListener('focusout', () => (held = false));
+
+      marquee.addEventListener('click', (event) => {
+        const chip = (event.target as HTMLElement).closest<HTMLElement>('[data-pick]');
+        if (!chip) return;
+        widget = Number(chip.dataset.pick);
+        size = 0;
+        render();
+        centre(widget, true);
+      });
+      navs.forEach((b) =>
+        b.addEventListener('click', () => {
+          const dir = Number(b.dataset.nav);
+          const d = dir * marquee.clientWidth * 0.8;
+          fit(d);
+          slide(d);
+          held = true; // paging means the visitor is steering: stay still until the pointer leaves
+          window.setTimeout(() => { if (!marquee.matches(':hover, :focus-within') && !b.matches(':hover, :focus')) held = false; }, 4000);
+        }),
+      );
+
+      // Start with the first widget in the middle, and only drift while the showcase is on screen.
+      requestAnimationFrame((t) => {
+        last = t;
+        centre(0, false);
+        pos = marquee.scrollLeft;
+        frame(t);
+      });
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(([entry]) => (held = !entry.isIntersecting), { threshold: 0.1 }).observe(root);
+      }
     }
     render();
   }

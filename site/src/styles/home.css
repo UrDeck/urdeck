@@ -145,13 +145,22 @@ figcaption .chips { margin-top: 0.6rem; }
 .marquee-track { display: flex; width: max-content; animation: marquee-run linear infinite; }
 .marquee:hover .marquee-track, .marquee:focus-within .marquee-track { animation-play-state: paused; }
 /* Each copy of the list is wider than the content column, so a name never shows twice at once. */
-.marquee-half { display: flex; flex: none; justify-content: space-around; gap: 0.75rem; min-width: 87.5rem; }
+.marquee-half { display: flex; flex: none; justify-content: space-around; gap: 0.75rem; min-width: 87.5rem; box-sizing: border-box; padding-right: 0.75rem; } /* the padding is the gap at the seam where the copies meet */
 .marquee-chip { flex: none; text-align: left; cursor: pointer; font: inherit; color: inherit; padding: 0.875rem 1.375rem; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); }
 .marquee-chip[aria-pressed='true'] { background: rgb(var(--accent-rgb) / 0.14); border-color: rgb(var(--accent-rgb) / 0.6); }
 .marquee-chip b { display: block; font: 600 1.25rem/1.2 var(--display); letter-spacing: -0.02em; }
 .marquee-chip small { display: block; margin-top: 2px; font: 400 0.72rem/1.3 var(--mono); color: var(--dim); }
 .marquee-more { flex: none; padding: 0.875rem 1.375rem; border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 18px; color: var(--dim); font-size: 0.94rem; display: flex; align-items: center; }
 @keyframes marquee-run { to { transform: translateX(-50%); } }
+/* With script the list is a scroller that script drifts, and the buttons page it by hand. */
+.marquee-row { display: flex; align-items: center; gap: 0.5rem; margin-top: 1.25rem; }
+.marquee-row .marquee { flex: 1; min-width: 0; margin-top: 0; }
+.marquee.is-scripted { overflow-x: auto; scrollbar-width: none; }
+.marquee.is-scripted::-webkit-scrollbar { display: none; }
+.marquee.is-scripted .marquee-track { animation: none; }
+.marquee-nav { flex: none; width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font: inherit; font-size: 1.1rem; line-height: 1; cursor: pointer; }
+.marquee-nav:hover { border-color: rgb(var(--accent-rgb) / 0.6); color: var(--accent); }
+.marquee-nav[hidden] { display: none; }
 
 /* Backgrounds */
 .backgrounds { margin-top: 3.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr)); gap: 2rem 1.5rem; }
@@ -185,7 +194,7 @@ body.home .site-footer { margin-top: 5rem; }
 
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { animation: none; }
-  .marquee-half { min-width: 0; }
+  .marquee-half { min-width: 0; padding-right: 0; }
   .marquee-half[data-dup] { display: none; }
   .marquee { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
 }
