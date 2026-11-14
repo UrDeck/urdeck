@@ -73,16 +73,17 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
 
     /// <param name="time">The clock of the readings, the launcher's repeat guard and the icon cache's age.</param>
     /// <param name="iconCacheFolder">Where fetched site icons are kept; by default the system's temp folder, so that nothing is written beside the executable.</param>
+    /// <param name="cacheFolder">The data folder's <c>cache/</c>, offered to providers (<c>IReadingSink.CacheFolder</c>); null offers none.</param>
     /// <param name="demo">
     /// Demo mode (host-shell, "Demo Mode"): every provider whose assembly carries a sample is registered as its sample, read by
     /// this clock, and no site icon is fetched. Null runs the providers.
     /// </param>
     /// <param name="secrets">The secret store of the providers; by default the system's (Credential Manager on Windows, the environment elsewhere).</param>
-    public WidgetPluginLoader(TimeProvider? time = null, string? iconCacheFolder = null, SampleClock? demo = null, ISecretStore? secrets = null)
+    public WidgetPluginLoader(TimeProvider? time = null, string? iconCacheFolder = null, SampleClock? demo = null, ISecretStore? secrets = null, string? cacheFolder = null)
     {
         _demo = demo;
         Secrets = secrets ?? SecretStores.CreateDefault();
-        _hub = new ReadingHub(_providers, time, secrets: Secrets);
+        _hub = new ReadingHub(_providers, time, secrets: Secrets, cacheFolder: cacheFolder);
         _icons = new IconService(iconCacheFolder ?? Path.Combine(Path.GetTempPath(), "urdeck-icons"), time) { SiteIcons = demo == null };
         _launcher = new Launcher(time);
         _registry.CreateServices = () => new WidgetServices(_hub, _launcher, _icons, _hub);

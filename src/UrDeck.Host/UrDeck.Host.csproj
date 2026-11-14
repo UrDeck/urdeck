@@ -31,11 +31,13 @@
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Control\UrDeck.Widgets.Control.csproj" />
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.List\UrDeck.Widgets.List.csproj" />
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.NowPlaying\UrDeck.Widgets.NowPlaying.csproj" />
+        <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Steam\UrDeck.Widgets.Steam.csproj" />
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Shortcut\UrDeck.Widgets.Shortcut.csproj" />
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Stats\UrDeck.Widgets.Stats.csproj" />
         <UrDeckPlugin Include="..\..\widgets\UrDeck.Widgets.Weather\UrDeck.Widgets.Weather.csproj" />
         <UrDeckPlugin Include="..\..\providers\UrDeck.Providers.HomeAssistant\UrDeck.Providers.HomeAssistant.csproj" />
         <UrDeckPlugin Include="..\..\providers\UrDeck.Providers.Media\UrDeck.Providers.Media.csproj" />
+        <UrDeckPlugin Include="..\..\providers\UrDeck.Providers.Steam\UrDeck.Providers.Steam.csproj" />
         <UrDeckPlugin Include="..\..\providers\UrDeck.Providers.System\UrDeck.Providers.System.csproj" />
         <UrDeckPlugin Include="..\..\providers\UrDeck.Providers.Weather\UrDeck.Providers.Weather.csproj" />
     </ItemGroup>

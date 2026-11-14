@@ -623,6 +623,9 @@ public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings> 
   works only for your own `SetBySignIn` secrets, replaces the stored value (the account name stays) and does not restart the provider.
   It returns false, and the log says so once, when nothing was kept (the environment variable is the source, no store, a value over
   2,560 bytes): use the new value in memory anyway.
+- **A cache folder.** `sink.CacheFolder` is the data folder's `cache/` (portable mode included); make a folder of your own name in it
+  (the Steam provider keeps `cache/steam/`: game names and at most 300 avatars) and keep it small and rebuildable, because the user
+  may delete it. It is empty when the host has none (a preview, a test): use a temporary folder then.
 - **Tests.** Use `InMemorySecretBackend` with `SecretStore` in an engine test; keep any real Credential Manager test under the target
   prefix `UrDeckTest` (see `SecretStoreTests`).
 
@@ -717,6 +720,11 @@ runs as usual in demo mode. The file is `sample.json`, embedded in the provider'
 - **Placeholders.** A path may hold whole segments written `{name}`, as a catalog pattern does: the sample answers for any value
   there (`weather:Zurich/...` and `weather:Portland, OR/...` alike), and `{name}` in a text value is replaced by the value asked
   for, so a place's name reads back as the place.
+- **Pictures.** A made-up avatar or cover travels in the assembly too: embed it as
+  `<EmbeddedResource Include="Sample\*.png" LogicalName="urdeck.sample.<provider id>.%(Filename)%(Extension)" />` and write a text value
+  as `"res:<file>"` (`"res:avatar-1.png"`). When the sample is loaded, each such text becomes the path of that picture, written once to
+  `%TEMP%/UrDeck/sample/<provider id>/`, so a widget loads it like any picture file; one the assembly does not carry becomes an empty text
+  and a warning. Previews decode these files (and no other icon source), so the pictures of the site, the goldens and `--demo` show them.
 - **The check.** The engine reads the file strictly: an unknown key, a value of the wrong kind or keys out of order are each a
   finding naming the reading, and a file with any finding gives no sample (the log says so once, with the provider's name).
   Add a test like `tests/UrDeck.Engine.Tests/ProviderSampleTests.cs`: the file parses without findings, and every path your

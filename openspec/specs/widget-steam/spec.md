@@ -1,9 +1,12 @@
-## ADDED Requirements
+# widget-steam Specification
 
+## Purpose
+TBD - created by archiving change steam-provider. Update Purpose after archive.
+## Requirements
 ### Requirement: Steam Widget Identity
 The system MUST provide a first-party widget `urdeck.widgets.steam` that shows the Steam provider's readings. It
 references only the SDK, draws no card, names no font and takes its colours, including the colours of Steam states, from
-the theme's status palette.
+the theme's status colours (good for online, warning for away and snooze, critical for busy, the accent for playing).
 
 #### Scenario: Theme colours
 - **WHEN** the theme changes
@@ -23,10 +26,11 @@ The widget MUST declare:
 ### Requirement: Steam Widget Layout
 The widget MUST draw by size:
 
-- 1x1: an image (my avatar when connected, otherwise the game's art when playing, otherwise the theme's Steam glyph) with
+- 1x1: an image (the game's art while playing, otherwise my avatar when connected, otherwise the theme's Steam glyph) with
   a state mark, and the number of friends playing
 - 2x1: the image, my name, my state or game on the second line, and "N playing · M online"
-- 2x2 and 4x2: the 2x1 card above the friends list (avatar, name, game), as many rows as fit
+- 2x2 and 4x2: the 2x1 card above the friends list (avatar, name, and the game or, for a friend not playing, how the friend
+  is), as many rows as fit
 - 4x4: as 4x2, with recent games (art, name, hours in the last two weeks) below the friends when `showRecent` is on
 
 When `showDownloads` is on and a download is active, the card's second line shows the game and its progress with a
@@ -69,3 +73,4 @@ The widget MUST draw from the Steam provider's sample in the preview tool, the g
 #### Scenario: Golden images
 - **WHEN** the golden tests run
 - **THEN** the widget is drawn at 1x1, 2x1, 2x2, 4x2 and 4x4 from the sample and matches the stored images
+

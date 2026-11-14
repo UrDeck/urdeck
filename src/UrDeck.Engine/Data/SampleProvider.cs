@@ -2,6 +2,8 @@
 // Copyright (C) 2026 Patrick Bigler
 
 using System.Reflection;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Sdk.Data;
 
@@ -64,7 +66,7 @@ public sealed class SampleProvider : IDataProvider
 public sealed record SampleClock(Func<DateTime> Now, DateTime Start);
 
 /// <summary>Finds the sample file a provider's assembly carries and registers the sample in the provider's place.</summary>
-public static class ProviderSamples
+public static partial class ProviderSamples
 {
     /// <summary>The logical name of a provider's sample file in its assembly: <c>urdeck.sample.&lt;id&gt;.json</c>.</summary>
     public static string ResourceName(string providerId) => $"urdeck.sample.{providerId}.json";
@@ -87,11 +89,58 @@ public static class ProviderSamples
         string json;
         using (var reader = new StreamReader(stream))
             json = reader.ReadToEnd();
+        json = ResolvePictures(json, assembly, provider.Id);
         var file = SampleFile.Parse(json, out var findings);
         if (file == null)
             UrDeckLog.Warn($"Provider '{provider.Id}' ({provider.Name}): its sample file cannot be used, so it has no sample: {string.Join("; ", findings)}");
         return file;
     }
+
+    /// <summary>
+    /// Replaces each text <c>"res:&lt;file&gt;"</c> of a sample by the path of that picture, which the assembly carries as
+    /// <c>urdeck.sample.&lt;id&gt;.&lt;file&gt;</c>: a made-up avatar or cover that widgets load like any picture file. The pictures are
+    /// written once to a folder of the system's temporary files; a picture the assembly does not carry becomes an empty text.
+    /// </summary>
+    internal static string ResolvePictures(string json, Assembly assembly, string providerId) =>
+        PictureReference().Replace(json, match =>
+        {
+            string path = ExtractPicture(assembly, providerId, match.Groups[1].Value);
+            return JsonSerializer.Serialize(path);
+        });
+
+    private static string ExtractPicture(Assembly assembly, string providerId, string file)
+    {
+        try
+        {
+            using var stream = assembly.GetManifestResourceStream($"urdeck.sample.{providerId}.{file}");
+            if (stream == null)
+            {
+                UrDeckLog.Warn($"Provider '{providerId}': its sample names the picture '{file}', which its assembly does not carry");
+                return "";
+            }
+
+            string folder = Path.Combine(Path.GetTempPath(), "UrDeck", "sample", providerId);
+            string target = Path.Combine(folder, file);
+            if (!File.Exists(target) || new FileInfo(target).Length != stream.Length)
+            {
+                Directory.CreateDirectory(folder);
+                string temp = target + "." + Environment.ProcessId.ToString(System.Globalization.CultureInfo.InvariantCulture) + ".tmp";
+                using (var output = File.Create(temp))
+                    stream.CopyTo(output);
+                File.Move(temp, target, overwrite: true);
+            }
+
+            return target;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            UrDeckLog.Warn($"Provider '{providerId}': a sample picture could not be written ({ex.GetType().Name})");
+            return "";
+        }
+    }
+
+    [GeneratedRegex("\"res:([A-Za-z0-9._-]+)\"")]
+    private static partial Regex PictureReference();
 
     /// <summary>
     /// The provider's descriptor with the sample in its place: the same id, name and intervals, an instance that replays

@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Copyright (C) 2026 Patrick Bigler
 
+using SkiaSharp;
 using UrDeck.Engine.Config;
 using UrDeck.Engine.Data;
 using UrDeck.Engine.Plugin;
 using UrDeck.Providers.HomeAssistant;
 using UrDeck.Providers.Machine;
 using UrDeck.Providers.Media;
+using UrDeck.Providers.Steam;
 using UrDeck.Providers.Weather;
 using UrDeck.Sdk;
 using UrDeck.Sdk.Data;
@@ -18,6 +20,7 @@ using UrDeck.Widgets.List;
 using UrDeck.Widgets.NowPlaying;
 using UrDeck.Widgets.Shortcut;
 using UrDeck.Widgets.Stats;
+using UrDeck.Widgets.Steam;
 using UrDeck.Widgets.Weather;
 
 namespace UrDeck.Preview;
@@ -29,7 +32,7 @@ namespace UrDeck.Preview;
 public static class PreviewWidgets
 {
     private static readonly Lazy<IReadOnlyList<WidgetDescriptor>> All = new(() =>
-        new[] { typeof(ClockWidget), typeof(StatsWidget), typeof(WeatherWidget), typeof(ShortcutWidget), typeof(NowPlayingWidget), typeof(ControlWidget), typeof(ListWidget) }
+        new[] { typeof(ClockWidget), typeof(StatsWidget), typeof(WeatherWidget), typeof(ShortcutWidget), typeof(NowPlayingWidget), typeof(SteamWidget), typeof(ControlWidget), typeof(ListWidget) }
             .Select(type => WidgetDescriptor.TryCreate(type, out _)!)
             .OrderBy(d => d.Id, StringComparer.Ordinal)
             .ToList());
@@ -62,7 +65,7 @@ public static class PreviewWidgets
 public static class PreviewProviders
 {
     private static readonly Lazy<IReadOnlyList<(ProviderDescriptor Provider, SampleFile? Sample)>> All = new(() =>
-        new[] { typeof(HomeAssistantProvider), typeof(MediaProvider), typeof(SystemProvider), typeof(WeatherProvider) }
+        new[] { typeof(HomeAssistantProvider), typeof(MediaProvider), typeof(SteamProvider), typeof(SystemProvider), typeof(WeatherProvider) }
             .Select(type => ProviderDescriptor.TryCreate(type, out _)!)
             .Select(provider => (provider, ProviderSamples.Find(provider)))
             .OrderBy(p => p.provider.Id, StringComparer.Ordinal)
@@ -93,11 +96,16 @@ public static class PreviewProviders
 }
 
 /// <summary>
-/// What a widget in a preview is given: the readings of the preview's hub, a launcher that opens nothing, and icons that are
-/// always on their way, so a shortcut draws its letter tile on every machine and no network or shell is asked.
+/// What a widget in a preview is given: the readings of the preview's hub, a launcher that opens nothing, and icons: a picture
+/// file that exists (a sample's made-up avatar or cover) is decoded at once, anything else is always on its way, so a shortcut
+/// draws its letter tile on every machine and no network or shell is asked.
 /// </summary>
-internal sealed class PreviewHost(IReadingSource readings) : IWidgetHost, ILauncher, IIconSource
+internal sealed class PreviewHost(IReadingSource readings) : IWidgetHost, ILauncher, IIconSource, IDisposable
 {
+    private static readonly string[] PictureExtensions = [".png", ".jpg", ".jpeg", ".webp"];
+
+    private readonly Dictionary<string, SKImage?> _pictures = new(StringComparer.Ordinal);
+
     public IReadingSource Readings { get; } = readings;
 
     public ILauncher Launcher => this;
@@ -110,7 +118,25 @@ internal sealed class PreviewHost(IReadingSource readings) : IWidgetHost, ILaunc
 
     public bool Launch(string target, string? arguments = null) => false;
 
-    public IconResult GetIcon(string source, int pixelSize) => IconResult.Loading;
+    public IconResult GetIcon(string source, int pixelSize)
+    {
+        if (!PictureExtensions.Contains(Path.GetExtension(source), StringComparer.OrdinalIgnoreCase) || !Path.IsPathRooted(source))
+            return IconResult.Loading;
+        if (!_pictures.TryGetValue(source, out var image))
+        {
+            image = File.Exists(source) ? SKImage.FromEncodedData(source) : null;
+            _pictures[source] = image;
+        }
+
+        return image == null ? IconResult.None : new IconResult(image, false);
+    }
+
+    public void Dispose()
+    {
+        foreach (var image in _pictures.Values)
+            image?.Dispose();
+        _pictures.Clear();
+    }
 }
 
 /// <summary>Reads the configuration a preview draws.</summary>

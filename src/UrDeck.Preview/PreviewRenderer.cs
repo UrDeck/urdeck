@@ -147,7 +147,8 @@ public sealed class PreviewRenderer(ThemeStore themes, ShaderStore shaders, stri
         DateTime now = moment;
         using var hub = new ReadingHub(PreviewProviders.Registry(() => now, moment),
             regionUsesFahrenheit: false, regionUses24HourClock: true, sampling: ReadingHubSampling.Manual);
-        using var page = PreviewPage.Build(config, pageIndex, request.WithDock && request.Widget == null, new PreviewHost(hub));
+        using var host = new PreviewHost(hub);
+        using var page = PreviewPage.Build(config, pageIndex, request.WithDock && request.Widget == null, host);
         hub.Subscribe(page.Subscriptions);
 
         var decision = MotionPolicy.ForSnapshot(MotionName(request.Motion), theme.Definition.Motion?.Level);

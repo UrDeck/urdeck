@@ -53,8 +53,12 @@ Steamworks SDK or the client's debug port.
 6. **Renewal is the gate (task 1).** The access token lives about 24 h; the provider renews it from the refresh token
    before expiry (`IAuthenticationService/GenerateAccessTokenForApp`, with `renewal_type` so a rotated refresh token
    comes back) and stores a rotated refresh token with `StoreSecret`. The spike must show this working for a sign-in
-   with the right `platform_type` (1, Steam client, is the first candidate), and find `RevokeRefreshToken`'s parameters for
-   Disconnect. If no Web API renewal works: the connected half moves to SteamKit2 over the same `ISteamWeb`-level seam
+   with the right `platform_type`, and find `RevokeRefreshToken`'s parameters for Disconnect.
+   **Result (2026-11-13, `docs/handoff/2026-11-12-steam.md`): the Web API works with `platform_type` 3 (mobile app,
+   `website_id=Mobile`).** `GenerateAccessTokenForApp` with `refresh_token` and `steamid` returns a new access token; no rotated
+   refresh token comes back (`StoreSecret` is only used if one ever does), and the refresh token's 210 days are the lifetime of
+   a connection. `RevokeRefreshToken` with `refresh_token` and `steamid` (authenticated by the access token) ends the session.
+   Platform 1 tokens cannot renew or revoke. So the Web API stays and SteamKit2 is not needed. Had no Web API renewal worked: the connected half moves to SteamKit2 over the same `ISteamWeb`-level seam
    (a CM connection signed in with the refresh token, persona state pushed). That is larger but changes no requirement.
    A refresh token Steam rejects makes the connected readings unavailable with `Steam sign-in expired; connect Steam
    again in Settings` and stops calling Steam until the secret changes.
@@ -73,7 +77,9 @@ Steamworks SDK or the client's debug port.
 9. **The widget composes components, it does not draw a card.** Card: `ImageTile` (my avatar when connected, else the
    game's art, else the theme's Steam glyph), `TextLine`s for name, state and game, a `Chip` for "3 playing", a `Gauge`
    bar for a download. List: `TextList.SetItems` from `friends/online` or `friends/playing`. Status colours come from
-   the theme's status palette (online, away, busy, playing), never from the widget.
+   the theme's existing status colours (good for online, warning for away and snooze, critical for busy, the accent for
+   playing), never from the widget; the theme gains no new keys. A friend's state is the row's detail line when no game is
+   shown, not a coloured column (it made the names start far from the pictures).
 
 10. **What leaves the PC.** Only after Connect, only while a connected reading is shown, and only to Steam's hosts listed in
     the proposal. Never logged: persona names, account names, SteamIDs, game names, tokens. Logged: state changes,

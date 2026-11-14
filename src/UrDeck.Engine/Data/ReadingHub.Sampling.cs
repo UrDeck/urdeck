@@ -893,5 +893,7 @@ public sealed partial class ReadingHub
 
         public bool StoreSecret(string setting, SecretValue value) =>
             hub.StoreSecretFromProvider(runtime, generation, setting, value);
+
+        public string CacheFolder => hub.CacheFolder;
     }
 }

@@ -34,8 +34,10 @@
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Control\UrDeck.Widgets.Control.csproj" />
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.List\UrDeck.Widgets.List.csproj" />
     <ProjectReference Include="..\..\widgets\UrDeck.Widgets.NowPlaying\UrDeck.Widgets.NowPlaying.csproj" />
+    <ProjectReference Include="..\..\widgets\UrDeck.Widgets.Steam\UrDeck.Widgets.Steam.csproj" />
     <ProjectReference Include="..\..\providers\UrDeck.Providers.HomeAssistant\UrDeck.Providers.HomeAssistant.csproj" />
     <ProjectReference Include="..\..\providers\UrDeck.Providers.Media\UrDeck.Providers.Media.csproj" />
+    <ProjectReference Include="..\..\providers\UrDeck.Providers.Steam\UrDeck.Providers.Steam.csproj" />
     <ProjectReference Include="..\..\providers\UrDeck.Providers.System\UrDeck.Providers.System.csproj" />
     <ProjectReference Include="..\..\providers\UrDeck.Providers.Weather\UrDeck.Providers.Weather.csproj" />
   </ItemGroup>

@@ -14,6 +14,7 @@
   <Folder Name="/providers/">
     <Project Path="providers/UrDeck.Providers.HomeAssistant/UrDeck.Providers.HomeAssistant.csproj" />
     <Project Path="providers/UrDeck.Providers.Media/UrDeck.Providers.Media.csproj" />
+    <Project Path="providers/UrDeck.Providers.Steam/UrDeck.Providers.Steam.csproj" />
     <Project Path="providers/UrDeck.Providers.System/UrDeck.Providers.System.csproj" />
     <Project Path="providers/UrDeck.Providers.Weather/UrDeck.Providers.Weather.csproj" />
   </Folder>
@@ -22,6 +23,7 @@
     <Project Path="widgets/UrDeck.Widgets.Control/UrDeck.Widgets.Control.csproj" />
     <Project Path="widgets/UrDeck.Widgets.List/UrDeck.Widgets.List.csproj" />
     <Project Path="widgets/UrDeck.Widgets.NowPlaying/UrDeck.Widgets.NowPlaying.csproj" />
+    <Project Path="widgets/UrDeck.Widgets.Steam/UrDeck.Widgets.Steam.csproj" />
     <Project Path="widgets/UrDeck.Widgets.Shortcut/UrDeck.Widgets.Shortcut.csproj" />
     <Project Path="widgets/UrDeck.Widgets.Stats/UrDeck.Widgets.Stats.csproj" />
     <Project Path="widgets/UrDeck.Widgets.Weather/UrDeck.Widgets.Weather.csproj" />
