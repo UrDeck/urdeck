@@ -56,11 +56,17 @@ public sealed class SteamWindowsWatchTests : IDisposable
     [WindowsFact]
     public void A_registry_change_under_steams_key_is_reported_and_stops_when_the_watch_is_disposed()
     {
-        using var local = new WindowsSteamLocal(_root);
-        using var changed = new ManualResetEventSlim();
+        // A machine without Steam (a CI runner) has no key to watch: make it for the test and remove only what was made.
+        const string Valve = @"Software\Valve";
+        const string SteamKey = @"Software\Valve\Steam";
         const string Probe = @"Software\Valve\Steam\UrDeckTestProbe";
+        bool madeValve = Registry.CurrentUser.OpenSubKey(Valve) is null;
+        bool madeSteam = Registry.CurrentUser.OpenSubKey(SteamKey) is null;
+        Registry.CurrentUser.CreateSubKey(SteamKey).Dispose();
         try
         {
+            using var local = new WindowsSteamLocal(_root);
+            using var changed = new ManualResetEventSlim();
             var watch = local.Watch(LocalChange.Client, c => changed.Set());
             using (var key = Registry.CurrentUser.CreateSubKey(Probe))
                 key.SetValue("n", 1);
@@ -71,6 +77,10 @@ public sealed class SteamWindowsWatchTests : IDisposable
         finally
         {
             Registry.CurrentUser.DeleteSubKey(Probe, throwOnMissingSubKey: false);
+            if (madeSteam)
+                Registry.CurrentUser.DeleteSubKey(SteamKey, throwOnMissingSubKey: false);
+            if (madeValve)
+                Registry.CurrentUser.DeleteSubKey(Valve, throwOnMissingSubKey: false);
         }
     }
 }
