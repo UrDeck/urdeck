@@ -151,6 +151,12 @@ internal interface ISettingsHost
     /// <summary>Runs a provider's connection test with the values of the form, saving nothing.</summary>
     Task<EditorResult> TestProviderAsync(string providerId, IReadOnlyDictionary<string, string> values, IReadOnlyDictionary<string, string> newSecrets, CancellationToken cancellationToken);
 
+    /// <summary>Sign-in of the providers that offer one (Connect, Cancel, Disconnect); its sessions end when the window closes.</summary>
+    ProviderSignIn SignIn { get; }
+
+    /// <summary>Opens a web address in the default browser through the launcher (a sign-in challenge's address); false when it is refused.</summary>
+    bool OpenAddress(string address);
+
     /// <summary>The displays, the arrangement or the placement changed. May arrive in bursts and when nothing visible changed.</summary>
     event Action? Changed;
 }

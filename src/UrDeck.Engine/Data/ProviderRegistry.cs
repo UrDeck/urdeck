@@ -28,6 +28,35 @@ public sealed partial record ProviderDescriptor(
     /// <summary>What a reading says while a required setting is missing; empty to name the provider and the setting.</summary>
     public string MissingSettingMessage { get; init; } = "";
 
+    /// <summary>What a reading says while the provider's sign-in has not been made.</summary>
+    public string ConnectReason => $"Connect {Name} in Settings";
+
+    /// <summary>Whether the provider offers a sign-in (an instance is made to ask; a provider that fails to construct offers none).</summary>
+    public bool OffersSignIn
+    {
+        get
+        {
+            if (!typeof(ISignIn).IsAssignableFrom(ProviderType) || !Schema.Secrets.Any(s => s.SetBySignIn))
+                return false;
+            try
+            {
+                var instance = CreateInstance();
+                try
+                {
+                    return instance is ISignIn { Offered: true };
+                }
+                finally
+                {
+                    (instance as IDisposable)?.Dispose();
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+    }
+
     /// <summary>The provider's settings type.</summary>
     public Type SettingsType => SettingsTypeOverride ?? ProviderSchema.FindSettingsType(ProviderType);
 

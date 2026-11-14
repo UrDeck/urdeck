@@ -605,6 +605,24 @@ public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings> 
 - **Connection test.** Override `OffersConnectionTest` (return true) and `ValidateAsync(settings, token)` to give the settings window a
   "Test connection" button. It runs on a provider that is not started, with the unsaved values; return one line (`Connected to
   Home Assistant 2026.10`) or throw with the reason. It is cancelled after 10 seconds.
+- **Sign-in.** A provider whose service lets the user approve a sign-in elsewhere (a phone app, a device code) can offer it instead of
+  a token to paste. Mark the secret `[Secret(SetBySignIn = true)]` (the Providers section then shows Connect, not a text field),
+  override `OffersSignIn` (true), `SignInDescription` (one line: what connecting gives) and `SignOutHint` (where the user ends a
+  session you could not), and implement `SignInAsync(settings, progress, token)`. It runs on a provider that is not started. Report
+  what the user must do with `progress.Show(SignInChallenge.Qr(text, instructions, expiresAt))` (the host draws the QR code; the text
+  is a credential) or `SignInChallenge.CodeAndAddress(code, address, instructions, expiresAt)`, call `Show` again when the service
+  rotates it, `progress.Status("Scanned; approve on your phone")` for progress, and poll the service yourself. Return
+  `SignInResult.Success(account, secrets)` with a value for each of your `SetBySignIn` secrets by key (any other key fails the
+  sign-in; the account name is kept with the secret in Credential Manager and never in the file or the log), or
+  `SignInResult.Failed(reason)` (declined, expired). Honor the token: it is cancelled by Cancel, when the window closes and 30 seconds
+  after the challenge expired, and a result that arrives afterwards is dropped. `SignOutAsync(settings, token)` ends the session at
+  the service when the user disconnects (10 seconds; throw when you could not tell it): the host deletes the secrets either way.
+  Never put a challenge, code, secret or account in a log line. A reading that needs the connection is unavailable until it is made;
+  a required secret set by sign-in reports `Connect <name> in Settings` by itself.
+- **Renewing a secret.** A running provider keeps a rotated token with `sink.StoreSecret("refreshToken", new SecretValue(token))`. It
+  works only for your own `SetBySignIn` secrets, replaces the stored value (the account name stays) and does not restart the provider.
+  It returns false, and the log says so once, when nothing was kept (the environment variable is the source, no store, a value over
+  2,560 bytes): use the new value in memory anyway.
 - **Tests.** Use `InMemorySecretBackend` with `SecretStore` in an engine test; keep any real Credential Manager test under the target
   prefix `UrDeckTest` (see `SecretStoreTests`).
 

@@ -111,6 +111,24 @@ The log tells where each secret came from every time a provider starts, for exam
 `Secret homeassistant/token: from Credential Manager`, and `missing; set it in Settings` when there is none. A secret is at most
 2,560 bytes. Uninstalling UrDeck deletes every credential named `UrDeck/...`.
 
+### Connecting an account
+
+A provider whose service lets you approve a sign-in on your phone shows **Connect** under its settings in **Providers**, instead
+of a field for a token. Press it: a QR code appears (or a code with Copy and Open for a service that works that way), with one
+line saying what to do, the time left and **Cancel**. Scan it with the service's app and approve. The section then says
+**Connected as** and your account name, and the provider starts. Nothing about the QR code reaches the deck, the log or any server
+of ours; it is drawn on your PC.
+
+What is kept where: the token the service gave lives in Windows Credential Manager as `UrDeck/<provider>/<setting>`, and your
+account name is stored with it as the credential's user name, so neither is in `urdeck-config.json` (a file you may share when you
+ask for help) and both go when you disconnect. A provider may renew its token while it runs; the new value replaces the stored one
+without restarting it. The environment variable still takes its place if you prefer: the section then says **Connected** and names
+the variable, and there is no account name. Signing in from the command line or on Linux is not offered; use the variable there.
+
+**Disconnect** asks the service to end the session when it can, then deletes the stored token whatever happened. When the service
+could not be told (you were offline), the section says the session may still be listed in your account at the service, and where to
+remove it. Until you connect, a reading that needs the account says **Connect** and the provider's name **in Settings**.
+
 ## The widgets
 
 Four widgets ship with UrDeck. Each page below lists the widget's settings, its sizes and an example.

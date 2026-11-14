@@ -56,8 +56,11 @@
          Package 0.22.0 (list-readings): ReadingValueType.List, ReadingList, ReadingRow, ReadingKind.List, ReadingField, FieldRole,
          ListRoles, ReadingDescriptor.Fields and EmptyText, ReadingFormatter.FormatField, ReadingFilter.ListsOnly and NoLists, and
          TextListItem.Key, ImageSource and MarkLevel with TextList.Icons and the SetItems overload for a list reading. All additive,
-         so the assembly version stays; a widget that reads a list as one value gets its row count. -->
-    <Version>0.22.0</Version>
+         so the assembly version stays; a widget that reads a list as one value gets its row count.
+         Package 0.23.0 (provider-sign-in): SignInChallenge, ISignInProgress, SignInResult, ISignIn, DataProvider.OffersSignIn,
+         SignInAsync, SignOutAsync, SignInDescription and SignOutHint, SecretAttribute.SetBySignIn and IReadingSink.StoreSecret (a
+         default member). All additive, so the assembly version stays. -->
+    <Version>0.23.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

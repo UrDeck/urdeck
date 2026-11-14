@@ -45,6 +45,8 @@ internal sealed record BoundSettings(
     /// <summary>What a reading says while <see cref="Missing"/> is not empty.</summary>
     public string MissingReason(ProviderDescriptor descriptor)
     {
+        if (Missing.All(m => m.SetBySignIn))
+            return descriptor.ConnectReason;
         if (descriptor.MissingSettingMessage.Length > 0)
             return descriptor.MissingSettingMessage;
         return $"set {string.Join(", ", Missing.Select(m => m.Label))} for {descriptor.Name} in Settings";

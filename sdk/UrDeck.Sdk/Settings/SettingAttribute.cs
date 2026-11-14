@@ -95,6 +95,13 @@ public sealed class SecretAttribute : Attribute
     /// secret, and a copy configured for another value logs that the secret was saved for the other one.
     /// </summary>
     public string? ContextSetting { get; set; }
+
+    /// <summary>
+    /// The secret is obtained by the provider's sign-in (<c>OffersSignIn</c>) and renewed by the provider itself
+    /// (<see cref="IReadingSink.StoreSecret"/>), so the Providers section shows Connect instead of a text field for it. The
+    /// environment variable still overrides it.
+    /// </summary>
+    public bool SetBySignIn { get; set; }
 }
 
 /// <summary>The setting applies only while another setting of the same object has one of the given values.</summary>

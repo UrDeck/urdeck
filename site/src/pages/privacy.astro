@@ -108,6 +108,13 @@ import Base from '../layouts/Base.astro';
     sends it nowhere else, and not to urdeck.app, which has no server to send it to. A provider receives only its own secrets.
   </p>
   <p>
+    Some providers let you <strong>connect an account</strong> by approving a sign-in on your phone. The token the service then
+    gives is kept like any other secret, in Credential Manager, together with your account name (the credential's user name), and
+    deleted when you disconnect. The QR code or the code you type is drawn on your PC and goes nowhere but to the service you are
+    signing in to; UrDeck never sends it to urdeck.app, copies a QR code to the clipboard or writes a challenge, code, token or
+    account name to the log. The only network traffic is between the provider and its own service.
+  </p>
+  <p>
     Credential Manager ties a secret to your Windows account; it does not hide it from a program that runs as you. Malicious code
     running with your user's rights can read it, as it can read your browser's saved passwords, and UrDeck does not defend against
     that. A <a href="#plugins">plugin</a> runs with your rights too. Uninstalling UrDeck from Windows' installed apps deletes every
