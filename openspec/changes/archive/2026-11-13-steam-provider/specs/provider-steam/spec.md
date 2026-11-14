@@ -52,6 +52,7 @@ log says once that the two differ, without naming either.
 After the user connects Steam, the provider MUST offer:
 
 - `me/state` (text): Online, Away, Busy, Snooze, Looking to trade, Looking to play or Offline
+- `me/avatar` (text): the path of my avatar in the cache, empty when there is none
 - `friends/online` (list): friends who are not offline, those playing first, then by name; keyed by SteamID, with `name`
   (title), `game` (detail, absent when not playing), `state` (status), `avatar` (image) and `link`
   (`steam://url/SteamIDPage/<steamid>`); unit "online", empty text "No friends online"

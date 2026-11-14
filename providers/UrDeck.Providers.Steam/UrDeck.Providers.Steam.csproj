@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(UrDeckTfm)</TargetFramework>
+    <Description>First-party data provider for Steam: what this PC knows about the account (the game playing, recent games, downloads) and, after a sign-in, friends.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- UrDeck.Sdk and SkiaSharp are provided by the host at runtime; do not copy them next to the plugin. -->
+    <ProjectReference Include="..\..\sdk\UrDeck.Sdk\UrDeck.Sdk.csproj" Private="false" />
+    <ProjectReference Include="..\..\sdk\UrDeck.Analyzer\UrDeck.Analyzer.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="UrDeck.Engine.Tests" />
+  </ItemGroup>
+
+  <!-- Made-up readings, with made-up avatars and game art, for previews, the picture tests and the host's demo mode (CONTRIBUTING "Sample files").
+       A text in the sample that reads res:<file> is that picture, written to a temporary folder when the sample is loaded. -->
+  <ItemGroup>
+    <EmbeddedResource Include="sample.json" LogicalName="urdeck.sample.steam.json" />
+    <EmbeddedResource Include="Sample\*.png" LogicalName="urdeck.sample.steam.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

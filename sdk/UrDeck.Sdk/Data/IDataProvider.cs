@@ -93,6 +93,13 @@ public interface IReadingSink
     /// source, no store, or a value too large. The default stores nothing and returns false.
     /// </summary>
     bool StoreSecret(string setting, SecretValue value) => false;
+
+    /// <summary>
+    /// A folder the provider may keep files in between runs (downloaded pictures, name lookups): the data folder's <c>cache/</c>.
+    /// Make a folder of your own name inside it and keep it small; the user may delete all of it. Empty when the host has none (a
+    /// preview or a test): use a temporary folder then. The default is empty.
+    /// </summary>
+    string CacheFolder => "";
 }
 
 /// <summary>

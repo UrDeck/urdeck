@@ -60,6 +60,9 @@ public sealed class DataFolder
     /// <summary>First-party plugins; they update with the application. The same folder as <see cref="UserPluginsFolder"/> in portable mode.</summary>
     public string FirstPartyPluginsFolder => Path.Combine(ApplicationFolder, "plugins");
 
+    /// <summary>The cache folder; providers keep downloaded files in folders of their own inside it.</summary>
+    public string CacheFolder => Path.Combine(Root, "cache");
+
     public string IconCacheFolder => Path.Combine(Root, "cache", "icons");
 
     /// <summary>The descriptions of the readings the pages use (<c>ReadingDescriptionCache</c>).</summary>

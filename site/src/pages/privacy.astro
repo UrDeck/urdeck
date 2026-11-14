@@ -76,6 +76,24 @@ import Base from '../layouts/Base.astro';
         <td>Your access token and the service to run on an entity (a light to toggle), or a request for the list of entities.</td>
         <td>One request per tap on a widget that switches something; the list when a reading names an entity that does not exist, when you test the connection, or with <code>urdeck-cli readings browse</code>.</td>
       </tr>
+      <tr>
+        <th scope="row">Steam sign-in and friends</th>
+        <td>Steam (<code>api.steampowered.com</code>)</td>
+        <td>The sign-in you approve in the Steam app, then the token Steam gave you to renew its access and to ask for your friend list and your friends' states. No key, no password.</td>
+        <td>Only after you connect Steam, and only while a Steam reading of your friends or your state is on the screen: about once a minute, the friend list every ten minutes.</td>
+      </tr>
+      <tr>
+        <th scope="row">Steam game names</th>
+        <td>Steam (<code>store.steampowered.com</code>)</td>
+        <td>The number of a game a friend is playing that you do not have installed.</td>
+        <td>Once per game, then kept in a small cache. At most five lookups a sample.</td>
+      </tr>
+      <tr>
+        <th scope="row">Steam avatars</th>
+        <td>Steam (<code>avatars.fastly.steamstatic.com</code>)</td>
+        <td>A request for the picture of each friend in the list shown, by its hash.</td>
+        <td>Once per picture, then kept (at most 300 pictures). Only after you connect Steam.</td>
+      </tr>
     </tbody>
   </table>
 
@@ -96,6 +114,13 @@ import Base from '../layouts/Base.astro';
     keyboard's media keys do. None of it leaves your PC. The cover is written to a small folder under your temporary folder
     (<code>%TEMP%\UrDeck\media-art</code>, at most two pictures), cleared when UrDeck starts and removed when it stops, and the
     title, artist and cover are never written to the log. Without a now playing card the provider reads nothing.
+  </p>
+  <p>
+    The <strong>Steam</strong> card reads what the Steam client keeps on your PC: a few values in Windows' registry (whether Steam
+    runs, the account signed in, the game being played) and its own files in the Steam folder (the names of your installed games,
+    your recent games and hours, the progress of downloads, the pictures in its library cache), read-only and only while a card
+    that shows them is on the screen. None of it leaves your PC, and no name, game or Steam id is written to the log. Friends
+    are the one part that needs Steam's servers; see the table above.
   </p>
 
   <h2 id="secrets">Tokens and passwords</h2>
@@ -136,6 +161,7 @@ import Base from '../layouts/Base.astro';
     <li>Open-Meteo learns the places you ask the weather for, and so roughly where you are or care about, along with your IP address. The place search sends exactly what you typed.</li>
     <li>A site you put on a shortcut learns that someone at your IP address runs UrDeck and has that site on their deck.</li>
     <li>GitHub learns that your IP address asked for UrDeck's releases about once a day, which tells it that UrDeck is installed there.</li>
+    <li>Steam learns that your account signed in from your PC with a mobile-app session called UrDeck, and, about once a minute while a card that shows friends is on the screen, which friends' states you ask for; it already knows all of that about your account. It is the same traffic Steam's own mobile app makes.</li>
     <li>Your Home Assistant learns which of its entities are on your deck and when the deck shows them, as its own app would. It is yours, so this stays in your house unless you put Home Assistant elsewhere.</li>
   </ul>
   <p>UrDeck does not combine these, keep a record of them or pass them on. Each goes straight from your PC to the service named.</p>
@@ -145,6 +171,7 @@ import Base from '../layouts/Base.astro';
     <li><strong>Update check:</strong> add <code>"updates": "off"</code> to <code>urdeck-config.json</code>. A copy you built yourself or ran from a folder never checks.</li>
     <li><strong>Place search and forecast:</strong> do not use a weather widget. Without one, the weather provider makes no request.</li>
     <li><strong>Site icons:</strong> give the shortcut an <code>icon</code> of its own (a local image file), or point it at something that is not a web address. A shortcut with its own icon makes no request.</li>
+    <li><strong>Steam:</strong> do not connect it, or choose Disconnect, which ends the session at Steam and deletes the token. Without a connection the Steam card reads only your PC and sends nothing.</li>
     <li><strong>Home Assistant:</strong> do not set it up, or remove its readings from your pages. Without a Home Assistant reading on the screen, no connection is open.</li>
   </ul>
   <p>

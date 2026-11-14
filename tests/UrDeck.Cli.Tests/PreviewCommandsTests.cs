@@ -63,7 +63,7 @@ public sealed class PreviewCommandsTests : IDisposable
         var run = Workspace.Invoke("preview", "render", "--widget", "example.unknown", "--widget-size", "1x1", "-o", "x.png");
 
         Assert.Equal(1, run.Code);
-        Assert.Contains("urdeck.widgets.clock, urdeck.widgets.control, urdeck.widgets.list, urdeck.widgets.nowplaying, urdeck.widgets.shortcut, urdeck.widgets.stats, urdeck.widgets.weather", run.Error);
+        Assert.Contains("urdeck.widgets.clock, urdeck.widgets.control, urdeck.widgets.list, urdeck.widgets.nowplaying, urdeck.widgets.shortcut, urdeck.widgets.stats, urdeck.widgets.steam, urdeck.widgets.weather", run.Error);
         Assert.False(File.Exists("x.png"));
     }
 
@@ -161,9 +161,9 @@ public sealed class PreviewCommandsTests : IDisposable
         Assert.Equal(1, root.GetProperty("version").GetInt32());
         Assert.Equal(ThemeStore.BuiltInNames.Order(StringComparer.Ordinal), Names(root.GetProperty("themes"), "name"));
         Assert.Equal(ShaderStore.BuiltInNames.Order(StringComparer.Ordinal), Names(root.GetProperty("backgrounds"), "name"));
-        Assert.Equal(["urdeck.widgets.clock", "urdeck.widgets.control", "urdeck.widgets.list", "urdeck.widgets.nowplaying", "urdeck.widgets.shortcut", "urdeck.widgets.stats", "urdeck.widgets.weather"],
+        Assert.Equal(["urdeck.widgets.clock", "urdeck.widgets.control", "urdeck.widgets.list", "urdeck.widgets.nowplaying", "urdeck.widgets.shortcut", "urdeck.widgets.stats", "urdeck.widgets.steam", "urdeck.widgets.weather"],
             Names(root.GetProperty("widgets"), "typeId"));
-        Assert.Equal(["homeassistant", "media", "system", "weather"], Names(root.GetProperty("providers"), "id"));
+        Assert.Equal(["homeassistant", "media", "steam", "system", "weather"], Names(root.GetProperty("providers"), "id"));
         Assert.All(root.GetProperty("providers").EnumerateArray(), p => Assert.True(p.GetProperty("sample").GetBoolean()));
 
         var rigline = root.GetProperty("themes").EnumerateArray().Single(t => t.GetProperty("name").GetString() == "rigline");
@@ -188,8 +188,13 @@ public sealed class PreviewCommandsTests : IDisposable
             [("name", "title"), ("cpu", "status"), ("memory", "detail")],
             processes.GetProperty("fields").EnumerateArray().Select(f => (f.GetProperty("name").GetString()!, f.GetProperty("role").GetString()!)));
         Assert.All(
-            root.GetProperty("providers").EnumerateArray().Where(p => p.GetProperty("id").GetString() != "system"),
+            root.GetProperty("providers").EnumerateArray().Where(p => p.GetProperty("id").GetString() is not ("system" or "steam")),
             p => Assert.Equal(0, p.GetProperty("lists").GetArrayLength()));
+
+        var steam = root.GetProperty("providers").EnumerateArray().Single(p => p.GetProperty("id").GetString() == "steam");
+        Assert.Equal(
+            ["downloads", "friends/online", "friends/playing", "games/recent"],
+            steam.GetProperty("lists").EnumerateArray().Select(l => l.GetProperty("path").GetString()!).Order(StringComparer.Ordinal));
 
         var list = root.GetProperty("widgets").EnumerateArray().Single(w => w.GetProperty("typeId").GetString() == "urdeck.widgets.list");
         var reading = list.GetProperty("settings").EnumerateArray().Single(s => s.GetProperty("name").GetString() == "reading");
@@ -197,12 +202,15 @@ public sealed class PreviewCommandsTests : IDisposable
     }
 
     [Fact]
-    public void Only_Home_Assistant_declares_settings_beyond_the_base_ones()
+    public void Only_Home_Assistant_and_Steam_declare_settings_beyond_the_base_ones()
     {
         using var document = JsonDocument.Parse(Workspace.Invoke("catalog", "export").Out);
 
         var providers = document.RootElement.GetProperty("providers").EnumerateArray().ToList();
-        Assert.All(providers.Where(p => p.GetProperty("id").GetString() != "homeassistant"), p => Assert.Equal(0, p.GetProperty("settings").GetArrayLength()));
+        Assert.All(providers.Where(p => p.GetProperty("id").GetString() is not ("homeassistant" or "steam")), p => Assert.Equal(0, p.GetProperty("settings").GetArrayLength()));
+        var steam = providers.Single(p => p.GetProperty("id").GetString() == "steam").GetProperty("settings");
+        Assert.Equal(["refreshToken"], steam.EnumerateArray().Select(s => s.GetProperty("name").GetString()));
+        Assert.Equal("URDECK_SECRET_STEAM_REFRESHTOKEN", steam[0].GetProperty("environmentVariable").GetString());
         var homeAssistant = providers.Single(p => p.GetProperty("id").GetString() == "homeassistant").GetProperty("settings");
         Assert.Equal(["url", "token"], homeAssistant.EnumerateArray().Select(s => s.GetProperty("name").GetString()));
         Assert.Equal("URDECK_SECRET_HOMEASSISTANT_TOKEN", homeAssistant[1].GetProperty("environmentVariable").GetString());

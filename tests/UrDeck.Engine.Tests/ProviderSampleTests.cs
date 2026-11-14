@@ -7,6 +7,7 @@ using UrDeck.Engine.Data;
 using UrDeck.Engine.Tests.Support;
 using UrDeck.Providers.Machine;
 using UrDeck.Providers.Media;
+using UrDeck.Providers.Steam;
 using UrDeck.Providers.Weather;
 using UrDeck.Sdk.Data;
 using Xunit;
@@ -35,6 +36,8 @@ public sealed partial class ProviderSampleTests
 
     private static SampleFile Media => Sample(typeof(MediaProvider), "media");
 
+    private static SampleFile Steam => Sample(typeof(SteamProvider), "steam");
+
     [Fact]
     public void AllSamples_ParseWithoutFindings()
     {
@@ -57,6 +60,47 @@ public sealed partial class ProviderSampleTests
         }
 
         Assert.Equal(catalog.Count, sample.Count);
+    }
+
+    [Fact]
+    public void TheSteamSample_DescribesEveryReadingOfTheCatalog_AsTheCatalogDoes()
+    {
+        var sample = Steam.Describe().ToDictionary(d => d.Path);
+        using var provider = new SteamProvider();
+        var catalog = provider.Describe();
+
+        foreach (var entry in catalog)
+        {
+            Assert.True(sample.TryGetValue(entry.Path, out var described), $"the steam sample has no '{entry.Path}'");
+            Assert.True(entry == described, Difference(entry, described!));
+        }
+
+        Assert.Equal(catalog.Count, sample.Count);
+    }
+
+    [Fact]
+    public void TheSteamSample_CarriesItsPictures_AsFilesThatExist()
+    {
+        var moment = new DateTime(2026, 10, 13, 21, 47, 32, DateTimeKind.Local);
+        ReadingValue At(string path) => Steam.Match(path, out var bindings)!.ValueAt(0, moment, bindings)!.Value;
+
+        string art = At("me/game/art").Text;
+        Assert.True(File.Exists(art), $"the game art '{art}' is not a file");
+        var friends = At("friends/online").List;
+        Assert.Equal(7, friends.Count);
+        Assert.Equal(3, At("friends/playing").List.Count);
+        foreach (var row in friends.Rows)
+            Assert.True(File.Exists(row.Get("avatar")!.Value.Text), "an avatar of the sample is not a file");
+        foreach (var row in At("games/recent").List.Rows.Concat(At("downloads").List.Rows))
+            Assert.True(File.Exists(row.Get("art")!.Value.Text), "a game art of the sample is not a file");
+    }
+
+    [Fact]
+    public void ASamplePictureTheAssemblyDoesNotCarry_BecomesAnEmptyText()
+    {
+        string json = ProviderSamples.ResolvePictures("{ \"a\": \"res:nothing-here.png\" }", typeof(SteamProvider).Assembly, "steam");
+
+        Assert.Equal("{ \"a\": \"\" }", json);
     }
 
     [Fact]

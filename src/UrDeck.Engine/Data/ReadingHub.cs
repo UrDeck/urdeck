@@ -40,14 +40,17 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, Deck.ID
     /// only by <see cref="SampleNow"/>. For previews, which set the moment of each drawing themselves; the host uses the loop.
     /// </param>
     /// <param name="secrets">Where the providers' secret settings are looked up; null finds none.</param>
+    /// <param name="cacheFolder">The data folder's <c>cache/</c>, offered to providers through <see cref="IReadingSink.CacheFolder"/>; null offers none.</param>
     public ReadingHub(
         ProviderRegistry providers,
         TimeProvider? time = null,
         bool? regionUsesFahrenheit = null,
         bool? regionUses24HourClock = null,
         ReadingHubSampling sampling = ReadingHubSampling.Loop,
-        ISecretStore? secrets = null)
+        ISecretStore? secrets = null,
+        string? cacheFolder = null)
     {
+        CacheFolder = cacheFolder ?? "";
         _providers = providers;
         _secrets = secrets;
         _time = time ?? TimeProvider.System;
@@ -62,6 +65,9 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, Deck.ID
     /// Marshalling to the UI thread is the subscriber's job.
     /// </summary>
     public event Action<IReadOnlyCollection<string>>? ReadingsChanged;
+
+    /// <summary>The folder providers may keep cached files in (the data folder's <c>cache/</c>); empty when there is none.</summary>
+    public string CacheFolder { get; }
 
     public bool RegionUsesFahrenheit { get; }
 

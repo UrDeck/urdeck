@@ -1241,6 +1241,222 @@
       "settings": []
     },
     {
+      "id": "steam",
+      "lists": [
+        {
+          "emptyText": "No games played recently",
+          "fields": [
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Game",
+              "name": "name",
+              "role": "title",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "date",
+              "label": "Last played",
+              "name": "lastPlayed",
+              "role": "detail",
+              "unit": null
+            },
+            {
+              "decimals": 1,
+              "kind": "number",
+              "label": "Last two weeks",
+              "name": "hours2wks",
+              "role": "status",
+              "unit": "h"
+            },
+            {
+              "decimals": 0,
+              "kind": "number",
+              "label": "Total",
+              "name": "hours",
+              "role": "none",
+              "unit": "h"
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Art",
+              "name": "art",
+              "role": "image",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Link",
+              "name": "link",
+              "role": "link",
+              "unit": null
+            }
+          ],
+          "label": "Recent games",
+          "name": "The games played most recently, with hours",
+          "path": "games/recent",
+          "unit": "games"
+        },
+        {
+          "emptyText": "Nothing downloading",
+          "fields": [
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Game",
+              "name": "name",
+              "role": "title",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "State",
+              "name": "state",
+              "role": "detail",
+              "unit": null
+            },
+            {
+              "decimals": 0,
+              "kind": "percent",
+              "label": "Progress",
+              "name": "progress",
+              "role": "status",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Art",
+              "name": "art",
+              "role": "image",
+              "unit": null
+            }
+          ],
+          "label": "Downloads",
+          "name": "Games downloading or updating",
+          "path": "downloads",
+          "unit": "downloads"
+        },
+        {
+          "emptyText": "No friends online",
+          "fields": [
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Friend",
+              "name": "name",
+              "role": "title",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Playing",
+              "name": "game",
+              "role": "detail",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "State",
+              "name": "state",
+              "role": "status",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Avatar",
+              "name": "avatar",
+              "role": "image",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Profile",
+              "name": "link",
+              "role": "link",
+              "unit": null
+            }
+          ],
+          "label": "Friends online",
+          "name": "Friends who are not offline, those playing first",
+          "path": "friends/online",
+          "unit": "online"
+        },
+        {
+          "emptyText": "Nobody is playing",
+          "fields": [
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Friend",
+              "name": "name",
+              "role": "title",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Playing",
+              "name": "game",
+              "role": "detail",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "State",
+              "name": "state",
+              "role": "status",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Avatar",
+              "name": "avatar",
+              "role": "image",
+              "unit": null
+            },
+            {
+              "decimals": null,
+              "kind": "text",
+              "label": "Profile",
+              "name": "link",
+              "role": "link",
+              "unit": null
+            }
+          ],
+          "label": "Friends playing",
+          "name": "Friends who are playing a game",
+          "path": "friends/playing",
+          "unit": "playing"
+        }
+      ],
+      "name": "Steam",
+      "sample": true,
+      "settings": [
+        {
+          "default": null,
+          "environmentVariable": "URDECK_SECRET_STEAM_REFRESHTOKEN",
+          "help": "Connect Steam with the Steam mobile app to show your friends.",
+          "kind": "secret",
+          "label": "Steam sign-in",
+          "name": "refreshToken",
+          "required": false,
+          "secret": true,
+          "type": "secret"
+        }
+      ]
+    },
+    {
       "id": "system",
       "lists": [
         {
@@ -2461,6 +2677,91 @@
         }
       ],
       "typeId": "urdeck.widgets.stats"
+    },
+    {
+      "category": "Games",
+      "defaultConfig": {
+        "friends": "online",
+        "showDownloads": true,
+        "showRecent": true,
+        "typeId": "urdeck.widgets.steam"
+      },
+      "description": "Shows what you are playing, your friends who are online or playing, and downloads",
+      "name": "Steam",
+      "settings": [
+        {
+          "default": "online",
+          "help": "Which friends the list shows: everyone who is online (those playing first) or only those playing a game.",
+          "kind": "choice",
+          "label": "Friends shown",
+          "name": "friends",
+          "options": [
+            {
+              "label": "Online",
+              "value": "online"
+            },
+            {
+              "label": "Playing",
+              "value": "playing"
+            }
+          ],
+          "required": false,
+          "secret": false,
+          "type": "values",
+          "values": [
+            "online",
+            "playing"
+          ]
+        },
+        {
+          "default": true,
+          "help": "While Steam downloads or updates a game, the card shows the game and its progress instead of your state.",
+          "kind": "toggle",
+          "label": "Show downloads",
+          "name": "showDownloads",
+          "required": false,
+          "secret": false,
+          "type": "onOff"
+        },
+        {
+          "default": true,
+          "help": "At the largest size, the games you played lately with their hours, below the friends.",
+          "kind": "toggle",
+          "label": "Show recent games",
+          "name": "showRecent",
+          "required": false,
+          "secret": false,
+          "type": "onOff"
+        }
+      ],
+      "sizes": [
+        {
+          "height": 1,
+          "preview": true,
+          "width": 1
+        },
+        {
+          "height": 1,
+          "preview": true,
+          "width": 2
+        },
+        {
+          "height": 2,
+          "preview": true,
+          "width": 2
+        },
+        {
+          "height": 2,
+          "preview": true,
+          "width": 4
+        },
+        {
+          "height": 4,
+          "preview": true,
+          "width": 4
+        }
+      ],
+      "typeId": "urdeck.widgets.steam"
     },
     {
       "category": "Weather",

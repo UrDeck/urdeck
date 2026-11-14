@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "readings": {
+    "client/running": { "kind": "onOff", "label": "Steam running", "name": "Whether the Steam client is running", "value": true },
+    "me/name": { "kind": "text", "label": "My name", "name": "The persona name of the account signed in to Steam on this PC", "value": "Juniper" },
+    "me/playing": { "kind": "onOff", "label": "Playing", "name": "Whether a game is being played", "value": true },
+    "me/game": { "kind": "text", "label": "My game", "name": "The game being played (empty when none)", "value": "Starfall Odyssey" },
+    "me/game/art": { "kind": "text", "label": "My game art", "name": "Path of the game's art in Steam's library cache (empty when there is none)", "value": "res:art-starfall.png" },
+    "games/recent": {
+      "kind": "list", "label": "Recent games", "name": "The games played most recently, with hours", "unit": "games",
+      "emptyText": "No games played recently",
+      "fields": [
+        { "name": "name", "kind": "text", "label": "Game", "role": "title" },
+        { "name": "lastPlayed", "kind": "date", "label": "Last played", "role": "detail" },
+        { "name": "hours2wks", "kind": "number", "label": "Last two weeks", "role": "status", "unit": "h", "decimals": 1 },
+        { "name": "hours", "kind": "number", "label": "Total", "unit": "h", "decimals": 0 },
+        { "name": "art", "kind": "text", "label": "Art", "role": "image" },
+        { "name": "link", "kind": "text", "label": "Link", "role": "link" }
+      ],
+      "value": [
+        { "key": "900001", "name": "Starfall Odyssey", "lastPlayed": 0, "hours2wks": 14.5, "hours": 212, "art": "res:art-starfall.png", "link": "steam://nav/games/details/900001" },
+        { "key": "900002", "name": "Harbor Lights", "lastPlayed": -1, "hours2wks": 6.2, "hours": 48, "art": "res:art-harbor.png", "link": "steam://nav/games/details/900002" },
+        { "key": "900003", "name": "Ember Court", "lastPlayed": -3, "hours2wks": 3.0, "hours": 126, "art": "res:art-ember.png", "link": "steam://nav/games/details/900003" },
+        { "key": "900004", "name": "Tilt Garden", "lastPlayed": -6, "hours2wks": 1.4, "hours": 19, "art": "res:art-tilt.png", "link": "steam://nav/games/details/900004" },
+        { "key": "900005", "name": "Relay Station", "lastPlayed": -11, "hours2wks": 0.5, "hours": 7, "art": "res:art-relay.png", "link": "steam://nav/games/details/900005" }
+      ]
+    },
+    "downloads": {
+      "kind": "list", "label": "Downloads", "name": "Games downloading or updating", "unit": "downloads",
+      "emptyText": "Nothing downloading",
+      "fields": [
+        { "name": "name", "kind": "text", "label": "Game", "role": "title" },
+        { "name": "state", "kind": "text", "label": "State", "role": "detail" },
+        { "name": "progress", "kind": "percent", "label": "Progress", "role": "status", "decimals": 0, "min": 0, "max": 100 },
+        { "name": "art", "kind": "text", "label": "Art", "role": "image" }
+      ],
+      "value": [
+        { "key": "900003", "name": "Ember Court", "state": "Updating", "progress": 64, "art": "res:art-ember.png" },
+        { "key": "900005", "name": "Relay Station", "state": "Queued", "progress": 0, "art": "res:art-relay.png" }
+      ]
+    },
+    "download/progress": { "kind": "percent", "label": "Download progress", "name": "Progress of the first active download", "decimals": 0, "min": 0, "max": 100,
+      "keys": [ { "at": 0, "value": 64 }, { "at": 20, "value": 82 } ], "period": 24 },
+    "download/name": { "kind": "text", "label": "Download", "name": "Name of the first active download", "value": "Ember Court" },
+    "me/state": { "kind": "text", "label": "My state", "name": "Your Steam state: Online, Away, Busy, Snooze, Looking to trade, Looking to play or Offline", "value": "Online" },
+    "me/avatar": { "kind": "text", "label": "My avatar", "name": "Path of your Steam avatar (empty when there is none)", "value": "res:avatar-7.png" },
+    "friends/online": {
+      "kind": "list", "label": "Friends online", "name": "Friends who are not offline, those playing first", "unit": "online",
+      "emptyText": "No friends online",
+      "fields": [
+        { "name": "name", "kind": "text", "label": "Friend", "role": "title" },
+        { "name": "game", "kind": "text", "label": "Playing", "role": "detail" },
+        { "name": "state", "kind": "text", "label": "State", "role": "status" },
+        { "name": "avatar", "kind": "text", "label": "Avatar", "role": "image" },
+        { "name": "link", "kind": "text", "label": "Profile", "role": "link" }
+      ],
+      "value": [
+        { "key": "76561190000000001", "name": "Marlowe", "game": "Starfall Odyssey", "state": "Online", "avatar": "res:avatar-1.png", "link": "steam://url/SteamIDPage/76561190000000001" },
+        { "key": "76561190000000002", "name": "Okoye", "game": "Harbor Lights", "state": "Online", "avatar": "res:avatar-2.png", "link": "steam://url/SteamIDPage/76561190000000002" },
+        { "key": "76561190000000003", "name": "Pixel Fox", "game": "Tilt Garden", "state": "Busy", "avatar": "res:avatar-3.png", "link": "steam://url/SteamIDPage/76561190000000003" },
+        { "key": "76561190000000004", "name": "Bram", "state": "Online", "avatar": "res:avatar-4.png", "link": "steam://url/SteamIDPage/76561190000000004" },
+        { "key": "76561190000000005", "name": "Calliope", "state": "Away", "avatar": "res:avatar-5.png", "link": "steam://url/SteamIDPage/76561190000000005" },
+        { "key": "76561190000000006", "name": "Tamsin", "state": "Snooze", "avatar": "res:avatar-6.png", "link": "steam://url/SteamIDPage/76561190000000006" },
+        { "key": "76561190000000007", "name": "Wren", "state": "Looking to play", "avatar": "res:avatar-7.png", "link": "steam://url/SteamIDPage/76561190000000007" }
+      ]
+    },
+    "friends/playing": {
+      "kind": "list", "label": "Friends playing", "name": "Friends who are playing a game", "unit": "playing",
+      "emptyText": "Nobody is playing",
+      "fields": [
+        { "name": "name", "kind": "text", "label": "Friend", "role": "title" },
+        { "name": "game", "kind": "text", "label": "Playing", "role": "detail" },
+        { "name": "state", "kind": "text", "label": "State", "role": "status" },
+        { "name": "avatar", "kind": "text", "label": "Avatar", "role": "image" },
+        { "name": "link", "kind": "text", "label": "Profile", "role": "link" }
+      ],
+      "value": [
+        { "key": "76561190000000001", "name": "Marlowe", "game": "Starfall Odyssey", "state": "Online", "avatar": "res:avatar-1.png", "link": "steam://url/SteamIDPage/76561190000000001" },
+        { "key": "76561190000000002", "name": "Okoye", "game": "Harbor Lights", "state": "Online", "avatar": "res:avatar-2.png", "link": "steam://url/SteamIDPage/76561190000000002" },
+        { "key": "76561190000000003", "name": "Pixel Fox", "game": "Tilt Garden", "state": "Busy", "avatar": "res:avatar-3.png", "link": "steam://url/SteamIDPage/76561190000000003" }
+      ]
+    }
+  }
+}

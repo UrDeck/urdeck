@@ -1,0 +1,59 @@
+---
+title: Steam
+description: "A card for Steam: your name and the game you are playing or downloading, the friends who are online or playing, and your recent games."
+section: Widgets
+order: 17
+---
+
+import SettingsTable from '../../../components/SettingsTable.astro';
+import WidgetSizes from '../../../components/WidgetSizes.astro';
+
+`urdeck.widgets.steam` shows [Steam](/docs/steam/) on the deck. The top of the card is you: a picture, your name, the game
+you are playing and how many friends are playing. Below it, the friends who are online, and at the largest size the games you
+played lately.
+
+<WidgetSizes widget="steam" />
+
+```json
+{ "typeId": "urdeck.widgets.steam", "col": 0, "row": 0, "width": 4, "height": 2 }
+```
+
+The card works without connecting Steam: it shows your name, the game, its art and any download, all from your PC. The friends
+need one sign-in with the Steam app (see [connecting Steam](/docs/steam/#connecting-steam)). Until then the friends area says
+`Connect Steam in Settings`.
+
+## Settings
+
+In the editor, add the widget on **Pages** and select it: the pane on the right shows these settings with a control for each.
+The file keys are listed for reference.
+
+<SettingsTable widget="steam" />
+
+## What it shows
+
+- **At 1x1:** the picture with a small mark for your state, and below it the number of friends playing (your name before you
+  connect).
+- **At 2x1:** the picture, your name, a second line and `N playing · M online`. The second line is the game you are playing,
+  or your state (Online, Away, Busy), or `Steam is not running`. While a game downloads or updates and **Show downloads** is
+  on, it is the game and its progress, `Ember Court  64%`, with a progress bar under the lines.
+- **At 2x2 and 4x2:** the same card, and below it the friends: a picture, a name, and the game they are in (or, for a friend not
+  in a game, how they are: Away, Busy). As many whole rows as fit.
+- **At 4x4:** as 4x2, with **Recent games** below the friends when **Show recent games** is on: the game's art, the hours of
+  the last two weeks and the name.
+- **The picture** is the game's art while you play, otherwise your avatar when Steam is connected, otherwise the theme's Steam
+  glyph. The mark on it is the theme's colour for your state: the accent while you play, the theme's *good* colour for online,
+  *warning* for away or snooze, *critical* for busy, muted when Steam is off.
+- **Friends** shows who is online (those playing first) or, with **Friends shown** on *Playing*, only those in a game.
+- **A list with nobody in it** says `No friends online` or `Nobody is playing`. A list Steam could not refresh keeps its rows,
+  drawn faded, as everywhere in UrDeck.
+
+## Touch
+
+A tap on the card opens the **friends list in the Steam client**. A tap on a friend opens that friend's **profile**, and a tap
+on a recent game opens it in your **library**. The taps go to Steam on your PC through Windows, as a
+[shortcut](/docs/widgets/shortcut/) does; the widget sends nothing to Steam's servers.
+
+## Looks
+
+The widget draws no card and names no font: its text, its muted lines, its bar and its state colours come from the theme. See
+[themes](/docs/themes/).
