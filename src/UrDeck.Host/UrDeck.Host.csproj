@@ -21,6 +21,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.WindowsAppSDK" />
         <PackageReference Include="Microsoft.Win32.SystemEvents" />
+        <PackageReference Include="QRCoder" />
         <PackageReference Include="SkiaSharp" />
         <PackageReference Include="SkiaSharp.Views.WinUI" />
         <PackageReference Include="Velopack" />

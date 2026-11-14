@@ -89,6 +89,9 @@ public sealed record SettingDescriptor(
     /// <summary>The sentence that says why it is disabled in those roles.</summary>
     public string? DisabledHelp { get; init; }
 
+    /// <summary>For a secret: whether the provider's sign-in sets it (no text field; Connect instead).</summary>
+    public bool SetBySignIn { get; init; }
+
     internal PropertyInfo Property { get; init; } = null!;
 
     /// <summary>Whether this is a secret.</summary>
@@ -392,6 +395,7 @@ public sealed class SettingSchema
             Property = property,
             DisabledInRoles = setting.DisabledInRoles ?? [],
             DisabledHelp = setting.DisabledHelp,
+            SetBySignIn = property.GetCustomAttribute<SecretAttribute>()?.SetBySignIn ?? false,
         };
     }
 

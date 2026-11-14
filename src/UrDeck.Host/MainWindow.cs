@@ -39,6 +39,7 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
     private readonly ThemeStore _themes;
     private readonly ShaderStore _shaders;
     private readonly ProviderSettingsEditor _providerEditor;
+    private readonly ProviderSignIn _providerSignIn;
     private readonly string _dataFolder;
     private readonly Engine.Startup.DataFolder _data;
     private Engine.Editor.ReadingDescriptionCache? _readingCache;
@@ -105,6 +106,7 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
         _session.PageChanged += _ => DeckPageChangedEvent?.Invoke(_session.Navigator.Id);
         _hwnd = WindowNative.GetWindowHandle(this);
         _providerEditor = new ProviderSettingsEditor(_configStore, _plugins.Providers, _plugins.Secrets, _plugins.Readings);
+        _providerSignIn = new ProviderSignIn(_configStore, _plugins.Providers, _plugins.Secrets, _plugins.Readings);
         _plugins.Readings.ApplySettings(_configStore.Config.Providers);
 
         Title = "UrDeck";
@@ -355,6 +357,11 @@ public sealed class MainWindow : Window, ISettingsHost, IDeckPresenter
     void ISettingsHost.SetStartWithWindows(bool on) => SetAutostart?.Invoke(on);
 
     IReadOnlyList<ProviderForm> ISettingsHost.GetProviderForms() => _providerEditor.GetForms();
+
+    ProviderSignIn ISettingsHost.SignIn => _providerSignIn;
+
+    bool ISettingsHost.OpenAddress(string address) =>
+        Uri.TryCreate(address, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps && new Engine.Launch.Launcher().Launch(uri.AbsoluteUri);
 
     EditorResult ISettingsHost.SaveProvider(string providerId, IReadOnlyDictionary<string, string> values, IReadOnlyDictionary<string, string> newSecrets) =>
         _providerEditor.Save(providerId, values, newSecrets);

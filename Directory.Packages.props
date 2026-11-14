@@ -12,6 +12,8 @@
     <!-- The vpk tool in dotnet-tools.json must be the same version as this package (release-process spec); bump both together. -->
     <PackageVersion Include="Velopack" Version="1.2.161" />
     <PackageVersion Include="DotMake.CommandLine" Version="3.7.0" />
+    <!-- The host draws a sign-in challenge as a QR code on this PC (provider-sign-in); MIT, managed only, used by UrDeck.Host alone. -->
+    <PackageVersion Include="QRCoder" Version="1.8.1" />
     <PackageVersion Include="SkiaSharp.Views.WinUI" Version="4.155.0" />
     <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="11.0.0" />

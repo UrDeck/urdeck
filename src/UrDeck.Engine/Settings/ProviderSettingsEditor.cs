@@ -28,7 +28,7 @@ public sealed record SecretStatus(bool HasValue, bool StoredHere, SecretSource? 
 public sealed record ProviderField(SettingDescriptor Setting, string Value, SecretStatus? Secret);
 
 /// <summary>A provider's settings as the settings window shows them.</summary>
-public sealed record ProviderForm(string ProviderId, string Name, IReadOnlyList<ProviderField> Fields, bool OffersConnectionTest, bool CanStoreSecrets);
+public sealed record ProviderForm(string ProviderId, string Name, IReadOnlyList<ProviderField> Fields, bool OffersConnectionTest, bool CanStoreSecrets, bool OffersSignIn = false);
 
 /// <summary>The outcome of a save or a test: ok, or one sentence saying what is wrong.</summary>
 public sealed record EditorResult(bool Ok, string Message)
@@ -73,7 +73,7 @@ public sealed class ProviderSettingsEditor
 
             var raw = _config.Config.Providers?.GetValueOrDefault(descriptor.Id);
             var fields = schema.Settings.Select(s => new ProviderField(s, s.IsSecret ? "" : CurrentText(s, raw), s.IsSecret ? StatusOf(descriptor.Id, s) : null)).ToList();
-            forms.Add(new ProviderForm(descriptor.Id, descriptor.Name, fields, OffersTest(descriptor), _secrets.CanStore));
+            forms.Add(new ProviderForm(descriptor.Id, descriptor.Name, fields, OffersTest(descriptor), _secrets.CanStore, descriptor.OffersSignIn));
         }
 
         return forms;
@@ -95,7 +95,7 @@ public sealed class ProviderSettingsEditor
         foreach (var setting in descriptor.Schema.Settings.Where(s => !s.IsSecret))
         {
             string text = values.GetValueOrDefault(setting.Key) ?? "";
-            if (!TryParse(setting, text, out var element, out string? problem))
+            if (!TryParseValue(setting, text, out var element, out string? problem))
                 return EditorResult.Failure(problem!);
             parsed[setting.Key] = element;
         }
@@ -181,7 +181,7 @@ public sealed class ProviderSettingsEditor
         var raw = new ProviderSettings { ExtensionData = new Dictionary<string, JsonElement>(StringComparer.OrdinalIgnoreCase) };
         foreach (var setting in descriptor.Schema.Settings.Where(s => !s.IsSecret))
         {
-            if (!TryParse(setting, values.GetValueOrDefault(setting.Key) ?? "", out var element, out string? problem))
+            if (!TryParseValue(setting, values.GetValueOrDefault(setting.Key) ?? "", out var element, out string? problem))
                 return EditorResult.Failure(problem!);
             if (element is { } value)
                 raw.ExtensionData[setting.Key] = value;
@@ -301,7 +301,7 @@ public sealed class ProviderSettingsEditor
     }
 
     /// <summary>Reads a field's text into the JSON value the file keeps; null removes the key (an empty field).</summary>
-    private static bool TryParse(SettingDescriptor setting, string text, out JsonElement? element, out string? problem)
+    internal static bool TryParseValue(SettingDescriptor setting, string text, out JsonElement? element, out string? problem)
     {
         element = null;
         problem = null;

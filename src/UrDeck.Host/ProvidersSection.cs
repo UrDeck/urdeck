@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Controls;
 using UrDeck.Engine.Diagnostics;
 using UrDeck.Engine.Secrets;
 using UrDeck.Engine.Settings;
+using UrDeck.Host.Editor;
 using UrDeck.Host.Editor.Forms;
 using UrDeck.Sdk.Data;
 
@@ -26,6 +27,7 @@ internal sealed class ProvidersSection
     private readonly ISettingsHost _host;
     private readonly Window _owner;
     private readonly List<FormView> _views = [];
+    private readonly List<IDisposable> _panels = [];
     private readonly StackPanel _root = new() { Spacing = 12 };
     private readonly Dictionary<string, string> _messages = new(StringComparer.Ordinal);
     private CancellationTokenSource? _closing = new();
@@ -46,6 +48,7 @@ internal sealed class ProvidersSection
         _closing = null;
         closing?.Cancel();
         closing?.Dispose();
+        _host.SignIn.CancelAll();
         DisposeViews();
         _root.Children.Clear();
     }
@@ -95,7 +98,7 @@ internal sealed class ProvidersSection
         var readings = new PreviewEditorReadings(_host.Readings, _host.Readings, _host.Readings, _owner.DispatcherQueue);
         var builder = new FormBuilder(new FormContext(_host.Document, null, readings, new NoIconCatalog(), _owner, new ReadingChooserDialog(() => _root.XamlRoot, readings)));
         var view = builder.BuildStaged(
-            SettingSchema.Of(typeof(ProviderSettings), form.Fields.Select(f => f.Setting).ToList()),
+            SettingSchema.Of(typeof(ProviderSettings), form.Fields.Where(f => !f.Setting.SetBySignIn).Select(f => f.Setting).ToList()),
             target,
             setting =>
             {
@@ -112,6 +115,13 @@ internal sealed class ProvidersSection
 
         Dictionary<string, string> Values() => form.Fields.Where(f => f.Setting.Kind != SettingKinds.Secret).ToDictionary(f => f.Setting.Key, f => TextOf(staging, f.Setting), StringComparer.Ordinal);
         Dictionary<string, string> NewSecrets() => secrets.Where(s => s.Value.Password.Length > 0).ToDictionary(s => s.Key, s => s.Value.Password, StringComparer.Ordinal);
+
+        if (form.OffersSignIn)
+        {
+            var account = new SignInPanel(_host, _owner.DispatcherQueue, form, Values);
+            _panels.Add(account);
+            panel.Children.Add(account.Root);
+        }
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Margin = new Thickness(0, 8, 0, 0) };
         var save = new Button { Content = "Save" };
@@ -147,6 +157,9 @@ internal sealed class ProvidersSection
         foreach (var view in _views)
             view.Dispose();
         _views.Clear();
+        foreach (var panel in _panels)
+            panel.Dispose();
+        _panels.Clear();
     }
 
     /// <summary>The value the form starts from: what the file holds (else the default), as the kind types it.</summary>

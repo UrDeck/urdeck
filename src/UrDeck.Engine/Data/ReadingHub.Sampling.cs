@@ -890,5 +890,8 @@ public sealed partial class ReadingHub
 
         public void Describe(string path, ReadingDescriptor descriptor) =>
             hub.RefineFromProvider(runtime, generation, path, descriptor);
+
+        public bool StoreSecret(string setting, SecretValue value) =>
+            hub.StoreSecretFromProvider(runtime, generation, setting, value);
     }
 }

@@ -85,6 +85,14 @@ public interface IReadingSink
     void Describe(string path, ReadingDescriptor descriptor)
     {
     }
+
+    /// <summary>
+    /// Stores a new value of one of the provider's own secrets without restarting it (a rotated refresh token). Allowed only for a
+    /// secret the settings type declares <c>SetBySignIn</c>; the account name stays. The provider keeps using the value in memory
+    /// either way. Returns false, and the engine logs once, when nothing was kept: another secret, an environment variable as the
+    /// source, no store, or a value too large. The default stores nothing and returns false.
+    /// </summary>
+    bool StoreSecret(string setting, SecretValue value) => false;
 }
 
 /// <summary>

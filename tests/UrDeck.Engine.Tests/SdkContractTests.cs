@@ -215,4 +215,62 @@ public class SdkContractTests
         {
         }
     }
+
+    [Fact]
+    public void AProvider_OffersNoSignInByDefault_AndRenewsNoSecret()
+    {
+        var provider = new PlainProvider();
+        ISignIn signIn = provider;
+
+        Assert.False(signIn.Offered);
+        Assert.Equal("", signIn.Description);
+        Assert.Equal("", signIn.SignOutHint);
+        Assert.False(SignInResult.Failed("x").Approved);
+        IReadingSink sink = new NoSinkMembers();
+        Assert.False(sink.StoreSecret("token", new SecretValue("v")));
+    }
+
+    [Fact]
+    public void ASignInChallenge_And_AResult_NeverPrintTheirContent()
+    {
+        var challenge = SignInChallenge.Qr("https://s.team/q/SECRET", "Scan", DateTimeOffset.UnixEpoch);
+        var result = SignInResult.Success("example_gamer", new Dictionary<string, SecretValue> { ["t"] = new("SECRET") });
+
+        Assert.DoesNotContain("SECRET", challenge.ToString());
+        Assert.DoesNotContain("SECRET", result.ToString());
+        Assert.DoesNotContain("example_gamer", result.ToString());
+        Assert.Equal("example_gamer", result.Account);
+        Assert.Equal("", result.Reason);
+        Assert.Null(SignInChallenge.CodeAndAddress("A-B", "https://x", "Type", DateTimeOffset.UnixEpoch).QrText);
+    }
+
+    private sealed class NoSinkMembers : IReadingSink
+    {
+        public void Publish(string path, ReadingValue value)
+        {
+        }
+
+        public void Unavailable(string path, string reason)
+        {
+        }
+    }
+
+    private sealed class PlainProvider : DataProvider<ProviderSettings>
+    {
+        public override IReadOnlyList<ReadingDescriptor> Describe() => [];
+
+        public override void Start(IReadingSink sink, ProviderSettings settings)
+        {
+        }
+
+        public override void SetDemand(IReadOnlyCollection<string> paths)
+        {
+        }
+
+        public override Task SampleAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+        public override void Shutdown()
+        {
+        }
+    }
 }
