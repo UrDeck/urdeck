@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, beforeEach, test } from 'node:test';
-import { backgroundTheme, matrix, plan, run } from './lib.mjs';
+import { backgroundTheme, matrix, parseArgs, plan, run } from './lib.mjs';
 
 let root, repo, site, catalog, renders, movers;
 
@@ -290,4 +290,9 @@ test('what a recipe shows is part of its key, and only the cookbook filter rende
   assert.deepEqual(renders, []);
   await generate('cookbook');
   assert.deepEqual(renders, ['cookbook:circular-dock']);
+});
+
+test('--no-probe turns the motion probes off, and they are on by default', () => {
+  assert.equal(parseArgs(['--status']).probe, true);
+  assert.equal(parseArgs(['--status', '--no-probe']).probe, false);
 });

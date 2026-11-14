@@ -125,6 +125,7 @@ Adding a theme, widget, size or background adds its files; removing one deletes 
 cd site
 npm run media                    # render what is missing or stale
 npm run media -- --status        # say what is missing, stale and unneeded; render nothing
+npm run media -- --status --no-probe   # the same, fast: no probe renders (the CI's "is anything stale" check)
 npm run media -- --all           # render everything
 npm run media -- decks|widgets|backgrounds|cookbook [name...]   # only some (carbon, clock-4x2, aurora, hard-shadow)
 npm test                         # the generator's tests (a stub catalog and a fake renderer)
