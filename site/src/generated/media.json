@@ -7,7 +7,7 @@
         "public/generated/backgrounds/aurora.mp4"
       ],
       "id": "background:aurora",
-      "key": "9e04b92e16e3de5042663adf6c747620f39f41dfe692f75af6b30d0be147b6d1",
+      "key": "1aaabd30b31244db69f34b604944d0693f07a426c78bd90a3203b2b8a7d304af",
       "kind": "backgrounds",
       "settings": {
         "background": "aurora",
@@ -30,7 +30,7 @@
         "public/generated/backgrounds/contour.mp4"
       ],
       "id": "background:contour",
-      "key": "ab3a26880c5485c7ee75a36d86842569a503c8250c8bae27bbe70ced01b998c5",
+      "key": "ae4f02a0af9387f3989053bce5f5254832304fa10dad1a3aa2c68adf7767a2bc",
       "kind": "backgrounds",
       "settings": {
         "background": "contour",
@@ -53,7 +53,7 @@
         "public/generated/backgrounds/embers.mp4"
       ],
       "id": "background:embers",
-      "key": "691ac8e13599e5504b299e98df072866f55d632a67290f9f859bf036eab553c1",
+      "key": "b0531511171510eaedec0cfc77730f834b0caee9731ba7a2a2d317f62707e428",
       "kind": "backgrounds",
       "settings": {
         "background": "embers",
@@ -76,7 +76,7 @@
         "public/generated/backgrounds/equalizer.mp4"
       ],
       "id": "background:equalizer",
-      "key": "58b05bdb386981fcfb0a3779a0f123590116ac1069c75d6d67f8e1917c301246",
+      "key": "deeab483d315fe80758b7bbf3d365a9663f6667b33a1c1f8ee2280cd953c61cf",
       "kind": "backgrounds",
       "settings": {
         "background": "equalizer",
@@ -99,7 +99,7 @@
         "public/generated/backgrounds/gradient.mp4"
       ],
       "id": "background:gradient",
-      "key": "b9bb03d9f2a9b7eb92e1a05809fc564bfad072703a0f3aeba813c934953d7756",
+      "key": "56dbfc1496555e0b1316e61b1a4be1926fd1ee3d675bc563b514e3f35d5784b8",
       "kind": "backgrounds",
       "settings": {
         "background": "gradient",
@@ -122,7 +122,7 @@
         "public/generated/backgrounds/horizon.mp4"
       ],
       "id": "background:horizon",
-      "key": "5c6db8ada9b9a581ed515f5bd1cb6b4a7f3b867a30651919a47a3cfa05f3ad63",
+      "key": "e3f05aa173fcb5aec6b8c4b96efa97c9109c7574f65053a1215f40188b72ecb2",
       "kind": "backgrounds",
       "settings": {
         "background": "horizon",
@@ -145,7 +145,7 @@
         "public/generated/backgrounds/julia.mp4"
       ],
       "id": "background:julia",
-      "key": "d7007a39d90a2e97bbed0907392b2ac3ac3453c7b41cfc9267801584c0f16e86",
+      "key": "3149549ae7ff574ba4eb766a37b4063fa6ea5982c5934bfe7b9932150815e80f",
       "kind": "backgrounds",
       "settings": {
         "background": "julia",
@@ -168,7 +168,7 @@
         "public/generated/backgrounds/nebula.mp4"
       ],
       "id": "background:nebula",
-      "key": "4687b940331d9a797cd71801b27fb5b886d7c77b040015dc83e5fcb44ba756ad",
+      "key": "69f3a52e765c86819de36c7381ee3d95e14c9cca842028605dcc4fc32029856b",
       "kind": "backgrounds",
       "settings": {
         "background": "nebula",
@@ -191,7 +191,7 @@
         "public/generated/backgrounds/plasma.mp4"
       ],
       "id": "background:plasma",
-      "key": "d0ec82541dc867d4eb474d8b9f8c1fdb450520ae431c3eccdafe84b14452a7b3",
+      "key": "1b7fa67ffe57781e20436d7fc5dd83efc122d4103f068f33b6a7653eb5ef865e",
       "kind": "backgrounds",
       "settings": {
         "background": "plasma",
@@ -214,7 +214,7 @@
         "public/generated/backgrounds/plotter.mp4"
       ],
       "id": "background:plotter",
-      "key": "40a62b1d03e6d1e0bfe8a5e0f1c26a0acdb0a01dd084f9c507a7605a32f9865a",
+      "key": "5e566397ba2e13afe977d9f41ace90e14b5d778b0a33aa5cd9f538ac825b28ac",
       "kind": "backgrounds",
       "settings": {
         "background": "plotter",
@@ -237,7 +237,7 @@
         "public/generated/backgrounds/ripple.mp4"
       ],
       "id": "background:ripple",
-      "key": "84cd6149de3ed694919d4dbadddc558e6fabc5f839540be1f806f2e559ac9dd3",
+      "key": "cd424f61f5a57541e9734d3243b652b9af4c5eb4bf21fda0e73b23c546fd09ba",
       "kind": "backgrounds",
       "settings": {
         "background": "ripple",
@@ -260,7 +260,7 @@
         "public/generated/backgrounds/shapes.mp4"
       ],
       "id": "background:shapes",
-      "key": "9e642c6ba94622b71ce682418a90e9c76430399f0c99dbe328ba5bbbe96c6710",
+      "key": "1d849426adb664fd96e5ac5dc4e199294c84d9f3c94c59ee93e8efc5706a63b3",
       "kind": "backgrounds",
       "settings": {
         "background": "shapes",
@@ -283,7 +283,7 @@
         "public/generated/backgrounds/spectrum.mp4"
       ],
       "id": "background:spectrum",
-      "key": "fc3a61611d1f85ab07748c3e52e1f21ca200a30aa41f2d6c9d124b0709127410",
+      "key": "f6434a6c6e6dfc2f9a6aa8130fb086fb7618572cf7ad065b85f80990f752053a",
       "kind": "backgrounds",
       "settings": {
         "background": "spectrum",
@@ -306,7 +306,7 @@
         "public/generated/backgrounds/streams.mp4"
       ],
       "id": "background:streams",
-      "key": "d9382ad7f903b7cbafcc188a48f7d8c314f6f873664f2145462f3f46b4926d4f",
+      "key": "24eca940757048f8ea1f6af13ebb51f3a980c65769e4d4e15f346f5e2bbf90e3",
       "kind": "backgrounds",
       "settings": {
         "background": "streams",
@@ -329,7 +329,7 @@
         "public/generated/backgrounds/vortex.mp4"
       ],
       "id": "background:vortex",
-      "key": "f8522c37a8a97250b714198089364e87b3328521f51813fa1891f79f3943ce45",
+      "key": "655740a012c7a18db8952c953223e4ab3058e72db320d820a369f69ac4c83458",
       "kind": "backgrounds",
       "settings": {
         "background": "vortex",
@@ -352,7 +352,7 @@
         "public/generated/backgrounds/warpgate.mp4"
       ],
       "id": "background:warpgate",
-      "key": "3ddcc7128986cdc575c228f59988756d66b2eef07f29538f02dc8fb5d29f94e4",
+      "key": "72008aa4542eec7e796eac0a1c5c72cdcc5611fb9724f4d96f6fd8c9102e76d6",
       "kind": "backgrounds",
       "settings": {
         "background": "warpgate",
@@ -374,7 +374,7 @@
         "src/generated/cookbook/chamfered-cards.webp"
       ],
       "id": "cookbook:chamfered-cards",
-      "key": "2743c84f2ff864ce56a814e2afb65d7a8bcb84374adfb55c769e2f8d68708dfc",
+      "key": "678f793ff1bc6cba9950fd7ab90ece35da0263c628fe0e44c07cdb555c13a04b",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -397,7 +397,7 @@
         "src/generated/cookbook/circular-dock.webp"
       ],
       "id": "cookbook:circular-dock",
-      "key": "91db2ddcc04218297847ceb6cad6641a1dc1b9f0dc908a3bf77dd016d4a001f0",
+      "key": "e8b04accc410d9a7e14b3a4fe25c2ce10a45c83f25a77e699ada2dc3919dec5b",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -420,7 +420,7 @@
         "src/generated/cookbook/custom-icons.webp"
       ],
       "id": "cookbook:custom-icons",
-      "key": "15eab1ae09f45c8f813fec92fe814ef7c0e83b106fb4412e4fa2bc83cf3aae0c",
+      "key": "5b5dd4bc57e50a9ca29832693eabac272edcdd5a2f2fc58d8fd97f90494736ef",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -443,7 +443,7 @@
         "src/generated/cookbook/dotted-page.webp"
       ],
       "id": "cookbook:dotted-page",
-      "key": "b2f43d89d2311c00191f56bc82550f2c17d2684b262bb30e6f97376dae0a14bf",
+      "key": "10ca7c7b80cfdd3a8b29a3bc68b56b40ddac3f11d2c2bd66238ec1240c3d065f",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -466,7 +466,7 @@
         "src/generated/cookbook/gradient-border.webp"
       ],
       "id": "cookbook:gradient-border",
-      "key": "ac61905647d3971023fe812b4797b57539039a5ea7cd01bd5362f89c314a25f7",
+      "key": "508edca7347c42b22e9009344d3d4dd50d3c25f6df32bc5e1825db44a673428d",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -489,7 +489,7 @@
         "src/generated/cookbook/hard-shadow.webp"
       ],
       "id": "cookbook:hard-shadow",
-      "key": "7f280225ad432518c56d8ad2479ab58d5913e8f5c8f0e2a255bcca8e9017465b",
+      "key": "65d51c8c78748445dd1fee2427b0819e7694cbe1abab360d4e0fa7c09742f51b",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -512,7 +512,7 @@
         "src/generated/cookbook/led-bars.webp"
       ],
       "id": "cookbook:led-bars",
-      "key": "e723d4e822ab5da77f589ad69d7cbf6af5881b5e2e44d92eb0a1bcaf518feba6",
+      "key": "74c2689921718dd0d60b23e551476ae5f9c43c8aa520f98e0ee5bc00dbc51f5a",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -535,7 +535,7 @@
         "src/generated/cookbook/tach-redline.webp"
       ],
       "id": "cookbook:tach-redline",
-      "key": "1d66c1e9e911b620dcfe218654b1327fa1152cbb7f5f52d55ac468629c929f09",
+      "key": "69398202beb2db2a29696c0e5dd063e11eebe776d2d81eb4d131ed3eeabd8f0e",
       "kind": "cookbook",
       "settings": {
         "background": "none",
@@ -559,7 +559,7 @@
         "public/generated/decks/blueprint.mp4"
       ],
       "id": "deck:blueprint",
-      "key": "1c15258167fd0db264d70b85bb03da0d1a799b2baf4e77b6daa80175bc6fdc10",
+      "key": "38b1ad4d0a3f6fdcac6b50462f2a3532694ade31378be6473328c5d128f65764",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -585,7 +585,7 @@
         "public/generated/decks/carbon.mp4"
       ],
       "id": "deck:carbon",
-      "key": "523da0f953ee04a59e63fdb59f89ab1924321384863ccb104c12bd829e9defe6",
+      "key": "8f512fad14cf85538b709a6293c3addfa6b845b10cbe804fa463c0a49e1a3139",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -610,7 +610,7 @@
         "src/generated/decks/default-dark.webp"
       ],
       "id": "deck:default-dark",
-      "key": "fece36224e71d1d3cba05f3438bee0f62f12926f48a7f2ecc7f4d13f38d8e922",
+      "key": "673316774994f383eb657fef4f6414fee1a0d5180dd0e7daa0a26435ec5f7a95",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -631,7 +631,7 @@
         "src/generated/decks/default-light.webp"
       ],
       "id": "deck:default-light",
-      "key": "a100438bde975033fd89caa453a8fc9ad568a1150dd2f9c943055bca1748f493",
+      "key": "5b7f20b06705d274c77c2ee3124b5fe27c70e6314b90f39c0a71cf6e6b91b4bf",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -653,7 +653,7 @@
         "public/generated/decks/ember.mp4"
       ],
       "id": "deck:ember",
-      "key": "96b4668b6c91adee8f62260092ffecfc3b1d8505fb6f8221ff2aee5f5606a604",
+      "key": "69078bedffbc55be3c3ab2cdd1e423309d036b809f337ce2331097b23a1151f5",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -678,7 +678,7 @@
         "src/generated/decks/glass.webp"
       ],
       "id": "deck:glass",
-      "key": "61ef4b028cbd8417a80687e34d6d42b629248e9e501992732bfb94db99bff5e9",
+      "key": "9c790760af93c4c32499cb572cdca10ddd6d0f5c69ee08c082b260c9ba31afb6",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -700,7 +700,7 @@
         "public/generated/decks/obsidian.mp4"
       ],
       "id": "deck:obsidian",
-      "key": "f2c3c676b294d2240464c6168e174280d1e5d72025ec6bac244adc2e0636c72c",
+      "key": "2a29bbec45761d4e0303a77f46ad508f4d4cfcc4d1e5c992e6b189b4dede5ca9",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -726,7 +726,7 @@
         "public/generated/decks/paper.mp4"
       ],
       "id": "deck:paper",
-      "key": "9130e23d8c853a6820ef1487123bf255dbb7c229718ba7920ee75a6d30ff6381",
+      "key": "7bd365ed782a87c97d2f90e0fa5e391645531243e7b25d311db886f7d4fad27f",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -752,7 +752,7 @@
         "public/generated/decks/pop.mp4"
       ],
       "id": "deck:pop",
-      "key": "bf569a48e9b755d41cd022bea45ca8304b23c386221499a3a0937c28f3694792",
+      "key": "9e2c72df26a3f34e948bce7eb7141f5f86111a2029d1bde4fc0a98632f01831b",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -778,7 +778,7 @@
         "public/generated/decks/prism.mp4"
       ],
       "id": "deck:prism",
-      "key": "feadb79e7e5f45e6c875c1e0a9394c3e7f8345b69da02c8da0a15a5d19cc7da0",
+      "key": "222071227912344398e1e94878922fc77828b27e93dc7e8cea319dc7c0378d61",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -804,7 +804,7 @@
         "public/generated/decks/rigline.mp4"
       ],
       "id": "deck:rigline",
-      "key": "8e180d58d28d430d7b6d8a3ffc9aae3d3ffad337975bc578a2d81746221cfdb7",
+      "key": "6d7ea4c31c72d28396ec29e31128f02a790e7fa3c81ba7c1a90a0e5ad2c83aae",
       "kind": "decks",
       "settings": {
         "background": "theme",
@@ -830,7 +830,7 @@
         "public/generated/widgets/clock-1x1-blueprint.mp4"
       ],
       "id": "widget:clock-1x1-blueprint",
-      "key": "9f04030b336f9fecf4c19d060a6d9a6e7e8632277ac683d74416cb62a55eba14",
+      "key": "1af39b5fc9cd326cea49927800d43f36eab84b0671e0cfb7c1c5e921f3501d86",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -860,7 +860,7 @@
         "public/generated/widgets/clock-1x1-carbon.mp4"
       ],
       "id": "widget:clock-1x1-carbon",
-      "key": "6c282f041ceac2e7d771e786286894aefbbdbfec46c24b97d4def101a5ce75ef",
+      "key": "f0d683267469e94f2e02efb005acec11edff9a6f0345cb6a40c542fcab5c202b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -890,7 +890,7 @@
         "public/generated/widgets/clock-1x1-default-dark.mp4"
       ],
       "id": "widget:clock-1x1-default-dark",
-      "key": "6a6384dedbd59f6fa06509b6674121e9b6bd1292f9541233d5bbe44bb5323140",
+      "key": "53cc7b66e4aea14ebd94ac0e7b98995b13e3c4424acafdc57f4e4fc3b416d58d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -920,7 +920,7 @@
         "public/generated/widgets/clock-1x1-default-light.mp4"
       ],
       "id": "widget:clock-1x1-default-light",
-      "key": "2f9528a7e477f9f5f55fba8dda1e6000cc290e56de4eb0149f6e50ab44b3036c",
+      "key": "7d00060a80c0055d20edd75875a1b6122c8a06c30b7d991f16c4f927ed4dd616",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -950,7 +950,7 @@
         "public/generated/widgets/clock-1x1-ember.mp4"
       ],
       "id": "widget:clock-1x1-ember",
-      "key": "72e894d749a2a94e583032b0890f74896c73cc458081094a70362b1d6644a2b0",
+      "key": "cc1f1dccf9ececace8a5324b60913a7fbb4ecb1ab1fa42cce8495c06ba395fb3",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -980,7 +980,7 @@
         "public/generated/widgets/clock-1x1-glass.mp4"
       ],
       "id": "widget:clock-1x1-glass",
-      "key": "380df540092e42d01584a34a72f20ee20cb35ac18445c94738478d231e992352",
+      "key": "d103c98b8296c8751c9be38f9aedee816ae9a741f5f9f775576dcd73cd96c721",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1010,7 +1010,7 @@
         "public/generated/widgets/clock-1x1-obsidian.mp4"
       ],
       "id": "widget:clock-1x1-obsidian",
-      "key": "77424b07875b4667589ee0851ab7f1d10f8c686a4be2491f20a8bfa8a0d84d58",
+      "key": "09d9341457fb3a654d7cbfc041ccea210e63835e8c4cde3f5d267e42571eeb6e",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1040,7 +1040,7 @@
         "public/generated/widgets/clock-1x1-paper.mp4"
       ],
       "id": "widget:clock-1x1-paper",
-      "key": "faf4847a86fbf4f4b2cff2ac1eb38ad48fa5545e400f8f6d4f06645c49e6cead",
+      "key": "f3a7cb675e1a6f2798eff254a955fe39271607305a36d3bf8cf123f4d03bb2eb",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1070,7 +1070,7 @@
         "public/generated/widgets/clock-1x1-pop.mp4"
       ],
       "id": "widget:clock-1x1-pop",
-      "key": "7c70f3f99744e672ab85cdfa44922ac9eae695c35aa0490dd5a67d86430152ba",
+      "key": "81881f3f0315167965fe7dbacf341446eaf9a9906c4af24e0c7f729a617e918f",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1100,7 +1100,7 @@
         "public/generated/widgets/clock-1x1-prism.mp4"
       ],
       "id": "widget:clock-1x1-prism",
-      "key": "f6011dcd300fc565d3f54b73879edefd05a114c32d80b60fb9be1ff26ef62b73",
+      "key": "b90b343a212d09ae22d802cead1930bde4d126848999b5df82616fdac3da5d47",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1130,7 +1130,7 @@
         "public/generated/widgets/clock-1x1-rigline.mp4"
       ],
       "id": "widget:clock-1x1-rigline",
-      "key": "73c01d336ca59c05da961e23691e5f4f4850b701ab8ed63cff076b75f14dc378",
+      "key": "a7ebc4ff393d7efc35c1cf4f9b3bb56db7e6ae1c813725fef6831d1dbc134061",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1160,7 +1160,7 @@
         "public/generated/widgets/clock-2x1-blueprint.mp4"
       ],
       "id": "widget:clock-2x1-blueprint",
-      "key": "19f86b74d148935c52199cf1c078f605c58038e1a0d5d0ec25955eb1e3381d17",
+      "key": "4c218c01daff632ac9af36a4793ef29d0a583ed394ef53f5fed676885dee7c88",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1190,7 +1190,7 @@
         "public/generated/widgets/clock-2x1-carbon.mp4"
       ],
       "id": "widget:clock-2x1-carbon",
-      "key": "a632ded75aa5fb554ae853c5473b5e35649a81e1e040cef53b721025b1a20171",
+      "key": "1aba3ad18ec668925e28e40a84e54ee1699108483b52504ddae15fd561928bbb",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1220,7 +1220,7 @@
         "public/generated/widgets/clock-2x1-default-dark.mp4"
       ],
       "id": "widget:clock-2x1-default-dark",
-      "key": "e7ca80e41432d4bbcaa2495a86a6a3e6885d61e19422100458e268c4214add97",
+      "key": "2c7dc29e8b9f37da47b3ca9a99a35a41d048cb95918416e6e0936858190d4022",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1250,7 +1250,7 @@
         "public/generated/widgets/clock-2x1-default-light.mp4"
       ],
       "id": "widget:clock-2x1-default-light",
-      "key": "9052439a1dd5f5b8b28b3d3b128c686dbc0bfa99ec0b01f765e75a795d82283d",
+      "key": "5e6a0c28fb6d7bfe63ea37cb6b0b4b887c5c3c1378728c6bb47dcb99a9abc332",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1280,7 +1280,7 @@
         "public/generated/widgets/clock-2x1-ember.mp4"
       ],
       "id": "widget:clock-2x1-ember",
-      "key": "f2afcc22300f59573c43776df7b7819dae532415ac3fead49c65f6d03611f1a3",
+      "key": "3f8603533bc6115f9e748e31b3bfad7c329f5a707dd2c0d531c5deccd0823b26",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1310,7 +1310,7 @@
         "public/generated/widgets/clock-2x1-glass.mp4"
       ],
       "id": "widget:clock-2x1-glass",
-      "key": "42532353df315fb492582ae29b1fbb2d29dfbf3a53116d4e6bd6b5ca49a5ca7f",
+      "key": "0fceb43f2a7164989792b6b7fd25b97bab3e10b0d6746df4df2ad11f5497ba00",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1340,7 +1340,7 @@
         "public/generated/widgets/clock-2x1-obsidian.mp4"
       ],
       "id": "widget:clock-2x1-obsidian",
-      "key": "fdecda0a7fe8e72b3a62ddb5a2bc462351e225de53ea9f38015b8fef7c298abe",
+      "key": "83d6819eae73514fbb3e4d0a24177a0dbfdcc947ebe6d616c893d161e86d1514",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1370,7 +1370,7 @@
         "public/generated/widgets/clock-2x1-paper.mp4"
       ],
       "id": "widget:clock-2x1-paper",
-      "key": "b99e4bb06c9496d9943ae7ee037fe14bb666c8cd32d56697de356ea44be02b5a",
+      "key": "ad6ceadbef487eea165b9b40eb7dd28f0789dea3ffa38e8dcdc702d858cb33a7",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1400,7 +1400,7 @@
         "public/generated/widgets/clock-2x1-pop.mp4"
       ],
       "id": "widget:clock-2x1-pop",
-      "key": "2d9ab9b0e2035e445e1250fecb17c2b008113ad6258fa4ea943f14ad3157bd45",
+      "key": "ddf471222e093590cd744bb22ca1fa9d4b345760cbfc38844f8aea78ea0b6240",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1430,7 +1430,7 @@
         "public/generated/widgets/clock-2x1-prism.mp4"
       ],
       "id": "widget:clock-2x1-prism",
-      "key": "4ef57a80bcd9aa523ecb976b00345a985340b6ba2b38c2358dce0314eebdd0f2",
+      "key": "6809a2e3dc6d44b0d97a1f761cb3b2329432b03b7f0376c9c7a3b5b11b0fb53d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1460,7 +1460,7 @@
         "public/generated/widgets/clock-2x1-rigline.mp4"
       ],
       "id": "widget:clock-2x1-rigline",
-      "key": "18279eec8f70b2fd8bc50ed7152fdd011fede0446fc84ac9c5742b51664a7b70",
+      "key": "02d5ea29415b56c6d09c622881a53ba14a4f1ac81e841668bf17031ad4ab433e",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1490,7 +1490,7 @@
         "public/generated/widgets/clock-4x1-blueprint.mp4"
       ],
       "id": "widget:clock-4x1-blueprint",
-      "key": "ba0af61e9045abb45a65ae6faaa6b1516f2dc7ce48beb2c27998c5115e8a1daa",
+      "key": "aae6f3189ea73ae1bb2475082d39c2ef83f0f18cfd6c3f7d8340971393e6dc66",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1520,7 +1520,7 @@
         "public/generated/widgets/clock-4x1-carbon.mp4"
       ],
       "id": "widget:clock-4x1-carbon",
-      "key": "f27e1a775f6e9b106ea50c1f4cf5d1ed4dab96f5894bdd58e30c70999a31140b",
+      "key": "8d5027dc71c500ebea1f1559650ebd3ba9e8a1326f6c452ebd54b2c4cf6cc8a0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1550,7 +1550,7 @@
         "public/generated/widgets/clock-4x1-default-dark.mp4"
       ],
       "id": "widget:clock-4x1-default-dark",
-      "key": "4842a3ed040946ff4eb72860b82d17f19307fc638fc3acd54d548692e39c23e0",
+      "key": "066dbbfb40df6b27fada6c3105c2c836dcd8907d3e5826de4637b4654b385a84",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1580,7 +1580,7 @@
         "public/generated/widgets/clock-4x1-default-light.mp4"
       ],
       "id": "widget:clock-4x1-default-light",
-      "key": "3ea25da9be6fd77963920a1e4dfdb82f4e62ef757ca35c20d0109e801c24ccf1",
+      "key": "7dfb2adcc998ab408dec8ef5da9fb547d73f6bd4f3503f7492f943265a5b687d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1610,7 +1610,7 @@
         "public/generated/widgets/clock-4x1-ember.mp4"
       ],
       "id": "widget:clock-4x1-ember",
-      "key": "907115a5cdefb54c7d8b05694a352ef78d4de88cd91a02b9db2004ffcd722ebd",
+      "key": "90a922c2ec5da0584709108046365e2f55e269d2e15bc7416425fc082c0c7cf6",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1640,7 +1640,7 @@
         "public/generated/widgets/clock-4x1-glass.mp4"
       ],
       "id": "widget:clock-4x1-glass",
-      "key": "5e48a9d5ffc0b879d29a5fa87253f10ec358a50c21710915d674449ed9f54d28",
+      "key": "cc49f2ea3ee855adb7a79196f99dc97f9c4a4ef8937164dbe468b83efbd3e1cc",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1670,7 +1670,7 @@
         "public/generated/widgets/clock-4x1-obsidian.mp4"
       ],
       "id": "widget:clock-4x1-obsidian",
-      "key": "42daf64d6eeeb2fa32e2e0fce30f97a288071cb3a2b686c0f79bcfb82878cc51",
+      "key": "192153bba536bfd17a01cb843d3a3aecebdd62c7c50f7d0d7ac1ae9b2b66189b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1700,7 +1700,7 @@
         "public/generated/widgets/clock-4x1-paper.mp4"
       ],
       "id": "widget:clock-4x1-paper",
-      "key": "15a2998f32766e1d7b485fcafa772c3c0fc9c7dcb00affce440dd4dbc704a986",
+      "key": "fd514605b12e3362dae5fdf768ee718f3aa9fcc15194c3aade159326a743d987",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1730,7 +1730,7 @@
         "public/generated/widgets/clock-4x1-pop.mp4"
       ],
       "id": "widget:clock-4x1-pop",
-      "key": "6ae41bea15cddf6617d5acc73c729819ab64faa57f1194c58dbbcbaa81a1b518",
+      "key": "b270720213509ca71db84cec75024262ab7943a2c3445dd109b581f2a6917852",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1760,7 +1760,7 @@
         "public/generated/widgets/clock-4x1-prism.mp4"
       ],
       "id": "widget:clock-4x1-prism",
-      "key": "26ebbf800bfd3d76738d04932df9e43c50939976ab228ad87b484f0b2d524703",
+      "key": "2bde283fc6a8102e0e146c27c6b8a8bc053194153d470cce78f060e303927a09",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1790,7 +1790,7 @@
         "public/generated/widgets/clock-4x1-rigline.mp4"
       ],
       "id": "widget:clock-4x1-rigline",
-      "key": "dfe537d205f1def3903857b9c2e2a2b953b34df81b2baf33579e67d3b8979ff9",
+      "key": "aca6b3f6a02ad88097a51b445ecd1b58f015758754248c3ca5c6c7b0316fc428",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1820,7 +1820,7 @@
         "public/generated/widgets/clock-4x2-blueprint.mp4"
       ],
       "id": "widget:clock-4x2-blueprint",
-      "key": "84855b80545efafc5598c36ae20ac2f4aa305e0337fe3143cd4b0464e685779c",
+      "key": "15784a2d908ac020f1a244656f55552d59ccca08590a515ce0ed80bc278cbdc7",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1850,7 +1850,7 @@
         "public/generated/widgets/clock-4x2-carbon.mp4"
       ],
       "id": "widget:clock-4x2-carbon",
-      "key": "63c90b6ba8e90d47396ddb0c46ef15fae413c12758393a43a36097297823b4ca",
+      "key": "4da4c05b60ceb13594ac7cb834f991a35456a32614d2f9f260c70957b90c27bf",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1880,7 +1880,7 @@
         "public/generated/widgets/clock-4x2-default-dark.mp4"
       ],
       "id": "widget:clock-4x2-default-dark",
-      "key": "ed3a0d67a832cf367ca56af33163e282678af54e1dc42c4ab7531919a325aa2c",
+      "key": "e17c882b71806cd77c7746de0410eaba10e6c16d0429914827c7c70aabec2e03",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1910,7 +1910,7 @@
         "public/generated/widgets/clock-4x2-default-light.mp4"
       ],
       "id": "widget:clock-4x2-default-light",
-      "key": "14c79715e7639cb748717d6161f063964fb5f5d2126e58ba43d83665956cdaa4",
+      "key": "e04c8e4d185e5958a61894761781e770a9410143ec0cd2e01698ba9b0f4531d2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1940,7 +1940,7 @@
         "public/generated/widgets/clock-4x2-ember.mp4"
       ],
       "id": "widget:clock-4x2-ember",
-      "key": "1f2af8819166b18b2906c19681d4844671bc8f2bda7de311a88cf9d3588ff1b0",
+      "key": "28610599c0eeee97ddd0a8c7308ffecce877c27b360b17bc9ef54fb99662b803",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -1970,7 +1970,7 @@
         "public/generated/widgets/clock-4x2-glass.mp4"
       ],
       "id": "widget:clock-4x2-glass",
-      "key": "1a3bf106463274e7c13ab70340217dcea9c682843bdad40ead86442dd8e3b207",
+      "key": "140eb5348c6c2408f667c993d1980239de859d70f297340d2f9cb563532e112e",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2000,7 +2000,7 @@
         "public/generated/widgets/clock-4x2-obsidian.mp4"
       ],
       "id": "widget:clock-4x2-obsidian",
-      "key": "ab93c45c17d546fb1f4f1f5d491f082bc0e04712856fe2c8b1ed705e1219cfab",
+      "key": "acb30d8231a2f6f7af297cc7aea799e12f8d2c784d4badb1e30d2ea6e3762f5b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2030,7 +2030,7 @@
         "public/generated/widgets/clock-4x2-paper.mp4"
       ],
       "id": "widget:clock-4x2-paper",
-      "key": "c3c82244e99a85111aacdf5ffa963f008c8df77a67c0b04ed2cf4a297a6266fe",
+      "key": "cec869846c059d03fb4d85c777484ddff784e8c627a02bf20cbbdd1c7078e16c",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2060,7 +2060,7 @@
         "public/generated/widgets/clock-4x2-pop.mp4"
       ],
       "id": "widget:clock-4x2-pop",
-      "key": "b69b0a23cf31beeb6014ec4fc0471e4c5769fce6438bd40a0e4d37a05a3d2db1",
+      "key": "adf269fa526b3950de2cd7679417f1a15c4f889c478e268ffcf6274ab68228b0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2090,7 +2090,7 @@
         "public/generated/widgets/clock-4x2-prism.mp4"
       ],
       "id": "widget:clock-4x2-prism",
-      "key": "6cfb751c34fc18139a3ab02ba666df798d241fb82d53a080ed19b27bb6c20e3d",
+      "key": "a38074435606de1f0fb027c2a89614db37e2110a88bb9ea036abb7612438ef89",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2120,7 +2120,7 @@
         "public/generated/widgets/clock-4x2-rigline.mp4"
       ],
       "id": "widget:clock-4x2-rigline",
-      "key": "c28cd4b3f184041d0bf18d1c4ec50a8240d4d3306680e4f09d563985212284e0",
+      "key": "98542c4173b56b7bf616859afbabcb9318c5b659f5ce6d1d33218bbf3fa4512b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2149,7 +2149,7 @@
         "src/generated/widgets/control-1x1-blueprint.webp"
       ],
       "id": "widget:control-1x1-blueprint",
-      "key": "157e2654b2e75916a3e323cac0de9b98b86575742ef33a62f02fde3b9c49dcd8",
+      "key": "dfa5ddbb92e767de0845cee946ad33ebb9daf57483a05e04f2ab2fa0c1f55fea",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2173,7 +2173,7 @@
         "src/generated/widgets/control-1x1-carbon.webp"
       ],
       "id": "widget:control-1x1-carbon",
-      "key": "0bc60e3fff7d8bf0b7efc6db016a7a84d1476181b62731933a86a06dcb571366",
+      "key": "409259a05bff82af12c090a152af265b587c0f2f6d286f711d75d27e3f88bc79",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2197,7 +2197,7 @@
         "src/generated/widgets/control-1x1-default-dark.webp"
       ],
       "id": "widget:control-1x1-default-dark",
-      "key": "ef02694608bbe7f04808d4c67e8ce3829fb5d5880f22b43f8c3a0ebd12e12e59",
+      "key": "5c4f139e7e51db978f8c9bdd4643d482f567000419294b43732b4f0e823c7800",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2221,7 +2221,7 @@
         "src/generated/widgets/control-1x1-default-light.webp"
       ],
       "id": "widget:control-1x1-default-light",
-      "key": "91ee03fc497b55a105ee4abd9a3f33c6641ddb2ea31918b7977b9c1a5b91bd78",
+      "key": "84824b9ed161ddfca9617652673f16777fb5aa6ee892f0f3d14e2fc2c46a0879",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2245,7 +2245,7 @@
         "src/generated/widgets/control-1x1-ember.webp"
       ],
       "id": "widget:control-1x1-ember",
-      "key": "090671850e4ae650701b659d3fd3aa35b67ee0bac695ad97dfbbca87e11bf4c2",
+      "key": "f561a5bf69205d0aecf0544e0e4b895be1b81fe6b93ae6b6ae22bf80688ec17b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2269,7 +2269,7 @@
         "src/generated/widgets/control-1x1-glass.webp"
       ],
       "id": "widget:control-1x1-glass",
-      "key": "442ebd01581e60ab5d3ba608a28d105d0cb5623fd364eadc531958ee6c0908e4",
+      "key": "4292a32a5b354de8a0dec65d15306a35f798e344ebd73313f375d11e5d57fa63",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2293,7 +2293,7 @@
         "src/generated/widgets/control-1x1-obsidian.webp"
       ],
       "id": "widget:control-1x1-obsidian",
-      "key": "ad8ec14f6050fb034245b381c4aeca1b13019c1342edd5b581b0178fe63b46fc",
+      "key": "75eb15d1bf27568ead7f28ace565b4e62d30ed8d5fa8a071245ff49ba92a0372",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2317,7 +2317,7 @@
         "src/generated/widgets/control-1x1-paper.webp"
       ],
       "id": "widget:control-1x1-paper",
-      "key": "ba19b3e7455667e0bb46be8e801ac167c0ec1b5756567f50c788a8fe5e325ec8",
+      "key": "d1da11d26a654af61a7dfa3f7c8bcc6c89b5520e2fd768bf5e85f73e9bcc129a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2341,7 +2341,7 @@
         "src/generated/widgets/control-1x1-pop.webp"
       ],
       "id": "widget:control-1x1-pop",
-      "key": "b67007d6de00f91789d037e2bd7c8368f7e86e24abf4fdf009ba6dacbf92d304",
+      "key": "82a1dea2e3e8cad1d2800bfd3b36d7fadffdada09940758803c7c150daa90557",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2365,7 +2365,7 @@
         "src/generated/widgets/control-1x1-prism.webp"
       ],
       "id": "widget:control-1x1-prism",
-      "key": "4cf3d5529fff2a81635e292f414c7d2b3e43137927393f202870fef1b102c534",
+      "key": "8f102e8730a27ad83d4ab4d8e758072c56812385b7b0a077d3c758ce10347265",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2389,7 +2389,7 @@
         "src/generated/widgets/control-1x1-rigline.webp"
       ],
       "id": "widget:control-1x1-rigline",
-      "key": "7fe69e4cb8ee77ad25a4838712a62b58a14ad9ea1c3d07459ee7ecc7315f9dbd",
+      "key": "1ebcda068f361302b19d7d37ac2754725a2d2c4a82950890325c2381a5c623a4",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2413,7 +2413,7 @@
         "src/generated/widgets/control-2x1-blueprint.webp"
       ],
       "id": "widget:control-2x1-blueprint",
-      "key": "0684f05ee340ca900099a2422d52b91fa1a9aaa8f2f240080d3ceac8d2d23f95",
+      "key": "cd166eb5d83691a7c9f5650640481d5fd3ce33c49a0896f667d7ab42665a7659",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2439,7 +2439,7 @@
         "src/generated/widgets/control-2x1-carbon.webp"
       ],
       "id": "widget:control-2x1-carbon",
-      "key": "eb37be2629df6299c9d5d4eb1225cee5e99bac3949f2f6a541b96084287a3a44",
+      "key": "da75284c521e57430e5a08e18dfd4bf52d5301f68146301215fe0997a9a2c8cb",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2465,7 +2465,7 @@
         "src/generated/widgets/control-2x1-default-dark.webp"
       ],
       "id": "widget:control-2x1-default-dark",
-      "key": "22c3014c4e79cfc08a7c7496e0a7b1f23d0ec40f908a1fb61b4bbfab55dcba0f",
+      "key": "9a2a5a0ba856305d18d58c9f252eaa28151eb9c57afa0d9a1d10df8c789946cb",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2491,7 +2491,7 @@
         "src/generated/widgets/control-2x1-default-light.webp"
       ],
       "id": "widget:control-2x1-default-light",
-      "key": "ab9c42467e6d30da84deca0f6306b5dad30ae5907923e8fca33ec99956befc74",
+      "key": "82f717bd4aeb4213665fb47060568f4fdfc789b5027a2b8c0a7c436b6a2007d0",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2517,7 +2517,7 @@
         "src/generated/widgets/control-2x1-ember.webp"
       ],
       "id": "widget:control-2x1-ember",
-      "key": "23ef488bd7da767ff27fe93621e8b77fa87ccff9ff47ba553b81747b38f605a0",
+      "key": "de87929f769032614ec2f54f4c1a4627a399b01acf93e776f5d338b46d283069",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2543,7 +2543,7 @@
         "src/generated/widgets/control-2x1-glass.webp"
       ],
       "id": "widget:control-2x1-glass",
-      "key": "382f5ecfda6dfc72f49042b4b918036456e612da18b4c4e2de8da29bb0a6e6ff",
+      "key": "05eb0952173605d57883b37de533a808d1ee65daa9d51b232400c961eeeaefc2",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2569,7 +2569,7 @@
         "src/generated/widgets/control-2x1-obsidian.webp"
       ],
       "id": "widget:control-2x1-obsidian",
-      "key": "b3893662e37d2b6dde41343cb277aba7a25e27117e43d43d80ac055232f5a76c",
+      "key": "d8e8288a256d0e88dd3811a35387d0a99aa7f30e839e84a60db8024ea78e77f7",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2595,7 +2595,7 @@
         "src/generated/widgets/control-2x1-paper.webp"
       ],
       "id": "widget:control-2x1-paper",
-      "key": "e9ee69e9673f2ead6ac79e0d78e9b3d6e84c76ba44e7391b57b9223cfdf66c69",
+      "key": "27065519a8a2ed726284bc286444eee32e038fc1862bbec3972dc213c9abff9a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2621,7 +2621,7 @@
         "src/generated/widgets/control-2x1-pop.webp"
       ],
       "id": "widget:control-2x1-pop",
-      "key": "1644583520b0ddb87fd4d1ef2b0c5dfed5b83f6a5c9e7b5877c0e419f17c77e3",
+      "key": "c7daffe89861dc3ea68d109e12a16844cdff62764ba9593c6dc4b96914e754fe",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2647,7 +2647,7 @@
         "src/generated/widgets/control-2x1-prism.webp"
       ],
       "id": "widget:control-2x1-prism",
-      "key": "04bd16fb4d8e3d7ed6d3d90c2d21ee5a1f24e3badfc3c3b72acc0f982f0f2ef8",
+      "key": "3f05eded38c5ee33858cdfdefce40d6bc0ebec7839799281e5b5cb2e6810b102",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2673,7 +2673,7 @@
         "src/generated/widgets/control-2x1-rigline.webp"
       ],
       "id": "widget:control-2x1-rigline",
-      "key": "ba21c34362a769da2b4fd1461645bb916f81a7ebdd1ae5746c55d85ad4d2f1af",
+      "key": "96a70c2139a1a00a66296158bf025fa3ea6151163707b3bc1903741bf5f00643",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2696,10 +2696,1220 @@
     {
       "background": "plotter",
       "files": [
+        "src/generated/widgets/list-1x1-blueprint.webp"
+      ],
+      "id": "widget:list-1x1-blueprint",
+      "key": "f6828e106b0f9698143b69ab57b0125e165a24d60a6e133f7c2485727f7e1a56",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-1x1-carbon.webp"
+      ],
+      "id": "widget:list-1x1-carbon",
+      "key": "cc9c1cee598bbd8e7c1ea4919897d657f0f5f97e8809b03cae1d5bb6815ee4b7",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-1x1-default-dark.webp"
+      ],
+      "id": "widget:list-1x1-default-dark",
+      "key": "b651ddec48f4e57a53195c19108b8815f2b8016f126262074f50efe011a94d61",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-1x1-default-light.webp"
+      ],
+      "id": "widget:list-1x1-default-light",
+      "key": "73208d29a7f5b742ef1325af33899d6e6b14c2355744bcccbf142e8856f697d7",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/list-1x1-ember.webp"
+      ],
+      "id": "widget:list-1x1-ember",
+      "key": "a2601c9bb200741d282f2a1d6c3c3a8f5ae3fa8e51c19e7b1040c9d456ec61de",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-1x1-glass.webp"
+      ],
+      "id": "widget:list-1x1-glass",
+      "key": "2141542fab36749491b36eb0379a79ef49ab4e4f1f68a33df7aab6522d1f47ad",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-1x1-obsidian.webp"
+      ],
+      "id": "widget:list-1x1-obsidian",
+      "key": "694c082e7122df6ccb2beeb973f26094c694d7cfe9bcf787eaf44b67e8be1c9c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-1x1-paper.webp"
+      ],
+      "id": "widget:list-1x1-paper",
+      "key": "af708a763776d59406cba32b09cdcd6d6ea789e86021237ce711380960393919",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/list-1x1-pop.webp"
+      ],
+      "id": "widget:list-1x1-pop",
+      "key": "0a9479c55ef0811136035d4465772d179f1460e55f56a1db92684a81bc579d8e",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-1x1-prism.webp"
+      ],
+      "id": "widget:list-1x1-prism",
+      "key": "e1996dfa2c5b908931649c224e079a34107095b46ca3d5880ab0dff62fec7f27",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/list-1x1-rigline.webp"
+      ],
+      "id": "widget:list-1x1-rigline",
+      "key": "77d51d42cfd530ad3ae859e38998886f6c73a85e69512a65ba6880b20a4db1a2",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/list-2x1-blueprint.webp"
+      ],
+      "id": "widget:list-2x1-blueprint",
+      "key": "6f5eddfc9ee3bf97d7a7a1ab1ca54d5276b943d2677b0f8522ebace5ce5d20a6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-2x1-carbon.webp"
+      ],
+      "id": "widget:list-2x1-carbon",
+      "key": "c1a055967c45711132c2e3f9feec95a45c30669d4317e417c146d1553e9a97b9",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-2x1-default-dark.webp"
+      ],
+      "id": "widget:list-2x1-default-dark",
+      "key": "1f24eeebcac8e2a1be8ad8f3917349adad774fa3a3eb8c393f2d9c6fb1a3492f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-2x1-default-light.webp"
+      ],
+      "id": "widget:list-2x1-default-light",
+      "key": "bdd332ec0e5ddd6b63d64f07e5024391f4f961a9073e5d63d3edf6832966dc0b",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/list-2x1-ember.webp"
+      ],
+      "id": "widget:list-2x1-ember",
+      "key": "4db5727495d1604694764bd4b15895866113f826c1bf86808b52da07ed13a4cb",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-2x1-glass.webp"
+      ],
+      "id": "widget:list-2x1-glass",
+      "key": "5346032f669cfa005c1181a46f4e8457b8061a59df6213575a10705a4ac6edf6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-2x1-obsidian.webp"
+      ],
+      "id": "widget:list-2x1-obsidian",
+      "key": "a450c6c06c75af80214fb4d4b6d449b1c773df2ffdbe0fca4c51bacb4d76d517",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-2x1-paper.webp"
+      ],
+      "id": "widget:list-2x1-paper",
+      "key": "70f08f0efbb1b742ba9c0394bd119b95820077a40920c93b534df5e590235826",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/list-2x1-pop.webp"
+      ],
+      "id": "widget:list-2x1-pop",
+      "key": "1d203d7649c28852315f01744fd3b1ce7617ce4c14e07a7dbe3c6f196ff45ada",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-2x1-prism.webp"
+      ],
+      "id": "widget:list-2x1-prism",
+      "key": "e89ba16c66d86511449a74bf15974074adfa3a3befd4b35d8cb55976ecd86873",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/list-2x1-rigline.webp"
+      ],
+      "id": "widget:list-2x1-rigline",
+      "key": "cb9fa72a188558e8bd44431f81f630da9b5d6971a2a3a673327fb55ec894f445",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/list-2x2-blueprint.webp"
+      ],
+      "id": "widget:list-2x2-blueprint",
+      "key": "9940ed4f1c4a106eed3e8fdfb8df3ce4d8d2dbc64e959d45b11488bde2b67791",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-2x2-carbon.webp"
+      ],
+      "id": "widget:list-2x2-carbon",
+      "key": "85cdc930b47c4f776e249100012b15dde4d1fa56d08023369eecaa046dc5da70",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-2x2-default-dark.webp"
+      ],
+      "id": "widget:list-2x2-default-dark",
+      "key": "6b28b5f3e6d0a1b697ab3586378e0412765564923fff3fab791d8050fbc8f5d1",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-2x2-default-light.webp"
+      ],
+      "id": "widget:list-2x2-default-light",
+      "key": "8df0ab278a60fc90bb9a4095ff697391044bd6ad58f8ec271306805f8c7530da",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/list-2x2-ember.webp"
+      ],
+      "id": "widget:list-2x2-ember",
+      "key": "d7ec14649bf3f1f02f59fc644a5f9d7758a90cab0b915737b53676a778b529ed",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "ember",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-2x2-glass.webp"
+      ],
+      "id": "widget:list-2x2-glass",
+      "key": "ab8eac24611edba60cdec8b703d47334ec7caa5712cb50b986415e5bab7530e4",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "glass",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-2x2-obsidian.webp"
+      ],
+      "id": "widget:list-2x2-obsidian",
+      "key": "87999ecc32d5a6b4bc20e5ade9e2c212f598eb9a6f48a7f71284c3c842113487",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-2x2-paper.webp"
+      ],
+      "id": "widget:list-2x2-paper",
+      "key": "9ceabaef39c214d6723fdedbe2cae47dd1fe295f6715b273ef0b11b413c66887",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "paper",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/list-2x2-pop.webp"
+      ],
+      "id": "widget:list-2x2-pop",
+      "key": "b9ffc513172f01c813eb7631cb09485c25d2a32681352799c5889b194f5f058e",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "pop",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-2x2-prism.webp"
+      ],
+      "id": "widget:list-2x2-prism",
+      "key": "0c343d00db655a35a73ffbf8440e150085eda0459e7a286fb3855140bf32b312",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "prism",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/list-2x2-rigline.webp"
+      ],
+      "id": "widget:list-2x2-rigline",
+      "key": "535eab533eb05ee1a6b45503df5b56a2f8caf1ee959700904c4c5890008f28d7",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/list-4x2-blueprint.webp"
+      ],
+      "id": "widget:list-4x2-blueprint",
+      "key": "206f6ef3b44a404a91586823dea81dd45ac55af18ada52c7f2ed13a313052888",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-4x2-carbon.webp"
+      ],
+      "id": "widget:list-4x2-carbon",
+      "key": "3d68e9ce56796092f9fd7f1e4bdedb01cf740ec835f80e88d9e53e2670d1f2c6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-4x2-default-dark.webp"
+      ],
+      "id": "widget:list-4x2-default-dark",
+      "key": "84ab88ca2eb49371cd210060d6dfd44861d39f94685d6690d05be9ab9b2048f8",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-4x2-default-light.webp"
+      ],
+      "id": "widget:list-4x2-default-light",
+      "key": "100ae554ddebf8654c64a36d655a3fa4cc129a826eb73486fe40139731df0865",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/list-4x2-ember.webp"
+      ],
+      "id": "widget:list-4x2-ember",
+      "key": "6e0955c46b74b013a188e117227ea358fe89bbeefb6d4fd328e98ba5dbac8606",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "ember",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-4x2-glass.webp"
+      ],
+      "id": "widget:list-4x2-glass",
+      "key": "3d43db326f3ecceb723d73a8cd01ba2b1a946cac8aab723223bf4f7e830b64d2",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "glass",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-4x2-obsidian.webp"
+      ],
+      "id": "widget:list-4x2-obsidian",
+      "key": "ab1b4e1975e26ea550f40500ab14457db73d901c7f5e6318adad8f56848eee19",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-4x2-paper.webp"
+      ],
+      "id": "widget:list-4x2-paper",
+      "key": "9fb3632662a30d19e901cf72cc420d0e2e5de1ac5b48fd5c02655c63ffe80468",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "paper",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/list-4x2-pop.webp"
+      ],
+      "id": "widget:list-4x2-pop",
+      "key": "c1991ee5cc14762cf009cf62a5c244a463de36acddcb486f93beb10fef82e55b",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "pop",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-4x2-prism.webp"
+      ],
+      "id": "widget:list-4x2-prism",
+      "key": "1ded97822f66fa47a6b9c249492de18cafb943c7a691ca8af5c57fb93f3874f3",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "prism",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/list-4x2-rigline.webp"
+      ],
+      "id": "widget:list-4x2-rigline",
+      "key": "2c6cb1e96dc52939b1b2d5d94bec75c3570bc237e95693d158a2151b6b8ea1af",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/list-4x4-blueprint.webp"
+      ],
+      "id": "widget:list-4x4-blueprint",
+      "key": "66d28672a91765981d5b53e5af8ea6d8863fa789441e1749b9d0f9d530551910",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-4x4-carbon.webp"
+      ],
+      "id": "widget:list-4x4-carbon",
+      "key": "1dcd3d5306350643d2c2ab2cfdd7cd1132f952996a9dfad0356d06e81f195d45",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-4x4-default-dark.webp"
+      ],
+      "id": "widget:list-4x4-default-dark",
+      "key": "9b6d94308d6d18d440bde02952be8312702329f4c96fc007e0f90545af44c2a2",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-4x4-default-light.webp"
+      ],
+      "id": "widget:list-4x4-default-light",
+      "key": "e368e6e74b9671f99f251ecaff4344672366f41d230ce2c1dadfd3af1c8e8045",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/list-4x4-ember.webp"
+      ],
+      "id": "widget:list-4x4-ember",
+      "key": "705abb9ba07ae65b5f146e27c4a8f8fbc1801925ad3874d570f2d1f41ca0f697",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "ember",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/list-4x4-glass.webp"
+      ],
+      "id": "widget:list-4x4-glass",
+      "key": "942f531329b8ca4db21ced4bb53ee78801d0abb8ae08471f28111f0a03561291",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "glass",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-4x4-obsidian.webp"
+      ],
+      "id": "widget:list-4x4-obsidian",
+      "key": "dbec5ccd84fe88eb63769051f2a039c189236a4e2430c4692297a19c1b2998ca",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/list-4x4-paper.webp"
+      ],
+      "id": "widget:list-4x4-paper",
+      "key": "efb5227fbf47ce4e2fa671d8478d68077642627ce5054e07ddc02fdce370a133",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "paper",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/list-4x4-pop.webp"
+      ],
+      "id": "widget:list-4x4-pop",
+      "key": "c3c97bf72a1710cc31c86ddc11bdaf2766b3d4f0f0dc9f127a3175d36796068b",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "pop",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/list-4x4-prism.webp"
+      ],
+      "id": "widget:list-4x4-prism",
+      "key": "05d35b67571470c79e3c23df518656ffddd3c6bc5b9d11267b9cf55a711ce870",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "prism",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/list-4x4-rigline.webp"
+      ],
+      "id": "widget:list-4x4-rigline",
+      "key": "61f7565218c08fb98db994af6a152a0fe57a3ed57d7a74e55e9526a02226bb67",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.list",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.list"
+    },
+    {
+      "background": "plotter",
+      "files": [
         "src/generated/widgets/nowplaying-4x2-blueprint.webp"
       ],
       "id": "widget:nowplaying-4x2-blueprint",
-      "key": "49e83acb66632d3b20e0e7e632a7d30f16cfac1b4352fc4836907eca6dbd7125",
+      "key": "1085d756a341b7639faf59f838296cfa562911213304c4e531e9d7d3fd097829",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2721,7 +3931,7 @@
         "src/generated/widgets/nowplaying-4x2-carbon.webp"
       ],
       "id": "widget:nowplaying-4x2-carbon",
-      "key": "51374a8bd7bac1af87a375ff8b5b62db3565a22edc1d026add652bcf55ab8243",
+      "key": "3c32f9c8b3a235493dbf226fe109017164c1cd8f7f9f456f4a348e39e8135a40",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2743,7 +3953,7 @@
         "src/generated/widgets/nowplaying-4x2-default-dark.webp"
       ],
       "id": "widget:nowplaying-4x2-default-dark",
-      "key": "0ed76b48bcde79763c54d9d352ff973ae78185998add5f6888b22cf1ca47fa9e",
+      "key": "81a7671408e2873c33f48de938b8efa27cc802d498c74a15748b55a9ac5d7ee7",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2765,7 +3975,7 @@
         "src/generated/widgets/nowplaying-4x2-default-light.webp"
       ],
       "id": "widget:nowplaying-4x2-default-light",
-      "key": "ef4a20ab017681077ba89f058484d08a1269ab58026e4a3c518adeb1b8afc3c5",
+      "key": "0b53bef7b3ca81fa1dda607f8e9c23fa7646e3c68ead7467ee82278fab88a9c7",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2787,7 +3997,7 @@
         "src/generated/widgets/nowplaying-4x2-ember.webp"
       ],
       "id": "widget:nowplaying-4x2-ember",
-      "key": "171b38fd017dd6d2a85486437b0e29b61f5778a204c8b6a0b71f5edc94db07ff",
+      "key": "19bb9a6ee65c092df2b7fde0f968778c5e3b6568f0a4c03df2a1e3b0fbcb1504",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2809,7 +4019,7 @@
         "src/generated/widgets/nowplaying-4x2-glass.webp"
       ],
       "id": "widget:nowplaying-4x2-glass",
-      "key": "68c44055d397bfe57b525d617477d0349218b26810bc664ecaa04906258d01e0",
+      "key": "d0b3d8e853b7158b6de8f5f50ed95c45b0963f8da59b45c02c0a8b1faafb73f5",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2831,7 +4041,7 @@
         "src/generated/widgets/nowplaying-4x2-obsidian.webp"
       ],
       "id": "widget:nowplaying-4x2-obsidian",
-      "key": "77755f4b69cc0e78e18aed1588a24c522824497087cdfeff4a40c905eb67c5ce",
+      "key": "efdb4673863304d940a8d9239bf246bbc138e6ed1e7b69415fe91c9e9b180f89",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2853,7 +4063,7 @@
         "src/generated/widgets/nowplaying-4x2-paper.webp"
       ],
       "id": "widget:nowplaying-4x2-paper",
-      "key": "752e229379b7432b3c0decd7c21e1a5a7af5a0c73786865853b22288a23e6042",
+      "key": "05b241aa02cf81001abf83a88c02da6a641606cf6d015752a9811bb14cb21f5f",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2875,7 +4085,7 @@
         "src/generated/widgets/nowplaying-4x2-pop.webp"
       ],
       "id": "widget:nowplaying-4x2-pop",
-      "key": "97ca22778065654ac9efea3afcbfeee9b7a8921f2c45cd3644c7c1bb857c65e9",
+      "key": "b0258fae34ea80cb154e8565a6c94893f0b5537aa06d04c53c2278245f055972",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2897,7 +4107,7 @@
         "src/generated/widgets/nowplaying-4x2-prism.webp"
       ],
       "id": "widget:nowplaying-4x2-prism",
-      "key": "e8a7e60dab1ff147778057207882e8d0230f50d983aff27c548152daf59d2fc2",
+      "key": "077be40e99cd31184d8e7e362ed1329a638cd1e0122d8b9b813f20b99bedfcd9",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2919,7 +4129,7 @@
         "src/generated/widgets/nowplaying-4x2-rigline.webp"
       ],
       "id": "widget:nowplaying-4x2-rigline",
-      "key": "cea2592010443aad7c0de37aa6669e64927dc4c884fc153a4386ef89981f72c8",
+      "key": "28c4791963396fa7cc2b92de6c713cbd86b2d83e55444220e6cae7b17a4da876",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2941,7 +4151,7 @@
         "src/generated/widgets/shortcut-1x1-blueprint.webp"
       ],
       "id": "widget:shortcut-1x1-blueprint",
-      "key": "d24f31b4020df9d09d616215df10e8151e8530711fd1fb240e209c4ed44a5de2",
+      "key": "87539ba7de73646dc241b661695860ac6f58ca48560287b3c6ef82cdf8956be6",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2963,7 +4173,7 @@
         "src/generated/widgets/shortcut-1x1-carbon.webp"
       ],
       "id": "widget:shortcut-1x1-carbon",
-      "key": "cbcf0d9ffbf9eaf3982ee0e3914b8207c199cfb9d3bb8eb496e5ad7ef1a6fd91",
+      "key": "10acaab9be75c3c33ba8c8d96084419984d527fadc079bcc3190ad12a092f02b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -2985,7 +4195,7 @@
         "src/generated/widgets/shortcut-1x1-default-dark.webp"
       ],
       "id": "widget:shortcut-1x1-default-dark",
-      "key": "ae4b5c100323ca21cdbb645314c0e5239925774d27edbf6d2ba37065ac95eef9",
+      "key": "3edd01bcd65bcc3a7f13cecabae542b2963027bb31d22a9defb000b3d2b1ca7f",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3007,7 +4217,7 @@
         "src/generated/widgets/shortcut-1x1-default-light.webp"
       ],
       "id": "widget:shortcut-1x1-default-light",
-      "key": "fd277cc2503d83addbe1a093342797b9c4f465b600bac3c6c6482e15b6cf7a36",
+      "key": "35b487588b9f1ccbe9b15ed9848b3c3f934df68123447a4585a125a8a04db507",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3029,7 +4239,7 @@
         "src/generated/widgets/shortcut-1x1-ember.webp"
       ],
       "id": "widget:shortcut-1x1-ember",
-      "key": "2a66fc16a9cf2a9c96225ece08c0d463e07707d467b774fc100920aa382dbe57",
+      "key": "c8823c30b1d82073207b72e0803e4766e5dc24fa3274ecde8fe2ab90ed57eb22",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3051,7 +4261,7 @@
         "src/generated/widgets/shortcut-1x1-glass.webp"
       ],
       "id": "widget:shortcut-1x1-glass",
-      "key": "76f7d23c4784aad5a64663796601ca6df543e66a3a80fdb94bc9b654cfeb3d3b",
+      "key": "d54c14c88dde179eb032a8fbabc81c9ae57e47f045b1029f92dd352eb718f35d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3073,7 +4283,7 @@
         "src/generated/widgets/shortcut-1x1-obsidian.webp"
       ],
       "id": "widget:shortcut-1x1-obsidian",
-      "key": "6e84cfa4cbaf721b5b3e14fc549d8cad95a42b78269527d3eca064f1f484a94e",
+      "key": "7af61028b8c1f6e2572af77f058a2bd1261a574a900a1f08e7c080851a74f74a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3095,7 +4305,7 @@
         "src/generated/widgets/shortcut-1x1-paper.webp"
       ],
       "id": "widget:shortcut-1x1-paper",
-      "key": "eac992591dae7d7f93135ca4a119e3fa09ebbf246546d9d7a60e522f9adebc78",
+      "key": "b1d519fbebc0c99fe6cbcfee31545857deafedbf6e8373363d414f7666f9eaf5",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3117,7 +4327,7 @@
         "src/generated/widgets/shortcut-1x1-pop.webp"
       ],
       "id": "widget:shortcut-1x1-pop",
-      "key": "ac0f6d53cbbf8fb081e4b6ecffe01367ed35a2a62253bf2cd6bd31ad2f35a2cd",
+      "key": "4765a2b08aeff0a06db3870eeef8a6b173c0252a27a0a7661a70027671ca4c12",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3139,7 +4349,7 @@
         "src/generated/widgets/shortcut-1x1-prism.webp"
       ],
       "id": "widget:shortcut-1x1-prism",
-      "key": "7e34f06a441263f2ce88bf5d400de0fae6ab4c4614d6d25bf3beb4dca267296b",
+      "key": "379c37ddf60ac8d4389d9ca5d1f5236bcce39a649e60ef992a2166c3700632fa",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3161,7 +4371,7 @@
         "src/generated/widgets/shortcut-1x1-rigline.webp"
       ],
       "id": "widget:shortcut-1x1-rigline",
-      "key": "3279d840bb1338bdb8b8bafd4904d185fe4d9e7af1a075d8ef318d7fbee1a94b",
+      "key": "f6cc92906260a799804dcf261634dcb35a704fa0798309892a2cf72ae10e6ff1",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3184,7 +4394,7 @@
         "public/generated/widgets/stats-1x1-blueprint.mp4"
       ],
       "id": "widget:stats-1x1-blueprint",
-      "key": "631ee05f0a53a8a618d475909416fe910b28a7ccf4e153a995cd30084f3fcacb",
+      "key": "084654419e6e0bc81355d03af1ce8aa08d3940b216f210b3f135753f8188de8f",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3210,7 +4420,7 @@
         "public/generated/widgets/stats-1x1-carbon.mp4"
       ],
       "id": "widget:stats-1x1-carbon",
-      "key": "c5ce0e40f5fa491f3d197f93f46e35b55d43a634dd3b856f96a9678ee8c118c3",
+      "key": "5b92414bb74469140358d37f4c9076882bca6cc14ca9cdfe910752f5b009726d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3236,7 +4446,7 @@
         "public/generated/widgets/stats-1x1-default-dark.mp4"
       ],
       "id": "widget:stats-1x1-default-dark",
-      "key": "4c54933e8f2a1319156e2ba321efba658b880272848708fbf31ea30e30b1d212",
+      "key": "95157be9c9a2f17227fee75aa8aad91f8757e34778e5f68993b5147a02d36cec",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3262,7 +4472,7 @@
         "public/generated/widgets/stats-1x1-default-light.mp4"
       ],
       "id": "widget:stats-1x1-default-light",
-      "key": "d7e9d1505b2d5630f91b10db3f9f1ef78bc9c084e245f14bc2e0bc86efe4571a",
+      "key": "5b61dd102b9d0273edeb1c39caeadf3674f8e927a039afef3e7e40f763c717dc",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3288,7 +4498,7 @@
         "public/generated/widgets/stats-1x1-ember.mp4"
       ],
       "id": "widget:stats-1x1-ember",
-      "key": "0f928777eddff6b812823a12c780a286b3b41a5fb51b48c0375efd1761eea798",
+      "key": "f69c8893262ee64d80526441abb4139eafadc72d607271570d90d453617a2542",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3314,7 +4524,7 @@
         "public/generated/widgets/stats-1x1-glass.mp4"
       ],
       "id": "widget:stats-1x1-glass",
-      "key": "56e7919e7227f76a98127c8eda92e57672ef8d4323b6898e4b190225bc93fc13",
+      "key": "532f64aa656757a8c30008a9971610d5d2c1936f81dcf6cb0f7fa5992796f282",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3340,7 +4550,7 @@
         "public/generated/widgets/stats-1x1-obsidian.mp4"
       ],
       "id": "widget:stats-1x1-obsidian",
-      "key": "43c0ecb3185e52181a514a6010329a3bc292d8e07c47a82afad380c3b85cb23b",
+      "key": "5a374777ebb1346d8bfa4580e90b64aeceaa5d1a02004f1ea40fb6b4274fe019",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3366,7 +4576,7 @@
         "public/generated/widgets/stats-1x1-paper.mp4"
       ],
       "id": "widget:stats-1x1-paper",
-      "key": "fae34f6e77437566109937429437c0bc1f3bbce2729e534dd0ab3825acd54b51",
+      "key": "0edb4fdb2c37f9d54d173427ebab0027a80717593babd4a2cdfb95ef7274cd88",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3392,7 +4602,7 @@
         "public/generated/widgets/stats-1x1-pop.mp4"
       ],
       "id": "widget:stats-1x1-pop",
-      "key": "1917277db24b8d66f1ef76cd6e2220fef3890e70af6f828d122cba17f0ac3bd2",
+      "key": "f7c4b53f0ab4d8fe935030d81c52c15f5e4121edd8009fd26114c33373f53691",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3418,7 +4628,7 @@
         "public/generated/widgets/stats-1x1-prism.mp4"
       ],
       "id": "widget:stats-1x1-prism",
-      "key": "9556c936152a9abda9220639bfac8ac8bdbfce7446e4b19666b157bf0c414b1c",
+      "key": "83871e7ad6ccf12796538db4beddeec15eee8f7bf40d186991755b0b0d621771",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3444,7 +4654,7 @@
         "public/generated/widgets/stats-1x1-rigline.mp4"
       ],
       "id": "widget:stats-1x1-rigline",
-      "key": "b0ef301a3bb103921c793a7b08b2749b97d5e68e74e30a4b26273a886f23e3e0",
+      "key": "736b342135bfe65d731fe20cb5c35b77db40d928f5d6224f35a7f15cb49abd18",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3466,11 +4676,297 @@
     {
       "background": "plotter",
       "files": [
+        "src/generated/widgets/stats-2x1-blueprint.webp",
+        "public/generated/widgets/stats-2x1-blueprint.mp4"
+      ],
+      "id": "widget:stats-2x1-blueprint",
+      "key": "d8173e817c34aa70a3fea01d87912fe60d16475445f6a0d3170da1c929052b3e",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-2x1-carbon.webp",
+        "public/generated/widgets/stats-2x1-carbon.mp4"
+      ],
+      "id": "widget:stats-2x1-carbon",
+      "key": "fbbaa64a60c3b0d2fee76363d6754ef3aba3068310a6738163f19ff5bfcbb976",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-2x1-default-dark.webp",
+        "public/generated/widgets/stats-2x1-default-dark.mp4"
+      ],
+      "id": "widget:stats-2x1-default-dark",
+      "key": "b406ecf8b6bf605a149abdf424515583999589a54659538e98ff608bf18f1e77",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-2x1-default-light.webp",
+        "public/generated/widgets/stats-2x1-default-light.mp4"
+      ],
+      "id": "widget:stats-2x1-default-light",
+      "key": "ca9099d6fad0657281c41910e66b0881eb03b25ff31b3d9221613aaffbd1e9d1",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/stats-2x1-ember.webp",
+        "public/generated/widgets/stats-2x1-ember.mp4"
+      ],
+      "id": "widget:stats-2x1-ember",
+      "key": "5fdefc80b65c3d9aa34824695b0574275e5668349756df3147631db764892eca",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/stats-2x1-glass.webp",
+        "public/generated/widgets/stats-2x1-glass.mp4"
+      ],
+      "id": "widget:stats-2x1-glass",
+      "key": "7b42e0e8472f23d85431fc84873913ea4d82a97d6115f5ab44d149b56c909edb",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-2x1-obsidian.webp",
+        "public/generated/widgets/stats-2x1-obsidian.mp4"
+      ],
+      "id": "widget:stats-2x1-obsidian",
+      "key": "78853172840797dcf4743687d59b9113f365c06c45c0d620b3617869b11e183b",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/stats-2x1-paper.webp",
+        "public/generated/widgets/stats-2x1-paper.mp4"
+      ],
+      "id": "widget:stats-2x1-paper",
+      "key": "85f476723eebb008afc5a0ff2d2d4dabd815ce874d4ef59d84a5116c0f4dde5f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/stats-2x1-pop.webp",
+        "public/generated/widgets/stats-2x1-pop.mp4"
+      ],
+      "id": "widget:stats-2x1-pop",
+      "key": "522d6170cb32503245094e86c181892bc66eae8b275b70d910193b3c1e8043fe",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/stats-2x1-prism.webp",
+        "public/generated/widgets/stats-2x1-prism.mp4"
+      ],
+      "id": "widget:stats-2x1-prism",
+      "key": "0b1a2aac96022b4ba69a5b4d2fcdc49de94cbb87603bdf543a0c7d7d214355d5",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/stats-2x1-rigline.webp",
+        "public/generated/widgets/stats-2x1-rigline.mp4"
+      ],
+      "id": "widget:stats-2x1-rigline",
+      "key": "356f9206c9bb54fbdb35e19b8e62bd18cf073d91021e8f30baa9b8fc26c4283f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.stats",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.stats"
+    },
+    {
+      "background": "plotter",
+      "files": [
         "src/generated/widgets/stats-2x2-blueprint.webp",
         "public/generated/widgets/stats-2x2-blueprint.mp4"
       ],
       "id": "widget:stats-2x2-blueprint",
-      "key": "d87240b0d0ccab1b29094baf9c755c6c880e2c43fe31e6020875ea81525fe336",
+      "key": "acd26076b0f51e0fc2d113289994813bf84a85efeba69865287b54555ccba504",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3496,7 +4992,7 @@
         "public/generated/widgets/stats-2x2-carbon.mp4"
       ],
       "id": "widget:stats-2x2-carbon",
-      "key": "2ba0259f859b11fbed84a7d62c46c73165b16e3879363d358b120667b5e44cb1",
+      "key": "71460e645930b638ab0de8189a51de7fa7542740e8d81796499e32450a0f753d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3522,7 +5018,7 @@
         "public/generated/widgets/stats-2x2-default-dark.mp4"
       ],
       "id": "widget:stats-2x2-default-dark",
-      "key": "d2b90a286d0b5250913d5bffbfd05f22115b9e04fd3bf13d3f8fceafb4f901e2",
+      "key": "a5eb389bc443574d12aedbba92a600e3659c77eeb569787a52fa6fccd2a31673",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3548,7 +5044,7 @@
         "public/generated/widgets/stats-2x2-default-light.mp4"
       ],
       "id": "widget:stats-2x2-default-light",
-      "key": "a24ab841079fd8bc7de4dfc9e205c97058935b8dd51e18ebfc7e06f58e91a7b7",
+      "key": "76b1478a9c53843686c1992d090cf91894047e8aa5a8e075c3e2484bcda1bd84",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3574,7 +5070,7 @@
         "public/generated/widgets/stats-2x2-ember.mp4"
       ],
       "id": "widget:stats-2x2-ember",
-      "key": "ebb8a39f002327468de2aea0ca37c1a6f8b23bb559471b7adabe5b78947e45e4",
+      "key": "3fa0d054dad88eadd724414a4c3920d4bd6c11857f00d1bdac8c598602d5cfbd",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3600,7 +5096,7 @@
         "public/generated/widgets/stats-2x2-glass.mp4"
       ],
       "id": "widget:stats-2x2-glass",
-      "key": "ecf954d8b72d1c1f5177f654681dd0c9c6e3954aff31f651c6ddd43dbfee383f",
+      "key": "59f40b4e3f715de7b4b177793dbd327de58c9ccbba7805d13ccd73abcc64c39f",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3626,7 +5122,7 @@
         "public/generated/widgets/stats-2x2-obsidian.mp4"
       ],
       "id": "widget:stats-2x2-obsidian",
-      "key": "343f855ce896d71de6721f4c10c1c8eccf56fa1ebae066d1dbf6374694ca58d8",
+      "key": "a532e12e5761509479213406b6d413d186dfe782868b9ac075413b554957af45",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3652,7 +5148,7 @@
         "public/generated/widgets/stats-2x2-paper.mp4"
       ],
       "id": "widget:stats-2x2-paper",
-      "key": "8a5994b538284b1e2479f10f3db4f180df47394b409a88a6b5352107959f646b",
+      "key": "02e3600e96f9ebd78bfc6cbbe90973c3286843c77d0d62e37add31452eb2307e",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3678,7 +5174,7 @@
         "public/generated/widgets/stats-2x2-pop.mp4"
       ],
       "id": "widget:stats-2x2-pop",
-      "key": "e5f4ce33a0b4247fc7309a192381d740703030f1e6baef7a68c780dd03b35e87",
+      "key": "26024c059c606c90ac67fa8ce5e30adffe1c55d354dd0428e33dfc72daf8488c",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3704,7 +5200,7 @@
         "public/generated/widgets/stats-2x2-prism.mp4"
       ],
       "id": "widget:stats-2x2-prism",
-      "key": "53a66d5309755f7b43f396ddfb4fbada26955a83ceffeb3fb8d9a3104f0674aa",
+      "key": "103bef76ebc6588bd1409373eab3922b44165827ad978dd4bbf133a1ecbfe44f",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3730,7 +5226,7 @@
         "public/generated/widgets/stats-2x2-rigline.mp4"
       ],
       "id": "widget:stats-2x2-rigline",
-      "key": "f9f9536694a8c7ddff835f9f9de4933b9833d916333dfd4bb0086f88e12e3e99",
+      "key": "e54c21b2a7469d911e42631eb47482ffaedbbb68bd9971d361ca97ed56481489",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3756,7 +5252,7 @@
         "public/generated/widgets/stats-4x2-blueprint.mp4"
       ],
       "id": "widget:stats-4x2-blueprint",
-      "key": "8efa46ef884589fa655ef83d3eb24279b31984f60243707ea25e05905733a092",
+      "key": "a14335b0579e7739ae5b5c48eb02ae920229dce4dddcbd14e8b42fad8ac241ae",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3782,7 +5278,7 @@
         "public/generated/widgets/stats-4x2-carbon.mp4"
       ],
       "id": "widget:stats-4x2-carbon",
-      "key": "fcb2676de8579fe0242fa38c809fd08fb4a3ca0e61eb2e6e2d36899f8de048c7",
+      "key": "9dbda4aa5b9c0714ccb339ea5850170dc4c4c20905ae8f23a512b2b58555d9a9",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3808,7 +5304,7 @@
         "public/generated/widgets/stats-4x2-default-dark.mp4"
       ],
       "id": "widget:stats-4x2-default-dark",
-      "key": "26d0e359e43bf51e93c2314c766c71e48fe298512cdc72967f1dc49d4dd588fa",
+      "key": "d902c9732e784e9aa1996e5f6b8095b0134a3c5eebfa018dadb33846e5ebc8eb",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3834,7 +5330,7 @@
         "public/generated/widgets/stats-4x2-default-light.mp4"
       ],
       "id": "widget:stats-4x2-default-light",
-      "key": "f40a1ef5768a0ee953469704b3725071e6617b0370a1e6314141780b144ffd3c",
+      "key": "81b1b4f38b9dc01b499fe3d064590383c5f9adb286a6a2d0898fb75ada6b8f7d",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3860,7 +5356,7 @@
         "public/generated/widgets/stats-4x2-ember.mp4"
       ],
       "id": "widget:stats-4x2-ember",
-      "key": "421ee367db7bc384518370f889ad46e87658af45788070dac76c992a56c8da3e",
+      "key": "8da79efcd36004a4cfc8f7067b739d991f16f391f376635a19df48b513a5d2b7",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3886,7 +5382,7 @@
         "public/generated/widgets/stats-4x2-glass.mp4"
       ],
       "id": "widget:stats-4x2-glass",
-      "key": "38de6ca2511ff648cf1540957ec3ad69740930ce68e5110af9a2529bbf4d16dd",
+      "key": "a5113a8fac76176e2d9c78d342c2ce2bd99cdebc2e2d85d5f152dc6677f23fa4",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3912,7 +5408,7 @@
         "public/generated/widgets/stats-4x2-obsidian.mp4"
       ],
       "id": "widget:stats-4x2-obsidian",
-      "key": "fad2a60af334d43b9ba1bfb8e6827d0126e74c2a3d217c4d61ed62d3485a305c",
+      "key": "8d841c5e9261df30bec7346050c5fea9c97a881850a1828427512fc8a604b3a8",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3938,7 +5434,7 @@
         "public/generated/widgets/stats-4x2-paper.mp4"
       ],
       "id": "widget:stats-4x2-paper",
-      "key": "25eda8d1b58b988faa87bde725f1cba844a2a1626c8fafa18e4a022cd0abd52b",
+      "key": "427c4f0ff87bb26015624695ab3c5d5a8d28a01dc481c97434ebd65ec2124e66",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3964,7 +5460,7 @@
         "public/generated/widgets/stats-4x2-pop.mp4"
       ],
       "id": "widget:stats-4x2-pop",
-      "key": "160570becee941f727eb168efca354747bb175db6225c6a24ef1e47db84ef3a4",
+      "key": "a2708c6db6a17363f0c6460cf8fef5e7b71e36639d9782541eac2358689035e3",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -3990,7 +5486,7 @@
         "public/generated/widgets/stats-4x2-prism.mp4"
       ],
       "id": "widget:stats-4x2-prism",
-      "key": "cba877c4dbd3ae3934d8c56fc4bf3b3d7250aeb2fb2923e9f4c8f3b57f6d83a2",
+      "key": "5d6e7f044fa8dc4ef70dc1b0c58df83b6f9763277b47470a1db15780a11aa019",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4016,7 +5512,7 @@
         "public/generated/widgets/stats-4x2-rigline.mp4"
       ],
       "id": "widget:stats-4x2-rigline",
-      "key": "488c0f8d61559fde3bf0630177e033d4fe8faec617bb58420dec5a362ccfd190",
+      "key": "607755e6294844d668a85501942753eb9c7da9400a622d2b7a2726cb7de30f72",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4042,7 +5538,7 @@
         "public/generated/widgets/stats-4x4-blueprint.mp4"
       ],
       "id": "widget:stats-4x4-blueprint",
-      "key": "ca2f1ddf6c4af1e1a8975b04f5c0b5496b5f409b8348c586abdc2b2fbe91e2a5",
+      "key": "dd60a730430b60b4560ae9ac91bbb8d2431ccac7ed0b241e271baca3801fd611",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4068,7 +5564,7 @@
         "public/generated/widgets/stats-4x4-carbon.mp4"
       ],
       "id": "widget:stats-4x4-carbon",
-      "key": "0cf7f1f89ebe12bc4d05aed38e3c7d240e5f8a4cfbc5086362e8ee467af75764",
+      "key": "a39a267fccdf989a07b5e139c0a542b0a19fa0d74ae1d9e69dd629eee1f1ebbf",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4094,7 +5590,7 @@
         "public/generated/widgets/stats-4x4-default-dark.mp4"
       ],
       "id": "widget:stats-4x4-default-dark",
-      "key": "d959eb2ad66def1994695f59b2d494eff73d565d70f237065b283636c55a8fc5",
+      "key": "73f7026a6fe0ac4c34611443a5b8451d760c9cf8ad30c6a4ef6eeabf3dc40d45",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4120,7 +5616,7 @@
         "public/generated/widgets/stats-4x4-default-light.mp4"
       ],
       "id": "widget:stats-4x4-default-light",
-      "key": "9d812dcab1d0b755033bcec3395632ee4568f0ba7e2f2af4503dbc15d50ee1da",
+      "key": "5dcc96db5fa5e8b432d8f2062f183db5ce412866723d886d2e47e09a27535890",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4146,7 +5642,7 @@
         "public/generated/widgets/stats-4x4-ember.mp4"
       ],
       "id": "widget:stats-4x4-ember",
-      "key": "9deb3619dfcb965875cf5dcd7e880f958363b5ed1fabb9fff7b0f54a79067c28",
+      "key": "9a10cd8af3d3b482b2cffadb78b767b547e80393e6a5ef1c8f2d31d280e7cd53",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4172,7 +5668,7 @@
         "public/generated/widgets/stats-4x4-glass.mp4"
       ],
       "id": "widget:stats-4x4-glass",
-      "key": "f6c538e8932dd5aa770c6fa3bdfc16a15a04e00590f30002bcef7c661d2b28fd",
+      "key": "6f4e4e7d6c2149ed78faa09cc4d5428330dba419d4d11da1b7b533ccb882505c",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4198,7 +5694,7 @@
         "public/generated/widgets/stats-4x4-obsidian.mp4"
       ],
       "id": "widget:stats-4x4-obsidian",
-      "key": "e2f433b57b1feac73dbfe80baca5ada6382d3c0221a6a2e6d8d08a453582864a",
+      "key": "3fbb8aff9a56272c112a471868b98ba4b7ed09cdfd4ccc390b14aeb0bf621f4a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4224,7 +5720,7 @@
         "public/generated/widgets/stats-4x4-paper.mp4"
       ],
       "id": "widget:stats-4x4-paper",
-      "key": "d07d92642aaa212a356a65dac02e88b8bc28e80c617e390db2f93a077d2ae5a9",
+      "key": "e378f9794b934e64af0244c55c898f2e504e93396657d25f0fe0ba2b81eaaa87",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4250,7 +5746,7 @@
         "public/generated/widgets/stats-4x4-pop.mp4"
       ],
       "id": "widget:stats-4x4-pop",
-      "key": "3a0a69b4428f5bacfda44ddeab3ff82c26cfcd2462c8feee4137763c3e42cbd9",
+      "key": "f1bea097b62f645cde453563a779920896a7d314600e73d99eafd72db975e714",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4276,7 +5772,7 @@
         "public/generated/widgets/stats-4x4-prism.mp4"
       ],
       "id": "widget:stats-4x4-prism",
-      "key": "3fefefa3b892ec4327eabc7bd9156a605df870e122379d0533b30adf679c809d",
+      "key": "523d89fe04929e3372ac63a71979655b22c112d413c5e8a62dad0324a8675a32",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4302,7 +5798,7 @@
         "public/generated/widgets/stats-4x4-rigline.mp4"
       ],
       "id": "widget:stats-4x4-rigline",
-      "key": "1a9ab1e716a470d7eb280045cb5faf20004f240667d01227ea91db60a4881895",
+      "key": "f3a293c7350c87145e78771f4aa361caf0b92bdb88385f76bd45fc7910ee2685",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4324,10 +5820,1396 @@
     {
       "background": "plotter",
       "files": [
+        "src/generated/widgets/steam-1x1-blueprint.webp"
+      ],
+      "id": "widget:steam-1x1-blueprint",
+      "key": "ccd7bae674a08a892be0343da0a0a1f5f237cfbb6323d3376cba32ff9fbf060f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-1x1-carbon.webp"
+      ],
+      "id": "widget:steam-1x1-carbon",
+      "key": "d90d7b80a14f47c9539531f98e8f2859950d7285fc94605d3af2f0c016e222ca",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-1x1-default-dark.webp"
+      ],
+      "id": "widget:steam-1x1-default-dark",
+      "key": "3b8bcd9222b6f754a080005002b21b58f1e9320e9d495a1642e97f12b2aacefe",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-1x1-default-light.webp"
+      ],
+      "id": "widget:steam-1x1-default-light",
+      "key": "3d73b19b440bbf7d402fe2397cbbaf3427836afb3dfb4ad2c283f5c4b769e82e",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/steam-1x1-ember.webp"
+      ],
+      "id": "widget:steam-1x1-ember",
+      "key": "0c14036913db06935c0f360cbdba48d3e80cdfa002504b5c4eafd6d69a18e3be",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-1x1-glass.webp"
+      ],
+      "id": "widget:steam-1x1-glass",
+      "key": "3d0c5641398bc79da5d85bc39cdfbabec7f0d543909e0f0385951d31d4105555",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-1x1-obsidian.webp"
+      ],
+      "id": "widget:steam-1x1-obsidian",
+      "key": "1654cb775b42ae2435bcf2874f2583dd42ca13473f1636dbac1f641919cfb38c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-1x1-paper.webp"
+      ],
+      "id": "widget:steam-1x1-paper",
+      "key": "7685b29437ba909e33f149ef91c8cf7a970499967a250a75ae96609f3d19afcf",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/steam-1x1-pop.webp"
+      ],
+      "id": "widget:steam-1x1-pop",
+      "key": "0d482b82964ecc159e6b032c6ef21dbdd63637d6536e13cbaa2bb43984b11a1d",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-1x1-prism.webp"
+      ],
+      "id": "widget:steam-1x1-prism",
+      "key": "8c873d46e6c4b37bc723c3a86d9dbb801d6eb0a28957541a3ef05d5efd9613d6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/steam-1x1-rigline.webp"
+      ],
+      "id": "widget:steam-1x1-rigline",
+      "key": "d47622637a32241194cae45f9ccb7e2d74c8305036bdf3aa486a377855db4fed",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": null,
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "1x1",
+        "width": 1100
+      },
+      "size": "1x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/steam-2x1-blueprint.webp",
+        "public/generated/widgets/steam-2x1-blueprint.mp4"
+      ],
+      "id": "widget:steam-2x1-blueprint",
+      "key": "728f2cff1581bbbf7151d5101229b58973fde6ecc1c5aecdac84e9053f4336ba",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-2x1-carbon.webp",
+        "public/generated/widgets/steam-2x1-carbon.mp4"
+      ],
+      "id": "widget:steam-2x1-carbon",
+      "key": "579385ab91f61673bb675397bb44af2157e690ef853e9e290c7467020e96227c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-2x1-default-dark.webp",
+        "public/generated/widgets/steam-2x1-default-dark.mp4"
+      ],
+      "id": "widget:steam-2x1-default-dark",
+      "key": "c54c8418d261b45f0e0854cb0397316117998190e47a78785c696b4b98c27e74",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-2x1-default-light.webp",
+        "public/generated/widgets/steam-2x1-default-light.mp4"
+      ],
+      "id": "widget:steam-2x1-default-light",
+      "key": "038f77d8f3dc0b0bfe692089a4bf4901fd908f32840cb6f92c0bfccf1ac713f1",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/steam-2x1-ember.webp",
+        "public/generated/widgets/steam-2x1-ember.mp4"
+      ],
+      "id": "widget:steam-2x1-ember",
+      "key": "e40b4a309913dad77146d9fa88a77c64809d60d35193f3102632daf4bc3a8052",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "ember",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-2x1-glass.webp",
+        "public/generated/widgets/steam-2x1-glass.mp4"
+      ],
+      "id": "widget:steam-2x1-glass",
+      "key": "57dab127050f03b44ad6a5fb8e99d76ce18dcd2c274b81228369eff5da884486",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "glass",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-2x1-obsidian.webp",
+        "public/generated/widgets/steam-2x1-obsidian.mp4"
+      ],
+      "id": "widget:steam-2x1-obsidian",
+      "key": "a731daf8eb76129e6d83413c27a78916b08625bc12dfbeecc5fa934ddc91f84a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-2x1-paper.webp",
+        "public/generated/widgets/steam-2x1-paper.mp4"
+      ],
+      "id": "widget:steam-2x1-paper",
+      "key": "19dfaf9d82772ce523268437edd100e60ef10e34d36faaea62e309c81fc4be6b",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "paper",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/steam-2x1-pop.webp",
+        "public/generated/widgets/steam-2x1-pop.mp4"
+      ],
+      "id": "widget:steam-2x1-pop",
+      "key": "ee0d164040d452c442aa2c611b3b7549feab44cf8de37f20d571cf216132ac20",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "pop",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-2x1-prism.webp",
+        "public/generated/widgets/steam-2x1-prism.mp4"
+      ],
+      "id": "widget:steam-2x1-prism",
+      "key": "2a9cde658ef3e708d2ffb60a610498def6b936b071c22fdad482ebba06bc7fbd",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "prism",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/steam-2x1-rigline.webp",
+        "public/generated/widgets/steam-2x1-rigline.mp4"
+      ],
+      "id": "widget:steam-2x1-rigline",
+      "key": "ff36cfc706e5917164d4be5b39c49dd4911b8ba08cf38ba5afc90956d5f9cd2a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x1",
+        "width": 1100
+      },
+      "size": "2x1",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/steam-2x2-blueprint.webp",
+        "public/generated/widgets/steam-2x2-blueprint.mp4"
+      ],
+      "id": "widget:steam-2x2-blueprint",
+      "key": "63fbbca9bb2d4e63fdbff402204ea77877c4ab2c5b0f1deb7fa54843218e25dc",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-2x2-carbon.webp",
+        "public/generated/widgets/steam-2x2-carbon.mp4"
+      ],
+      "id": "widget:steam-2x2-carbon",
+      "key": "4cb7263de0db1f512ef9f360aef211f85bebdada7ededb182fb33ed3182c7494",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-2x2-default-dark.webp",
+        "public/generated/widgets/steam-2x2-default-dark.mp4"
+      ],
+      "id": "widget:steam-2x2-default-dark",
+      "key": "f91df169a42bf73699d709f0c81e6d181ad5c626485ed295cf273acf3cc9d9db",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-2x2-default-light.webp",
+        "public/generated/widgets/steam-2x2-default-light.mp4"
+      ],
+      "id": "widget:steam-2x2-default-light",
+      "key": "2c52d0a334c1a9785ae4379f29687e365371f62b2db8046358be61c4f26d816d",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/steam-2x2-ember.webp",
+        "public/generated/widgets/steam-2x2-ember.mp4"
+      ],
+      "id": "widget:steam-2x2-ember",
+      "key": "c0404148408865183e04865d5a50d588d52daafa2d9cc0cbe9923aaa61e7faaf",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "ember",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-2x2-glass.webp",
+        "public/generated/widgets/steam-2x2-glass.mp4"
+      ],
+      "id": "widget:steam-2x2-glass",
+      "key": "11d3821a782405e27ac6a10f503f794eaf0c72962b15ec887f5a51a6cf7845da",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "glass",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-2x2-obsidian.webp",
+        "public/generated/widgets/steam-2x2-obsidian.mp4"
+      ],
+      "id": "widget:steam-2x2-obsidian",
+      "key": "aecbe4efc8d59eed3706db862b4b44a971cb2a9098d85b53bd01bc34eedb51db",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-2x2-paper.webp",
+        "public/generated/widgets/steam-2x2-paper.mp4"
+      ],
+      "id": "widget:steam-2x2-paper",
+      "key": "d00904e189ba3db2583c13808ad828d452366a1ccfbfb823b6ec5e3e0012e9d2",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "paper",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/steam-2x2-pop.webp",
+        "public/generated/widgets/steam-2x2-pop.mp4"
+      ],
+      "id": "widget:steam-2x2-pop",
+      "key": "ad4e66dcc25ce34699f934120f6383b701e7f98ffb63d2aedba341175711ecd3",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "pop",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-2x2-prism.webp",
+        "public/generated/widgets/steam-2x2-prism.mp4"
+      ],
+      "id": "widget:steam-2x2-prism",
+      "key": "c5d9917c4d6d833d99b52d30056adf80cac2fe67a11adf9f7e602a043488d2d4",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "prism",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/steam-2x2-rigline.webp",
+        "public/generated/widgets/steam-2x2-rigline.mp4"
+      ],
+      "id": "widget:steam-2x2-rigline",
+      "key": "80c9d45c3a5139e3fa24961ee4bfc7fe3fd92e9a57a56072ae51c685e0eed2fa",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "2x2",
+        "width": 1100
+      },
+      "size": "2x2",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/steam-4x2-blueprint.webp",
+        "public/generated/widgets/steam-4x2-blueprint.mp4"
+      ],
+      "id": "widget:steam-4x2-blueprint",
+      "key": "1c539263d58946471e33a68dee736ef0ec182bd6d740da567d5eaaf2c3a097b0",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-4x2-carbon.webp",
+        "public/generated/widgets/steam-4x2-carbon.mp4"
+      ],
+      "id": "widget:steam-4x2-carbon",
+      "key": "85302577593c4fecff7fac1303ddce7121f288cf46d95108b0d6053c8e9a817e",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-4x2-default-dark.webp",
+        "public/generated/widgets/steam-4x2-default-dark.mp4"
+      ],
+      "id": "widget:steam-4x2-default-dark",
+      "key": "cea6d5c210d2d16318fe1daca74598b4473f1f10f69ced90812c811b4dc11594",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-4x2-default-light.webp",
+        "public/generated/widgets/steam-4x2-default-light.mp4"
+      ],
+      "id": "widget:steam-4x2-default-light",
+      "key": "e99abde5a063113e50430930fa069d719866712fecb1a230e7b32a8a93280179",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/steam-4x2-ember.webp",
+        "public/generated/widgets/steam-4x2-ember.mp4"
+      ],
+      "id": "widget:steam-4x2-ember",
+      "key": "51ad7f97319aa0ac7a0f8bf87de89429b538144751e2836ef69aa7c804c3a0b3",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "ember",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-4x2-glass.webp",
+        "public/generated/widgets/steam-4x2-glass.mp4"
+      ],
+      "id": "widget:steam-4x2-glass",
+      "key": "438050169afec0714579b07d44b2adeb41a195e7db871cd2684195ca93f94abc",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "glass",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-4x2-obsidian.webp",
+        "public/generated/widgets/steam-4x2-obsidian.mp4"
+      ],
+      "id": "widget:steam-4x2-obsidian",
+      "key": "b3547b3cc362947b9fb9436ee409da18c6f937d1c6ad361855672cb04e5d4cc9",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-4x2-paper.webp",
+        "public/generated/widgets/steam-4x2-paper.mp4"
+      ],
+      "id": "widget:steam-4x2-paper",
+      "key": "843bd02b2ccb205e35fbdf57c34adb941c59e98129caac9a279b4804c70d79a6",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "paper",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/steam-4x2-pop.webp",
+        "public/generated/widgets/steam-4x2-pop.mp4"
+      ],
+      "id": "widget:steam-4x2-pop",
+      "key": "b46e596c30bb12cc09886254597d25741e0fb510770aa0e2a7bd572519717767",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "pop",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-4x2-prism.webp",
+        "public/generated/widgets/steam-4x2-prism.mp4"
+      ],
+      "id": "widget:steam-4x2-prism",
+      "key": "41a5e6b194ce6c5dd0d729547fc4d4a336ccc80e9024d3cd4601a92829305810",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "prism",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/steam-4x2-rigline.webp",
+        "public/generated/widgets/steam-4x2-rigline.mp4"
+      ],
+      "id": "widget:steam-4x2-rigline",
+      "key": "effb29add9d6042a298186eeb89b040857ccd75ba96441d05afd6f26bac6139f",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x2",
+        "width": 1100
+      },
+      "size": "4x2",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "plotter",
+      "files": [
+        "src/generated/widgets/steam-4x4-blueprint.webp",
+        "public/generated/widgets/steam-4x4-blueprint.mp4"
+      ],
+      "id": "widget:steam-4x4-blueprint",
+      "key": "b9124b6742b49a47e8b8948c8ca6a8f7388fec537ba6798efdec31e470dd117a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "blueprint",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "blueprint",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-4x4-carbon.webp",
+        "public/generated/widgets/steam-4x4-carbon.mp4"
+      ],
+      "id": "widget:steam-4x4-carbon",
+      "key": "a20698811848789abedda7e429f873016f11151a3082eb2735788a07de3f5371",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "carbon",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "carbon",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-4x4-default-dark.webp",
+        "public/generated/widgets/steam-4x4-default-dark.mp4"
+      ],
+      "id": "widget:steam-4x4-default-dark",
+      "key": "78f45cb0b4624d166a20c8d03dfdad012b734257c5022087cf821955e8adee87",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-dark",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "default-dark",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-4x4-default-light.webp",
+        "public/generated/widgets/steam-4x4-default-light.mp4"
+      ],
+      "id": "widget:steam-4x4-default-light",
+      "key": "7a61788b511eb708e282e77d9ecdd3666bbe1c540b33097ae27314d140527185",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "default-light",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "default-light",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "embers",
+      "files": [
+        "src/generated/widgets/steam-4x4-ember.webp",
+        "public/generated/widgets/steam-4x4-ember.mp4"
+      ],
+      "id": "widget:steam-4x4-ember",
+      "key": "7c51c131bfe68d2b808c66ebeb5306767c7212ddc9b157e462551680c2d6b868",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "ember",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "ember",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": null,
+      "files": [
+        "src/generated/widgets/steam-4x4-glass.webp",
+        "public/generated/widgets/steam-4x4-glass.mp4"
+      ],
+      "id": "widget:steam-4x4-glass",
+      "key": "47d443b49c4638f2b0a912f6c069627193ed6d58d246ada460d7a1bd243db2a3",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "glass",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "glass",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-4x4-obsidian.webp",
+        "public/generated/widgets/steam-4x4-obsidian.mp4"
+      ],
+      "id": "widget:steam-4x4-obsidian",
+      "key": "5a80c978acd433373a429a93dc4afe41f3eef731f9fd79355683139cb1e7b42b",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "obsidian",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "obsidian",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "contour",
+      "files": [
+        "src/generated/widgets/steam-4x4-paper.webp",
+        "public/generated/widgets/steam-4x4-paper.mp4"
+      ],
+      "id": "widget:steam-4x4-paper",
+      "key": "b8f28bdc4001ce3097ad6b452339f33148d8b366910ca17a7a659af64c42916c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "paper",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "paper",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "shapes",
+      "files": [
+        "src/generated/widgets/steam-4x4-pop.webp",
+        "public/generated/widgets/steam-4x4-pop.mp4"
+      ],
+      "id": "widget:steam-4x4-pop",
+      "key": "b57106e4d4dfd38bc79a3c9237ada9265f7ce367b6611565c18a61383c613e9c",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "pop",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "pop",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "nebula",
+      "files": [
+        "src/generated/widgets/steam-4x4-prism.webp",
+        "public/generated/widgets/steam-4x4-prism.mp4"
+      ],
+      "id": "widget:steam-4x4-prism",
+      "key": "ab464280db55a958bdb42aa3aaceac98628e7569635271822422266063311f75",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "prism",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "prism",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "horizon",
+      "files": [
+        "src/generated/widgets/steam-4x4-rigline.webp",
+        "public/generated/widgets/steam-4x4-rigline.mp4"
+      ],
+      "id": "widget:steam-4x4-rigline",
+      "key": "505e939e9bec38e3dc328c098d2bee70928f54d53fb9fdc9e9927e8df8500a1a",
+      "kind": "widgets",
+      "settings": {
+        "background": "theme",
+        "loop": {
+          "fps": 30,
+          "frames": 90
+        },
+        "moment": "2026-10-13T21:47:32.000",
+        "theme": "rigline",
+        "widget": "urdeck.widgets.steam",
+        "widgetConfig": {},
+        "widgetSize": "4x4",
+        "width": 1100
+      },
+      "size": "4x4",
+      "theme": "rigline",
+      "widget": "urdeck.widgets.steam"
+    },
+    {
+      "background": "plotter",
+      "files": [
         "src/generated/widgets/weather-4x2-blueprint.webp"
       ],
       "id": "widget:weather-4x2-blueprint",
-      "key": "1100b61459f62f32c476cb727ad808579bff4ac6f6529b09d06f927e3a152b4d",
+      "key": "d17885a6cb4c512950c40c2c6693291829cc186d26065e1f857f42900735a9f6",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4349,7 +7231,7 @@
         "src/generated/widgets/weather-4x2-carbon.webp"
       ],
       "id": "widget:weather-4x2-carbon",
-      "key": "5f1b52716fc505f5ebde1e1fdf0c9323dec5d5f513352dd383437eb7ade257a2",
+      "key": "753a0bedc90d0e11d863bb29aadf30bbcc310064cd4a12726351c1f23883784a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4372,7 +7254,7 @@
         "public/generated/widgets/weather-4x2-default-dark.mp4"
       ],
       "id": "widget:weather-4x2-default-dark",
-      "key": "6824aa5eb20d11b0295c2f9501ccad840f90db2b07ee538176cd4f4223bd72e0",
+      "key": "1df2089d54e480f7e17908ffb0bb2b456c32b58a81ad75b964b775f13c098b24",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4398,7 +7280,7 @@
         "public/generated/widgets/weather-4x2-default-light.mp4"
       ],
       "id": "widget:weather-4x2-default-light",
-      "key": "e5597a82b074dc38624ecb8f390ee92f70a6cfc91501b50c705126d05185bed9",
+      "key": "e9ffefa6531f9ff54219acca15711ccc7d4283b4a798cb7643fa510377b4f7ed",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4423,7 +7305,7 @@
         "src/generated/widgets/weather-4x2-ember.webp"
       ],
       "id": "widget:weather-4x2-ember",
-      "key": "cca7a1ba7153df1fec1a62ac08207bfd48b1fa5204dc6624a2232dfd523bdb79",
+      "key": "ecac030c29efcc72485293a0c5a5f40659d93af4a3f44d1bdb5628e9b798e27a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4446,7 +7328,7 @@
         "public/generated/widgets/weather-4x2-glass.mp4"
       ],
       "id": "widget:weather-4x2-glass",
-      "key": "3d4701b832231ebd50bdb321b59399761580198d1c3f0c53a880a3fce47649d1",
+      "key": "8d10304356929d0d2555def0a6fd087a8523d5a64a07810f7f58625a0456b1d5",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4471,7 +7353,7 @@
         "src/generated/widgets/weather-4x2-obsidian.webp"
       ],
       "id": "widget:weather-4x2-obsidian",
-      "key": "f8bddb1614e31254378c3bb9072ea3598589ac9a363d2fe21bed885af8c3e4d5",
+      "key": "3305618470989a6343fd77040b679e7b5787fbb7f404894a5c3643614299dc49",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4493,7 +7375,7 @@
         "src/generated/widgets/weather-4x2-paper.webp"
       ],
       "id": "widget:weather-4x2-paper",
-      "key": "1c614ef2989d376bbaf0f684a212d1c7dc1344a22a4e2cb4b0637d938d19ead3",
+      "key": "5e12269b5d0c2125c649622f9f8d08c8298e4ac224e1fc071c7a7235e5306257",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4515,7 +7397,7 @@
         "src/generated/widgets/weather-4x2-pop.webp"
       ],
       "id": "widget:weather-4x2-pop",
-      "key": "0393de993fefb1f18a07baf47a7bd59fb7238fa22c9cd5216b34889473d4b809",
+      "key": "c654c77965cf6f584a3cc97919034b3f4cad98a751e9a9c864b63786e0c3eea6",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4537,7 +7419,7 @@
         "src/generated/widgets/weather-4x2-prism.webp"
       ],
       "id": "widget:weather-4x2-prism",
-      "key": "cb51a6311b8cf7daa3d2ef86ca8cf9d7f7b4fc8e9704c7ad0d2af231ad7c279d",
+      "key": "7b05ed659c47b3178bb8cec946f3daba97834bfec0312ccf2c97d8e27336b4aa",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4559,7 +7441,7 @@
         "src/generated/widgets/weather-4x2-rigline.webp"
       ],
       "id": "widget:weather-4x2-rigline",
-      "key": "85b1e9013e2665a667f11ce9b58f02eb9e51b8339715ac102f42efeffb7640a6",
+      "key": "2a8ea59f9d84652e75d548f44b1528d4f8ed51c9a9bafcdb7710968843b602ec",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4581,7 +7463,7 @@
         "src/generated/widgets/weather-4x4-blueprint.webp"
       ],
       "id": "widget:weather-4x4-blueprint",
-      "key": "c45ea5c5784ebb4deec736920071dff2d6a996bc7caade5cf79541b79cc61948",
+      "key": "32ce0d3ec46eb5dbb187280bc843758891240230d63ecb3952e90f7db74b5a5e",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4603,7 +7485,7 @@
         "src/generated/widgets/weather-4x4-carbon.webp"
       ],
       "id": "widget:weather-4x4-carbon",
-      "key": "632aeef8913fff224779a4464acb35d70571eb83c3a1f54a8122c6a69af3513a",
+      "key": "79b7e021045cbcec37fa5d27688b27f6b3acf2c26d375ce63966aeeafa0414c1",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4626,7 +7508,7 @@
         "public/generated/widgets/weather-4x4-default-dark.mp4"
       ],
       "id": "widget:weather-4x4-default-dark",
-      "key": "b860082d9c9d5c094c4d1730111d6370c093836ff1910d3089852bea68317bd3",
+      "key": "bea89f95d993056d2da7ad0ef79a5e3c2639795c99db1d920166e63fd8c51648",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4652,7 +7534,7 @@
         "public/generated/widgets/weather-4x4-default-light.mp4"
       ],
       "id": "widget:weather-4x4-default-light",
-      "key": "37ecb2c009b3ea45d08e59bdaf7aa6eb8a09766c31f5876c0251702d03b8cb14",
+      "key": "2b5e13362f53a22dd194f2cab5d1e10734989a68cdafa805a1a8103a1d2868bb",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4677,7 +7559,7 @@
         "src/generated/widgets/weather-4x4-ember.webp"
       ],
       "id": "widget:weather-4x4-ember",
-      "key": "2044ace30920e94697ef44fb0a271dd9009779f0ca8f68e9cfe744638058b9c3",
+      "key": "4cc505f915a40233604e247bd3d03724ad79034298acd7a12f208fe59629445a",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4700,7 +7582,7 @@
         "public/generated/widgets/weather-4x4-glass.mp4"
       ],
       "id": "widget:weather-4x4-glass",
-      "key": "04b1e67dcefd80531af8bd0cf62cb8d39c59139c3004855d970e3f338665c532",
+      "key": "1fcf9426e8e558e2ebe59c0b6f190ee5abb125a9de19cb42346cea6eb0255b54",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4725,7 +7607,7 @@
         "src/generated/widgets/weather-4x4-obsidian.webp"
       ],
       "id": "widget:weather-4x4-obsidian",
-      "key": "0cd4671c83c34d00a9eb3e3072bf20de9a3a8abcb5d9806662b12b7efdf0ba26",
+      "key": "0dc3797a3fc6ae1f16dd1c300e07a66597e92b19cfb2c467ca63bb0cce4119ee",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4747,7 +7629,7 @@
         "src/generated/widgets/weather-4x4-paper.webp"
       ],
       "id": "widget:weather-4x4-paper",
-      "key": "aaadb8f464ec0f826929d2412911dc36d040ea79de2314a3c36cc5f5fb866e54",
+      "key": "594c173ffc953dae13a8c27ba2b7822aaf3dd8f657b40bd3e950e0046f595dbc",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4769,7 +7651,7 @@
         "src/generated/widgets/weather-4x4-pop.webp"
       ],
       "id": "widget:weather-4x4-pop",
-      "key": "234a971fc9e09f6b85c1629893e9d9dfac4cfe3e51de0d71d05e466c93a0c157",
+      "key": "5c353a785630221678025c31d6fa7ba64b36307c360896b548f1f600a47afa9b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4791,7 +7673,7 @@
         "src/generated/widgets/weather-4x4-prism.webp"
       ],
       "id": "widget:weather-4x4-prism",
-      "key": "a792425a91b259a72a7f7b1ea52c2ed6b728f332059f6852c19d5d5a238d2fb2",
+      "key": "8874600c051414dfaf218f56ee5eda0cfda13265df941a7ecd8c1cd429e85a75",
       "kind": "widgets",
       "settings": {
         "background": "theme",
@@ -4813,7 +7695,7 @@
         "src/generated/widgets/weather-4x4-rigline.webp"
       ],
       "id": "widget:weather-4x4-rigline",
-      "key": "70a0a76efb4f1b4785716a12206ad3f720232cf55ceda2a14fe816268eb22487",
+      "key": "227d990cfec187c94981ee27f24dbba19216e028e80537e3ef188ab2fa81530b",
       "kind": "widgets",
       "settings": {
         "background": "theme",
