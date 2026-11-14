@@ -265,7 +265,8 @@ public class SteamWidget : Widget<SteamConfig>, ITapTarget, IDisposable
         var lines = new List<(string Text, TextStep Step, TextEmphasis Emphasis)>(3);
         lines.Add((me.Name.Length > 0 ? me.Name : "Steam", TextStep.Title, TextEmphasis.Primary));
         lines.Add((SecondLine(me), TextStep.Body, me.PlayingGame || me.HasDownload ? TextEmphasis.Primary : TextEmphasis.Muted));
-        string counts = CountsLine(me);
+        // Before Steam is connected the counts line says so; where a friends area sits below the card it says so itself.
+        string counts = me.FriendsKnown || Config.Height <= 1 ? CountsLine(me) : "";
         if (counts.Length > 0)
             lines.Add((counts, TextStep.Label, TextEmphasis.Muted));
 
