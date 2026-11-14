@@ -3,6 +3,7 @@
 //
 //   npm run media                          render what is missing or stale
 //   npm run media -- --status              say what is missing, stale and unneeded; render nothing
+//   npm run media -- --status --no-probe   the same without rendering frames to see which media move (minutes, not an hour; the counts are the same, only whether a loop is expected is a guess)
 //   npm run media -- --all                 render everything, keys or not
 //   npm run media -- decks|widgets|backgrounds [name...]   only those kinds / names (carbon, clock-4x2, aurora, clock)
 //   npm run media -- --report file.md      also write the added / changed / removed lists (the pull request's body)

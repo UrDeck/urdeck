@@ -297,10 +297,11 @@ export async function plan({ repo, site, catalog, moves = null, log = () => {} }
 const defaultJobs = () => Math.max(1, Math.min(6, Math.floor(cpus().length / 4)));
 
 export function parseArgs(argv) {
-  const opts = { status: false, all: false, kinds: [], names: [], report: null, catalog: null, jobs: defaultJobs() };
+  const opts = { status: false, probe: true, all: false, kinds: [], names: [], report: null, catalog: null, jobs: defaultJobs() };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--status') opts.status = true;
+    else if (a === '--no-probe') opts.probe = false;
     else if (a === '--all') opts.all = true;
     else if (a === '--report') opts.report = argv[++i];
     else if (a === '--catalog') opts.catalog = argv[++i];
@@ -357,7 +358,7 @@ export function markdown(before, rendered, removed) {
 export async function run({ repo, site, renderer, argv, log = console.log }) {
   const opts = parseArgs(argv);
   const catalog = opts.status && opts.catalog ? JSON.parse(readFileSync(opts.catalog, 'utf8')) : await renderer.catalog();
-  const result = await plan({ repo, site, catalog, moves: opts.status && !renderer.canRender ? null : (e) => (wanted(e, opts) ? renderer.moves(e) : null), log });
+  const result = await plan({ repo, site, catalog, moves: !opts.probe || (opts.status && !renderer.canRender) ? null : (e) => (wanted(e, opts) ? renderer.moves(e) : null), log });
 
   if (opts.status) {
     log(report(result));
