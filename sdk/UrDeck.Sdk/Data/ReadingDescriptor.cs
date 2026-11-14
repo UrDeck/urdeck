@@ -63,6 +63,12 @@ public sealed record ReadingDescriptor(string Path, ReadingKind Kind, string Lab
 
     /// <summary>A category in plain words (<c>Lights</c>, <c>CPU</c>), for grouping and filtering in the editor. Null when there is none.</summary>
     public string? Category { get; init; }
+
+    /// <summary>For a <see cref="ReadingKind.List"/> reading, what each row holds, in order. Empty for every other kind.</summary>
+    public ReadingFields Fields { get; init; } = ReadingFields.Empty;
+
+    /// <summary>What a widget says when a list reading has no rows (<c>Nobody is playing</c>); null for the widget's own words.</summary>
+    public string? EmptyText { get; init; }
 }
 
 /// <summary>A source's credit: the text to draw, an optional shorter text for a narrow place and an optional link.</summary>

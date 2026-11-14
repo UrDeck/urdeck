@@ -11,6 +11,7 @@ using UrDeck.Engine.Plugin;
 using UrDeck.Engine.Settings;
 using UrDeck.Engine.Themes;
 using UrDeck.Preview;
+using UrDeck.Sdk.Data;
 using UrDeck.Sdk.Settings;
 
 namespace UrDeck.Cli;
@@ -127,6 +128,7 @@ internal static class CatalogExportRunner
                 ["id"] = p.Id,
                 ["name"] = p.Name,
                 ["sample"] = PreviewProviders.HasSample(p.Id),
+                ["lists"] = Array(PreviewProviders.ListsOf(p.Id).Select(List)),
                 ["settings"] = Array(ProviderSettingsOf(p)),
             })),
             ["findings"] = Array(FindingCatalog.All.OrderBy(f => f.Code, StringComparer.Ordinal).Select(f => (JsonNode)new JsonObject
@@ -279,6 +281,25 @@ internal static class CatalogExportRunner
         SettingKinds.Secret => "secret",
         SettingKinds.Positions => "list",
         var other => other,
+    };
+
+    /// <summary>A list reading as the site documents it: its path, label, unit, empty text and the fields with their roles.</summary>
+    private static JsonNode List(ReadingDescriptor d) => new JsonObject
+    {
+        ["path"] = d.Path,
+        ["label"] = d.Label,
+        ["name"] = d.Name,
+        ["unit"] = d.Unit,
+        ["emptyText"] = d.EmptyText,
+        ["fields"] = Array(d.Fields.Select(f => (JsonNode)new JsonObject
+        {
+            ["name"] = f.Name,
+            ["kind"] = JsonNamingPolicy.CamelCase.ConvertName(f.Kind.ToString()),
+            ["label"] = f.Label,
+            ["role"] = JsonNamingPolicy.CamelCase.ConvertName(f.Role.ToString()),
+            ["unit"] = f.Unit,
+            ["decimals"] = f.Decimals,
+        })),
     };
 
     private static JsonObject Parameters(IReadOnlyDictionary<string, ManifestParameter> parameters)

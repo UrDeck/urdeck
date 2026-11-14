@@ -14,6 +14,7 @@ using UrDeck.Sdk.Icons;
 using UrDeck.Sdk.Launch;
 using UrDeck.Widgets.Clock;
 using UrDeck.Widgets.Control;
+using UrDeck.Widgets.List;
 using UrDeck.Widgets.NowPlaying;
 using UrDeck.Widgets.Shortcut;
 using UrDeck.Widgets.Stats;
@@ -28,7 +29,7 @@ namespace UrDeck.Preview;
 public static class PreviewWidgets
 {
     private static readonly Lazy<IReadOnlyList<WidgetDescriptor>> All = new(() =>
-        new[] { typeof(ClockWidget), typeof(StatsWidget), typeof(WeatherWidget), typeof(ShortcutWidget), typeof(NowPlayingWidget), typeof(ControlWidget) }
+        new[] { typeof(ClockWidget), typeof(StatsWidget), typeof(WeatherWidget), typeof(ShortcutWidget), typeof(NowPlayingWidget), typeof(ControlWidget), typeof(ListWidget) }
             .Select(type => WidgetDescriptor.TryCreate(type, out _)!)
             .OrderBy(d => d.Id, StringComparer.Ordinal)
             .ToList());
@@ -72,6 +73,10 @@ public static class PreviewProviders
 
     /// <summary>Whether the provider carries a sample a preview can use.</summary>
     public static bool HasSample(string providerId) => All.Value.Any(p => p.Provider.Id == providerId && p.Sample != null);
+
+    /// <summary>The list readings the provider's sample describes (their fields, roles and empty text); none without a sample.</summary>
+    public static IReadOnlyList<ReadingDescriptor> ListsOf(string providerId) =>
+        All.Value.FirstOrDefault(p => p.Provider.Id == providerId).Sample?.Describe().Where(d => d.Kind == ReadingKind.List).ToList() ?? [];
 
     /// <summary>Every first-party provider that has a sample, replaced by it, at the seconds since <paramref name="start"/> by <paramref name="now"/>.</summary>
     internal static ProviderRegistry Registry(Func<DateTime> now, DateTime start)

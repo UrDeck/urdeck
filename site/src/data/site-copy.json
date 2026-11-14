@@ -56,6 +56,31 @@
         }
       }
     },
+    "list": {
+      "description": "Any list reading as rows with a title, a detail line, a status and a picture: busy processes, friends who are playing, headlines.",
+      "sizes": {
+        "4x4": {
+          "note": "Ten rows in the theme's title size.",
+          "alt": "The list widget at 4x4: the ten busiest processes with their CPU share and memory."
+        },
+        "4x2": {
+          "note": "Four cells wide and two tall.",
+          "alt": "The list widget at 4x2: the busiest processes with their CPU share and memory."
+        },
+        "2x2": {
+          "note": "A square card with a title and as many rows as fit.",
+          "alt": "The list widget at 2x2: the busiest processes, each with its CPU share, name and memory."
+        },
+        "2x1": {
+          "note": "Two cells wide and one tall: the first rows, paged by a tap.",
+          "alt": "The list widget at 2x1: the first rows of the busiest processes."
+        },
+        "1x1": {
+          "note": "One cell: the title and the number of rows.",
+          "alt": "The list widget at 1x1: the title and the number of rows in the list."
+        }
+      }
+    },
     "shortcut": {
       "description": "The icon of an application, a folder or a web address. Tap it and it opens. A dock keeps up to four of them in the same place on every page.",
       "sizes": {

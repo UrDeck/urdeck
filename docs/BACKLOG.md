@@ -433,6 +433,8 @@ deleted and replaced.
 
 ## 7. Default widget set
 
+**Status (2026-11-13):** list readings are in (`list-readings`): a reading may hold rows, the text list draws them (with an image per item), and a generic List widget shows any of them; `system:processes/top` is the first list. The Steam provider (`steam-provider`) is the next user.
+
 **Status (2026-11-03):** text that does not fit is solved in the SDK (`text-layout`, #106): `TextLine` overflow (ellipsis, clip,
 marquee), `TextBlock` (wrap, line limit) and the stateful `TextList` (follow, rotate, item at a point), with the effective
 motion level in `WidgetRenderContext.Motion`. No widget uses them yet; the label overflow in stats and control is next, then the
@@ -452,6 +454,7 @@ clone. **Model:** Sonnet to implement; Opus where a widget introduces a new comp
 | Weather, 4x4 (done in `weather-4x4-forecast`) | 4x4 | everything of the 4x2 plus feels like, humidity and wind, the snow total, and 1 to 7 forecast columns (weekday, icon, high and low, chance, rain, snow) | the 4x2 weather change | forecast readings (`daily/N/...`), the date, speed and depth reading kinds |
 | Shortcut | 1x1 (done in `shortcut-and-tap`) | the icon of an application, a file, a folder or a web address; opens it on tap; settings `target`, `arguments`, `icon`, `label` | item 8 (touch) | tap input (`ITapTarget`), the launch and icon services, the image tile; all shared with the dock (item 10) |
 | Media / now playing (done in `now-playing`) | 4x2 | art, title, artist, album, a progress bar and previous / play-pause / next buttons for the Windows media session (`media` provider; the widget is `urdeck.widgets.nowplaying`) | items 3 and 8 (actions: done, `provider-actions`) | `ButtonRow` (the buttons' layout and hit test), `IIconSource.Release`, `IReadingSink.PublishBatch`, the four `media/` glyphs; the Windows part is embedded C#/WinRT (`docs/perf/now-playing.md`). Left: other sizes (2x1, 4x4), choosing among players, seek and volume, per-button press feedback |
+| List (done in `list-readings`) | 1x1, 2x1, 2x2, 4x2, 4x4 | any list reading as rows by the roles its description gives the fields (title, detail, status, image, link): the busiest processes (`system:processes/top`), and the friends and games of the Steam provider to come (`steam-provider`); scrolls by whole rows or rotates, a tap opens a row's link; the widget is `urdeck.widgets.list` | item 3 (readings) | the list value (`ReadingList`, `ReadingRow`, `ReadingKind.List`, field descriptions and roles, bounds of 200 rows and 500 characters, a list read as one value is its count), the text list's image per item and `SetItems` from a list, list samples, the picker's list badge and the lists-only setting |
 | Web page | open | any web page, with touch (the owner shows Frigate camera feeds this way in Nexus) | item 14 (new host), item 8 | a hosted widget kind: the host places a web view layer instead of calling `Render` |
 | Camera (parked) | open | camera streams without a browser, for example from Frigate's go2rtc | item 9 for real video | reuses the video layer; a first version could draw snapshots on the canvas |
 

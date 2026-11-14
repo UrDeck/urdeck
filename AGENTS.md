@@ -77,7 +77,7 @@ src/UrDeck.Preview    GPL. `PreviewRenderer` (a configuration's page or one widg
                       providers' sample data), the sample page `SamplePage/urdeck-config.json` and `ThemePreview.Render`; above the engine
                       and the four first-party widgets and two providers, used by the tool and the golden tests
 providers/            GPL. First-party data provider plugins (UrDeck.Providers.System); reference only UrDeck.Sdk
-widgets/              first-party widget plugins (UrDeck.Widgets.Clock, .Stats, .Weather, .Shortcut); with the providers, copied to
+widgets/              first-party widget plugins (UrDeck.Widgets.Clock, .Stats, .Weather, .Shortcut, .Control, .NowPlaying, .List); with the providers, copied to
                       plugins/ by the host build (the UrDeckPlugin list in UrDeck.Host.csproj)
 tests/                xUnit projects
 site/                 the website (Astro) published at urdeck.app; user documentation in `src/content/docs/` (reference tables generated from `docs/schemas/` and the catalog), the theme cookbook in `cookbook/`, sample decks in `decks/`

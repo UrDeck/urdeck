@@ -15,6 +15,16 @@ public enum ReadingFilter
 
     /// <summary>Only readings that can be acted on.</summary>
     HasAction = 2,
+
+    /// <summary>
+    /// Only list readings (<see cref="Data.ReadingKind.List"/>). The setting needs rows, so a reading that is one value is not offered.
+    /// </summary>
+    ListsOnly = 4,
+
+    /// <summary>
+    /// No list readings. Without either list flag a setting accepts every reading and a list reads as its row count.
+    /// </summary>
+    NoLists = 8,
 }
 
 /// <summary>What a launch target setting accepts.</summary>

@@ -416,7 +416,7 @@ that throws in `Render` shows a red error tile instead of taking the dashboard d
 
 ## Writing a data provider
 
-A data provider supplies readings (numbers, texts or on/off states) that any widget can show. It is a class implementing
+A data provider supplies readings (numbers, texts, on/off states, times or lists of rows) that any widget can show. It is a class implementing
 `DataProvider<TSettings>` (or `IDataProvider`) with `[DataProvider]`, in a plugin assembly that references only `UrDeck.Sdk` (a plugin may hold providers,
 widgets or both; it loads from `plugins/` and hot-reloads like a widget). `providers/UrDeck.Providers.System` is the
 first-party example and uses the same contract.
@@ -450,7 +450,7 @@ public sealed class ExampleProvider : DataProvider<ProviderSettings>
   the same id the first by file name is kept and the other is rejected with a warning that names both. A reading is
   addressed as `<provider id>:<path>`; the path is yours (`cpu/core/2/load`). Keep paths stable and portable (the same
   path on every machine), because users write them into their config.
-- **Catalog.** `Describe()` lists every reading with its kind (`Number`, `Percent`, `Temperature`, `Text`, `OnOff`, `Time`, `Date`, `Speed`, `Depth`), a short
+- **Catalog.** `Describe()` lists every reading with its kind (`Number`, `Percent`, `Temperature`, `Text`, `OnOff`, `Time`, `Date`, `Speed`, `Depth`, `List`), a short
   label, a full name, and optionally a device, a range, a unit text for plain numbers, a default display unit and
   decimals. A `Depth` reading (rainfall, snowfall) declares the unit its value is reported in (`DepthUnit`, millimetres
   when absent), and the formatter converts it for display; a `Speed` is reported in kilometres per hour. A widget's
@@ -518,6 +518,54 @@ public sealed class ExampleProvider : DataProvider<ProviderSettings>
   The engine starts the provider for it, as for an action. `urdeck-cli readings browse <id>` and, later, the editor use it.
 - **Settings and secrets.** See "Settings and secrets" below.
 - **Not yet.** Image values, and new patterns while running, come with the first provider that needs them.
+
+### Publishing a list
+
+A reading of kind `ReadingKind.List` holds rows: a few friends, the busiest processes, the next events. The value is a
+`ReadingList` of `ReadingRow`s, published whole with the usual call:
+
+```csharp
+new ReadingDescriptor("friends/playing", ReadingKind.List, "Friends playing", "Friends who are in a game")
+{
+    Unit = "playing",                       // what the row count counts, where a widget shows the list as one number
+    EmptyText = "Nobody is playing",
+    Fields =
+    [
+        new ReadingField("name", ReadingKind.Text, "Name") { Role = FieldRole.Title },
+        new ReadingField("game", ReadingKind.Text, "Game") { Role = FieldRole.Detail },
+        new ReadingField("avatar", ReadingKind.Text, "Avatar") { Role = FieldRole.Image },
+        new ReadingField("profile", ReadingKind.Text, "Profile") { Role = FieldRole.Link },
+    ],
+}
+
+sink.Publish("friends/playing", ReadingValue.FromList(new ReadingList(
+[
+    new ReadingRow("76561190000000001", [new("name", "Alex"), new("game", "Factorio"), new("avatar", url)]),
+    new ReadingRow("76561190000000002", [new("name", "Sam")]),   // no game: the row has no `game` field
+])));
+```
+
+- **Keys.** Each row's key is a text that is unique in the list and stable for the same thing across publications (a Steam id,
+  an app id, a process id; never the row's position). Widgets keep the scroll position and know a tapped row by it. Two rows
+  with one key make the publication invalid: the reading keeps its last good value and the hub logs the reason once.
+- **Fields.** A field is a number, a text, an on/off state or a time, never a list. Describe it as you would a reading of its kind
+  (`Unit`, `Decimals`, `Min`, `Max`, `Warning`, `Critical`); the formatter formats it by the same rules, so a temperature in a row
+  looks like one in a readout. A row may lack a field.
+- **Roles.** `Title` is the row's text (one field; without it the first text field is used), `Detail` a second line, `Status` a
+  short mark before the title (coloured by the field's levels), `Image` a local file path or an `http` or `https` address and
+  `Link` a launch target opened by a tap. Declare the roles a generic widget needs to draw your list: the List widget knows
+  nothing else. A widget written for your provider may read fields by name.
+- **Bounds.** At most 200 rows and 500 characters in a text field. The hub cuts a larger publication to the bound and logs it
+  once per reading, naming your provider; do not publish a long list and rely on a widget to cut it.
+- **Whole lists, cheap equality.** Replace the list as a whole. A `ReadingList` compares by its rows with a hash computed once,
+  so publishing the same rows again (a poll that found nothing new) changes nothing and repaints nothing.
+- **A count is free.** Where a widget shows a reading as one value it shows the list's row count, in the list's `Unit`, and `0` for
+  an empty list. Do not publish a second reading for the count.
+- **Samples.** In `sample.json` a reading of kind `list` declares `fields` (`name`, `kind`, `label`, `role`, ... as above), an
+  `emptyText` and a `value` that is an array of rows, each an object with `key` and a member for each field it has; `keys` give
+  the rows at each time and never blend two lists. `providers/UrDeck.Providers.System` (`processes/top`) is the example.
+- **Keep it a glance.** A list is for a few rows on a deck, not for an inbox. Names, titles and avatars are your user's data: log
+  none of them.
 
 ### Settings and secrets
 

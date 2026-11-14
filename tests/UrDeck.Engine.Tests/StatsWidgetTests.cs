@@ -96,6 +96,22 @@ public sealed class StatsWidgetTests : IDisposable
     private static bool SameImage(SKBitmap a, SKBitmap b) => a.Bytes.AsSpan().SequenceEqual(b.Bytes);
 
     [Fact]
+    public void ASlotThatShowsAList_DrawsItsRowCount_LikeTheSameNumber()
+    {
+        // data-providers, "A List Read As One Value": no count reading from the provider is needed.
+        _source.Catalog["steam:friends/playing"] = new ReadingDescriptor("friends/playing", ReadingKind.List, "Playing", "Friends playing") { Unit = "friends" };
+        _source.Readings["steam:friends/playing"] = Reading.Ok(ReadingValue.FromList(new ReadingList(
+            Enumerable.Range(0, 3).Select(i => new ReadingRow(i.ToString(System.Globalization.CultureInfo.InvariantCulture), [new("name", "Friend")])))));
+        _source.Catalog["steam:friends/count"] = new ReadingDescriptor("friends/count", ReadingKind.Number, "Playing", "Friends playing") { Unit = "friends" };
+        _source.Readings["steam:friends/count"] = Reading.Ok(3);
+
+        using var fromList = Paint(Widget(Slot("steam:friends/playing")));
+        using var fromNumber = Paint(Widget(Slot("steam:friends/count")));
+
+        Assert.True(SameImage(fromList, fromNumber));
+    }
+
+    [Fact]
     public void WithNoSlots_ItShowsTheTotalCpuLoad()
     {
         var widget = Widget();

@@ -66,7 +66,10 @@ internal static class ReadingsBrowseRunner
         return ExitCodes.Ok;
     }
 
-    private sealed record BrowseRow(string Id, string Kind, string State, string Value, string? Unit, string Label, string? Action, string? Icon, string? Area, string? Category);
+    /// <summary>One row of a list reading: its key and the fields it has, as the formatter writes them.</summary>
+    private sealed record ListRowText(string Key, IReadOnlyList<KeyValuePair<string, string>> Fields);
+
+    private sealed record BrowseRow(string Id, string Kind, string State, string Value, string? Unit, string Label, string? Action, string? Icon, string? Area, string? Category, IReadOnlyList<ListRowText>? Rows = null);
 
     /// <summary>
     /// The providers' settings: the configuration given (else the user's, when it exists), with <c>--url</c> in place of the
@@ -142,7 +145,31 @@ internal static class ReadingsBrowseRunner
         }
 
         string kind = descriptor.Kind.ToString();
-        return new BrowseRow(id, char.ToLowerInvariant(kind[0]) + kind[1..], state, value, unit, descriptor.Label, descriptor.Action, descriptor.Icon, descriptor.Area, descriptor.Category);
+        return new BrowseRow(id, char.ToLowerInvariant(kind[0]) + kind[1..], state, value, unit, descriptor.Label, descriptor.Action, descriptor.Icon, descriptor.Area, descriptor.Category,
+            RowsOf(hub, reading, descriptor));
+    }
+
+    /// <summary>The rows of a list reading, field by field in the description's order; null for any other reading.</summary>
+    private static List<ListRowText>? RowsOf(ReadingHub hub, Reading reading, ReadingDescriptor descriptor)
+    {
+        if (reading.Value is not { Type: ReadingValueType.List } value)
+            return null;
+        var rows = new List<ListRowText>();
+        foreach (var row in value.List.Rows)
+        {
+            var fields = new List<KeyValuePair<string, string>>();
+            foreach (var field in descriptor.Fields)
+            {
+                if (!row.TryGet(field.Name, out _))
+                    continue;
+                var text = ReadingFormatter.FormatField(row, field, null, hub);
+                fields.Add(new(field.Name, string.IsNullOrEmpty(text.Unit) ? text.Value : $"{text.Value} {text.Unit}"));
+            }
+
+            rows.Add(new ListRowText(row.Key, fields));
+        }
+
+        return rows;
     }
 
     private static string Text(List<BrowseRow> rows)
@@ -164,6 +191,13 @@ internal static class ReadingsBrowseRunner
             string label = where.Length == 0 ? rows[i].Label : $"{rows[i].Label}  [{where}]";
             text.Append((rows[i].Id.PadRight(idWidth) + "  " + rows[i].Kind.PadRight(kindWidth) + "  " + values[i].PadRight(valueWidth) + "  " + label).TrimEnd());
             text.Append('\n');
+            foreach (var row in rows[i].Rows ?? [])
+            {
+                text.Append("    ").Append(row.Key);
+                foreach (var (name, shown) in row.Fields)
+                    text.Append("  ").Append(name).Append('=').Append(shown);
+                text.Append('\n');
+            }
         }
 
         return text.ToString();
@@ -186,6 +220,11 @@ internal static class ReadingsBrowseRunner
                 ["icon"] = row.Icon,
                 ["area"] = row.Area,
                 ["category"] = row.Category,
+                ["rows"] = row.Rows == null ? null : new JsonArray([.. row.Rows.Select(r => (JsonNode)new JsonObject
+                {
+                    ["key"] = r.Key,
+                    ["fields"] = new JsonObject(r.Fields.Select(f => KeyValuePair.Create(f.Key, (JsonNode?)JsonValue.Create(f.Value)))),
+                })]),
             });
         }
 

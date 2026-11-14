@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Patrick Bigler
 
 using SkiaSharp;
+using UrDeck.Sdk.Data;
+using UrDeck.Sdk.Icons;
 
 namespace UrDeck.Sdk.Components;
 
@@ -18,13 +20,41 @@ public enum TextListMode
     Rotate,
 }
 
+/// <summary>How much attention an item's mark deserves; it picks the theme's status colour when the item has no colour of its own.</summary>
+public enum TextListLevel
+{
+    /// <summary>The theme's accent.</summary>
+    None,
+    /// <summary>The theme's good colour.</summary>
+    Good,
+    /// <summary>The theme's warning colour.</summary>
+    Warning,
+    /// <summary>The theme's critical colour.</summary>
+    Critical,
+}
+
 /// <summary>One entry of a <see cref="TextList"/>.</summary>
 /// <param name="Text">The text, wrapped to the list's width.</param>
 /// <param name="Detail">An optional second line in the label step and the muted colour, ended with an ellipsis when too long.</param>
 /// <param name="Mark">An optional short leading text (a user name) drawn on the first line; the text is indented past it.</param>
 /// <param name="MarkColor">The mark's colour; the theme's accent when null.</param>
 /// <param name="MaxLines">The most lines the text may take (the last ends in an ellipsis); 0 for no limit.</param>
-public sealed record TextListItem(string Text, string? Detail = null, string? Mark = null, SKColor? MarkColor = null, int MaxLines = 0);
+/// <param name="Key">A stable identity (a list row's key); the list keeps the scroll position on an item whose key survives a replacement.</param>
+/// <param name="ImageSource">
+/// A leading image, asked from the list's <see cref="TextList.Icons"/> as a launch-target-like text (a file or an address). It is
+/// drawn as a square the height of the first line before the mark and the text, which start after it; the place stays empty
+/// while the image loads, so nothing moves when it arrives.
+/// </param>
+/// <param name="MarkLevel">Colours the mark by the theme's status colours when <paramref name="MarkColor"/> is null.</param>
+public sealed record TextListItem(
+    string Text,
+    string? Detail = null,
+    string? Mark = null,
+    SKColor? MarkColor = null,
+    int MaxLines = 0,
+    string? Key = null,
+    string? ImageSource = null,
+    TextListLevel MarkLevel = TextListLevel.None);
 
 /// <summary>
 /// A list of text items drawn in a rectangle, scrolled vertically and clipped to it: a chat feed that follows its newest
@@ -47,6 +77,7 @@ public sealed class TextList
     {
         public required string[] Lines;
         public required float Indent;
+        public required float ImageWidth;
         public string? Detail;
         public required float Height;
     }
@@ -69,6 +100,10 @@ public sealed class TextList
     private int _first;
     private DateTime? _nextAt;
     private int? _pendingItem;
+    private float _pendingDelta;
+    private bool _alignMarks;
+    private bool _markDirty = true;
+    private float _alignedMark;
 
     private SKRect _rect;
     private float _origin;
@@ -79,6 +114,31 @@ public sealed class TextList
 
     /// <summary>The most items the list keeps; adding more removes the oldest from the top. 0 keeps them all.</summary>
     public int Capacity { get; set; }
+
+    /// <summary>
+    /// Whether every item's text starts after the widest mark, so the texts of a list of values line up. Off, each item is indented
+    /// by its own mark (a chat feed).
+    /// </summary>
+    public bool AlignMarks
+    {
+        get => _alignMarks;
+        set
+        {
+            if (_alignMarks == value)
+                return;
+            _alignMarks = value;
+            _markDirty = true;
+        }
+    }
+
+    /// <summary>
+    /// For <see cref="TextListMode.Manual"/>: a list at rest draws only the items that fit whole, so no row is cut through its
+    /// text, and <see cref="Page"/> moves by whole items. Off, the last item shows as far as it reaches, as a scrolled view does.
+    /// </summary>
+    public bool WholeRows { get; set; }
+
+    /// <summary>Where item images come from; without it an item's image place stays empty.</summary>
+    public IIconSource? Icons { get; set; }
 
     /// <summary>The theme step the items' text is drawn in. The detail line is always the label step.</summary>
     public TextStep Step { get; set; } = TextStep.Body;
@@ -132,6 +192,7 @@ public sealed class TextList
         _layouts.Clear();
         _replaced.Clear();
         _first = 0;
+        _markDirty = true;
         foreach (var item in items)
         {
             _items.Add(item);
@@ -141,12 +202,126 @@ public sealed class TextList
         TrimToCapacity();
     }
 
+    /// <summary>
+    /// Replaces every item with the rows of a list reading, by the roles the description gives its fields: the title field is the
+    /// text, the detail field the second line, the status field the mark (coloured by its levels), the image field the image
+    /// and the row's key the item's key. Values are formatted with <see cref="ReadingFormatter"/>. A field a row lacks leaves
+    /// that part out. When some of the keys survive, the first row that was visible and still is stays at the top of the view.
+    /// </summary>
+    /// <param name="list">The rows.</param>
+    /// <param name="descriptor">The reading's description, which declares the fields and their roles.</param>
+    /// <param name="source">The user's region, for formatting.</param>
+    /// <param name="options">Formatting choices; none for the description's own.</param>
+    /// <param name="maxRows">The most rows to take, from the start; 0 for all.</param>
+    public void SetItems(ReadingList list, ReadingDescriptor descriptor, IReadingSource source, ReadingFormatOptions? options = null, int maxRows = 0) =>
+        SetItems(list, ListRoles.Of(descriptor), source, options, maxRows);
+
+    /// <summary>
+    /// As <see cref="SetItems(ReadingList, ReadingDescriptor, IReadingSource, ReadingFormatOptions?, int)"/> with the roles chosen by
+    /// the caller, which may leave a part out (no image) of what the description gives.
+    /// </summary>
+    /// <param name="list">The rows.</param>
+    /// <param name="roles">The fields to draw, by what they are for.</param>
+    /// <param name="source">The user's region, for formatting.</param>
+    /// <param name="options">Formatting choices; none for the description's own.</param>
+    /// <param name="maxRows">The most rows to take, from the start; 0 for all.</param>
+    public void SetItems(ReadingList list, ListRoles roles, IReadingSource source, ReadingFormatOptions? options = null, int maxRows = 0)
+    {
+        var items = new List<TextListItem>(list.Count);
+        foreach (var row in list.Rows)
+        {
+            if (maxRows > 0 && items.Count >= maxRows)
+                break;
+            items.Add(ItemOf(row, roles, source, options));
+        }
+
+        var (anchorKey, anchorDelta) = Anchor();
+        SetItems(items);
+        if (anchorKey == null)
+            return;
+        int at = _items.FindIndex(i => i.Key == anchorKey);
+        if (at < 0)
+            return;
+        _pendingItem = at;
+        _pendingDelta = anchorDelta;
+    }
+
+    /// <summary>The row of a list as an item, by roles.</summary>
+    public static TextListItem ItemOf(ReadingRow row, ListRoles roles, IReadingSource source, ReadingFormatOptions? options = null)
+    {
+        string text = roles.Title is { } title && row.TryGet(title.Name, out _) ? FieldText(row, title, source, options) : "";
+        string? detail = roles.Detail is { } d && row.TryGet(d.Name, out _) ? FieldText(row, d, source, options) : null;
+        string? mark = null;
+        var level = TextListLevel.None;
+        if (roles.Status is { } status && row.TryGet(status.Name, out var statusValue))
+        {
+            mark = FieldText(row, status, source, options);
+            level = LevelOf(status, statusValue);
+        }
+
+        string? image = roles.Image is { } img && row.TryGet(img.Name, out var imageValue) && imageValue.Type == ReadingValueType.Text && imageValue.Text.Length > 0
+            ? imageValue.Text
+            : null;
+        return new TextListItem(text, detail, mark, null, 0, row.Key, image, level);
+    }
+
+    /// <summary>A field as the text a widget draws: the value and its unit.</summary>
+    public static string FieldText(ReadingRow row, ReadingField field, IReadingSource source, ReadingFormatOptions? options = null)
+    {
+        var formatted = ReadingFormatter.FormatField(row, field, options, source);
+        if (string.IsNullOrEmpty(formatted.Unit))
+            return formatted.Value;
+        return char.IsLetter(formatted.Unit[0]) ? formatted.Value + " " + formatted.Unit : formatted.Value + formatted.Unit;
+    }
+
+    private static TextListLevel LevelOf(ReadingField field, ReadingValue value)
+    {
+        if (value.Type != ReadingValueType.Number || (field.Warning == null && field.Critical == null))
+            return TextListLevel.None;
+        if (field.Critical is { } critical && value.Number >= critical)
+            return TextListLevel.Critical;
+        if (field.Warning is { } warning && value.Number >= warning)
+            return TextListLevel.Warning;
+        return TextListLevel.Good;
+    }
+
+    /// <summary>The key of the first item in view and how far into it the view is; null when there is nothing to keep.</summary>
+    private (string? Key, float Delta) Anchor()
+    {
+        if (_width < 0 || _tops.Length != _items.Count || _items.Count == 0)
+            return (null, 0);
+        int index = Mode == TextListMode.Rotate ? _first : FirstVisible();
+        if (index < 0 || index >= _items.Count || _items[index].Key == null)
+            return (null, 0);
+        return (_items[index].Key, Mode == TextListMode.Rotate ? 0 : Math.Max(0, _target - _tops[index]));
+    }
+
+    private int FirstVisible()
+    {
+        for (int i = 0; i < _items.Count; i++)
+        {
+            if (_layouts[i] is { } layout && _tops[i] + layout.Height > _target)
+                return i;
+        }
+
+        return -1;
+    }
+
+    private static SKColor LevelColor(Theme theme, TextListLevel level) => level switch
+    {
+        TextListLevel.Good => theme.Good,
+        TextListLevel.Warning => theme.Warning,
+        TextListLevel.Critical => theme.Critical,
+        _ => theme.Accent,
+    };
+
     /// <summary>Removes every item.</summary>
     public void Clear() => SetItems([]);
 
     /// <summary>Adds an item at the end, removing the oldest from the top beyond <see cref="Capacity"/>.</summary>
     public void Add(TextListItem item)
     {
+        _markDirty = true;
         _items.Add(item);
         _layouts.Add(null);
         TrimToCapacity();
@@ -157,8 +332,49 @@ public sealed class TextList
     {
         if (_layouts[index] is { } old && index < _tops.Length)
             _replaced.Add((index, _tops[index], old.Height));
+        _markDirty = true;
         _items[index] = item;
         _layouts[index] = null;
+    }
+
+    /// <summary>
+    /// Scrolls by a page of whole items: forward (<paramref name="direction"/> above zero) so that the first item that was not
+    /// whole in the view is at the top, back so that the items before the view fill it. Based on the last draw.
+    /// </summary>
+    public void Page(int direction)
+    {
+        if (_width < 0 || _tops.Length != _items.Count || _items.Count == 0)
+            return;
+        if (direction > 0)
+        {
+            float bottom = _target + _view;
+            for (int i = 0; i < _items.Count; i++)
+            {
+                if (_tops[i] + _layouts[i]!.Height > bottom + 0.5f)
+                {
+                    ScrollToItem(i);
+                    return;
+                }
+            }
+
+            return;
+        }
+
+        float want = _target - _view;
+        if (want <= 0.5f)
+        {
+            Offset = 0;
+            return;
+        }
+
+        for (int i = 0; i < _items.Count; i++)
+        {
+            if (_tops[i] >= want - 0.5f)
+            {
+                ScrollToItem(i);
+                return;
+            }
+        }
     }
 
     /// <summary>Scrolls by <paramref name="pixels"/> (positive moves the content up).</summary>
@@ -173,6 +389,7 @@ public sealed class TextList
         {
             // No layout yet: the first draw knows where the item is.
             _pendingItem = index;
+            _pendingDelta = 0;
             return;
         }
 
@@ -222,6 +439,7 @@ public sealed class TextList
         {
             _theme = theme;
             _width = rect.Width;
+            _markDirty = true;
             for (int i = 0; i < _layouts.Count; i++)
                 _layouts[i] = null;
             _replaced.Clear();
@@ -230,6 +448,18 @@ public sealed class TextList
         _view = rect.Height;
         float size = theme.GetTextSize(Step);
         float gap = size * GapRatio;
+        if (_alignMarks && _markDirty)
+        {
+            _markDirty = false;
+            _alignedMark = WidestMark(theme, rect.Width);
+            for (int i = 0; i < _layouts.Count; i++)
+                _layouts[i] = null;
+        }
+        else if (!_alignMarks)
+        {
+            _alignedMark = 0;
+        }
+
         for (int i = 0; i < _items.Count; i++)
             _layouts[i] ??= LayOut(theme, _items[i], rect.Width);
 
@@ -247,9 +477,15 @@ public sealed class TextList
             _pendingItem = null;
             if (pending < _items.Count)
             {
-                _target = Math.Clamp(_tops[pending], 0, MaxOffset);
+                float delta = Math.Min(_pendingDelta, _layouts[pending]!.Height);
+                _target = Math.Clamp(_tops[pending] + delta, 0, MaxOffset);
+                _animating = false;
                 _following = _target >= MaxOffset - 0.5f;
+                if (Mode == TextListMode.Rotate)
+                    _first = pending;
             }
+
+            _pendingDelta = 0;
         }
 
         if (!_following || Mode != TextListMode.Follow)
@@ -370,15 +606,34 @@ public sealed class TextList
         return (float)(_animFrom + (_target - _animFrom) * eased);
     }
 
+    /// <summary>The room the widest mark needs, with the gap after it; 0 when no item has a mark.</summary>
+    private float WidestMark(Theme theme, float width)
+    {
+        float size = theme.GetTextSize(Step);
+        float tracking = TextStyle.TrackingFor(theme.TextStyle, Step);
+        using var font = TextMetrics.CreateFont(theme.GetTypeface(TextLayoutCache.RoleOf(Step)), size);
+        float widest = 0;
+        foreach (var item in _items)
+        {
+            if (!string.IsNullOrEmpty(item.Mark))
+                widest = Math.Max(widest, TextMetrics.Measure(font, item.Mark, tracking));
+        }
+
+        return widest <= 0 ? 0 : Math.Min(width / 2, widest + size * 0.4f);
+    }
+
     private Layout LayOut(Theme theme, TextListItem item, float width)
     {
         float size = theme.GetTextSize(Step);
         float lineHeight = size * TextBlock.LineSpacing;
-        float indent = 0;
+        float imageWidth = string.IsNullOrEmpty(item.ImageSource) ? 0 : Math.Min(width / 3, lineHeight + size * 0.4f);
+        float indent = imageWidth;
         float tracking = TextStyle.TrackingFor(theme.TextStyle, Step);
         using var font = TextMetrics.CreateFont(theme.GetTypeface(TextLayoutCache.RoleOf(Step)), size);
-        if (!string.IsNullOrEmpty(item.Mark))
-            indent = Math.Min(width / 2, TextMetrics.Measure(font, item.Mark, tracking) + size * 0.4f);
+        if (_alignMarks)
+            indent += _alignedMark;
+        else if (!string.IsNullOrEmpty(item.Mark))
+            indent += Math.Min(width / 2, TextMetrics.Measure(font, item.Mark, tracking) + size * 0.4f);
 
         string[] lines = [.. TextLayoutCache.Lines(theme, Step, item.Text, Math.Max(1, width - indent))];
         if (item.MaxLines > 0 && lines.Length > item.MaxLines)
@@ -397,7 +652,7 @@ public sealed class TextList
             height += detailSize * TextBlock.LineSpacing;
         }
 
-        return new Layout { Lines = lines, Indent = indent, Detail = detail, Height = height };
+        return new Layout { Lines = lines, Indent = indent, ImageWidth = imageWidth, Detail = detail, Height = height };
     }
 
     /// <summary>Draws the list in <paramref name="rect"/> at <paramref name="time"/> (see <see cref="Prepare"/>).</summary>
@@ -415,6 +670,15 @@ public sealed class TextList
         if (Mode == TextListMode.Rotate && !_animating && _items.Count > 0 && _total > _view)
         {
             int last = Math.Min(_items.Count - 1, _first + Math.Max(1, RotateCount) - 1);
+            _clipBottom = Math.Min(rect.Bottom, _origin + _tops[last] + _layouts[last]!.Height);
+        }
+
+        if (WholeRows && Mode == TextListMode.Manual && !_animating && _items.Count > 0 && _total > _view)
+        {
+            // At rest, only what fits whole: the first item always shows, even if it is taller than the view.
+            int last = 0;
+            for (int i = 1; i < _items.Count && _tops[i] + _layouts[i]!.Height <= visible + rect.Height + 0.5f; i++)
+                last = i;
             _clipBottom = Math.Min(rect.Bottom, _origin + _tops[last] + _layouts[last]!.Height);
         }
 
@@ -445,13 +709,16 @@ public sealed class TextList
             if (top > rect.Bottom)
                 break;
 
+            if (layout.ImageWidth > 0)
+                DrawImage(canvas, theme, new SKRect(rect.Left, top, rect.Left + layout.ImageWidth, top + lineHeight), _items[i].ImageSource!);
+
             for (int line = 0; line < layout.Lines.Length; line++)
             {
                 float baseline = top + line * lineHeight + (lineHeight + cap) / 2;
                 if (line == 0 && !string.IsNullOrEmpty(_items[i].Mark))
                 {
-                    mark.Color = _items[i].MarkColor ?? theme.Accent;
-                    TextMetrics.DrawLine(canvas, _items[i].Mark!, rect.Left, baseline, font, mark, tracking);
+                    mark.Color = _items[i].MarkColor ?? LevelColor(theme, _items[i].MarkLevel);
+                    TextMetrics.DrawLine(canvas, _items[i].Mark!, rect.Left + layout.ImageWidth, baseline, font, mark, tracking);
                 }
 
                 if (layout.Lines[line].Length > 0)
@@ -466,6 +733,24 @@ public sealed class TextList
             }
         }
 
+        canvas.RestoreToCount(save);
+    }
+
+    /// <summary>Draws an item's image in the square at the start of its first line; nothing while it loads or when it has none.</summary>
+    private void DrawImage(SKCanvas canvas, Theme theme, SKRect cell, string source)
+    {
+        float side = Math.Min(cell.Height, cell.Width);
+        if (Icons is not { } icons || side < 1)
+            return;
+        var result = icons.GetIcon(source, (int)Math.Ceiling(side));
+        if (result.Image is not { } image || image.Width <= 0 || image.Height <= 0)
+            return;
+        var square = SKRect.Create(cell.Left, cell.Top, side, side);
+        float radius = Math.Min(theme.CardRadius, side / 2);
+        int save = canvas.Save();
+        canvas.ClipRoundRect(new SKRoundRect(square, radius, radius), SKClipOperation.Intersect, true);
+        using var paint = new SKPaint { IsAntialias = true };
+        canvas.DrawImage(image, square, new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear), paint);
         canvas.RestoreToCount(save);
     }
 }

@@ -54,6 +54,7 @@ public static class ReadingFormatter
             ReadingValueType.Text => ReadingKind.Text,
             ReadingValueType.OnOff => ReadingKind.OnOff,
             ReadingValueType.Time => ReadingKind.Time,
+            ReadingValueType.List => ReadingKind.List,
             _ => ReadingKind.Number,
         };
         string? unitText = DisplayUnits.UnitText(kind, unit, descriptor);
@@ -65,6 +66,16 @@ public static class ReadingFormatter
         };
 
         bool hasValue = reading.State != ReadingState.Unavailable && reading.Value.HasValue;
+
+        // A list read as one value is its number of rows, with the list's unit; an empty list is 0, not a dash.
+        if (kind == ReadingKind.List || reading.Value is { Type: ReadingValueType.List })
+        {
+            string count = hasValue && reading.Value!.Value.Type == ReadingValueType.List
+                ? reading.Value.Value.List.Count.ToString(CultureInfo.InvariantCulture)
+                : Dash;
+            return new ReadingText(count, unitText, UnitPlacement.Baseline, hasValue ? count : DashWidth, reading.State == ReadingState.Ok);
+        }
+
         if (kind == ReadingKind.Time)
             return FormatTime(reading, hasValue, options.Use24HourClock ?? source.RegionUses24HourClock);
 
@@ -75,6 +86,16 @@ public static class ReadingFormatter
         string text = hasValue ? Text(reading.Value!.Value, kind, decimals, explicitDecimals, unit, descriptor) : Dash;
         string widest = Widest(hasValue ? reading.Value : null, text, descriptor, kind, decimals, explicitDecimals, unit);
         return new ReadingText(text, unitText, placement, widest, reading.State == ReadingState.Ok);
+    }
+
+    /// <summary>
+    /// Formats one field of a row by the rules of a reading of the field's kind, so that a temperature in a list row and in a
+    /// readout look alike. A field the row lacks is a dash and not current.
+    /// </summary>
+    public static ReadingText FormatField(ReadingRow row, ReadingField field, ReadingFormatOptions? options, IReadingSource source)
+    {
+        var reading = row.TryGet(field.Name, out var value) ? Reading.Ok(value) : Reading.Unavailable("");
+        return Format(reading, field.ToDescriptor(), options, source);
     }
 
     private static ReadingText FormatTime(Reading reading, bool hasValue, bool use24Hour)

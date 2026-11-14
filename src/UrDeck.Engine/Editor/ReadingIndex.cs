@@ -45,6 +45,9 @@ public sealed class ReadingEntry
     /// <summary>Whether something can be done to the reading (it has an action).</summary>
     public bool HasAction { get; }
 
+    /// <summary>Whether the reading is a list of rows.</summary>
+    public bool IsList => Descriptor.Kind == ReadingKind.List;
+
     internal string[] LabelWords { get; }
 
     internal string FoldedLabel { get; }
@@ -215,12 +218,14 @@ public sealed class ReadingIndex
     {
         if (query.Provider != null && !string.Equals(entry.ProviderId, query.Provider, StringComparison.OrdinalIgnoreCase))
             return false;
-        return query.Restrict switch
-        {
-            ReadingFilter.HasRange => entry.HasRange,
-            ReadingFilter.HasAction => entry.HasAction,
-            _ => true,
-        };
+        var restrict = query.Restrict;
+        if (restrict.HasFlag(ReadingFilter.HasRange) && !entry.HasRange)
+            return false;
+        if (restrict.HasFlag(ReadingFilter.HasAction) && !entry.HasAction)
+            return false;
+        if (restrict.HasFlag(ReadingFilter.ListsOnly) && !entry.IsList)
+            return false;
+        return !(restrict.HasFlag(ReadingFilter.NoLists) && entry.IsList);
     }
 
     private static bool Matches(ReadingEntry e, string word) =>

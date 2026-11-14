@@ -1,0 +1,65 @@
+---
+title: List
+description: Any list reading as rows with a title, a detail line, a status and a picture, such as busy processes, friends who are playing or headlines.
+section: Widgets
+order: 16
+---
+
+import SettingsTable from '../../../components/SettingsTable.astro';
+import WidgetSizes from '../../../components/WidgetSizes.astro';
+
+`urdeck.widgets.list` shows a **list reading** as rows. It names no provider: the reading's description says which field is
+each row's title, its detail line, its status mark, its picture and its link, so the same widget shows the busiest
+processes of the [system provider](/docs/widgets/stats/#the-system-readings) today and a friends list or a set of headlines
+from any other provider tomorrow. See [Readings and lists](/docs/readings/) for what a list reading is.
+
+<WidgetSizes widget="list" />
+
+It needs only a reading. A new widget shows the processes using the most CPU:
+
+```json
+{ "typeId": "urdeck.widgets.list", "col": 0, "row": 0, "width": 2, "height": 2, "reading": "system:processes/top" }
+```
+
+## Settings
+
+In the editor, add the widget on **Pages** and select it: the pane on the right shows these settings with a control for each.
+The reading's picker offers list readings only, each marked as a list with its number of rows, and shows the fields a list's
+rows hold. The file keys are listed for reference.
+
+<SettingsTable widget="list" />
+
+### Defaults
+
+`title` follows one rule. **Left out**, it is the list's own name (`Busy processes`). **Any text** is used as written. **An
+empty text (`""`)** hides it. The title is drawn on cards two cells tall or more; on a card one cell tall the rows take the room.
+
+## What it shows
+
+- **Rows by role.** The title field is the row's text, the detail field its second line, the status field a short mark before
+  it (coloured by the field's levels, or the theme's accent), and the picture field a square the height of the first line. A
+  value is formatted as everywhere else in UrDeck: a percentage with its sign, a size with its unit, a time in your clock.
+  Marks are aligned, so the titles start in one column.
+- **A row without a field** is drawn without that part: a friend who is in no game has no second line.
+- **At 1x1** the card shows the title and the number of rows, as any card shows a list that way: three friends playing is
+  `3 playing`.
+- **At 4x4** the rows are set in the theme's title size, which reads from further away.
+- **When there are more rows than fit,** `overflow` decides. `scroll` shows whole rows and a tap on the lower part of the list
+  pages forward and a tap on the upper part pages back. `rotate` moves the rows up by one on a timer and takes no taps (a tap
+  on a row with a link still opens it). A theme with motion off jumps instead of sliding.
+- **`maxRows`** takes at most that many rows from the top of the list, in the order the provider published them.
+- **A list with no rows** says what the provider says for it (`No busy processes`, `Nobody is playing`), or `Nothing to show`.
+- **A reading that is not there:** while the provider has not answered yet, three placeholder rows hold the place; a list the
+  provider could not refresh keeps its rows, drawn faded; a reading that cannot be supplied shows its reason
+  (`Connect Steam in Settings`).
+
+## Touch
+
+A tap on a row whose list has a link field opens the link, as a [shortcut](/docs/widgets/shortcut/) does: a web address, a
+file, a `steam://` link. A tap anywhere else pages the list when `overflow` is `scroll` and the rows do not fit; otherwise it
+does nothing and the card does not show a press.
+
+## Looks
+
+The widget draws no card and names no font: its text, its muted lines and its marks come from the theme. See
+[themes](/docs/themes/).

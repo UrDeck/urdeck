@@ -52,8 +52,12 @@
          the product has not shipped), with Group, Order, Sizes, Fallback, AllowsNone and more; ShownWhen, Option, SettingPart,
          Positions, the kind attributes (Number, Slider, Reading, Action, Unit, Place, LaunchTarget, Icon), ISuggestionSource and
          Suggestion. Data.DisplayUnits (ToDisplay, FromDisplay, UnitText). The assembly version stays.
-         Package 0.21.0 (editor-reading-picker): ReadingDescriptor.Area and Category (additive). The assembly version stays. -->
-    <Version>0.21.0</Version>
+         Package 0.21.0 (editor-reading-picker): ReadingDescriptor.Area and Category (additive). The assembly version stays.
+         Package 0.22.0 (list-readings): ReadingValueType.List, ReadingList, ReadingRow, ReadingKind.List, ReadingField, FieldRole,
+         ListRoles, ReadingDescriptor.Fields and EmptyText, ReadingFormatter.FormatField, ReadingFilter.ListsOnly and NoLists, and
+         TextListItem.Key, ImageSource and MarkLevel with TextList.Icons and the SetItems overload for a list reading. All additive,
+         so the assembly version stays; a widget that reads a list as one value gets its row count. -->
+    <Version>0.22.0</Version>
     <AssemblyVersion>0.3.0.0</AssemblyVersion>
   </PropertyGroup>
 

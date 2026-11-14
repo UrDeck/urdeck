@@ -40,6 +40,76 @@ public sealed class SampleFileTests
         return value!.Value;
     }
 
+    private const string FriendsFields = """
+        "fields": [
+          { "name": "name", "kind": "text", "label": "Name", "role": "title" },
+          { "name": "game", "kind": "text", "label": "Game", "role": "detail" },
+          { "name": "hours", "kind": "number", "label": "Hours", "unit": "h", "decimals": 1 }
+        ]
+        """;
+
+    [Fact]
+    public void AListSample_DeclaresItsFields_AndDrawsItsRows()
+    {
+        var file = Read($$"""
+            "friends": { "kind": "list", "label": "Friends", "name": "Friends playing", "unit": "playing", "emptyText": "Nobody is playing",
+              {{FriendsFields}},
+              "value": [
+                { "key": "1", "name": "Alex", "game": "Factorio", "hours": 12.25 },
+                { "key": "2", "name": "Sam" },
+                { "key": "3", "name": "Kim", "game": "Satisfactory" }
+              ] }
+            """);
+
+        var descriptor = file.Match("friends", out _)!.Descriptor;
+        Assert.Equal(ReadingKind.List, descriptor.Kind);
+        Assert.Equal("Nobody is playing", descriptor.EmptyText);
+        Assert.Equal([FieldRole.Title, FieldRole.Detail, FieldRole.None], descriptor.Fields.Select(f => f.Role));
+        Assert.Equal("h", descriptor.Fields[2].Unit);
+
+        var list = At(file, "friends", 0).List;
+        Assert.Equal(3, list.Count);
+        Assert.Equal("Factorio", list[0].Get("game")!.Value.Text);
+        Assert.Equal(12.25, list[0].Get("hours")!.Value.Number);
+        Assert.False(list[1].TryGet("game", out _));
+    }
+
+    [Fact]
+    public void AListSamplesKeyframes_SwapTheRows_AndNeverBlend()
+    {
+        var file = Read($$"""
+            "friends": { "kind": "list", "label": "Friends", "name": "Friends playing", {{FriendsFields}}, "period": 8,
+              "keys": [
+                { "at": 0, "value": [ { "key": "1", "name": "Alex" }, { "key": "2", "name": "Sam" } ] },
+                { "at": 4, "value": [ { "key": "1", "name": "Alex" }, { "key": "2", "name": "Sam" }, { "key": "3", "name": "Kim" } ] }
+              ] }
+            """);
+
+        Assert.Equal(2, At(file, "friends", 3.9).List.Count);
+        Assert.Equal(3, At(file, "friends", 5).List.Count);
+        Assert.Equal(2, At(file, "friends", 9).List.Count);
+    }
+
+    [Fact]
+    public void AListSample_IsRefused_WhenItsRowsOrFieldsAreWrong()
+    {
+        string head = $$"""
+            "friends": { "kind": "list", "label": "Friends", "name": "Friends playing", {{FriendsFields}},
+            """;
+
+        Assert.Contains(ReadingFindings(head + """ "value": [ { "key": "1", "name": "A" }, { "key": "1", "name": "B" } ] } """), f => f.Contains("used by another row", StringComparison.Ordinal));
+        Assert.Contains(ReadingFindings(head + """ "value": [ { "name": "A" } ] } """), f => f.Contains("key is missing", StringComparison.Ordinal));
+        Assert.Contains(ReadingFindings(head + """ "value": [ { "key": "1", "nickname": "A" } ] } """), f => f.Contains("not one of the list's fields", StringComparison.Ordinal));
+        Assert.Contains(ReadingFindings(head + """ "value": [ { "key": "1", "name": 5 } ] } """), f => f.Contains("must be a text", StringComparison.Ordinal) || f.Contains("a text", StringComparison.Ordinal));
+        Assert.Contains(ReadingFindings("""
+            "friends": { "kind": "list", "label": "Friends", "name": "Friends", "value": [] }
+            """), f => f.Contains("needs fields", StringComparison.Ordinal));
+        Assert.Contains(ReadingFindings("""
+            "friends": { "kind": "list", "label": "Friends", "name": "Friends",
+              "fields": [ { "name": "inner", "kind": "list", "label": "Inner" } ], "value": [] }
+            """), f => f.Contains("kind must be one of", StringComparison.Ordinal));
+    }
+
     [Fact]
     public void AReading_IsDescribedAsItsCatalogEntry()
     {

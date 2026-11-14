@@ -61,7 +61,12 @@ The `system` provider needs no administrator rights.
 | `system:cpu/load` | The share of time all logical processors are busy, in percent. |
 | `system:cpu/core/N/load` | The same for logical processor `N`, counted from 1. |
 | `system:memory/load` | Memory in use, in percent. |
+| `system:processes/top` | A list: the ten processes using the most processor time, most first, each with its CPU share and memory. Shown by the [List](/docs/widgets/list/) widget; in a Stats slot it is the number of rows. |
 | `system:gpu/load`, `system:gpu/temperature`, `system:gpu/power`, `system:gpu/clock` | The main GPU (the one with the most video memory): load in percent, temperature, power in watts and clock in MHz. `system:gpu/N/...` is each adapter, counted from 1 in that order. |
+
+The process list needs two looks at the machine to work out a share, so it appears about one interval (two seconds) after a widget
+starts showing it, and processes are looked at only while a widget shows it. A process is named by its executable without the
+extension; the names are shown on the deck and never written to `urdeck.log`.
 
 CPU load is the share of time the processors are busy, so with a CPU that boosts it reads lower under load than Task
 Manager, which weighs by clock speed. GPU load is the busiest engine of the adapter, as in Task Manager.

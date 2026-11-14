@@ -12,23 +12,27 @@ public enum ReadingValueType
     Text,
     OnOff,
     Time,
+    List,
 }
 
 /// <summary>
-/// A reading's value: a number, a text, an on/off state or a time (an instant with the UTC offset it is read in). It is an SDK type so that a widget can read a value from any
-/// provider without referencing that provider's assembly.
+/// A reading's value: a number, a text, an on/off state, a time (an instant with the UTC offset it is read in) or a list of
+/// rows. It is an SDK type so that a widget can read a value from any provider without referencing that provider's assembly.
+/// Where a widget formats a list as one value, the formatter gives its row count.
 /// </summary>
 public readonly struct ReadingValue : IEquatable<ReadingValue>
 {
     private readonly double _number;
-    private readonly string? _text;
+
+    // The text of a text value or the ReadingList of a list value share one slot, so the struct does not grow.
+    private readonly object? _ref;
     private readonly int _offsetMinutes;
 
-    private ReadingValue(ReadingValueType type, double number, string? text, int offsetMinutes = 0)
+    private ReadingValue(ReadingValueType type, double number, object? reference, int offsetMinutes = 0)
     {
         Type = type;
         _number = number;
-        _text = text;
+        _ref = reference;
         _offsetMinutes = offsetMinutes;
     }
 
@@ -38,7 +42,10 @@ public readonly struct ReadingValue : IEquatable<ReadingValue>
     public double Number => _number;
 
     /// <summary>The text; empty unless <see cref="Type"/> is <see cref="ReadingValueType.Text"/>.</summary>
-    public string Text => _text ?? "";
+    public string Text => _ref as string ?? "";
+
+    /// <summary>The list; an empty list unless <see cref="Type"/> is <see cref="ReadingValueType.List"/>.</summary>
+    public ReadingList List => _ref as ReadingList ?? ReadingList.Empty;
 
     /// <summary>The state; false unless <see cref="Type"/> is <see cref="ReadingValueType.OnOff"/>.</summary>
     public bool IsOn => Type == ReadingValueType.OnOff && _number != 0;
@@ -57,6 +64,9 @@ public readonly struct ReadingValue : IEquatable<ReadingValue>
     public static ReadingValue FromNumber(double number) => new(ReadingValueType.Number, number, null);
 
     public static ReadingValue FromText(string text) => new(ReadingValueType.Text, 0, text ?? "");
+
+    /// <summary>A list of rows, replaced as a whole; see <see cref="ReadingList"/>.</summary>
+    public static ReadingValue FromList(ReadingList list) => new(ReadingValueType.List, 0, list ?? ReadingList.Empty);
 
     public static ReadingValue FromOnOff(bool on) => new(ReadingValueType.OnOff, on ? 1 : 0, null);
 
@@ -77,11 +87,14 @@ public readonly struct ReadingValue : IEquatable<ReadingValue>
 
     public bool Equals(ReadingValue other) =>
         Type == other.Type && _number.Equals(other._number) && _offsetMinutes == other._offsetMinutes
-        && string.Equals(_text, other._text, StringComparison.Ordinal);
+        && (Type == ReadingValueType.List
+            ? List.Equals(other.List)
+            : string.Equals(_ref as string, other._ref as string, StringComparison.Ordinal));
 
     public override bool Equals(object? obj) => obj is ReadingValue other && Equals(other);
 
-    public override int GetHashCode() => HashCode.Combine(Type, _number, _text, _offsetMinutes);
+    public override int GetHashCode() => HashCode.Combine(
+        Type, _number, Type == ReadingValueType.List ? List.GetHashCode() : (_ref as string)?.GetHashCode(), _offsetMinutes);
 
     public static bool operator ==(ReadingValue left, ReadingValue right) => left.Equals(right);
 
@@ -90,6 +103,7 @@ public readonly struct ReadingValue : IEquatable<ReadingValue>
     public override string ToString() => Type switch
     {
         ReadingValueType.Text => Text,
+        ReadingValueType.List => List.Count.ToString(CultureInfo.InvariantCulture),
         ReadingValueType.OnOff => IsOn ? "On" : "Off",
         ReadingValueType.Time => Time.ToString("yyyy-MM-dd HH:mm:sszzz", CultureInfo.InvariantCulture),
         _ => _number.ToString(CultureInfo.InvariantCulture),
