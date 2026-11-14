@@ -61,7 +61,7 @@ public static class DisplayUnits
     {
         ReadingKind.Percent => "%",
         ReadingKind.Temperature => "°",
-        ReadingKind.Number when !string.IsNullOrEmpty(descriptor?.Unit) => descriptor!.Unit,
+        ReadingKind.Number or ReadingKind.List when !string.IsNullOrEmpty(descriptor?.Unit) => descriptor!.Unit,
         ReadingKind.Speed => unit == DisplayUnit.Fahrenheit ? "mph" : "km/h",
         ReadingKind.Depth when unit == DisplayUnit.Fahrenheit => "\"",
         ReadingKind.Depth => CanonicalDepth(descriptor) == DepthUnit.Centimetre ? "cm" : "mm",

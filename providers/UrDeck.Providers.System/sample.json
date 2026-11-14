@@ -21,6 +21,25 @@
       "keys": [ { "at": 0, "value": 49 }, { "at": 2, "value": 71 }, { "at": 4, "value": 5 } ], "period": 6 },
     "memory/load": { "kind": "percent", "label": "Memory", "name": "Memory load", "min": 0, "max": 100,
       "keys": [ { "at": 0, "value": 47 }, { "at": 5, "value": 52 } ], "period": 10 },
+    "processes/top": { "kind": "list", "label": "Busy processes", "name": "Processes using the most CPU", "unit": "processes",
+      "emptyText": "No busy processes",
+      "fields": [
+        { "name": "name", "kind": "text", "label": "Process", "role": "title" },
+        { "name": "cpu", "kind": "percent", "label": "CPU", "role": "status", "decimals": 1, "min": 0, "max": 100 },
+        { "name": "memory", "kind": "number", "label": "Memory", "role": "detail", "unit": "MB", "decimals": 0 }
+      ],
+      "value": [
+        { "key": "4120", "name": "Starfall", "cpu": 35.0, "memory": 4210 },
+        { "key": "1832", "name": "Render Worker", "cpu": 12.4, "memory": 1536 },
+        { "key": "7788", "name": "Tabby Browser", "cpu": 6.8, "memory": 2318 },
+        { "key": "3010", "name": "Voice Chat", "cpu": 3.1, "memory": 412 },
+        { "key": "5204", "name": "Sync Agent", "cpu": 1.7, "memory": 188 },
+        { "key": "960", "name": "Desktop Compositor", "cpu": 1.2, "memory": 305 },
+        { "key": "2476", "name": "Photo Editor", "cpu": 0.9, "memory": 1204 },
+        { "key": "6150", "name": "Music Player", "cpu": 0.6, "memory": 276 },
+        { "key": "3342", "name": "Cloud Backup", "cpu": 0.4, "memory": 143 },
+        { "key": "880", "name": "Search Indexer", "cpu": 0.2, "memory": 96 }
+      ] },
     "gpu/load": { "kind": "percent", "label": "GPU", "name": "GPU load", "device": "Sample GPU", "min": 0, "max": 100,
       "keys": [ { "at": 0, "value": 82 }, { "at": 2, "value": 91 }, { "at": 4, "value": 76 } ], "period": 6 },
     "gpu/temperature": { "kind": "temperature", "label": "GPU", "name": "GPU temperature", "device": "Sample GPU", "min": 0, "max": 100,

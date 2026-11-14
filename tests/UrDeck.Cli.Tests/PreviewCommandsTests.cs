@@ -63,7 +63,7 @@ public sealed class PreviewCommandsTests : IDisposable
         var run = Workspace.Invoke("preview", "render", "--widget", "example.unknown", "--widget-size", "1x1", "-o", "x.png");
 
         Assert.Equal(1, run.Code);
-        Assert.Contains("urdeck.widgets.clock, urdeck.widgets.control, urdeck.widgets.nowplaying, urdeck.widgets.shortcut, urdeck.widgets.stats, urdeck.widgets.weather", run.Error);
+        Assert.Contains("urdeck.widgets.clock, urdeck.widgets.control, urdeck.widgets.list, urdeck.widgets.nowplaying, urdeck.widgets.shortcut, urdeck.widgets.stats, urdeck.widgets.weather", run.Error);
         Assert.False(File.Exists("x.png"));
     }
 
@@ -161,7 +161,7 @@ public sealed class PreviewCommandsTests : IDisposable
         Assert.Equal(1, root.GetProperty("version").GetInt32());
         Assert.Equal(ThemeStore.BuiltInNames.Order(StringComparer.Ordinal), Names(root.GetProperty("themes"), "name"));
         Assert.Equal(ShaderStore.BuiltInNames.Order(StringComparer.Ordinal), Names(root.GetProperty("backgrounds"), "name"));
-        Assert.Equal(["urdeck.widgets.clock", "urdeck.widgets.control", "urdeck.widgets.nowplaying", "urdeck.widgets.shortcut", "urdeck.widgets.stats", "urdeck.widgets.weather"],
+        Assert.Equal(["urdeck.widgets.clock", "urdeck.widgets.control", "urdeck.widgets.list", "urdeck.widgets.nowplaying", "urdeck.widgets.shortcut", "urdeck.widgets.stats", "urdeck.widgets.weather"],
             Names(root.GetProperty("widgets"), "typeId"));
         Assert.Equal(["homeassistant", "media", "system", "weather"], Names(root.GetProperty("providers"), "id"));
         Assert.All(root.GetProperty("providers").EnumerateArray(), p => Assert.True(p.GetProperty("sample").GetBoolean()));
@@ -172,6 +172,28 @@ public sealed class PreviewCommandsTests : IDisposable
         Assert.Equal(5, stats.GetProperty("sizes").GetArrayLength());
         Assert.Equal(4, stats.GetProperty("defaultConfig").GetProperty("slots").GetArrayLength());
         Assert.False(stats.GetProperty("defaultConfig").TryGetProperty("width", out _));
+    }
+
+    [Fact]
+    public void The_catalog_describes_the_list_readings_with_their_fields_and_roles_and_the_list_widgets_reading_accepts_lists_only()
+    {
+        using var document = JsonDocument.Parse(Workspace.Invoke("catalog", "export").Out);
+        var root = document.RootElement;
+
+        var system = root.GetProperty("providers").EnumerateArray().Single(p => p.GetProperty("id").GetString() == "system");
+        var processes = system.GetProperty("lists").EnumerateArray().Single();
+        Assert.Equal("processes/top", processes.GetProperty("path").GetString());
+        Assert.Equal("No busy processes", processes.GetProperty("emptyText").GetString());
+        Assert.Equal(
+            [("name", "title"), ("cpu", "status"), ("memory", "detail")],
+            processes.GetProperty("fields").EnumerateArray().Select(f => (f.GetProperty("name").GetString()!, f.GetProperty("role").GetString()!)));
+        Assert.All(
+            root.GetProperty("providers").EnumerateArray().Where(p => p.GetProperty("id").GetString() != "system"),
+            p => Assert.Equal(0, p.GetProperty("lists").GetArrayLength()));
+
+        var list = root.GetProperty("widgets").EnumerateArray().Single(w => w.GetProperty("typeId").GetString() == "urdeck.widgets.list");
+        var reading = list.GetProperty("settings").EnumerateArray().Single(s => s.GetProperty("name").GetString() == "reading");
+        Assert.Equal("ListsOnly", reading.GetProperty("reading").GetProperty("filter").GetString());
     }
 
     [Fact]

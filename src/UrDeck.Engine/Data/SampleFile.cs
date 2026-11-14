@@ -24,7 +24,7 @@ public sealed class SampleFile
 
     private static readonly HashSet<string> ReadingKeys = new(StringComparer.Ordinal)
     {
-        "kind", "label", "name", "value", "keys", "period", "unavailable", "action", "icon",
+        "kind", "label", "name", "value", "keys", "period", "unavailable", "action", "icon", "fields", "emptyText",
     };
 
     // A reading gives its value in exactly one of these.
@@ -238,8 +238,11 @@ public sealed class SampleFile
         if (kind is not { } readingKind || label == null || name == null)
             return null;
 
+        var listFields = ReadFields(readingKind, fields, at, found);
         var descriptor = new ReadingDescriptor(path, readingKind, label, name)
         {
+            Fields = listFields,
+            EmptyText = NonEmptyText(fields, "emptyText", at, found),
             Device = Text(fields, "device", at, found, required: false),
             Unit = Text(fields, "unit", at, found, required: false),
             Min = Number(fields, "min", at, found),
@@ -275,7 +278,7 @@ public sealed class SampleFile
         double? period = null;
         if (fields.TryGetValue("value", out var valueElement))
         {
-            if (Value(readingKind, valueElement, $"{at}: value", found) is { } value)
+            if (Value(readingKind, valueElement, $"{at}: value", found, listFields) is { } value)
                 keys.Add(new SampleKey(0, value));
         }
         else
@@ -291,7 +294,7 @@ public sealed class SampleFile
             foreach (var key in keysElement.EnumerateArray())
             {
                 string where = $"{at}: keys[{index}]";
-                if (ReadKey(readingKind, key, where, found) is { } read)
+                if (ReadKey(readingKind, key, where, found, listFields) is { } read)
                 {
                     if (index == 0 && read.At != 0)
                         found.Add($"{where}.at: the first key must be at 0, so a still picture and the first frame agree");
@@ -344,7 +347,7 @@ public sealed class SampleFile
         return segments;
     }
 
-    private static SampleKey? ReadKey(ReadingKind kind, JsonElement key, string where, List<string> found)
+    private static SampleKey? ReadKey(ReadingKind kind, JsonElement key, string where, List<string> found, IReadOnlyList<ReadingField> listFields)
     {
         if (key.ValueKind != JsonValueKind.Object)
         {
@@ -367,7 +370,7 @@ public sealed class SampleFile
                     break;
                 case "value":
                     hasValue = true;
-                    value = Value(kind, property.Value, $"{where}.value", found);
+                    value = Value(kind, property.Value, $"{where}.value", found, listFields);
                     break;
                 default:
                     found.Add($"{where}: '{property.Name}' is not a key of a keyframe (at, value)");
@@ -383,10 +386,12 @@ public sealed class SampleFile
     }
 
     /// <summary>A value of the reading's kind: a number, a text, true or false, a time of day <c>HH:mm</c> or a number of days.</summary>
-    private static SampleValue? Value(ReadingKind kind, JsonElement element, string where, List<string> found)
+    private static SampleValue? Value(ReadingKind kind, JsonElement element, string where, List<string> found, IReadOnlyList<ReadingField>? listFields = null)
     {
         switch (kind)
         {
+            case ReadingKind.List when element.ValueKind == JsonValueKind.Array:
+                return ReadRows(element, listFields ?? [], where, found) is { } rows ? new SampleValue(0, null, rows) : null;
             case ReadingKind.Text when element.ValueKind == JsonValueKind.String:
                 return new SampleValue(0, element.GetString());
             case ReadingKind.OnOff when element.ValueKind is JsonValueKind.True or JsonValueKind.False:
@@ -408,10 +413,145 @@ public sealed class SampleFile
             ReadingKind.OnOff => "true or false",
             ReadingKind.Time => "a time of day, \"HH:mm\" or \"HH:mm:ss\"",
             ReadingKind.Date => "a whole number of days from the day drawn (0 is that day)",
+            ReadingKind.List => "an array of rows, each { \"key\": ..., and a member for each field it has }",
             _ => "a number",
         };
         found.Add($"{where}: a {JsonName(kind.ToString())} reading's value must be {expected}");
         return null;
+    }
+
+    private static readonly HashSet<string> FieldKeys = new(StringComparer.Ordinal)
+    {
+        "name", "kind", "label", "role", "unit", "displayUnit", "depthUnit", "decimals", "min", "max", "warning", "critical",
+    };
+
+    /// <summary>The fields of a list reading, as the description gives them; none for any other kind.</summary>
+    private static ReadingFields ReadFields(ReadingKind kind, Dictionary<string, JsonElement> fields, string at, List<string> found)
+    {
+        if (!fields.TryGetValue("fields", out var element))
+        {
+            if (kind == ReadingKind.List)
+                found.Add($"{at}: a list reading needs fields, an array of {{ \"name\": ..., \"kind\": ..., \"label\": ... }}");
+            return [];
+        }
+
+        if (kind != ReadingKind.List)
+        {
+            found.Add($"{at}: fields belong to a reading of kind list");
+            return [];
+        }
+
+        if (element.ValueKind != JsonValueKind.Array || element.GetArrayLength() == 0)
+        {
+            found.Add($"{at}: fields must be an array of at least one field");
+            return [];
+        }
+
+        var result = new List<ReadingField>();
+        var names = new HashSet<string>(StringComparer.Ordinal);
+        int index = 0;
+        foreach (var item in element.EnumerateArray())
+        {
+            string where = $"{at}: fields[{index++}]";
+            if (item.ValueKind != JsonValueKind.Object)
+            {
+                found.Add($"{where}: must be an object");
+                continue;
+            }
+
+            var members = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+            foreach (var property in Distinct(item, where, found))
+            {
+                if (FieldKeys.Contains(property.Name))
+                    members[property.Name] = property.Value;
+                else
+                    found.Add($"{where}: '{property.Name}' is not a key of a field ({string.Join(", ", FieldKeys.Order(StringComparer.Ordinal))})");
+            }
+
+            string? name = Text(members, "name", where, found, required: true);
+            string? label = Text(members, "label", where, found, required: true);
+            ReadingKind? fieldKind = null;
+            if (!members.TryGetValue("kind", out var kindElement))
+                found.Add($"{where}: kind is missing");
+            else if (EnumValue<ReadingKind>(kindElement) is { } k && k != ReadingKind.List)
+                fieldKind = k;
+            else
+                found.Add($"{where}: kind must be one of {string.Join(", ", System.Enum.GetValues<ReadingKind>().Where(v => v != ReadingKind.List).Select(v => JsonName(v.ToString())))}");
+
+            if (name != null && !names.Add(name))
+                found.Add($"{where}: the field name '{name}' is used twice");
+            var role = Enum<FieldRole>(members, "role", where, found) ?? FieldRole.None;
+            if (role == FieldRole.Title && result.Any(f => f.Role == FieldRole.Title))
+                found.Add($"{where}: only one field is the title");
+            string? unit = Text(members, "unit", where, found, required: false);
+            int? decimals = WholeNumber(members, "decimals", where, found);
+            if (name == null || label == null || fieldKind is not { } fk)
+                continue;
+            result.Add(new ReadingField(name, fk, label)
+            {
+                Role = role,
+                Unit = unit,
+                DisplayUnit = Enum<DisplayUnit>(members, "displayUnit", where, found),
+                DepthUnit = Enum<DepthUnit>(members, "depthUnit", where, found),
+                Decimals = decimals,
+                Min = Number(members, "min", where, found),
+                Max = Number(members, "max", where, found),
+                Warning = Number(members, "warning", where, found),
+                Critical = Number(members, "critical", where, found),
+            });
+        }
+
+        return new ReadingFields(result);
+    }
+
+    /// <summary>The rows of a list value: each an object with a unique <c>key</c> and a member for each field it has.</summary>
+    private static List<SampleRow>? ReadRows(JsonElement array, IReadOnlyList<ReadingField> listFields, string where, List<string> found)
+    {
+        int before = found.Count;
+        var rows = new List<SampleRow>();
+        var keys = new HashSet<string>(StringComparer.Ordinal);
+        int index = 0;
+        foreach (var row in array.EnumerateArray())
+        {
+            string at = $"{where}[{index++}]";
+            if (row.ValueKind != JsonValueKind.Object)
+            {
+                found.Add($"{at}: a row must be an object with a key");
+                continue;
+            }
+
+            string? key = null;
+            var values = new List<KeyValuePair<string, SampleValue>>();
+            foreach (var property in Distinct(row, at, found))
+            {
+                if (property.Name == "key")
+                {
+                    key = property.Value.ValueKind == JsonValueKind.String ? property.Value.GetString() : null;
+                    if (string.IsNullOrEmpty(key))
+                        found.Add($"{at}.key: must be a text");
+                    else if (!keys.Add(key))
+                        found.Add($"{at}.key: '{key}' is used by another row");
+                    continue;
+                }
+
+                var field = listFields.FirstOrDefault(f => f.Name == property.Name);
+                if (field == null)
+                {
+                    found.Add($"{at}: '{property.Name}' is not one of the list's fields");
+                    continue;
+                }
+
+                if (Value(field.Kind, property.Value, $"{at}.{property.Name}", found) is { } value)
+                    values.Add(new(property.Name, value));
+            }
+
+            if (key == null && !row.TryGetProperty("key", out _))
+                found.Add($"{at}: key is missing");
+            if (key != null)
+                rows.Add(new SampleRow(key, values));
+        }
+
+        return found.Count > before ? null : rows;
     }
 
     private static string? Text(Dictionary<string, JsonElement> fields, string key, string at, List<string> found, bool required)
@@ -539,8 +679,11 @@ public sealed class SampleFile
     internal static string JsonName(string name) => char.ToLowerInvariant(name[0]) + name[1..];
 }
 
-/// <summary>A value as the sample file gives it: a number (also on/off, a time of day in seconds, a number of days) or a text.</summary>
-internal readonly record struct SampleValue(double Number, string? Text);
+/// <summary>A value as the sample file gives it: a number (also on/off, a time of day in seconds, a number of days), a text or rows.</summary>
+internal readonly record struct SampleValue(double Number, string? Text, IReadOnlyList<SampleRow>? Rows = null);
+
+/// <summary>One row of a list sample: its key and the values of the fields it has.</summary>
+internal sealed record SampleRow(string Key, IReadOnlyList<KeyValuePair<string, SampleValue>> Fields);
 
 /// <summary>One keyframe: the seconds from the start of a drawing and the value from then on.</summary>
 internal readonly record struct SampleKey(double At, SampleValue Value);
@@ -584,6 +727,21 @@ public sealed class SampleReading
         var value = Evaluate(seconds, out SampleValue? next, out double blend);
         var kind = Descriptor.Kind;
         DateTime day = moment.Date;
+        if (kind == ReadingKind.List)
+        {
+            // Rows swap at a keyframe and never blend; each field is read as its own kind.
+            return ReadingValue.FromList(new ReadingList((value.Rows ?? []).Select(row => new ReadingRow(
+                row.Key,
+                row.Fields.Select(f => KeyValuePair.Create(
+                    f.Key,
+                    Scalar(Descriptor.Fields.First(d => d.Name == f.Key).Kind, f.Value, null, 0, day, bindings)))))));
+        }
+
+        return Scalar(kind, value, next, blend, day, bindings);
+    }
+
+    private static ReadingValue Scalar(ReadingKind kind, SampleValue value, SampleValue? next, double blend, DateTime day, IReadOnlyDictionary<string, string>? bindings)
+    {
         switch (kind)
         {
             case ReadingKind.Text:

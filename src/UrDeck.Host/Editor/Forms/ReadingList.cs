@@ -379,12 +379,15 @@ internal sealed class ReadingList : IDisposable
         string text = narrowed
             ? string.Create(CultureInfo.CurrentCulture, $"{result.Hits.Count:N0} of {result.Total:N0} {noun} match.")
             : string.Create(CultureInfo.CurrentCulture, $"{result.Total:N0} {noun}.");
-        text += _options.Restrict switch
-        {
-            ReadingFilter.HasAction => " Showing only readings that can be switched or set.",
-            ReadingFilter.HasRange => " Showing only readings with a range.",
-            _ => "",
-        };
+        var restrict = _options.Restrict;
+        if (restrict.HasFlag(ReadingFilter.HasAction))
+            text += " Showing only readings that can be switched or set.";
+        else if (restrict.HasFlag(ReadingFilter.HasRange))
+            text += " Showing only readings with a range.";
+        if (restrict.HasFlag(ReadingFilter.ListsOnly))
+            text += " Showing only lists, which show rows.";
+        else if (restrict.HasFlag(ReadingFilter.NoLists))
+            text += " Lists are not offered here.";
         return text;
     }
 
@@ -439,7 +442,7 @@ internal sealed class ReadingList : IDisposable
         Highlight((TextBlock)text.Children[1], entry.Id, row.Hit.IdMatches, FontWeights.SemiBold);
 
         var tag = (Border)grid.Children[1];
-        string? tagText = entry.IsTemplate ? "template" : entry.HasAction ? "action" : null;
+        string? tagText = entry.IsTemplate ? "template" : entry.IsList ? "list" : entry.HasAction ? "action" : null;
         tag.Visibility = tagText == null ? Visibility.Collapsed : Visibility.Visible;
         if (tagText != null)
             ((TextBlock)tag.Child).Text = tagText;

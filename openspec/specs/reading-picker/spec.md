@@ -2,9 +2,7 @@
 
 Finding and choosing a reading in the editor by what the user calls it, with its live value, across every provider,
 including a Home Assistant installation with thousands of entities.
-
 ## Requirements
-
 ### Requirement: Choosing A Reading
 A reading setting MUST open a picker that lists the readings of every provider, restricted to what the setting accepts
 (readings with a range, readings with an action, or one provider's readings). Choosing a reading sets it and closes the
@@ -63,3 +61,18 @@ search and filters as the picker, and lets the user copy a reading's id.
 #### Scenario: Browsing
 - **WHEN** the user opens Readings and types "gpu"
 - **THEN** the GPU readings of this PC are listed with their current values
+
+### Requirement: Lists In The Picker
+The picker MUST mark a list reading as a list and show its number of rows as its live value. When the setting accepts
+lists only, only list readings are listed and the picker says so; when it does not accept lists, none are listed.
+Choosing a list shows its fields under the choice, so the user sees what the rows will hold.
+
+#### Scenario: Choosing the friends list
+- **WHEN** the user opens the picker from the List widget's reading and types "steam"
+- **THEN** only Steam's list readings are listed, each marked as a list with its row count, and choosing "Friends
+  playing" shows its fields name, game and avatar
+
+#### Scenario: A list for a stats slot
+- **WHEN** the user opens the picker from a stats slot
+- **THEN** list readings are listed among the others, marked as lists, their value being the count
+

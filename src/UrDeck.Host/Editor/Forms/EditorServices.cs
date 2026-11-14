@@ -77,6 +77,9 @@ internal sealed class PreviewEditorReadings(IReadingSource preview, UrDeck.Engin
     public string RowValue(string id, ReadingDescriptor described)
     {
         var text = ReadingFormatter.Format(preview.Read(id), described, null, preview);
+        // A list's live value is its row count; without a unit of its own the count says what it counts.
+        if (described.Kind == ReadingKind.List && string.IsNullOrEmpty(text.Unit) && text.Value != ReadingFormatter.Dash)
+            return text.Value == "1" ? "1 row" : $"{text.Value} rows";
         return text.Unit is { Length: > 0 } unit ? $"{text.Value} {unit}" : text.Value;
     }
 

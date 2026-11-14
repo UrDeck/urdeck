@@ -101,6 +101,36 @@ public sealed class ReadingIndexTests
         Assert.DoesNotContain(ranged.Hits, h => h.Entry.Id == "homeassistant:light.desk");
     }
 
+    private static ReadingIndex WithAList() => new(ReadingIndex.EntriesOf("steam",
+    [
+        new("friends/playing", ReadingKind.List, "Friends playing", "Friends playing")
+        {
+            Unit = "playing",
+            Fields = [new ReadingField("name", ReadingKind.Text, "Name") { Role = FieldRole.Title }, new ReadingField("game", ReadingKind.Text, "Game")],
+        },
+        new("status", ReadingKind.Text, "Status", "Connection status"),
+    ]));
+
+    [Fact]
+    public void ASettingThatAcceptsListsOnly_IsOfferedOnlyLists()
+    {
+        var result = WithAList().Search(new ReadingQuery(Restrict: ReadingFilter.ListsOnly));
+
+        Assert.Equal(["steam:friends/playing"], result.Hits.Select(h => h.Entry.Id));
+        Assert.Equal(1, result.Total);
+        Assert.True(result.Hits[0].Entry.IsList);
+        Assert.Equal(["name", "game"], result.Hits[0].Entry.Descriptor.Fields.Select(f => f.Name));
+    }
+
+    [Fact]
+    public void ASettingThatExcludesLists_IsOfferedNone_AndOneThatSaysNothingIsOfferedAll()
+    {
+        var index = WithAList();
+
+        Assert.Equal(["steam:status"], index.Search(new ReadingQuery(Restrict: ReadingFilter.NoLists)).Hits.Select(h => h.Entry.Id));
+        Assert.Equal(2, index.Search(new ReadingQuery()).Hits.Count);
+    }
+
     [Fact]
     public void APatternIsATemplate()
     {

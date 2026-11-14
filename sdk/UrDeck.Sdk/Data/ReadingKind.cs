@@ -27,6 +27,8 @@ public enum ReadingKind
     /// the formatter converts for display.
     /// </summary>
     Depth,
+    /// <summary>A list of rows (see <see cref="ReadingList"/>); <see cref="ReadingDescriptor.Fields"/> say what a row holds.</summary>
+    List,
 }
 
 /// <summary>The unit a <see cref="ReadingKind.Depth"/> reading is reported in.</summary>

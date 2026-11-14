@@ -20,6 +20,7 @@
   <Folder Name="/widgets/">
     <Project Path="widgets/UrDeck.Widgets.Clock/UrDeck.Widgets.Clock.csproj" />
     <Project Path="widgets/UrDeck.Widgets.Control/UrDeck.Widgets.Control.csproj" />
+    <Project Path="widgets/UrDeck.Widgets.List/UrDeck.Widgets.List.csproj" />
     <Project Path="widgets/UrDeck.Widgets.NowPlaying/UrDeck.Widgets.NowPlaying.csproj" />
     <Project Path="widgets/UrDeck.Widgets.Shortcut/UrDeck.Widgets.Shortcut.csproj" />
     <Project Path="widgets/UrDeck.Widgets.Stats/UrDeck.Widgets.Stats.csproj" />

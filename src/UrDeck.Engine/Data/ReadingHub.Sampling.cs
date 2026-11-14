@@ -832,7 +832,16 @@ public sealed partial class ReadingHub
             reported.Add(entry.Path);
             rt.Misses[entry.Path] = 0;
             string id = $"{providerId}:{entry.Path}";
-            Set(id, publication.Value is { } value ? Reading.Ok(value) : Reading.Unavailable(publication.Reason ?? "unavailable"), changed);
+            if (publication.Value is { } value)
+            {
+                // An invalid list leaves the reading as it was.
+                if (Bounded(providerId, id, value) is { } bounded)
+                    Set(id, Reading.Ok(bounded), changed);
+            }
+            else
+            {
+                Set(id, Reading.Unavailable(publication.Reason ?? "unavailable"), changed);
+            }
         }
 
         // A sample that published nothing is a pushed provider's idle tick, not a skipped reading.

@@ -48,11 +48,18 @@ internal sealed class ReadingPickerDialog(
             });
 
         var content = new Grid { Width = 700, Height = 520 };
+        content.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        content.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
         content.Children.Add(list.Root);
+
+        // The fields of a chosen list, so the user sees what its rows will hold.
+        var fields = new TextBlock { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0), Visibility = Visibility.Collapsed };
+        Grid.SetRow(fields, 1);
+        content.Children.Add(fields);
         dialog = new ContentDialog
         {
             XamlRoot = xamlRoot,
-            Title = restrict == ReadingFilter.HasAction ? "Choose what it controls" : "Choose a reading",
+            Title = restrict.HasFlag(ReadingFilter.HasAction) ? "Choose what it controls" : restrict.HasFlag(ReadingFilter.ListsOnly) ? "Choose a list" : "Choose a reading",
             Content = content,
             PrimaryButtonText = "Choose",
             SecondaryButtonText = "Type an id by hand",
@@ -67,6 +74,9 @@ internal sealed class ReadingPickerDialog(
             var selected = list.Selected;
             dialog.IsPrimaryButtonEnabled = selected != null;
             dialog.PrimaryButtonText = selected?.IsTemplate == true ? "Fill in" : "Choose";
+            fields.Visibility = selected is { IsList: true, Descriptor.Fields.Count: > 0 } ? Visibility.Visible : Visibility.Collapsed;
+            if (selected is { IsList: true } chosen)
+                fields.Text = "Each row holds: " + string.Join(", ", chosen.Descriptor.Fields.Select(f => f.Name)) + ".";
         };
         dialog.Opened += (_, _) => list.FocusSearch();
 

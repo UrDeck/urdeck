@@ -8,7 +8,7 @@ namespace UrDeck.Providers.Machine;
 
 /// <summary>
 /// Readings about the local machine that need no administrator rights: CPU load (whole and per logical processor), the
-/// share of physical memory in use, and the load, temperature, power and clock of each GPU. Each group lives in its own
+/// share of physical memory in use, the processes using the most CPU, and the load, temperature, power and clock of each GPU. Each group lives in its own
 /// class and is queried only while one of its readings is subscribed to.
 /// </summary>
 [SupportedOSPlatform("windows")]
@@ -16,7 +16,7 @@ namespace UrDeck.Providers.Machine;
 public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBrowser
 {
     /// <summary>What the subscribers want; replaced whole so a sample reads a consistent set.</summary>
-    private sealed record Demand(bool Total, bool[] Cores, string[] MissingCores, bool Memory, GpuWant[] Gpu, string[] MissingGpu)
+    private sealed record Demand(bool Total, bool[] Cores, string[] MissingCores, bool Memory, GpuWant[] Gpu, string[] MissingGpu, bool Processes = false)
     {
         public bool Cpu => Total || Array.IndexOf(Cores, true) >= 0;
     }
@@ -26,6 +26,7 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBro
     private readonly CpuReadings _cpu = new();
     private readonly MemoryReadings _memory = new();
     private readonly GpuReadings _gpu;
+    private readonly ProcessReadings _processes;
     private IReadingSink? _sink;
     private Demand _demand = None;
 
@@ -34,7 +35,18 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBro
     {
     }
 
-    internal SystemProvider(IGpuPlatform gpuPlatform) => _gpu = new GpuReadings(gpuPlatform);
+    internal SystemProvider(IGpuPlatform gpuPlatform)
+        : this(gpuPlatform, new WindowsProcessPlatform())
+    {
+    }
+
+    internal SystemProvider(IGpuPlatform gpuPlatform, IProcessPlatform processPlatform)
+    {
+        _gpu = new GpuReadings(gpuPlatform);
+        _processes = new ProcessReadings(processPlatform);
+    }
+
+    internal int ProcessQueries => _processes.Queries;
 
     internal int CpuQueries => _cpu.Queries;
 
@@ -51,6 +63,7 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBro
         var catalog = new List<ReadingDescriptor>(_cpu.CoreCount() + 10);
         _cpu.Describe(catalog);
         MemoryReadings.Describe(catalog);
+        ProcessReadings.Describe(catalog);
         _gpu.Describe(catalog);
         return catalog;
     }
@@ -72,6 +85,7 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBro
         path.StartsWith("cpu/", StringComparison.Ordinal) ? "CPU"
         : path.StartsWith("memory/", StringComparison.Ordinal) ? "Memory"
         : path.StartsWith("gpu/", StringComparison.Ordinal) ? "GPU"
+        : path.StartsWith("processes/", StringComparison.Ordinal) ? "Processes"
         : null;
 
     public override void Start(IReadingSink sink, ProviderSettings settings)
@@ -86,6 +100,7 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBro
         int adapters = _gpu.Count;
         bool total = false;
         bool memory = false;
+        bool processes = false;
         bool[] wantedCores = new bool[cores];
         var gpu = new GpuWant[adapters];
         List<string>? missingCores = null;
@@ -96,6 +111,8 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBro
                 total = true;
             else if (string.Equals(path, MemoryReadings.Load, StringComparison.OrdinalIgnoreCase))
                 memory = true;
+            else if (string.Equals(path, ProcessReadings.Top, StringComparison.OrdinalIgnoreCase))
+                processes = true;
             else if (CpuReadings.TryParseCore(path, out int number))
             {
                 if (number >= 1 && number <= cores)
@@ -115,7 +132,7 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBro
             }
         }
 
-        _demand = new Demand(total, wantedCores, missingCores?.ToArray() ?? [], memory, gpu, missingGpu?.ToArray() ?? []);
+        _demand = new Demand(total, wantedCores, missingCores?.ToArray() ?? [], memory, gpu, missingGpu?.ToArray() ?? [], processes);
     }
 
     public override Task SampleAsync(CancellationToken cancellationToken)
@@ -138,6 +155,11 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBro
         if (demand.Memory)
             _memory.Sample(sink);
 
+        if (demand.Processes)
+            _processes.Sample(sink);
+        else
+            _processes.DropBaseline();
+
         _gpu.Sample(sink, demand.Gpu);
         return Task.CompletedTask;
     }
@@ -147,6 +169,7 @@ public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBro
         _sink = null;
         _demand = None;
         _cpu.DropBaseline();
+        _processes.DropBaseline();
         _gpu.Shutdown();
     }
 }

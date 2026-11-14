@@ -3,9 +3,7 @@
 ## Purpose
 How a widget or a data provider declares the settings a user can change, so that the editor can build a form for any
 plugin and the site can document it, without the plugin shipping any user interface.
-
 ## Requirements
-
 ### Requirement: Declared Settings
 A widget's configuration type and a provider's settings type MUST declare each setting a user can change, on the
 property that holds it, with a label and a help text. The declaration states the setting's kind, from which the editor
@@ -141,3 +139,17 @@ the positions per size and the item's settings.
 #### Scenario: Help text reaches the site
 - **WHEN** the catalog is exported
 - **THEN** each Clock setting has a non-empty `help`, and the Stats `slots` setting lists the item settings
+
+### Requirement: Reading Settings And Lists
+A reading setting MAY declare that it accepts list readings only, or that it does not accept them; by default it accepts
+every reading, a list then being shown as its count (see data-providers, "A List Read As One Value"). The declaration MUST
+be part of the setting's schema, so the editor and the catalog export can filter by it.
+
+#### Scenario: The List widget's reading
+- **WHEN** the List widget's configuration declares its reading setting as lists only
+- **THEN** its schema says so, and the editor offers only list readings for it
+
+#### Scenario: A stats slot
+- **WHEN** a stats slot's reading setting declares nothing about lists
+- **THEN** a list reading can be chosen for it, and the slot shows the list's count
+

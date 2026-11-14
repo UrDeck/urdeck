@@ -166,6 +166,31 @@ public class SettingSchemaTests
         public string? Icon { get; set; }
     }
 
+    private sealed class ListWidget : WidgetConfig
+    {
+        [Setting("Reading")]
+        [Reading(Filter = ReadingFilter.ListsOnly)]
+        public string? Reading { get; set; }
+
+        [Setting("Count")]
+        [Reading(Filter = ReadingFilter.NoLists)]
+        public string? Count { get; set; }
+
+        [Setting("Anything")]
+        [Reading]
+        public string? Anything { get; set; }
+    }
+
+    [Fact]
+    public void A_reading_setting_says_whether_it_takes_lists()
+    {
+        var schema = SettingSchema.Read(typeof(ListWidget), typeof(WidgetConfig));
+
+        Assert.Equal(ReadingFilter.ListsOnly, Of(schema, "reading").Reading!.Filter);
+        Assert.Equal(ReadingFilter.NoLists, Of(schema, "count").Reading!.Filter);
+        Assert.Equal(ReadingFilter.None, Of(schema, "anything").Reading!.Filter);
+    }
+
     [Fact]
     public void Every_modifier_is_read()
     {
