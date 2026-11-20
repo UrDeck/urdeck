@@ -335,10 +335,12 @@ public sealed partial class ReadingHub : IReadingSource, IActionInvoker, Deck.ID
         rt.LingerTimer?.Dispose();
         rt.LingerTimer = null;
 
-        // A provider still running (lingering) keeps reporting, so its readings keep their state across a page rebuild.
-        // Otherwise the last value is shown as pending until the provider reports.
+        // A provider still running (lingering) keeps reporting, so its readings keep their state across a page rebuild,
+        // an unavailable one with its reason too: the provider says it again only when its demand changes or at its next
+        // sample, which would leave the reading blank until then. Otherwise the last value is shown as pending until the
+        // provider reports.
         bool had = _store.TryGetValue(id, out var existing);
-        if (!(rt.Loop != null && had && existing.State != ReadingState.Unavailable))
+        if (!(rt.Loop != null && had))
         {
             var pending = Reading.Pending(had && existing.State != ReadingState.Unavailable ? existing.Value : null);
             Set(id, pending, changed);
