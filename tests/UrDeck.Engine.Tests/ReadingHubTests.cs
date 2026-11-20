@@ -172,6 +172,25 @@ public sealed class ReadingHubTests : IDisposable
     }
 
     [Fact]
+    public void AnUnavailableReadingKeepsItsReasonAcrossAPageRebuildWithinTheLinger()
+    {
+        Provider.OnSample = (_, sink, _) =>
+        {
+            sink.PublishBatch([ReadingUpdate.Missing("a", "Steam needs setup")]);
+            return Task.CompletedTask;
+        };
+        Hub.Subscribe(["fake:a"]);
+        Assert.True(Wait(() => Hub.Read("fake:a").State == ReadingState.Unavailable));
+
+        Hub.Unsubscribe(["fake:a"]);
+        Hub.Subscribe(["fake:a"]);
+
+        var reading = Hub.Read("fake:a");
+        Assert.Equal(ReadingState.Unavailable, reading.State);
+        Assert.Equal("Steam needs setup", reading.Reason);
+    }
+
+    [Fact]
     public void TheLastValueIsKept_AndIsPendingWhenSubscribedAgainAfterAStop()
     {
         Provider.OnSample = (_, sink, _) =>
