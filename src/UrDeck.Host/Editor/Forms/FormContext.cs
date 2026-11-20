@@ -94,7 +94,7 @@ internal abstract class FormTarget
 
     /// <summary>Applies one key. A merging key makes typing into one field one undo step.</summary>
     public void Set(string label, string key, JsonNode? value, bool merge = false) =>
-        Apply(label, [new(key, value)], merge ? MergeKeyOf(key) : null);
+        Apply(label, (KeyValuePair<string, JsonNode?>[])[new(key, value)], merge ? MergeKeyOf(key) : null);
 
     /// <summary>The key that makes the steps on <paramref name="key"/> one.</summary>
     protected abstract string MergeKeyOf(string key);

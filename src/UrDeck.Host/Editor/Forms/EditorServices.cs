@@ -45,12 +45,12 @@ internal sealed class PreviewEditorReadings(IReadingSource preview, UrDeck.Engin
                 queue.TryEnqueue(() => changed());
         }
 
-        subscriptions.Subscribe([id]);
+        subscriptions.Subscribe((string[])[id]);
         subscriptions.ReadingsChanged += OnChanged;
         return new Disposer(() =>
         {
             subscriptions.ReadingsChanged -= OnChanged;
-            subscriptions.Unsubscribe([id]);
+            subscriptions.Unsubscribe((string[])[id]);
         });
     }
 

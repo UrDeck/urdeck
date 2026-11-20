@@ -104,7 +104,7 @@ public sealed class ConfigStoreDocumentTests : IDisposable
         store.Config.Display = null;
         store.CommitDisplay();
         store.Document.Flush();
-        Assert.False(JsonDocument.Parse(File.ReadAllText(ConfigPath)).RootElement.TryGetProperty("display", out _));
+        Assert.False(JsonElement.Parse(File.ReadAllText(ConfigPath)).TryGetProperty("display", out _));
     }
 
     [Fact]

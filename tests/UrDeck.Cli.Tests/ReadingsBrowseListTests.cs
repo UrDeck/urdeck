@@ -42,7 +42,7 @@ public sealed class ReadingsBrowseListTests
         var run = Browse("json");
 
         Assert.Equal(0, run.Code);
-        var reading = JsonDocument.Parse(run.Out).RootElement[0];
+        var reading = JsonElement.Parse(run.Out)[0];
         Assert.Equal("list", reading.GetProperty("kind").GetString());
         var rows = reading.GetProperty("rows");
         Assert.Equal(2, rows.GetArrayLength());

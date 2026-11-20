@@ -32,7 +32,7 @@ internal sealed class ReadingCatalog : IDisposable
     public ReadingIndex Index { get; private set; } = new([]);
 
     /// <summary>The providers that are loaded, in name order.</summary>
-    public IReadOnlyList<ProviderReadings> Providers => [.. _loaded.Values.OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)];
+    public IReadOnlyList<ProviderReadings> Providers => (ProviderReadings[])[.. _loaded.Values.OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)];
 
     /// <summary>The providers still being listed.</summary>
     public IReadOnlyCollection<string> Loading => _loading;

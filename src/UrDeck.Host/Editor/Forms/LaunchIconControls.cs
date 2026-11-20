@@ -68,7 +68,7 @@ internal sealed partial class FormBuilder
             string current = label == null ? "" : SettingValues.Read(scope.Target.Get(label.Key), label) as string ?? "";
             if (label != null && (current.Length == 0 || current == "UrDeck" || current == previous.DisplayName))
             {
-                scope.Target.Apply("Change " + scope.Setting.Label, [new(scope.Setting.Key, JsonValue.Create(path)), new(label.Key, JsonValue.Create(name))], null);
+                scope.Target.Apply("Change " + scope.Setting.Label, (KeyValuePair<string, JsonNode?>[])[new(scope.Setting.Key, JsonValue.Create(path)), new(label.Key, JsonValue.Create(name))], null);
                 return;
             }
 
