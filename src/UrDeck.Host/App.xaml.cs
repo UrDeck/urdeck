@@ -82,7 +82,7 @@ public partial class App : Application
         // Opening a window is queued, not done inside the tray's window procedure or the menu's message loop.
         void OpenSettingsLater() => dispatcher.TryEnqueue(() => OpenSettings());
         _tray = new TrayIcon(
-            [
+            (TrayMenuEntry[])[
                 new TrayMenuEntry(
                     "Restart to update",
                     RestartToUpdate,

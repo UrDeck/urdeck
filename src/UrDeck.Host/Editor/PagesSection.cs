@@ -246,7 +246,7 @@ internal sealed partial class PagesSection
         switches.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         switches.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         _wholePage = true;
-        var zoom = Segmented("Zoom", ["Fit width", "Whole page"], 1, index =>
+        var zoom = Segmented("Zoom", (string[])["Fit width", "Whole page"], 1, index =>
         {
             _wholePage = index == 1;
             Resize();
@@ -260,7 +260,7 @@ internal sealed partial class PagesSection
         switches.Children.Add(_gridToggle);
         var readings = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
         readings.Children.Add(new TextBlock { Text = "Readings", Opacity = 0.7, VerticalAlignment = VerticalAlignment.Center });
-        readings.Children.Add(Segmented("Readings", ["Live", "Sample"], 0, index =>
+        readings.Children.Add(Segmented("Readings", (string[])["Live", "Sample"], 0, index =>
             _preview.Readings.Mode = index == 1 ? PreviewReadingMode.Sample : PreviewReadingMode.Live));
         Grid.SetColumn(readings, 3);
         switches.Children.Add(readings);

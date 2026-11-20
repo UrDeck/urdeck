@@ -800,7 +800,7 @@ public sealed class HomeAssistantProviderTests : IDisposable
             attributes["device_class"] = deviceClass;
         if (mdi != null)
             attributes["icon"] = mdi;
-        var entity = EntityState.FromCompressed(id, System.Text.Json.JsonDocument.Parse(new JsonObject { ["s"] = "on", ["a"] = attributes }.ToJsonString()).RootElement);
+        var entity = EntityState.FromCompressed(id, System.Text.Json.JsonElement.Parse(new JsonObject { ["s"] = "on", ["a"] = attributes }.ToJsonString()));
 
         var described = EntityMapping.Describe(entity);
 

@@ -307,7 +307,7 @@ internal sealed class FakeHomeAssistantSocket(FakeHomeAssistant server) : IHomeA
 
     private void Enqueue(JsonObject message)
     {
-        var element = JsonDocument.Parse(message.ToJsonString()).RootElement.Clone();
+        var element = JsonElement.Parse(message.ToJsonString());
         Write(() => element);
     }
 
