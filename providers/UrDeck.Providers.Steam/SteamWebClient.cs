@@ -9,8 +9,8 @@ namespace UrDeck.Providers.Steam;
 
 /// <summary>
 /// <see cref="ISteamWeb"/> over HTTPS to <c>api.steampowered.com</c>, <c>store.steampowered.com</c> and the avatar host, and to
-/// nothing else. The methods are Steam's service API (the calls Steam's own mobile app makes), not the keyed Web API. No token,
-/// secret, name or id is ever written to a log or an exception message here.
+/// nothing else. The calls are Steam's documented Web API (<c>ISteamUser</c>), made with the user's own API key. No key, name or id
+/// is ever written to a log or an exception message here.
 /// </summary>
 internal sealed class SteamWebClient : ISteamWeb, IDisposable
 {
@@ -18,8 +18,6 @@ internal sealed class SteamWebClient : ISteamWeb, IDisposable
     private const string Store = "https://store.steampowered.com/api/appdetails";
     private const string AvatarHost = "https://avatars.fastly.steamstatic.com/";
     private const long MaxAvatarBytes = 512 * 1024;
-
-    private static readonly int[] RejectedResults = [5, 15, 63];
 
     private readonly HttpClient _http;
 
@@ -37,76 +35,17 @@ internal sealed class SteamWebClient : ISteamWeb, IDisposable
 
     public void Dispose() => _http.Dispose();
 
-    public async Task<QrSession> BeginQrAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<long>> GetFriendsAsync(string apiKey, long steamId, CancellationToken cancellationToken)
     {
-        using var reply = await PostAsync("IAuthenticationService/BeginAuthSessionViaQR/v1/",
-        [
-            ("device_friendly_name", "UrDeck"),
-            ("platform_type", "3"),
-            ("website_id", "Mobile"),
-        ], cancellationToken);
-        var response = reply.Response;
-        return new QrSession(
-            Text(response, "client_id"),
-            Text(response, "request_id"),
-            Text(response, "challenge_url"),
-            TimeSpan.FromSeconds(Math.Clamp(Number(response, "interval", 5), 1, 30)));
-    }
-
-    public async Task<QrPoll> PollQrAsync(QrSession session, CancellationToken cancellationToken)
-    {
-        using var reply = await PostAsync("IAuthenticationService/PollAuthSessionStatus/v1/",
-        [
-            ("client_id", session.ClientId),
-            ("request_id", session.RequestId),
-        ], cancellationToken, allowFailure: true);
-        if (reply.EResult != 1)
-            throw new SteamSignInFailedException($"Steam answered eresult {reply.EResult}");
-        var response = reply.Response;
-        QrApproval? approved = Text(response, "refresh_token") is { Length: > 0 } refresh
-            ? new QrApproval(refresh, Text(response, "account_name"))
-            : null;
-        string newClient = Text(response, "new_client_id");
-        return new QrPoll(
-            newClient.Length > 0 ? newClient : null,
-            newClient.Length > 0 ? Text(response, "new_challenge_url") : null,
-            response.TryGetProperty("had_remote_interaction", out var seen) && seen.ValueKind == JsonValueKind.True,
-            approved);
-    }
-
-    public async Task<AccessGrant> RenewAsync(string refreshToken, long steamId, CancellationToken cancellationToken)
-    {
-        using var reply = await PostAsync("IAuthenticationService/GenerateAccessTokenForApp/v1/",
-        [
-            ("refresh_token", refreshToken),
-            ("steamid", steamId.ToString(CultureInfo.InvariantCulture)),
-        ], cancellationToken);
-        string token = Text(reply.Response, "access_token");
-        if (token.Length == 0)
-            throw new SteamRejectedException("Steam gave no access token");
-        string rotated = Text(reply.Response, "refresh_token");
-        return new AccessGrant(token, SteamJwt.Expires(token) ?? DateTimeOffset.UtcNow.AddHours(1), rotated.Length > 0 ? rotated : null);
-    }
-
-    public async Task RevokeAsync(string refreshToken, long steamId, string accessToken, CancellationToken cancellationToken)
-    {
-        using var reply = await PostAsync("IAuthenticationService/RevokeRefreshToken/v1/",
-        [
-            ("refresh_token", refreshToken),
-            ("steamid", steamId.ToString(CultureInfo.InvariantCulture)),
-        ], cancellationToken, accessToken);
-    }
-
-    public async Task<IReadOnlyList<long>> GetFriendsAsync(string accessToken, CancellationToken cancellationToken)
-    {
-        using var reply = await GetAsync("IFriendsListService/GetFriendsList/v1/", [], accessToken, cancellationToken);
+        using var reply = await GetAsync("ISteamUser/GetFriendList/v1/",
+            [("key", apiKey), ("steamid", steamId.ToString(CultureInfo.InvariantCulture)), ("relationship", "friend")],
+            friendList: true, cancellationToken);
         var ids = new List<long>();
-        if (reply.Response.TryGetProperty("friendslist", out var list) && list.TryGetProperty("friends", out var friends))
+        if (reply.Root.TryGetProperty("friendslist", out var list) && list.TryGetProperty("friends", out var friends))
         {
             foreach (var friend in friends.EnumerateArray())
             {
-                // Relationship 3 is a friend; the list also holds invitations, blocked accounts and the like.
-                if (Number(friend, "efriendrelationship", 0) == 3 && long.TryParse(Text(friend, "ulfriendid"), NumberStyles.None, CultureInfo.InvariantCulture, out long id))
+                if (long.TryParse(Text(friend, "steamid"), NumberStyles.None, CultureInfo.InvariantCulture, out long id))
                     ids.Add(id);
             }
         }
@@ -114,25 +53,19 @@ internal sealed class SteamWebClient : ISteamWeb, IDisposable
         return ids;
     }
 
-    public async Task<IReadOnlyList<FriendState>> GetStatesAsync(string accessToken, IReadOnlyList<long> steamIds, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<FriendState>> GetStatesAsync(string apiKey, IReadOnlyList<long> steamIds, CancellationToken cancellationToken)
     {
-        var query = new List<(string, string)>();
-        for (int i = 0; i < steamIds.Count; i++)
-            query.Add(($"steamids[{i.ToString(CultureInfo.InvariantCulture)}]", steamIds[i].ToString(CultureInfo.InvariantCulture)));
-
-        using var reply = await GetAsync("IPlayerService/GetPlayerLinkDetails/v1/", query, accessToken, cancellationToken);
+        string ids = string.Join(',', steamIds.Select(id => id.ToString(CultureInfo.InvariantCulture)));
+        using var reply = await GetAsync("ISteamUser/GetPlayerSummaries/v2/", [("key", apiKey), ("steamids", ids)], friendList: false, cancellationToken);
         var states = new List<FriendState>();
-        if (!reply.Response.TryGetProperty("accounts", out var accounts))
+        if (!reply.Root.TryGetProperty("response", out var response) || !response.TryGetProperty("players", out var players))
             return states;
-        foreach (var account in accounts.EnumerateArray())
+        foreach (var player in players.EnumerateArray())
         {
-            account.TryGetProperty("public_data", out var pub);
-            account.TryGetProperty("private_data", out var priv);
-            long id = long.TryParse(Text(pub, "steamid"), NumberStyles.None, CultureInfo.InvariantCulture, out long parsed) ? parsed : 0;
-            if (id == 0)
+            if (!long.TryParse(Text(player, "steamid"), NumberStyles.None, CultureInfo.InvariantCulture, out long id) || id == 0)
                 continue;
-            ulong game = ulong.TryParse(Text(priv, "game_id"), NumberStyles.None, CultureInfo.InvariantCulture, out ulong g) ? g : 0;
-            states.Add(new FriendState(id, Text(pub, "persona_name"), (int)Number(priv, "persona_state", 0), game, SteamCaches.NormalizeAvatarHash(Text(pub, "sha_digest_avatar"))));
+            ulong game = ulong.TryParse(Text(player, "gameid"), NumberStyles.None, CultureInfo.InvariantCulture, out ulong g) ? g : 0;
+            states.Add(new FriendState(id, Text(player, "personaname"), (int)Number(player, "personastate", 0), game, SteamCaches.NormalizeAvatarHash(Text(player, "avatarhash"))));
         }
 
         return states;
@@ -187,62 +120,34 @@ internal sealed class SteamWebClient : ISteamWeb, IDisposable
             ? value.GetDouble()
             : fallback;
 
-    private Task<Reply> PostAsync(string method, IEnumerable<(string, string)> fields, CancellationToken cancellationToken, string? accessToken = null, bool allowFailure = false)
+    private async Task<Reply> GetAsync(string method, IEnumerable<(string, string)> query, bool friendList, CancellationToken cancellationToken)
     {
-        string url = Api + method + (accessToken is null ? "" : "?access_token=" + Uri.EscapeDataString(accessToken));
-        var content = new FormUrlEncodedContent(fields.Select(f => KeyValuePair.Create(f.Item1, f.Item2)));
-        return SendAsync(new HttpRequestMessage(HttpMethod.Post, url) { Content = content }, allowFailure, cancellationToken);
-    }
+        string url = Api + method + "?" + string.Join('&', query.Select(q => Uri.EscapeDataString(q.Item1) + "=" + Uri.EscapeDataString(q.Item2)));
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        using var response = await _http.SendAsync(request, cancellationToken);
 
-    private Task<Reply> GetAsync(string method, IEnumerable<(string, string)> query, string accessToken, CancellationToken cancellationToken)
-    {
-        string url = Api + method + "?access_token=" + Uri.EscapeDataString(accessToken)
-            + string.Concat(query.Select(q => "&" + Uri.EscapeDataString(q.Item1) + "=" + Uri.EscapeDataString(q.Item2)));
-        return SendAsync(new HttpRequestMessage(HttpMethod.Get, url), allowFailure: false, cancellationToken);
-    }
+        // A key Steam does not know is a 403. A friend list the profile keeps private is a 401 (the key is fine).
+        if (response.StatusCode == HttpStatusCode.Unauthorized && friendList)
+            throw new SteamFriendsPrivateException("Steam answered 401 for the friend list");
+        if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+            throw new SteamRejectedException($"Steam answered {(int)response.StatusCode}");
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Steam answered {(int)response.StatusCode}");
 
-    private async Task<Reply> SendAsync(HttpRequestMessage request, bool allowFailure, CancellationToken cancellationToken)
-    {
-        using (request)
+        string body = await response.Content.ReadAsStringAsync(cancellationToken);
+        try
         {
-            using var response = await _http.SendAsync(request, cancellationToken);
-            if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
-                throw new SteamRejectedException($"Steam answered {(int)response.StatusCode}");
-            if (!response.IsSuccessStatusCode)
-                throw new HttpRequestException($"Steam answered {(int)response.StatusCode}");
-
-            int eresult = response.Headers.TryGetValues("x-eresult", out var values)
-                && int.TryParse(values.FirstOrDefault(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed)
-                    ? parsed
-                    : 1;
-            if (eresult != 1 && !allowFailure)
-            {
-                if (RejectedResults.Contains(eresult))
-                    throw new SteamRejectedException($"Steam answered eresult {eresult}");
-                throw new HttpRequestException($"Steam answered eresult {eresult}");
-            }
-
-            string body = await response.Content.ReadAsStringAsync(cancellationToken);
-            JsonDocument document;
-            try
-            {
-                document = JsonDocument.Parse(string.IsNullOrWhiteSpace(body) ? "{}" : body);
-            }
-            catch (JsonException ex)
-            {
-                throw new HttpRequestException("Steam answered something that is not JSON", ex);
-            }
-
-            var root = document.RootElement.TryGetProperty("response", out var inner) ? inner : default;
-            return new Reply(document, root.ValueKind == JsonValueKind.Object ? root : document.RootElement, eresult);
+            return new Reply(JsonDocument.Parse(string.IsNullOrWhiteSpace(body) ? "{}" : body));
+        }
+        catch (JsonException ex)
+        {
+            throw new HttpRequestException("Steam answered something that is not JSON", ex);
         }
     }
 
-    private sealed class Reply(JsonDocument document, JsonElement response, int eresult) : IDisposable
+    private sealed class Reply(JsonDocument document) : IDisposable
     {
-        public JsonElement Response { get; } = response;
-
-        public int EResult { get; } = eresult;
+        public JsonElement Root { get; } = document.RootElement;
 
         public void Dispose() => document.Dispose();
     }

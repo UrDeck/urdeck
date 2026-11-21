@@ -9,8 +9,8 @@ using Xunit;
 namespace UrDeck.Engine.Tests;
 
 /// <summary>
-/// The connected half of the Steam provider against the real Steam, with the refresh token of a Connect from the environment.
-/// Opt-in only (see <see cref="SteamFactAttribute"/>); it reads and renews, and never revokes the token.
+/// The connected half of the Steam provider against the real Steam, with a Web API key from the environment.
+/// Opt-in only (see <see cref="SteamFactAttribute"/>); it only reads.
 /// </summary>
 public sealed class SteamEndToEndTests : IDisposable
 {
@@ -23,11 +23,11 @@ public sealed class SteamEndToEndTests : IDisposable
     }
 
     [SteamFact]
-    public async Task A_sample_with_a_real_sign_in_gives_my_state_and_the_friends()
+    public async Task A_sample_with_a_real_key_gives_my_state_and_the_friends()
     {
         var sink = new SteamLocalProviderTests.Sink { CacheFolder = _cache };
         using var provider = new SteamProvider();
-        provider.Start(sink, new SteamSettings { RefreshToken = new SecretValue(Environment.GetEnvironmentVariable(SteamFactAttribute.TokenVariable)!) });
+        provider.Start(sink, new SteamSettings { ApiKey = new SecretValue(Environment.GetEnvironmentVariable(SteamFactAttribute.KeyVariable)!), SteamId = Environment.GetEnvironmentVariable(SteamFactAttribute.SteamIdVariable) });
         provider.SetDemand(["me/state", "friends/online", "friends/playing"]);
 
         await provider.SampleAsync(CancellationToken.None);
@@ -46,7 +46,7 @@ public sealed class SteamEndToEndTests : IDisposable
         if (online.Count > 0)
             Assert.Contains(online.Rows, r => r.Get("avatar")!.Value.Text.Length > 0);
 
-        // A second sample must not need a new access token.
+        // A second sample works as well.
         await provider.SampleAsync(CancellationToken.None);
         Assert.Empty(sink.Interruptions);
     }

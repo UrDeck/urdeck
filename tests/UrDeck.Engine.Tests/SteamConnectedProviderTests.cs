@@ -13,6 +13,7 @@ namespace UrDeck.Engine.Tests;
 public sealed class SteamConnectedProviderTests : IDisposable
 {
     private const long Base = LocalReadings.IdBase;
+    private const string Key = "0123456789ABCDEF0123456789ABCDEF";
     private const string Sha1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     private const string Sha2 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
@@ -24,13 +25,11 @@ public sealed class SteamConnectedProviderTests : IDisposable
     private readonly SteamLocalProviderTests.FakeLocal _local = new();
     private readonly SteamLocalProviderTests.Sink _sink = new();
     private readonly SteamProvider _provider;
-    private readonly string _refresh;
 
     public SteamConnectedProviderTests()
     {
         _web = new FakeSteamWeb(_time);
         _sink.CacheFolder = _cache;
-        _refresh = SteamTestTokens.Make(SteamTestTokens.Me, _time.GetUtcNow().AddDays(200));
         _provider = new SteamProvider(_local, _web, _time);
     }
 
@@ -76,7 +75,7 @@ public sealed class SteamConnectedProviderTests : IDisposable
         AddFriend(5, "Dee", 4, game: 77, sha: Sha2);
         _web.StoreNames[77] = "Store Game";
         _web.Avatars[Sha1] = [1, 2, 3];
-        _web.States[SteamTestTokens.Me] = new FriendState(SteamTestTokens.Me, "Pat", 3, 0, Sha2);
+        _web.States[SteamTestIds.Me] = new FriendState(SteamTestIds.Me, "Pat", 3, 0, Sha2);
         _web.Avatars[Sha2] = [4, 5, 6];
         StartConnected();
 
@@ -128,6 +127,94 @@ public sealed class SteamConnectedProviderTests : IDisposable
         Assert.Equal(0, _sink.List("friends/online").Count);
     }
 
+
+    [Fact]
+    public async Task The_key_and_the_account_are_what_steam_is_asked_with()
+    {
+        AddFriend(1, "Amy", 1);
+        StartConnected();
+        _provider.SetDemand(AllConnected);
+
+        await _provider.SampleAsync(CancellationToken.None);
+
+        Assert.All(_web.Keys, k => Assert.Equal(Key, k));
+        Assert.Equal([SteamTestIds.Me], _web.FriendsOf);
+    }
+
+    [Fact]
+    public async Task Without_a_steam_id_the_account_steam_is_signed_in_to_on_this_pc_is_used()
+    {
+        AddFriend(1, "Amy", 1);
+        _provider.Start(_sink, new SteamSettings { ApiKey = new SecretValue(Key) });
+        _provider.SetDemand(AllConnected);
+
+        await _provider.SampleAsync(CancellationToken.None);
+
+        Assert.Equal([SteamTestIds.Me], _web.FriendsOf);
+        Assert.Equal(1, _sink.List("friends/online").Count);
+    }
+
+    [Fact]
+    public async Task Without_a_steam_id_and_without_steam_on_this_pc_the_readings_ask_for_one()
+    {
+        _local.Installed = false;
+        _provider.Start(_sink, new SteamSettings { ApiKey = new SecretValue(Key) });
+        _provider.SetDemand(AllConnected);
+
+        await _provider.SampleAsync(CancellationToken.None);
+
+        Assert.Equal("Enter your SteamID in Settings", _sink.Latest["friends/online"].Reason);
+        Assert.Empty(_web.Calls);
+    }
+
+    [Fact]
+    public async Task A_key_steam_refuses_makes_the_readings_unavailable_and_steam_is_not_called_again()
+    {
+        StartConnected();
+        _provider.SetDemand(AllConnected);
+        _web.RefuseKey = true;
+
+        await _provider.SampleAsync(CancellationToken.None);
+
+        foreach (string path in AllConnected)
+            Assert.Equal("Steam rejected the API key; check it in Settings", _sink.Latest[path].Reason);
+        int calls = _web.Calls.Length;
+        await _provider.SampleAsync(CancellationToken.None);
+        Assert.Equal(calls, _web.Calls.Length);
+    }
+
+    [Fact]
+    public async Task A_private_friends_list_leaves_my_state_and_says_why_the_friends_are_missing()
+    {
+        _web.FriendsPrivate = true;
+        _web.States[SteamTestIds.Me] = new FriendState(SteamTestIds.Me, "Pat", 1, 0, "");
+        StartConnected();
+        _provider.SetDemand(AllConnected);
+
+        await _provider.SampleAsync(CancellationToken.None);
+
+        Assert.Equal("Online", _sink.Text("me/state"));
+        Assert.Equal("Your Steam friends list is private; make it public to show friends", _sink.Latest["friends/online"].Reason);
+        Assert.Equal("Your Steam friends list is private; make it public to show friends", _sink.Latest["friends/playing"].Reason);
+    }
+
+    [Fact]
+    public async Task A_new_key_is_tried_after_the_old_one_was_refused()
+    {
+        StartConnected();
+        _provider.SetDemand(AllConnected);
+        _web.RefuseKey = true;
+        await _provider.SampleAsync(CancellationToken.None);
+
+        _web.RefuseKey = false;
+        _provider.Shutdown();
+        using var next = new SteamProvider(_local, _web, _time);
+        next.Start(_sink, new SteamSettings { ApiKey = new SecretValue("another-key"), SteamId = SteamTestIds.Me.ToString(CultureInfo.InvariantCulture) });
+        next.SetDemand(AllConnected);
+        await next.SampleAsync(CancellationToken.None);
+
+        Assert.Equal("Offline", _sink.Text("me/state"));
+    }
     [Fact]
     public async Task The_friend_list_is_fetched_every_ten_minutes_and_states_every_sample_in_batches_of_a_hundred()
     {
@@ -158,88 +245,6 @@ public sealed class SteamConnectedProviderTests : IDisposable
         _time.Advance(TimeSpan.FromMinutes(2));
         await _provider.SampleAsync(CancellationToken.None);
         Assert.Equal(2, _web.Count("friends"));
-    }
-
-    [Fact]
-    public async Task Access_is_renewed_before_it_expires_and_not_every_sample()
-    {
-        AddFriend(1, "Amy", 1);
-        StartConnected();
-        _provider.SetDemand(AllConnected);
-
-        await _provider.SampleAsync(CancellationToken.None);
-        _time.Advance(TimeSpan.FromHours(12));
-        await _provider.SampleAsync(CancellationToken.None);
-        Assert.Equal(1, _web.Renewals);
-
-        _time.Advance(TimeSpan.FromHours(11.7)); // inside the last half hour of the 24
-        await _provider.SampleAsync(CancellationToken.None);
-        Assert.Equal(2, _web.Renewals);
-    }
-
-    [Fact]
-    public async Task An_access_token_steam_refuses_is_renewed_once_and_the_call_repeated()
-    {
-        AddFriend(1, "Amy", 1);
-        StartConnected();
-        _provider.SetDemand(AllConnected);
-        await _provider.SampleAsync(CancellationToken.None);
-
-        // Steam refuses the access token the provider holds (revoked elsewhere, say) at the next call.
-        _time.Advance(TimeSpan.FromMinutes(11));
-        _web.RefuseNextAccess = true;
-        await _provider.SampleAsync(CancellationToken.None);
-
-        Assert.Equal(2, _web.Renewals);
-        Assert.Equal(1, _sink.List("friends/online").Count);
-    }
-
-    [Fact]
-    public async Task A_rotated_refresh_token_is_stored_and_used_for_the_next_renewal()
-    {
-        _web.RotateRefreshTokens = true;
-        AddFriend(1, "Amy", 1);
-        StartConnected();
-        _provider.SetDemand(AllConnected);
-
-        await _provider.SampleAsync(CancellationToken.None);
-
-        var (setting, value) = Assert.Single(_sink.StoredSecrets);
-        Assert.Equal("refreshToken", setting);
-        Assert.NotEqual(_refresh, value);
-        Assert.Equal(1, _sink.List("friends/online").Count);
-    }
-
-    [Fact]
-    public async Task A_refresh_token_steam_refuses_makes_the_readings_unavailable_and_steam_is_not_called_again()
-    {
-        AddFriend(1, "Amy", 1);
-        StartConnected();
-        _provider.SetDemand(AllConnected);
-        await _provider.SampleAsync(CancellationToken.None);
-        _web.RefuseRefreshToken = true;
-        _time.Advance(TimeSpan.FromHours(25));
-
-        await _provider.SampleAsync(CancellationToken.None);
-
-        foreach (string path in AllConnected)
-            Assert.Equal("Steam sign-in expired; connect Steam again in Settings", _sink.Latest[path].Reason);
-        int calls = _web.Calls.Length;
-        _time.Advance(TimeSpan.FromHours(1));
-        await _provider.SampleAsync(CancellationToken.None);
-        Assert.Equal(calls, _web.Calls.Length);
-    }
-
-    [Fact]
-    public async Task A_token_that_is_not_steams_is_expired_without_a_call()
-    {
-        _provider.Start(_sink, new SteamSettings { RefreshToken = new SecretValue("not-a-token") });
-        _provider.SetDemand(AllConnected);
-
-        await _provider.SampleAsync(CancellationToken.None);
-
-        Assert.Equal("Steam sign-in expired; connect Steam again in Settings", _sink.Latest["friends/online"].Reason);
-        Assert.Empty(_web.Calls);
     }
 
     [Fact]
@@ -325,8 +330,8 @@ public sealed class SteamConnectedProviderTests : IDisposable
         _provider.SetDemand(AllConnected);
 
         await _provider.SampleAsync(CancellationToken.None);
-        _web.RefuseRefreshToken = true;
-        _time.Advance(TimeSpan.FromHours(25));
+        _web.RefuseKey = true;
+        _time.Advance(TimeSpan.FromMinutes(11));
         await _provider.SampleAsync(CancellationToken.None);
 
         Assert.NotEmpty(_sink.Logged);
@@ -335,7 +340,7 @@ public sealed class SteamConnectedProviderTests : IDisposable
             Assert.DoesNotContain("Secret", line, StringComparison.Ordinal);
             Assert.DoesNotContain("4444", line, StringComparison.Ordinal);
             Assert.DoesNotContain(Base.ToString(CultureInfo.InvariantCulture)[..8], line, StringComparison.Ordinal);
-            Assert.DoesNotContain(_refresh[..20], line, StringComparison.Ordinal);
+            Assert.DoesNotContain(Key[..12], line, StringComparison.Ordinal);
         }
     }
 
@@ -372,137 +377,17 @@ public sealed class SteamConnectedProviderTests : IDisposable
         Assert.Equal(expected, SteamCaches.NormalizeAvatarHash(reported));
     }
 
-    [Fact]
-    public async Task Sign_in_shows_the_qr_redraws_a_rotated_one_reports_the_scan_and_returns_the_token()
-    {
-        var progress = new Progress();
-        _web.Polls.Enqueue(new QrPoll(null, null, false, null));
-        _web.Polls.Enqueue(new QrPoll("client-2", "https://s.team/q/2/rotated", false, null));
-        _web.Polls.Enqueue(new QrPoll(null, null, true, null));
-        _web.Polls.Enqueue(new QrPoll(null, null, true, new QrApproval(_refresh, "sample_account")));
-        _provider.Start(_sink, new SteamSettings());
-
-        var result = await Advancing(_provider.SignInAsync(new SteamSettings(), progress, CancellationToken.None));
-
-        Assert.True(result.Approved);
-        Assert.Equal("sample_account", result.Account);
-        Assert.Equal(_refresh, result.Secrets["refreshToken"].Reveal());
-        Assert.Equal(["https://s.team/q/1/secret-challenge", "https://s.team/q/2/rotated"], progress.Challenges.Select(c => c.QrText).ToArray());
-        Assert.Contains("Approve the sign-in in the Steam app", progress.Statuses);
-        Assert.DoesNotContain(_sink.Logged, l => l.Contains("s.team", StringComparison.Ordinal));
-    }
-
-    [Fact]
-    public async Task Sign_in_declined_fails_with_a_reason()
-    {
-        _web.PollFault = new SteamSignInFailedException("eresult 3");
-
-        var result = await Advancing(_provider.SignInAsync(new SteamSettings(), new Progress(), CancellationToken.None));
-
-        Assert.False(result.Approved);
-        Assert.Equal("Steam did not approve the sign-in.", result.Reason);
-    }
-
-    [Fact]
-    public async Task Sign_in_nobody_scans_expires()
-    {
-        var result = await Advancing(_provider.SignInAsync(new SteamSettings(), new Progress(), CancellationToken.None), TimeSpan.FromSeconds(10));
-
-        Assert.False(result.Approved);
-        Assert.Equal("The sign-in expired. Connect again.", result.Reason);
-    }
-
-    [Fact]
-    public async Task Sign_in_can_be_cancelled()
-    {
-        using var cancel = new CancellationTokenSource();
-        var task = _provider.SignInAsync(new SteamSettings(), new Progress(), cancel.Token);
-        await cancel.CancelAsync();
-
-        var result = await Advancing(task);
-
-        Assert.False(result.Approved);
-    }
-
-    [Fact]
-    public async Task Sign_in_that_cannot_reach_steam_fails_with_a_reason()
-    {
-        _web.NetworkDown = true;
-        var result = await Advancing(_provider.SignInAsync(new SteamSettings(), new Progress(), CancellationToken.None));
-        Assert.False(result.Approved);
-        Assert.Equal("Steam could not be reached. Check the connection and try again.", result.Reason);
-    }
-
-    [Fact]
-    public async Task Sign_out_renews_then_revokes_the_session()
-    {
-        await _provider.SignOutAsync(new SteamSettings { RefreshToken = new SecretValue(_refresh) }, CancellationToken.None);
-
-        Assert.Equal(["renew", "revoke"], _web.Calls);
-        Assert.Equal([_refresh], _web.Revoked);
-    }
-
-    [Fact]
-    public async Task Sign_out_of_a_session_steam_already_ended_is_not_an_error()
-    {
-        _web.RefuseRefreshToken = true;
-
-        await _provider.SignOutAsync(new SteamSettings { RefreshToken = new SecretValue(_refresh) }, CancellationToken.None);
-
-        Assert.Empty(_web.Revoked);
-    }
-
-    [Fact]
-    public async Task Sign_out_when_steam_cannot_be_reached_throws_so_the_host_can_say_so()
-    {
-        _web.NetworkDown = true;
-
-        await Assert.ThrowsAsync<HttpRequestException>(() =>
-            _provider.SignOutAsync(new SteamSettings { RefreshToken = new SecretValue(_refresh) }, CancellationToken.None));
-    }
-
-    [Fact]
-    public void The_provider_offers_a_sign_in_and_declares_one_secret_set_by_it()
-    {
-        Assert.True(_provider.OffersSignIn);
-        var property = typeof(SteamSettings).GetProperty(nameof(SteamSettings.RefreshToken))!;
-        var secret = (UrDeck.Sdk.Settings.SecretAttribute)Attribute.GetCustomAttribute(property, typeof(UrDeck.Sdk.Settings.SecretAttribute))!;
-        Assert.True(secret.SetBySignIn);
-    }
 
     private static string Manifest(int id, string name) =>
         $"\"AppState\"\n{{\n\t\"appid\"\t\"{id}\"\n\t\"name\"\t\"{name}\"\n\t\"StateFlags\"\t\"4\"\n}}\n";
 
     private void StartConnected() =>
-        _provider.Start(_sink, new SteamSettings { RefreshToken = new SecretValue(_refresh) });
+        _provider.Start(_sink, new SteamSettings { ApiKey = new SecretValue(Key), SteamId = SteamTestIds.Me.ToString(CultureInfo.InvariantCulture) });
 
     private void AddFriend(int n, string name, int state, ulong game = 0, string sha = "")
     {
         long id = Base + n;
         _web.Friends.Add(id);
         _web.States[id] = new FriendState(id, name, state, game, sha);
-    }
-
-    /// <summary>Lets a task that waits on the fake clock finish: moves the clock on in steps until it does.</summary>
-    private async Task<T> Advancing<T>(Task<T> task, TimeSpan? step = null)
-    {
-        for (int i = 0; i < 400 && !task.IsCompleted; i++)
-        {
-            _time.Advance(step ?? TimeSpan.FromSeconds(5));
-            await Task.Delay(2);
-        }
-
-        return await task.WaitAsync(TimeSpan.FromSeconds(5));
-    }
-
-    private sealed class Progress : ISignInProgress
-    {
-        public List<SignInChallenge> Challenges { get; } = [];
-
-        public List<string> Statuses { get; } = [];
-
-        public void Show(SignInChallenge challenge) => Challenges.Add(challenge);
-
-        public void Status(string text) => Statuses.Add(text);
     }
 }
