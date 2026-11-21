@@ -7,11 +7,10 @@ using UrDeck.Sdk.Data;
 namespace UrDeck.Providers.Steam;
 
 /// <summary>
-/// The readings that need a signed-in Steam: my state and the friends online and playing. It keeps the connection alive (a new
-/// access token from the refresh token before the old one stops working), asks for the friend list every ten minutes and for the
-/// states at every sample, and turns the answers into rows. A refused token ends the calls until the token changes. Nothing is
-/// written to the log that names a person, a game or an id. Network failures propagate as <see cref="HttpRequestException"/>
-/// (or a timeout) for the provider to report as an interruption.
+/// The readings that need the user's Steam Web API key: my state and the friends online and playing. It asks for the friend list
+/// every ten minutes and for the states at every sample, and turns the answers into rows. A key Steam refuses ends the calls until
+/// the key changes. Nothing is written to the log that names a person, a game, an id or the key. Network failures propagate as
+/// <see cref="HttpRequestException"/> (or a timeout) for the provider to report as an interruption.
 /// </summary>
 internal sealed class ConnectedReadings(
     ISteamWeb web,
@@ -19,8 +18,7 @@ internal sealed class ConnectedReadings(
     Func<uint, string?> installedName,
     Func<long?> localAccount,
     TimeProvider time,
-    Action<string> log,
-    Action<string>? refreshTokenRotated = null)
+    Action<string> log)
 {
     internal const string MeState = "me/state";
     internal const string MeAvatar = "me/avatar";
@@ -28,12 +26,14 @@ internal sealed class ConnectedReadings(
     internal const string FriendsPlaying = "friends/playing";
 
     internal const string NotConnected = "Connect Steam in Settings";
-    internal const string Expired = "Steam sign-in expired; connect Steam again in Settings";
+    internal const string Rejected = "Steam rejected the API key; check it in Settings";
+    internal const string NoSteamId = "Enter your SteamID in Settings";
+    internal const string FriendsPrivate = "Your Steam friends list is private; make it public to show friends";
 
     internal static readonly string[] Paths = [MeState, MeAvatar, FriendsOnline, FriendsPlaying];
+    private static readonly string[] FriendPaths = [FriendsOnline, FriendsPlaying];
 
     internal static readonly TimeSpan FriendListEvery = TimeSpan.FromMinutes(10);
-    internal static readonly TimeSpan RenewBefore = TimeSpan.FromMinutes(30);
 
     internal const int BatchSize = 100;
     internal const int NameLookupsPerSample = 5;
@@ -43,11 +43,11 @@ internal sealed class ConnectedReadings(
         ["Offline", "Online", "Busy", "Away", "Snooze", "Looking to trade", "Looking to play"];
 
     private readonly HashSet<uint> _unknownNames = [];
-    private string _token = "";
+    private string _key = "";
     private long _steamId;
-    private AccessGrant? _access;
     private IReadOnlyList<long> _friends = [];
     private DateTimeOffset _friendsAt = DateTimeOffset.MinValue;
+    private bool _friendsPrivate;
     private bool _rejected;
     private bool _mismatchChecked;
     private int _reportedMissing = -1;
@@ -70,26 +70,27 @@ internal sealed class ConnectedReadings(
         },
     ];
 
-    /// <summary>Takes one sample with the sign-in's refresh token (empty when not connected).</summary>
-    public async Task<IReadOnlyList<ReadingUpdate>> SampleAsync(string refreshToken, CancellationToken cancellationToken)
+    /// <summary>Takes one sample with the Web API key (empty when not set) and the configured SteamID (null: this PC's account).</summary>
+    public async Task<IReadOnlyList<ReadingUpdate>> SampleAsync(string apiKey, long? configuredSteamId, CancellationToken cancellationToken)
     {
-        if (refreshToken.Length == 0)
+        if (apiKey.Length == 0)
         {
             Forget();
             return LocalReadings.Unavailable(Paths, NotConnected);
         }
 
-        if (!string.Equals(refreshToken, _token, StringComparison.Ordinal))
+        long? steamId = configuredSteamId ?? localAccount();
+        if (steamId is null)
         {
             Forget();
-            _token = refreshToken;
-            if (SteamJwt.SteamId(refreshToken) is not { } id)
-            {
-                _rejected = true;
-                return LocalReadings.Unavailable(Paths, Expired);
-            }
+            return LocalReadings.Unavailable(Paths, NoSteamId);
+        }
 
-            _steamId = id;
+        if (!string.Equals(apiKey, _key, StringComparison.Ordinal) || steamId != _steamId)
+        {
+            Forget();
+            _key = apiKey;
+            _steamId = steamId.Value;
         }
 
         if (_rejected)
@@ -99,7 +100,17 @@ internal sealed class ConnectedReadings(
         {
             if (_friendsAt == DateTimeOffset.MinValue || time.GetUtcNow() - _friendsAt >= FriendListEvery)
             {
-                _friends = await WithAccess((token, ct) => web.GetFriendsAsync(token, ct), cancellationToken);
+                try
+                {
+                    _friends = await web.GetFriendsAsync(_key, _steamId, cancellationToken);
+                    _friendsPrivate = false;
+                }
+                catch (SteamFriendsPrivateException)
+                {
+                    _friends = [];
+                    _friendsPrivate = true;
+                }
+
                 _friendsAt = time.GetUtcNow();
             }
 
@@ -107,19 +118,25 @@ internal sealed class ConnectedReadings(
             ids.AddRange(_friends);
             var states = new List<FriendState>(ids.Count);
             for (int i = 0; i < ids.Count; i += BatchSize)
-            {
-                var batch = ids.GetRange(i, Math.Min(BatchSize, ids.Count - i));
-                states.AddRange(await WithAccess((token, ct) => web.GetStatesAsync(token, batch, ct), cancellationToken));
-            }
+                states.AddRange(await web.GetStatesAsync(_key, ids.GetRange(i, Math.Min(BatchSize, ids.Count - i)), cancellationToken));
 
             CheckAccount();
-            return await Publish(states, cancellationToken);
+            var updates = await Publish(states, cancellationToken);
+            if (_friendsPrivate)
+            {
+                // My own state is public either way; only the friends are not available.
+                var mine = updates.Where(u => !FriendPaths.Contains(u.Path, StringComparer.Ordinal)).ToList();
+                mine.AddRange(LocalReadings.Unavailable(FriendPaths, FriendsPrivate));
+                return mine;
+            }
+
+            return updates;
         }
         catch (SteamRejectedException)
         {
             _rejected = true;
-            log("Steam rejected the sign-in; connected readings stop until Steam is connected again");
-            return LocalReadings.Unavailable(Paths, Expired);
+            log("Steam rejected the API key; connected readings stop until the key is changed");
+            return LocalReadings.Unavailable(Paths, Rejected);
         }
     }
 
@@ -132,49 +149,17 @@ internal sealed class ConnectedReadings(
         new ReadingField("link", ReadingKind.Text, "Profile") { Role = FieldRole.Link },
     ];
 
+
     private void Forget()
     {
-        _token = "";
+        _key = "";
         _steamId = 0;
-        _access = null;
         _friends = [];
         _friendsAt = DateTimeOffset.MinValue;
+        _friendsPrivate = false;
         _rejected = false;
         _mismatchChecked = false;
         _reportedMissing = -1;
-    }
-
-    /// <summary>
-    /// Runs <paramref name="call"/> with a current access token. A token Steam refuses is renewed once and the call repeated; a
-    /// refresh token Steam refuses (or a second refusal) surfaces as <see cref="SteamRejectedException"/>.
-    /// </summary>
-    private async Task<T> WithAccess<T>(Func<string, CancellationToken, Task<T>> call, CancellationToken cancellationToken)
-    {
-        string token = await AccessToken(force: false, cancellationToken);
-        try
-        {
-            return await call(token, cancellationToken);
-        }
-        catch (SteamRejectedException)
-        {
-            token = await AccessToken(force: true, cancellationToken);
-            return await call(token, cancellationToken);
-        }
-    }
-
-    private async Task<string> AccessToken(bool force, CancellationToken cancellationToken)
-    {
-        if (!force && _access is { } current && current.ExpiresAt - time.GetUtcNow() > RenewBefore)
-            return current.AccessToken;
-        _access = await web.RenewAsync(_token, _steamId, cancellationToken);
-        if (_access.NewRefreshToken is { Length: > 0 } rotated)
-        {
-            // Steam handed out a new refresh token: use it from now on and keep it for the next run.
-            _token = rotated;
-            refreshTokenRotated?.Invoke(rotated);
-        }
-
-        return _access.AccessToken;
     }
 
     private void CheckAccount()
@@ -183,7 +168,7 @@ internal sealed class ConnectedReadings(
             return;
         _mismatchChecked = true;
         if (localAccount() is { } local && local != _steamId)
-            log("The connected Steam account is not the one Steam is signed in to on this PC; friends are the connected account's, my game is this PC's");
+            log("The configured Steam account is not the one Steam is signed in to on this PC; friends are the configured account's, my game is this PC's");
     }
 
     private async Task<IReadOnlyList<ReadingUpdate>> Publish(List<FriendState> states, CancellationToken cancellationToken)

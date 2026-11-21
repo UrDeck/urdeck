@@ -13,17 +13,11 @@ namespace UrDeck.Providers.Steam;
 /// only for the download readings, and publishes the local readings from changes, not from the sampling interval.
 /// </summary>
 [DataProvider("steam", "Steam", DefaultIntervalMs = 60000, MinIntervalMs = 30000,
-    Description = "The game you are playing, recent games and downloads, and your friends after you connect.")]
+    Description = "The game you are playing, recent games and downloads, and your friends once you add a Steam Web API key.")]
 public sealed class SteamProvider : DataProvider<SteamSettings>, IDisposable
 {
-    internal const string RefreshTokenKey = "refreshToken";
-
     internal static readonly TimeSpan FileDebounce = TimeSpan.FromSeconds(2);
     internal static readonly TimeSpan DownloadPoll = TimeSpan.FromSeconds(5);
-
-    private const string ScanInstructions = "Open the Steam app on your phone, choose Steam Guard, scan this code and approve.";
-
-    private static readonly TimeSpan ChallengeLifetime = TimeSpan.FromMinutes(5);
 
     private readonly ISteamLocal _local;
     private readonly ISteamWeb _web;
@@ -37,7 +31,8 @@ public sealed class SteamProvider : DataProvider<SteamSettings>, IDisposable
     private ITimer? _debounce;
     private ITimer? _poll;
     private Groups _demand;
-    private string _refreshToken = "";
+    private string _apiKey = "";
+    private long? _steamId;
     private bool _connectedDemand;
     private bool _stopped;
 
@@ -70,23 +65,18 @@ public sealed class SteamProvider : DataProvider<SteamSettings>, IDisposable
 
     public override SetupGuidance? Guidance =>
         _local.Installed ? null : new SetupGuidance("Steam is not installed.", "https://store.steampowered.com/about/", "Get Steam");
-
-    public override bool OffersSignIn => true;
-
-    public override string SignInDescription => "Shows your friends and what they play";
-
-    public override string SignOutHint => "the authorized devices in the Steam mobile app";
-
     public override void Start(IReadingSink sink, SteamSettings settings)
+
     {
         lock (_gate)
         {
             _sink = sink;
             _readings = new LocalReadings(_local, _time, sink.Log);
-            _refreshToken = settings.RefreshToken?.Reveal() ?? "";
+            _apiKey = settings.ApiKey?.Reveal() ?? "";
+            _steamId = settings.ParsedSteamId;
             string cache = sink.CacheFolder.Length > 0 ? sink.CacheFolder : Path.Combine(Path.GetTempPath(), "UrDeck");
             _connected = new ConnectedReadings(
-                _web, new SteamCaches(Path.Combine(cache, "steam")), _readings.GameName, _readings.CurrentAccount, _time, sink.Log, StoreRotated);
+                _web, new SteamCaches(Path.Combine(cache, "steam")), _readings.GameName, _readings.CurrentAccount, _time, sink.Log);
         }
     }
 
@@ -140,7 +130,7 @@ public sealed class SteamProvider : DataProvider<SteamSettings>, IDisposable
             Refresh(added);
 
         // Not connected is known without asking Steam: say so now rather than at the next sample.
-        if (connectedAdded && _refreshToken.Length == 0)
+        if (connectedAdded && _apiKey.Length == 0)
             _sink?.PublishBatch(LocalReadings.Unavailable(ConnectedReadings.Paths, ConnectedReadings.NotConnected));
     }
 
@@ -158,92 +148,13 @@ public sealed class SteamProvider : DataProvider<SteamSettings>, IDisposable
             return;
         try
         {
-            var updates = await connected.SampleAsync(_refreshToken, cancellationToken);
+            var updates = await connected.SampleAsync(_apiKey, _steamId, cancellationToken);
             if (updates.Count > 0)
                 sink.PublishBatch(updates);
         }
         catch (Exception ex) when (ex is HttpRequestException || (ex is TaskCanceledException && !cancellationToken.IsCancellationRequested))
         {
             sink.Interrupted("Steam could not be reached");
-        }
-    }
-
-    public override async Task<SignInResult> SignInAsync(SteamSettings settings, ISignInProgress progress, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var session = await _web.BeginQrAsync(cancellationToken);
-            var expires = _time.GetUtcNow() + ChallengeLifetime;
-            progress.Show(SignInChallenge.Qr(session.ChallengeUrl, ScanInstructions, expires));
-            progress.Status("Waiting for the Steam app");
-
-            bool scannedShown = false;
-            int failures = 0;
-            while (true)
-            {
-                await Task.Delay(session.Interval, _time, cancellationToken);
-                if (_time.GetUtcNow() > expires)
-                    return SignInResult.Failed("The sign-in expired. Connect again.");
-
-                QrPoll poll;
-                try
-                {
-                    poll = await _web.PollQrAsync(session, cancellationToken);
-                    failures = 0;
-                }
-                catch (HttpRequestException) when (++failures < 3)
-                {
-                    continue; // a dropped request is not a declined sign-in
-                }
-
-                if (poll.Approved is { } approved)
-                {
-                    var secrets = new Dictionary<string, SecretValue> { [RefreshTokenKey] = new SecretValue(approved.RefreshToken) };
-                    return SignInResult.Success(approved.AccountName, secrets);
-                }
-
-                if (poll.NewClientId is { } clientId && poll.NewChallengeUrl is { } url)
-                {
-                    session = session with { ClientId = clientId, ChallengeUrl = url };
-                    expires = _time.GetUtcNow() + ChallengeLifetime;
-                    progress.Show(SignInChallenge.Qr(url, ScanInstructions, expires));
-                }
-
-                if (poll.Scanned && !scannedShown)
-                {
-                    scannedShown = true;
-                    progress.Status("Approve the sign-in in the Steam app");
-                }
-            }
-        }
-        catch (SteamSignInFailedException)
-        {
-            return SignInResult.Failed("Steam did not approve the sign-in.");
-        }
-        catch (HttpRequestException)
-        {
-            return SignInResult.Failed("Steam could not be reached. Check the connection and try again.");
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            return SignInResult.Failed("The sign-in was cancelled.");
-        }
-    }
-
-    public override async Task SignOutAsync(SteamSettings settings, CancellationToken cancellationToken)
-    {
-        string token = settings.RefreshToken?.Reveal() ?? "";
-        if (token.Length == 0 || SteamJwt.SteamId(token) is not { } steamId)
-            return;
-        try
-        {
-            // The revoke call is signed with an access token, so renew one first.
-            var grant = await _web.RenewAsync(token, steamId, cancellationToken);
-            await _web.RevokeAsync(token, steamId, grant.AccessToken, cancellationToken);
-        }
-        catch (SteamRejectedException)
-        {
-            // Steam no longer accepts this sign-in: there is no session left to end.
         }
     }
 
@@ -266,12 +177,6 @@ public sealed class SteamProvider : DataProvider<SteamSettings>, IDisposable
     }
 
     public void Dispose() => Shutdown();
-
-    private void StoreRotated(string refreshToken)
-    {
-        _refreshToken = refreshToken;
-        _sink?.StoreSecret(RefreshTokenKey, new SecretValue(refreshToken));
-    }
 
     private static ISteamLocal CreateLocal() =>
         OperatingSystem.IsWindows() ? new WindowsSteamLocal() : new NoSteamLocal();

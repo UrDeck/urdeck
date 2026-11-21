@@ -209,8 +209,8 @@ public sealed class PreviewCommandsTests : IDisposable
         var providers = document.RootElement.GetProperty("providers").EnumerateArray().ToList();
         Assert.All(providers.Where(p => p.GetProperty("id").GetString() is not ("homeassistant" or "steam")), p => Assert.Equal(0, p.GetProperty("settings").GetArrayLength()));
         var steam = providers.Single(p => p.GetProperty("id").GetString() == "steam").GetProperty("settings");
-        Assert.Equal(["refreshToken"], steam.EnumerateArray().Select(s => s.GetProperty("name").GetString()));
-        Assert.Equal("URDECK_SECRET_STEAM_REFRESHTOKEN", steam[0].GetProperty("environmentVariable").GetString());
+        Assert.Equal(["apiKey", "steamId"], steam.EnumerateArray().Select(s => s.GetProperty("name").GetString()));
+        Assert.Equal("URDECK_SECRET_STEAM_APIKEY", steam[0].GetProperty("environmentVariable").GetString());
         var homeAssistant = providers.Single(p => p.GetProperty("id").GetString() == "homeassistant").GetProperty("settings");
         Assert.Equal(["url", "token"], homeAssistant.EnumerateArray().Select(s => s.GetProperty("name").GetString()));
         Assert.Equal("URDECK_SECRET_HOMEASSISTANT_TOKEN", homeAssistant[1].GetProperty("environmentVariable").GetString());
