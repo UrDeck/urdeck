@@ -25,8 +25,9 @@ Windows' registry and in its own files, read-only, and only while a card that sh
 | `steam:downloads` | A list: games downloading, updating or paused, with their progress. |
 | `steam:download/progress`, `steam:download/name` | The first download in progress, for a gauge. Unavailable, with the reason `Nothing downloading`, when there is none. |
 
-Steam does not have to run for your name to show. Without Steam installed, these readings say
-`Steam is not installed on this PC`. If a file cannot be read, because Steam is writing it at that moment, the reading keeps
+Steam does not have to run for your name to show. Without Steam installed, the reading picker offers no Steam readings, and
+**Providers**, **Steam** in the editor says `Steam is not installed.` with a **Get Steam** link; a card that already shows one of
+these readings says `Steam is not installed on this PC`. Installing Steam is noticed the next time you open the picker or Providers. If a file cannot be read, because Steam is writing it at that moment, the reading keeps
 its last value and is read again at the next change.
 
 ## Connecting Steam

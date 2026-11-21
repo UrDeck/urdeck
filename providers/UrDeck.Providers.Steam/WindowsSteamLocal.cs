@@ -27,21 +27,40 @@ internal sealed class WindowsSteamLocal : ISteamLocal
         "library_600x900.jpg",
     ];
 
-    private readonly string _steamPath;
+    private readonly bool _fromRegistry;
+    private volatile string _steamPath;
 
     public WindowsSteamLocal()
     {
-        using var key = Registry.CurrentUser.OpenSubKey(SteamKey);
-        string path = (key?.GetValue("SteamPath") as string ?? "").Replace('/', Path.DirectorySeparatorChar);
-        _steamPath = Directory.Exists(path) ? path : "";
+        _fromRegistry = true;
+        _steamPath = ReadSteamPath();
     }
 
     /// <summary>Reads the files of the Steam folder <paramref name="steamPath"/> (the registry is still Steam's own); for tests.</summary>
     internal WindowsSteamLocal(string steamPath) => _steamPath = steamPath;
 
-    public bool Installed => _steamPath.Length > 0;
+    /// <summary>
+    /// Whether the Steam client is installed. While it is not, the registry is read again each time, so installing Steam is noticed
+    /// without restarting UrDeck; once found, the path is kept.
+    /// </summary>
+    public bool Installed
+    {
+        get
+        {
+            if (_steamPath.Length == 0 && _fromRegistry)
+                _steamPath = ReadSteamPath();
+            return _steamPath.Length > 0;
+        }
+    }
 
-    public string SteamPath => _steamPath;
+    public string SteamPath => Installed ? _steamPath : "";
+
+    private static string ReadSteamPath()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(SteamKey);
+        string path = (key?.GetValue("SteamPath") as string ?? "").Replace('/', Path.DirectorySeparatorChar);
+        return Directory.Exists(path) ? path : "";
+    }
 
     public ClientState ReadClient()
     {

@@ -28,7 +28,7 @@ public sealed record SecretStatus(bool HasValue, bool StoredHere, SecretSource? 
 public sealed record ProviderField(SettingDescriptor Setting, string Value, SecretStatus? Secret);
 
 /// <summary>A provider's settings as the settings window shows them.</summary>
-public sealed record ProviderForm(string ProviderId, string Name, IReadOnlyList<ProviderField> Fields, bool OffersConnectionTest, bool CanStoreSecrets, bool OffersSignIn = false);
+public sealed record ProviderForm(string ProviderId, string Name, IReadOnlyList<ProviderField> Fields, bool OffersConnectionTest, bool CanStoreSecrets, bool OffersSignIn = false, ProviderStatus? Status = null, string Description = "", bool BuiltIn = false);
 
 /// <summary>The outcome of a save or a test: ok, or one sentence saying what is wrong.</summary>
 public sealed record EditorResult(bool Ok, string Message)
@@ -61,22 +61,22 @@ public sealed class ProviderSettingsEditor
         _hub = hub;
     }
 
-    /// <summary>The form of each loaded provider that declares settings beyond the base ones, by name.</summary>
+    /// <summary>
+    /// The form of each loaded provider, ready ones first and then by name; a provider with no settings of its own has a form with
+    /// no fields, so the Providers section lists every provider with its readiness (provider-readiness spec).
+    /// </summary>
     public IReadOnlyList<ProviderForm> GetForms()
     {
         var forms = new List<ProviderForm>();
         foreach (var descriptor in _providers.Descriptors.OrderBy(d => d.Name, StringComparer.CurrentCultureIgnoreCase))
         {
             var schema = descriptor.Schema;
-            if (schema.Settings.Count == 0)
-                continue;
-
             var raw = _config.Config.Providers?.GetValueOrDefault(descriptor.Id);
             var fields = schema.Settings.Select(s => new ProviderField(s, s.IsSecret ? "" : CurrentText(s, raw), s.IsSecret ? StatusOf(descriptor.Id, s) : null)).ToList();
-            forms.Add(new ProviderForm(descriptor.Id, descriptor.Name, fields, OffersTest(descriptor), _secrets.CanStore, descriptor.OffersSignIn));
+            forms.Add(new ProviderForm(descriptor.Id, descriptor.Name, fields, OffersTest(descriptor), _secrets.CanStore, descriptor.OffersSignIn, _hub.GetStatus(descriptor.Id), descriptor.Description, descriptor.BuiltIn));
         }
 
-        return forms;
+        return [.. forms.OrderBy(f => f.Status is { IsReady: false } ? 1 : 0)];
     }
 
     /// <summary>

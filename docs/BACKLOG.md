@@ -39,6 +39,13 @@ everything else should be fine on Sonnet.
   Decided in that review: the editor is the product's front door and hand-edited JSON is not a design constraint (keys the
   host does not know are still never lost). The SDK input model and the hosted (web page) widget kind wait for milestone 4.
   The widget template repo waits for a stable SDK.
+- **Provider readiness** (`provider-availability`, applied 2026-11-20, then `provider-setup-route`): a provider is not available, needs
+  setup or is ready, derived and never stored; the reading picker offers only ready providers (plus any a page already uses), and
+  Settings, Providers lists them all with their guidance. `DataProvider<T>.IsAvailable` and `Guidance` are the SDK's seam; Steam is
+  available when its client is installed.
+- Open for `provider-setup-route`: a provider whose stored sign-in was rejected (an expired Steam token) still reads as Ready, since
+  readiness is local by design. Surface a runtime "Sign-in expired" note on its Providers entry (a badge and a Connect-again hint),
+  without hiding its working local readings in the picker.
 - **Milestone 2 is done** (2026-11-05): a user outside the project installed 0.1.0 from GitHub and runs it on their HYTE
   case. Their hardware is the first report for the compatibility table (item 15, "Hardware reports").
 - **Since 2026-10-24** (all archived under `openspec/changes/archive/`): 0.1.0 is released (2026-10-25, from

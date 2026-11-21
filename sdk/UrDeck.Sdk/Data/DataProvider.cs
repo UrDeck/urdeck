@@ -9,7 +9,7 @@ namespace UrDeck.Sdk.Data;
 /// provider's settings (or its secrets) shuts the provider down and starts a new run with the new ones. A provider that needs no
 /// settings of its own derives with <see cref="ProviderSettings"/>.
 /// </summary>
-public abstract class DataProvider<TSettings> : IDataProvider, IConnectionTest, ISignIn
+public abstract class DataProvider<TSettings> : IDataProvider, IConnectionTest, ISignIn, IProviderAvailability
     where TSettings : ProviderSettings, new()
 {
     /// <inheritdoc />
@@ -36,6 +36,17 @@ public abstract class DataProvider<TSettings> : IDataProvider, IConnectionTest, 
     /// that is not started; the default offers no test (see <see cref="OffersConnectionTest"/>).
     /// </summary>
     public virtual Task<string> ValidateAsync(TSettings settings, CancellationToken cancellationToken) => Task.FromResult("");
+
+    /// <summary>
+    /// Whether the provider applies on this PC (the default: yes). Return false when it makes no sense here, for example when the
+    /// service's client is not installed: the pickers then offer none of its readings and Settings, Providers lists it as not
+    /// available with <see cref="Guidance"/>. Asked often and on the UI's path: be fast, touch no network, have no side effects,
+    /// and read the machine's state afresh rather than caching it. An exception means available.
+    /// </summary>
+    public virtual bool IsAvailable => true;
+
+    /// <summary>A sentence, and optionally a web address, telling the user how to get the provider going; shown while it is not ready.</summary>
+    public virtual SetupGuidance? Guidance => null;
 
     /// <summary>Whether <see cref="ValidateAsync"/> is implemented; the window then shows a Test connection button.</summary>
     public virtual bool OffersConnectionTest => false;

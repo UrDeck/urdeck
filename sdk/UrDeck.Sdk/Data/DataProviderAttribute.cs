@@ -21,6 +21,9 @@ public sealed class DataProviderAttribute : Attribute
 
     public string Name { get; }
 
+    /// <summary>One short sentence on what the provider gives ("The PC's processor, memory, disks and network"), shown in Settings, Providers.</summary>
+    public string Description { get; set; } = "";
+
     /// <summary>The sampling interval when the user sets none, in milliseconds.</summary>
     public int DefaultIntervalMs { get; set; } = 1000;
 

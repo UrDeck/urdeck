@@ -112,7 +112,11 @@ internal sealed class ReadingCatalog : IDisposable
         {
             if (_disposed || cancel.IsCancellationRequested || !ReferenceEquals(cancel, _cancel))
                 return;
-            _loaded[provider.Id] = result;
+            // A provider that is not ready and unused is not offered at all (reading-picker spec).
+            if (result.Hidden)
+                _loaded.Remove(provider.Id);
+            else
+                _loaded[provider.Id] = result;
             _loading.Remove(provider.Id);
             Index = new ReadingIndex(_loaded.Values.OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase).SelectMany(p => p.Entries));
             Changed?.Invoke();

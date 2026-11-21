@@ -605,6 +605,11 @@ public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings> 
 - **Connection test.** Override `OffersConnectionTest` (return true) and `ValidateAsync(settings, token)` to give the settings window a
   "Test connection" button. It runs on a provider that is not started, with the unsaved values; return one line (`Connected to
   Home Assistant 2026.10`) or throw with the reason. It is cancelled after 10 seconds.
+- **Availability.** A provider that makes no sense on some PCs (its service's client is not installed) overrides `IsAvailable`
+  (default true) and `Guidance` (a `SetupGuidance` with one sentence, an optional `https://` link and its text). The pickers then
+  offer none of its readings, and Settings, Providers lists it as not available with the guidance. `IsAvailable` is asked often: be fast,
+  use no network, have no side effects and read the machine afresh (an exception means available). A required setting without a
+  value makes a provider "needs setup" on its own; declare nothing for that.
 - **Sign-in.** A provider whose service lets the user approve a sign-in elsewhere (a phone app, a device code) can offer it instead of
   a token to paste. Mark the secret `[Secret(SetBySignIn = true)]` (the Providers section then shows Connect, not a text field),
   override `OffersSignIn` (true), `SignInDescription` (one line: what connecting gives) and `SignOutHint` (where the user ends a

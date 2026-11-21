@@ -328,8 +328,8 @@ internal sealed class ReadingList : IDisposable
                 Severity = InfoBarSeverity.Warning,
                 IsOpen = true,
                 IsClosable = false,
-                Title = $"{provider.Name} is not connected.",
-                Message = provider.Message + (provider.FromCache ? " The readings your pages use are listed, without values." : ""),
+                Title = provider.Status is { IsReady: false } ? $"{provider.Name} needs setup." : $"{provider.Name} is not connected.",
+                Message = BarMessage(provider) + (provider.FromCache ? " The readings your pages use are listed, without values." : ""),
             };
             if (_setUp != null)
             {
@@ -342,6 +342,14 @@ internal sealed class ReadingList : IDisposable
             _bars.Children.Add(bar);
         }
     }
+
+    /// <summary>Why a provider is not offered in full: its own guidance, what is missing, or what the listing said.</summary>
+    private static string BarMessage(ProviderReadings provider) => provider.Status switch
+    {
+        { Guidance: { } guidance } => guidance.Text,
+        { Readiness: Engine.Data.ProviderReadiness.NeedsSetup, Missing.Count: > 0 } status => $"Set {string.Join(", ", status.Missing)}.",
+        _ => provider.Message ?? "",
+    };
 
     /// <summary>Searches and fills the list.</summary>
     private void Update()

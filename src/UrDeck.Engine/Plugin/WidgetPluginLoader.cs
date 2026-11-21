@@ -444,6 +444,17 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
         return true;
     }
 
+    /// <summary>A first-party provider (<c>UrDeck.Providers.*</c>) loaded from the application's own plugins folder, not the user's.</summary>
+    private bool IsBuiltIn(ProviderDescriptor descriptor)
+    {
+        if (!descriptor.AssemblyName.StartsWith("UrDeck.Providers.", StringComparison.Ordinal))
+            return false;
+        if (_loadingFile == null)
+            return true;
+        string app = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "plugins")) + Path.DirectorySeparatorChar;
+        return Path.GetFullPath(_loadingFile).StartsWith(app, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+    }
+
     private bool RegisterProvider(Type type)
     {
         var descriptor = ProviderDescriptor.TryCreate(type, out string? reason);
@@ -457,6 +468,7 @@ public sealed class WidgetPluginLoader : IPluginService, Deck.IDeckWidgets, IDis
         // In demo mode the sample takes the provider's place under its own id; the provider itself is never created.
         var sample = _demo != null ? ProviderSamples.Find(descriptor) : null;
         var registered = sample != null ? ProviderSamples.Replace(descriptor, sample, _demo!.Now, _demo.Start) : descriptor;
+        registered = registered with { BuiltIn = IsBuiltIn(descriptor) };
         if (!_providers.TryRegister(registered, out var existing))
         {
             UrDeckLog.Warn($"Provider '{descriptor.Id}' from {_loadingFile ?? descriptor.AssemblyName} rejected: {existing!.AssemblyName} already provides it");

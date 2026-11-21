@@ -14,7 +14,8 @@ namespace UrDeck.Providers.Weather;
 /// every wanted place in one request; a place that was not wanted before is fetched at once, outside the sample, so a
 /// widget whose location was just edited shows values in seconds. Nothing is held while no reading is shown.
 /// </summary>
-[DataProvider("weather", "Weather", DefaultIntervalMs = 900000, MinIntervalMs = 300000)]
+[DataProvider("weather", "Weather", DefaultIntervalMs = 900000, MinIntervalMs = 300000,
+    Description = "Current conditions and a seven-day forecast for your location (Open-Meteo, no key).")]
 public sealed class WeatherProvider : DataProvider<ProviderSettings>, ISuggestionSource, IDisposable
 {
     /// <summary>A place fetched this recently is not fetched again, so a sample right after a new place's fetch makes no second request.</summary>
