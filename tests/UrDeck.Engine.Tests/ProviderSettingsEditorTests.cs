@@ -57,9 +57,12 @@ public sealed class ProviderSettingsEditorTests : IDisposable
     private string File_() => File.ReadAllText(Path.Combine(_dir, "urdeck-config.json"));
 
     [Fact]
-    public void OnlyProvidersWithDeclaredSettings_GetAForm()
+    public void EveryProvider_GetsAForm_AndOnlyTheOnesWithSettingsHaveFields()
     {
-        var form = Assert.Single(_editor.GetForms());
+        var forms = _editor.GetForms();
+        Assert.Equal(["plain", "typed"], forms.Select(f => f.ProviderId).Order(StringComparer.Ordinal));
+        Assert.Empty(forms.Single(f => f.ProviderId == "plain").Fields);
+        var form = forms.Single(f => f.ProviderId == "typed");
 
         Assert.Equal("typed", form.ProviderId);
         Assert.Equal(["url", "token", "retries", "secure"], form.Fields.Select(f => f.Setting.Key));
@@ -70,13 +73,15 @@ public sealed class ProviderSettingsEditorTests : IDisposable
     }
 
     [Fact]
-    public void NoDeclaredSettings_GivesNoForms()
+    public void NoDeclaredSettings_GivesAFormWithNoFields()
     {
         var registry = new ProviderRegistry();
         registry.TryRegister(new FakeProvider(_time).Descriptor("plain"), out _);
         var editor = new ProviderSettingsEditor(_config, registry, _store, _hub);
 
-        Assert.Empty(editor.GetForms());
+        var form = Assert.Single(editor.GetForms());
+        Assert.Empty(form.Fields);
+        Assert.True(form.Status!.IsReady);
     }
 
     [Fact]
@@ -165,22 +170,22 @@ public sealed class ProviderSettingsEditorTests : IDisposable
     [Fact]
     public void TheSecretField_SaysWhereTheValueIsAndWhatOverridesIt()
     {
-        var none = _editor.GetForms()[0].Fields[1].Secret!;
+        var none = _editor.GetForms().Single(f => f.ProviderId == "typed").Fields[1].Secret!;
         Assert.False(none.HasValue);
         Assert.Equal("URDECK_SECRET_TYPED_TOKEN", none.EnvironmentName);
 
         _backend.Write("typed", "token", "tok", null);
-        var stored = _editor.GetForms()[0].Fields[1].Secret!;
+        var stored = _editor.GetForms().Single(f => f.ProviderId == "typed").Fields[1].Secret!;
         Assert.True(stored.HasValue);
         Assert.True(stored.StoredHere);
         Assert.Equal(SecretSource.Stored, stored.Source);
         Assert.False(stored.EnvironmentOverrides);
 
         _environment["URDECK_SECRET_TYPED_TOKEN"] = "env";
-        var overridden = _editor.GetForms()[0].Fields[1].Secret!;
+        var overridden = _editor.GetForms().Single(f => f.ProviderId == "typed").Fields[1].Secret!;
         Assert.Equal(SecretSource.Environment, overridden.Source);
         Assert.True(overridden.EnvironmentOverrides);
-        Assert.Equal("", _editor.GetForms()[0].Fields[1].Value);
+        Assert.Equal("", _editor.GetForms().Single(f => f.ProviderId == "typed").Fields[1].Value);
     }
 
     [Fact]

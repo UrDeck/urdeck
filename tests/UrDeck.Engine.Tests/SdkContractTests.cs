@@ -21,6 +21,17 @@ public class SdkContractTests
     }
 
     [Fact]
+    public void AProviderThatDeclaresNothing_IsAvailable_AndHasNoGuidance()
+    {
+        // A provider written before availability existed behaves as before: it applies everywhere.
+        var provider = new PlainProvider();
+
+        var availability = Assert.IsAssignableFrom<IProviderAvailability>(provider);
+        Assert.True(availability.IsAvailable);
+        Assert.Null(availability.Guidance);
+    }
+
+    [Fact]
     public void ADescriptorBuiltWithoutLevels_HasNone()
     {
         // Providers built before warning and critical existed construct descriptors without them.

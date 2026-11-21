@@ -25,6 +25,12 @@ public sealed partial record ProviderDescriptor(
     /// <summary>The settings type to bind instead of the provider class's own; a sample that replaces a provider takes the base settings.</summary>
     public Type? SettingsTypeOverride { get; init; }
 
+    /// <summary>What the provider says it gives, one sentence; empty when it did not say.</summary>
+    public string Description { get; init; } = "";
+
+    /// <summary>Whether the provider ships with UrDeck (the first-party plugins of the application's own folder), not one the user added.</summary>
+    public bool BuiltIn { get; init; }
+
     /// <summary>What a reading says while a required setting is missing; empty to name the provider and the setting.</summary>
     public string MissingSettingMessage { get; init; } = "";
 
@@ -118,6 +124,7 @@ public sealed partial record ProviderDescriptor(
             type.Assembly.GetName().Name ?? "?")
         {
             MissingSettingMessage = meta.MissingSettingMessage ?? "",
+            Description = meta.Description ?? "",
             LingerMs = meta.LingerMs,
         };
     }

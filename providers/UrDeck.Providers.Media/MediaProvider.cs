@@ -11,7 +11,8 @@ namespace UrDeck.Providers.Media;
 /// configured interval has no effect). Everything that changed with one event is published in one batch, album art included:
 /// the art is read first when the track changed, so a widget never draws a new title beside the old cover.
 /// </summary>
-[DataProvider("media", "Media", DefaultIntervalMs = 60000, MinIntervalMs = 250)]
+[DataProvider("media", "Media", DefaultIntervalMs = 60000, MinIntervalMs = 250,
+    Description = "What is playing on this PC: title, artist, album art and playback controls.")]
 public sealed class MediaProvider : DataProvider<ProviderSettings>, IActionProvider, IDisposable
 {
     internal const string Status = "status";

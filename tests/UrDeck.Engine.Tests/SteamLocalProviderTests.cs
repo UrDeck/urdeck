@@ -38,6 +38,37 @@ public sealed class SteamLocalProviderTests : IDisposable
     }
 
     [Fact]
+    public void Installed_is_available_and_says_nothing()
+    {
+        _local.Installed = true;
+
+        Assert.True(_provider.IsAvailable);
+        Assert.Null(_provider.Guidance);
+    }
+
+    [Fact]
+    public void Not_installed_is_not_available_and_points_to_the_download()
+    {
+        _local.Installed = false;
+
+        Assert.False(_provider.IsAvailable);
+        Assert.Equal("Steam is not installed.", _provider.Guidance!.Text);
+        Assert.Equal("Get Steam", _provider.Guidance.LinkText);
+        Assert.StartsWith("https://", _provider.Guidance.Url, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Installed_later_is_noticed_without_a_restart()
+    {
+        _local.Installed = false;
+        Assert.False(_provider.IsAvailable);
+
+        _local.Installed = true;
+
+        Assert.True(_provider.IsAvailable);
+    }
+
+    [Fact]
     public void Steam_closed_has_no_game_and_the_most_recent_accounts_name()
     {
         _local.Client = new ClientState(false, 0, 0);

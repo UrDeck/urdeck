@@ -12,7 +12,8 @@ namespace UrDeck.Providers.Steam;
 /// <c>me/</c> or <c>client/</c> reading is subscribed, reads <c>localconfig.vdf</c> only for <c>games/recent</c> and the manifests
 /// only for the download readings, and publishes the local readings from changes, not from the sampling interval.
 /// </summary>
-[DataProvider("steam", "Steam", DefaultIntervalMs = 60000, MinIntervalMs = 30000)]
+[DataProvider("steam", "Steam", DefaultIntervalMs = 60000, MinIntervalMs = 30000,
+    Description = "The game you are playing, recent games and downloads, and your friends after you connect.")]
 public sealed class SteamProvider : DataProvider<SteamSettings>, IDisposable
 {
     internal const string RefreshTokenKey = "refreshToken";
@@ -63,6 +64,12 @@ public sealed class SteamProvider : DataProvider<SteamSettings>, IDisposable
 
     public override IReadOnlyList<ReadingDescriptor> Describe() =>
         [.. LocalReadings.Describe(), .. ConnectedReadings.Describe()];
+
+    /// <summary>Whether the Steam client is installed; asked afresh, so installing Steam is noticed. Connecting is not needed: the local readings work without it.</summary>
+    public override bool IsAvailable => _local.Installed;
+
+    public override SetupGuidance? Guidance =>
+        _local.Installed ? null : new SetupGuidance("Steam is not installed.", "https://store.steampowered.com/about/", "Get Steam");
 
     public override bool OffersSignIn => true;
 

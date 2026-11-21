@@ -12,7 +12,8 @@ namespace UrDeck.Providers.Machine;
 /// class and is queried only while one of its readings is subscribed to.
 /// </summary>
 [SupportedOSPlatform("windows")]
-[DataProvider("system", "System", DefaultIntervalMs = 2000, MinIntervalMs = 250)]
+[DataProvider("system", "System", DefaultIntervalMs = 2000, MinIntervalMs = 250,
+    Description = "This PC: processor, memory, graphics card and the busiest processes.")]
 public sealed class SystemProvider : DataProvider<ProviderSettings>, IReadingBrowser
 {
     /// <summary>What the subscribers want; replaced whole so a sample reads a consistent set.</summary>

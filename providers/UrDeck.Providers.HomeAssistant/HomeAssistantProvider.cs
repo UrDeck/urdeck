@@ -15,6 +15,7 @@ namespace UrDeck.Providers.HomeAssistant;
 /// open. The provider talks to the configured address only and sends the token nowhere else.
 /// </summary>
 [DataProvider("homeassistant", "Home Assistant", DefaultIntervalMs = 60000, MinIntervalMs = 250, LingerMs = 30000,
+    Description = "Your Home Assistant lights, sensors and switches, and a way to toggle them.",
     MissingSettingMessage = "set up Home Assistant in Settings")]
 public sealed class HomeAssistantProvider : DataProvider<HomeAssistantSettings>, IActionProvider, IReadingBrowser, IDisposable
 {

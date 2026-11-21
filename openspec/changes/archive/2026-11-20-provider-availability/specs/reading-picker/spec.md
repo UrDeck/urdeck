@@ -5,6 +5,10 @@ When a provider is ready but cannot list its readings because it is not reachabl
 open its settings, and still list the readings of that provider that the pages already use, without values. A reading
 setting in the form whose provider is missing required settings MUST say so too.
 
+#### Scenario: Home Assistant without a token
+- **WHEN** Home Assistant has an address but no token, a page uses one of its entities, and the user opens the picker's Home Assistant tab
+- **THEN** the picker says Home Assistant needs setup, offers Set up, and lists the entities the pages use (see "Providers That Are Not Ready Are Not Offered")
+
 #### Scenario: Home Assistant that does not answer
 - **WHEN** Home Assistant has an address and a token, does not answer, and the user opens the picker's Home Assistant tab
 - **THEN** the picker says Home Assistant is not connected, offers Set up, and lists the entities the pages use

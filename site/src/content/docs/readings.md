@@ -10,6 +10,11 @@ is written `provider:path`, for example `system:cpu/load` or `homeassistant:ligh
 data names its readings that way. In the editor you never type one: the reading picker lists what the providers offer, with
 live values.
 
+The picker offers only what could work on this PC. A provider that does not apply here (Steam without the Steam client) or that
+still needs a setting (Home Assistant without its address or token) has no tab, no filter and no rows, unless a page already uses
+one of its readings: then its tab stays, with a bar saying it needs setup and a **Set up** button. **Providers** in the editor
+lists every provider, ready or not, with how to get it going.
+
 ## The shapes of a value
 
 A reading's value is one of five shapes:
