@@ -15,7 +15,7 @@
     <!-- The host draws a sign-in challenge as a QR code on this PC (provider-sign-in); MIT, managed only, used by UrDeck.Host alone. -->
     <PackageVersion Include="QRCoder" Version="1.8.1" />
     <PackageVersion Include="SkiaSharp.Views.WinUI" Version="4.155.0" />
-    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
+    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.7.0" />
     <PackageVersion Include="Microsoft.Win32.SystemEvents" Version="11.0.0" />
     <!-- The media provider embeds the Windows Runtime projection in its own assembly (docs/perf/now-playing.md). The winmd files come
          from the SDK reference package, so the build does not depend on an installed Windows SDK. -->
